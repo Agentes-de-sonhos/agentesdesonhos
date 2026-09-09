@@ -95,6 +95,11 @@ export type ItineraryDictionary = {
   pdfWhatsappCta: string;
   pdfPreparedFor: string; // "Preparado especialmente para {name}"
   pdfGeneratedAt: string; // "Gerado em {date} • Agentes de Sonhos"
+  whatsappAria: string;
+  whatsappMessageTemplate: string; // "Olá! Vi o roteiro para {destination} e gostaria de mais informações."
+  invalidLinkMessage: string;
+  checkLinkMessage: string;
+  documentFallbackName: string;
 };
 
 const pt: ItineraryDictionary = {
@@ -175,6 +180,11 @@ const pt: ItineraryDictionary = {
   pdfWhatsappCta: "💬 Falar no WhatsApp",
   pdfPreparedFor: "Preparado especialmente para {name}",
   pdfGeneratedAt: "Gerado em {date} • Agentes de Sonhos",
+  whatsappAria: "Falar no WhatsApp",
+  whatsappMessageTemplate: "Olá! Vi o roteiro para {destination} e gostaria de mais informações.",
+  invalidLinkMessage: "Link inválido",
+  checkLinkMessage: "Verifique o link e tente novamente.",
+  documentFallbackName: "arquivo",
 };
 
 const it: ItineraryDictionary = {
@@ -255,6 +265,11 @@ const it: ItineraryDictionary = {
   pdfWhatsappCta: "💬 Scrivi su WhatsApp",
   pdfPreparedFor: "Preparato appositamente per {name}",
   pdfGeneratedAt: "Generato il {date} • Agentes de Sonhos",
+  whatsappAria: "Scrivi su WhatsApp",
+  whatsappMessageTemplate: "Ciao! Ho visto l'itinerario per {destination} e vorrei maggiori informazioni.",
+  invalidLinkMessage: "Link non valido",
+  checkLinkMessage: "Verifica il link e riprova.",
+  documentFallbackName: "file",
 };
 
 export const itineraryTranslator = createTranslator<ItineraryDictionary>({

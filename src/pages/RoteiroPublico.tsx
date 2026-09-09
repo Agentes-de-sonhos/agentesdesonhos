@@ -255,7 +255,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const consultantPhoto = agentProfile?.avatar_url || sig.photo_url || null;
   const whatsappUrl = buildWhatsAppUrl(
     sig.whatsapp || sig.phone,
-    `Olá! Vi o roteiro para ${itinerary.destination} e gostaria de mais informações.`,
+    t("whatsappMessageTemplate", { destination: itinerary.destination }),
   );
 
   const tripStart = parseLocalDate(itinerary.startDate);
@@ -615,7 +615,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
                 </div>
                 {whatsappUrl && (
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer"
-                    aria-label="Falar no WhatsApp"
+                    aria-label={t("whatsappAria")}
                     className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-5 py-2.5 font-bold text-sm shadow-md w-full">
                     <WhatsAppIcon className="h-4 w-4" />
                     {t("whatsappCta")}

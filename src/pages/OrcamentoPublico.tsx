@@ -7,7 +7,7 @@ import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordio
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
+import { resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -163,124 +163,124 @@ function getServiceDetails(service: QuoteService): string[] {
   switch (service.service_type) {
     case "flight":
       if (data.return_date && !data.is_one_way) {
-        details.push(`Ida: ${formatDateShort(data.departure_date)} | Volta: ${formatDateShort(data.return_date)}`);
+        details.push(`${t("ida")}: ${formatDateShort(data.departure_date)} | ${t("volta")}: ${formatDateShort(data.return_date)}`);
       } else {
-        details.push(`Ida: ${formatDateShort(data.departure_date)} (somente ida)`);
+        details.push(`${t("ida")}: ${formatDateShort(data.departure_date)} (${t("somenteIda")})`);
       }
       // Multi-leg with internal-segment support
       const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data);
       outLegs.forEach((ob: any, i: number) => {
         const parts: string[] = [];
         if (ob.leg_date) parts.push(formatDateShort(ob.leg_date));
-        if (ob.flight_number) parts.push(`Voo ${ob.flight_number}`);
+        if (ob.flight_number) parts.push(`${t("voo")} ${ob.flight_number}`);
         if (ob.airport_origin && ob.airport_destination) parts.push(`${ob.airport_origin} → ${ob.airport_destination}`);
-        if (ob.departure_time) parts.push(`Saída: ${ob.departure_time}`);
-        if (ob.arrival_time) parts.push(`Chegada: ${ob.arrival_time}`);
-        const label = outLegs.length > 1 ? `✈ Ida (trecho ${i + 1})` : `✈ Ida`;
+        if (ob.departure_time) parts.push(`${t("saida")}: ${ob.departure_time}`);
+        if (ob.arrival_time) parts.push(`${t("chegada")}: ${ob.arrival_time}`);
+        const label = outLegs.length > 1 ? `✈ ${t("ida")} (${t("internalLeg").toLowerCase()} ${i + 1})` : `✈ ${t("ida")}`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
       intLegs.forEach((it: any, i: number) => {
         const parts: string[] = [];
         if (it.leg_date) parts.push(formatDateShort(it.leg_date));
-        if (it.flight_number) parts.push(`Voo ${it.flight_number}`);
+        if (it.flight_number) parts.push(`${t("voo")} ${it.flight_number}`);
         if (it.airport_origin && it.airport_destination) parts.push(`${it.airport_origin} → ${it.airport_destination}`);
-        if (it.departure_time) parts.push(`Saída: ${it.departure_time}`);
-        if (it.arrival_time) parts.push(`Chegada: ${it.arrival_time}`);
-        const label = intLegs.length > 1 ? `✈ Trecho interno (${i + 1})` : `✈ Trecho interno`;
+        if (it.departure_time) parts.push(`${t("saida")}: ${it.departure_time}`);
+        if (it.arrival_time) parts.push(`${t("chegada")}: ${it.arrival_time}`);
+        const label = intLegs.length > 1 ? `✈ ${t("internalLeg")} (${i + 1})` : `✈ ${t("internalLeg")}`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
       retLegs.forEach((rt: any, i: number) => {
         const parts: string[] = [];
         if (rt.leg_date) parts.push(formatDateShort(rt.leg_date));
-        if (rt.flight_number) parts.push(`Voo ${rt.flight_number}`);
+        if (rt.flight_number) parts.push(`${t("voo")} ${rt.flight_number}`);
         if (rt.airport_origin && rt.airport_destination) parts.push(`${rt.airport_origin} → ${rt.airport_destination}`);
-        if (rt.departure_time) parts.push(`Saída: ${rt.departure_time}`);
-        if (rt.arrival_time) parts.push(`Chegada: ${rt.arrival_time}`);
-        const label = retLegs.length > 1 ? `✈ Volta (trecho ${i + 1})` : `✈ Volta`;
+        if (rt.departure_time) parts.push(`${t("saida")}: ${rt.departure_time}`);
+        if (rt.arrival_time) parts.push(`${t("chegada")}: ${rt.arrival_time}`);
+        const label = retLegs.length > 1 ? `✈ ${t("volta")} (${t("internalLeg").toLowerCase()} ${i + 1})` : `✈ ${t("volta")}`;
         if (parts.length) details.push(`${label}: ${parts.join(" | ")}`);
       });
-      if (data.includes_baggage) details.push("✓ Bagagem incluída");
-      if (data.includes_boarding_fee) details.push("✓ Taxa de embarque incluída");
+      if (data.includes_baggage) details.push(`✓ ${t("baggageIncluded")}`);
+      if (data.includes_boarding_fee) details.push(`✓ ${t("boardingFeeIncluded")}`);
       if (data.notes) details.push(data.notes);
       break;
     case "hotel":
-      details.push(`Check-in: ${formatDateShort(data.check_in)} | Check-out: ${formatDateShort(data.check_out)}`);
-      if (data.meal_plan) details.push(`Regime: ${formatLabel(data.meal_plan)}`);
+      details.push(`${t("checkIn")}: ${formatDateShort(data.check_in)} | ${t("checkOut")}: ${formatDateShort(data.check_out)}`);
+      if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
       if (Array.isArray(data.rooms) && data.rooms.length > 0) {
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
-          if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+          if (r.adults) paxParts.push(`${r.adults} ${pluralize(publicLocale, r.adults, { one: t("adultOne"), other: t("adultOther") })}`);
           if (r.children) {
             const ages = Array.isArray(r.children_ages) && r.children_ages.length
-              ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+              ? ` (${r.children_ages.join(", ")} ${pluralize(publicLocale, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
               : "";
-            paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+            paxParts.push(`${r.children} ${pluralize(publicLocale, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
           }
           details.push(`${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
         });
       } else if (data.room_type) {
-        details.push(`Quarto: ${formatLabel(data.room_type)}`);
+        details.push(`${t("quarto")}: ${formatLabel(data.room_type)}`);
       }
       if (data.notes) details.push(data.notes);
       break;
     case "car_rental":
-      details.push(`Retirada: ${data.pickup_location}`);
-      details.push(`Devolução: ${data.dropoff_location}`);
+      details.push(`${t("retirada")}: ${data.pickup_location}`);
+      details.push(`${t("devolucao")}: ${data.dropoff_location}`);
       if (data.notes) details.push(data.notes);
       break;
     case "transfer":
-      details.push(`Local: ${data.location}`);
+      details.push(`${t("local")}: ${data.location}`);
       if (data.transfer_type === "round_trip") {
-        details.push(`Chegada: ${formatDateShort(data.arrival_date || data.date)}`);
-        if (data.departure_date) details.push(`Saída: ${formatDateShort(data.departure_date)}`);
+        details.push(`${t("chegada")}: ${formatDateShort(data.arrival_date || data.date)}`);
+        if (data.departure_date) details.push(`${t("saida")}: ${formatDateShort(data.departure_date)}`);
       } else {
-        details.push(`Data: ${formatDateShort(data.date)}`);
+        details.push(`${t("data")}: ${formatDateShort(data.date)}`);
       }
-      if (data.service_category) details.push(`Tipo: ${data.service_category === "private" ? "Privativo" : "Regular"}`);
+      if (data.service_category) details.push(`${t("tipo")}: ${data.service_category === "private" ? t("privateType") : t("regularType")}`);
       if (data.notes) details.push(data.notes);
       break;
     case "attraction":
-      if (data.ticket_type) details.push(`Tipo: ${data.ticket_type}`);
-      details.push(`Data: ${formatDateShort(data.date)} | Qtd: ${data.quantity || 1}`);
-      if (data.adult_price > 0) details.push(`Adulto: ${getCurrencySymbol(quoteCurrency)} ${Number(data.adult_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
-      if (data.child_price > 0) details.push(`Criança: ${getCurrencySymbol(quoteCurrency)} ${Number(data.child_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`);
+      if (data.ticket_type) details.push(`${t("tipo")}: ${data.ticket_type}`);
+      details.push(`${t("data")}: ${formatDateShort(data.date)} | ${t("qty")}: ${data.quantity || 1}`);
+      if (data.adult_price > 0) details.push(`${t("adultLabel")}: ${getCurrencySymbol(quoteCurrency)} ${formatPublicNumber(Number(data.adult_price), publicLocale, { minimumFractionDigits: 2 })}`);
+      if (data.child_price > 0) details.push(`${t("childLabel")}: ${getCurrencySymbol(quoteCurrency)} ${formatPublicNumber(Number(data.child_price), publicLocale, { minimumFractionDigits: 2 })}`);
       break;
     case "insurance":
-      details.push(`Seguradora: ${data.provider}`);
+      details.push(`${t("seguradora")}: ${data.provider}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
-      details.push(`Cobertura: ${data.coverage}`);
+      details.push(`${t("cobertura")}: ${data.coverage}`);
       if (data.notes) details.push(data.notes);
       break;
     case "cruise":
-      details.push(`Navio: ${data.ship_name}`);
-      details.push(`Rota: ${data.route}`);
+      details.push(`${t("navio")}: ${data.ship_name}`);
+      details.push(`${t("rota")}: ${data.route}`);
       details.push(`${formatDateShort(data.start_date)} a ${formatDateShort(data.end_date)}`);
       {
         const cabins = normalizeCruiseCabins(data, service.amount);
-        if (cabins.length === 1) details.push(`Cabine: ${cabinOptionLabel(cabins[0])}`);
-        else if (cabins.length > 1) details.push(`Cabines: ${cabins.map(cabinOptionLabel).join(" | ")}`);
+        if (cabins.length === 1) details.push(`${t("cabine")}: ${cabinOptionLabel(cabins[0])}`);
+        else if (cabins.length > 1) details.push(`${t("cabines")}: ${cabins.map(cabinOptionLabel).join(" | ")}`);
       }
       break;
     case "rail_transport": {
-      const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
-      const railClassLbl: Record<string, string> = { economy: "Classe Econômica", second: "Segunda Classe", first: "Primeira Classe", executive: "Executiva", sleeper: "Cabine Leito" };
-      details.push(`Trajeto: ${data.origin_city || ""} → ${data.destination_city || ""}`);
-      if (data.origin_station || data.destination_station) details.push(`Estações: ${data.origin_station || "—"} → ${data.destination_station || "—"}`);
-      if (data.travel_date) details.push(`Data: ${formatDateShort(data.travel_date)}`);
+      const railTypeLbl: Record<string, string> = { high_speed: t("railHighSpeed"), regional: t("railRegional"), night: t("railNight"), panoramic: t("railPanoramic"), other: t("railOther") };
+      const railClassLbl: Record<string, string> = { economy: t("railClassEconomy"), second: t("railClassSecond"), first: t("railClassFirst"), executive: t("railClassExecutive"), sleeper: t("railClassSleeper") };
+      details.push(`${t("trajeto")}: ${data.origin_city || ""} → ${data.destination_city || ""}`);
+      if (data.origin_station || data.destination_station) details.push(`${t("stations")}: ${data.origin_station || "—"} → ${data.destination_station || "—"}`);
+      if (data.travel_date) details.push(`${t("data")}: ${formatDateShort(data.travel_date)}`);
       if (data.departure_time || data.arrival_time) {
-        details.push(`Horário: ${data.departure_time || "—"} → ${data.arrival_time || "—"}`);
+        details.push(`${t("schedule")}: ${data.departure_time || "—"} → ${data.arrival_time || "—"}`);
       }
-      if (data.operator) details.push(`Operadora: ${data.operator}`);
-      if (data.rail_type) details.push(`Tipo: ${railTypeLbl[data.rail_type] || data.rail_type}`);
-      if (data.travel_class) details.push(`Classe: ${railClassLbl[data.travel_class] || data.travel_class}`);
+      if (data.operator) details.push(`${t("operator")}: ${data.operator}`);
+      if (data.rail_type) details.push(`${t("tipo")}: ${railTypeLbl[data.rail_type] || data.rail_type}`);
+      if (data.travel_class) details.push(`${t("classe")}: ${railClassLbl[data.travel_class] || data.travel_class}`);
       const pax = (Number(data.adults_count) || 0) + (Number(data.children_count) || 0) + (Number(data.infants_count) || 0);
-      if (pax > 0) details.push(`Passageiros: ${pax}`);
-      if (data.whats_included) details.push(`Incluso: ${data.whats_included}`);
+      if (pax > 0) details.push(`${t("passengersLabel")}: ${pax}`);
+      if (data.whats_included) details.push(`${t("included")}: ${data.whats_included}`);
       if (data.notes) details.push(data.notes);
       break;
     }
     case "circuit":
-      if (data.duration) details.push(`Duração: ${data.duration}`);
+      if (data.duration) details.push(`${t("duration")}: ${data.duration}`);
       if (data.itinerary) details.push(data.itinerary);
       if (data.notes) details.push(data.notes);
       break;
@@ -336,7 +336,7 @@ function FlightLegRow({ leg }: { leg: any }) {
           <span className="font-medium text-foreground/80">{publicAirportText({ code: leg.airport_origin, customName: leg.origin_airport_name, city: leg.origin_city }) || "—"}</span>
           <span className="mx-1.5 opacity-50">→</span>
           <span className="font-medium text-foreground/80">{publicAirportText({ code: leg.airport_destination, customName: leg.destination_airport_name, city: leg.destination_city }) || "—"}</span>
-          {leg.flight_number && <span className="ml-2 opacity-70">• Voo {leg.flight_number}</span>}
+          {leg.flight_number && <span className="ml-2 opacity-70">• {t("voo")} {leg.flight_number}</span>}
         </div>
       </div>
     </div>
@@ -361,7 +361,7 @@ function FlightDirectionGroup({ title, icon, legs, fallbackDate }: { title: stri
               {layover && (
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground my-1.5">
                   <Clock className="h-3 w-3" />
-                  <span>Conexão • {layover}</span>
+                  <span>{t("connection")} • {layover}</span>
                 </div>
               )}
               {date && i === 0 && (
@@ -395,7 +395,7 @@ function FlightBody({ data }: { data: any }) {
       {/* Header: airline + route */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-base font-semibold text-foreground tracking-tight truncate">{data.airline || "Companhia aérea"}</div>
+          <div className="text-base font-semibold text-foreground tracking-tight truncate">{data.airline || t("airlineDefault")}</div>
           <div className="text-xs text-muted-foreground mt-0.5">
             <span className="font-medium text-foreground/80">{data.origin_city}</span>
             <span className="mx-1.5 opacity-50">→</span>
@@ -404,18 +404,18 @@ function FlightBody({ data }: { data: any }) {
         </div>
       </div>
 
-      <FlightDirectionGroup title="Ida" icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
+      <FlightDirectionGroup title={t("ida")} icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
       {intLegs.length > 0 && (
-        <FlightDirectionGroup title="Trecho interno" icon={<Plane className="h-3.5 w-3.5" />} legs={intLegs} />
+        <FlightDirectionGroup title={t("internalLeg")} icon={<Plane className="h-3.5 w-3.5" />} legs={intLegs} />
       )}
       {!data.is_one_way && retLegs.length > 0 && (
-        <FlightDirectionGroup title="Volta" icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
+        <FlightDirectionGroup title={t("volta")} icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
       )}
 
       {/* Inclusions */}
       <div className="flex flex-wrap gap-1.5 pt-1">
-        <InclusionBadge ok={!!data.includes_baggage} label={data.includes_baggage ? "Bagagem incluída" : "Sem bagagem despachada"} />
-        <InclusionBadge ok={!!data.includes_boarding_fee} label={data.includes_boarding_fee ? "Taxa de embarque incluída" : "Taxa de embarque não incluída"} />
+        <InclusionBadge ok={!!data.includes_baggage} label={data.includes_baggage ? t("baggageIncluded") : t("noCheckedBaggage")} />
+        <InclusionBadge ok={!!data.includes_boarding_fee} label={data.includes_boarding_fee ? t("boardingFeeIncluded") : t("boardingFeeNotIncluded")} />
       </div>
 
       {data.notes && (
@@ -465,12 +465,12 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
         )}
       </div>
       <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 flex items-center gap-4">
-        <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label="Check-in" value={formatDateShort(data.check_in)} />
+        <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label={t("checkIn")} value={formatDateShort(data.check_in)} />
         <div className="flex flex-col items-center text-muted-foreground">
           <ArrowRight className="h-4 w-4" />
-          {nights && <span className="text-[10px] font-semibold mt-0.5">{nights} {nights === 1 ? "noite" : "noites"}</span>}
+          {nights && <span className="text-[10px] font-semibold mt-0.5">{nights} {pluralize(publicLocale, nights, { one: t("nightOne"), other: t("nightOther") })}</span>}
         </div>
-        <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label="Check-out" value={formatDateShort(data.check_out)} />
+        <StayRow icon={<BedDouble className="h-3 w-3 mr-1" />} label={t("checkOut")} value={formatDateShort(data.check_out)} />
       </div>
       <div className="flex flex-wrap gap-3 text-sm">
         {rooms.length === 0 && data.room_type && (
@@ -488,16 +488,16 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
       </div>
       {rooms.length > 0 && !hasMultipleRooms && (
         <div className="rounded-xl border border-border/40 bg-muted/10 p-3 space-y-2">
-          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acomodações</div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("accommodations")}</div>
           <ul className="space-y-1.5">
             {rooms.map((r: any, i: number) => {
               const paxParts: string[] = [];
-              if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+              if (r.adults) paxParts.push(`${r.adults} ${pluralize(publicLocale, r.adults, { one: t("adultOne"), other: t("adultOther") })}`);
               if (r.children) {
                 const ages = Array.isArray(r.children_ages) && r.children_ages.length
-                  ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+                  ? ` (${r.children_ages.join(", ")} ${pluralize(publicLocale, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
                   : "";
-                paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+                paxParts.push(`${r.children} ${pluralize(publicLocale, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
               }
               return (
                 <li key={i} className="flex items-start gap-2 text-sm text-foreground/85">
@@ -515,15 +515,15 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
       )}
       {hasMultipleRooms && (
         <div className="space-y-3">
-          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Acomodações</div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("accommodations")}</div>
           {rooms.map((r: any, i: number) => {
             const paxParts: string[] = [];
-            if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+            if (r.adults) paxParts.push(`${r.adults} ${pluralize(publicLocale, r.adults, { one: t("adultOne"), other: t("adultOther") })}`);
             if (r.children) {
               const ages = Array.isArray(r.children_ages) && r.children_ages.length
-                ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+                ? ` (${r.children_ages.join(", ")} ${pluralize(publicLocale, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
                 : "";
-              paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+              paxParts.push(`${r.children} ${pluralize(publicLocale, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
             }
             const qty = Number(r.quantity) || 1;
             const unit = Number(r.unit_price) || 0;
@@ -544,12 +544,12 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
                 {sim && (
                   <div className="pl-6 pt-1.5 border-t border-border/30 mt-1.5 space-y-0.5 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Valor</span>
+                      <span className="text-muted-foreground">{t("value")}</span>
                       <span className="font-semibold text-foreground tabular-nums">{fmt(sim.total)}</span>
                     </div>
                     {sim.installmentValue != null && (
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">ou {sim.installmentsCount}x de</span>
+                        <span className="text-muted-foreground">{t("orInstallmentsCountOf", { count: sim.installmentsCount })}</span>
                         <span className="font-medium text-primary tabular-nums">{fmt(sim.installmentValue)}</span>
                       </div>
                     )}
@@ -578,7 +578,7 @@ function CarBody({ data }: { data: any }) {
       </div>
       <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 space-y-3">
         <div className="flex items-start gap-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 w-20 shrink-0 pt-0.5">Retirada</div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 w-20 shrink-0 pt-0.5">{t("retirada")}</div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium text-foreground break-words">{data.pickup_location}</div>
             {(data.pickup_date || data.pickup_time) && (
@@ -589,7 +589,7 @@ function CarBody({ data }: { data: any }) {
           </div>
         </div>
         <div className="flex items-start gap-3">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 w-20 shrink-0 pt-0.5">Devolução</div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60 w-20 shrink-0 pt-0.5">{t("devolucao")}</div>
           <div className="min-w-0 flex-1">
             <div className="text-sm font-medium text-foreground break-words">{data.dropoff_location}</div>
             {(data.dropoff_date || data.dropoff_time) && (
@@ -601,7 +601,7 @@ function CarBody({ data }: { data: any }) {
         </div>
       </div>
       {data.days && (
-        <div className="text-xs text-muted-foreground">{data.days} {data.days === 1 ? "diária" : "diárias"}</div>
+        <div className="text-xs text-muted-foreground">{data.days} {pluralize(publicLocale, data.days, { one: t("dailyRateOne"), other: t("dailyRateOther") })}</div>
       )}
       {data.notes && (
         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
@@ -617,11 +617,11 @@ function TransferBody({ data }: { data: any }) {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider">
-          {data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"}
+          {data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")}
         </span>
         {data.service_category && (
           <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
-            {data.service_category === "private" ? "Privativo" : "Regular"}
+            {data.service_category === "private" ? t("privateType") : t("regularType")}
           </span>
         )}
       </div>
@@ -653,16 +653,16 @@ function AttractionBody({ data }: { data: any }) {
         <span className="inline-flex items-center gap-1 tabular-nums"><Calendar className="h-3.5 w-3.5" />{formatDateShort(data.date)}</span>
         <span className="inline-flex items-center gap-1">
           <Ticket className="h-3.5 w-3.5" />
-          {fareCounts ? formatCompositionLabel(fareCounts) : `Qtd: ${data.quantity || 1}`}
+          {fareCounts ? formatCompositionLabel(fareCounts) : `${t("qty")}: ${data.quantity || 1}`}
         </span>
       </div>
       {(data.adult_price > 0 || data.child_price > 0) && (
         <div className="flex flex-wrap gap-2">
           {data.adult_price > 0 && (
-            <span className="text-[11px] rounded-full bg-muted px-2.5 py-0.5 text-foreground/80">Adulto {getCurrencySymbol(quoteCurrency)} {Number(data.adult_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+            <span className="text-[11px] rounded-full bg-muted px-2.5 py-0.5 text-foreground/80">{t("adultLabel")} {getCurrencySymbol(quoteCurrency)} {formatPublicNumber(Number(data.adult_price), publicLocale, { minimumFractionDigits: 2 })}</span>
           )}
           {data.child_price > 0 && (
-            <span className="text-[11px] rounded-full bg-muted px-2.5 py-0.5 text-foreground/80">Criança {getCurrencySymbol(quoteCurrency)} {Number(data.child_price).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</span>
+            <span className="text-[11px] rounded-full bg-muted px-2.5 py-0.5 text-foreground/80">{t("childLabel")} {getCurrencySymbol(quoteCurrency)} {formatPublicNumber(Number(data.child_price), publicLocale, { minimumFractionDigits: 2 })}</span>
           )}
         </div>
       )}
@@ -679,12 +679,12 @@ function PeriodBody({ title, sub, data }: { title: string; sub?: string; data: a
       </div>
       <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 flex items-center gap-4 tabular-nums">
         <div className="flex-1">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60">Início</div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60">{t("start")}</div>
           <div className="text-sm font-semibold text-foreground mt-0.5">{formatDateShort(data.start_date)}</div>
         </div>
         <ArrowRight className="h-4 w-4 text-muted-foreground" />
         <div className="flex-1">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60">Fim</div>
+          <div className="text-[11px] font-bold uppercase tracking-wider text-foreground/60">{t("end")}</div>
           <div className="text-sm font-semibold text-foreground mt-0.5">{formatDateShort(data.end_date)}</div>
         </div>
       </div>
@@ -695,7 +695,7 @@ function PeriodBody({ title, sub, data }: { title: string; sub?: string; data: a
 function InsuranceBody({ data }: { data: any }) {
   return (
     <div className="space-y-3">
-      <PeriodBody title={data.provider} sub={data.coverage ? `Cobertura: ${data.coverage}` : undefined} data={data} />
+      <PeriodBody title={data.provider} sub={data.coverage ? `${t("cobertura")}: ${data.coverage}` : undefined} data={data} />
       {data.notes && (
         <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
           <FormattedText>{data.notes}</FormattedText>
@@ -756,7 +756,7 @@ function hasServiceInvestmentBand(service: QuoteService, quote?: Quote) {
 function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
   const passengerLabel = buildServicePassengerLabel(service, quote);
   const fmt = (v: number) => formatCurrency(v);
-  const conditions = buildServicePaymentConditions(service as any, quote as any, fmt);
+  const conditions = buildServicePaymentConditions(service as any, quote as any, fmt, publicLocale);
   const amount = conditions.amount;
 
   // Valor fechado de pacote: nenhum valor individual é exibido ao cliente.
@@ -782,7 +782,7 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
       data-service-investment-inline={service.id}
     >
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
-        Condições de pagamento
+        {t("paymentConditions")}
       </p>
       {rows.length > 0 && (
         <div className="space-y-2">
@@ -804,7 +804,7 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
       )}
       <div className="space-y-1">
         <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-sm sm:text-base text-foreground/80">
-          <span className="text-muted-foreground">Valor do serviço:</span>
+          <span className="text-muted-foreground">{t("serviceValueLabel")}:</span>
           <span className="font-semibold text-foreground tabular-nums">{fmt(amount)}</span>
         </div>
         {passengerLabel && (
@@ -812,13 +812,13 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
             className="text-xs sm:text-[13px] font-medium text-muted-foreground break-words [overflow-wrap:anywhere]"
             data-service-passenger-label={service.id}
           >
-            Para {passengerLabel}
+            {t("forWhomLabel", { label: passengerLabel })}
           </p>
         )}
       </div>
       {methodLabel && (
         <div className="flex flex-wrap items-baseline justify-center gap-x-2 text-xs sm:text-sm text-foreground/80">
-          <span className="text-muted-foreground">Forma de pagamento:</span>
+          <span className="text-muted-foreground">{t("paymentMethodLabel")}:</span>
           <span className="font-medium text-foreground">{methodLabel}</span>
         </div>
       )}
@@ -1026,7 +1026,7 @@ function CollapsibleServiceCard({
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
                 <CreditCard className="h-4 w-4 text-primary" />
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/70">Condições de pagamento</span>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/70">{t("paymentConditions")}</span>
             </div>
             <span className="text-lg sm:text-xl font-bold tracking-tight text-primary break-words leading-snug tabular-nums">
               {display}
@@ -1101,11 +1101,11 @@ function MobileFloatingCta({ href }: { href: string }) {
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Quero reservar esta viagem"
+        aria-label={t("reserveThisTrip")}
         className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] text-white px-5 py-3.5 font-semibold text-sm shadow-[0_12px_30px_-8px_rgba(37,211,102,0.6)] active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#25D366] min-h-12 w-[50vw] max-w-[260px]"
       >
         <WhatsAppIcon className="h-4 w-4" />
-        <span>Quero reservar</span>
+        <span>{t("reserveWanted")}</span>
       </a>
     </div>
   );
@@ -1505,7 +1505,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-10 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full bg-white shadow-[0_20px_60px_-12px_rgba(0,0,0,0.55)] ring-1 ring-black/[0.06] flex items-center justify-center">
               <img
                 src={agentProfile.agency_logo_url}
-                alt={agentProfile.agency_name || "Agência"}
+                alt={agentProfile.agency_name || t("agencyAlt")}
                 className="h-full w-full object-cover object-center"
               />
             </div>

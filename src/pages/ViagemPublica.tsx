@@ -636,7 +636,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       return { title: data.service_name || t('fldServico'), details: otherDetails, dates: data.date ? formatDate(data.date) : undefined };
     }
     default:
-      return { title: "Serviço", details: [] };
+      return { title: tWallet(locale)("fldServico"), details: [] };
   }
 }
 
@@ -870,8 +870,8 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                       {seg.flight_date ? formatDate(seg.flight_date) : ''}
                       {seg.departure_time ? ` • ${seg.departure_time}` : ''}
                       {seg.arrival_time ? ` → ${seg.arrival_time}` : ''}
-                      {seg.terminal ? ` • Terminal ${seg.terminal}` : ''}
-                      {seg.gate ? ` • Portão ${seg.gate}` : ''}
+                      {seg.terminal ? ` • ${t("fldTerminal")} ${seg.terminal}` : ''}
+                      {seg.gate ? ` • ${t("fldPortao")} ${seg.gate}` : ''}
                     </p>
                   </div>
                 </div>
@@ -909,7 +909,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações de Embarque</p>
             {data.recommended_arrival && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Antecedência: {data.recommended_arrival}</p>}
-            {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Terminal: {data.boarding_terminal}</p>}
+            {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTerminal")}: {data.boarding_terminal}</p>}
             {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Documentos: {data.required_documents}</p>}
             {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Imigração: {data.immigration_rules}</p>}
             {data.boarding_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.boarding_notes}</p>}
@@ -940,7 +940,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 ring-1 ring-amber-200/70 dark:ring-amber-900/40 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
-              <p className="text-[13px] font-semibold tracking-tight text-foreground">Orientações de embarque</p>
+              <p className="text-[13px] font-semibold tracking-tight text-foreground">{t("sectionOrientacoesEmbarque")}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
               <BoardingFact icon={Building2} label={t("fldTerminal")} value={data.boarding_terminal || t("attrConfirmarPending")} />
@@ -958,10 +958,10 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-5">
             <a href={data.checkin_url} target="_blank" rel="noopener noreferrer" className="block">
               <Button className="w-full h-12 rounded-2xl text-[14px] font-semibold shadow-md bg-[hsl(222_47%_18%)] hover:bg-[hsl(222_47%_24%)] text-white">
-                <CalendarDays className="h-4 w-4 mr-2" /> Fazer check-in do cruzeiro
+                <CalendarDays className="h-4 w-4 mr-2" /> {t("chkAutoCruiseCheckin")}
               </Button>
             </a>
-            {data.checkin_deadline && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-2 text-center">Prazo: {data.checkin_deadline}</p>}
+            {data.checkin_deadline && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-2 text-center">{t("fldPrazo")}: {data.checkin_deadline}</p>}
           </div>
         )}
 
@@ -975,22 +975,22 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                   <MapPin className="h-4 w-4 text-primary" />
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Rota até o porto</p>
-                <p className="text-[13px] font-semibold text-foreground">Ver no mapa</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">{t("fldRotaAtePorto")}</p>
+                <p className="text-[13px] font-semibold text-foreground">{t("verNoMapaPlain")}</p>
               </a>
             )}
             {data.onboard_currency && (
               <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
                 <DollarSign className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Moeda a bordo</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">{t("fldMoedaABordo")}</p>
                 <p className="text-[13px] font-semibold text-foreground">{data.onboard_currency}</p>
               </div>
             )}
             {(data.voltage || isCruise) && (
               <div className="rounded-2xl bg-card ring-1 ring-border/60 shadow-sm p-3">
                 <Plug className="h-4 w-4 text-primary" />
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Voltagem</p>
-                <p className={cn('text-[13px] font-semibold', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || 'A confirmar'}</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">{t("fldVoltagem")}</p>
+                <p className={cn('text-[13px] font-semibold', data.voltage ? 'text-foreground' : 'text-muted-foreground/80 italic')}>{data.voltage || t('attrConfirmarPending')}</p>
               </div>
             )}
             {data.ship_website && (
@@ -1000,7 +1000,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                   <Globe className="h-4 w-4 text-primary" />
                   <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">Site do navio</p>
+                <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground mt-2">{t("fldSiteDoNavio")}</p>
                 <p className="text-[13px] font-semibold text-foreground break-words">{(data.ship_website || '').replace(/^https?:\/\//, '').replace(/\/$/, '')}</p>
               </a>
             )}
@@ -1105,11 +1105,12 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
               address={data.address}
               name={data.hotel_name}
               placeId={(service as any)?.place_id ?? data.place_id ?? null}
+              locale={locale}
             />
             {!data.latitude && !data.longitude && !data.address && data.maps_url && (
               <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
-                  <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+                  <MapPin className="h-3 w-3 mr-1" /> {t("verNoMapaPlain")}
                 </Button>
               </a>
             )}
@@ -1144,13 +1145,13 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             {data.pickup_address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.pickup_address}</p>}
             {data.pickup_city && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.pickup_city}{data.pickup_country ? `, ${data.pickup_country}` : ''}</p>}
             {data.pickup_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📅 {formatDate(data.pickup_date)}{data.pickup_time ? ` às ${data.pickup_time}` : ''}</p>}
-            {data.pickup_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Terminal: {data.pickup_terminal}</p>}
+            {data.pickup_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTerminal")}: {data.pickup_terminal}</p>}
             {data.pickup_phone && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 {data.pickup_phone}</p>}
             {data.pickup_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.pickup_instructions}</p>}
             {data.pickup_maps_url && (
               <a href={data.pickup_maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
-                  <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+                  <MapPin className="h-3 w-3 mr-1" /> {t("verNoMapaPlain")}
                 </Button>
               </a>
             )}
@@ -1251,7 +1252,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">✈️ Detalhes da Chegada</p>
             {data.flight_number && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Voo: {data.flight_number}</p>}
             {data.arrival_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Chegada prevista: {data.arrival_time}</p>}
-            {data.arrival_airport && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Aeroporto: {data.arrival_airport}{data.arrival_terminal ? ` • Terminal ${data.arrival_terminal}` : ''}</p>}
+            {data.arrival_airport && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAeroporto")}: {data.arrival_airport}{data.arrival_terminal ? ` • ${t("fldTerminal")} ${data.arrival_terminal}` : ''}</p>}
             {data.driver_wait_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Espera do motorista: {data.driver_wait_time}</p>}
             {data.reception_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Recepção: {data.reception_type === 'placa' ? 'Com placa / nome' : data.reception_type === 'balcao' ? 'Balcão da empresa' : 'Ponto fixo'}</p>}
             {data.meeting_instructions && (
@@ -1269,7 +1270,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧳 Detalhes da Saída</p>
             {data.hotel_departure_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Saída do hotel: {data.hotel_departure_time}</p>}
             {data.departure_flight_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário do voo: {data.departure_flight_time}</p>}
-            {data.departure_airport && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Aeroporto: {data.departure_airport}</p>}
+            {data.departure_airport && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAeroporto")}: {data.departure_airport}</p>}
             {data.recommended_departure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Saída recomendada: {data.recommended_departure}</p>}
             {data.boarding_point && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Embarque: {data.boarding_point === 'lobby' ? 'Lobby / Recepção' : data.boarding_point === 'entrada' ? 'Entrada Principal' : data.boarding_point === 'estacionamento' ? 'Estacionamento' : data.boarding_point}</p>}
             {data.departure_alert && (
@@ -1432,7 +1433,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             {data.maps_url && (
               <a href={data.maps_url} target="_blank" rel="noopener noreferrer">
                 <Button variant="outline" size="sm" className="text-xs h-8 rounded-full px-3 mt-1">
-                  <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+                  <MapPin className="h-3 w-3 mr-1" /> {t("verNoMapaPlain")}
                 </Button>
               </a>
             )}
@@ -1518,7 +1519,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             {data.emergency_languages && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🌐 Idiomas: {data.emergency_languages}</p>}
             {data.insurer_website && (
               <a href={data.insurer_website} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm" className="text-xs w-full">🌐 Site da Seguradora</Button>
+                <Button variant="outline" size="sm" className="text-xs w-full">{t("ctaSiteSeguradora")}</Button>
               </a>
             )}
           </div>
@@ -1527,15 +1528,15 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Insurance - Coverages */}
         {isInsurance && (data.medical_assistance || data.hospital_expenses || data.lost_baggage || data.trip_cancellation) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🏥 Coberturas</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionCoberturas")}</p>
             <div className="grid grid-cols-1 gap-1">
-              {data.medical_assistance && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Assistência Médica</span><span className="font-medium">{data.medical_assistance}</span></div>}
-              {data.hospital_expenses && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Despesas Hospitalares</span><span className="font-medium">{data.hospital_expenses}</span></div>}
-              {data.lost_baggage && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Bagagem Extraviada</span><span className="font-medium">{data.lost_baggage}</span></div>}
-              {data.trip_cancellation && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Cancelamento</span><span className="font-medium">{data.trip_cancellation}</span></div>}
-              {data.trip_interruption && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Interrupção</span><span className="font-medium">{data.trip_interruption}</span></div>}
-              {data.dental_assistance && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Odontológica</span><span className="font-medium">{data.dental_assistance}</span></div>}
-              {data.medical_repatriation && <div className="flex justify-between text-xs"><span className="text-muted-foreground">Repatriação</span><span className="font-medium">{data.medical_repatriation}</span></div>}
+              {data.medical_assistance && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldAssistenciaMedica")}</span><span className="font-medium">{data.medical_assistance}</span></div>}
+              {data.hospital_expenses && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldDespesasHospitalares")}</span><span className="font-medium">{data.hospital_expenses}</span></div>}
+              {data.lost_baggage && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldBagagemExtraviada")}</span><span className="font-medium">{data.lost_baggage}</span></div>}
+              {data.trip_cancellation && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldCancelamento")}</span><span className="font-medium">{data.trip_cancellation}</span></div>}
+              {data.trip_interruption && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldInterrupcao")}</span><span className="font-medium">{data.trip_interruption}</span></div>}
+              {data.dental_assistance && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldOdontologica")}</span><span className="font-medium">{data.dental_assistance}</span></div>}
+              {data.medical_repatriation && <div className="flex justify-between text-xs"><span className="text-muted-foreground">{t("fldRepatriacao")}</span><span className="font-medium">{data.medical_repatriation}</span></div>}
               {data.covid_coverage && <div className="flex justify-between text-xs"><span className="text-muted-foreground">COVID</span><span className="font-medium">{data.covid_coverage}</span></div>}
             </div>
           </div>
@@ -2241,7 +2242,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
           {agentProfile?.agency_logo_url ? (
             <img
               src={agentProfile.agency_logo_url}
-              alt={agentProfile.agency_name || "Agência"}
+              alt={agentProfile.agency_name || tWallet(publicLocale)("fldAgencia")}
               translate="no"
               className="h-16 sm:h-20 max-w-[180px] sm:max-w-[260px] object-contain notranslate"
             />
@@ -2336,9 +2337,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                       <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-colors", itColors.bg)}>
                         <CalendarDays className={cn("h-5 w-5", itColors.icon)} />
                       </div>
-                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">Roteiro</span>
+                      <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">{tWallet(publicLocale)("sectionRoteiroPlain")}</span>
                       <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", itColors.badge)}>
-                        {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} dias
+                        {Object.keys(itineraryActivities.reduce((acc: Record<string, boolean>, a: any) => { acc[a.day_date] = true; return acc; }, {})).length} {tWallet(publicLocale)("diasCountLabel")}
                       </span>
                     </button>
                   );

@@ -18,6 +18,8 @@ import {
   extractFlightFeeInfo,
   extractServicePaymentConfig,
 } from "@/lib/servicePayment";
+import { translateQuote, type QuoteTranslator } from "@/i18n/publicMaterials/quote";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 export interface ServicePaymentRow {
   label: string;
@@ -40,7 +42,9 @@ export function buildServicePaymentConditions(
   service: any,
   quote: any,
   formatAmount: (value: number) => string,
+  locale?: PublicLocale | string | null,
 ): ServicePaymentConditions {
+  const t: QuoteTranslator = translateQuote(locale);
   const amount = Number(service?.amount) || 0;
   const empty = { rows: [] as ServicePaymentRow[], methodLabel: null, hasConditions: false };
 
@@ -64,21 +68,21 @@ export function buildServicePaymentConditions(
     methodLabel = cfg.payment_method ?? null;
     if (r.type === "installments") {
       if ("firstInstallmentValue" in r && r.firstInstallmentValue) {
-        rows.push({ label: "1ª parcela", value: fmt(r.firstInstallmentValue), emphasis: true });
+        rows.push({ label: t("firstInstallment"), value: fmt(r.firstInstallmentValue), emphasis: true });
         rows.push({
-          label: `+ ${r.installmentCount - 1}x de`,
+          label: t("plusInstallmentsOf", { count: r.installmentCount - 1 }),
           value: fmt(r.installmentValue),
           emphasis: true,
         });
       } else {
-        rows.push({ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue), emphasis: true });
+        rows.push({ label: t("installmentsCountOf", { count: r.installmentCount }), value: fmt(r.installmentValue), emphasis: true });
       }
     } else if (r.type === "installments_with_entry") {
-      rows.push({ label: "Entrada", value: fmt(r.entryValue) });
-      rows.push({ label: `${r.installmentCount}x de`, value: fmt(r.installmentValue), emphasis: true });
+      rows.push({ label: t("entryLabel"), value: fmt(r.entryValue) });
+      rows.push({ label: t("installmentsCountOf", { count: r.installmentCount }), value: fmt(r.installmentValue), emphasis: true });
     } else {
       rows.push({
-        label: r.hasDiscount ? "À vista (com desconto)" : "À vista",
+        label: r.hasDiscount ? t("cashPaymentWithDiscount") : t("cashPayment"),
         value: fmt(r.hasDiscount ? r.discountedTotal : r.total),
         emphasis: true,
       });
@@ -91,16 +95,16 @@ export function buildServicePaymentConditions(
     methodLabel = formatPaymentMethodsInline(quote.payment_method_label) || null;
 
     if (mode === "installments") {
-      rows.push({ label: `${installments}x de`, value: fmt(amount / (installments || 1)), emphasis: true });
+      rows.push({ label: t("installmentsCountOf", { count: installments }), value: fmt(amount / (installments || 1)), emphasis: true });
     } else if (mode === "installments_with_entry") {
       const entry = amount * (entryPct / 100);
       const rem = Math.max(0, amount - entry);
-      rows.push({ label: "Entrada", value: fmt(entry) });
-      rows.push({ label: `${installments}x de`, value: fmt(rem / (installments || 1)), emphasis: true });
+      rows.push({ label: t("entryLabel"), value: fmt(entry) });
+      rows.push({ label: t("installmentsCountOf", { count: installments }), value: fmt(rem / (installments || 1)), emphasis: true });
     } else if (mode === "full_payment") {
       const v = amount * (1 - discountPct / 100);
       rows.push({
-        label: discountPct > 0 ? `À vista (-${discountPct}%)` : "À vista",
+        label: discountPct > 0 ? t("cashPaymentDiscountPct", { percent: discountPct }) : t("cashPayment"),
         value: fmt(v),
         emphasis: true,
       });
