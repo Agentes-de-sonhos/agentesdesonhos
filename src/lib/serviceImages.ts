@@ -81,7 +81,7 @@ export function fetchPlacePhoto(
     .invoke("hotel-photos", { body: { place_id: placeId, photo_index: index, size } })
     .then(({ data, error }) => {
       if (error) throw error;
-      return (data?.photo ?? null) as PlacePhoto | null;
+      return (data?.photo ?? data?.photos?.[0] ?? null) as PlacePhoto | null;
     })
     .catch((e) => {
       console.warn("[serviceImages] falha ao resolver foto do Google Places", placeId, index, e?.message || e);

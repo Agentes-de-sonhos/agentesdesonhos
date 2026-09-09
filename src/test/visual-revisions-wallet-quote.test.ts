@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { walletDict } from "@/i18n/publicMaterials/wallet";
 
 const guide = readFileSync("src/components/quote/QuoteStepsGuide.tsx", "utf8");
 const carousel = readFileSync("src/components/quote/ServiceImageCarousel.tsx", "utf8");
@@ -59,8 +60,10 @@ describe("Observações da hospedagem", () => {
 
   it("bloco de largura total com título 'Observações:' e whitespace preservado", () => {
     expect(wallet).toContain("{isHotel && (data.notes || data.special_requests || data.agency_notes) && (");
-    expect(wallet).toContain(">Observações:<");
+    expect(wallet).toContain('>{t("secObservacoesColon")}<');
     expect(wallet).toContain("w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words");
-    expect(wallet).toContain("Solicitações: {data.special_requests}");
+    expect(wallet).toContain('{t("fldSolicitacoes")}: {data.special_requests}');
+    expect(walletDict["pt-BR"].secObservacoesColon).toBe("Observações:");
+    expect(walletDict["pt-BR"].fldSolicitacoes).toBe("Solicitações");
   });
 });

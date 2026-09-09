@@ -569,7 +569,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                 ${paxParts.length ? `<div style="font-size:11px;color:${C.mutedT};margin-top:2px;">${paxParts.join(" + ")}</div>` : ""}
                 ${r.notes ? `<div style="font-size:11px;color:${C.mutedT};font-style:italic;margin-top:2px;">${r.notes}</div>` : ""}
                 <div style="border-top:1px solid ${C.border};margin-top:8px;padding-top:6px;">
-                  <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:${C.mutedT};">Valor</span><span style="color:${C.textT};font-weight:700;">${formatCurrency(sim.total)}</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:${C.mutedT};">${t("value")}</span><span style="color:${C.textT};font-weight:700;">${formatCurrency(sim.total)}</span></div>
                   ${installmentLine}
                 </div>
               </div>
@@ -577,7 +577,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }).join("");
           hotelRoomsHtml = `
             <div class="pdf-block pdf-hotel-rooms" style="margin-top:10px;">
-              <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${C.text};margin:0 0 6px;">Acomodações</p>
+              <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${C.text};margin:0 0 6px;">${t("accommodations")}</p>
               ${rowsHtml}
             </div>
           `;
