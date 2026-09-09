@@ -47,6 +47,7 @@ export function useQuoteImport() {
         .single();
       if (insErr || !newQuote) throw insErr || new Error("Não foi possível criar o orçamento");
 
+      try {
       // Seções (mantêm o agrupamento dos serviços)
       const sectionIdMap = new Map<string, string>();
       const { data: srcSections } = await (supabase as any)
@@ -100,6 +101,12 @@ export function useQuoteImport() {
         if (svcErr) throw svcErr;
       }
 
+      } catch (err) {
+        // Sem registro parcial: remove o orçamento recém-criado.
+        await supabase.from("quotes").delete().eq("id", newQuote.id);
+        throw err;
+      }
+
       invalidate();
       return newQuote as { id: string };
     } finally {
@@ -134,13 +141,18 @@ export function useQuoteImport() {
         .single();
       if (error || !newQuote) throw error || new Error("Não foi possível criar o orçamento");
 
-      const rows = items.map((item, idx) => importedItemToServiceRow(item, newQuote.id, idx));
-      const { error: svcErr } = await supabase.from("quote_services").insert(rows as any);
-      if (svcErr) throw svcErr;
+      try {
+        const rows = items.map((item, idx) => importedItemToServiceRow(item, newQuote.id, idx));
+        const { error: svcErr } = await supabase.from("quote_services").insert(rows as any);
+        if (svcErr) throw svcErr;
 
-      const total = items.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
-      if (total > 0) {
-        await supabase.from("quotes").update({ total_amount: total } as any).eq("id", newQuote.id);
+        const total = items.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+        if (total > 0) {
+          await supabase.from("quotes").update({ total_amount: total } as any).eq("id", newQuote.id);
+        }
+      } catch (err) {
+        await supabase.from("quotes").delete().eq("id", newQuote.id);
+        throw err;
       }
 
       invalidate();
