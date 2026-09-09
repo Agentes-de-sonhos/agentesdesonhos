@@ -177,6 +177,7 @@ export function CategoryServiceView({
                   key={s.id}
                   service={s}
                   type={type}
+                  locale={locale}
                   onClick={() => focusCard(s.id)}
                 />
               ))}
@@ -195,6 +196,7 @@ export function CategoryServiceView({
                     <SummaryItem
                       service={s}
                       type={type}
+                      locale={locale}
                       onClick={() => focusCard(s.id)}
                     />
                   </div>
@@ -257,11 +259,12 @@ function SummaryItem({
 }: {
   service: TripService;
   type: TripServiceType;
+  locale?: PublicLocale;
   onClick: () => void;
 }) {
   const cfg = CATEGORY_CONFIG[type];
   const Icon = cfg.icon;
-  const name = getServiceShortName(service);
+  const name = getServiceShortName(service, locale);
 
   return (
     <button
