@@ -1444,10 +1444,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const timelineNodes: { icon: React.ReactNode; label: string }[] = [];
   if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <MapPin className="h-4 w-4" />, label: flightSvc.service_data.origin_city });
   if (flightSvc?.service_data?.destination_city || quote.destination) timelineNodes.push({ icon: <Plane className="h-4 w-4" />, label: flightSvc?.service_data?.destination_city || quote.destination });
-  if (hotelSvc) timelineNodes.push({ icon: <Hotel className="h-4 w-4" />, label: `${days - 1 > 0 ? days - 1 : days} noites` });
-  if (svcTypes.has("car_rental")) timelineNodes.push({ icon: <Car className="h-4 w-4" />, label: "Locação" });
-  if (svcTypes.has("attraction")) timelineNodes.push({ icon: <Ticket className="h-4 w-4" />, label: "Experiências" });
-  if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: "Retorno" });
+  if (hotelSvc) timelineNodes.push({ icon: <Hotel className="h-4 w-4" />, label: `${days - 1 > 0 ? days - 1 : days} ${pluralize(publicLocale, days - 1 > 0 ? days - 1 : days, { one: t("nightOne"), other: t("nightOther") })}` });
+  if (svcTypes.has("car_rental")) timelineNodes.push({ icon: <Car className="h-4 w-4" />, label: t("svc_car_rental") });
+  if (svcTypes.has("attraction")) timelineNodes.push({ icon: <Ticket className="h-4 w-4" />, label: t("svc_attraction") });
+  if (flightSvc?.service_data?.origin_city) timelineNodes.push({ icon: <Plane className="h-4 w-4 rotate-180" />, label: t("retorno") });
 
 
   return (
@@ -1541,8 +1541,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Users className="h-4 w-4 opacity-80" />
-                {quote.adults_count} {pluralize(publicLocale, quote.adults_count, { one: "adulto", other: "adultos" })}
-                {quote.children_count > 0 && ` + ${quote.children_count} ${pluralize(publicLocale, quote.children_count, { one: "criança", other: "crianças" })}`}
+                {quote.adults_count} {pluralize(publicLocale, quote.adults_count, { one: t("adultOne"), other: t("adultOther") })}
+                {quote.children_count > 0 && ` + ${quote.children_count} ${pluralize(publicLocale, quote.children_count, { one: t("childOne"), other: t("childOther") })}`}
               </div>
               {flightSvc?.service_data?.origin_city && (
                 <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
@@ -1987,7 +1987,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     </div>
                   )}
                   <p className="pt-1 text-xs text-foreground/60 leading-snug italic">
-                    "{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}"
+                    "{signatureContact.custom_message || t("defaultSignatureMessage")}"
                   </p>
                   {signatureContact.email && (
                     <p className="text-[11px] text-muted-foreground">{signatureContact.email}</p>
@@ -2033,7 +2033,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     </div>
                   )}
                   <p className="pt-1 text-sm text-foreground/60 leading-snug italic">
-                    "{signatureContact.custom_message || "Estou aqui para tirar suas dúvidas e cuidar de cada detalhe da sua viagem."}"
+                    "{signatureContact.custom_message || t("defaultSignatureMessage")}"
                   </p>
                   {signatureContact.email && (
                     <p className="text-[11px] text-muted-foreground">{signatureContact.email}</p>

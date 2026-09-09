@@ -359,7 +359,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
         details.push(`Horário: ${data.departure_time || "—"} → ${data.arrival_time || "—"}`);
       }
       if (data.operator) details.push(`Operadora: ${data.operator}`);
-      if (data.rail_type) details.push(`Tipo: ${railTypeLbl[data.rail_type] || data.rail_type}`);
+      if (data.rail_type) details.push(`${t("tipo")}: ${railTypeLbl[data.rail_type] || data.rail_type}`);
       if (data.travel_class) details.push(`Classe: ${railClassLbl[data.travel_class] || data.travel_class}`);
       const pax = (Number(data.adults_count) || 0) + (Number(data.children_count) || 0) + (Number(data.infants_count) || 0);
       if (pax > 0) details.push(`Passageiros: ${pax}`);
@@ -521,7 +521,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           case "insurance": summary = data.provider || ""; break;
           case "cruise": summary = `${data.ship_name || ""}${data.route ? ` — ${data.route}` : ""}`; break;
           case "rail_transport": {
-            const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
+            const railTypeLbl: Record<string, string> = { high_speed: t("railHighSpeed"), regional: t("railRegional"), night: t("railNight"), panoramic: t("railPanoramic"), other: t("railOther") };
             summary = `${data.origin_city || ""} → ${data.destination_city || ""}${data.rail_type ? ` | ${railTypeLbl[data.rail_type] || data.rail_type}` : ""}`;
             break;
           }
