@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { input, place_type, context_city, fetch_details, place_id } = await req.json();
+    const { input, place_type, context_city, fetch_details, place_id, metadata_only } = await req.json();
 
     const GOOGLE_PLACES_API_KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
     if (!GOOGLE_PLACES_API_KEY) {
