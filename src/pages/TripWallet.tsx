@@ -937,18 +937,6 @@ function TripWalletContent() {
                       };
                     })()}
                   />
-                  <div className="mt-6 pt-6 border-t flex flex-col items-center gap-2">
-                    <p className="text-xs text-muted-foreground">ou aproveite informações já cadastradas</p>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="w-full h-10 rounded-lg"
-                      onClick={() => setShowImportQuoteAsNew(true)}
-                    >
-                      <FileTextIcon className="h-4 w-4 mr-2" />
-                      Importar de um Orçamento
-                    </Button>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
