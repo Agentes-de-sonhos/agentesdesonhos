@@ -1,0 +1,1 @@
+ALTER TABLE public.activity_photo_cache ADD COLUMN IF NOT EXISTS photos jsonb;

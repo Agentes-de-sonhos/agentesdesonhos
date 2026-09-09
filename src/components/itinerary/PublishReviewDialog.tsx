@@ -176,7 +176,7 @@ export function PublishReviewDialog({
               </Label>
               <InternetPhotosPicker
                 query={itinerary.destination}
-                destination={itinerary.destination}
+                purpose="destination"
                 existingUrls={images}
                 onPick={handlePickedPhotos}
                 triggerLabel="Buscar fotos da internet"
