@@ -9,6 +9,8 @@
  * vantagens, estrelas e observações NUNCA substituem o nome real.
  */
 import type { QuoteService, ServiceType } from "@/types/quote";
+import { translateQuote, type QuoteTranslator } from "@/i18n/publicMaterials/quote";
+import { pluralize, DEFAULT_PUBLIC_LOCALE, type PublicLocale } from "@/i18n/publicMaterials/locale";
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem aérea",
@@ -83,17 +85,39 @@ function humanize(value: string): string {
   return clean.charAt(0).toUpperCase() + clean.slice(1);
 }
 
-export function serviceDigestTypeLabel(service: QuoteService): string {
-  return SERVICE_TYPE_LABELS[service.service_type as ServiceType] || "Serviço";
+function localizedTypeLabel(type: ServiceType | string, t: QuoteTranslator): string {
+  switch (type) {
+    case "flight": return t("digestFlight");
+    case "hotel": return t("digestHotel");
+    case "car_rental": return t("digestCarRental");
+    case "transfer": return t("digestTransfer");
+    case "attraction": return t("digestAttraction");
+    case "insurance": return t("digestInsurance");
+    case "cruise": return t("digestCruise");
+    case "rail_transport": return t("digestRail");
+    case "circuit": return t("digestCircuit");
+    case "other": return t("digestOther");
+    default: return t("digestDefault");
+  }
+}
+
+export function serviceDigestTypeLabel(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): string {
+  return localizedTypeLabel(service.service_type as ServiceType, translateQuote(locale));
 }
 
 /**
  * Nome real do serviço, resolvido por tipo. Cada registro lê apenas o seu
  * próprio `service_data` — nunca herda título de outra opção.
  */
-export function serviceDigestTitle(service: QuoteService): string {
+export function serviceDigestTitle(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): string {
   const data = (service.service_data as any) || {};
-  const typeLabel = serviceDigestTypeLabel(service);
+  const typeLabel = serviceDigestTypeLabel(service, locale);
   let real: string | null = null;
 
   switch (service.service_type) {
@@ -191,8 +215,12 @@ export interface ServiceDigestLine {
 }
 
 /** Linhas de data/período, por tipo de serviço. Nunca omite a segunda data. */
-export function serviceDigestDateLines(service: QuoteService): ServiceDigestLine[] {
+export function serviceDigestDateLines(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): ServiceDigestLine[] {
   const data = (service.service_data as any) || {};
+  const t = translateQuote(locale);
   const lines: ServiceDigestLine[] = [];
   const push = (label: string, value: string | null) => {
     if (value) lines.push({ label, value });
@@ -200,46 +228,46 @@ export function serviceDigestDateLines(service: QuoteService): ServiceDigestLine
 
   switch (service.service_type) {
     case "flight":
-      push("Ida", fmtDate(data.departure_date));
-      if (!data.is_one_way) push("Volta", fmtDate(data.return_date));
+      push(t("ida"), fmtDate(data.departure_date));
+      if (!data.is_one_way) push(t("volta"), fmtDate(data.return_date));
       break;
     case "hotel":
-      push("Check-in", fmtDate(data.check_in));
-      push("Check-out", fmtDate(data.check_out));
+      push(t("checkIn"), fmtDate(data.check_in));
+      push(t("checkOut"), fmtDate(data.check_out));
       break;
     case "car_rental":
-      push("Retirada", dateWithTime(data.pickup_date, data.pickup_time));
-      push("Devolução", dateWithTime(data.dropoff_date, data.dropoff_time));
+      push(t("retirada"), dateWithTime(data.pickup_date, data.pickup_time));
+      push(t("devolucao"), dateWithTime(data.dropoff_date, data.dropoff_time));
       break;
     case "transfer":
       push(
-        "Chegada",
+        t("chegada"),
         dateWithTime(data.arrival_date || data.date, data.arrival_time || data.time),
       );
       push(
-        "Retorno",
+        t("retorno"),
         dateWithTime(data.departure_date || data.return_date, data.departure_time || data.return_time),
       );
       break;
     case "attraction":
-      push("Data", fmtDate(data.date || data.usage_date));
+      push(t("data"), fmtDate(data.date || data.usage_date));
       break;
     case "insurance":
-      push("Início", fmtDate(data.start_date));
-      push("Término", fmtDate(data.end_date));
+      push(t("start"), fmtDate(data.start_date));
+      push(t("termino"), fmtDate(data.end_date));
       break;
     case "cruise":
-      push("Embarque", fmtDate(data.start_date));
-      push("Desembarque", fmtDate(data.end_date));
+      push(t("embarque"), fmtDate(data.start_date));
+      push(t("desembarque"), fmtDate(data.end_date));
       break;
     case "rail_transport":
-      push("Partida", dateWithTime(data.travel_date || data.departure_date, data.departure_time));
-      push("Retorno", dateWithTime(data.return_date, data.return_time));
+      push(t("partida"), dateWithTime(data.travel_date || data.departure_date, data.departure_time));
+      push(t("retorno"), dateWithTime(data.return_date, data.return_time));
       break;
     default:
-      push("Início", fmtDate(data.start_date));
-      push("Término", fmtDate(data.end_date));
-      if (lines.length === 0) push("Data", fmtDate(data.date));
+      push(t("start"), fmtDate(data.start_date));
+      push(t("termino"), fmtDate(data.end_date));
+      if (lines.length === 0) push(t("data"), fmtDate(data.date));
       break;
   }
   return lines;
@@ -250,15 +278,19 @@ const positive = (v: unknown): number | null => {
   return Number.isFinite(n) && n > 0 ? n : null;
 };
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
 /** Quantidade relevante ao tipo (nunca inventada). */
-export function serviceDigestQuantity(service: QuoteService): string | null {
+export function serviceDigestQuantity(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): string | null {
   const data = (service.service_data as any) || {};
+  const t = translateQuote(locale);
+  const plural = (n: number, oneKey: keyof ReturnType<typeof translateQuote> extends never ? never : any, otherKey: any) =>
+    `${n} ${pluralize(locale, n, { one: t(oneKey), other: t(otherKey) })}`;
   switch (service.service_type) {
     case "attraction": {
       const q = positive(data.quantity);
-      return q ? plural(q, "ingresso", "ingressos") : null;
+      return q ? plural(q, "ingressoOne", "ingressoOther") : null;
     }
     case "hotel": {
       const rooms = Array.isArray(data.rooms) ? data.rooms : [];
@@ -267,19 +299,19 @@ export function serviceDigestQuantity(service: QuoteService): string | null {
         : positive(data.rooms_quantity) || positive(data.quantity);
       const guests = positive(data.guests) || positive(data.total_passengers);
       const parts: string[] = [];
-      if (roomCount) parts.push(plural(roomCount, "quarto", "quartos"));
-      if (guests) parts.push(plural(guests, "hóspede", "hóspedes"));
+      if (roomCount) parts.push(plural(roomCount, "quartoOne", "quartoOther"));
+      if (guests) parts.push(plural(guests, "hospedeOne", "hospedeOther"));
       return parts.length > 0 ? parts.join(" · ") : null;
     }
     case "car_rental": {
       const units = positive(data.quantity) || positive(data.vehicles);
-      return units ? plural(units, "veículo", "veículos") : null;
+      return units ? plural(units, "veiculoOne", "veiculoOther") : null;
     }
     default: {
       const pax = positive(data.passengers) || positive(data.total_passengers);
-      if (pax) return plural(pax, "passageiro", "passageiros");
+      if (pax) return plural(pax, "passageiroOne", "passageiroOther");
       const units = positive(data.quantity);
-      return units ? plural(units, "unidade", "unidades") : null;
+      return units ? plural(units, "unidadeOne", "unidadeOther") : null;
     }
   }
 }
@@ -321,13 +353,16 @@ export interface ServiceCompactDigest {
 }
 
 /** Modelo compacto compartilhado por todas as telas do fluxo de reserva. */
-export function serviceCompactDigest(service: QuoteService): ServiceCompactDigest {
+export function serviceCompactDigest(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): ServiceCompactDigest {
   return {
-    typeLabel: serviceDigestTypeLabel(service),
-    title: serviceDigestTitle(service),
+    typeLabel: serviceDigestTypeLabel(service, locale),
+    title: serviceDigestTitle(service, locale),
     location: serviceDigestLocation(service),
-    dateLines: serviceDigestDateLines(service),
-    quantity: serviceDigestQuantity(service),
+    dateLines: serviceDigestDateLines(service, locale),
+    quantity: serviceDigestQuantity(service, locale),
     shortDescription: serviceDigestShortDescription(service),
     images: serviceDigestImages(service),
   };
@@ -347,7 +382,11 @@ export function serviceDigestDateSummary(service: QuoteService): string | null {
  * pública (chips). Usa somente dados já cadastrados — nunca duplica cadastro
  * e nunca substitui o nome real do serviço.
  */
-export function serviceDigestHighlights(service: QuoteService): string[] {
+export function serviceDigestHighlights(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): string[] {
+  const t = translateQuote(locale);
   const d = (service.service_data || {}) as any;
   const out: string[] = [];
   const push = (value: unknown) => {
@@ -374,12 +413,12 @@ export function serviceDigestHighlights(service: QuoteService): string[] {
     case "flight": {
       push(d.airline);
       push(d.baggage);
-      if (d.includes_boarding_fee) push("Taxas incluídas");
+      if (d.includes_boarding_fee) push(t("taxasIncluidas"));
       break;
     }
     case "transfer": {
-      if (d.service_category === "private") push("Privativo");
-      if (d.service_category === "regular") push("Regular");
+      if (d.service_category === "private") push(t("privateType"));
+      if (d.service_category === "regular") push(t("regularType"));
       push(d.vehicle_type);
       break;
     }
@@ -406,7 +445,7 @@ export function serviceDigestHighlights(service: QuoteService): string[] {
       break;
   }
 
-  const quantity = serviceDigestQuantity(service);
+  const quantity = serviceDigestQuantity(service, locale);
   if (quantity) push(quantity);
   return out.slice(0, 4);
 }
@@ -420,14 +459,18 @@ export interface ServiceDetailRow {
  * Linhas de "Ver detalhes" — mesma informação do card, expandida, sem inventar
  * campos que a agência não preencheu.
  */
-export function serviceDigestDetailRows(service: QuoteService): ServiceDetailRow[] {
+export function serviceDigestDetailRows(
+  service: QuoteService,
+  locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE,
+): ServiceDetailRow[] {
+  const t = translateQuote(locale);
   const rows: ServiceDetailRow[] = [];
   const location = serviceDigestLocation(service);
-  if (location) rows.push({ label: "Local", value: location });
-  for (const line of serviceDigestDateLines(service)) {
+  if (location) rows.push({ label: t("local"), value: location });
+  for (const line of serviceDigestDateLines(service, locale)) {
     rows.push({ label: line.label, value: line.value });
   }
-  const highlights = serviceDigestHighlights(service);
-  if (highlights.length > 0) rows.push({ label: "Destaques", value: highlights.join(" · ") });
+  const highlights = serviceDigestHighlights(service, locale);
+  if (highlights.length > 0) rows.push({ label: t("destaques"), value: highlights.join(" · ") });
   return rows;
 }

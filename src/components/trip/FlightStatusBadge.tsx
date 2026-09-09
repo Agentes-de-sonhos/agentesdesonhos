@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plane, Clock, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { normalizePublicLocale } from "@/i18n/publicMaterials/locale";
 
 interface FlightStatusData {
   status: string;
@@ -103,7 +104,7 @@ export function FlightStatusBadge({ tripServiceId, flightNumber, flightDate, loc
       )}
       {statusData.departure_actual && statusData.status === 'active' && (
         <span className="text-[10px] text-muted-foreground">
-          {t("fldDecolou")}: {new Date(statusData.departure_actual).toLocaleTimeString(locale === 'it-IT' ? 'it-IT' : 'pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          {t("fldDecolou")}: {new Date(statusData.departure_actual).toLocaleTimeString(normalizePublicLocale(locale), { hour: '2-digit', minute: '2-digit' })}
         </span>
       )}
     </div>

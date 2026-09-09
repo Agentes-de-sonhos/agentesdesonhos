@@ -714,7 +714,7 @@ function ServiceSection({
             </div>
             <div className="text-left">
               <span className="font-semibold text-sm block">{label}</span>
-              <span className={cn("text-[11px] px-2 py-0.5 rounded-full font-medium", colors.badge)}>{services.length} {services.length === 1 ? 'item' : 'itens'}</span>
+              <span className={cn("text-[11px] px-2 py-0.5 rounded-full font-medium", colors.badge)}>{services.length} {pluralize(locale, services.length, { one: tWallet(locale)("itemLabelOne"), other: tWallet(locale)("itemLabelOther") })}</span>
             </div>
           </div>
           <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isOpen && "rotate-180")} />
@@ -746,10 +746,10 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
   const cruiseStatusLabel = (() => {
     if (!isCruise) return null;
     const s = (data.reservation_status || '').toString().toLowerCase();
-    if (s.includes('confirm') && !s.includes('a confirm') && !s.includes('pre')) return { label: 'Confirmado', tone: 'emerald' as const };
-    if (s.includes('pre') || s.includes('pré')) return { label: 'Pré-reserva', tone: 'amber' as const };
-    if (s.includes('opc') || s.includes('pend')) return { label: 'Opcional', tone: 'slate' as const };
-    return { label: 'A confirmar', tone: 'amber' as const };
+    if (s.includes('confirm') && !s.includes('a confirm') && !s.includes('pre')) return { label: t("cruiseStatusConfirmado"), tone: 'emerald' as const };
+    if (s.includes('pre') || s.includes('pré')) return { label: t("cruiseStatusPreReserva"), tone: 'amber' as const };
+    if (s.includes('opc') || s.includes('pend')) return { label: t("cruiseStatusOpcional"), tone: 'slate' as const };
+    return { label: t("cruiseStatusAConfirmar"), tone: 'amber' as const };
   })();
   const isFlight = service.service_type === 'flight';
   const isCarRental = service.service_type === 'car_rental';
@@ -860,6 +860,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                           tripServiceId={service.id}
                           flightNumber={seg.flight_number}
                           flightDate={seg.flight_date}
+                          locale={locale}
                         />
                       )}
                     </div>

@@ -37,4 +37,23 @@ describe("public wallet i18n", () => {
     const freeText = "Observação do agente: levar protetor solar";
     expect(freeText).toBe("Observação do agente: levar protetor solar");
   });
+
+  it("adds itemLabel and cruise status keys for it-IT", () => {
+    expect(tWallet("pt-BR")("itemLabelOne")).toBe("item");
+    expect(tWallet("pt-BR")("itemLabelOther")).toBe("itens");
+    expect(tWallet("it-IT")("itemLabelOne")).toBe("elemento");
+    expect(tWallet("it-IT")("itemLabelOther")).toBe("elementi");
+    expect(tWallet("pt-BR")("cruiseStatusConfirmado")).toBe("Confirmado");
+    expect(tWallet("it-IT")("cruiseStatusConfirmado")).toBe("Confermato");
+    expect(tWallet("it-IT")("cruiseStatusAConfirmar")).toBe("Da confermare");
+  });
+
+  it("FlightStatusBadge time formatting locale is not hardcoded pt-BR/it-IT ternary in JSX (uses normalizePublicLocale)", () => {
+    const src = require("fs").readFileSync(
+      require("path").join(__dirname, "../components/trip/FlightStatusBadge.tsx"),
+      "utf-8"
+    );
+    expect(src).not.toMatch(/locale === 'it-IT' \? 'it-IT' : 'pt-BR'/);
+    expect(src).toContain("normalizePublicLocale(locale)");
+  });
 });
