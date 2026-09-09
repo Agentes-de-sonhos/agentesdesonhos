@@ -597,7 +597,7 @@ export default function CriarRoteiro() {
               ) : null}
               <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="min-w-0">
                       <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
@@ -609,19 +609,21 @@ export default function CriarRoteiro() {
                     </div>
 
                     {/* Importação de roteiro pronto (mesma funcionalidade/modal de antes) */}
-                    <div className="sm:text-right sm:shrink-0">
-                      <div className="flex items-center gap-2 font-medium text-sm sm:justify-end">
-                        <FileText className="h-4 w-4 text-primary" />
-                        Já tem um roteiro pronto?
+                    <div className="flex items-center gap-3 sm:shrink-0">
+                      <div className="min-w-0 sm:text-right">
+                        <div className="flex items-center gap-1.5 font-medium text-sm sm:justify-end">
+                          <FileText className="h-4 w-4 text-primary" />
+                          Já tem um roteiro pronto?
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Importe PDF, DOC ou texto.
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 sm:max-w-[16rem]">
-                        Importe PDFs, DOCs ou texto colado e a IA monta o roteiro para você.
-                      </p>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setImportWizardOpen(true)}
-                        className="mt-2 h-9 rounded-lg"
+                        className="h-9 rounded-lg shrink-0"
                       >
                         <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                         Importar roteiro
