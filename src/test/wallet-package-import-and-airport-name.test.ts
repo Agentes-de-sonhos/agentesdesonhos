@@ -44,8 +44,8 @@ describe("Carteira — importar pacote com IA", () => {
   });
 
   it("grava direto em trip_services com o order_index informado", async () => {
-    const insert = vi.fn(async () => ({ error: null }));
-    const from = vi.fn(() => ({ insert }));
+    const insert = vi.fn(async (_row: any) => ({ error: null }));
+    const from = vi.fn((_table: string) => ({ insert }));
     const ok = await insertPackageServiceIntoTrip(
       { from } as any,
       "trip-1",
