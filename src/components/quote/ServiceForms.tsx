@@ -923,6 +923,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
   }, [fetchAutocomplete, onPlaceIdChange]);
 
+  const metadataRequestRef = useRef<string | null>(null);
+
   const handleSelectPrediction = useCallback((p: { place_id: string; name: string; secondary: string }) => {
     form.setValue("hotel_name", p.name);
     setSelectedPlaceId(p.place_id);
@@ -935,6 +937,18 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
       const cityPart = parts.length >= 3 ? parts[1] : parts[0];
       if (cityPart) form.setValue("city", cityPart);
     }
+
+    // Uma única consulta de metadados (sem fotos). Falhas são silenciosas e
+    // respostas antigas nunca contaminam um hotel trocado.
+    metadataRequestRef.current = p.place_id;
+    void fetchPlaceMetadata(p.place_id).then((place) => {
+      if (metadataRequestRef.current !== p.place_id) return;
+      const description = extractPlaceDescription(place);
+      if (!description) return;
+      const current = (form.getValues("service_description") || "").trim();
+      if (current) return; // nunca sobrescreve texto do usuário/importado
+      form.setValue("service_description", description);
+    });
   }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
