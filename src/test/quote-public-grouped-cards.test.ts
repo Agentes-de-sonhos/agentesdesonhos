@@ -117,7 +117,8 @@ describe("apresentação dos pagamentos por serviço", () => {
     expect(block).toMatch(/text-sm sm:text-base text-muted-foreground/);
     // "Valor do serviço" em text-sm/base, sem duplicar o bloco.
     expect(block).toMatch(/text-sm sm:text-base text-foreground\/80/);
-    expect(block.match(/Valor do serviço:/g)).toHaveLength(1);
+    expect(block.match(/t\("serviceValueLabel"\)/g)).toHaveLength(1);
+    expect(quoteDict["pt-BR"].serviceValueLabel).toBe("Valor do serviço");
     expect(block.match(/t\("paymentConditions"\)/g)).toHaveLength(1);
     expect(quoteDict["pt-BR"].paymentConditions).toBe("Condições de pagamento");
   });

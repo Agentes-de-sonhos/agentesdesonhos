@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { BOOKING_REQUEST_DISCLAIMER, quoteHasLinkedClient } from "@/lib/quoteBookingSelection";
+import { quoteDict } from "@/i18n/publicMaterials/quote";
 
 const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 const quotesHook = readFileSync("src/hooks/useQuotes.ts", "utf8");
@@ -14,16 +15,19 @@ describe("modal final de solicitação de reserva", () => {
     expect(block).toContain('htmlFor="br-name"');
     expect(block).toContain('htmlFor="br-whats"');
     expect(block).toContain('htmlFor="br-email"');
-    expect(block).toContain("Informe pelo menos WhatsApp ou e-mail.");
+    expect(block).toContain('t("provideWhatsappOrEmail")');
+    expect(quoteDict["pt-BR"].provideWhatsappOrEmail).toBe("Informe pelo menos WhatsApp ou e-mail.");
   });
 
   it("orçamento genérico mantém o formulário de contato", () => {
     expect(quoteHasLinkedClient({})).toBe(false);
-    expect(panel).toContain("Revise os serviços e informe como a agência pode falar com você.");
+    expect(panel).toContain('t("reviewServicesContact")');
+    expect(quoteDict["pt-BR"].reviewServicesContact).toBe("Revise os serviços e informe como a agência pode falar com você.");
   });
 
   it("subtítulo nominal não pede canal de contato", () => {
-    expect(panel).toContain("Revise os serviços e confirme sua solicitação.");
+    expect(panel).toContain('t("reviewServicesConfirm")');
+    expect(quoteDict["pt-BR"].reviewServicesConfirm).toBe("Revise os serviços e confirme sua solicitação.");
   });
 
   it("Observações continua fora do bloco condicional", () => {
