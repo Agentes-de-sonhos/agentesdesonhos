@@ -397,36 +397,40 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
 };
 
 /** Cor + label do status, ou null se status vazio/desconhecido. */
-export function resolveStatusBadge(rawStatus?: string): {
+export function resolveStatusBadge(
+  rawStatus?: string,
+  locale: PublicLocale = "pt-BR",
+): {
   label: string;
   className: string;
 } | null {
   if (!rawStatus || !rawStatus.trim()) return null;
+  const t = tWallet(locale);
   const key = rawStatus.toLowerCase().trim();
   const GREEN = "bg-emerald-50 text-emerald-700 border-emerald-200";
   const AMBER = "bg-amber-50 text-amber-700 border-amber-200";
   const BLUE = "bg-sky-50 text-sky-700 border-sky-200";
   const RED = "bg-rose-50 text-rose-700 border-rose-200";
   const map: Record<string, { label: string; className: string }> = {
-    confirmado: { label: "Confirmado", className: GREEN },
-    confirmada: { label: "Confirmada", className: GREEN },
-    emitido: { label: "Emitido", className: GREEN },
-    emitida: { label: "Emitida", className: GREEN },
-    ativo: { label: "Ativo", className: GREEN },
-    realizado: { label: "Realizado", className: GREEN },
-    utilizado: { label: "Utilizado", className: GREEN },
-    pendente: { label: "Pendente", className: AMBER },
-    pre_reserva: { label: "Pré-reserva", className: AMBER },
-    agendado: { label: "Agendado", className: AMBER },
-    a_retirar: { label: "A retirar", className: AMBER },
-    a_confirmar: { label: "A confirmar", className: BLUE },
-    reservado: { label: "Reservado", className: BLUE },
-    flexivel: { label: "Flexível", className: BLUE },
-    opcional: { label: "Opcional", className: BLUE },
-    futuro: { label: "Futuro", className: BLUE },
-    cancelado: { label: "Cancelado", className: RED },
-    cancelada: { label: "Cancelada", className: RED },
-    expirado: { label: "Expirado", className: RED },
+    confirmado: { label: t("stConfirmado"), className: GREEN },
+    confirmada: { label: t("stConfirmada"), className: GREEN },
+    emitido: { label: t("stEmitido"), className: GREEN },
+    emitida: { label: t("stEmitida"), className: GREEN },
+    ativo: { label: t("stAtivo"), className: GREEN },
+    realizado: { label: t("stRealizado"), className: GREEN },
+    utilizado: { label: t("stUtilizado"), className: GREEN },
+    pendente: { label: t("stPendente"), className: AMBER },
+    pre_reserva: { label: t("stPreReserva"), className: AMBER },
+    agendado: { label: t("stAgendado"), className: AMBER },
+    a_retirar: { label: t("stARetirar"), className: AMBER },
+    a_confirmar: { label: t("stAConfirmar"), className: BLUE },
+    reservado: { label: t("stReservado"), className: BLUE },
+    flexivel: { label: t("stFlexivel"), className: BLUE },
+    opcional: { label: t("stOpcional"), className: BLUE },
+    futuro: { label: t("stFuturo"), className: BLUE },
+    cancelado: { label: t("stCancelado"), className: RED },
+    cancelada: { label: t("stCancelada"), className: RED },
+    expirado: { label: t("stExpirado"), className: RED },
   };
   return map[key] || { label: rawStatus, className: BLUE };
 }
