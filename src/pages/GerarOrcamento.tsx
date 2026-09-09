@@ -1024,6 +1024,31 @@ export default function GerarOrcamento() {
     setPendingSectionId(null);
   };
 
+  /** Adiciona vários serviços do mesmo tipo (importação de documento com vários hotéis). */
+  const handleAddManyServices = async (
+    items: Array<{ service_data: ServiceData; amount: number; option_label?: string; description?: string }>,
+  ) => {
+    if (!selectedServiceType || items.length === 0) return;
+    for (const item of items) {
+      await addService({
+        service_type: selectedServiceType,
+        service_data: item.service_data,
+        amount: item.amount,
+        option_label: item.option_label,
+        description: item.description,
+        section_id: pendingSectionId,
+      });
+    }
+    toast({
+      title: items.length > 1 ? `${items.length} hospedagens adicionadas` : "Serviço adicionado",
+      description: "Revise os serviços do orçamento.",
+    });
+    setSelectedServiceType(null);
+    setEditingService(null);
+    setPendingSectionId(null);
+    setNewServicePaymentConfig({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
+  };
+
   const handleDeleteQuote = async (qId: string) => {
     await deleteQuote(qId);
     setDeleteConfirmId(null);
@@ -1531,6 +1556,7 @@ export default function GerarOrcamento() {
         childrenCount={quote.children_count}
         isLoading={isAddingService}
         onSubmit={handleAddService}
+        onSubmitMany={handleAddManyServices}
         newServicePaymentConfig={newServicePaymentConfig}
         setNewServicePaymentConfig={setNewServicePaymentConfig}
         servicePaymentConfigs={servicePaymentConfigs}

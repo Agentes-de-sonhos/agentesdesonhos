@@ -10,10 +10,18 @@ const SYSTEM_PROMPT = `Você é um extrator de RESERVAS / ORÇAMENTOS DE HOSPEDA
 Sua ÚNICA tarefa: ler vouchers, confirmações de reserva, e-mails, prints, PDFs e textos de HOSPEDAGEM (em IMAGEM, texto ou ambos)
 e devolver os dados estruturados usando a função "extract_hotel_document".
 
+REGRA #0 — VÁRIOS HOTÉIS NO MESMO DOCUMENTO.
+- O documento pode conter 1, 2, 5 ou mais hospedagens (opções alternativas para as mesmas datas, ou trechos sequenciais em cidades diferentes).
+- Devolva SEMPRE o array "hospedagens" com UM ITEM POR HOTEL/HOSPEDAGEM identificado, na ordem em que aparecem (ou cronológica, quando houver datas).
+- NUNCA junte dois hotéis diferentes no mesmo item. NUNCA repita o mesmo hotel em itens diferentes.
+- Se houver apenas um hotel, devolva um array com um único item.
+- Cada item deve conter TODOS os campos que você conseguir ler daquele hotel específico (valores, taxas, políticas, regime, quarto, observações).
+
 REGRA #1 — POSTURA DE EXTRAÇÃO.
 - NUNCA desista. Mesmo com campos ilegíveis, EXTRAIA TUDO o que conseguir.
 - Deixe vazio/null o que não tiver certeza. Liste em "campos_nao_identificados" o nome dos campos que ficaram em branco.
 - SEMPRE chame a função extract_hotel_document. NUNCA retorne texto explicando que o documento está ruim.
+
 
 REGRA #2 — DATAS.
 - Sempre que o ANO estiver visível no documento, preencha datas como "YYYY-MM-DD".
@@ -62,75 +70,90 @@ FONTES DE ENTRADA:
 IMPORTANTE FINAL:
 - NÃO INVENTE ANO. NÃO INVENTE VALORES. SEMPRE chame extract_hotel_document.`;
 
-const TOOL_SCHEMA = {
-  type: "function",
-  function: {
-    name: "extract_hotel_document",
-    description: "Extract structured hotel/lodging reservation data from a voucher/booking/email/PDF/image.",
-    parameters: {
+const HOTEL_ITEM_SCHEMA = {
+  type: "object",
+  properties: {
+    nome_hotel: { type: "string" },
+    cidade: { type: "string" },
+    pais: { type: "string" },
+    endereco: { type: "string" },
+    check_in: { type: "string", description: "YYYY-MM-DD or short date if year unknown" },
+    check_out: { type: "string", description: "YYYY-MM-DD or short date if year unknown" },
+    horario_check_in: { type: "string", description: "HH:mm" },
+    horario_check_out: { type: "string", description: "HH:mm" },
+    noites: { type: ["integer", "null"] },
+    tipo_acomodacao: { type: "string" },
+    categoria_quarto: { type: "string" },
+    regime_alimentacao: { type: "string" },
+    hospedes_adultos: { type: ["integer", "null"] },
+    hospedes_criancas: { type: ["integer", "null"] },
+    hospedes_total: { type: ["integer", "null"] },
+    quantidade_quartos: { type: ["integer", "null"] },
+    moeda: { type: "string" },
+    valor_total: { type: ["number", "null"] },
+    valor_total_brl: { type: ["number", "null"] },
+    valor_diaria: { type: ["number", "null"] },
+    cambio: { type: ["number", "null"] },
+    data_cambio: { type: "string" },
+    taxas: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          nome: { type: "string" },
+          valor: { type: ["number", "null"] },
+          moeda: { type: "string" },
+        },
+        required: [],
+        additionalProperties: false,
+      },
+    },
+    politica_cancelamento: { type: "string" },
+    inclusos: { type: "array", items: { type: "string" } },
+    nao_inclusos: { type: "array", items: { type: "string" } },
+    observacoes: { type: "array", items: { type: "string" } },
+    codigo_reserva: { type: "string" },
+    localizador: { type: "string" },
+    link_reserva: { type: "string" },
+    fornecedor: { type: "string" },
+    campos_nao_identificados: { type: "array", items: { type: "string" } },
+    confianca_extracao: {
       type: "object",
       properties: {
-        nome_hotel: { type: "string" },
-        cidade: { type: "string" },
-        pais: { type: "string" },
-        endereco: { type: "string" },
-        check_in: { type: "string", description: "YYYY-MM-DD or short date if year unknown" },
-        check_out: { type: "string", description: "YYYY-MM-DD or short date if year unknown" },
-        horario_check_in: { type: "string", description: "HH:mm" },
-        horario_check_out: { type: "string", description: "HH:mm" },
-        noites: { type: ["integer", "null"] },
-        tipo_acomodacao: { type: "string" },
-        categoria_quarto: { type: "string" },
-        regime_alimentacao: { type: "string" },
-        hospedes_adultos: { type: ["integer", "null"] },
-        hospedes_criancas: { type: ["integer", "null"] },
-        hospedes_total: { type: ["integer", "null"] },
-        quantidade_quartos: { type: ["integer", "null"] },
-        moeda: { type: "string" },
-        valor_total: { type: ["number", "null"] },
-        valor_total_brl: { type: ["number", "null"] },
-        valor_diaria: { type: ["number", "null"] },
-        cambio: { type: ["number", "null"] },
-        data_cambio: { type: "string" },
-        taxas: {
-          type: "array",
-          items: {
-            type: "object",
-            properties: {
-              nome: { type: "string" },
-              valor: { type: ["number", "null"] },
-              moeda: { type: "string" },
-            },
-            required: [],
-            additionalProperties: false,
-          },
-        },
-        politica_cancelamento: { type: "string" },
-        inclusos: { type: "array", items: { type: "string" } },
-        nao_inclusos: { type: "array", items: { type: "string" } },
-        observacoes: { type: "array", items: { type: "string" } },
-        codigo_reserva: { type: "string" },
-        localizador: { type: "string" },
-        link_reserva: { type: "string" },
-        fornecedor: { type: "string" },
-        campos_nao_identificados: { type: "array", items: { type: "string" } },
-        confianca_extracao: {
-          type: "object",
-          properties: {
-            geral: { type: "number" },
-            dados_principais: { type: "number" },
-            valores: { type: "number" },
-            politicas: { type: "number" },
-          },
-          required: [],
-          additionalProperties: false,
-        },
+        geral: { type: "number" },
+        dados_principais: { type: "number" },
+        valores: { type: "number" },
+        politicas: { type: "number" },
       },
       required: [],
       additionalProperties: false,
     },
   },
+  required: [],
+  additionalProperties: false,
+} as const;
+
+const TOOL_SCHEMA = {
+  type: "function",
+  function: {
+    name: "extract_hotel_document",
+    description:
+      "Extract every hotel/lodging reservation found in a voucher/booking/email/PDF/image. Always return one item per hotel inside 'hospedagens'.",
+    parameters: {
+      type: "object",
+      properties: {
+        hospedagens: {
+          type: "array",
+          description: "Uma entrada por hotel/hospedagem identificada no documento (mínimo 1).",
+          items: HOTEL_ITEM_SCHEMA,
+        },
+      },
+      required: ["hospedagens"],
+      additionalProperties: false,
+    },
+  },
 };
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -263,33 +286,50 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Normalização leve
-    parsed.taxas = Array.isArray(parsed.taxas) ? parsed.taxas : [];
-    parsed.inclusos = Array.isArray(parsed.inclusos) ? parsed.inclusos : [];
-    parsed.nao_inclusos = Array.isArray(parsed.nao_inclusos) ? parsed.nao_inclusos : [];
-    parsed.observacoes = Array.isArray(parsed.observacoes) ? parsed.observacoes : [];
-    parsed.campos_nao_identificados = Array.isArray(parsed.campos_nao_identificados) ? parsed.campos_nao_identificados : [];
-    parsed.confianca_extracao = parsed.confianca_extracao || {};
+    // Compatibilidade: aceita { hospedagens: [...] }, array puro ou objeto singular antigo.
+    const rawList: any[] = Array.isArray(parsed?.hospedagens)
+      ? parsed.hospedagens
+      : Array.isArray(parsed?.hoteis)
+        ? parsed.hoteis
+        : Array.isArray(parsed)
+          ? parsed
+          : [parsed];
 
-    const confidence = Number(parsed.confianca_extracao?.geral) || 0;
-    const hasAnyUseful = !!(
-      parsed.nome_hotel ||
-      parsed.cidade ||
-      parsed.check_in ||
-      parsed.check_out ||
-      parsed.codigo_reserva ||
-      parsed.localizador ||
-      typeof parsed.valor_total === "number" ||
-      typeof parsed.valor_total_brl === "number"
+    const normalizeHotel = (item: any) => {
+      const h = item && typeof item === "object" ? { ...item } : {};
+      h.taxas = Array.isArray(h.taxas) ? h.taxas : [];
+      h.inclusos = Array.isArray(h.inclusos) ? h.inclusos : [];
+      h.nao_inclusos = Array.isArray(h.nao_inclusos) ? h.nao_inclusos : [];
+      h.observacoes = Array.isArray(h.observacoes) ? h.observacoes : [];
+      h.campos_nao_identificados = Array.isArray(h.campos_nao_identificados) ? h.campos_nao_identificados : [];
+      h.confianca_extracao = h.confianca_extracao || {};
+      return h;
+    };
+
+    const hasUseful = (h: any) => !!(
+      h.nome_hotel ||
+      h.cidade ||
+      h.check_in ||
+      h.check_out ||
+      h.codigo_reserva ||
+      h.localizador ||
+      typeof h.valor_total === "number" ||
+      typeof h.valor_total_brl === "number"
     );
 
-    if (!hasAnyUseful) {
+    const normalized = rawList.map(normalizeHotel);
+    // Retorno parcial: mantém apenas os hotéis com dados úteis, sem descartar os demais válidos.
+    const hotels = normalized.filter(hasUseful);
+    const first = hotels[0] || normalized[0] || normalizeHotel(null);
+    const confidence = Number(first.confianca_extracao?.geral) || 0;
+
+    if (hotels.length === 0) {
       return debugFail(
         "low_confidence",
         "no_useful_data",
         "A IA não conseguiu identificar dados úteis da hospedagem. Tente uma imagem com melhor resolução ou preencha manualmente.",
         200,
-        { raw_ai_response: rawAiText, partial_data: parsed, confidence_score: confidence },
+        { raw_ai_response: rawAiText, partial_data: first, confidence_score: confidence },
       );
     }
 
@@ -297,9 +337,13 @@ Deno.serve(async (req) => {
       success: true,
       stage: "validation",
       confidence_score: confidence,
-      data: parsed,
-      ...parsed,
+      hotels_count: hotels.length,
+      hotels,
+      // Compatibilidade com consumidores singulares existentes.
+      data: first,
+      ...first,
     }, 200);
+
   } catch (err) {
     console.error("import-hotel-document fatal:", err);
     return debugFail(currentStage, "fatal", String((err as any)?.message || err), 500, { raw_ai_response: rawAiText });

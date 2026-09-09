@@ -5,13 +5,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Hotel, CheckCircle2, AlertTriangle, X, Trash2, Plus, Bug } from "lucide-react";
+import { Loader2, Upload, Hotel, CheckCircle2, AlertTriangle, X, Trash2, Plus, Bug, ChevronLeft, ChevronRight, Ban, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { extractPdfText } from "@/lib/pdfText";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { extractParsedHotels } from "@/lib/hotelImportList";
 import type { HotelData } from "@/types/quote";
+
 
 /** ─────────── Types matching the edge function ─────────── */
 export interface ParsedHotelTaxa {
@@ -233,9 +235,14 @@ interface Props {
   quoteId?: string;
   onCancel: () => void;
   onConfirm: (data: Partial<HotelData>, raw: ParsedHotel) => void;
+  /**
+   * Quando informado, permite adicionar TODAS as hospedagens confirmadas de um
+   * documento com vários hotéis. Sem esta prop, o comportamento segue singular.
+   */
+  onConfirmMany?: (items: Array<{ data: Partial<HotelData>; raw: ParsedHotel }>) => void | Promise<void>;
 }
 
-export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
+export function HotelSmartImport({ quoteId, onCancel, onConfirm, onConfirmMany }: Props) {
   const { toast } = useToast();
   const { isAdmin } = useUserRole();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -243,10 +250,13 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   const [pastedText, setPastedText] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
-  const [parsed, setParsed] = useState<ParsedHotel | null>(null);
+  const [parsedList, setParsedList] = useState<ParsedHotel[] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [skipped, setSkipped] = useState<boolean[]>([]);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [showDebug, setShowDebug] = useState(false);
   const [hardError, setHardError] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (!isUploading) return;
@@ -281,9 +291,12 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       return;
     }
     setIsUploading(true);
-    setParsed(null);
+    setParsedList(null);
+    setActiveIndex(0);
+    setSkipped([]);
     setDebugInfo(null);
     setHardError(null);
+
     let storagePath: string | null = null;
 
     try {
@@ -342,22 +355,9 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         success: body?.success,
       });
 
-      const candidate: ParsedHotel | null =
-        (body?.success && (body?.data || body)) ||
-        (body?.partial_data && Object.keys(body.partial_data || {}).length > 0 ? body.partial_data : null);
+      const hotels = extractParsedHotels<ParsedHotel>(body);
 
-      const hasUseful = !!(
-        candidate?.nome_hotel ||
-        candidate?.cidade ||
-        candidate?.check_in ||
-        candidate?.check_out ||
-        candidate?.codigo_reserva ||
-        candidate?.localizador ||
-        typeof candidate?.valor_total === "number" ||
-        typeof candidate?.valor_total_brl === "number"
-      );
-
-      if (!hasUseful) {
+      if (hotels.length === 0) {
         const msg = body?.error_message || body?.error ||
           "Não foi possível identificar dados da hospedagem. Tente uma imagem mais nítida.";
         setHardError(msg);
@@ -365,16 +365,22 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         return;
       }
 
-      setParsed(candidate!);
+      setParsedList(hotels);
+      setActiveIndex(0);
+      setSkipped(hotels.map(() => false));
 
-      const conf = candidate!.confianca_extracao?.geral ?? 0;
+      const conf = hotels[0].confianca_extracao?.geral ?? 0;
       const confPct = Math.round(conf * 100);
+      const many = hotels.length > 1 ? `${hotels.length} hospedagens encontradas. ` : "";
       if (conf < 0.5) {
-        toast({ title: "Dados parciais identificados", description: `Confiança ${confPct}%. Revise os campos antes de aplicar.` });
+        toast({ title: "Dados parciais identificados", description: `${many}Confiança ${confPct}%. Revise os campos antes de aplicar.` });
       } else if (conf < 0.8) {
-        toast({ title: "Importação concluída com ressalvas", description: `Confiança ${confPct}%. Confira os campos.` });
+        toast({ title: "Importação concluída com ressalvas", description: `${many}Confiança ${confPct}%. Confira os campos.` });
       } else {
-        toast({ title: "Importação concluída", description: "Confira os dados antes de aplicar ao orçamento." });
+        toast({
+          title: hotels.length > 1 ? `${hotels.length} hospedagens encontradas` : "Importação concluída",
+          description: "Confira os dados antes de aplicar ao orçamento.",
+        });
       }
     } catch (e: any) {
       const msg = e?.message || "Não foi possível identificar os dados da reserva com precisão.";
@@ -386,22 +392,92 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
   };
 
   /* ─────────── REVIEW SCREEN ─────────── */
-  if (parsed) {
+  if (parsedList && parsedList.length > 0) {
+    const total = parsedList.length;
+    const current = parsedList[Math.min(activeIndex, total - 1)];
+    const isSkipped = !!skipped[activeIndex];
+    const includedIdx = parsedList.map((_, i) => i).filter((i) => !skipped[i]);
+
+    const resetReview = () => {
+      setParsedList(null);
+      setActiveIndex(0);
+      setSkipped([]);
+      setUploadFile(null);
+      setDebugInfo(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    // Edições ficam na lista — navegar entre hotéis nunca perde alterações.
+    const updateCurrent = (d: ParsedHotel) =>
+      setParsedList((prev) => (prev ? prev.map((h, i) => (i === activeIndex ? d : h)) : prev));
+
+    const handleConfirm = () => {
+      const items = includedIdx.map((i) => ({ data: parsedHotelToHotelData(parsedList[i]), raw: parsedList[i] }));
+      if (items.length === 0) {
+        toast({ title: "Nenhuma hospedagem selecionada", description: "Inclua pelo menos um hotel para continuar.", variant: "destructive" });
+        return;
+      }
+      if (items.length > 1 && onConfirmMany) {
+        void onConfirmMany(items);
+        return;
+      }
+      onConfirm(items[0].data, items[0].raw);
+    };
+
     return (
       <>
+        {total > 1 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-3">
+            <div className="flex items-center gap-2">
+              <Hotel className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold">
+                Hotel {activeIndex + 1} de {total}
+              </span>
+              {isSkipped && <Badge variant="destructive">Ignorado</Badge>}
+            </div>
+            <span className="text-xs text-muted-foreground truncate max-w-[220px]">
+              {current.nome_hotel || "Sem nome identificado"}
+            </span>
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <Button
+                type="button" variant="outline" size="sm"
+                disabled={activeIndex === 0}
+                onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" /> Anterior
+              </Button>
+              <Button
+                type="button" variant="outline" size="sm"
+                disabled={activeIndex >= total - 1}
+                onClick={() => setActiveIndex((i) => Math.min(total - 1, i + 1))}
+              >
+                Próximo <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+              <Button
+                type="button" variant={isSkipped ? "default" : "ghost"} size="sm"
+                onClick={() => setSkipped((prev) => prev.map((v, i) => (i === activeIndex ? !v : v)))}
+              >
+                {isSkipped
+                  ? (<><RotateCcw className="h-3 w-3 mr-1" /> Incluir</>)
+                  : (<><Ban className="h-3 w-3 mr-1" /> Ignorar</>)}
+              </Button>
+            </div>
+            <p className="w-full text-[11px] text-muted-foreground">
+              {includedIdx.length} de {total} hospedagens serão adicionadas ao orçamento.
+            </p>
+          </div>
+        )}
         <ReviewScreen
-          data={parsed}
-          onChange={setParsed}
-          onCancel={() => {
-            setParsed(null);
-            setUploadFile(null);
-            setDebugInfo(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-          }}
-          onConfirm={() => {
-            const mapped = parsedHotelToHotelData(parsed);
-            onConfirm(mapped, parsed);
-          }}
+          key={activeIndex}
+          data={current}
+          onChange={updateCurrent}
+          onCancel={resetReview}
+          onConfirm={handleConfirm}
+          confirmLabel={
+            includedIdx.length > 1
+              ? `Adicionar ${includedIdx.length} hospedagens`
+              : undefined
+          }
           isAdmin={isAdmin}
           onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}
         />
@@ -409,6 +485,7 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm }: Props) {
       </>
     );
   }
+
 
   /* ─────────── UPLOAD SCREEN ─────────── */
   return (
@@ -571,7 +648,7 @@ function DebugRow({ label, value }: { label: string; value: string }) {
 
 /* ─────────── REVIEW SCREEN ─────────── */
 function ReviewScreen({
-  data, onChange, onCancel, onConfirm, isAdmin, onShowDebug,
+  data, onChange, onCancel, onConfirm, isAdmin, onShowDebug, confirmLabel,
 }: {
   data: ParsedHotel;
   onChange: (d: ParsedHotel) => void;
@@ -579,7 +656,9 @@ function ReviewScreen({
   onConfirm: () => void;
   isAdmin?: boolean;
   onShowDebug?: () => void;
+  confirmLabel?: string;
 }) {
+
   const conf = data.confianca_extracao?.geral ?? 0;
   const lowConf = conf > 0 && conf < 0.8;
   const veryLowConf = conf > 0 && conf < 0.5;
@@ -752,7 +831,8 @@ function ReviewScreen({
           <X className="h-4 w-4 mr-1" /> Cancelar
         </Button>
         <Button type="button" onClick={onConfirm}>
-          <CheckCircle2 className="h-4 w-4 mr-1" /> Aplicar ao formulário
+          <CheckCircle2 className="h-4 w-4 mr-1" /> {confirmLabel || "Aplicar ao formulário"}
+
         </Button>
       </div>
     </div>
