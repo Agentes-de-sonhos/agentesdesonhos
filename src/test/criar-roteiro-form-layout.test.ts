@@ -24,6 +24,13 @@ describe("Criar Roteiro — navegação e layout", () => {
     expect(page).toContain("ImportItineraryWizard");
   });
 
+  it("usa Download + Importar e mantém a descrição em uma linha no desktop", () => {
+    expect(page).toContain('<Download className="h-4 w-4" />');
+    expect(page).toContain("md:whitespace-nowrap");
+    expect(page).not.toContain("Importe PDF, DOC ou texto.");
+    expect(page).not.toContain("Importar roteiro");
+  });
+
   it("primeira linha: Cliente 50%, Adultos 25%, Crianças 25% com grupo Viajantes", () => {
     expect(form).toContain("md:grid-cols-4");
     expect(form).toContain("md:col-span-2");

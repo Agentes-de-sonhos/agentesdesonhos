@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, UserCircle2, Building2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Download, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, UserCircle2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Search, Globe2, Sparkles } from "lucide-react";
 import { parseDestinationParts } from "@/lib/destination-parts";
@@ -903,16 +903,22 @@ function TripWalletContent() {
                         Preencha os dados iniciais para criar uma carteira digital.
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 h-9 rounded-lg self-start sm:self-auto"
-                      onClick={() => setShowImportQuoteAsNew(true)}
-                    >
-                      <FileTextIcon className="h-4 w-4 mr-2" />
-                      Importar de um Orçamento
-                    </Button>
+                    <div className="flex flex-col items-start gap-1 sm:shrink-0 sm:items-end">
+                      <div className="flex items-center gap-1.5 text-sm font-medium">
+                        <FileTextIcon className="h-4 w-4 text-primary" />
+                        Já tem um orçamento pronto?
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 h-9 rounded-lg"
+                        onClick={() => setShowImportQuoteAsNew(true)}
+                      >
+                        <Download className="h-4 w-4" />
+                        Importar
+                      </Button>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
