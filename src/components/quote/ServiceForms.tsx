@@ -916,13 +916,17 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     } finally { setIsSearching(false); }
   }, [form]);
 
+  const metadataRequestRef = useRef<string | null>(null);
+
   const handleHotelNameInput = useCallback((value: string, formOnChange: (v: string) => void) => {
     formOnChange(value);
     setSelectedPlaceId(null);
     onPlaceIdChange?.(null);
+    metadataRequestRef.current = null;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
   }, [fetchAutocomplete, onPlaceIdChange]);
+
 
   const metadataRequestRef = useRef<string | null>(null);
 
