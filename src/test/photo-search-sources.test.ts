@@ -109,3 +109,19 @@ describe("cache", () => {
     })();
   });
 });
+
+describe("gallery cache schema compatibility", () => {
+  it("uses the existing created_at column (no updated_at) in the gallery flow", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const src = readFileSync(
+      resolve(process.cwd(), "supabase/functions/activity-photo/index.ts"),
+      "utf8",
+    );
+    const galleryBlock = src.slice(src.indexOf("wantMulti"), src.indexOf("// 1) cache lookup"));
+    expect(galleryBlock).toContain('.select("photos, created_at")');
+    expect(galleryBlock).toContain("isCacheFresh(cachedGallery.created_at)");
+    expect(galleryBlock).toContain("created_at: new Date().toISOString()");
+    expect(galleryBlock).not.toContain("updated_at");
+  });
+});
