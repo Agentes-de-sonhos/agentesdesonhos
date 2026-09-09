@@ -101,8 +101,9 @@ describe("cards agrupados x individuais no orçamento público", () => {
   });
 
   it("texto de apoio da seção é universal e válido para cards agrupados e individuais", () => {
-    expect(src).toMatch(/Consulte abaixo os detalhes de cada serviço\./);
+    expect(src).toMatch(/t\("checkDetailsBelow"\)/);
     expect(src).not.toMatch(/Toque em cada item para ver os detalhes completos/);
+    expect(quoteDict["pt-BR"].checkDetailsBelow).toBe("Consulte abaixo os detalhes de cada serviço.");
   });
 });
 
