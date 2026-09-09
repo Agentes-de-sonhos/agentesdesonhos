@@ -9,9 +9,8 @@ const form = read("src/components/itinerary/ItineraryForm.tsx");
 const hook = read("src/hooks/useItineraries.ts");
 
 describe("Criar Roteiro — navegação e layout", () => {
-  it("Meus Roteiros e Meus Modelos navegam para Meus Projetos via helper contextual", () => {
-    expect(page).toContain('navigate(nav.projects("roteiros"))');
-    expect(page).toContain('navigate(nav.projects("modelos"))');
+  it("Meus Roteiros abre Meus Projetos em nova aba via helper contextual", () => {
+    expect(page).toContain('openInNewTab(nav.projects("roteiros"))');
     expect(page).toContain("useAdminNav");
   });
 
