@@ -12,6 +12,24 @@
  * timezone) via parseLocalDateSafe.
  */
 
+/** Idiomas suportados nos materiais públicos (pt-BR é o padrão). */
+export type FriendlyLocale = "pt-BR" | "it-IT";
+
+const MONTHS_IT = [
+  "gennaio",
+  "febbraio",
+  "marzo",
+  "aprile",
+  "maggio",
+  "giugno",
+  "luglio",
+  "agosto",
+  "settembre",
+  "ottobre",
+  "novembre",
+  "dicembre",
+];
+
 const MONTHS_PT = [
   "janeiro",
   "fevereiro",
