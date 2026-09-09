@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Plane, Sparkles } from "lucide-react";
@@ -18,6 +18,7 @@ import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { resolvePublicLocale, formatPublicNumber, pluralize } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
+import { reconcileCachedAgentProfile } from "@/lib/walletOfflineProfile";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
