@@ -71,6 +71,18 @@ Deno.serve(async (req) => {
       }
 
       const m = metaData.result;
+      // Mescla com o raw_data existente: sobrescreve apenas os metadados
+      // retornados agora, preservando price_level e demais dados já armazenados.
+      const mergedRaw = {
+        ...(cachedRaw || {}),
+        types: m.types,
+        rating: m.rating ?? null,
+        user_ratings_total: m.user_ratings_total ?? null,
+        editorial_summary: m.editorial_summary?.overview ?? null,
+        maps_url: m.url ?? null,
+        website: m.website ?? null,
+        phone: m.international_phone_number ?? null,
+      };
       const metaPlace: any = {
         place_id: m.place_id,
         name: m.name || "",
@@ -78,18 +90,11 @@ Deno.serve(async (req) => {
         place_type: (m.types || [])[0] || place_type || "establishment",
         latitude: m.geometry?.location?.lat ?? null,
         longitude: m.geometry?.location?.lng ?? null,
-        raw_data: {
-          types: m.types,
-          rating: m.rating ?? null,
-          user_ratings_total: m.user_ratings_total ?? null,
-          editorial_summary: m.editorial_summary?.overview ?? null,
-          maps_url: m.url ?? null,
-          website: m.website ?? null,
-          phone: m.international_phone_number ?? null,
-        },
+        raw_data: mergedRaw,
       };
 
       if (cachedMeta) {
+        // Update não toca photo_url/photo_urls: fotos já cacheadas são preservadas.
         await supabaseAdmin.from("place_cache").update(metaPlace).eq("place_id", place_id);
       } else {
         await supabaseAdmin
