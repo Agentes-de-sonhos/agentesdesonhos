@@ -12,5 +12,5 @@
 - [x] Corrigir todos os erros de typecheck/build (inclusive preexistentes) antes de concluir
 
 ## Padronização dos botões de importação
-- [ ] Padronizar os cabeçalhos de Roteiro, Carteira Digital e Orçamento
-- [ ] Atualizar testes focados e validar tipos/build
+- [x] Padronizar os cabeçalhos de Roteiro, Carteira Digital e Orçamento
+- [x] Atualizar testes focados e validar tipos/build
