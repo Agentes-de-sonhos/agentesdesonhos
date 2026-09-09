@@ -31,7 +31,7 @@ describe("economia de chamadas Google Places Photo", () => {
   it("fotos de atividade buscam no máximo 5 candidatas com 1 chamada cada", () => {
     expect(read("src/components/itinerary/ActivityMediaActions.tsx")).toContain("limit: 5");
     const fn = read("supabase/functions/activity-photo/index.ts");
-    expect(fn).toContain("1), 5)");
+    expect(fn).toContain("1), MAX_PHOTOS)");
     expect(fn).toContain("thumb_url: full");
   });
 });
