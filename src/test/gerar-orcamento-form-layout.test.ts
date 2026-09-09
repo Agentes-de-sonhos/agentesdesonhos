@@ -18,6 +18,13 @@ describe("Gerar Orçamento — navegação e layout", () => {
     expect(page).not.toMatch(/navigate\(["']\/meus-projetos\?tab=orcamentos["']\)/);
   });
 
+  it("mantém Download + Importar como referência visual", () => {
+    expect(page).toContain('<Download className="h-4 w-4" />');
+    expect(page).toContain('className="shrink-0 h-9 rounded-lg"');
+    expect(page).toContain("onClick={() => setImportOpen(true)}");
+    expect(page).not.toContain("Já tem um orçamento pronto?");
+  });
+
   it("primeira linha: Cliente 50%, Adultos 25%, Crianças 25%", () => {
     expect(form).toContain("md:grid-cols-4");
     expect(form).toContain("md:col-span-2");

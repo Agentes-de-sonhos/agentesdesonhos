@@ -37,7 +37,7 @@ import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
-import { Wand2, ArrowLeft, Check, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
+import { Wand2, ArrowLeft, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
@@ -596,38 +596,34 @@ export default function CriarRoteiro() {
                   />
                 </div>
               ) : null}
-              <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
+              <Card className="max-w-4xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0">
+                  <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                    <div className="min-w-0 md:flex-1">
                       <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
                         Novo Roteiro de Viagem
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-sm text-muted-foreground mt-1 md:whitespace-nowrap">
                         Preencha os dados e deixe a IA criar um roteiro personalizado.
                       </p>
                     </div>
 
                     {/* Importação de roteiro pronto (mesma funcionalidade/modal de antes) */}
-                    <div className="flex items-center gap-3 sm:shrink-0">
-                      <div className="min-w-0 sm:text-right">
-                        <div className="flex items-center gap-1.5 font-medium text-sm sm:justify-end">
-                          <FileText className="h-4 w-4 text-primary" />
-                          Já tem um roteiro pronto?
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Importe PDF, DOC ou texto.
-                        </p>
+                    <div className="flex flex-col items-start gap-1 md:shrink-0 md:items-end">
+                      <div className="flex items-center gap-1.5 text-sm font-medium">
+                        <FileText className="h-4 w-4 text-primary" />
+                        Já tem um roteiro pronto?
                       </div>
                       <Button
+                        type="button"
                         variant="outline"
                         size="sm"
                         onClick={() => setImportWizardOpen(true)}
-                        className="h-9 rounded-lg shrink-0"
+                        className="shrink-0 h-9 rounded-lg"
                       >
-                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                        Importar roteiro
+                        <Download className="h-4 w-4" />
+                        Importar
                       </Button>
                     </div>
                   </div>

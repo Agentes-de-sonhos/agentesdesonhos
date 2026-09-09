@@ -42,15 +42,22 @@ describe("Nova janela interna do sistema para as listagens contextuais", () => {
 describe("Carteira Digital — cabeçalho compacto", () => {
   it("botão de importar orçamento fica no CardHeader, antes do formulário", () => {
     const header = wallet.indexOf("Informações da Viagem");
-    const button = wallet.indexOf("Importar de um Orçamento");
+    const prompt = wallet.indexOf("Já tem um orçamento pronto?");
+    const button = wallet.indexOf("<Download", prompt);
     const form = wallet.indexOf("<TripForm");
-    expect(header).toBeLessThan(button);
+    expect(header).toBeLessThan(prompt);
+    expect(prompt).toBeLessThan(button);
     expect(button).toBeLessThan(form);
   });
 
-  it("remove o bloco inferior antigo de importação", () => {
+  it("usa o padrão Download + Importar e remove a redação antiga", () => {
     expect(wallet).not.toContain("ou aproveite informações já cadastradas");
-    expect(wallet.match(/Importar de um Orçamento/g)?.length).toBe(1);
+    expect(wallet).not.toContain("Importar de um Orçamento");
+    const prompt = wallet.indexOf("Já tem um orçamento pronto?");
+    const block = wallet.slice(wallet.lastIndexOf("<div", prompt), wallet.indexOf("</Button>", prompt));
+    expect(block).toContain('<FileTextIcon className="h-4 w-4 text-primary" />');
+    expect(block).toContain('<Download className="h-4 w-4" />');
+    expect(block).toContain("Importar");
   });
 
   it("mantém o mesmo modal conectado", () => {
@@ -66,17 +73,46 @@ describe("Criar Roteiro — aba Modelos removida e cabeçalho compacto", () => {
   });
 
   it("cabeçalho compacta a importação ao lado do título", () => {
-    expect(itinerary).toContain("Importe PDF, DOC ou texto.");
-    expect(itinerary).toContain("sm:flex-row sm:items-center sm:justify-between");
+    expect(itinerary).not.toContain("Importe PDF, DOC ou texto.");
+    expect(itinerary).not.toContain("Importar roteiro");
+    expect(itinerary).toContain("md:flex-row md:items-start md:justify-between");
+    expect(itinerary).toContain("md:whitespace-nowrap");
     const header = itinerary.indexOf("Novo Roteiro de Viagem");
-    const button = itinerary.indexOf("Importar roteiro");
+    const prompt = itinerary.indexOf("Já tem um roteiro pronto?");
+    const button = itinerary.indexOf("<Download", prompt);
     const form = itinerary.indexOf("<ItineraryForm", button);
-    expect(header).toBeLessThan(button);
+    expect(header).toBeLessThan(prompt);
+    expect(prompt).toBeLessThan(button);
     expect(button).toBeLessThan(form);
+  });
+
+  it("mantém o ícone de documento fora do botão e Download dentro dele", () => {
+    const prompt = itinerary.indexOf("Já tem um roteiro pronto?");
+    const block = itinerary.slice(itinerary.lastIndexOf("<div", prompt), itinerary.indexOf("</Button>", prompt));
+    expect(block).toContain('<FileText className="h-4 w-4 text-primary" />');
+    expect(block).toContain('<Download className="h-4 w-4" />');
+    expect(block).toContain("Importar");
   });
 
   it("mantém o wizard de importação conectado", () => {
     expect(itinerary).toContain("setImportWizardOpen(true)");
     expect(itinerary).toContain("<ImportItineraryWizard");
+  });
+});
+
+describe("Padrão visual dos três botões de importação", () => {
+  it("usa Download, texto Importar e o mesmo estilo nos três cabeçalhos", () => {
+    for (const source of [wallet, quote, itinerary]) {
+      expect(source).toContain('<Download className="h-4 w-4" />');
+      expect(source).toContain('variant="outline"');
+      expect(source).toContain('size="sm"');
+      expect(source).toContain('className="shrink-0 h-9 rounded-lg"');
+    }
+  });
+
+  it("orçamento preserva o handler e não ganha frase externa", () => {
+    expect(quote).toContain("onClick={() => setImportOpen(true)}");
+    expect(quote).toContain("<QuoteImportDialog");
+    expect(quote).not.toContain("Já tem um orçamento pronto?");
   });
 });

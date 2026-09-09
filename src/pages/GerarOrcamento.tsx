@@ -1200,7 +1200,7 @@ export default function GerarOrcamento() {
                       onClick={() => setImportOpen(true)}
                     >
                       <Download className="h-4 w-4" />
-                      <span className="hidden sm:inline">Importar</span>
+                      Importar
                     </Button>
                   </div>
                 </CardHeader>
