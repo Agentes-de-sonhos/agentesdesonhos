@@ -825,9 +825,9 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Flight segments timeline */}
         {isFlight && data.segments?.length > 0 && (
           <div className="mt-3 space-y-2">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🛫 Trechos</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionTrechos")}</p>
             {data.segments.map((seg: any, i: number) => {
-              const segTypeLabel = seg.segment_type === 'ida' ? 'Ida' : seg.segment_type === 'conexao' ? 'Conexão' : 'Volta';
+              const segTypeLabel = seg.segment_type === 'ida' ? t('fldIda') : seg.segment_type === 'conexao' ? t('segConexao') : t('segVolta');
               // Connection time calc
               let connectionInfo: string | null = null;
               if (i > 0 && data.segments[i-1]) {
@@ -839,7 +839,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                   if (diff > 0) {
                     const h = Math.floor(diff / 60);
                     const m = diff % 60;
-                    connectionInfo = `Conexão em ${seg.origin_city || seg.origin_airport} — ${h}h${m > 0 ? `${m.toString().padStart(2, '0')}` : ''}`;
+                    connectionInfo = `${t('fldConexaoEm')} ${seg.origin_city || seg.origin_airport} — ${h}h${m > 0 ? `${m.toString().padStart(2, '0')}` : ''}`;
                   }
                 }
               }
@@ -884,11 +884,11 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Flight passengers */}
         {isFlight && data.passengers?.length > 0 && (
           <div className="mt-3">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👤 Passageiros</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">{t("sectionPassageirosPerson")}</p>
             {data.passengers.map((p: any, i: number) => (
               <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
-                {p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'})
-                {p.seat ? ` • Assento ${p.seat}` : ''}
+                {p.name} ({p.passenger_type === 'adulto' ? t('paxAdulto') : p.passenger_type === 'crianca' ? t('paxCrianca') : t('paxBebe')})
+                {p.seat ? ` • ${t('fldAssento')} ${p.seat}` : ''}
               </p>
             ))}
           </div>
@@ -897,10 +897,10 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Flight baggage */}
         {isFlight && (data.carry_on || data.checked_baggage) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">🧳 Bagagem</p>
-            {data.carry_on && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Mão: {data.carry_on}</p>}
-            {data.checked_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Despachada: {data.checked_baggage}</p>}
-            {data.extra_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Extra: {data.extra_baggage}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">{t("sectionBagagem")}</p>
+            {data.carry_on && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldMao")}: {data.carry_on}</p>}
+            {data.checked_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDespachada")}: {data.checked_baggage}</p>}
+            {data.extra_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldExtra")}: {data.extra_baggage}</p>}
             {data.baggage_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic mt-1">{data.baggage_rules}</p>}
           </div>
         )}
@@ -908,11 +908,11 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Flight boarding instructions */}
         {isFlight && (data.recommended_arrival || data.required_documents || data.boarding_notes) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">⚠️ Orientações de Embarque</p>
-            {data.recommended_arrival && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Antecedência: {data.recommended_arrival}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionOrientacoesEmbarque")}</p>
+            {data.recommended_arrival && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAntecedencia")}: {data.recommended_arrival}</p>}
             {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTerminal")}: {data.boarding_terminal}</p>}
-            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Documentos: {data.required_documents}</p>}
-            {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Imigração: {data.immigration_rules}</p>}
+            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentosField")}: {data.required_documents}</p>}
+            {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldImigracao")}: {data.immigration_rules}</p>}
             {data.boarding_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.boarding_notes}</p>}
           </div>
         )}
@@ -922,7 +922,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-3">
             <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
               <Button variant="default" className="w-full sm:w-auto h-11 rounded-full text-sm font-medium shadow-sm px-6">
-                ✅ Fazer Check-in Online
+                {t("ctaCheckinOnline").replace("✅ ", "")}
               </Button>
             </a>
             {data.checkin_open_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Abertura: {data.checkin_open_date}</p>}
