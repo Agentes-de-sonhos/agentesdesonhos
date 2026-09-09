@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+vi.mock("@/lib/pdfText", () => ({ extractPdfText: async () => "" }));
+
 import { packageServiceToTripService, insertPackageServiceIntoTrip } from "@/lib/walletPackageImport";
 import { publicAirportText, airportDisplayName, fillAirportNameIfEmpty } from "@/lib/airportDisplay";
 import { parsedAirfareToFlightData, type ParsedAirfare } from "@/components/quote/flight-wizard/AirfareSmartImport";
