@@ -20,6 +20,7 @@ import {
   getServiceThumbnail,
   hasAdditionalDetails,
   resolveStatusBadge,
+  categoryText,
 } from "./categoryPresentation";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import type { PublicLocale } from "@/i18n/publicMaterials/locale";
@@ -40,6 +41,7 @@ export function CategoryServiceView({
 }: CategoryServiceViewProps) {
   const t = tWallet(locale);
   const cfg = CATEGORY_CONFIG[type];
+  const catText = categoryText(type, locale);
   const total = services.length;
   const [gridMode, setGridMode] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -140,11 +142,11 @@ export function CategoryServiceView({
       <div className="space-y-5">
         <div>
           <h2 className="text-base sm:text-lg font-semibold text-foreground tracking-tight">
-            {cfg.summaryTitle}
+            {catText.summaryTitle}
           </h2>
           <p className="mt-0.5 text-xs sm:text-sm text-[hsl(var(--wallet-brand))] font-medium inline-flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" />
-            {cfg.countWord(total)}
+            {catText.countWord(total)}
           </p>
         </div>
         <div id={`service-card-${only.id}`}>{renderFullCard(only)}</div>
@@ -157,11 +159,11 @@ export function CategoryServiceView({
       {/* Summary header */}
       <div>
         <h2 className="text-base sm:text-lg font-semibold text-foreground tracking-tight">
-          {cfg.summaryTitle}
+          {catText.summaryTitle}
         </h2>
         <p className="mt-0.5 text-xs sm:text-sm text-[hsl(var(--wallet-brand))] font-medium inline-flex items-center gap-1.5">
           <FileText className="h-3.5 w-3.5" />
-          {cfg.countWord(total)}
+          {catText.countWord(total)}
         </p>
       </div>
 
@@ -204,7 +206,7 @@ export function CategoryServiceView({
           <button
             type="button"
             onClick={() => setGridMode((v) => !v)}
-            aria-label={gridMode ? t("catCarousel") : cfg.seeAllLabel}
+            aria-label={gridMode ? t("catCarousel") : catText.seeAllLabel}
             className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[hsl(var(--wallet-brand))] hover:opacity-80 transition"
           >
             {gridMode ? (
@@ -215,7 +217,7 @@ export function CategoryServiceView({
             ) : (
               <>
                 <LayoutGrid className="h-4 w-4" aria-hidden />
-                {cfg.seeAllLabel}
+                {catText.seeAllLabel}
               </>
             )}
           </button>
@@ -317,14 +319,14 @@ const CompactServiceCard = forwardRef<HTMLDivElement, CompactCardProps>(
       const t = tWallet(locale);
       const cfg = CATEGORY_CONFIG[type];
       const Icon = cfg.icon;
-      const compact = cfg.getCompactFields(service);
+      const compact = cfg.getCompactFields(service, locale);
       const thumb = getServiceThumbnail(service);
       const thumbPlaceId = resolveServicePlaceId(service);
-      const status = resolveStatusBadge(compact.rawStatus);
+      const status = resolveStatusBadge(compact.rawStatus, locale);
       // Fonte única de arquivos: mesma lista normalizada do card expandido.
       const filesCount = countServiceFiles(service);
-      const filesLabel = formatFilesCountLabel(filesCount);
-      const expandable = hasAdditionalDetails(service);
+      const filesLabel = formatFilesCountLabel(filesCount, locale);
+      const expandable = hasAdditionalDetails(service, locale);
 
       return (
         <div
