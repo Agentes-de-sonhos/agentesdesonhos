@@ -65,4 +65,34 @@ describe("metadados de hospedagem (modo econômico)", () => {
     const forms = read("src/components/quote/ServiceForms.tsx");
     expect(forms).not.toContain("hotel-photos");
   });
+
+  it("cache antigo sem editorial_summary não é tratado como completo", () => {
+    const fn = read("supabase/functions/places-autocomplete/index.ts");
+    const block = fn.slice(fn.indexOf("Mode 0"), fn.indexOf("Mode 1"));
+    // Só reutiliza o cache quando raw_data possui explicitamente a propriedade
+    // editorial_summary (mesmo que null); caso contrário consulta o Google.
+    expect(block).toContain('hasOwnProperty.call(cachedRaw, "editorial_summary")');
+    const earlyReturn = block.indexOf("place: cachedMeta");
+    const guard = block.indexOf("hasOwnProperty");
+    const googleCall = block.indexOf("maps.googleapis.com");
+    expect(guard).toBeGreaterThan(-1);
+    expect(guard).toBeLessThan(earlyReturn);
+    expect(earlyReturn).toBeLessThan(googleCall);
+  });
+
+  it("ao atualizar, mescla raw_data e preserva campos e fotos existentes", () => {
+    const fn = read("supabase/functions/places-autocomplete/index.ts");
+    const block = fn.slice(fn.indexOf("Mode 0"), fn.indexOf("Mode 1"));
+    // Mescla com o raw_data atual antes de sobrescrever os metadados novos.
+    expect(block).toContain("...(cachedRaw || {})");
+    // Update não inclui photo_url/photo_urls — fotos cacheadas são preservadas.
+    const updateIdx = block.indexOf('.from("place_cache").update(metaPlace)');
+    expect(updateIdx).toBeGreaterThan(-1);
+    expect(block.slice(0, updateIdx)).not.toContain("photo_url:");
+  });
+
+  it("editorial_summary null no cache é válido: descrição vazia sem nova consulta", () => {
+    expect(extractPlaceDescription({ raw_data: { editorial_summary: null } })).toBe("");
+    expect(extractPlaceDescription({ raw_data: { editorial_summary: null, price_level: 3 } })).toBe("");
+  });
 });
