@@ -82,7 +82,7 @@ serve(async (req) => {
 
       const { data: cachedGallery } = await admin
         .from("activity_photo_cache")
-        .select("photos, updated_at")
+        .select("photos, created_at")
         .eq("query_key", cacheKey)
         .maybeSingle();
 
@@ -90,7 +90,7 @@ serve(async (req) => {
         cachedGallery?.photos &&
         Array.isArray(cachedGallery.photos) &&
         cachedGallery.photos.length > 0 &&
-        isCacheFresh(cachedGallery.updated_at)
+        isCacheFresh(cachedGallery.created_at)
       ) {
         return new Response(
           JSON.stringify({ photos: (cachedGallery.photos as PhotoCandidate[]).slice(0, want), cached: true }),
@@ -178,7 +178,7 @@ serve(async (req) => {
             photo_url: photos[0].photo_url,
             thumb_url: photos[0].thumb_url,
             source: photos[0].source,
-            updated_at: new Date().toISOString(),
+            created_at: new Date().toISOString(),
           });
         } catch (e) {
           console.warn("gallery cache upsert failed", e);
