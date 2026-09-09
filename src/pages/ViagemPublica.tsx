@@ -940,7 +940,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/20 ring-1 ring-amber-200/70 dark:ring-amber-900/40 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
-              <p className="text-[13px] font-semibold tracking-tight text-foreground">{t("sectionOrientacoesEmbarque")}</p>
+              <p className="text-[13px] font-semibold tracking-tight text-foreground">{t("sectionOrientacoesEmbarquePlain")}</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-5 gap-y-4">
               <BoardingFact icon={Building2} label={t("fldTerminal")} value={data.boarding_terminal || t("attrConfirmarPending")} />
