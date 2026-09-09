@@ -88,6 +88,7 @@ export type Database = {
           attributions: string[] | null
           created_at: string
           photo_url: string | null
+          photos: Json | null
           place_id: string | null
           query_key: string
           source: string
@@ -98,6 +99,7 @@ export type Database = {
           attributions?: string[] | null
           created_at?: string
           photo_url?: string | null
+          photos?: Json | null
           place_id?: string | null
           query_key: string
           source?: string
@@ -108,6 +110,7 @@ export type Database = {
           attributions?: string[] | null
           created_at?: string
           photo_url?: string | null
+          photos?: Json | null
           place_id?: string | null
           query_key?: string
           source?: string
