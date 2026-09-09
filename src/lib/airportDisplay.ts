@@ -49,3 +49,19 @@ export function fillAirportNameIfEmpty(
   if (current) return current;
   return (suggestedName || "").trim();
 }
+
+/**
+ * Rótulo usado nas visualizações públicas (orçamento web, PDF e carteira).
+ * Preserva o nome personalizado salvo; sem nome personalizado, mantém o
+ * comportamento atual (código IATA e, na ausência dele, a cidade).
+ */
+export function publicAirportText(input: {
+  code?: string | null;
+  customName?: string | null;
+  city?: string | null;
+}): string {
+  const code = (input.code || "").toUpperCase().trim();
+  const custom = (input.customName || "").trim();
+  if (custom) return code ? `${code} – ${custom}` : custom;
+  return code || (input.city || "").trim();
+}
