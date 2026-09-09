@@ -922,7 +922,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-3">
             <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
               <Button variant="default" className="w-full sm:w-auto h-11 rounded-full text-sm font-medium shadow-sm px-6">
-                {t("ctaCheckinOnline").replace("✅ ", "")}
+                {t("ctaCheckinOnline")}
               </Button>
             </a>
             {data.checkin_open_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Abertura: {data.checkin_open_date}</p>}
