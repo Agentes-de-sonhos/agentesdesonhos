@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Plus, FileText, Copy, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, UserCircle2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Search, Globe2 } from "lucide-react";
+import { Search, Globe2, Sparkles } from "lucide-react";
 import { parseDestinationParts } from "@/lib/destination-parts";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
