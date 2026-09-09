@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { BOOKING_REQUEST_DISCLAIMER } from "@/lib/quoteBookingSelection";
+import { quoteDict } from "@/i18n/publicMaterials/quote";
 
 const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 
@@ -23,7 +24,7 @@ describe("aceite único no rodapé fixo do modal de solicitação", () => {
     const footerStart = panel.indexOf('className="shrink-0 space-y-2 border-t');
     const body = panel.slice(0, footerStart);
     expect(body).not.toContain("BOOKING_REQUEST_DISCLAIMER}");
-    expect(body).not.toContain("Aceito o aviso sobre a solicitação de reserva");
+    expect(body).not.toContain('t("acceptBookingDisclaimer")');
     // Observações continua no corpo
     expect(body).toContain('htmlFor="br-notes"');
   });
@@ -31,10 +32,11 @@ describe("aceite único no rodapé fixo do modal de solicitação", () => {
   it("checkbox acessível é a única fonte de estado de accepted", () => {
     expect(panel).toContain("const [accepted, setAccepted] = useState(false)");
     expect(panel).toContain("onCheckedChange={(v) => setAccepted(v === true)}");
-    expect(panel).toContain('aria-label="Aceito o aviso sobre a solicitação de reserva"');
+    expect(panel).toContain('aria-label={t("acceptBookingDisclaimer")}');
     expect(panel).toContain("disclaimerAccepted: accepted");
     // não marca automaticamente
     expect(panel).not.toContain("setAccepted(true)");
+    expect(quoteDict["pt-BR"].acceptBookingDisclaimer).toBe("Aceito o aviso sobre a solicitação de reserva");
   });
 
   it("mantém texto jurídico intacto e a validação obrigatória", () => {
