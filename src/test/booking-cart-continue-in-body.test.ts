@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { quoteDict } from "@/i18n/publicMaterials/quote";
 
 const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 const FOOTER = 'className="shrink-0 space-y-2 border-t';
@@ -7,16 +8,17 @@ const FOOTER = 'className="shrink-0 space-y-2 border-t';
 describe("Continuar escolhendo fora do rodapé fixo", () => {
   it("o rodapé fixo não contém o botão", () => {
     const footer = panel.slice(panel.indexOf(FOOTER));
-    expect(footer).not.toContain("Continuar escolhendo");
+    expect(footer).not.toContain('t("continueChoosing")');
   });
 
   it("existe exatamente um botão na revisão com itens, no corpo rolável", () => {
     const body = panel.slice(0, panel.indexOf(FOOTER));
-    const inBody = body.split("Continuar escolhendo").length - 1;
+    const inBody = body.split('t("continueChoosing")').length - 1;
     // 1 do estado vazio (ação principal) + 1 da revisão
     expect(inBody).toBe(2);
     expect(body).toContain("data-booking-continue-body");
     expect(body.split("data-booking-continue-body").length - 1).toBe(1);
+    expect(quoteDict["pt-BR"].continueChoosing).toBe("Continuar escolhendo");
   });
 
   it("fica imediatamente depois do textarea de observações", () => {
@@ -53,15 +55,17 @@ describe("Continuar escolhendo fora do rodapé fixo", () => {
     expect(footer).toContain("cart.totalLabel");
     expect(footer).toContain("data-booking-disclaimer-accept");
     expect(footer).toContain("cart.validationError");
-    expect(footer).toContain("Enviar solicitação de reserva");
+    expect(footer).toContain('t("sendBookingRequest")');
+    expect(quoteDict["pt-BR"].sendBookingRequest).toBe("Enviar solicitação de reserva");
   });
 
   it("estado vazio preserva a ação principal e sucesso mantém só Fechar", () => {
     const body = panel.slice(0, panel.indexOf(FOOTER));
-    expect(body).toContain("Continuar escolhendo");
+    expect(body).toContain('t("continueChoosing")');
     const footer = panel.slice(panel.indexOf(FOOTER));
     const successBranch = footer.slice(footer.indexOf("{success ? ("), footer.indexOf(") : ("));
-    expect(successBranch).toContain("Fechar");
-    expect(successBranch).not.toContain("Continuar escolhendo");
+    expect(successBranch).toContain('t("close")');
+    expect(successBranch).not.toContain('t("continueChoosing")');
+    expect(quoteDict["pt-BR"].close).toBe("Fechar");
   });
 });

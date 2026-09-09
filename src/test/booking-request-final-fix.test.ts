@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { buildRequestedServicesView, requestedItemLabel } from "@/lib/bookingRequestCrmView";
+import { quoteDict } from "@/i18n/publicMaterials/quote";
 
 describe("rótulos do CRM a partir do snapshot", () => {
   it("prioriza option_label do snapshot sobre service_name genérico", () => {
@@ -66,6 +67,12 @@ describe("texto de sucesso do link público", () => {
   const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 
   it("usa canais cadastrados para orçamento nominal e canal informado no fallback", () => {
-    expect(panel).toContain('hasLinkedClient ? "pelos canais cadastrados" : "pelo canal informado"');
+    expect(panel).toContain('hasLinkedClient ? t("notYetConfirmedRegisteredChannels") : t("notYetConfirmedInformedChannel")');
+    expect(quoteDict["pt-BR"].notYetConfirmedRegisteredChannels).toBe(
+      "Esta solicitação ainda não é uma reserva confirmada. A agência entrará em contato pelos canais cadastrados.",
+    );
+    expect(quoteDict["pt-BR"].notYetConfirmedInformedChannel).toBe(
+      "Esta solicitação ainda não é uma reserva confirmada. A agência entrará em contato pelo canal informado.",
+    );
   });
 });

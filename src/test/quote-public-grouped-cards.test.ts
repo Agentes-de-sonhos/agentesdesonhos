@@ -17,6 +17,7 @@ import {
   visibleSectionGroups,
 } from "@/lib/quoteSections";
 import type { QuoteSection, QuoteService } from "@/types/quote";
+import { quoteDict } from "@/i18n/publicMaterials/quote";
 
 const src = readFileSync("src/pages/OrcamentoPublico.tsx", "utf8");
 
@@ -100,8 +101,9 @@ describe("cards agrupados x individuais no orçamento público", () => {
   });
 
   it("texto de apoio da seção é universal e válido para cards agrupados e individuais", () => {
-    expect(src).toMatch(/Consulte abaixo os detalhes de cada serviço\./);
+    expect(src).toMatch(/t\("checkDetailsBelow"\)/);
     expect(src).not.toMatch(/Toque em cada item para ver os detalhes completos/);
+    expect(quoteDict["pt-BR"].checkDetailsBelow).toBe("Consulte abaixo os detalhes de cada serviço.");
   });
 });
 
@@ -116,8 +118,10 @@ describe("apresentação dos pagamentos por serviço", () => {
     expect(block).toMatch(/text-sm sm:text-base text-muted-foreground/);
     // "Valor do serviço" em text-sm/base, sem duplicar o bloco.
     expect(block).toMatch(/text-sm sm:text-base text-foreground\/80/);
-    expect(block.match(/Valor do serviço:/g)).toHaveLength(1);
-    expect(block.match(/Condições de pagamento/g)).toHaveLength(1);
+    expect(block.match(/t\("serviceValueLabel"\)/g)).toHaveLength(1);
+    expect(quoteDict["pt-BR"].serviceValueLabel).toBe("Valor do serviço");
+    expect(block.match(/t\("paymentConditions"\)/g)).toHaveLength(1);
+    expect(quoteDict["pt-BR"].paymentConditions).toBe("Condições de pagamento");
   });
 
   it("footer customizado é centralizado e não coexiste com o bloco inline", () => {
@@ -130,8 +134,9 @@ describe("apresentação dos pagamentos por serviço", () => {
     const footerStart = src.indexOf("data-service-payment-footer");
     const footerEnd = src.indexOf("{!collapsible && <BookingServiceActionRow service={service} attached={investmentBandVisible} />}");
     const footer = src.slice(footerStart, footerEnd);
-    expect(footer).toMatch(/Condições de pagamento/);
+    expect(footer).toMatch(/t\("paymentConditions"\)/);
     expect(footer).not.toMatch(/Parcelamento/);
+    expect(quoteDict["pt-BR"].paymentConditions).toBe("Condições de pagamento");
   });
 
   it("valores ocultos: pacote fechado mostra apenas o rótulo de incluído", () => {

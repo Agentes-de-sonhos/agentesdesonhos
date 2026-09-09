@@ -41,6 +41,7 @@ import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useWorkspace } from "@/workspace/WorkspaceProvider";
 import { useViewport } from "@/lib/agencyAdminDensity";
 import { QuickAddClientDialog } from "@/components/crm/QuickAddClientDialog";
+import { CreateOperationDialog } from "@/components/crm/operations/CreateOperationDialog";
 import {
   QuickCreateItineraryDialog,
   QuickCreateQuoteDialog,
@@ -292,6 +293,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const [newQuoteOpen, setNewQuoteOpen] = useState(false);
   const [newItineraryOpen, setNewItineraryOpen] = useState(false);
   const [newWalletOpen, setNewWalletOpen] = useState(false);
+  const [newOperationOpen, setNewOperationOpen] = useState(false);
   const [todayPage, setTodayPage] = useState(0);
   const [upcomingPage, setUpcomingPage] = useState(0);
   const [tripsPage, setTripsPage] = useState(0);
@@ -522,6 +524,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
           onOpenChange={setNewWalletOpen}
           onCreated={(id) => openTab(nav.wallet(id), "Carteira digital")}
         />
+        <CreateOperationDialog open={newOperationOpen} onOpenChange={setNewOperationOpen} />
 
         {isError ? (
           <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center shadow-sm">
@@ -853,6 +856,16 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                       </button>
                     );
                   })}
+                  {recentTab === "operacoes" && (!can || can?.operations_create) && (
+                    <button
+                      type="button"
+                      onClick={() => setNewOperationOpen(true)}
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted"
+                    >
+                      <Briefcase className="h-3 w-3" />
+                      Nova operação
+                    </button>
+                  )}
                 </div>
               }
             >

@@ -1183,9 +1183,9 @@ function PublicQuoteDocuments({
             <Paperclip className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/80">Anexos</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/80">{t("attachments")}</p>
             <h3 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Documentos do seu orçamento
+              {t("quoteDocuments")}
             </h3>
           </div>
           <span className="text-xs text-muted-foreground hidden sm:inline">
@@ -1217,20 +1217,20 @@ function PublicQuoteDocuments({
                     size="sm"
                     className="h-9 px-2.5 text-xs"
                     onClick={() => openDoc(doc, false)}
-                    title="Visualizar"
+                    title={t("viewTitle")}
                   >
                     <Eye className="h-4 w-4 sm:mr-1.5" />
-                    <span className="hidden sm:inline">Ver</span>
+                    <span className="hidden sm:inline">{t("viewLabel")}</span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-9 px-2.5 text-xs"
                     onClick={() => openDoc(doc, true)}
-                    title="Baixar"
+                    title={t("downloadTitle")}
                   >
                     <Download className="h-4 w-4 sm:mr-1.5" />
-                    <span className="hidden sm:inline">Baixar</span>
+                    <span className="hidden sm:inline">{t("downloadLabel")}</span>
                   </Button>
                 </div>
               </li>
@@ -1635,9 +1635,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         {quote.services && quote.services.length > 0 && (
           <section className="space-y-5 animate-fade-up">
             <div className="text-center space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">Sua experiência</p>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Serviços incluídos</h2>
-              <p className="text-sm text-muted-foreground">Consulte abaixo os detalhes de cada serviço.</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/80">{t("yourExperience")}</p>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{t("servicesIncludedHeading")}</h2>
+              <p className="text-sm text-muted-foreground">{t("checkDetailsBelow")}</p>
             </div>
             {(() => {
               const renderCard = (service: QuoteService, collapsible = true) => {
@@ -1763,7 +1763,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             );
             secondaryDisplay = (
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mt-4">
-                <span>Valor à vista:</span>
+                <span>{t("cashValueLabel")}</span>
                 <span className="font-medium text-foreground/80">{formatCurrency(headlineTotal)}</span>
                 {discountPct > 0 && (
                   <span className="line-through text-muted-foreground/60">{formatCurrency(total)}</span>
@@ -1791,7 +1791,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             secondaryDisplay = (
               <div className="flex flex-col items-center justify-center gap-1 text-sm text-muted-foreground">
                 <div className="flex items-center justify-center gap-2">
-                  <span>Valor total:</span>
+                  <span>{t("totalValueLabel")}</span>
                   <span className="font-medium text-foreground/80">{formatCurrency(investimentoTotal)}</span>
                 </div>
                 {visibleExtras.length > 0 && (

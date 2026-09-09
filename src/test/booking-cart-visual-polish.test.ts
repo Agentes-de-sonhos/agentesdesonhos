@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { quoteDict } from "@/i18n/publicMaterials/quote";
 
 const panel = readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
 const FOOTER = 'className="shrink-0 space-y-2 border-t';
@@ -40,6 +41,7 @@ describe("Polimento visual do painel Minha solicitação de reserva", () => {
     const footer = panel.slice(panel.indexOf(FOOTER));
     expect(footer).toContain("cart.totalLabel");
     expect(footer).toContain("data-booking-disclaimer-accept");
-    expect(footer).toContain("Enviar solicitação de reserva");
+    expect(footer).toContain('t("sendBookingRequest")');
+    expect(quoteDict["pt-BR"].sendBookingRequest).toBe("Enviar solicitação de reserva");
   });
 });

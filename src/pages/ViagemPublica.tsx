@@ -925,7 +925,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                 {t("ctaCheckinOnline")}
               </Button>
             </a>
-            {data.checkin_open_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Abertura: {data.checkin_open_date}</p>}
+            {data.checkin_open_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">{t("fldAbertura")}: {data.checkin_open_date}</p>}
           </div>
         )}
 
