@@ -327,6 +327,9 @@ export default function CarteiraPublicaV2({
   const [isLocked, setIsLocked] = useState(false);
   const [usedPassword, setUsedPassword] = useState("");
   const [branding, setBranding] = useState<AgentProfile | null>(null);
+  // Espelho do branding para uso dentro de fluxos assíncronos (cache offline).
+  const brandingRef = useRef<AgentProfile | null>(null);
+  useEffect(() => { brandingRef.current = branding; }, [branding]);
   const [attemptsUsed, setAttemptsUsed] = useState(0);
   const isMobile = useIsMobile();
   const { triggerInstall, showInstructions, setShowInstructions, platform } = useInstallPrompt();
