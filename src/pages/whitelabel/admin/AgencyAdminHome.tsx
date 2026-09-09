@@ -41,6 +41,7 @@ import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useWorkspace } from "@/workspace/WorkspaceProvider";
 import { useViewport } from "@/lib/agencyAdminDensity";
 import { QuickAddClientDialog } from "@/components/crm/QuickAddClientDialog";
+import { CreateOperationDialog } from "@/components/crm/operations/CreateOperationDialog";
 import {
   QuickCreateItineraryDialog,
   QuickCreateQuoteDialog,
@@ -292,6 +293,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
   const [newQuoteOpen, setNewQuoteOpen] = useState(false);
   const [newItineraryOpen, setNewItineraryOpen] = useState(false);
   const [newWalletOpen, setNewWalletOpen] = useState(false);
+  const [newOperationOpen, setNewOperationOpen] = useState(false);
   const [todayPage, setTodayPage] = useState(0);
   const [upcomingPage, setUpcomingPage] = useState(0);
   const [tripsPage, setTripsPage] = useState(0);
@@ -345,6 +347,13 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
         icon: Wallet,
         create: true,
         onClick: () => setNewWalletOpen(true),
+      });
+    if (!can || can?.operations_create)
+      list.push({
+        label: "Criar operação",
+        icon: Briefcase,
+        create: true,
+        onClick: () => setNewOperationOpen(true),
       });
     return list;
   }, [can]);
@@ -522,6 +531,7 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
           onOpenChange={setNewWalletOpen}
           onCreated={(id) => openTab(nav.wallet(id), "Carteira digital")}
         />
+        <CreateOperationDialog open={newOperationOpen} onOpenChange={setNewOperationOpen} />
 
         {isError ? (
           <Card className="min-w-0 rounded-2xl border-border/60 p-6 text-center shadow-sm">
