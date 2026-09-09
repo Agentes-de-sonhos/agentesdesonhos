@@ -375,7 +375,7 @@ export function QuoteImportDialog({ open, onOpenChange, onImported }: Props) {
                         <Label className="text-xs">Valor</Label>
                         <CurrencyInput
                           value={item.amount}
-                          onChange={(v) =>
+                          onValueChange={(v) =>
                             setItems((prev) => prev.map((p, i) => (i === idx ? { ...p, amount: v || 0 } : p)))
                           }
                         />
