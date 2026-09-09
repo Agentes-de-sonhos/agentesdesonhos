@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
 import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Plane, Sparkles } from "lucide-react";
@@ -18,6 +18,7 @@ import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { resolvePublicLocale, formatPublicNumber, pluralize } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
+import { reconcileCachedAgentProfile } from "@/lib/walletOfflineProfile";
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
@@ -326,6 +327,9 @@ export default function CarteiraPublicaV2({
   const [isLocked, setIsLocked] = useState(false);
   const [usedPassword, setUsedPassword] = useState("");
   const [branding, setBranding] = useState<AgentProfile | null>(null);
+  // Espelho do branding para uso dentro de fluxos assíncronos (cache offline).
+  const brandingRef = useRef<AgentProfile | null>(null);
+  useEffect(() => { brandingRef.current = branding; }, [branding]);
   const [attemptsUsed, setAttemptsUsed] = useState(0);
   const isMobile = useIsMobile();
   const { triggerInstall, showInstructions, setShowInstructions, platform } = useInstallPrompt();
@@ -439,7 +443,12 @@ export default function CarteiraPublicaV2({
           // Erro de rede / servidor: tenta servir cópia offline.
           const cached = getOfflineCache(accessCode);
           if (cached) {
-            setTripData(cached);
+            // Cache antigo (sem idioma) não decide o idioma: complementa com o
+            // branding do servidor quando disponível, senão cai no pt-BR.
+            setTripData({
+              ...cached,
+              agentProfile: reconcileCachedAgentProfile(cached.agentProfile, brandingRef.current) as AgentProfile | null,
+            });
             setNeedsPassword(false);
           } else {
             setError(msg || "Erro ao acessar carteira");
