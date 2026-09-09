@@ -119,7 +119,9 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       const period = formatFriendlyDateRange(
         first?.flight_date || d.departure_date,
         last && last !== first ? last.flight_date : d.return_date,
-      , locale);
+        locale,
+      );
+
 
       const departure = formatFriendlyTime(first?.departure_time);
       const arrival = formatFriendlyTime(last?.arrival_time);
