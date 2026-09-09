@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { MapPin, Navigation, ExternalLink, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 import {
   googleDirectionsUrl,
   googlePlaceUrl,
@@ -15,14 +17,16 @@ interface PlaceMapCardProps extends MapPoint {
   /** Altura do mapa em px (mobile). Desktop usa proporção maior. */
   compact?: boolean;
   className?: string;
+  locale?: PublicLocale;
 }
 
 /**
  * Mapa estático clicável + ações de rota. Degrada com elegância:
  * sem coordenadas (ou se a imagem falhar) mostra apenas os botões de link.
  */
-export function PlaceMapCard({ latitude, longitude, address, name, placeId, compact, className }: PlaceMapCardProps) {
+export function PlaceMapCard({ latitude, longitude, address, name, placeId, compact, className, locale }: PlaceMapCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
+  const t = tWallet(locale);
   const point: MapPoint = { latitude, longitude, address, name, placeId };
 
   const mapSrc = useMemo(
@@ -69,14 +73,14 @@ export function PlaceMapCard({ latitude, longitude, address, name, placeId, comp
             onError={() => setImageFailed(true)}
           />
           <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-background/85 px-2 py-1 text-[10px] font-medium text-foreground shadow-sm">
-            <Maximize2 className="h-3 w-3" /> Ampliar
+            <Maximize2 className="h-3 w-3" /> {t("mapAmpliar")}
           </span>
         </button>
       )}
 
       <Dialog open={expanded} onOpenChange={setExpanded}>
         <DialogContent className="max-w-3xl p-3 sm:p-4">
-          <DialogTitle className="text-sm font-semibold">{name || "Localização"}</DialogTitle>
+          <DialogTitle className="text-sm font-semibold">{name || t("mapLocalizacaoTitle")}</DialogTitle>
           {address && <p className="text-xs text-muted-foreground break-words">{address}</p>}
           {mapSrcLarge && !imageFailed && (
             <img
@@ -90,21 +94,21 @@ export function PlaceMapCard({ latitude, longitude, address, name, placeId, comp
             {routeUrl && (
               <a href={routeUrl} target="_blank" rel="noopener noreferrer">
                 <Button size="sm" className="h-8 rounded-full px-3 text-xs">
-                  <Navigation className="h-3 w-3 mr-1" /> Traçar rota
+                  <Navigation className="h-3 w-3 mr-1" /> {t("mapTracarRota")}
                 </Button>
               </a>
             )}
             {viewUrl && (
               <a href={viewUrl} target="_blank" rel="noopener noreferrer">
                 <Button size="sm" variant="outline" className="h-8 rounded-full px-3 text-xs">
-                  <MapPin className="h-3 w-3 mr-1" /> Google Maps
+                  <MapPin className="h-3 w-3 mr-1" /> {t("mapGoogleMaps")}
                 </Button>
               </a>
             )}
             {wazeUrl && (
               <a href={wazeUrl} target="_blank" rel="noopener noreferrer">
                 <Button size="sm" variant="outline" className="h-8 rounded-full px-3 text-xs">
-                  <ExternalLink className="h-3 w-3 mr-1" /> Waze
+                  <ExternalLink className="h-3 w-3 mr-1" /> {t("mapWaze")}
                 </Button>
               </a>
             )}
@@ -115,21 +119,21 @@ export function PlaceMapCard({ latitude, longitude, address, name, placeId, comp
         {routeUrl && (
           <a href={routeUrl} target="_blank" rel="noopener noreferrer">
             <Button size="sm" className="h-8 rounded-full px-3 text-xs">
-              <Navigation className="h-3 w-3 mr-1" /> Traçar rota
+              <Navigation className="h-3 w-3 mr-1" /> {t("mapTracarRota")}
             </Button>
           </a>
         )}
         {viewUrl && (
           <a href={viewUrl} target="_blank" rel="noopener noreferrer">
             <Button size="sm" variant="outline" className="h-8 rounded-full px-3 text-xs">
-              <MapPin className="h-3 w-3 mr-1" /> Ver no mapa
+              <MapPin className="h-3 w-3 mr-1" /> {t("verNoMapaPlain")}
             </Button>
           </a>
         )}
         {wazeUrl && (
           <a href={wazeUrl} target="_blank" rel="noopener noreferrer">
             <Button size="sm" variant="outline" className="h-8 rounded-full px-3 text-xs">
-              <ExternalLink className="h-3 w-3 mr-1" /> Waze
+              <ExternalLink className="h-3 w-3 mr-1" /> {t("mapWaze")}
             </Button>
           </a>
         )}

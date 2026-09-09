@@ -12,6 +12,24 @@
  * timezone) via parseLocalDateSafe.
  */
 
+/** Idiomas suportados nos materiais públicos (pt-BR é o padrão). */
+export type FriendlyLocale = "pt-BR" | "it-IT";
+
+const MONTHS_IT = [
+  "gennaio",
+  "febbraio",
+  "marzo",
+  "aprile",
+  "maggio",
+  "giugno",
+  "luglio",
+  "agosto",
+  "settembre",
+  "ottobre",
+  "novembre",
+  "dicembre",
+];
+
 const MONTHS_PT = [
   "janeiro",
   "fevereiro",
@@ -77,10 +95,16 @@ export function parseFriendlyDate(value: unknown): Date | null {
   return parsed;
 }
 
-/** "17 de agosto de 2026" — null quando a data é inválida/ausente. */
-export function formatFriendlyDate(value: unknown): string | null {
+/** "17 de agosto de 2026" (pt-BR) / "17 agosto 2026" (it-IT). */
+export function formatFriendlyDate(
+  value: unknown,
+  locale: FriendlyLocale = "pt-BR",
+): string | null {
   const d = parseFriendlyDate(value);
   if (!d) return null;
+  if (locale === "it-IT") {
+    return `${d.getDate()} ${MONTHS_IT[d.getMonth()]} ${d.getFullYear()}`;
+  }
   return `${d.getDate()} de ${MONTHS_PT[d.getMonth()]} de ${d.getFullYear()}`;
 }
 
@@ -91,12 +115,13 @@ export function formatFriendlyDate(value: unknown): string | null {
 export function formatFriendlyDateRange(
   start: unknown,
   end?: unknown,
+  locale: FriendlyLocale = "pt-BR",
 ): string | null {
   let a = parseFriendlyDate(start);
   let b = parseFriendlyDate(end);
 
   if (!a && !b) return null;
-  if (!a || !b) return formatFriendlyDate(a ?? b);
+  if (!a || !b) return formatFriendlyDate(a ?? b, locale);
 
   // Ordena para nunca exibir período invertido.
   if (b.getTime() < a.getTime()) {
@@ -109,18 +134,28 @@ export function formatFriendlyDateRange(
     a.getFullYear() === b.getFullYear() &&
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate();
-  if (sameDay) return formatFriendlyDate(a);
+  if (sameDay) return formatFriendlyDate(a, locale);
+
+  const it = locale === "it-IT";
+  const months = it ? MONTHS_IT : MONTHS_PT;
 
   if (a.getFullYear() !== b.getFullYear()) {
-    return `${formatFriendlyDate(a)} a ${formatFriendlyDate(b)}`;
+    return it
+      ? `dal ${formatFriendlyDate(a, locale)} al ${formatFriendlyDate(b, locale)}`
+      : `${formatFriendlyDate(a)} a ${formatFriendlyDate(b)}`;
   }
 
   if (a.getMonth() !== b.getMonth()) {
-    return `${a.getDate()} de ${MONTHS_PT[a.getMonth()]} a ${b.getDate()} de ${MONTHS_PT[b.getMonth()]} de ${b.getFullYear()}`;
+    return it
+      ? `dal ${a.getDate()} ${months[a.getMonth()]} al ${b.getDate()} ${months[b.getMonth()]} ${b.getFullYear()}`
+      : `${a.getDate()} de ${months[a.getMonth()]} a ${b.getDate()} de ${months[b.getMonth()]} de ${b.getFullYear()}`;
   }
 
-  return `${a.getDate()} a ${b.getDate()} de ${MONTHS_PT[a.getMonth()]} de ${a.getFullYear()}`;
+  return it
+    ? `dal ${a.getDate()} al ${b.getDate()} ${months[a.getMonth()]} ${a.getFullYear()}`
+    : `${a.getDate()} a ${b.getDate()} de ${months[a.getMonth()]} de ${a.getFullYear()}`;
 }
+
 
 /** Normaliza horários "HH:MM(:SS)" → "HH:MM"; null quando não há dado útil. */
 export function formatFriendlyTime(value: unknown): string | null {

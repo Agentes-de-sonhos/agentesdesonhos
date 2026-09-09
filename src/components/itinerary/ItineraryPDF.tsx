@@ -19,7 +19,6 @@ import {
 import {
   isPricingContentEmpty,
   sanitizePricingContent,
-  PRICING_SECTION_TITLE,
 } from "@/lib/pricingSection";
 import { sanitizedDescriptionHtml } from "@/lib/richDescription";
 
@@ -206,7 +205,7 @@ export function generatePDFContent(
                           ? `<div style="margin-top:6px;display:flex;flex-direction:column;gap:3px;">
                               ${((a as any).documentUrls as string[])
                                 .map((url) => {
-                                  const name = decodeURIComponent((url.split("/").pop() || "arquivo").split("?")[0]);
+                                  const name = decodeURIComponent((url.split("/").pop() || t("documentFallbackName")).split("?")[0]);
                                   return `<a href="${url}" target="_blank" style="font-size:11px;color:#0f766e;text-decoration:none;">📎 ${name}</a>`;
                                 })
                                 .join("")}
@@ -304,7 +303,7 @@ export function generatePDFContent(
           ? `
       <div style="height:1px;background:#e2e8f0;margin:32px 0 24px;"></div>
       <div class="pdf-block" style="background:#ffffff;border:1px solid rgba(37,99,235,0.22);border-radius:16px;padding:18px 22px;margin-bottom:18px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-        <h3 style="font-size:15px;font-weight:800;color:#1e293b;margin:0 0 12px;letter-spacing:-0.01em;">${PRICING_SECTION_TITLE}</h3>
+        <h3 style="font-size:15px;font-weight:800;color:#1e293b;margin:0 0 12px;letter-spacing:-0.01em;">${t("pricingSectionTitle")}</h3>
         <div style="font-size:12.5px;color:#334155;line-height:1.65;">
           ${sanitizePricingContent(itinerary.pricingContent || "")}
         </div>

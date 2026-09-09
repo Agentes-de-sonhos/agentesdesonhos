@@ -2,6 +2,7 @@ import { CheckCircle2, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 
 /**
  * CTA exibido logo depois das condições de pagamento. Abre exatamente a mesma
@@ -10,6 +11,7 @@ import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
 export function BookingCartCta() {
   const cart = useBookingCart();
   if (!cart.enabled) return null;
+  const t = translateQuote(cart.locale);
 
   const submitted = !!cart.success;
 
@@ -19,15 +21,15 @@ export function BookingCartCta() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/80">
-              Próximo passo
+              {t("nextStep")}
             </p>
             <h2 id="booking-cart-cta-title" className="text-base font-bold tracking-tight sm:text-lg">
-              {submitted ? "Solicitação enviada à agência" : "Revisar minha seleção"}
+              {submitted ? t("requestSentToAgency") : t("reviewMySelection")}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {submitted
-                ? "A agência vai reconfirmar disponibilidade, valores e condições."
-                : "Selecione os serviços pelo ícone de carrinho em cada item e revise sua solicitação aqui."}
+                ? t("agencyWillReconfirm")
+                : t("selectViaCartIcon")}
             </p>
           </div>
           <Button
@@ -42,7 +44,7 @@ export function BookingCartCta() {
             ) : (
               <ShoppingCart className="h-4 w-4" aria-hidden="true" />
             )}
-            {submitted ? "Ver minha solicitação" : "Ver meu carrinho"}
+            {submitted ? t("viewMyRequest") : t("viewMyCart")}
             {!submitted && (
               <Badge variant="secondary" className="text-[11px]" data-booking-cta-badge="true">
                 {cart.count}
@@ -52,8 +54,8 @@ export function BookingCartCta() {
         </div>
         <span className="sr-only" aria-live="polite">
           {cart.count === 1
-            ? "1 serviço na solicitação"
-            : `${cart.count} serviços na solicitação`}
+            ? t("serviceOnRequest", { count: cart.count })
+            : t("servicesOnRequest", { count: cart.count })}
         </span>
       </div>
     </section>

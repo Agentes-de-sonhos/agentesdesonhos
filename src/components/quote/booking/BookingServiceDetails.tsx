@@ -9,6 +9,7 @@ import {
 } from "@/lib/quoteServiceDigest";
 import { buildServicePaymentConditions } from "@/lib/servicePaymentConditions";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import type { QuoteService } from "@/types/quote";
 
 interface Props {
@@ -21,13 +22,14 @@ interface Props {
 export function BookingServiceDetails({ service, amountLabel, onClose }: Props) {
   const isMobile = useIsMobile();
   const cart = useBookingCart();
+  const t = translateQuote(cart.locale);
   const open = !!service;
   const conditions = service
-    ? buildServicePaymentConditions(service as any, cart.quote as any, cart.formatAmount)
+    ? buildServicePaymentConditions(service as any, cart.quote as any, cart.formatAmount, cart.locale)
     : null;
   const showConditions = !!conditions && !conditions.packageMode && conditions.hasConditions;
-  const digest = service ? serviceCompactDigest(service) : null;
-  const rows = service ? serviceDigestDetailRows(service) : [];
+  const digest = service ? serviceCompactDigest(service, cart.locale) : null;
+  const rows = service ? serviceDigestDetailRows(service, cart.locale) : [];
 
   const body = service && digest && (
     <div className="space-y-4">
@@ -59,7 +61,7 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
       {amountLabel && (
         <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Valor apresentado
+            {t("presentedValue")}
           </p>
           <p className="text-lg font-bold text-foreground">{amountLabel}</p>
 
@@ -69,7 +71,7 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
               data-service-detail-payment={service.id}
             >
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                Condições de pagamento
+                {t("paymentConditions")}
               </p>
               {conditions!.rows.map((row, i) => (
                 <p key={`${row.label}-${i}`} className="flex flex-wrap items-baseline gap-x-2 text-sm">
@@ -87,7 +89,7 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
               ))}
               {conditions!.methodLabel && (
                 <p className="flex flex-wrap items-baseline gap-x-2 text-xs">
-                  <span className="text-muted-foreground">Forma de pagamento:</span>
+                  <span className="text-muted-foreground">{t("paymentMethodColon")}</span>
                   <span className="font-medium text-foreground">{conditions!.methodLabel}</span>
                 </p>
               )}

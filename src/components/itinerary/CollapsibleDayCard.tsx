@@ -15,9 +15,9 @@ import { sanitizedDescriptionHtml } from "@/lib/richDescription";
 
 const periodIcons = { manha: Sun, tarde: Sunset, noite: Moon } as const;
 
-export function getFileName(url: string) {
-  try { return decodeURIComponent(url.split("/").pop()?.split("?")[0] || "arquivo"); }
-  catch { return "arquivo"; }
+export function getFileName(url: string, fallback = "arquivo") {
+  try { return decodeURIComponent(url.split("/").pop()?.split("?")[0] || fallback); }
+  catch { return fallback; }
 }
 
 export function isImageUrl(url: string) {
@@ -255,7 +255,7 @@ export function CollapsibleDayCard({
                             </p>
                             <div className="space-y-1">
                               {(activity as any).documentUrls.map((url: string, i: number) => {
-                                const name = getFileName(url);
+                                const name = getFileName(url, t("documentFallbackName"));
                                 const isImg = isImageUrl(url);
                                 return (
                                   <a key={i} href={url} target="_blank" rel="noopener noreferrer"

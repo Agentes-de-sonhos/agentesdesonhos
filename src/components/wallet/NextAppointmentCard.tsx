@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { ptBR, it as itLocale } from "date-fns/locale";
 import {
   Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText,
   LogIn, LogOut, CalendarClock, ChevronRight,
@@ -80,7 +80,11 @@ function parseDateTime(dateStr?: string, timeStr?: string): { d: Date; hasTime: 
   return { d, hasTime };
 }
 
-function buildAppointments(services: TripService[]): Appointment[] {
+function buildAppointments(
+  services: TripService[],
+  locale: PublicLocale = "pt-BR",
+): Appointment[] {
+  const t = tWallet(locale);
   const out: Appointment[] = [];
   for (const s of services) {
     const data = (s.service_data || {}) as any;
@@ -93,26 +97,26 @@ function buildAppointments(services: TripService[]): Appointment[] {
             if (!p) return;
             const title = `${seg.origin_city || data.origin_city || ""} → ${seg.destination_city || data.destination_city || ""}`.trim();
             const sub = [seg.flight_number || data.main_airline, seg.origin_airport].filter(Boolean).join(" • ");
-            out.push({ when: p.d, hasTime: p.hasTime, kind: "flight", title: title || "Voo", subtitle: sub || undefined, service: s });
+            out.push({ when: p.d, hasTime: p.hasTime, kind: "flight", title: title || t("fldVoo"), subtitle: sub || undefined, service: s });
           });
         } else {
           const p = parseDateTime(data.departure_date, data.departure_time);
-          if (p) out.push({ when: p.d, hasTime: p.hasTime, kind: "flight", title: `${data.origin_city || ""} → ${data.destination_city || ""}`.trim() || "Voo", subtitle: data.main_airline, service: s });
+          if (p) out.push({ when: p.d, hasTime: p.hasTime, kind: "flight", title: `${data.origin_city || ""} → ${data.destination_city || ""}`.trim() || t("fldVoo"), subtitle: data.main_airline, service: s });
         }
         break;
       }
       case "hotel": {
         const ci = parseDateTime(data.check_in, data.check_in_time);
         const co = parseDateTime(data.check_out, data.check_out_time);
-        if (ci) out.push({ when: ci.d, hasTime: ci.hasTime, kind: "hotel_checkin", title: data.hotel_name || "Hospedagem", subtitle: data.city, service: s });
-        if (co) out.push({ when: co.d, hasTime: co.hasTime, kind: "hotel_checkout", title: data.hotel_name || "Hospedagem", subtitle: data.city, service: s });
+        if (ci) out.push({ when: ci.d, hasTime: ci.hasTime, kind: "hotel_checkin", title: data.hotel_name || t("serviceHotel"), subtitle: data.city, service: s });
+        if (co) out.push({ when: co.d, hasTime: co.hasTime, kind: "hotel_checkout", title: data.hotel_name || t("serviceHotel"), subtitle: data.city, service: s });
         break;
       }
       case "car_rental": {
         const pu = parseDateTime(data.pickup_date, data.pickup_time);
         const dr = parseDateTime(data.dropoff_date, data.dropoff_time);
-        if (pu) out.push({ when: pu.d, hasTime: pu.hasTime, kind: "car_pickup", title: data.rental_company || "Locação de veículo", subtitle: data.pickup_location, service: s });
-        if (dr) out.push({ when: dr.d, hasTime: dr.hasTime, kind: "car_dropoff", title: data.rental_company || "Locação de veículo", subtitle: data.dropoff_location || data.pickup_location, service: s });
+        if (pu) out.push({ when: pu.d, hasTime: pu.hasTime, kind: "car_pickup", title: data.rental_company || t("catFallback_car_rental"), subtitle: data.pickup_location, service: s });
+        if (dr) out.push({ when: dr.d, hasTime: dr.hasTime, kind: "car_dropoff", title: data.rental_company || t("catFallback_car_rental"), subtitle: data.dropoff_location || data.pickup_location, service: s });
         break;
       }
       case "transfer": {
@@ -121,31 +125,31 @@ function buildAppointments(services: TripService[]): Appointment[] {
         const typeMap: Record<string, string> = { arrival: "Transfer IN", departure: "Transfer OUT", inter_hotel: "Inter-hotel" };
         const route = data.origin_location && data.destination_location
           ? `${data.origin_location} → ${data.destination_location}` : data.location || "";
-        out.push({ when: p.d, hasTime: p.hasTime, kind: "transfer", title: typeMap[data.transfer_type] || "Transfer", subtitle: route, service: s });
+        out.push({ when: p.d, hasTime: p.hasTime, kind: "transfer", title: typeMap[data.transfer_type] || t("kindTransfer"), subtitle: route, service: s });
         break;
       }
       case "attraction": {
         const p = parseDateTime(data.date, data.entry_time);
         if (!p) break;
-        out.push({ when: p.d, hasTime: p.hasTime, kind: "attraction", title: data.name || "Atração", subtitle: data.city, service: s });
+        out.push({ when: p.d, hasTime: p.hasTime, kind: "attraction", title: data.name || t("fldAtracao"), subtitle: data.city, service: s });
         break;
       }
       case "cruise": {
         const p = parseDateTime(data.start_date);
         if (!p) break;
-        out.push({ when: p.d, hasTime: p.hasTime, kind: "cruise", title: data.ship_name || "Cruzeiro", subtitle: data.embarkation_port, service: s });
+        out.push({ when: p.d, hasTime: p.hasTime, kind: "cruise", title: data.ship_name || t("serviceCruise"), subtitle: data.embarkation_port, service: s });
         break;
       }
       case "train": {
         const p = parseDateTime(data.travel_date, data.departure_time);
         if (!p) break;
-        out.push({ when: p.d, hasTime: p.hasTime, kind: "train", title: `${data.origin_city || ""} → ${data.destination_city || ""}`.trim() || "Trem", subtitle: data.train_company, service: s });
+        out.push({ when: p.d, hasTime: p.hasTime, kind: "train", title: `${data.origin_city || ""} → ${data.destination_city || ""}`.trim() || t("fldTrem"), subtitle: data.train_company, service: s });
         break;
       }
       case "other": {
         const p = parseDateTime(data.date, data.time);
         if (!p) break;
-        out.push({ when: p.d, hasTime: p.hasTime, kind: "other", title: data.service_name || "Compromisso", subtitle: data.city || data.location_name, service: s });
+        out.push({ when: p.d, hasTime: p.hasTime, kind: "other", title: data.service_name || t("nextApptSectionAria"), subtitle: data.city || data.location_name, service: s });
         break;
       }
       case "insurance":
@@ -209,7 +213,7 @@ export function NextAppointmentCard({
   locale?: PublicLocale;
 }) {
   const t = tWallet(locale);
-  const appointments = useMemo(() => buildAppointments(services), [services]);
+  const appointments = useMemo(() => buildAppointments(services, locale), [services, locale]);
   const [now, setNow] = useState<Date>(() => new Date());
 
   useEffect(() => {
@@ -254,8 +258,12 @@ export function NextAppointmentCard({
         </div>
       ) : (() => {
         const Icon = ICON_FOR[next.kind];
-        const dateLabel = format(next.when, "EEE, dd 'de' MMM", { locale: ptBR });
-        const timeLabel = next.hasTime ? format(next.when, "HH:mm", { locale: ptBR }) : null;
+        const dateFns = locale === "it-IT" ? itLocale : ptBR;
+        const dateLabel =
+          locale === "it-IT"
+            ? format(next.when, "EEE d MMM", { locale: dateFns })
+            : format(next.when, "EEE, dd 'de' MMM", { locale: dateFns });
+        const timeLabel = next.hasTime ? format(next.when, "HH:mm", { locale: dateFns }) : null;
         const remaining = formatRemaining(next.when, next.hasTime, now, locale);
         const kindLabel = t(LABEL_KEY_FOR[next.kind]);
 

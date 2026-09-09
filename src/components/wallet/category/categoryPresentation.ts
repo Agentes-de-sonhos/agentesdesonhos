@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import type { TripService, TripServiceType } from "@/types/trip";
 import { collectServiceDocuments } from "@/lib/serviceDocuments";
+import { type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
 import {
   formatFriendlyDate,
   formatFriendlyDateRange,
@@ -48,7 +50,7 @@ export interface CategoryConfig {
   thumbBg: string;
   thumbIconColor: string;
   /** Extrai os campos do card compacto a partir do serviço. */
-  getCompactFields: (s: TripService) => CompactFields;
+  getCompactFields: (s: TripService, locale?: PublicLocale) => CompactFields;
 }
 
 const MAX_DETAIL_LINES = 3;
@@ -102,7 +104,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Plane,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const segments = Array.isArray(d.segments) ? d.segments.filter(Boolean) : [];
       const first = segments[0];
@@ -116,21 +119,23 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       const period = formatFriendlyDateRange(
         first?.flight_date || d.departure_date,
         last && last !== first ? last.flight_date : d.return_date,
+        locale,
       );
+
 
       const departure = formatFriendlyTime(first?.departure_time);
       const arrival = formatFriendlyTime(last?.arrival_time);
       const times =
         departure && arrival
-          ? `Partida ${departure} · Chegada ${arrival}`
+          ? `${t("fldPartida")} ${departure} · ${t("fldChegada")} ${arrival}`
           : departure
-            ? `Partida ${departure}`
+            ? `${t("fldPartida")} ${departure}`
             : arrival
-              ? `Chegada ${arrival}`
+              ? `${t("fldChegada")} ${arrival}`
               : null;
 
       return {
-        title: routeLabel(origin, dest) || "Voo",
+        title: routeLabel(origin, dest) || t("fldVoo"),
         details: buildDetails([period, times, labelOr(d.main_airline || d.airline) || null]),
         rawStatus: d.flight_status,
       };
@@ -145,13 +150,14 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Hotel,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       // Nunca exibir room_type/categoria do quarto nem quantidade de hóspedes aqui.
       return {
-        title: labelOr(d.hotel_name, "Hospedagem"),
+        title: labelOr(d.hotel_name, t("serviceHotel")),
         details: buildDetails([
-          formatFriendlyDateRange(d.check_in, d.check_out),
+          formatFriendlyDateRange(d.check_in, d.check_out, locale),
           cityRegionLabel(d),
         ]),
         rawStatus: d.reservation_status,
@@ -167,11 +173,12 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Car,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const company = labelOr(d.rental_company);
       const car = labelOr(d.car_model || d.car_type);
-      const title = joinDetail([company, car], " · ") || "Locação de veículo";
+      const title = joinDetail([company, car], " · ") || t("catFallback_car_rental");
 
       const pickupPlace = labelOr(d.pickup_city || d.pickup_location || d.pickup_address);
       const dropoffPlace = labelOr(d.dropoff_city || d.dropoff_location || d.dropoff_address);
@@ -194,7 +201,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       return {
         title,
         details: buildDetails([
-          formatFriendlyDateRange(d.pickup_date, d.dropoff_date),
+          formatFriendlyDateRange(d.pickup_date, d.dropoff_date, locale),
           places,
         ]),
         rawStatus: d.reservation_status,
@@ -210,15 +217,16 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Bus,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const origin = labelOr(d.origin_location || d.pickup_address);
       const dest = labelOr(d.destination_location || d.destination_address);
       const route = routeLabel(origin, dest);
-      const title = route || labelOr(d.company_name, "Transfer");
+      const title = route || labelOr(d.company_name, t("kindTransfer"));
 
       const dateLine = joinDetail(
-        [formatFriendlyDate(d.date), formatFriendlyTime(d.time)],
+        [formatFriendlyDate(d.date, locale), formatFriendlyTime(d.time)],
         " · ",
       );
       const city = labelOr(d.city);
@@ -241,10 +249,11 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Ticket,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const dateLine = joinDetail(
-        [formatFriendlyDate(d.date), formatFriendlyTime(d.entry_time)],
+        [formatFriendlyDate(d.date, locale), formatFriendlyTime(d.entry_time)],
         " · ",
       );
       const city = cityRegionLabel(d);
@@ -254,7 +263,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       const placeLine = joinDetail([city, venueAddsValue], " · ");
 
       return {
-        title: labelOr(d.name, "Ingresso"),
+        title: labelOr(d.name, t("fldEntrada")),
         details: buildDetails([dateLine, placeLine]),
         rawStatus: d.status,
       };
@@ -269,14 +278,15 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Shield,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const plan = labelOr(d.plan_name);
       const provider = labelOr(d.provider);
       const title =
         plan && provider && plan.toLowerCase() !== provider.toLowerCase()
           ? `${plan} · ${provider}`
-          : plan || provider || "Seguro Viagem";
+          : plan || provider || t("serviceInsurance");
 
       // Destino coberto: sem rótulo genérico de cobertura no lugar do destino.
       const destination = labelOr(
@@ -286,7 +296,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       return {
         title,
         details: buildDetails([
-          formatFriendlyDateRange(d.start_date, d.end_date),
+          formatFriendlyDateRange(d.start_date, d.end_date, locale),
           destination || null,
         ]),
         rawStatus: d.status,
@@ -302,14 +312,15 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: Ship,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const ship = labelOr(d.ship_name);
       const company = labelOr(d.cruise_company);
       const title =
         ship && company && ship.toLowerCase() !== company.toLowerCase()
           ? `${ship} · ${company}`
-          : ship || company || "Cruzeiro";
+          : ship || company || t("serviceCruise");
 
       // Sem cabin_type no card recolhido.
       const ports = routeLabel(d.embarkation_port, d.disembarkation_port);
@@ -318,7 +329,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
       return {
         title,
         details: buildDetails([
-          formatFriendlyDateRange(d.start_date, d.end_date),
+          formatFriendlyDateRange(d.start_date, d.end_date, locale),
           routeLine,
         ]),
         rawStatus: d.checkin_status,
@@ -334,7 +345,8 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: TrainFront,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const departure = formatFriendlyTime(d.departure_time);
       const arrival = formatFriendlyTime(d.arrival_time);
@@ -342,15 +354,15 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
         departure && arrival
           ? `${departure} → ${arrival}`
           : departure
-            ? `Partida ${departure}`
+            ? `${t("fldPartida")} ${departure}`
             : arrival
-              ? `Chegada ${arrival}`
+              ? `${t("fldChegada")} ${arrival}`
               : null;
       const stations = routeLabel(d.origin_station, d.destination_station);
 
       return {
-        title: routeLabel(d.origin_city, d.destination_city) || "Trem",
-        details: buildDetails([formatFriendlyDate(d.travel_date), times, stations]),
+        title: routeLabel(d.origin_city, d.destination_city) || t("fldTrem"),
+        details: buildDetails([formatFriendlyDate(d.travel_date, locale), times, stations]),
       };
     },
   },
@@ -363,10 +375,11 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
     icon: FileText,
     thumbBg: "bg-[hsl(var(--wallet-brand-soft))]",
     thumbIconColor: "text-[hsl(var(--wallet-brand))]",
-    getCompactFields: (s) => {
+    getCompactFields: (s, locale = "pt-BR") => {
+      const t = tWallet(locale);
       const d: any = s.service_data || {};
       const dateLine = joinDetail(
-        [formatFriendlyDate(d.date), formatFriendlyTime(d.time)],
+        [formatFriendlyDate(d.date, locale), formatFriendlyTime(d.time)],
         " · ",
       );
       const city = labelOr(d.city);
@@ -377,7 +390,7 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
         null;
 
       return {
-        title: labelOr(d.service_name, "Serviço"),
+        title: labelOr(d.service_name, t("fldServico")),
         details: buildDetails([dateLine, place]),
         rawStatus: d.status,
       };
@@ -386,36 +399,40 @@ export const CATEGORY_CONFIG: Record<TripServiceType, CategoryConfig> = {
 };
 
 /** Cor + label do status, ou null se status vazio/desconhecido. */
-export function resolveStatusBadge(rawStatus?: string): {
+export function resolveStatusBadge(
+  rawStatus?: string,
+  locale: PublicLocale = "pt-BR",
+): {
   label: string;
   className: string;
 } | null {
   if (!rawStatus || !rawStatus.trim()) return null;
+  const t = tWallet(locale);
   const key = rawStatus.toLowerCase().trim();
   const GREEN = "bg-emerald-50 text-emerald-700 border-emerald-200";
   const AMBER = "bg-amber-50 text-amber-700 border-amber-200";
   const BLUE = "bg-sky-50 text-sky-700 border-sky-200";
   const RED = "bg-rose-50 text-rose-700 border-rose-200";
   const map: Record<string, { label: string; className: string }> = {
-    confirmado: { label: "Confirmado", className: GREEN },
-    confirmada: { label: "Confirmada", className: GREEN },
-    emitido: { label: "Emitido", className: GREEN },
-    emitida: { label: "Emitida", className: GREEN },
-    ativo: { label: "Ativo", className: GREEN },
-    realizado: { label: "Realizado", className: GREEN },
-    utilizado: { label: "Utilizado", className: GREEN },
-    pendente: { label: "Pendente", className: AMBER },
-    pre_reserva: { label: "Pré-reserva", className: AMBER },
-    agendado: { label: "Agendado", className: AMBER },
-    a_retirar: { label: "A retirar", className: AMBER },
-    a_confirmar: { label: "A confirmar", className: BLUE },
-    reservado: { label: "Reservado", className: BLUE },
-    flexivel: { label: "Flexível", className: BLUE },
-    opcional: { label: "Opcional", className: BLUE },
-    futuro: { label: "Futuro", className: BLUE },
-    cancelado: { label: "Cancelado", className: RED },
-    cancelada: { label: "Cancelada", className: RED },
-    expirado: { label: "Expirado", className: RED },
+    confirmado: { label: t("stConfirmado"), className: GREEN },
+    confirmada: { label: t("stConfirmada"), className: GREEN },
+    emitido: { label: t("stEmitido"), className: GREEN },
+    emitida: { label: t("stEmitida"), className: GREEN },
+    ativo: { label: t("stAtivo"), className: GREEN },
+    realizado: { label: t("stRealizado"), className: GREEN },
+    utilizado: { label: t("stUtilizado"), className: GREEN },
+    pendente: { label: t("stPendente"), className: AMBER },
+    pre_reserva: { label: t("stPreReserva"), className: AMBER },
+    agendado: { label: t("stAgendado"), className: AMBER },
+    a_retirar: { label: t("stARetirar"), className: AMBER },
+    a_confirmar: { label: t("stAConfirmar"), className: BLUE },
+    reservado: { label: t("stReservado"), className: BLUE },
+    flexivel: { label: t("stFlexivel"), className: BLUE },
+    opcional: { label: t("stOpcional"), className: BLUE },
+    futuro: { label: t("stFuturo"), className: BLUE },
+    cancelado: { label: t("stCancelado"), className: RED },
+    cancelada: { label: t("stCancelada"), className: RED },
+    expirado: { label: t("stExpirado"), className: RED },
   };
   return map[key] || { label: rawStatus, className: BLUE };
 }
@@ -427,11 +444,28 @@ export function getServiceThumbnail(s: TripService): string | null {
   return null;
 }
 
+/**
+ * Textos da categoria no idioma público da agência (pt-BR por padrão).
+ * Os rótulos estáticos de CATEGORY_CONFIG seguem em pt-BR como fallback.
+ */
+export function categoryText(type: TripServiceType, locale: PublicLocale = "pt-BR") {
+  const t = tWallet(locale);
+  return {
+    singular: t(`catSingular_${type}` as never),
+    summaryTitle: t(`catSummary_${type}` as never),
+    seeAllLabel: t(`catSeeAll_${type}` as never),
+    countWord: (n: number) =>
+      `${n} ${n === 1 ? t(`catCountOne_${type}` as never) : t(`catCountOther_${type}` as never)}`,
+  };
+}
+
 /** Nome curto usado no item do resumo (1ª linha). */
-export function getServiceShortName(s: TripService): string {
-  const cfg = CATEGORY_CONFIG[s.service_type];
-  const compact = cfg.getCompactFields(s);
-  return compact.title || cfg.singular;
+export function getServiceShortName(
+  s: TripService,
+  locale: PublicLocale = "pt-BR",
+): string {
+  const compact = CATEGORY_CONFIG[s.service_type].getCompactFields(s, locale);
+  return compact.title || categoryText(s.service_type, locale).singular;
 }
 
 /** Quantidade de arquivos do serviço — mesma lista do card expandido. */
@@ -440,15 +474,22 @@ export function countServiceFiles(s: TripService): number {
 }
 
 /** Texto do contador de arquivos: "1 arquivo" / "2 arquivos" / null quando zero. */
-export function formatFilesCountLabel(count: number): string | null {
+export function formatFilesCountLabel(
+  count: number,
+  locale: PublicLocale = "pt-BR",
+): string | null {
   if (!Number.isFinite(count) || count <= 0) return null;
-  return `${count} ${count === 1 ? "arquivo" : "arquivos"}`;
+  const t = tWallet(locale);
+  return `${count} ${count === 1 ? t("catFileOne") : t("catFileOther")}`;
 }
 
 /** Verifica se o serviço tem dados adicionais (não exibidos no card compacto). */
-export function hasAdditionalDetails(s: TripService): boolean {
+export function hasAdditionalDetails(
+  s: TripService,
+  locale: PublicLocale = "pt-BR",
+): boolean {
   if (countServiceFiles(s) > 0) return true;
-  const compact = CATEGORY_CONFIG[s.service_type].getCompactFields(s);
+  const compact = CATEGORY_CONFIG[s.service_type].getCompactFields(s, locale);
   const compactText = [compact.title, ...compact.details].join(" · ").toLowerCase();
   const compactBlobs = new Set(
     compactText
@@ -461,12 +502,14 @@ export function hasAdditionalDetails(s: TripService): boolean {
   const isCovered = (raw: string): boolean => {
     const t = raw.toLowerCase();
     if (compactBlobs.has(t) || compactText.includes(t)) return true;
-    const asDate = formatFriendlyDate(raw);
+    const asDate = formatFriendlyDate(raw, locale);
     if (asDate) {
       if (compactText.includes(asDate.toLowerCase())) return true;
       // Períodos ("17 a 22 de agosto de 2026") cobrem cada data isolada:
       // basta que dia, mês e ano da data crua apareçam no resumo.
-      const parts = asDate.match(/^(\d{1,2}) de (.+) de (\d{4})$/);
+      const parts =
+        asDate.match(/^(\d{1,2}) de (.+) de (\d{4})$/) ||
+        asDate.match(/^(\d{1,2}) (\D+) (\d{4})$/);
       if (parts) {
         const [, d, m, y] = parts;
         if (

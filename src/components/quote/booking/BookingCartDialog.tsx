@@ -23,6 +23,7 @@ import {
 } from "@/lib/quoteBookingSelection";
 import { buildSelectionSummary, sectionMetaChips } from "@/lib/quoteBookingShowcase";
 import type { QuoteService } from "@/types/quote";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 
 /**
  * Modal amplo "Minha solicitação de reserva".
@@ -31,6 +32,7 @@ import type { QuoteService } from "@/types/quote";
  */
 export function BookingCartDialog() {
   const cart = useBookingCart();
+  const t = translateQuote(cart.locale);
   const [details, setDetails] = useState<QuoteService | null>(null);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -90,14 +92,14 @@ export function BookingCartDialog() {
           <DialogHeader className="shrink-0 space-y-1 border-b border-border/50 px-5 py-4 text-left sm:px-6">
             <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
               <ShoppingCart className="h-5 w-5 text-primary" aria-hidden="true" />
-              {success ? "Solicitação enviada à agência" : "Minha solicitação de reserva"}
+              {success ? t("requestSentToAgency") : t("myBookingRequestTitle")}
             </DialogTitle>
             <DialogDescription>
               {success
-                ? "A agência vai reconfirmar disponibilidade, valores e condições."
+                ? t("agencyWillReconfirm")
                 : hasLinkedClient
-                  ? "Revise os serviços e confirme sua solicitação."
-                  : "Revise os serviços e informe como a agência pode falar com você."}
+                  ? t("reviewServicesConfirm")
+                  : t("reviewServicesContact")}
             </DialogDescription>
           </DialogHeader>
 
@@ -107,10 +109,10 @@ export function BookingCartDialog() {
                 <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
                   <div className="min-w-0 space-y-1">
-                    <p className="text-sm font-bold text-foreground">Solicitação enviada</p>
+                    <p className="text-sm font-bold text-foreground">{t("requestSent")}</p>
                     {success.fileNumber ? (
                       <p className="text-sm font-semibold tabular-nums text-muted-foreground">
-                        Processo de reserva nº {success.fileNumber}
+                        {t("bookingProcessNumber", { number: success.fileNumber })}
                       </p>
                     ) : (
                       <p className="text-sm font-semibold tracking-wide text-muted-foreground">
@@ -121,7 +123,7 @@ export function BookingCartDialog() {
                 </div>
                 <div className="rounded-xl border border-border/50 p-3">
                   <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Serviços solicitados
+                    {t("servicesRequested")}
                   </p>
                   <ul className="list-disc space-y-0.5 pl-4 text-sm text-foreground [overflow-wrap:anywhere]">
                     {success.services.map((s, i) => (
@@ -130,8 +132,7 @@ export function BookingCartDialog() {
                   </ul>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Esta solicitação ainda não é uma reserva confirmada. A agência entrará em contato{" "}
-                  {hasLinkedClient ? "pelos canais cadastrados" : "pelo canal informado"}.
+                  {hasLinkedClient ? t("notYetConfirmedRegisteredChannels") : t("notYetConfirmedInformedChannel")}
                 </p>
               </div>
             ) : isEmpty ? (
@@ -139,13 +140,12 @@ export function BookingCartDialog() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                   <ShoppingCart className="h-6 w-6" aria-hidden="true" />
                 </div>
-                <p className="text-base font-bold text-foreground">Sua seleção está vazia</p>
+                <p className="text-base font-bold text-foreground">{t("emptySelectionTitle")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Use o ícone de carrinho em cada serviço do orçamento para escolher o que deseja
-                  solicitar. Nada é reservado ou cobrado nesta etapa.
+                  {t("emptySelectionBody")}
                 </p>
                 <Button type="button" variant="outline" onClick={() => cart.setCartOpen(false)}>
-                  Continuar escolhendo
+                  {t("continueChoosing")}
                 </Button>
               </div>
             ) : (
@@ -199,14 +199,14 @@ export function BookingCartDialog() {
                                       onClick={() => setDetails(entry.service)}
                                       className="inline-flex min-h-11 items-center px-2 text-xs font-semibold text-primary underline-offset-4 hover:underline"
                                     >
-                                      Ver detalhes
+                                      {t("viewDetails")}
                                     </button>
                                     {canRemove ? (
                                       <button
                                         type="button"
                                         onClick={() => cart.remove(entry.service.id)}
-                                        aria-label={`Remover ${entry.service.option_label || "serviço"} da solicitação`}
-                                        title="Remover da solicitação"
+                                        aria-label={t("removeServiceAria", { label: entry.service.option_label || t("defaultServiceWord") })}
+                                        title={t("removeFromRequest")}
                                         className="inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                       >
                                         <Trash2 className="h-4 w-4" aria-hidden="true" />
@@ -216,8 +216,8 @@ export function BookingCartDialog() {
                                         className="inline-flex h-11 w-11 items-center justify-center text-primary/70"
                                         title={
                                           entry.locked
-                                            ? "Incluído na proposta"
-                                            : "Selecione outra opção no orçamento para trocar"
+                                            ? t("includedInProposal")
+                                            : t("selectAnotherOptionToSwap")
                                         }
                                       >
                                         <Lock className="h-4 w-4" aria-hidden="true" />
@@ -240,19 +240,19 @@ export function BookingCartDialog() {
                       <>
                         <div className="space-y-1.5 sm:col-span-2">
                           <Label htmlFor="br-name" className="text-xs">
-                            Nome completo *
+                            {t("fullNameLabel")}
                           </Label>
                           <Input
                             id="br-name"
                             value={name}
                             maxLength={200}
                             onChange={(e) => setName(e.target.value)}
-                            placeholder="Seu nome"
+                            placeholder={t("namePlaceholder")}
                           />
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor="br-whats" className="text-xs">
-                            WhatsApp
+                            {t("whatsappLabel")}
                           </Label>
                           <Input
                             id="br-whats"
@@ -265,7 +265,7 @@ export function BookingCartDialog() {
                         </div>
                         <div className="space-y-1.5">
                           <Label htmlFor="br-email" className="text-xs">
-                            E-mail
+                            {t("emailLabel")}
                           </Label>
                           <Input
                             id="br-email"
@@ -273,17 +273,17 @@ export function BookingCartDialog() {
                             value={email}
                             maxLength={200}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="voce@email.com"
+                            placeholder={t("emailPlaceholder")}
                           />
                         </div>
                         <p className="text-[11px] text-muted-foreground sm:col-span-2">
-                          Informe pelo menos WhatsApp ou e-mail.
+                          {t("provideWhatsappOrEmail")}
                         </p>
                       </>
                     )}
                     <div className="space-y-1.5 sm:col-span-2">
                       <Label htmlFor="br-notes" className="text-xs">
-                        Observações (opcional)
+                        {t("notesLabel")}
                       </Label>
                       <Textarea
                         id="br-notes"
@@ -291,7 +291,7 @@ export function BookingCartDialog() {
                         maxLength={2000}
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
-                        placeholder="Preferências, datas alternativas, dúvidas…"
+                        placeholder={t("notesPlaceholder")}
                         className="border-primary/40 bg-background ring-offset-background transition-colors placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
                       />
                     </div>
@@ -304,7 +304,7 @@ export function BookingCartDialog() {
                         onClick={() => cart.setCartOpen(false)}
                         disabled={cart.submitting}
                       >
-                        Continuar escolhendo
+                        {t("continueChoosing")}
                       </Button>
                     </div>
 
@@ -320,7 +320,7 @@ export function BookingCartDialog() {
           >
             {success ? (
               <Button type="button" className="w-full sm:ml-auto sm:w-auto" onClick={() => cart.setCartOpen(false)}>
-                Fechar
+                {t("close")}
               </Button>
             ) : (
               <>
@@ -330,7 +330,7 @@ export function BookingCartDialog() {
                       {cart.totalLabel}
                     </span>
                     <span className="text-lg font-bold text-foreground">
-                      {cart.total != null ? cart.formatAmount(cart.total) : "A confirmar com a agência"}
+                      {cart.total != null ? cart.formatAmount(cart.total) : t("toConfirmWithAgency")}
                     </span>
                   </div>
                 )}
@@ -343,7 +343,7 @@ export function BookingCartDialog() {
                       className="mt-0.5"
                       checked={accepted}
                       onCheckedChange={(v) => setAccepted(v === true)}
-                      aria-label="Aceito o aviso sobre a solicitação de reserva"
+                      aria-label={t("acceptBookingDisclaimer")}
                     />
                     <span>{BOOKING_REQUEST_DISCLAIMER}</span>
                   </label>
@@ -367,7 +367,7 @@ export function BookingCartDialog() {
                       ) : (
                         <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                       )}
-                      {cart.submitting ? "Enviando…" : "Enviar solicitação de reserva"}
+                      {cart.submitting ? t("sending") : t("sendBookingRequest")}
                     </Button>
                   </div>
                 )}

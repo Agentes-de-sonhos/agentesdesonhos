@@ -116,18 +116,6 @@ function getServiceLabels(locale: PublicLocale): Record<TripServiceType, string>
   attraction: t("serviceAttraction"), insurance: t("serviceInsurance"), cruise: t("serviceCruise"), train: t("serviceTrain"), other: t("serviceOther"),
   };
 }
-const SERVICE_LABELS: Record<TripServiceType, string> = {
-  flight: "Passagem Aérea",
-  hotel: "Hospedagem",
-  car_rental: "Locação de Veículo",
-  transfer: "Transfer",
-  attraction: "Ingressos/Atrações",
-  insurance: "Seguro Viagem",
-  cruise: "Cruzeiro",
-  train: "Trem",
-  other: "Outros Serviços",
-};
-
 // Emoji + gradiente por serviço (alinhado ao QuotePDF para consistência visual)
 const SERVICE_EMOJI: Record<TripServiceType, string> = {
   flight: "✈️", hotel: "🏨", car_rental: "🚗", transfer: "🚐",

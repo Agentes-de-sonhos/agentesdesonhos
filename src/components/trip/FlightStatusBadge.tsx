@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Plane, Clock, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { tWallet } from "@/i18n/publicMaterials/wallet";
+import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { normalizePublicLocale } from "@/i18n/publicMaterials/locale";
 
 interface FlightStatusData {
   status: string;
@@ -18,6 +21,7 @@ interface FlightStatusBadgeProps {
   tripServiceId: string;
   flightNumber: string;
   flightDate: string;
+  locale?: PublicLocale;
 }
 
 const statusConfig: Record<string, { color: string; icon: typeof Plane }> = {
@@ -31,8 +35,9 @@ const statusConfig: Record<string, { color: string; icon: typeof Plane }> = {
   diverted: { color: "bg-orange-100 text-orange-800 border-orange-200", icon: AlertTriangle },
 };
 
-export function FlightStatusBadge({ tripServiceId, flightNumber, flightDate }: FlightStatusBadgeProps) {
+export function FlightStatusBadge({ tripServiceId, flightNumber, flightDate, locale }: FlightStatusBadgeProps) {
   const [statusData, setStatusData] = useState<FlightStatusData | null>(null);
+  const t = tWallet(locale);
 
   useEffect(() => {
     if (!tripServiceId || !flightNumber || !flightDate) return;
@@ -92,14 +97,14 @@ export function FlightStatusBadge({ tripServiceId, flightNumber, flightDate }: F
       </Badge>
       {(statusData.terminal || statusData.gate) && (
         <span className="text-[10px] text-muted-foreground">
-          {statusData.terminal && `Terminal ${statusData.terminal}`}
+          {statusData.terminal && `${t("fldTerminal")} ${statusData.terminal}`}
           {statusData.terminal && statusData.gate && ' • '}
-          {statusData.gate && `Portão ${statusData.gate}`}
+          {statusData.gate && `${t("fldPortao")} ${statusData.gate}`}
         </span>
       )}
       {statusData.departure_actual && statusData.status === 'active' && (
         <span className="text-[10px] text-muted-foreground">
-          Decolou: {new Date(statusData.departure_actual).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          {t("fldDecolou")}: {new Date(statusData.departure_actual).toLocaleTimeString(normalizePublicLocale(locale), { hour: '2-digit', minute: '2-digit' })}
         </span>
       )}
     </div>

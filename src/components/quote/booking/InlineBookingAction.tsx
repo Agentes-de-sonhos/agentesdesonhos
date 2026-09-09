@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Check, Plus, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import type { QuoteService } from "@/types/quote";
 
 /**
@@ -17,6 +18,7 @@ export function InlineBookingAction({
   className?: string;
 }) {
   const cart = useBookingCart();
+  const t = translateQuote(cart.locale);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const state = cart.enabled ? cart.stateFor(service.id) : null;
   if (!state) return null;
@@ -30,10 +32,10 @@ export function InlineBookingAction({
         )}
         data-booking-inline-action="locked"
         data-service-id={service.id}
-        title="Incluído na proposta"
+        title={t("includedInProposal")}
       >
         <Check className="h-3.5 w-3.5" aria-hidden="true" />
-        Incluído
+        {t("includedTag")}
       </div>
     );
   }
@@ -41,9 +43,9 @@ export function InlineBookingAction({
   const selected = state.selected;
   const label = selected
     ? state.canRemove
-      ? "Adicionado à solicitação — toque para remover"
-      : "Adicionado à solicitação"
-    : "Adicionar à solicitação de reserva";
+      ? t("addedToRequestTapToRemove")
+      : t("addedToRequest")
+    : t("addToBookingRequest");
 
   return (
     <div className={cn("inline-flex flex-col items-end gap-1", className)}>
@@ -79,7 +81,7 @@ export function InlineBookingAction({
       </button>
       {selected && !state.canRemove && (
         <span className="max-w-[180px] text-right text-[10px] leading-tight text-muted-foreground">
-          Selecione outra opção para trocar
+          {t("selectAnotherOptionToSwapShort")}
         </span>
       )}
     </div>
