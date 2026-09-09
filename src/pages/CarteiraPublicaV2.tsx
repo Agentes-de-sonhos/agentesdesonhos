@@ -439,7 +439,12 @@ export default function CarteiraPublicaV2({
           // Erro de rede / servidor: tenta servir cópia offline.
           const cached = getOfflineCache(accessCode);
           if (cached) {
-            setTripData(cached);
+            // Cache antigo (sem idioma) não decide o idioma: complementa com o
+            // branding do servidor quando disponível, senão cai no pt-BR.
+            setTripData({
+              ...cached,
+              agentProfile: reconcileCachedAgentProfile(cached.agentProfile, brandingRef.current) as AgentProfile | null,
+            });
             setNeedsPassword(false);
           } else {
             setError(msg || "Erro ao acessar carteira");
