@@ -54,7 +54,7 @@ describe("Carteira Digital — cabeçalho compacto", () => {
     expect(wallet).not.toContain("ou aproveite informações já cadastradas");
     expect(wallet).not.toContain("Importar de um Orçamento");
     const prompt = wallet.indexOf("Já tem um orçamento pronto?");
-    const block = wallet.slice(prompt, wallet.indexOf("</div>", wallet.indexOf("</Button>", prompt)) + 6);
+    const block = wallet.slice(wallet.lastIndexOf("<div", prompt), wallet.indexOf("</Button>", prompt));
     expect(block).toContain('<FileTextIcon className="h-4 w-4 text-primary" />');
     expect(block).toContain('<Download className="h-4 w-4" />');
     expect(block).toContain("Importar");
