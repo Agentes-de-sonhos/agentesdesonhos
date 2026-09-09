@@ -40,6 +40,64 @@ Deno.serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    // ─── Mode 0: metadados básicos (modo econômico, SEM fotos) ───
+    // Nunca pede `photos` ao Google e nunca resolve URLs de imagem.
+    if (metadata_only && place_id) {
+      const { data: cachedMeta } = await supabaseAdmin
+        .from("place_cache")
+        .select("*")
+        .eq("place_id", place_id)
+        .maybeSingle();
+
+      if (cachedMeta?.raw_data) {
+        return new Response(JSON.stringify({ place: cachedMeta }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const metaFields = "name,formatted_address,geometry,types,place_id,rating,user_ratings_total,editorial_summary,url,website,international_phone_number";
+      const metaUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&fields=${metaFields}&key=${GOOGLE_PLACES_API_KEY}&language=pt-BR`;
+      const metaResp = await fetch(metaUrl);
+      const metaData = await metaResp.json();
+
+      if (metaData.status !== "OK" || !metaData.result) {
+        return new Response(JSON.stringify({ place: null }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const m = metaData.result;
+      const metaPlace: any = {
+        place_id: m.place_id,
+        name: m.name || "",
+        address: m.formatted_address || "",
+        place_type: (m.types || [])[0] || place_type || "establishment",
+        latitude: m.geometry?.location?.lat ?? null,
+        longitude: m.geometry?.location?.lng ?? null,
+        raw_data: {
+          types: m.types,
+          rating: m.rating ?? null,
+          user_ratings_total: m.user_ratings_total ?? null,
+          editorial_summary: m.editorial_summary?.overview ?? null,
+          maps_url: m.url ?? null,
+          website: m.website ?? null,
+          phone: m.international_phone_number ?? null,
+        },
+      };
+
+      if (cachedMeta) {
+        await supabaseAdmin.from("place_cache").update(metaPlace).eq("place_id", place_id);
+      } else {
+        await supabaseAdmin
+          .from("place_cache")
+          .upsert({ ...metaPlace, photo_url: null, photo_urls: [] }, { onConflict: "place_id" });
+      }
+
+      return new Response(JSON.stringify({ place: metaPlace }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // ─── Mode 1: Fetch details for a place_id ───
     if (fetch_details && place_id) {
       // Check cache first
