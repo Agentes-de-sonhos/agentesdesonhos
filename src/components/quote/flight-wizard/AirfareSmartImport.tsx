@@ -27,8 +27,11 @@ export interface ParsedAirfareFlight {
   duracao: string;
   origem_codigo: string;
   origem_nome: string;
+  /** Nome público do aeroporto (editável pelo agente). */
+  origem_aeroporto?: string;
   destino_codigo: string;
   destino_nome: string;
+  destino_aeroporto?: string;
   numero_escalas: number;
   equipamento: string;
   cabine: string;
@@ -164,6 +167,8 @@ function voo2leg(v: ParsedAirfareFlight, yearHint: number): FlightLegDetail {
     airline: v.companhia_aerea || "",
     origin_city: v.origem_nome || "",
     destination_city: v.destino_nome || "",
+    origin_airport_name: (v.origem_aeroporto || "").trim() || undefined,
+    destination_airport_name: (v.destino_aeroporto || "").trim() || undefined,
     duration: v.duracao || "",
     stops: typeof v.numero_escalas === "number" ? v.numero_escalas : undefined,
     equipment: v.equipamento || "",
@@ -746,8 +751,8 @@ function ReviewScreen({
           ordem: data.voos.length + 1,
           companhia_aerea: "", numero_voo: "",
           data_saida: "", hora_saida: "", data_chegada: "", hora_chegada: "",
-          duracao: "", origem_codigo: "", origem_nome: "",
-          destino_codigo: "", destino_nome: "", numero_escalas: 0,
+          duracao: "", origem_codigo: "", origem_nome: "", origem_aeroporto: "",
+          destino_codigo: "", destino_nome: "", destino_aeroporto: "", numero_escalas: 0,
           equipamento: "", cabine: "", base_tarifaria: "",
           bagagem_texto: "", bagagem_mochila_bolsa: null, bagagem_mao: null,
           bagagem_despachada: null, quantidade_bagagem_despachada: null, alerta: "",
@@ -838,8 +843,10 @@ function ReviewScreen({
                 <Field label="Equipamento" value={v.equipamento} onChange={(val) => updateVoo(idx, "equipamento", val)} />
                 <Field label="Origem (IATA)" value={v.origem_codigo} onChange={(val) => updateVoo(idx, "origem_codigo", val.toUpperCase())} />
                 <Field label="Origem (cidade)" value={v.origem_nome} onChange={(val) => updateVoo(idx, "origem_nome", val)} />
+                <Field label="Aeroporto de origem (nome público)" value={v.origem_aeroporto || ""} onChange={(val) => updateVoo(idx, "origem_aeroporto", val)} placeholder="Ex.: Aeroporto de Joinville" />
                 <Field label="Destino (IATA)" value={v.destino_codigo} onChange={(val) => updateVoo(idx, "destino_codigo", val.toUpperCase())} />
                 <Field label="Destino (cidade)" value={v.destino_nome} onChange={(val) => updateVoo(idx, "destino_nome", val)} />
+                <Field label="Aeroporto de destino (nome público)" value={v.destino_aeroporto || ""} onChange={(val) => updateVoo(idx, "destino_aeroporto", val)} placeholder="Ex.: Aeroporto de Guarulhos" />
                 <Field label="Data saída" value={v.data_saida} onChange={(val) => updateVoo(idx, "data_saida", val)} placeholder="AAAA-MM-DD" />
                 <Field label="Hora saída" value={v.hora_saida} onChange={(val) => updateVoo(idx, "hora_saida", val)} placeholder="HH:mm" />
                 <Field label="Data chegada" value={v.data_chegada} onChange={(val) => updateVoo(idx, "data_chegada", val)} placeholder="AAAA-MM-DD" />
