@@ -13,6 +13,25 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+/** Limite máximo de fotos retornadas/selecionáveis por busca. */
+export const MAX_INTERNET_PHOTOS = 5;
+
+/**
+ * Chave de cache do cliente: consulta normalizada + contexto realmente enviado
+ * ao servidor. Nunca somente o texto digitado.
+ */
+export function photoSearchCacheKey(
+  term: string,
+  purpose: "destination" | "place",
+  destination?: string | null,
+  location?: string | null,
+): string {
+  const norm = (v?: string | null) =>
+    String(v || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim();
+  const context = purpose === "destination" ? "" : [norm(location), norm(destination)].filter(Boolean).join("|");
+  return `${purpose}|${norm(term)}|${context}`;
+}
+
 interface PhotoCandidate {
   photo_url: string;
   thumb_url: string;
@@ -31,8 +50,13 @@ interface Props {
   onPick: (urls: string[]) => void;
   /** Optional trigger label. Defaults to "Buscar fotos da internet". */
   triggerLabel?: string;
-  /** How many photos to request per search (max 18). */
+  /** How many photos to request per search (máx. 5). */
   limit?: number;
+  /**
+   * "destination" = galeria genérica do destino (Pexels → Unsplash → Google);
+   * "place" = local específico (hotel/atração/restaurante), Google prioritário.
+   */
+  purpose?: "destination" | "place";
   /** When true, opens the picker dialog automatically on mount and runs the initial search. */
   autoOpen?: boolean;
   /** When true, hides the trigger button (useful when autoOpen is controlling the flow). */
@@ -54,7 +78,8 @@ export function InternetPhotosPicker({
   existingUrls = [],
   onPick,
   triggerLabel = "Buscar fotos da internet",
-  limit = 18,
+  limit = MAX_INTERNET_PHOTOS,
+  purpose = "place",
   autoOpen = false,
   hideTrigger = false,
   onClose,
@@ -83,19 +108,28 @@ export function InternetPhotosPicker({
   const runSearch = async (term: string) => {
     const q = term.trim();
     if (q.length < 2) return;
-    if (cache.current.has(q)) {
-      setPhotos(cache.current.get(q)!);
+    const cacheKey = photoSearchCacheKey(q, purpose, destination, location);
+    if (cache.current.has(cacheKey)) {
+      setPhotos(cache.current.get(cacheKey)!);
       return;
     }
     setLoading(true);
     setPhotos([]);
     try {
       const { data, error } = await supabase.functions.invoke("activity-photo", {
-        body: { query: q, destination, location, limit },
+        body: {
+          query: q,
+          // Em buscas de destino o texto digitado é a consulta principal:
+          // não enviamos o destino do orçamento quando ele é diferente.
+          destination: purpose === "destination" ? undefined : destination,
+          location: purpose === "destination" ? undefined : location,
+          limit: Math.min(limit, MAX_INTERNET_PHOTOS),
+          purpose,
+        },
       });
       if (error) throw error;
       const list: PhotoCandidate[] = data?.photos ?? [];
-      cache.current.set(q, list);
+      cache.current.set(cacheKey, list);
       setPhotos(list);
     } catch (e: any) {
       toast.error("Não foi possível buscar fotos", { description: e?.message });

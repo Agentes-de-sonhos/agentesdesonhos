@@ -388,7 +388,7 @@ export function DestinationIntroEditor({
           </Button>
           <InternetPhotosPicker
             query={destination}
-            destination={destination}
+            purpose="destination"
             existingUrls={images}
             onPick={handleAddGooglePhotos}
             triggerLabel="Buscar fotos da internet"
@@ -491,7 +491,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
       {searchOpen && (
         <InternetPhotosPicker
           query={destination}
-          destination={destination}
+          purpose="destination"
           existingUrls={images}
           onPick={onAddGooglePhotos}
           autoOpen
@@ -697,7 +697,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
             </Button>
             <InternetPhotosPicker
               query={destination}
-              destination={destination}
+              purpose="destination"
               existingUrls={images}
               onPick={onAddGooglePhotos}
               triggerLabel="Buscar fotos da internet"
