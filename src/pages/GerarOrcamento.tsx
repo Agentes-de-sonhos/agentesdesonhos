@@ -1197,6 +1197,12 @@ export default function GerarOrcamento() {
                   />
                 </CardContent>
               </Card>
+
+              <QuoteImportDialog
+                open={importOpen}
+                onOpenChange={setImportOpen}
+                onImported={(id) => navigate(nav.quote(id))}
+              />
             </TabsContent>
 
             <TabsContent value="list" className="mt-5">
