@@ -1,6 +1,16 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { resolveGooglePlacePhotoUrl } from "../_shared/google-photo.ts";
+import {
+  buildQueryText,
+  collectPhotos,
+  galleryCacheKey,
+  isCacheFresh,
+  MAX_PHOTOS,
+  normalizePurpose,
+  sourceOrder,
+  type PhotoCandidate,
+} from "./photoSearch.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,8 +22,11 @@ interface ReqBody {
   query: string;        // ex: "Torre Eiffel"
   destination?: string; // ex: "Paris"
   location?: string;    // ex: "Champ de Mars"
-  limit?: number;       // when > 1 returns multiple candidates (no cache)
+  limit?: number;       // when > 1 returns multiple candidates
+  /** "destination" = galeria genérica do destino; "place" = local específico. */
+  purpose?: "destination" | "place";
 }
+
 
 function normalizeKey(q: string, destination?: string, location?: string) {
   const parts = [q, location, destination]
