@@ -45,6 +45,11 @@ interface Props {
     image_url?: string,
     image_urls?: string[],
   ) => Promise<void> | void;
+  /** Opcional: adiciona vários serviços de uma vez (importação de documento com vários hotéis). */
+  onSubmitMany?: (
+    items: Array<{ service_data: ServiceData; amount: number; option_label?: string; description?: string }>,
+  ) => Promise<void> | void;
+
   newServicePaymentConfig: ServicePaymentConfig;
   setNewServicePaymentConfig: (cfg: ServicePaymentConfig) => void;
   servicePaymentConfigs: Record<string, ServicePaymentConfig>;
@@ -54,7 +59,7 @@ interface Props {
 export function ServiceModal(props: Props) {
   const {
     open, onOpenChange, serviceType, editingService, serviceCountByType,
-    tripStartDate, tripEndDate, adultsCount, childrenCount, isLoading, onSubmit,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, isLoading, onSubmit, onSubmitMany,
     newServicePaymentConfig, setNewServicePaymentConfig,
     servicePaymentConfigs, onServicePaymentChange,
   } = props;
@@ -122,6 +127,22 @@ export function ServiceModal(props: Props) {
     return onSubmit(merged, amount, option_label, description, image_url, image_urls);
   };
 
+  // Adição em lote: o vínculo de fornecedor atual é aplicado a todos os itens,
+  // sem passar pelo diálogo de confirmação item a item.
+  const handleSubmitMany = onSubmitMany
+    ? (items: Array<{ service_data: ServiceData; amount: number; option_label?: string; description?: string }>) =>
+        onSubmitMany(
+          items.map((item) => ({
+            ...item,
+            service_data: {
+              ...(item.service_data as any),
+              supplier_operator_id: supplier.operator_id ?? null,
+              supplier_name: supplier.supplier_name || null,
+            },
+          })),
+        )
+    : undefined;
+
   const handleSubmit = (
     service_data: ServiceData,
     amount: number,
@@ -172,6 +193,7 @@ export function ServiceModal(props: Props) {
                 key={editingService?.id || `new-${serviceType}`}
                 serviceType={serviceType}
                 onSubmit={handleSubmit}
+                onSubmitMany={editingService ? undefined : handleSubmitMany}
                 onCancel={() => onOpenChange(false)}
                 isLoading={isLoading}
                 showOptionLabel={isMulti}
@@ -301,6 +323,7 @@ export function ServiceModal(props: Props) {
                 key={editingService?.id || `new-${serviceType}`}
                 serviceType={serviceType}
                 onSubmit={handleSubmit}
+                onSubmitMany={editingService ? undefined : handleSubmitMany}
                 onCancel={() => onOpenChange(false)}
                 isLoading={isLoading}
                 showOptionLabel={isMulti}

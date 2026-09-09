@@ -94,6 +94,9 @@ function parseLocalDate(dateStr: string | null | undefined): Date | undefined {
 interface ServiceFormProps {
   serviceType: ServiceType;
   onSubmit: (data: any, amount: number, optionLabel?: string, description?: string, imageUrl?: string, imageUrls?: string[]) => Promise<void> | void;
+  /** Opcional: adiciona vários serviços de uma vez (usado pela importação de documento com vários hotéis). */
+  onSubmitMany?: (items: Array<{ service_data: any; amount: number; option_label?: string; description?: string }>) => Promise<void> | void;
+
   onCancel: () => void;
   isLoading?: boolean;
   showOptionLabel?: boolean;
@@ -3048,7 +3051,23 @@ function HotelEntry(props: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdCh
                   });
                   setMode("manual");
                 }}
+                {...(props.onSubmitMany
+                  ? {
+                      onConfirmMany: async (items) => {
+                        // Vários hotéis no mesmo documento → um serviço de
+                        // hospedagem por hotel, na ordem cronológica recebida.
+                        await props.onSubmitMany!(
+                          items.map(({ data }) => ({
+                            service_data: data as any,
+                            amount: data.price || 0,
+                            option_label: data.hotel_name || undefined,
+                          })),
+                        );
+                      },
+                    }
+                  : {})}
               />
+
             </div>
           </DialogContent>
         </Dialog>
@@ -3335,7 +3354,7 @@ function GenericModeChooser({
   );
 }
 
-export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot }: ServiceFormProps) {
+export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
@@ -3374,8 +3393,10 @@ export function ServiceForm({ serviceType, onSubmit, onCancel, isLoading, showOp
   const formProps = {
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
+    ...(serviceType === 'hotel' && onSubmitMany ? { onSubmitMany } : {}),
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
   };
+
 
   let formElement: React.ReactNode = null;
   switch (serviceType) {
