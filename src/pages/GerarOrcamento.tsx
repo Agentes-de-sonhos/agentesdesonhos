@@ -19,7 +19,7 @@ import {
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
   Pencil, MoreHorizontal, UserCircle2,
 } from "lucide-react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -32,6 +32,7 @@ import {
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ClientAvatar } from "@/components/shared/ClientAvatar";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
+import { QuoteImportDialog } from "@/components/quote/quote-import/QuoteImportDialog";
 import { ServiceForm } from "@/components/quote/ServiceForms";
 import { QuoteServicesOrganizer } from "@/components/quote/QuoteServicesOrganizer";
 import {
@@ -448,6 +449,7 @@ export default function GerarOrcamento() {
   const [validUntil, setValidUntil] = useState<Date | undefined>();
   const [validityDisclaimer, setValidityDisclaimer] = useState("");
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
   const [paymentDisplayMode, setPaymentDisplayMode] = useState<PaymentDisplayMode>("full_payment");
   const [installmentsCount, setInstallmentsCount] = useState(10);
   const [entryPercentage, setEntryPercentage] = useState(30);
