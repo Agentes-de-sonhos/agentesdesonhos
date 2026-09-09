@@ -848,7 +848,16 @@ function TripWalletContent() {
             subtitle="Organize vouchers, documentos e serviços das viagens"
             icon={Wallet}
           />
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "list")} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={(v) => {
+              // "Minhas Carteiras" abre Meus Projetos em NOVA ABA, preservando
+              // a página de criação atual (contexto plataforma/SiteLab/agências).
+              if (v === "list") { openInNewTab(nav.projects("carteiras")); return; }
+              setActiveTab(v as "create" | "list");
+            }}
+            className="w-full"
+          >
             <div className="flex items-end justify-between gap-4 border-b border-border/60">
               <TabsList className="h-auto bg-transparent p-0 gap-6 rounded-none justify-start">
                 <TabsTrigger
@@ -882,13 +891,27 @@ function TripWalletContent() {
             <TabsContent value="create" className="mt-5">
               <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
-                  <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-primary" />
-                    Informações da Viagem
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Preencha os dados iniciais para criar uma carteira digital.
-                  </p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg font-semibold tracking-tight flex items-center gap-2">
+                        <Wallet className="h-5 w-5 text-primary" />
+                        Informações da Viagem
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Preencha os dados iniciais para criar uma carteira digital.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 h-9 rounded-lg self-start sm:self-auto"
+                      onClick={() => setShowImportQuoteAsNew(true)}
+                    >
+                      <FileTextIcon className="h-4 w-4 mr-2" />
+                      Importar de um Orçamento
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <TripForm
