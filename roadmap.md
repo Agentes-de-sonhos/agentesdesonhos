@@ -6,7 +6,7 @@
 - [ ] testes de contrato + typecheck + build + publicar
 
 ## Idioma it-IT nos materiais públicos
-- [ ] Zerar rótulos fixos em português no orçamento público + PDF
-- [ ] Zerar rótulos fixos em português na carteira digital pública + PDF
+- [x] Zerar rótulos fixos em português no orçamento público + PDF
+- [x] Zerar rótulos fixos em português na carteira digital pública + PDF
 - [x] Roteiro público + PDF
-- [ ] Corrigir todos os erros de typecheck/build (inclusive preexistentes) antes de concluir
+- [x] Corrigir todos os erros de typecheck/build (inclusive preexistentes) antes de concluir
