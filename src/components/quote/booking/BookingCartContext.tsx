@@ -23,6 +23,8 @@ import { agencyNameToSlug } from "@/lib/orcamento-domain";
 import { formatQuoteCurrency, getQuoteCurrencyInfo } from "@/lib/quoteCurrency";
 import { formatFileNumber } from "@/lib/travelFiles";
 import { serviceCompactDigest, serviceDigestTitle } from "@/lib/quoteServiceDigest";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
+import { DEFAULT_PUBLIC_LOCALE, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import {
   bookingCtaLabel,
   bookingSelectionTotal,
@@ -67,6 +69,7 @@ export interface ServiceCartState {
 
 export interface BookingCartValue {
   enabled: boolean;
+  locale: PublicLocale | string;
   packageMode: boolean;
   hideAmounts: boolean;
   /** Quantidade efetiva de serviços (inclui obrigatórios/pacote). */
@@ -106,6 +109,7 @@ export interface BookingCartValue {
 
 const DISABLED: BookingCartValue = {
   enabled: false,
+  locale: DEFAULT_PUBLIC_LOCALE,
   packageMode: false,
   hideAmounts: false,
   count: 0,
@@ -154,6 +158,7 @@ interface ProviderProps {
   agentProfile?: AgentProfile | null;
   agencySlugOverride?: string;
   accessCodeOverride?: string;
+  locale?: PublicLocale | string;
   children: React.ReactNode;
 }
 
@@ -162,8 +167,10 @@ export function BookingCartProvider({
   agentProfile,
   agencySlugOverride,
   accessCodeOverride,
+  locale = DEFAULT_PUBLIC_LOCALE,
   children,
 }: ProviderProps) {
+  const t = translateQuote(locale);
   const enabled =
     (quote as any)?.booking_requests_enabled === true && (quote?.services?.length ?? 0) > 0;
 
@@ -261,7 +268,7 @@ export function BookingCartProvider({
     const target = findCartTarget();
     if (!target) return;
     const service = services.find((s) => s.id === serviceId);
-    const imageUrl = service ? serviceCompactDigest(service).images[0] || null : null;
+    const imageUrl = service ? serviceCompactDigest(service, locale).images[0] || null : null;
     const cleanup = flyToCart(
       origin.getBoundingClientRect(),
       target.getBoundingClientRect(),
@@ -321,7 +328,7 @@ export function BookingCartProvider({
   const submit = useCallback(
     async (input: { name: string; email: string; whatsapp: string; notes: string }) => {
       if (!agencySlug || !publicCode) {
-        setSubmitError("Não foi possível identificar este orçamento. Fale com o seu consultor.");
+        setSubmitError(t("couldNotIdentifyQuote"));
         return;
       }
       if (!idempotencyKey.current) idempotencyKey.current = crypto.randomUUID();
@@ -342,7 +349,7 @@ export function BookingCartProvider({
           },
         });
         if (fnError) {
-          let message = "Não foi possível enviar sua solicitação agora. Tente novamente.";
+          let message = t("couldNotSendRequest");
           try {
             const ctx = (fnError as any)?.context;
             if (ctx?.text) {
@@ -363,15 +370,15 @@ export function BookingCartProvider({
         setSuccess({
           protocol: String((data as any)?.protocol || ""),
           fileNumber: formatFileNumber((data as any)?.file_number),
-          services: chosen.map((s) => serviceDigestTitle(s)),
+          services: chosen.map((s) => serviceDigestTitle(s, locale)),
         });
       } catch {
-        setSubmitError("Não foi possível enviar sua solicitação agora. Tente novamente.");
+        setSubmitError(t("couldNotSendRequest"));
       } finally {
         setSubmitting(false);
       }
     },
-    [agencySlug, publicCode, effectiveIds, hasLinkedClient, services],
+    [agencySlug, publicCode, effectiveIds, hasLinkedClient, services, locale, t],
   );
 
   const openCart = useCallback(() => {
@@ -385,6 +392,7 @@ export function BookingCartProvider({
       enabled
         ? {
             enabled: true,
+            locale,
             packageMode: model.packageMode,
             hideAmounts: model.hideAmounts,
             count,
@@ -417,6 +425,7 @@ export function BookingCartProvider({
         : DISABLED,
     [
       enabled,
+      locale,
       model,
       count,
       effectiveIds,
