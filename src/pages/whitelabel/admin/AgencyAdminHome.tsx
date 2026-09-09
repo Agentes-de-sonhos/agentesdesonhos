@@ -348,13 +348,6 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
         create: true,
         onClick: () => setNewWalletOpen(true),
       });
-    if (!can || can?.operations_create)
-      list.push({
-        label: "Criar operação",
-        icon: Briefcase,
-        create: true,
-        onClick: () => setNewOperationOpen(true),
-      });
     return list;
   }, [can]);
 
