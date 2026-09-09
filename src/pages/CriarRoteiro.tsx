@@ -540,10 +540,9 @@ export default function CriarRoteiro() {
           <Tabs
             value={activeTab}
             onValueChange={(v) => {
-              // "Meus Roteiros" e "Meus Modelos" passam a navegar para Meus Projetos,
-              // usando o helper contextual (plataforma, SiteLab e sites das agências).
-              if (v === "list") { navigate(nav.projects("roteiros")); return; }
-              if (v === "templates") { navigate(nav.projects("modelos")); return; }
+              // "Meus Roteiros" abre Meus Projetos em NOVA ABA, mantendo esta
+              // página de criação aberta (plataforma, SiteLab e sites das agências).
+              if (v === "list") { openInNewTab(nav.projects("roteiros")); return; }
               setActiveTab(v as "create" | "list" | "templates");
             }}
           >
