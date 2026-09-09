@@ -160,7 +160,7 @@ describe("PDF do orçamento com vários tipos de serviço", () => {
 
 describe("digest e condições de pagamento por idioma", () => {
   it("traduz nomes de tipo de serviço", () => {
-    expect(serviceDigestTypeLabel(quote.services[0])).toBe("Passagem Aérea");
+    expect(serviceDigestTypeLabel(quote.services[0])).toBe("Passagem aérea");
     expect(serviceDigestTypeLabel(quote.services[0], "it-IT")).toBe("Biglietto Aereo");
     expect(serviceDigestTypeLabel(quote.services[3], "it-IT")).toBe("Transfer");
   });
