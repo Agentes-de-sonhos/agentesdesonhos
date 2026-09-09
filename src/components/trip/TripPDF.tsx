@@ -172,7 +172,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
         details.push(t("detailsTrechosSeparator"));
         data.segments.forEach((seg: any, i: number) => {
           const segType = seg.segment_type === 'ida' ? t("fldIda") : seg.segment_type === 'conexao' ? t("segConexao") : t("segVolta");
-          details.push(`${segType}: ${seg.origin_airport || seg.origin_city} → ${seg.destination_airport || seg.destination_city} • ${seg.flight_date ? formatDate(seg.flight_date, locale) : ''} ${seg.departure_time || ''} → ${seg.arrival_time || ''} • ${seg.airline || ''} ${seg.flight_number || ''}`);
+          details.push(`${segType}: ${publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city })} → ${publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city })} • ${seg.flight_date ? formatDate(seg.flight_date, locale) : ''} ${seg.departure_time || ''} → ${seg.arrival_time || ''} • ${seg.airline || ''} ${seg.flight_number || ''}`);
         });
       } else {
         details.push(`${t("fldIda")}: ${formatDate(data.departure_date, locale)} | ${t("segVolta")}: ${formatDate(data.return_date, locale)}`);
@@ -465,7 +465,7 @@ function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"):
           ${seg.airline ? `<span style="color:#64748b;margin-left:6px;">${escapeHtml(seg.airline)}</span>` : ''}
           ${seg.flight_number ? `<span style="color:#64748b;font-family:'Courier New',monospace;margin-left:6px;">${escapeHtml(seg.flight_number)}</span>` : ''}
         </p>
-        <p style="margin:1px 0;font-size:12px;font-weight:600;color:#1e293b;">${escapeHtml(seg.origin_airport || seg.origin_city || '')} → ${escapeHtml(seg.destination_airport || seg.destination_city || '')}</p>
+        <p style="margin:1px 0;font-size:12px;font-weight:600;color:#1e293b;">${escapeHtml(publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city }))} → ${escapeHtml(publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city }))}</p>
         <p style="margin:1px 0;font-size:10px;color:#64748b;">
           ${seg.flight_date ? escapeHtml(fmtDate(seg.flight_date)) : ''}${seg.departure_time ? ` • ${escapeHtml(seg.departure_time)}` : ''}${seg.arrival_time ? ` → ${escapeHtml(seg.arrival_time)}` : ''}${seg.terminal ? ` • ${t("fldTerminal")} ${escapeHtml(seg.terminal)}` : ''}${seg.gate ? ` • ${t("fldPortao")} ${escapeHtml(seg.gate)}` : ''}
         </p>

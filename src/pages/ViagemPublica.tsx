@@ -863,7 +863,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                       )}
                     </div>
                     <p className="text-sm font-medium mt-0.5">
-                      {seg.origin_airport || seg.origin_city} → {seg.destination_airport || seg.destination_city}
+                      {publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city })} → {publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city })}
                     </p>
                     <p className="text-[13px] text-foreground/80 leading-relaxed break-words">
                       {seg.flight_date ? formatDate(seg.flight_date) : ''}
