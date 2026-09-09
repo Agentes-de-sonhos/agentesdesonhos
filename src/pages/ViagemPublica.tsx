@@ -58,6 +58,7 @@ import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { resolvePublicLocale, formatPublicShortDate, formatPublicDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
+import { publicAirportText } from "@/lib/airportDisplay";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the

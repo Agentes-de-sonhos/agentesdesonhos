@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@/lib/serviceImages";
 import { formatPublicLongDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
+import { publicAirportText } from "@/lib/airportDisplay";
 
 /** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
 export type PdfImageResolver = (ref: string) => string | null;

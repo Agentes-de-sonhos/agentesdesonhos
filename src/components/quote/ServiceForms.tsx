@@ -150,6 +150,8 @@ const flightLegSchema = z.object({
   leg_date: z.string().optional(),
   airport_origin: z.string().optional(),
   airport_destination: z.string().optional(),
+  origin_airport_name: z.string().optional(),
+  destination_airport_name: z.string().optional(),
   departure_time: z.string().optional(),
   arrival_time: z.string().optional(),
   flight_number: z.string().optional(),
@@ -263,6 +265,12 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
                   {airportHint(leg.airport_origin, leg.origin_city)}
                 </p>
               )}
+              <Input
+                placeholder="Nome público (ex.: Aeroporto de Joinville)"
+                value={leg.origin_airport_name || ""}
+                onChange={e => updateLeg(idx, "origin_airport_name", e.target.value)}
+                className="h-8 text-sm mt-1"
+              />
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
@@ -272,6 +280,12 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
                   {airportHint(leg.airport_destination, leg.destination_city)}
                 </p>
               )}
+              <Input
+                placeholder="Nome público (ex.: Aeroporto de Guarulhos)"
+                value={leg.destination_airport_name || ""}
+                onChange={e => updateLeg(idx, "destination_airport_name", e.target.value)}
+                className="h-8 text-sm mt-1"
+              />
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

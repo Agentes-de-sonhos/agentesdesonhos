@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import {
+import { publicAirportText } from "@/lib/airportDisplay";
   getEffectiveQuoteTotal,
   hidesIndividualAmounts,
   getInvestmentPresentationLayout,

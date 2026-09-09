@@ -57,6 +57,7 @@ import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog"
 import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { publicAirportText } from "@/lib/airportDisplay";
 
 function getServiceLabel(service: QuoteService): string {
   if (service.service_type === "other") {

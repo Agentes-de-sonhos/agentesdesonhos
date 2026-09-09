@@ -1037,7 +1037,9 @@ function BlockEditor({ block, onChange }: { block: AiBlock; onChange: (b: AiBloc
             <div key={i} className="rounded border p-2 grid grid-cols-2 sm:grid-cols-4 gap-2">
               <Field label="Voo" value={v.numero_voo || ""} onChange={(x) => update(`voos.${i}.numero_voo`, x)} />
               <Field label="Origem" value={v.origem_codigo || ""} onChange={(x) => update(`voos.${i}.origem_codigo`, x.toUpperCase())} />
+              <Field label="Aeroporto origem (nome público)" value={v.origem_aeroporto || ""} onChange={(x) => update(`voos.${i}.origem_aeroporto`, x)} placeholder="Ex.: Aeroporto de Joinville" />
               <Field label="Destino" value={v.destino_codigo || ""} onChange={(x) => update(`voos.${i}.destino_codigo`, x.toUpperCase())} />
+              <Field label="Aeroporto destino (nome público)" value={v.destino_aeroporto || ""} onChange={(x) => update(`voos.${i}.destino_aeroporto`, x)} placeholder="Ex.: Aeroporto de Guarulhos" />
               <Field label="Saída" value={v.data_saida || ""} onChange={(x) => update(`voos.${i}.data_saida`, x)} placeholder="AAAA-MM-DD" />
             </div>
           ))}
