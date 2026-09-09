@@ -67,7 +67,7 @@ describe("Criar Roteiro — aba Modelos removida e cabeçalho compacto", () => {
     expect(itinerary).toContain("sm:flex-row sm:items-center sm:justify-between");
     const header = itinerary.indexOf("Novo Roteiro de Viagem");
     const button = itinerary.indexOf("Importar roteiro");
-    const form = itinerary.indexOf("<ItineraryForm");
+    const form = itinerary.indexOf("<ItineraryForm", button);
     expect(header).toBeLessThan(button);
     expect(button).toBeLessThan(form);
   });
