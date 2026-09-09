@@ -68,7 +68,7 @@ describe("categorias da carteira por idioma", () => {
 describe("cards compactos por idioma", () => {
   it("traduz o fallback do título e preserva o nome cadastrado", () => {
     expect(CATEGORY_CONFIG.hotel.getCompactFields(svc("hotel", {})).title).toBe("Hospedagem");
-    expect(CATEGORY_CONFIG.hotel.getCompactFields(svc("hotel", {}), "it-IT").title).toBe("Soggiorno");
+    expect(CATEGORY_CONFIG.hotel.getCompactFields(svc("hotel", {}), "it-IT").title).toBe("Alloggio");
     expect(
       CATEGORY_CONFIG.hotel.getCompactFields(svc("hotel", { hotel_name: "Hotel Ousare" }), "it-IT").title,
     ).toBe("Hotel Ousare");
