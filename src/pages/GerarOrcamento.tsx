@@ -1156,10 +1156,24 @@ export default function GerarOrcamento() {
             <TabsContent value="create" className="mt-5">
               <Card className="max-w-3xl rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
                 <CardHeader className="px-6 py-5 border-b border-border/60 bg-muted/20">
-                  <CardTitle className="text-lg font-semibold tracking-tight">Novo Orçamento</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Preencha os dados iniciais para criar um orçamento profissional.
-                  </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <CardTitle className="text-lg font-semibold tracking-tight">Novo Orçamento</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Preencha os dados iniciais para criar um orçamento profissional.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 h-9 rounded-lg"
+                      onClick={() => setImportOpen(true)}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="hidden sm:inline">Importar</span>
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-6">
                   <QuoteClientForm
