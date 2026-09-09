@@ -72,6 +72,7 @@ import { ServiceModeChooser } from "./ServiceModeChooser";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
+import { fetchPlaceMetadata, extractPlaceDescription } from "@/lib/hotelMetadata";
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
  * Returns undefined for empty/invalid input (e.g. "25 Set" from AI import
@@ -915,13 +916,18 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     } finally { setIsSearching(false); }
   }, [form]);
 
+  const metadataRequestRef = useRef<string | null>(null);
+
   const handleHotelNameInput = useCallback((value: string, formOnChange: (v: string) => void) => {
     formOnChange(value);
     setSelectedPlaceId(null);
     onPlaceIdChange?.(null);
+    metadataRequestRef.current = null;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
   }, [fetchAutocomplete, onPlaceIdChange]);
+
+
 
   const handleSelectPrediction = useCallback((p: { place_id: string; name: string; secondary: string }) => {
     form.setValue("hotel_name", p.name);
@@ -935,6 +941,18 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
       const cityPart = parts.length >= 3 ? parts[1] : parts[0];
       if (cityPart) form.setValue("city", cityPart);
     }
+
+    // Uma única consulta de metadados (sem fotos). Falhas são silenciosas e
+    // respostas antigas nunca contaminam um hotel trocado.
+    metadataRequestRef.current = p.place_id;
+    void fetchPlaceMetadata(p.place_id).then((place) => {
+      if (metadataRequestRef.current !== p.place_id) return;
+      const description = extractPlaceDescription(place);
+      if (!description) return;
+      const current = (form.getValues("service_description") || "").trim();
+      if (current) return; // nunca sobrescreve texto do usuário/importado
+      form.setValue("service_description", description);
+    });
   }, [form, onPlaceIdChange]);
 
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
