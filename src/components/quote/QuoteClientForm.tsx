@@ -81,9 +81,19 @@ interface QuoteClientFormProps {
     adults_count?: number | null;
     children_count?: number | null;
   };
+  /** Chave do rascunho local. Fluxos paralelos (ex.: importação) usam a própria. */
+  draftKey?: string;
+  /** Rótulo do botão de envio. */
+  submitLabel?: string;
 }
 
-export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFormProps) {
+export function QuoteClientForm({
+  onSubmit,
+  isLoading,
+  defaults,
+  draftKey = "quote-client",
+  submitLabel = "Criar Orçamento",
+}: QuoteClientFormProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<{ id: string; name: string } | null>(
     defaults?.client_id && defaults?.client_name
@@ -94,7 +104,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
   const [currency, setCurrency] = useState<QuoteCurrency>("BRL");
   const [currencyMode, setCurrencyMode] = useState<CurrencyMode>("fixed");
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
-  const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("quote-client");
+  const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>(draftKey);
 
   // When defaults are present (e.g., coming from an opportunity), skip the
   // saved local draft to avoid mixing data from a previous unrelated session.
@@ -521,7 +531,7 @@ export function QuoteClientForm({ onSubmit, isLoading, defaults }: QuoteClientFo
           ) : (
             <>
               <Plus className="h-4 w-4 mr-2" />
-              Criar Orçamento
+              {submitLabel}
             </>
           )}
         </Button>
