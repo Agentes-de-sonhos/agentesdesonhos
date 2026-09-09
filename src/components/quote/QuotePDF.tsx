@@ -292,15 +292,15 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       details.push(`${t("checkIn")}: ${formatDate(data.check_in)} | ${t("checkOut")}: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
       if (Array.isArray(data.rooms) && data.rooms.length === 1) {
-        details.push("Acomodações:");
+        details.push(`${t("accommodations")}:`);
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
-          if (r.adults) paxParts.push(`${r.adults} adulto${r.adults > 1 ? "s" : ""}`);
+          if (r.adults) paxParts.push(`${r.adults} ${pluralize(t as any, r.adults, { one: t("adultOne"), other: t("adultOther") }) as any}`);
           if (r.children) {
             const ages = Array.isArray(r.children_ages) && r.children_ages.length
-              ? ` (${r.children_ages.join(", ")} ${r.children_ages.length > 1 ? "anos" : "ano"})`
+              ? ` (${r.children_ages.join(", ")} ${pluralize(t as any, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
               : "";
-            paxParts.push(`${r.children} criança${r.children > 1 ? "s" : ""}${ages}`);
+            paxParts.push(`${r.children} ${pluralize(t as any, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
           }
           details.push(`  • ${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
         });
@@ -310,7 +310,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
       break;
     case "car_rental":
-      details.push(`${t("tipo")}: ${data.car_type} | ${data.days} diária(s)`);
+      details.push(`${t("tipo")}: ${data.car_type} | ${data.days} ${pluralize(t as any, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`);
       details.push(`${t("retirada")}: ${data.pickup_location}`);
       details.push(`${t("devolucao")}: ${data.dropoff_location}`);
       if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
@@ -350,8 +350,8 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       details.push(`Cabine: ${data.cabin_type}`);
       break;
     case "rail_transport": {
-      const railTypeLbl: Record<string, string> = { high_speed: "Trem de alta velocidade", regional: "Trem regional", night: "Trem noturno", panoramic: "Trem panorâmico", other: "Outro" };
-      const railClassLbl: Record<string, string> = { economy: "Classe Econômica", second: "Segunda Classe", first: "Primeira Classe", executive: "Executiva", sleeper: "Cabine Leito" };
+      const railTypeLbl: Record<string, string> = { high_speed: t("railHighSpeed"), regional: t("railRegional"), night: t("railNight"), panoramic: t("railPanoramic"), other: t("railOther") };
+      const railClassLbl: Record<string, string> = { economy: t("railClassEconomy"), second: t("railClassSecond"), first: t("railClassFirst"), executive: t("railClassExecutive"), sleeper: t("railClassSleeper") };
       if (data.origin_city || data.destination_city) details.push(`${data.origin_city || ""} → ${data.destination_city || ""}`);
       if (data.origin_station || data.destination_station) details.push(`Estações: ${data.origin_station || "—"} → ${data.destination_station || "—"}`);
       if (data.travel_date) details.push(`Data: ${formatDate(data.travel_date)}`);

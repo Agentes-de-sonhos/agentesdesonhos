@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { BOOKING_CART_TARGET_ATTR } from "@/lib/bookingCartFly";
 import { setBookingSelectionBarActive } from "@/lib/bookingSelectionBar";
 
@@ -15,6 +16,7 @@ import { setBookingSelectionBarActive } from "@/lib/bookingSelectionBar";
  */
 export function BookingCartLauncher() {
   const cart = useBookingCart();
+  const t = translateQuote(cart.locale);
   const [mounted, setMounted] = useState(false);
   const [pulse, setPulse] = useState(false);
   const previous = useRef(cart.count);
@@ -52,7 +54,7 @@ export function BookingCartLauncher() {
 
   const srCounter = (
     <span className="sr-only" aria-live="polite">
-      {cart.count === 1 ? "1 serviço na solicitação" : `${cart.count} serviços na solicitação`}
+      {cart.count === 1 ? t("serviceOnRequest", { count: cart.count }) : t("servicesOnRequest", { count: cart.count })}
     </span>
   );
 
@@ -63,15 +65,15 @@ export function BookingCartLauncher() {
         type="button"
         onClick={cart.openCart}
         {...{ [BOOKING_CART_TARGET_ATTR]: "desktop" }}
-        aria-label="Abrir minha solicitação de reserva"
-        title="Minha solicitação de reserva"
+        aria-label={t("openMyBookingRequest")}
+        title={t("myBookingRequestTooltip")}
         className="fixed right-4 top-[4.5rem] z-40 hidden items-center gap-2 rounded-full border border-border/60 bg-card/95 px-4 py-2.5 text-sm font-semibold text-foreground shadow-lg backdrop-blur transition-colors hover:border-primary/60 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:inline-flex"
       >
         <span className="relative inline-flex">
           <ShoppingCart className="h-5 w-5" aria-hidden="true" />
           {badge}
         </span>
-        <span className="hidden lg:inline">Minha seleção</span>
+        <span className="hidden lg:inline">{t("myBookingSelection")}</span>
         {srCounter}
       </button>
 
@@ -80,8 +82,8 @@ export function BookingCartLauncher() {
         type="button"
         onClick={cart.openCart}
         {...{ [BOOKING_CART_TARGET_ATTR]: "mobile" }}
-        aria-label="Abrir minha solicitação de reserva"
-        title="Minha solicitação de reserva"
+        aria-label={t("openMyBookingRequest")}
+        title={t("myBookingRequestTooltip")}
         className="fixed right-4 z-40 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl transition-transform active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 md:hidden"
         style={{ bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
       >

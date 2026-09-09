@@ -1456,6 +1456,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       agentProfile={agentProfile as any}
       agencySlugOverride={agencySlugOverride}
       accessCodeOverride={accessCodeOverride}
+      locale={publicLocale}
     >
     <div
       className="min-h-screen bg-[hsl(var(--background))]"
