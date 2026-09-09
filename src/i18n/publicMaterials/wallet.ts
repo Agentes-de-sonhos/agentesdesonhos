@@ -452,7 +452,6 @@ const dict = {
     sectionPoliticas: "🧾 Políticas",
     fldDressCodeTitle: "Dress Code",
     sectionDescricao: "📝 Descrição",
-    sectionOrientacoesEmbarque: "Orientações de embarque",
     fldRotaAtePorto: "Rota até o porto",
     verNoMapaPlain: "Ver no mapa",
     fldMoedaABordo: "Moeda a bordo",
@@ -465,6 +464,7 @@ const dict = {
     mapGoogleMaps: "Google Maps",
     mapWaze: "Waze",
     diasCountLabel: "dias",
+    fldDecolou: "Decolou",
 
     calMesAnterior: "Mês anterior",
     calProximoMes: "Próximo mês",
@@ -1154,7 +1154,6 @@ const dict = {
     sectionPoliticas: "🧾 Politiche",
     fldDressCodeTitle: "Dress Code",
     sectionDescricao: "📝 Descrizione",
-    sectionOrientacoesEmbarque: "Istruzioni per l'imbarco",
     fldRotaAtePorto: "Percorso fino al porto",
     verNoMapaPlain: "Vedi sulla mappa",
     fldMoedaABordo: "Valuta a bordo",
@@ -1167,6 +1166,7 @@ const dict = {
     mapGoogleMaps: "Google Maps",
     mapWaze: "Waze",
     diasCountLabel: "giorni",
+    fldDecolou: "Decollato",
 
     calMesAnterior: "Mese precedente",
     calProximoMes: "Mese successivo",
