@@ -10,7 +10,7 @@ const hook = read("src/hooks/useItineraries.ts");
 
 describe("Criar Roteiro — navegação e layout", () => {
   it("Meus Roteiros abre Meus Projetos em nova aba via helper contextual", () => {
-    expect(page).toContain('openInNewTab(nav.projects("roteiros"))');
+    expect(page).toContain('openInternalWindow(nav.projects("roteiros"))');
     expect(page).toContain("useAdminNav");
   });
 
