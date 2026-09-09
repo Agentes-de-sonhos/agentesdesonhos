@@ -49,7 +49,11 @@ Deno.serve(async (req) => {
         .eq("place_id", place_id)
         .maybeSingle();
 
-      if (cachedMeta?.raw_data) {
+      // Cache completo só quando raw_data possui explicitamente a propriedade
+      // editorial_summary (mesmo que null). Entradas antigas sem esse campo
+      // exigem nova consulta metadata_only ao Google.
+      const cachedRaw = (cachedMeta?.raw_data ?? null) as Record<string, unknown> | null;
+      if (cachedRaw && Object.prototype.hasOwnProperty.call(cachedRaw, "editorial_summary")) {
         return new Response(JSON.stringify({ place: cachedMeta }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
