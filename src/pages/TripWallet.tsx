@@ -64,6 +64,7 @@ function parseLocalDate(dateStr: string): Date {
 import { ptBR } from "date-fns/locale";
 import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { openInNewTab } from "@/lib/openInNewTab";
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",

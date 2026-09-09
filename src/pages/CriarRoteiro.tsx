@@ -65,6 +65,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { openInNewTab } from "@/lib/openInNewTab";
 
 export default function CriarRoteiro() {
   const navigate = useNavigate();
