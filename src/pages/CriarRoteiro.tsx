@@ -65,11 +65,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAdminNav } from "@/lib/agencyAdminNav";
-import { openInNewTab } from "@/lib/openInNewTab";
+import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 
 export default function CriarRoteiro() {
   const navigate = useNavigate();
   const nav = useAdminNav();
+  const openInternalWindow = useOpenInternalWindow();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const fromTripId = searchParams.get("fromTrip");
@@ -542,7 +543,7 @@ export default function CriarRoteiro() {
             onValueChange={(v) => {
               // "Meus Roteiros" abre Meus Projetos em NOVA ABA, mantendo esta
               // página de criação aberta (plataforma, SiteLab e sites das agências).
-              if (v === "list") { openInNewTab(nav.projects("roteiros")); return; }
+              if (v === "list") { openInternalWindow(nav.projects("roteiros")); return; }
               setActiveTab(v as "create" | "list" | "templates");
             }}
           >

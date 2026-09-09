@@ -10,7 +10,7 @@ const destinations = read("src/components/quote/MultiDestinationInput.tsx");
 
 describe("Gerar Orçamento — navegação e layout", () => {
   it("clique em Meus Orçamentos abre Meus Projetos (aba Orçamentos) em nova aba", () => {
-    expect(page).toContain('openInNewTab(nav.projects("orcamentos"))');
+    expect(page).toContain('openInternalWindow(nav.projects("orcamentos"))');
   });
 
   it("usa o helper de navegação contextual (plataforma/SiteLab/agências)", () => {

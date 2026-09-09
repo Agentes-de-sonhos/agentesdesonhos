@@ -64,7 +64,7 @@ function parseLocalDate(dateStr: string): Date {
 import { ptBR } from "date-fns/locale";
 import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
 import { useAdminNav } from "@/lib/agencyAdminNav";
-import { openInNewTab } from "@/lib/openInNewTab";
+import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -434,6 +434,7 @@ export default function TripWallet() {
 function TripWalletContent() {
   const navigate = useNavigate();
   const nav = useAdminNav();
+  const openInternalWindow = useOpenInternalWindow();
   const { id } = useParams();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -854,7 +855,7 @@ function TripWalletContent() {
             onValueChange={(v) => {
               // "Minhas Carteiras" abre Meus Projetos em NOVA ABA, preservando
               // a página de criação atual (contexto plataforma/SiteLab/agências).
-              if (v === "list") { openInNewTab(nav.projects("carteiras")); return; }
+              if (v === "list") { openInternalWindow(nav.projects("carteiras")); return; }
               setActiveTab(v as "create" | "list");
             }}
             className="w-full"
