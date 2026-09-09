@@ -91,6 +91,7 @@ import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasMana
 import { MultiSelect } from "@/components/ui/multi-select";
 import { parsePaymentMethods, serializePaymentMethods, formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { openInNewTab } from "@/lib/openInNewTab";
 
 function formatCurrency(value: number, currency: QuoteCurrency = 'BRL') {
   return formatQuoteCurrency(value, currency);
@@ -1081,10 +1082,10 @@ export default function GerarOrcamento() {
   if (!id) {
     const activeTab = (location.hash === "#list" ? "list" : "create") as "create" | "list";
     const setActiveTab = (val: "create" | "list") => {
-      // "Meus Orçamentos" funciona como navegação: leva para Meus Projetos
-      // na aba Orçamentos, respeitando o contexto (plataforma/SiteLab/agências).
+      // "Meus Orçamentos" abre Meus Projetos (aba Orçamentos) em NOVA ABA,
+      // respeitando o contexto (plataforma/SiteLab/agências).
       if (val === "list") {
-        navigate(nav.projects("orcamentos"));
+        openInNewTab(nav.projects("orcamentos"));
         return;
       }
       navigate({ pathname: location.pathname, hash: "" }, { replace: true });

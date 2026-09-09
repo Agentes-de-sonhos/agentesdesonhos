@@ -9,8 +9,8 @@ const form = read("src/components/quote/QuoteClientForm.tsx");
 const destinations = read("src/components/quote/MultiDestinationInput.tsx");
 
 describe("Gerar Orçamento — navegação e layout", () => {
-  it("clique em Meus Orçamentos navega para Meus Projetos na aba Orçamentos", () => {
-    expect(page).toContain('navigate(nav.projects("orcamentos"))');
+  it("clique em Meus Orçamentos abre Meus Projetos (aba Orçamentos) em nova aba", () => {
+    expect(page).toContain('openInNewTab(nav.projects("orcamentos"))');
   });
 
   it("usa o helper de navegação contextual (plataforma/SiteLab/agências)", () => {
