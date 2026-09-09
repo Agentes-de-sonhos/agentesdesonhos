@@ -255,7 +255,9 @@ export function CategoryServiceView({
 function SummaryItem({
   service,
   type,
+  locale = "pt-BR",
   onClick,
+
 }: {
   service: TripService;
   type: TripServiceType;
