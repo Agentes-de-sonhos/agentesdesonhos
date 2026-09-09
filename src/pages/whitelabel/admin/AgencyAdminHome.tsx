@@ -856,6 +856,16 @@ export default function AgencyAdminHome({ info }: { info: AgencyAdminPortalInfo 
                       </button>
                     );
                   })}
+                  {recentTab === "operacoes" && (!can || can?.operations_create) && (
+                    <button
+                      type="button"
+                      onClick={() => setNewOperationOpen(true)}
+                      className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted"
+                    >
+                      <Briefcase className="h-3 w-3" />
+                      Nova operação
+                    </button>
+                  )}
                 </div>
               }
             >
