@@ -72,6 +72,7 @@ import { ServiceModeChooser } from "./ServiceModeChooser";
 import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFlightLegs } from "@/lib/flightSegments";
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
+import { fetchPlaceMetadata, extractPlaceDescription } from "@/lib/hotelMetadata";
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
  * Returns undefined for empty/invalid input (e.g. "25 Set" from AI import
