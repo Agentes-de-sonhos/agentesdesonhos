@@ -560,12 +560,6 @@ export default function CriarRoteiro() {
                 >
                   Meus Roteiros
                 </TabsTrigger>
-                <TabsTrigger
-                  value="templates"
-                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
-                >
-                  Meus Modelos
-                </TabsTrigger>
               </TabsList>
 
               {activeTab === "list" && (
