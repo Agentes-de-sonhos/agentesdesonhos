@@ -241,7 +241,7 @@ function makeFormatDate(locale: PublicLocale) {
   };
 }
 
-function getServiceDetails(service: QuoteService, t: ReturnType<typeof translateQuote>, formatDate: (d: string) => string): string[] {
+function getServiceDetails(service: QuoteService, t: ReturnType<typeof translateQuote>, formatDate: (d: string) => string, locale: PublicLocale | string = DEFAULT_PUBLIC_LOCALE): string[] {
   const data = service.service_data as any;
   const details: string[] = [];
   switch (service.service_type) {
@@ -295,12 +295,12 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
         details.push(`${t("accommodations")}:`);
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
-          if (r.adults) paxParts.push(`${r.adults} ${pluralize(t as any, r.adults, { one: t("adultOne"), other: t("adultOther") }) as any}`);
+          if (r.adults) paxParts.push(`${r.adults} ${pluralize(locale, r.adults, { one: t("adultOne"), other: t("adultOther") }) as any}`);
           if (r.children) {
             const ages = Array.isArray(r.children_ages) && r.children_ages.length
-              ? ` (${r.children_ages.join(", ")} ${pluralize(t as any, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
+              ? ` (${r.children_ages.join(", ")} ${pluralize(locale, r.children_ages.length, { one: t("yearOne"), other: t("yearOther") })})`
               : "";
-            paxParts.push(`${r.children} ${pluralize(t as any, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
+            paxParts.push(`${r.children} ${pluralize(locale, r.children, { one: t("childOne"), other: t("childOther") })}${ages}`);
           }
           details.push(`  • ${r.quantity || 1}x ${r.room_type}${paxParts.length ? ` — ${paxParts.join(" + ")}` : ""}`);
         });
@@ -310,7 +310,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
       break;
     case "car_rental":
-      details.push(`${t("tipo")}: ${data.car_type} | ${data.days} ${pluralize(t as any, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`);
+      details.push(`${t("tipo")}: ${data.car_type} | ${data.days} ${pluralize(locale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`);
       details.push(`${t("retirada")}: ${data.pickup_location}`);
       details.push(`${t("devolucao")}: ${data.dropoff_location}`);
       if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
