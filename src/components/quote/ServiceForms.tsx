@@ -928,7 +928,6 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   }, [fetchAutocomplete, onPlaceIdChange]);
 
 
-  const metadataRequestRef = useRef<string | null>(null);
 
   const handleSelectPrediction = useCallback((p: { place_id: string; name: string; secondary: string }) => {
     form.setValue("hotel_name", p.name);
