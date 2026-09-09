@@ -35,6 +35,7 @@ CAMPOS POR VOO (cada linha da tabela):
 - hora_saida / hora_chegada: "HH:mm".
 - duracao: "HH:mm".
 - origem_codigo / destino_codigo: IATA 3 letras MAIÚSCULAS (ex.: "GRU", "FRA", "BER", "MAD").
+- origem_aeroporto / destino_aeroporto: nome do aeroporto como aparece no documento, se houver (ex.: "Aeroporto Lauro Carneiro de Loyola"). Deixe vazio quando não aparecer.
 - origem_nome / destino_nome: nome da cidade exatamente como aparece (ex.: "SAO PAULO", "FRANKFURT", "BERLIN", "MADRID").
 - numero_escalas: número de escalas (0 se direto).
 - equipamento: preserve exatamente (ex.: "773", "319", "321", "330").
@@ -116,8 +117,10 @@ const TOOL_SCHEMA = {
               duracao: { type: "string", description: "HH:mm" },
               origem_codigo: { type: "string", description: "IATA 3 letras" },
               origem_nome: { type: "string" },
+              origem_aeroporto: { type: "string", description: "Nome do aeroporto de origem, se aparecer" },
               destino_codigo: { type: "string", description: "IATA 3 letras" },
               destino_nome: { type: "string" },
+              destino_aeroporto: { type: "string", description: "Nome do aeroporto de destino, se aparecer" },
               numero_escalas: { type: "integer" },
               equipamento: { type: "string" },
               cabine: { type: "string" },

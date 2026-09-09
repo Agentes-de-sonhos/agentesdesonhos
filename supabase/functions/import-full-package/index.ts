@@ -77,7 +77,7 @@ data = {
   voos: [ {                           // UM ITEM POR LINHA DA TABELA DE VOOS
     ordem, companhia_aerea, numero_voo,
     data_saida, hora_saida, data_chegada, hora_chegada, duracao,
-    origem_codigo, origem_nome, destino_codigo, destino_nome,
+    origem_codigo, origem_nome, origem_aeroporto, destino_codigo, destino_nome, destino_aeroporto,
     numero_escalas, equipamento, cabine, base_tarifaria,
     bagagem_texto, bagagem_mochila_bolsa, bagagem_mao,
     bagagem_despachada, quantidade_bagagem_despachada,
