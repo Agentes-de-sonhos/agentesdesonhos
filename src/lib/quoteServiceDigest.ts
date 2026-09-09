@@ -285,7 +285,7 @@ export function serviceDigestQuantity(
 ): string | null {
   const data = (service.service_data as any) || {};
   const t = translateQuote(locale);
-  const plural = (n: number, oneKey: keyof ReturnType<typeof translateQuote> extends never ? never : any, otherKey: any) =>
+  const plural = (n: number, oneKey: Parameters<typeof t>[0], otherKey: Parameters<typeof t>[0]) =>
     `${n} ${pluralize(locale, n, { one: t(oneKey), other: t(otherKey) })}`;
   switch (service.service_type) {
     case "attraction": {
