@@ -20,8 +20,8 @@ export interface MappedTripService {
  * orçamento) no serviço equivalente da carteira digital, reutilizando o
  * mapeador oficial `mapQuoteServiceToTripService`.
  *
- * Nada é gravado em `quotes`/`quote_services`: o objeto abaixo é apenas um
- * envelope em memória para reaproveitar o mapeamento existente.
+ * Nada é gravado em tabelas de orçamento: o objeto abaixo é apenas um envelope
+ * em memória para reaproveitar o mapeamento existente.
  */
 export function packageServiceToTripService(input: PackageServiceInput): MappedTripService | null {
   const envelope = {

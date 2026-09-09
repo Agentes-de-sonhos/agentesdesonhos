@@ -122,7 +122,7 @@ describe("Nome público do aeroporto", () => {
         return_legs: [],
       },
     } as any);
-    const seg = (trip!.data as any).flight_segments[0];
+    const seg = (trip!.data as any).segments[0];
     expect(seg.origin_airport_name).toBe("Aeroporto de Joinville");
     expect(seg.destination_airport_name).toBe("Aeroporto de Guarulhos");
   });
