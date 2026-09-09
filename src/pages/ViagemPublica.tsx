@@ -1011,21 +1011,21 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Hotel - Check-in / Check-out details */}
         {isHotel && (data.checkin_time || data.checkin_holder || data.reservation_code) && (
           <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📅 Check-in</p>
-            {data.checkin_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário: {data.checkin_time}</p>}
-            {data.early_checkin && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Early check-in: {data.early_checkin === 'sim' ? '✅ Incluso' : data.early_checkin === 'mediante_taxa' ? '💰 Mediante taxa' : data.early_checkin === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
-            {data.checkin_holder && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Titular: {data.checkin_holder}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secCheckin")}</p>
+            {data.checkin_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldHorario")}: {data.checkin_time}</p>}
+            {data.early_checkin && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldEarlyCheckin")}: {data.early_checkin === 'sim' ? t('statusIncluso') : data.early_checkin === 'mediante_taxa' ? t('statusMedianteTaxa') : data.early_checkin === 'sob_consulta' ? t('statusSobConsulta') : t('statusNaoDisponivel')}</p>}
+            {data.checkin_holder && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTitular")}: {data.checkin_holder}</p>}
             {data.checkin_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.checkin_instructions}</p>}
-            {data.late_arrival_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Chegada tardia: {data.late_arrival_policy}</p>}
+            {data.late_arrival_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldChegadaTardia")}: {data.late_arrival_policy}</p>}
           </div>
         )}
 
         {isHotel && (data.checkout_time || data.late_checkout || data.checkout_procedure) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧳 Check-out</p>
-            {data.checkout_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Horário: {data.checkout_time}</p>}
-            {data.late_checkout && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Late check-out: {data.late_checkout === 'sim' ? '✅ Incluso' : data.late_checkout === 'mediante_taxa' ? `💰 Mediante taxa${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? '📞 Sob consulta' : '❌ Não disponível'}</p>}
-            {data.checkout_procedure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Procedimento: {data.checkout_procedure === 'recepcao' ? 'Recepção' : data.checkout_procedure === 'express' ? 'Express' : 'Online'}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secCheckout")}</p>
+            {data.checkout_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldHorario")}: {data.checkout_time}</p>}
+            {data.late_checkout && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldLateCheckout")}: {data.late_checkout === 'sim' ? t('statusIncluso') : data.late_checkout === 'mediante_taxa' ? `${t('statusMedianteTaxa')}${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? t('statusSobConsulta') : t('statusNaoDisponivel')}</p>}
+            {data.checkout_procedure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldProcedimento")}: {data.checkout_procedure === 'recepcao' ? t('checkoutProcRecepcao') : data.checkout_procedure === 'express' ? t('checkoutProcExpress') : t('checkoutProcOnline')}</p>}
             {data.checkout_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.checkout_instructions}</p>}
           </div>
         )}
@@ -1033,37 +1033,37 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Hotel - Room details */}
         {isHotel && (data.bed_type || data.room_view || data.amenities) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🛏️ Acomodação</p>
-            {data.bed_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Cama: {data.bed_type === 'king' ? 'King' : data.bed_type === 'queen' ? 'Queen' : data.bed_type === 'twin' ? 'Twin (2 Solteiro)' : data.bed_type === 'single' ? 'Solteiro' : data.bed_type === 'double' ? 'Casal' : data.bed_type === 'triple' ? 'Triplo' : data.bed_type}</p>}
-            {data.guest_count && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Hóspedes: {data.guest_count}</p>}
-            {data.room_view && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Vista: {data.room_view}</p>}
-            {data.amenities && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Amenities: {data.amenities}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secAcomodacao")}</p>
+            {data.bed_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCama")}: {data.bed_type === 'king' ? t('bedKing') : data.bed_type === 'queen' ? t('bedQueen') : data.bed_type === 'twin' ? t('bedTwin') : data.bed_type === 'single' ? t('bedSingle') : data.bed_type === 'double' ? t('bedDouble') : data.bed_type === 'triple' ? t('bedTriple') : data.bed_type}</p>}
+            {data.guest_count && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldHospedesField")}: {data.guest_count}</p>}
+            {data.room_view && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldVista")}: {data.room_view}</p>}
+            {data.amenities && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAmenities")}: {data.amenities}</p>}
           </div>
         )}
 
         {/* Hotel - Food */}
         {isHotel && (data.breakfast_hours || data.restaurants_included || data.food_notes || data.all_inclusive_rules) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🍽️ Alimentação</p>
-            {data.breakfast_hours && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Café da manhã: {data.breakfast_hours}</p>}
-            {data.restaurants_included && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Restaurantes: {data.restaurants_included}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionAlimentacao")}</p>
+            {data.breakfast_hours && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCafeDaManha")}: {data.breakfast_hours}</p>}
+            {data.restaurants_included && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldRestaurantes")}: {data.restaurants_included}</p>}
             {data.food_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.food_notes}</p>}
-            {data.all_inclusive_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">All Inclusive: {data.all_inclusive_rules}</p>}
+            {data.all_inclusive_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAllInclusive")}: {data.all_inclusive_rules}</p>}
           </div>
         )}
 
         {/* Hotel - What's included */}
         {isHotel && (data.breakfast_included || data.wifi_included || data.parking_included || data.resort_fee || data.other_inclusions) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">💰 Inclusos na Reserva</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secInclusosReserva")}</p>
             <div className="flex flex-wrap gap-2 text-xs">
-              {data.breakfast_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">☕ Café</span>}
-              {data.wifi_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">📶 Wi-Fi</span>}
-              {data.taxes_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">✅ Taxas</span>}
-              {data.parking_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">🅿️ Estacionamento</span>}
-              {data.transfer_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">🚐 Transfer</span>}
+              {data.breakfast_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{t("badgeCafe")}</span>}
+              {data.wifi_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{t("badgeWifi")}</span>}
+              {data.taxes_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{t("badgeTaxas")}</span>}
+              {data.parking_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{t("badgeEstacionamento")}</span>}
+              {data.transfer_included === 'sim' && <span className="bg-primary/10 text-primary px-2 py-0.5 rounded">{t("badgeTransfer")}</span>}
             </div>
-            {data.resort_fee && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">Resort Fee: {data.resort_fee}</p>}
+            {data.resort_fee && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">{t("fldResortFee")}: {data.resort_fee}</p>}
             {data.other_inclusions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.other_inclusions}</p>}
           </div>
         )}
@@ -1071,19 +1071,19 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Hotel - Policies */}
         {isHotel && (data.cancellation_policy || data.mandatory_fees || data.hotel_deposit) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">🧾 Políticas</p>
-            {data.cancellation_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Cancelamento: {data.cancellation_policy}</p>}
-            {data.children_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Crianças: {data.children_policy}</p>}
-            {data.pet_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Pets: {data.pet_policy}</p>}
-            {data.mandatory_fees && <p className="text-[13px] text-foreground/80 leading-relaxed break-words font-medium">⚠️ Taxas no destino: {data.mandatory_fees}</p>}
-            {data.hotel_deposit && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">Caução: {data.hotel_deposit}{data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}</p>}
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secPoliticas")}</p>
+            {data.cancellation_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCancelamento")}: {data.cancellation_policy}</p>}
+            {data.children_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCriancas")}: {data.children_policy}</p>}
+            {data.pet_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldPets")}: {data.pet_policy}</p>}
+            {data.mandatory_fees && <p className="text-[13px] text-foreground/80 leading-relaxed break-words font-medium">⚠️ {t("fldTaxasDestino")}: {data.mandatory_fees}</p>}
+            {data.hotel_deposit && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCaucao")}: {data.hotel_deposit}{data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}</p>}
           </div>
         )}
 
         {/* Hotel - Guests */}
         {isHotel && data.guests?.length > 0 && (
           <div className="mt-2">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">👨‍👩‍👧 Hóspedes</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">{t("secHospedesEmoji")}</p>
             {data.guests.map((g: any, i: number) => (
               <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
                 {g.name}{g.age ? ` (${g.age})` : ''}{g.notes ? ` • ${g.notes}` : ''}
@@ -1095,7 +1095,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Hotel - Location & Map */}
         {isHotel && (data.address || data.hotel_phone || data.maps_url) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">📍 Localização e Contato</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secLocalizacaoContato")}</p>
             {data.address && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.address}</p>}
             {data.hotel_phone && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📞 {data.hotel_phone}</p>}
             {data.hotel_email && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">✉️ {data.hotel_email}</p>}
@@ -1117,7 +1117,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             )}
             {data.hotel_website && (
               <a href={data.hotel_website} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline block">
-                🌐 Site oficial do hotel
+                {t("ctaSiteOficialHotel")}
               </a>
             )}
           </div>
@@ -1126,12 +1126,12 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {/* Hotel - Notes / Special requests / Agency notes (full width) */}
         {isHotel && (data.notes || data.special_requests || data.agency_notes) && (
           <div className="mt-2 w-full min-w-0 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1.5">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">Observações:</p>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secObservacoesColon")}</p>
             {data.notes && (
               <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.notes}</p>
             )}
             {data.special_requests && (
-              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">Solicitações: {data.special_requests}</p>
+              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{t("fldSolicitacoes")}: {data.special_requests}</p>
             )}
             {data.agency_notes && (
               <p className="w-full min-w-0 text-[13px] italic text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.agency_notes}</p>
