@@ -438,11 +438,28 @@ export function getServiceThumbnail(s: TripService): string | null {
   return null;
 }
 
+/**
+ * Textos da categoria no idioma público da agência (pt-BR por padrão).
+ * Os rótulos estáticos de CATEGORY_CONFIG seguem em pt-BR como fallback.
+ */
+export function categoryText(type: TripServiceType, locale: PublicLocale = "pt-BR") {
+  const t = tWallet(locale);
+  return {
+    singular: t(`catSingular_${type}` as never),
+    summaryTitle: t(`catSummary_${type}` as never),
+    seeAllLabel: t(`catSeeAll_${type}` as never),
+    countWord: (n: number) =>
+      `${n} ${n === 1 ? t(`catCountOne_${type}` as never) : t(`catCountOther_${type}` as never)}`,
+  };
+}
+
 /** Nome curto usado no item do resumo (1ª linha). */
-export function getServiceShortName(s: TripService): string {
-  const cfg = CATEGORY_CONFIG[s.service_type];
-  const compact = cfg.getCompactFields(s);
-  return compact.title || cfg.singular;
+export function getServiceShortName(
+  s: TripService,
+  locale: PublicLocale = "pt-BR",
+): string {
+  const compact = CATEGORY_CONFIG[s.service_type].getCompactFields(s, locale);
+  return compact.title || categoryText(s.service_type, locale).singular;
 }
 
 /** Quantidade de arquivos do serviço — mesma lista do card expandido. */
@@ -451,15 +468,22 @@ export function countServiceFiles(s: TripService): number {
 }
 
 /** Texto do contador de arquivos: "1 arquivo" / "2 arquivos" / null quando zero. */
-export function formatFilesCountLabel(count: number): string | null {
+export function formatFilesCountLabel(
+  count: number,
+  locale: PublicLocale = "pt-BR",
+): string | null {
   if (!Number.isFinite(count) || count <= 0) return null;
-  return `${count} ${count === 1 ? "arquivo" : "arquivos"}`;
+  const t = tWallet(locale);
+  return `${count} ${count === 1 ? t("catFileOne") : t("catFileOther")}`;
 }
 
 /** Verifica se o serviço tem dados adicionais (não exibidos no card compacto). */
-export function hasAdditionalDetails(s: TripService): boolean {
+export function hasAdditionalDetails(
+  s: TripService,
+  locale: PublicLocale = "pt-BR",
+): boolean {
   if (countServiceFiles(s) > 0) return true;
-  const compact = CATEGORY_CONFIG[s.service_type].getCompactFields(s);
+  const compact = CATEGORY_CONFIG[s.service_type].getCompactFields(s, locale);
   const compactText = [compact.title, ...compact.details].join(" · ").toLowerCase();
   const compactBlobs = new Set(
     compactText
@@ -472,12 +496,14 @@ export function hasAdditionalDetails(s: TripService): boolean {
   const isCovered = (raw: string): boolean => {
     const t = raw.toLowerCase();
     if (compactBlobs.has(t) || compactText.includes(t)) return true;
-    const asDate = formatFriendlyDate(raw);
+    const asDate = formatFriendlyDate(raw, locale);
     if (asDate) {
       if (compactText.includes(asDate.toLowerCase())) return true;
       // Períodos ("17 a 22 de agosto de 2026") cobrem cada data isolada:
       // basta que dia, mês e ano da data crua apareçam no resumo.
-      const parts = asDate.match(/^(\d{1,2}) de (.+) de (\d{4})$/);
+      const parts =
+        asDate.match(/^(\d{1,2}) de (.+) de (\d{4})$/) ||
+        asDate.match(/^(\d{1,2}) (\D+) (\d{4})$/);
       if (parts) {
         const [, d, m, y] = parts;
         if (
