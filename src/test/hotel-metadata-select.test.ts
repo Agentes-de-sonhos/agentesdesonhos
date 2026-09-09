@@ -49,7 +49,8 @@ describe("metadados de hospedagem (modo econômico)", () => {
 
   it("HotelForm preenche descrição só se vazia e ignora resposta antiga", () => {
     const src = read("src/components/quote/ServiceForms.tsx");
-    const block = src.slice(src.indexOf("const handleSelectPrediction"), src.indexOf("const handleSubmit"));
+    const start = src.indexOf("const handleSelectPrediction");
+    const block = src.slice(start, start + 1600);
     expect(block).toContain("fetchPlaceMetadata");
     expect(block).toContain("metadataRequestRef.current !== p.place_id");
     expect(block).toContain('if (current) return;');
