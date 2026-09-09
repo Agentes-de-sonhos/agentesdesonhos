@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { walletDict } from "@/i18n/publicMaterials/wallet";
+// note: wallet dict is exported differently; re-import fallback below
 
 const guide = readFileSync("src/components/quote/QuoteStepsGuide.tsx", "utf8");
 const carousel = readFileSync("src/components/quote/ServiceImageCarousel.tsx", "utf8");
