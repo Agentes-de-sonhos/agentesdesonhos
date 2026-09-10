@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAgencyCompanies } from "@/hooks/useTravelFiles";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type ContractorType = "individual" | "company";
 
@@ -104,6 +104,14 @@ export function ContractorPicker({
   const [clientSearch, setClientSearch] = useState("");
   const [companySearch, setCompanySearch] = useState("");
   const [contactSearch, setContactSearch] = useState("");
+
+  // Trocar de conta/agência na mesma aba limpa também os termos digitados:
+  // nenhuma busca da conta anterior continua na tela.
+  useEffect(() => {
+    setClientSearch("");
+    setCompanySearch("");
+    setContactSearch("");
+  }, [user?.id]);
 
   const clients = useClientSearch(
     clientSearch,

@@ -26,6 +26,7 @@ vi.mock("@/hooks/useTravelFiles", () => ({
     isLoading: false,
     isFetching: false,
     error: null,
+    refetch: vi.fn(),
     saveCompany: { mutateAsync: saveCompanyMutate, isPending: false },
   }),
 }));

@@ -248,3 +248,39 @@ nas cinco mutações manuais, `web_quote` inalterado e leitura de histórico sem
 focado da Central: 4 arquivos, 70 testes; regressões de rascunho/contratante passaram;
 `tsgo` e build passaram. Nenhum plano ou permissão de agência real foi alterado; o relatório
 do banco continua sem novos avisos (456) e nada foi publicado.
+
+## Revisão do seletor compartilhado (fechamento do mesmo lote)
+
+1. **Sem perda de dados na edição do rascunho.** `EditarRascunhoDialog` deixou de reenviar
+   (e de zerar) vínculos: o payload leva apenas os campos de contratante que o usuário pode
+   editar E que realmente mudaram. Sem permissão de corrigir contratante, nenhuma chave de
+   contratante é enviada — uma reserva PF com contato vinculado mantém o contato ao alterar
+   só datas ou destino. A limpeza é explícita: o contato da empresa só vai a nulo quando o
+   usuário troca o tipo de empresa para pessoa. `travel_file_update_manual` já distingue
+   chave ausente de limpeza explícita.
+2. **Pedido de "Nova empresa" consumido uma vez.** O contador `createSignal` foi trocado por
+   um pedido controlado (`createRequested` + `onCreateHandled`). Cancelar o cadastro, ir para
+   Pessoas e voltar para Empresas não reabre o formulário; cada novo clique na ação principal
+   abre normalmente.
+3. **Reset por identidade completo.** Trocar de conta/agência com o diálogo aberto agora
+   descarta todo o rascunho de `NovaReservaDialog` (viagem, destino, datas, passageiros e o
+   nome da nova empresa), gera nova chave de intenção e volta para Pessoa; `ContractorPicker`
+   também limpa os três termos de busca. Nada da conta anterior reaparece na tela nem entra
+   no que a nova conta salva.
+4. **Falha ao listar empresas não é lista vazia.** `AgencyCompaniesPanel` passou a usar
+   `error`/`refetch` de `useAgencyCompanies` e mostra aviso com "Tentar novamente", no mesmo
+   padrão do cadastro de reserva. A busca digitada e o formulário são preservados e nenhum
+   texto sugere cadastrar uma empresa que pode já existir.
+
+**Testes (executados):** novos `src/test/central-reservas-payload-contratante.test.tsx`
+(payload real através do hook `useTravelFileMutations`, inclusive com
+`canEditContractor=false`; identidade mutável real para o reset, sem mock fixo) e
+`src/test/central-reservas-empresas-painel.test.tsx` (navegação entre visões após cancelar e
+após salvar, novo clique reabrindo, erro com retry, lista vazia sem erro, formulário
+acessível durante a falha). Lote focado da Central reexecutado: 7 arquivos, 85 testes;
+`tsgo` e build passaram.
+
+**Limites reais desta revisão:** as verificações são de comportamento em ambiente de teste
+(payload e interface), sem execução autenticada com contas reais e sem validação visual em
+navegador autenticado. O endurecimento financeiro das reservas legadas de origem web continua
+dependendo de deploy coordenado. Nada foi publicado.

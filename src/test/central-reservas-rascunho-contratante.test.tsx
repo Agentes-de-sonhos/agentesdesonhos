@@ -33,6 +33,7 @@ vi.mock("@/hooks/useTravelFiles", () => ({
     isLoading: false,
     isFetching: false,
     error: null,
+    refetch: vi.fn(),
     saveCompany: { mutateAsync: vi.fn(), isPending: false },
   }),
 }));
@@ -86,7 +87,7 @@ describe("edição de rascunho: correção de contratante", () => {
       <EditarRascunhoDialog
         open
         onOpenChange={() => {}}
-        file={draft()}
+        file={draft({ client_id: "old-id" })}
         currentClient={{ id: "old-id", name: "Pessoa Antiga" }}
         canEditContractor
         onSave={onSave}
@@ -100,11 +101,9 @@ describe("edição de rascunho: correção de contratante", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Salvar alterações/i }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
-    expect(onSave.mock.calls[0][0]).toMatchObject({
-      contractorType: "individual",
-      clientId: SYNTHETIC_CLIENT.id,
-      companyId: null,
-    });
+    // só o vínculo realmente alterado é enviado
+    expect(onSave.mock.calls[0][0]).toMatchObject({ clientId: SYNTHETIC_CLIENT.id });
+    expect("contractorType" in onSave.mock.calls[0][0]).toBe(false);
   });
 
   it("troca de PF para PJ mantendo client_id e company_id separados e grava contato", async () => {
@@ -165,10 +164,11 @@ describe("edição de rascunho: correção de contratante", () => {
     expect(screen.queryByText("Quem está contratando")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /Salvar alterações/i }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
-    expect(onSave.mock.calls[0][0]).toMatchObject({
-      contractorType: "individual",
-      clientId: SYNTHETIC_CLIENT.id,
-      companyId: null,
-    });
+    // Nenhum vínculo é reenviado: campo oculto não é alterado nem apagado.
+    const sent = onSave.mock.calls[0][0];
+    expect("contractorType" in sent).toBe(false);
+    expect("clientId" in sent).toBe(false);
+    expect("companyId" in sent).toBe(false);
+    expect("contactClientId" in sent).toBe(false);
   });
 });

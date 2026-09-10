@@ -23,13 +23,29 @@ import { toast } from "sonner";
  * Reutiliza a tabela companies existente pelas RPCs seguras; uma empresa pode
  * existir sozinha e o contato responsável é sempre uma pessoa já cadastrada.
  */
-export function AgencyCompaniesPanel({ createSignal = 0 }: { createSignal?: number }) {
+export function AgencyCompaniesPanel({
+  createRequested = false,
+  onCreateHandled,
+}: {
+  /** Pedido de abertura do cadastro vindo da ação principal da área. */
+  createRequested?: boolean;
+  /** Confirma o consumo do pedido: ele nunca reabre sozinho depois. */
+  onCreateHandled?: () => void;
+}) {
   const { can } = usePermissions();
   const canCreate = can("clients.create");
   const canEdit = can("clients.edit");
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search);
-  const { companies, isLoading, isFetching, saveCompany } = useAgencyCompanies(debounced);
+  const {
+    companies,
+    isLoading,
+    isFetching,
+    error: listError,
+    refetch,
+    saveCompany,
+  } = useAgencyCompanies(debounced);
+
 
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -58,14 +74,18 @@ export function AgencyCompaniesPanel({ createSignal = 0 }: { createSignal?: numb
   };
 
   // A ação principal da área de Clientes abre este mesmo cadastro quando a
-  // visão selecionada é Empresas — sem duplicar formulário.
+  // visão selecionada é Empresas — sem duplicar formulário. O pedido é
+  // consumido na hora: cancelar e voltar para esta visão não reabre o cadastro.
   useEffect(() => {
-    if (createSignal > 0 && canCreate) {
+    if (!createRequested) return;
+    if (canCreate) {
       setEditing(null);
       setDialogOpen(true);
     }
+    onCreateHandled?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createSignal]);
+  }, [createRequested]);
+
 
 
   const submit = async () => {
@@ -120,7 +140,25 @@ export function AgencyCompaniesPanel({ createSignal = 0 }: { createSignal?: numb
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         </Card>
+      ) : listError ? (
+        // Falha de rede ou de permissão nunca é apresentada como lista vazia:
+        // quem está cadastrando não deve ser levado a duplicar uma empresa.
+        <Card className="rounded-2xl border-border/60 p-10 text-center" role="alert">
+          <p className="text-sm font-medium text-destructive">
+            Não foi possível carregar as empresas agora. Verifique a conexão e tente novamente.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="mt-3"
+            onClick={() => refetch()}
+          >
+            Tentar novamente
+          </Button>
+        </Card>
       ) : companies.length === 0 ? (
+
         <Card className="rounded-2xl border-border/60 p-10 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             <Building2 className="h-5 w-5 text-muted-foreground" />
