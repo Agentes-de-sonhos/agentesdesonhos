@@ -40,7 +40,10 @@ Fora do escopo, para fases posteriores:
   **patch parcial** — campo não alterado não vai no payload e o servidor preserva o vínculo,
   a moeda e os valores. Limpar um vínculo é sempre explícito.
 - **Serviços**: cadastro manual com tipo, produto, fornecedor, datas, quantidade, moeda,
-  valores e status. Serviços vindos do site permanecem congelados/imutáveis.
+  valores e status. Serviços vindos do site permanecem congelados/imutáveis. Na edição, a
+  **moeda do serviço prevalece** sobre a da reserva (tanto no rótulo quanto no envio): editar
+  um serviço em USD dentro de uma reserva em BRL nunca reclassifica o valor; a moeda da
+  reserva é apenas o fallback para serviço novo ou sem moeda.
 - **Histórico**: registra criação, mudanças de status, serviços, responsável, notas e também
   alterações isoladas de moeda, valor solicitado e contato — sem expor valores a quem não tem
   permissão financeira.
