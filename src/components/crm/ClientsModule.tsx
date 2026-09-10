@@ -174,6 +174,9 @@ export function ClientsModule() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [contactView, setContactView] = useState<"pessoas" | "empresas">("pessoas");
+  // Sinal de "criar" enviado ao painel de empresas pela ação principal.
+  const [companyCreateSignal, setCompanyCreateSignal] = useState(0);
+
 
   const debouncedSearch = useDebouncedValue(search);
 
@@ -674,7 +677,8 @@ export function ClientsModule() {
       </div>
 
       {contactView === "empresas" ? (
-        <AgencyCompaniesPanel />
+        <AgencyCompaniesPanel createSignal={companyCreateSignal} />
+
       ) : isLoading ? (
         <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="flex items-center justify-center py-16">
