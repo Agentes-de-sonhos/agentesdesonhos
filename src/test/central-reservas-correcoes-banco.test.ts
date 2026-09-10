@@ -169,9 +169,11 @@ describe("7) sanitização financeira em todos os níveis", () => {
   it("aplica a limpeza ao file, aos serviços (com snapshot) e aos dois históricos", () => {
     expect(detail).toMatch(/reservations_redact\(to_jsonb\(v_file\)/);
     expect(detail).toMatch(/reservations_redact\(to_jsonb\(s\)/);
-    const calls = detail.match(/reservations_redact\(COALESCE\((?:ev|e)\.payload/g) || [];
+    // Os históricos passaram a usar projeção explícita na reauditoria.
+    const calls = detail.match(/reservations_project\(COALESCE\((?:ev|e)\.payload/g) || [];
     expect(calls.length).toBe(2);
   });
+
 
   it("não remove apenas seis chaves do nível externo", () => {
     expect(detail).not.toMatch(/v_hidden/);
