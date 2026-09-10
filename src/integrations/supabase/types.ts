@@ -14188,6 +14188,50 @@ export type Database = {
         }
         Relationships: []
       }
+      travel_file_events: {
+        Row: {
+          actor_name: string | null
+          actor_team_member_id: string | null
+          actor_user_id: string | null
+          agency_id: string
+          created_at: string
+          event_type: string
+          file_id: string
+          id: string
+          payload: Json
+        }
+        Insert: {
+          actor_name?: string | null
+          actor_team_member_id?: string | null
+          actor_user_id?: string | null
+          agency_id: string
+          created_at?: string
+          event_type: string
+          file_id: string
+          id?: string
+          payload?: Json
+        }
+        Update: {
+          actor_name?: string | null
+          actor_team_member_id?: string | null
+          actor_user_id?: string | null
+          agency_id?: string
+          created_at?: string
+          event_type?: string
+          file_id?: string
+          id?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_file_events_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       travel_file_notes: {
         Row: {
           agency_id: string
@@ -14376,9 +14420,15 @@ export type Database = {
           cancelled_at: string | null
           children_count: number
           client_id: string | null
+          company_id: string | null
           completed_at: string | null
           confirmed_at: string | null
+          contact_client_id: string | null
+          contact_snapshot: Json
+          contractor_type: string
           created_at: string
+          created_by_team_member_id: string | null
+          created_by_user_id: string | null
           currency: string
           current_request_id: string | null
           destinations: string[]
@@ -14388,11 +14438,13 @@ export type Database = {
           final_sale_amount: number | null
           financial_status: string
           id: string
+          manual_key: string | null
           opened_at: string
           operation_id: string | null
           operational_status: string
           operations_responsible_team_member_id: string | null
           opportunity_id: string | null
+          origin: string
           original_responsible_team_member_id: string | null
           passengers_count: number
           passengers_snapshot: Json
@@ -14405,9 +14457,10 @@ export type Database = {
           responsible_team_member_id: string | null
           responsible_user_id: string | null
           revision: number
-          root_request_id: string
+          root_request_id: string | null
           start_date: string | null
           status: string
+          trip_name: string | null
           updated_at: string
         }
         Insert: {
@@ -14417,9 +14470,15 @@ export type Database = {
           cancelled_at?: string | null
           children_count?: number
           client_id?: string | null
+          company_id?: string | null
           completed_at?: string | null
           confirmed_at?: string | null
+          contact_client_id?: string | null
+          contact_snapshot?: Json
+          contractor_type?: string
           created_at?: string
+          created_by_team_member_id?: string | null
+          created_by_user_id?: string | null
           currency?: string
           current_request_id?: string | null
           destinations?: string[]
@@ -14429,11 +14488,13 @@ export type Database = {
           final_sale_amount?: number | null
           financial_status?: string
           id?: string
+          manual_key?: string | null
           opened_at?: string
           operation_id?: string | null
           operational_status?: string
           operations_responsible_team_member_id?: string | null
           opportunity_id?: string | null
+          origin?: string
           original_responsible_team_member_id?: string | null
           passengers_count?: number
           passengers_snapshot?: Json
@@ -14446,9 +14507,10 @@ export type Database = {
           responsible_team_member_id?: string | null
           responsible_user_id?: string | null
           revision?: number
-          root_request_id: string
+          root_request_id?: string | null
           start_date?: string | null
           status?: string
+          trip_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -14458,9 +14520,15 @@ export type Database = {
           cancelled_at?: string | null
           children_count?: number
           client_id?: string | null
+          company_id?: string | null
           completed_at?: string | null
           confirmed_at?: string | null
+          contact_client_id?: string | null
+          contact_snapshot?: Json
+          contractor_type?: string
           created_at?: string
+          created_by_team_member_id?: string | null
+          created_by_user_id?: string | null
           currency?: string
           current_request_id?: string | null
           destinations?: string[]
@@ -14470,11 +14538,13 @@ export type Database = {
           final_sale_amount?: number | null
           financial_status?: string
           id?: string
+          manual_key?: string | null
           opened_at?: string
           operation_id?: string | null
           operational_status?: string
           operations_responsible_team_member_id?: string | null
           opportunity_id?: string | null
+          origin?: string
           original_responsible_team_member_id?: string | null
           passengers_count?: number
           passengers_snapshot?: Json
@@ -14487,9 +14557,10 @@ export type Database = {
           responsible_team_member_id?: string | null
           responsible_user_id?: string | null
           revision?: number
-          root_request_id?: string
+          root_request_id?: string | null
           start_date?: string | null
           status?: string
+          trip_name?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -15640,6 +15711,11 @@ export type Database = {
         }
         Returns: Json
       }
+      agency_companies_search: {
+        Args: { _limit?: number; _search?: string }
+        Returns: Json
+      }
+      agency_company_save: { Args: { _payload: Json }; Returns: string }
       agency_has_client_area: { Args: { _agency_id: string }; Returns: boolean }
       agency_has_entitlement: {
         Args: { _agency_id: string; _key: string }
@@ -16765,6 +16841,8 @@ export type Database = {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined
       }
+      travel_file_create_manual: { Args: { _payload: Json }; Returns: Json }
+      travel_file_detail: { Args: { _file_id: string }; Returns: Json }
       travel_file_note_add: {
         Args: { _author_name?: string; _body: string; _file_id: string }
         Returns: string
@@ -16772,6 +16850,10 @@ export type Database = {
       travel_file_note_delete: {
         Args: { _note_id: string }
         Returns: undefined
+      }
+      travel_file_service_manual_save: {
+        Args: { _payload: Json }
+        Returns: string
       }
       travel_file_service_save: {
         Args: {
@@ -16793,6 +16875,10 @@ export type Database = {
       }
       travel_file_set_status: {
         Args: { _file_id: string; _reason?: string; _status: string }
+        Returns: undefined
+      }
+      travel_file_update_manual: {
+        Args: { _file_id: string; _payload: Json }
         Returns: undefined
       }
       travel_files_page: {
