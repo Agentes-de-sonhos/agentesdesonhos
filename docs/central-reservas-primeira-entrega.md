@@ -87,9 +87,13 @@ Use **dados fictícios**; não é necessário criar usuários ou senhas.
 3. Abra o rascunho, altere só o destino e salve: contratante e contato devem permanecer.
 4. Lance um serviço de BRL 1.500 e confira o valor na lista e no resumo; edite para 1.600 e
    confira a atualização.
-5. Acrescente um serviço em USD 100: devem aparecer **dois** grupos de moeda, nunca 300.
-6. Avance status, adicione nota e confira o histórico.
-7. Na área de **Clientes**, alterne entre Pessoas e Empresas e use a ação principal.
+   - O ManualServiceDialog desta fase ainda não oferece seletor de moeda: serviços **novos**
+     usam a moeda da reserva, e a edição preserva a moeda já registrada do serviço.
+   - Cenários com moedas diferentes na mesma reserva (ex.: reserva em BRL com serviço
+     pré-existente em USD) são verificados pelos testes automatizados com fixtures; na prévia
+     manual concentre-se no fluxo BRL 1.500 → BRL 1.600.
+5. Avance status, adicione nota e confira o histórico.
+6. Na área de **Clientes**, alterne entre Pessoas e Empresas e use a ação principal.
 
 ## 7. O que foi testado vs. não testado
 
