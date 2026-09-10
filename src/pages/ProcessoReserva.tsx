@@ -135,7 +135,9 @@ export default function ProcessoReserva() {
   const { user } = useAuth();
   // Volta para a lista de Reservas do contexto atual (painel da agência ou
   // aba de Reservas em Meus Projetos na plataforma tradicional).
-  const backToList = nav.isAgencyAdmin ? nav.reservas() : "/meus-projetos?tab=reservas";
+  // Sempre a lista da Central no contexto atual (plataforma, painel white label
+  // ou Site Lab). Nunca uma aba de projetos protegida por outro plano.
+  const backToList = nav.reservas();
   const { data, isLoading } = useTravelFile(id);
   const { members, memberNames } = useAgencyTeamDirectory();
   const { setStatus, setResponsibles, saveService, saveManualData, saveManualService } =
