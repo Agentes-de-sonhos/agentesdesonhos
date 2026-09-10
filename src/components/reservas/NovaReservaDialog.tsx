@@ -151,7 +151,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
           name: newCompanyName.trim(),
           contactClientId: contactClientId || null,
         });
-        setCompanyId(finalCompanyId);
+        setSelectedCompany({ id: finalCompanyId, name: newCompanyName.trim() });
       }
 
       const result = await createReservation.mutateAsync({
