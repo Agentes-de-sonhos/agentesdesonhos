@@ -499,7 +499,61 @@ export function useTravelFileMutations(fileId?: string) {
     onSuccess: invalidate,
   });
 
-  return { setStatus, setResponsibles, saveService };
+  /** Dados básicos do rascunho manual (nunca altera files vindos do site). */
+  const saveManualData = useMutation({
+    mutationFn: async (input: Omit<ManualReservationInput, "manualKey">) => {
+      const { error } = await sb.rpc("travel_file_update_manual", {
+        _file_id: fileId,
+        _payload: manualPayload({ ...input, manualKey: "" }),
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+
+  /** Serviço acrescentado ou editado à mão, de forma progressiva. */
+  const saveManualService = useMutation({
+    mutationFn: async (input: {
+      serviceId?: string | null;
+      serviceType: string;
+      productName: string;
+      supplierId?: string | null;
+      supplierName?: string | null;
+      destination?: string | null;
+      city?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+      quantity?: number;
+      status?: TravelFileServiceStatus;
+      notes?: string | null;
+      requestedAmount?: number | null;
+      currency?: string | null;
+    }) => {
+      const { error } = await sb.rpc("travel_file_service_manual_save", {
+        _payload: {
+          service_id: input.serviceId || null,
+          file_id: fileId,
+          service_type: input.serviceType,
+          product_name: input.productName,
+          supplier_id: input.supplierId || null,
+          supplier_name: input.supplierName || null,
+          destination: input.destination || null,
+          city: input.city || null,
+          start_date: input.startDate || null,
+          end_date: input.endDate || null,
+          quantity: input.quantity ?? 1,
+          status: input.status || "requested",
+          notes: input.notes || null,
+          ...(input.requestedAmount == null ? {} : { requested_amount: input.requestedAmount }),
+          currency: input.currency || null,
+        },
+      });
+      if (error) throw error;
+    },
+    onSuccess: invalidate,
+  });
+
+  return { setStatus, setResponsibles, saveService, saveManualData, saveManualService };
 }
 
 /** Notas internas do processo — visíveis apenas para a agência. */
