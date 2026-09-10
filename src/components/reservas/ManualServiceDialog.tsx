@@ -111,6 +111,8 @@ export function ManualServiceDialog({
     try {
       await onSave({
         serviceId: service?.id || null,
+        // Editar nome, datas ou observações não altera a situação já registrada.
+        status: service?.status,
         serviceType,
         productName: productName.trim(),
         supplierName: supplierName.trim() || null,
