@@ -155,3 +155,63 @@ Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
   (correção PF, troca PF→PJ com contato, validação de empresa obrigatória e caso
   sem permissão de correção). Regressões da Central, tipos e build passaram.
   Continua sem validação visual autenticada real.
+
+## Reauditoria de segurança (fechamento da mesma entrega)
+
+### 1) Leitura direta de serviços não falha mais aberta
+- A policy `travel_file_services_manual_direct_read_guard` usava
+  `NOT EXISTS (SELECT ... travel_files ... origin='manual')`. Para um membro com
+  `reservations.view` e sem permissões financeiras, a RLS do pai escondia a ficha manual,
+  a subconsulta retornava zero e o `NOT EXISTS` liberava o serviço bruto com todos os valores.
+- Agora a policy chama `private.travel_file_direct_read_is_web(file_id)`, função
+  `SECURITY DEFINER` com `search_path` fixo que **não** depende da RLS do pai, valida o
+  escopo da agência (`agency_id = ANY(private.agency_owner_ids())`) e **nega por padrão**:
+  pai ausente, de outra agência ou de origem manual retorna falso.
+- A compatibilidade pedida foi preservada: reservas de origem web da própria agência
+  continuam legíveis diretamente como hoje.
+
+### 2) Projeção explícita dos snapshots e payloads
+- A sanitização por lista de chaves proibidas deixava passar preços reais de estruturas
+  sintéticas nunca listadas: `total_estimated`, `items_sum`,
+  `snapshot.service_data.adult_price/child_price/fees_amount`,
+  `rooms[].unit_price/total_price` e `imported_summary.total_original/total_brl`.
+- Foi criada `private.reservations_project(jsonb, revenue, margin, commission)`: allowlist
+  recursiva (objetos e listas) que mantém apenas campos operacionais reconhecidos e, por
+  categoria de permissão, apenas os campos financeiros autorizados. Qualquer chave
+  desconhecida é omitida. Comparação por `lower(key)`, então aliases em maiúsculas ou caixa
+  mista também são cortados; contêiner com valor escalar desconhecido é descartado.
+- `travel_file_detail` aplica a projeção em `passengers_snapshot` e `contact_snapshot` da
+  ficha, em `snapshot`/`passengers_snapshot` dos serviços e nos dois históricos. As colunas
+  do esquema continuam sanitizadas por `private.reservations_redact`. A função segue
+  `STABLE`: **nenhum snapshot armazenado é alterado**, a redução acontece só na leitura.
+- Perfis restritos podem receber menos partes do snapshot, mas as observações operacionais
+  necessárias (notas, datas, códigos, tipos de quarto, trechos de voo, moeda) permanecem.
+
+### 3) Histórico manual completo sem vazar valores
+- `log_travel_file_manual_change` passou a detectar também alterações isoladas de moeda,
+  de valor solicitado e de contato livre (`contact_snapshot`). O evento registra
+  `currency`, `currency_changed`, `requested_amount_changed` e `contact_changed` —
+  o valor solicitado em si **não** entra no histórico.
+
+### Evidências desta reauditoria
+- **Testes de contrato/lógica (executados)**: `src/test/central-reservas-reauditoria.test.ts`
+  extrai as listas de chaves do SQL aplicado e roda uma réplica fiel da projeção recursiva
+  sobre as estruturas reais (`service_data`, `rooms[]`, `imported_summary`, `segments[]`),
+  provando que nenhum custo/preço/comissão não autorizado escapa, que cada categoria libera
+  só a própria projeção e que aliases em maiúsculas são cortados. Também simula o caso
+  `reservations.view=true` com receita/margem/comissão falsas e pai oculto.
+- **Execução real no banco (leitura)**: `private.reservations_project` e
+  `private.travel_file_direct_read_is_web` foram executadas no banco com JSON sintético e
+  com um id inexistente; o resultado confirmou a omissão dos campos financeiros por
+  categoria e a negação por padrão (`false`) para pai ausente. Nenhum dado real foi lido
+  ou alterado.
+- **Revisão de SQL (estática)**: policies e triggers revisadas linha a linha na definição
+  aplicada.
+- **Não comprovado**: execução autenticada com contas reais de agências diferentes e
+  validação visual em navegador autenticado (o papel disponível não permite autenticar como
+  membro de equipe).
+- **Limitação explícita mantida**: o endurecimento das linhas legadas de origem web depende
+  de **deploy coordenado** (frontend lendo por RPC + policy restritiva estendida a esses
+  registros). Até lá, o isolamento financeiro dos registros antigos de origem web **não**
+  está completo. Os avisos gerais do relatório de segurança do banco continuam os mesmos
+  (460), sem novos avisos. Nada foi publicado.
