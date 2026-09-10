@@ -74,14 +74,18 @@ export function AgencyCompaniesPanel({
   };
 
   // A ação principal da área de Clientes abre este mesmo cadastro quando a
-  // visão selecionada é Empresas — sem duplicar formulário.
+  // visão selecionada é Empresas — sem duplicar formulário. O pedido é
+  // consumido na hora: cancelar e voltar para esta visão não reabre o cadastro.
   useEffect(() => {
-    if (createSignal > 0 && canCreate) {
+    if (!createRequested) return;
+    if (canCreate) {
       setEditing(null);
       setDialogOpen(true);
     }
+    onCreateHandled?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [createSignal]);
+  }, [createRequested]);
+
 
 
   const submit = async () => {
