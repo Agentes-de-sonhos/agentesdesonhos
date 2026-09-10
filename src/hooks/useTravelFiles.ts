@@ -373,6 +373,30 @@ const manualPatchPayload = (input: ManualReservationPatch) => {
 };
 
 /**
+ * Elegibilidade comercial da Central de Reservas (plano/validade da conta
+ * principal da agência, concessões e exceções administrativas). Usada apenas
+ * para refletir na interface o que o servidor já bloqueia nas reservas
+ * cadastradas internamente — não substitui a checagem do servidor e não altera
+ * o comportamento de outros módulos.
+ */
+export function useReservationsCenterAccess() {
+  const { user } = useAuth();
+  const query = useQuery({
+    queryKey: ["reservations-center-access", user?.id],
+    enabled: !!user?.id,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const { data, error } = await sb.rpc("can_use_reservations_center");
+      if (error) throw error;
+      return !!data;
+    },
+  });
+  return { allowed: query.data !== false, isLoading: query.isLoading };
+}
+
+/**
+
  * Cadastro manual de reserva. O registro nasce como RASCUNHO e não cria
  * oportunidade, operação, orçamento, carteira nem lançamento financeiro.
  * A chave de intenção evita dois cadastros no clique duplo.
