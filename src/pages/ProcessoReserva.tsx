@@ -31,6 +31,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import {
   useAgencyTeamDirectory,
+  useReservationsCenterAccess,
+
   useTravelFile,
   useTravelFileMutations,
   useTravelFileNotes,
@@ -148,8 +150,15 @@ export default function ProcessoReserva() {
   // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
   // custo exige reservations.financial.manage e a comissão exige a permissão
   // específica de comissões.
-  const canManage = can("reservations.manage");
-  const canAssign = can("reservations.assign");
+  // Reservas cadastradas internamente também exigem elegibilidade comercial da
+  // Central; o servidor bloqueia essas alterações e a interface não oferece a
+  // ação. Reservas recebidas pelo site seguem apenas as permissões (leitura do
+  // histórico permanece disponível em qualquer caso).
+  const { allowed: centerAllowed } = useReservationsCenterAccess();
+  const manualBlocked = data?.file?.origin === "manual" && !centerAllowed;
+  const canManage = can("reservations.manage") && !manualBlocked;
+  const canAssign = can("reservations.assign") && !manualBlocked;
+
   const canRevenue = can("financial.view_revenue");
   const canMargin = can("financial.view_margin");
   const canCommission = can("financial.commissions.view");
