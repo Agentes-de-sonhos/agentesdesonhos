@@ -40,7 +40,10 @@ Fora do escopo, para fases posteriores:
   **patch parcial** — campo não alterado não vai no payload e o servidor preserva o vínculo,
   a moeda e os valores. Limpar um vínculo é sempre explícito.
 - **Serviços**: cadastro manual com tipo, produto, fornecedor, datas, quantidade, moeda,
-  valores e status. Serviços vindos do site permanecem congelados/imutáveis.
+  valores e status. Serviços vindos do site permanecem congelados/imutáveis. Na edição, a
+  **moeda do serviço prevalece** sobre a da reserva (tanto no rótulo quanto no envio): editar
+  um serviço em USD dentro de uma reserva em BRL nunca reclassifica o valor; a moeda da
+  reserva é apenas o fallback para serviço novo ou sem moeda.
 - **Histórico**: registra criação, mudanças de status, serviços, responsável, notas e também
   alterações isoladas de moeda, valor solicitado e contato — sem expor valores a quem não tem
   permissão financeira.
@@ -92,11 +95,16 @@ Use **dados fictícios**; não é necessário criar usuários ou senhas.
 
 Testado (automatizado, fixtures sintéticas):
 
-- Lote focado da Central/Clientes reexecutado nesta rodada: **12 arquivos, 152 testes**,
-  todos passando. `tsgo --noEmit` e `vite build` sem erros.
+- Rodada da moeda do serviço (mais recente): teste novo atravessa o caminho real
+  ProcessoReserva → diálogo → hook/RPC — **2 testes** passando (edição de serviço USD em
+  reserva BRL preserva USD no rótulo e no payload; serviço novo usa BRL e refaz as consultas
+  de ficha e lista). Regressões relacionadas: **4 arquivos, 61 testes** passando.
+  `tsgo --noEmit` e `vite build` sem erros.
+- Rodada anterior (CRM/edição): 12 arquivos, 152 testes, todos passando.
 - Comportamento de interface: criação PF/PJ, patch parcial da edição, seletor de contratante,
   painel de empresas (abertura única, erro com "Tentar novamente", lista vazia), serviço manual
-  (valores pt-BR "1.500,00"/"1500,50"), totais por moeda, reset ao trocar de identidade.
+  (valores pt-BR "1.500,00"/"1500,50", precedência da moeda do serviço), totais por moeda,
+  reset ao trocar de identidade.
 - Revisão de contrato do SQL efetivamente aplicado: gates, isolamento por agência, projeção
   financeira por permissão, agregado só para origem manual, ausência de gravação nos totais e
   cadastro PJ sem dependência de Reservas.
