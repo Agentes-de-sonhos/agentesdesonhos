@@ -26,11 +26,15 @@ interface ClientOption {
   phone: string | null;
 }
 
-/** Busca de clientes da própria agência (RLS garante o isolamento). */
-function useClientSearch(search: string, enabled: boolean) {
+/**
+ * Busca de clientes da própria agência (RLS garante o isolamento). A chave da
+ * consulta inclui a identidade do usuário: ao trocar de conta na mesma aba,
+ * nada do cache anterior é reaproveitado.
+ */
+function useClientSearch(search: string, enabled: boolean, identity?: string | null) {
   return useQuery({
-    queryKey: ["reservas-client-search", search.trim(), enabled],
-    enabled,
+    queryKey: ["reservas-client-search", identity ?? "anon", search.trim()],
+    enabled: !!identity && enabled,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<ClientOption[]> => {
