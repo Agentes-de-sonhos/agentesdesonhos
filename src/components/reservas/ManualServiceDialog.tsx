@@ -35,6 +35,8 @@ const SERVICE_TYPES: { value: string; label: string }[] = [
 
 export interface ManualServicePayload {
   serviceId?: string | null;
+  /** Situação atual do serviço, reenviada na edição para não regredir. */
+  status?: TravelFileService["status"];
   serviceType: string;
   productName: string;
   supplierName?: string | null;
