@@ -453,6 +453,7 @@ export function useAgencyCompanies(search: string, enabled = true) {
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: query.error as Error | null,
+    refetch: query.refetch,
     saveCompany,
   };
 }
