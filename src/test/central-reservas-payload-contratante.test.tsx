@@ -74,6 +74,7 @@ const draft = (over: Partial<TravelFile> = {}): TravelFile =>
     children_count: 0,
     passengers_count: 1,
     currency: "BRL",
+    ...over,
   }) as unknown as TravelFile;
 
 /** Liga o diálogo ao hook real: o payload verificado é o que vai ao servidor. */
@@ -149,14 +150,11 @@ describe("edição de rascunho: campo não alterado nunca é apagado", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Pessoa" }));
-    console.log("PRESSED", screen.getByRole("button", { name: "Pessoa" }).getAttribute("aria-pressed"));
     await user.click(await screen.findByText(SYNTHETIC_CLIENT.name));
-    console.log("SEL", screen.queryByText(/Selecionado:/)?.textContent);
     await user.click(screen.getByRole("button", { name: /Salvar alterações/i }));
 
     await waitFor(() => expect(rpc).toHaveBeenCalled());
     const payload = lastPayload();
-    console.log("CALLS", JSON.stringify(rpc.mock.calls));
     expect(payload.contractor_type).toBe("individual");
     expect(payload.client_id).toBe(SYNTHETIC_CLIENT.id);
     expect(payload.company_id).toBeNull();
