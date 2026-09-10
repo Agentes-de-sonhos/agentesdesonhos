@@ -53,6 +53,23 @@ const newManualKey = () =>
   (globalThis.crypto?.randomUUID?.() as string) ||
   `manual-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+/**
+ * Falha de rede ou de permissão na busca. Nunca dizemos "nada encontrado" nesse
+ * caso: quem está cadastrando não deve ser levado a duplicar um cadastro.
+ */
+function SearchErrorNotice({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div role="alert" className="space-y-2 p-3">
+      <p className="text-xs font-medium text-destructive">
+        Não foi possível buscar agora. Verifique a conexão e tente novamente.
+      </p>
+      <Button type="button" size="sm" variant="outline" onClick={onRetry}>
+        Tentar novamente
+      </Button>
+    </div>
+  );
+}
+
 export interface NovaReservaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
