@@ -291,7 +291,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                         key={co.id}
                         type="button"
                         onClick={() => {
-                          setCompanyId(co.id);
+                          setSelectedCompany({ id: co.id, name: co.name });
                           setNewCompanyName("");
                         }}
                         className={cn(
