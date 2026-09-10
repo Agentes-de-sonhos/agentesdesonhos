@@ -154,6 +154,7 @@ describe("edição de rascunho: campo não alterado nunca é apagado", () => {
 
     await waitFor(() => expect(rpc).toHaveBeenCalled());
     const payload = lastPayload();
+    console.log("CALLS", JSON.stringify(rpc.mock.calls));
     expect(payload.contractor_type).toBe("individual");
     expect(payload.client_id).toBe(SYNTHETIC_CLIENT.id);
     expect(payload.company_id).toBeNull();
