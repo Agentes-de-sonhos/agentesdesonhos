@@ -102,10 +102,13 @@ export function ManualServiceDialog({
     }
     let parsedAmount: number | null = null;
     if (canEditAmount && amount.trim()) {
-      // Aceita o jeito brasileiro de escrever ("1.500,00") e também "1500.50".
-      const digitsOnly = amount.replace(/[^\d.,-]/g, "");
-      const valid = digitsOnly.length > 0 && /^-?[\d.,]+$/.test(digitsOnly);
-      parsedAmount = valid ? parsePastedCurrency(amount) : null;
+      // Aceita o jeito brasileiro de escrever ("1.500,00", "R$ 1 500,00") e
+      // também "1500.50". Qualquer outra coisa é recusada, nunca convertida.
+      const cleaned = amount.replace(/R\$/gi, "").replace(/[\s\u00A0]/g, "").trim();
+      const brFormat = /^\d{1,3}(\.\d{3})+(,\d{1,2})?$/;
+      const simple = /^\d+([.,]\d{1,2})?$/;
+      const valid = brFormat.test(cleaned) || simple.test(cleaned);
+      parsedAmount = valid ? parsePastedCurrency(cleaned) : null;
       if (parsedAmount == null || !Number.isFinite(parsedAmount) || parsedAmount < 0) {
         setFieldError("Informe um valor válido, por exemplo 1.500,00.");
         return;
