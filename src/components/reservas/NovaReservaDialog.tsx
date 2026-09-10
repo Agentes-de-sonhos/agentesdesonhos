@@ -66,14 +66,17 @@ export interface NovaReservaDialogProps {
  * orçamento, carteira nem lançamento financeiro.
  */
 export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReservaDialogProps) {
+  const { user } = useAuth();
   const [contractorType, setContractorType] = useState<ContractorType>("individual");
   const [clientSearch, setClientSearch] = useState("");
-  const [clientId, setClientId] = useState<string | null>(null);
+  // A escolha guarda o registro inteiro: o nome continua visível mesmo depois
+  // de digitar outra busca, e nunca é enviado um contratante invisível.
+  const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
   const [companySearch, setCompanySearch] = useState("");
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [contactSearch, setContactSearch] = useState("");
-  const [contactClientId, setContactClientId] = useState<string | null>(null);
+  const [selectedContact, setSelectedContact] = useState<ClientOption | null>(null);
   const [tripName, setTripName] = useState("");
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
