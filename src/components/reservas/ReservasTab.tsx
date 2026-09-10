@@ -70,7 +70,9 @@ function StatusPill({ status }: { status: TravelFileListItem["status"] }) {
   const tone =
     status === "cancelled"
       ? "bg-rose-50 text-rose-700 ring-rose-200/70"
-      : status === "sale_confirmed" || status === "trip_completed"
+      : status === "draft"
+        ? "bg-muted text-muted-foreground ring-border/70"
+        : status === "sale_confirmed" || status === "trip_completed"
         ? "bg-emerald-50 text-emerald-700 ring-emerald-200/70"
         : status === "request_received"
           ? "bg-primary/10 text-primary ring-primary/20"
