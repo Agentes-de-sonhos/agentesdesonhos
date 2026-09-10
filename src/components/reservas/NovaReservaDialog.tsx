@@ -161,185 +161,21 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Quem está contratando</Label>
-            <div className="flex gap-2">
-              {(
-                [
-                  { id: "individual", label: "Pessoa" },
-                  { id: "company", label: "Empresa" },
-                ] as { id: ContractorType; label: string }[]
-              ).map((option) => (
-                <Button
-                  key={option.id}
-                  type="button"
-                  variant={contractorType === option.id ? "default" : "outline"}
-                  size="sm"
-                  aria-pressed={contractorType === option.id}
-                  onClick={() => setContractorType(option.id)}
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          </div>
+          <ContractorPicker
+            active={open}
+            idPrefix="reserva"
+            contractorType={contractorType}
+            onContractorTypeChange={setContractorType}
+            selectedClient={selectedClient}
+            onSelectClient={setSelectedClient}
+            selectedCompany={selectedCompany}
+            onSelectCompany={setSelectedCompany}
+            selectedContact={selectedContact}
+            onSelectContact={setSelectedContact}
+            newCompanyName={newCompanyName}
+            onNewCompanyNameChange={setNewCompanyName}
+          />
 
-          {contractorType === "individual" ? (
-            <div className="space-y-2">
-              <Label htmlFor="reserva-cliente">Pessoa contratante</Label>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="reserva-cliente"
-                  value={clientSearch}
-                  onChange={(e) => setClientSearch(e.target.value)}
-                  placeholder="Buscar pelo nome..."
-                  className="pl-9"
-                />
-              </div>
-              {clientName && (
-                <p className="text-xs text-muted-foreground">Selecionado: {clientName}</p>
-              )}
-              <div className="max-h-40 overflow-y-auto rounded-lg border border-border/60">
-                {clients.isLoading ? (
-                  <p className="p-3 text-xs text-muted-foreground">Carregando...</p>
-                ) : clients.error ? (
-                  <SearchErrorNotice onRetry={() => clients.refetch()} />
-                ) : (clients.data || []).length === 0 ? (
-                  <p className="p-3 text-xs text-muted-foreground">
-                    Nenhuma pessoa encontrada. Cadastre em Clientes e volte aqui.
-                  </p>
-                ) : (
-                  (clients.data || []).map((c) => (
-                    <button
-                      key={c.id}
-                      type="button"
-                      onClick={() => setSelectedClient(c)}
-                      className={cn(
-                        "flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-muted/60",
-                        clientId === c.id && "bg-primary/10",
-                      )}
-                    >
-                      <span className="min-w-0 [overflow-wrap:anywhere]">{c.name}</span>
-                      {c.email && (
-                        <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
-                          {c.email}
-                        </span>
-                      )}
-                    </button>
-                  ))
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="reserva-empresa">Empresa contratante</Label>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="reserva-empresa"
-                    value={companySearch}
-                    onChange={(e) => setCompanySearch(e.target.value)}
-                    placeholder="Buscar pelo nome da empresa..."
-                    className="pl-9"
-                  />
-                </div>
-                <div className="max-h-40 overflow-y-auto rounded-lg border border-border/60">
-                  {loadingCompanies ? (
-                    <p className="p-3 text-xs text-muted-foreground">Carregando...</p>
-                  ) : companiesError ? (
-                    <SearchErrorNotice onRetry={() => refetchCompanies()} />
-                  ) : companies.length === 0 ? (
-                    <p className="p-3 text-xs text-muted-foreground">
-                      Nenhuma empresa cadastrada ainda. Informe o nome abaixo para criar.
-                    </p>
-                  ) : (
-                    companies.map((co) => (
-                      <button
-                        key={co.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedCompany({ id: co.id, name: co.name });
-                          setNewCompanyName("");
-                        }}
-                        className={cn(
-                          "flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-muted/60",
-                          companyId === co.id && "bg-primary/10",
-                        )}
-                      >
-                        <span className="min-w-0 [overflow-wrap:anywhere]">{co.name}</span>
-                        {co.trade_name && (
-                          <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
-                            {co.trade_name}
-                          </span>
-                        )}
-                      </button>
-                    ))
-                  )}
-                </div>
-                {selectedCompany && (
-                  <p className="text-xs text-muted-foreground">
-                    Selecionada: {selectedCompany.name}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reserva-nova-empresa">Ou cadastre uma nova empresa</Label>
-                <Input
-                  id="reserva-nova-empresa"
-                  value={newCompanyName}
-                  onChange={(e) => {
-                    setNewCompanyName(e.target.value);
-                    if (e.target.value.trim()) setSelectedCompany(null);
-                  }}
-                  placeholder="Nome da empresa"
-                />
-                <p className="text-xs text-muted-foreground">
-                  A empresa pode existir sozinha. O contato responsável é opcional.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reserva-contato">Contato responsável (opcional)</Label>
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    id="reserva-contato"
-                    value={contactSearch}
-                    onChange={(e) => setContactSearch(e.target.value)}
-                    placeholder="Buscar pessoa já cadastrada..."
-                    className="pl-9"
-                  />
-                </div>
-                <div className="max-h-32 overflow-y-auto rounded-lg border border-border/60">
-                  {contacts.error ? (
-                    <SearchErrorNotice onRetry={() => contacts.refetch()} />
-                  ) : (contacts.data || []).length === 0 ? (
-                    <p className="p-3 text-xs text-muted-foreground">Nenhuma pessoa encontrada.</p>
-                  ) : (
-                    (contacts.data || []).map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setSelectedContact(contactClientId === c.id ? null : c)}
-                        className={cn(
-                          "flex w-full px-3 py-2 text-left text-sm hover:bg-muted/60",
-                          contactClientId === c.id && "bg-primary/10",
-                        )}
-                      >
-                        {c.name}
-                      </button>
-                    ))
-                  )}
-                </div>
-                {selectedContact && (
-                  <p className="text-xs text-muted-foreground">
-                    Contato: {selectedContact.name}
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="min-w-0 space-y-2">
