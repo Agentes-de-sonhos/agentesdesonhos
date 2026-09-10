@@ -23,13 +23,29 @@ import { toast } from "sonner";
  * Reutiliza a tabela companies existente pelas RPCs seguras; uma empresa pode
  * existir sozinha e o contato responsável é sempre uma pessoa já cadastrada.
  */
-export function AgencyCompaniesPanel({ createSignal = 0 }: { createSignal?: number }) {
+export function AgencyCompaniesPanel({
+  createRequested = false,
+  onCreateHandled,
+}: {
+  /** Pedido de abertura do cadastro vindo da ação principal da área. */
+  createRequested?: boolean;
+  /** Confirma o consumo do pedido: ele nunca reabre sozinho depois. */
+  onCreateHandled?: () => void;
+}) {
   const { can } = usePermissions();
   const canCreate = can("clients.create");
   const canEdit = can("clients.edit");
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search);
-  const { companies, isLoading, isFetching, saveCompany } = useAgencyCompanies(debounced);
+  const {
+    companies,
+    isLoading,
+    isFetching,
+    error: listError,
+    refetch,
+    saveCompany,
+  } = useAgencyCompanies(debounced);
+
 
 
   const [dialogOpen, setDialogOpen] = useState(false);
