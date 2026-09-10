@@ -537,10 +537,10 @@ export function useTravelFileMutations(fileId?: string) {
 
   /** Dados básicos do rascunho manual (nunca altera files vindos do site). */
   const saveManualData = useMutation({
-    mutationFn: async (input: Omit<ManualReservationInput, "manualKey">) => {
+    mutationFn: async (input: ManualReservationPatch) => {
       const { error } = await sb.rpc("travel_file_update_manual", {
         _file_id: fileId,
-        _payload: manualPayload({ ...input, manualKey: "" }),
+        _payload: manualPatchPayload(input),
       });
       if (error) throw error;
     },
