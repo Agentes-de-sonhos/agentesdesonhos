@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { parsePastedCurrency } from "@/lib/currencyMask";
 import type { TravelFileService } from "@/types/travelFile";
 
 const SERVICE_TYPES: { value: string; label: string }[] = [
