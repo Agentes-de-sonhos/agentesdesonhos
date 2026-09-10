@@ -190,20 +190,24 @@ export function ReservasTab() {
     { label: "Em operação", value: counts.in_operation, tone: "text-foreground" },
   ];
 
-  /** Somatórios da página atual — só aparecem com permissão financeira. */
+  /**
+   * Somatórios da página atual — só aparecem com permissão financeira e
+   * SEMPRE separados por moeda: valores em reais, dólares e euros nunca são
+   * somados como se fossem a mesma moeda.
+   */
   const pageAmounts = useMemo(() => {
-    let requested = 0;
-    let confirmed = 0;
-    let currency = "BRL";
+    const byCurrency = new Map<string, { requested: number; confirmed: number }>();
     for (const f of items) {
-      currency = f.currency || currency;
       if (f.status === "cancelled") continue;
-      requested += Number(f.requested_amount) || 0;
+      const currency = f.currency || "BRL";
+      const bucket = byCurrency.get(currency) ?? { requested: 0, confirmed: 0 };
+      bucket.requested += Number(f.requested_amount) || 0;
       if (f.status === "sale_confirmed" || f.status === "in_operation" || f.status === "trip_completed") {
-        confirmed += Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0;
+        bucket.confirmed += Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0;
       }
+      byCurrency.set(currency, bucket);
     }
-    return { requested, confirmed, currency };
+    return Array.from(byCurrency.entries()).map(([currency, totals]) => ({ currency, ...totals }));
   }, [items]);
 
   const hasFilters = !!(urlSearch || filter !== "all" || from || to || responsible !== "all" || unreadOnly);
