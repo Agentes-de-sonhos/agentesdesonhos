@@ -57,6 +57,17 @@ export function AgencyCompaniesPanel({ createSignal = 0 }: { createSignal?: numb
     setDialogOpen(true);
   };
 
+  // A ação principal da área de Clientes abre este mesmo cadastro quando a
+  // visão selecionada é Empresas — sem duplicar formulário.
+  useEffect(() => {
+    if (createSignal > 0 && canCreate) {
+      setEditing(null);
+      setDialogOpen(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [createSignal]);
+
+
   const submit = async () => {
     setFieldError(null);
     if (!name.trim()) {
