@@ -215,3 +215,36 @@ Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
   registros). Até lá, o isolamento financeiro dos registros antigos de origem web **não**
   está completo. Os avisos gerais do relatório de segurança do banco continuam os mesmos
   (460), sem novos avisos. Nada foi publicado.
+
+## Complemento de elegibilidade (fechamento do mesmo lote)
+
+1. **Equipe segue a conta principal.** `can_use_reservations_center()` deixou de tratar
+   colaborador ativo como caso resolvido: agora resolve a agência em
+   `agency_team_members`, exige status ativo e `reservations.view`, e avalia a
+   elegibilidade da master em `private.reservations_owner_is_eligible()` (concessão
+   `crm_basic` da master, ou assinatura ativa, não vencida, em Premium/Fundador/Promoção
+   Grupo SC). Dono e equipe passam a ter a mesma resposta comercial. Exceções de
+   administrador/promotor e a ausência de exigência de site white label continuam como
+   estavam. Nada mudou no bypass global de outros módulos (`has_feature_access` intocado);
+   a correção vale só para a Central.
+2. **Mutações de fichas manuais com gate condicional.** `private.assert_manual_file_gate()`
+   é chamado após a checagem de permissões em `travel_file_set_status`,
+   `travel_file_service_save`, `travel_file_set_responsibles`, `travel_file_note_add` e
+   `travel_file_note_delete`, bloqueando somente `origin = 'manual'` quando a Central não
+   está disponível. Fichas `web_quote` mantêm exatamente a regra anterior e a leitura
+   (`travel_file_detail`, `travel_files_page`) segue sem gate de plano. Na interface,
+   `ProcessoReserva` consulta `useReservationsCenterAccess()` e não oferece ações de
+   alteração em ficha manual quando o servidor as bloquearia.
+3. **Cadastro PJ protegido.** `agency_company_save` exige a mesma elegibilidade comercial da
+   área de Clientes/CRM antes de gravar, além de `clients.create`/`clients.edit`. Busca e
+   leitura de cadastros históricos (`agency_companies_search`, políticas de leitura)
+   permanecem por permissão, para não esconder cadastros após expiração.
+
+**Testes (executados):** `src/test/central-reservas-elegibilidade.test.ts` — 20 casos sobre o
+SQL aplicado e uma réplica fiel da regra: master expirada + colaborador ativo não altera
+ficha manual, agência válida sem site cria, colaborador sem permissão e colaborador
+bloqueado não criam, dono e equipe coincidem, exceções/concessões preservadas, gate presente
+nas cinco mutações manuais, `web_quote` inalterado e leitura de histórico sem gate. Lote
+focado da Central: 4 arquivos, 70 testes; regressões de rascunho/contratante passaram;
+`tsgo` e build passaram. Nenhum plano ou permissão de agência real foi alterado; o relatório
+do banco continua sem novos avisos (456) e nada foi publicado.
