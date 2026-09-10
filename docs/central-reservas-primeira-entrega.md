@@ -284,3 +284,41 @@ acessível durante a falha). Lote focado da Central reexecutado: 7 arquivos, 85 
 (payload e interface), sem execução autenticada com contas reais e sem validação visual em
 navegador autenticado. O endurecimento financeiro das reservas legadas de origem web continua
 dependendo de deploy coordenado. Nada foi publicado.
+
+## Coerência dos valores da reserva manual (fechamento da primeira entrega)
+
+Correção **apenas de apresentação/consulta** dos totais: nenhum lançamento financeiro,
+nenhuma automação entre módulos e nenhuma conversão de câmbio foi criada.
+
+1. **Valor efetivo vem dos serviços (origem manual).** O agregado é derivado na consulta pelo
+   helper `private.travel_file_manual_currency_totals`, usado por `travel_file_detail` e
+   `travel_files_page` somente quando `origin = 'manual'`. `travel_files.requested_amount`,
+   os snapshots e os preços gravados **não** são alterados. Cada `requested_amount` de serviço
+   já é o total do serviço: a quantidade não multiplica novamente e o rótulo na ficha é
+   "Valor dos serviços (solicitado)". Serviços cancelados ficam fora dos totais.
+2. **Agrupamento por moeda, sem soma nem conversão.** Lista, resumo e cartões da ficha usam
+   `groupServiceFinancialsByCurrency` / `manual_totals`. USD 100 + BRL 200 aparecem como dois
+   grupos; nunca como um total único de 300. Reservas de origem web mantêm os valores
+   congelados do processo e as regras legadas.
+3. **Permissões preservadas no novo campo agregado.** Sem `financial.view_revenue`,
+   `financial.view_margin` e `financial.commissions.view` o agregado sai vazio; com apenas
+   parte das permissões só os blocos autorizados são projetados. A **margem exige receita e
+   margem** — nunca é calculada tratando a receita removida como zero.
+
+**Testes (executados):** novo `src/test/central-reservas-totais-moeda.test.ts` — (a) testes de
+comportamento com fixtures sintéticas: BRL 1.500 exibe 1.500, edição para 1.600 atualiza o
+total, quantidade não multiplica, USD 100 + BRL 200 geram dois grupos, cancelado ignorado,
+reserva sem serviços não inventa valor; (b) mapeamento da listagem: sem permissão financeira o
+item não recebe nenhum agregado numérico, reserva web não recebe agregado, valores presentes
+são convertidos; (c) **revisão do SQL aplicado** (leitura da migration): agrupamento por moeda,
+exclusão de cancelados, projeção por permissão, margem condicionada a receita, agregado só
+para origem manual e ausência de `UPDATE` em `travel_files`/`travel_file_services`.
+Lote focado reexecutado: 8 arquivos, 114 testes; `tsgo --noEmit` e `vite build` passaram.
+
+**Limites reais:** (i) o item (c) é revisão do SQL efetivamente aplicado, não execução do RPC
+com sessão autenticada real — não houve teste de banco com usuários reais nem validação visual
+em navegador autenticado; (ii) o linter do projeto segue com avisos preexistentes de escopo
+amplo (execução de funções `SECURITY DEFINER`, RLS sem policy, `search_path` mutável, extensão
+em `public`, proteção de senha vazada), não verificados um a um nesta correção; (iii) o
+endurecimento financeiro das reservas legadas de origem web continua dependendo do deploy
+coordenado já descrito. Nada foi publicado.
