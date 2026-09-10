@@ -11,10 +11,12 @@ const files = readdirSync(DIR).filter((f) => f.endsWith(".sql")).sort();
 const fix = readFileSync(join(DIR, "20260910134125_05c03245-a001-46b1-83e0-9608a866005b.sql"), "utf8");
 const all = files.map((f) => readFileSync(join(DIR, f), "utf8")).join("\n");
 
-/** Última definição de uma função no conjunto das migrations. */
+/** Corpo da última definição de uma função no conjunto das migrations. */
 function lastDefinition(sql: string, name: string): string {
   const parts = sql.split(new RegExp(`CREATE OR REPLACE FUNCTION (?:public|private)\\.${name}\\b`));
-  return parts[parts.length - 1];
+  const tail = parts[parts.length - 1];
+  const end = tail.search(/\n(REVOKE|GRANT|DROP|CREATE|ALTER|-- ----)/);
+  return end > 0 ? tail.slice(0, end) : tail;
 }
 
 describe("1) responsável da reserva", () => {
