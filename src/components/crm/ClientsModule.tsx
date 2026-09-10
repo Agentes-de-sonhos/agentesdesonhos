@@ -174,6 +174,9 @@ export function ClientsModule() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [contactView, setContactView] = useState<"pessoas" | "empresas">("pessoas");
+  // Sinal de "criar" enviado ao painel de empresas pela ação principal.
+  const [companyCreateSignal, setCompanyCreateSignal] = useState(0);
+
 
   const debouncedSearch = useDebouncedValue(search);
 
@@ -395,13 +398,19 @@ export function ClientsModule() {
             <Button
               size="sm"
               className="h-8 shrink-0 gap-1 px-2.5 text-xs"
-              onClick={() => handleOpenDialog()}
-              title="Novo cliente"
-              aria-label="Novo cliente"
+              onClick={() =>
+                contactView === "empresas"
+                  ? setCompanyCreateSignal((n) => n + 1)
+                  : handleOpenDialog()
+              }
+              title={contactView === "empresas" ? "Nova empresa" : "Novo cliente"}
+              aria-label={contactView === "empresas" ? "Nova empresa" : "Novo cliente"}
             >
-              <Plus className="h-3.5 w-3.5" /> Nova
+              <Plus className="h-3.5 w-3.5" />{" "}
+              {contactView === "empresas" ? "Nova empresa" : "Nova pessoa"}
             </Button>
           )}
+
           <Button
             variant="outline"
             size="sm"
@@ -668,7 +677,8 @@ export function ClientsModule() {
       </div>
 
       {contactView === "empresas" ? (
-        <AgencyCompaniesPanel />
+        <AgencyCompaniesPanel createSignal={companyCreateSignal} />
+
       ) : isLoading ? (
         <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="flex items-center justify-center py-16">

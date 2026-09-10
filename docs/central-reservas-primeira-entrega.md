@@ -136,3 +136,22 @@ Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
   coordenado, portanto o isolamento financeiro dos registros antigos **não** está completo.
 - Os avisos gerais do relatório de segurança do banco permanecem os mesmos (460), sem novos
   avisos introduzidos. Nada foi publicado.
+
+## Últimos ajustes funcionais (mesma entrega)
+
+- Em RASCUNHO manual, a edição permite corrigir o contratante (pessoa ou empresa)
+  e adicionar/trocar o contato responsável PJ depois de salvo. O seletor foi
+  extraído para `src/components/reservas/ContractorPicker.tsx` e é o mesmo usado
+  no cadastro — sem duplicar a lógica do `NovaReservaDialog`. `client_id` e
+  `company_id` continuam separados: o lado não usado vai nulo. Fora de rascunho
+  (inclusive reservas vindas do site) o seletor não aparece e os vínculos
+  originais são reenviados sem alteração. Permissões seguem `reservations.manage`
+  e a busca continua limitada pela RLS da própria agência.
+- Na área de Clientes, a ação principal segue a visão selecionada: "Nova pessoa"
+  abre o cadastro PF de sempre e "Nova empresa" abre o cadastro de empresas já
+  existente no painel, sem duas ações incoerentes. Atalhos e fluxos antigos de PF
+  permanecem inalterados fora da visão Empresas.
+- Testes focados: `src/test/central-reservas-rascunho-contratante.test.tsx`
+  (correção PF, troca PF→PJ com contato, validação de empresa obrigatória e caso
+  sem permissão de correção). Regressões da Central, tipos e build passaram.
+  Continua sem validação visual autenticada real.

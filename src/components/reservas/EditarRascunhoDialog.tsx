@@ -12,11 +12,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import type { TravelFile } from "@/types/travelFile";
+import {
+  ContractorPicker,
+  type ClientOption,
+  type CompanyOption,
+  type ContractorType,
+} from "@/components/reservas/ContractorPicker";
 
 export interface EditarRascunhoDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   file: TravelFile;
+  /** Registros já vinculados, para manter nome visível ao abrir. */
+  currentClient?: ClientOption | null;
+  currentCompany?: CompanyOption | null;
+  currentContact?: ClientOption | null;
+  /** Rascunho manual permite corrigir o contratante; demais casos, não. */
+  canEditContractor?: boolean;
   onSave: (input: {
     contractorType: "individual" | "company";
     clientId?: string | null;
@@ -32,17 +44,31 @@ export interface EditarRascunhoDialogProps {
 }
 
 /**
- * Edição dos dados básicos de uma reserva cadastrada à mão. Só altera viagem,
- * destino, datas e passageiros — o contratante permanece o que foi escolhido no
- * cadastro e é reenviado sem alteração.
+ * Edição dos dados básicos de uma reserva cadastrada à mão. Em rascunho também
+ * permite corrigir o contratante (pessoa ou empresa) e trocar o contato
+ * responsável, reutilizando o mesmo seletor do cadastro. company_id e client_id
+ * seguem separados: escolher empresa limpa a pessoa e vice-versa.
  */
-export function EditarRascunhoDialog({ open, onOpenChange, file, onSave }: EditarRascunhoDialogProps) {
+export function EditarRascunhoDialog({
+  open,
+  onOpenChange,
+  file,
+  currentClient,
+  currentCompany,
+  currentContact,
+  canEditContractor = false,
+  onSave,
+}: EditarRascunhoDialogProps) {
   const [tripName, setTripName] = useState("");
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [adults, setAdults] = useState("1");
   const [children, setChildren] = useState("0");
+  const [contractorType, setContractorType] = useState<ContractorType>("individual");
+  const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyOption | null>(null);
+  const [selectedContact, setSelectedContact] = useState<ClientOption | null>(null);
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -55,6 +81,18 @@ export function EditarRascunhoDialog({ open, onOpenChange, file, onSave }: Edita
     setEndDate(file.end_date || "");
     setAdults(String(file.adults_count ?? 1));
     setChildren(String(file.children_count ?? 0));
+    setContractorType((file.contractor_type || "individual") as ContractorType);
+    setSelectedClient(
+      currentClient ?? (file.client_id ? { id: file.client_id, name: "Pessoa vinculada" } : null),
+    );
+    setSelectedCompany(
+      currentCompany ?? (file.company_id ? { id: file.company_id, name: "Empresa vinculada" } : null),
+    );
+    setSelectedContact(
+      currentContact ??
+        (file.contact_client_id ? { id: file.contact_client_id, name: "Contato vinculado" } : null),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, file]);
 
   const submit = async () => {
@@ -63,13 +101,30 @@ export function EditarRascunhoDialog({ open, onOpenChange, file, onSave }: Edita
       setFieldError("Informe o nome da viagem ou o destino.");
       return;
     }
+    const nextType = canEditContractor
+      ? contractorType
+      : ((file.contractor_type || "individual") as ContractorType);
+    const nextClientId = canEditContractor ? (selectedClient?.id ?? null) : file.client_id;
+    const nextCompanyId = canEditContractor ? (selectedCompany?.id ?? null) : file.company_id;
+    const nextContactId = canEditContractor ? (selectedContact?.id ?? null) : file.contact_client_id;
+
+    if (canEditContractor && nextType === "individual" && !nextClientId) {
+      setFieldError("Escolha a pessoa que está contratando.");
+      return;
+    }
+    if (canEditContractor && nextType === "company" && !nextCompanyId) {
+      setFieldError("Escolha a empresa contratante.");
+      return;
+    }
+
     setSaving(true);
     try {
       await onSave({
-        contractorType: (file.contractor_type || "individual") as "individual" | "company",
-        clientId: file.client_id,
-        companyId: file.company_id,
-        contactClientId: file.contact_client_id,
+        contractorType: nextType,
+        // Contratante e empresa nunca convivem: o lado não usado vai nulo.
+        clientId: nextType === "individual" ? nextClientId : null,
+        companyId: nextType === "company" ? nextCompanyId : null,
+        contactClientId: nextType === "company" ? nextContactId : null,
         tripName: tripName.trim() || null,
         primaryDestination: destination.trim() || null,
         startDate: startDate || null,
@@ -85,17 +140,36 @@ export function EditarRascunhoDialog({ open, onOpenChange, file, onSave }: Edita
     }
   };
 
+
   return (
     <Dialog open={open} onOpenChange={(next) => (saving ? null : onOpenChange(next))}>
       <DialogContent className="max-h-[90vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar dados da reserva</DialogTitle>
           <DialogDescription>
-            Ajuste a viagem, o destino, as datas e os passageiros. Nada aqui confirma a venda.
+            {canEditContractor
+              ? "Corrija o contratante, o contato responsável, a viagem, as datas e os passageiros. Nada aqui confirma a venda."
+              : "Ajuste a viagem, o destino, as datas e os passageiros. Nada aqui confirma a venda."}
           </DialogDescription>
         </DialogHeader>
 
+        {canEditContractor && (
+          <ContractorPicker
+            active={open}
+            idPrefix="rascunho"
+            contractorType={contractorType}
+            onContractorTypeChange={setContractorType}
+            selectedClient={selectedClient}
+            onSelectClient={setSelectedClient}
+            selectedCompany={selectedCompany}
+            onSelectCompany={setSelectedCompany}
+            selectedContact={selectedContact}
+            onSelectContact={setSelectedContact}
+          />
+        )}
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
           <div className="min-w-0 space-y-2">
             <Label htmlFor="rascunho-viagem">Nome da viagem</Label>
             <Input
