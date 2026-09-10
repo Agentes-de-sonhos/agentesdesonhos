@@ -902,11 +902,12 @@ export default function ProcessoReserva() {
               }}
               service={manualServiceEditing}
               canEditAmount={canFinancialManage}
-              currency={file.currency}
+              // A moeda do serviço em edição prevalece; a da reserva é só fallback.
+              currency={manualServiceEditing?.currency || file.currency}
               onSave={async (payload: ManualServicePayload) => {
                 await saveManualService.mutateAsync({
                   ...payload,
-                  currency: file.currency,
+                  currency: manualServiceEditing?.currency || file.currency,
                 });
                 toast.success("Serviço salvo.");
               }}
