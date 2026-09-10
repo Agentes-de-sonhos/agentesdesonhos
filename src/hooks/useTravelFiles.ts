@@ -146,6 +146,20 @@ export function mapTravelFileRow(row: any): TravelFileListItem {
     requested_amount: toNumber(row.requested_amount),
     reconfirmed_amount: row.reconfirmed_amount == null ? null : toNumber(row.reconfirmed_amount),
     final_sale_amount: row.final_sale_amount == null ? null : toNumber(row.final_sale_amount),
+    // Totais por moeda só existem em reservas manuais e apenas com permissão
+    // financeira: campos ausentes continuam ausentes (não viram zero).
+    manual_totals: Array.isArray(row.manual_totals)
+      ? row.manual_totals.map((group: any) => {
+          const out: Record<string, unknown> = {
+            currency: String(group?.currency || "BRL").toUpperCase(),
+            services_count: toNumber(group?.services_count),
+          };
+          for (const key of ["requested", "reconfirmed", "sold", "cost", "commission", "margin", "variation"]) {
+            if (group?.[key] != null) out[key] = toNumber(group[key]);
+          }
+          return out;
+        })
+      : null,
     clientName: row.client_name ?? null,
     companyName: row.company_name ?? null,
     servicesCount: toNumber(row.services_count),
@@ -154,6 +168,7 @@ export function mapTravelFileRow(row: any): TravelFileListItem {
     responsibleName: row.responsible_name ?? null,
   } as TravelFileListItem;
 }
+
 
 /**
  * Central de Reservas: busca, filtros e paginação executados NO SERVIDOR

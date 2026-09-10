@@ -43,6 +43,7 @@ import { isFileOverdue } from "@/lib/travelFileWorkflow";
 import type { TravelFileListItem } from "@/types/travelFile";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 import { NovaReservaDialog } from "@/components/reservas/NovaReservaDialog";
+import { manualTotalsLabel } from "@/lib/travelFileWorkflow";
 
 const money = (value: number, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -50,6 +51,22 @@ const money = (value: number, currency: string) =>
     currency: currency || "BRL",
     maximumFractionDigits: 2,
   }).format(Number(value) || 0);
+
+/**
+ * Valor apresentado no item da lista. Reserva manual usa os totais por moeda
+ * derivados dos serviços; cada moeda aparece separada, nunca somada nem
+ * convertida. Solicitações do site mantêm os valores congelados do processo.
+ */
+const fileAmountLabel = (file: TravelFileListItem): string => {
+  if (file.origin === "manual") {
+    return manualTotalsLabel(file.manual_totals ?? [], money);
+  }
+  return money(
+    Number(file.final_sale_amount ?? file.reconfirmed_amount ?? file.requested_amount) || 0,
+    file.currency,
+  );
+};
+
 
 /** Datas no fuso local: "YYYY-MM-DD" é montado manualmente. */
 const parseLocalDate = (value?: string | null): Date | null => {
@@ -202,18 +219,41 @@ export function ReservasTab() {
    */
   const pageAmounts = useMemo(() => {
     const byCurrency = new Map<string, { requested: number; confirmed: number }>();
+    const add = (currency: string, requested: number, confirmed: number) => {
+      const key = (currency || "BRL").toUpperCase();
+      const bucket = byCurrency.get(key) ?? { requested: 0, confirmed: 0 };
+      bucket.requested += requested;
+      bucket.confirmed += confirmed;
+      byCurrency.set(key, bucket);
+    };
+    const isConfirmed = (f: (typeof items)[number]) =>
+      f.status === "sale_confirmed" || f.status === "in_operation" || f.status === "trip_completed";
+
     for (const f of items) {
       if (f.status === "cancelled") continue;
-      const currency = f.currency || "BRL";
-      const bucket = byCurrency.get(currency) ?? { requested: 0, confirmed: 0 };
-      bucket.requested += Number(f.requested_amount) || 0;
-      if (f.status === "sale_confirmed" || f.status === "in_operation" || f.status === "trip_completed") {
-        bucket.confirmed += Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0;
+      // Reserva manual: o valor efetivo vem dos serviços, já agrupado por moeda
+      // pelo servidor. Solicitações do site mantêm os valores congelados.
+      const groups = f.origin === "manual" ? f.manual_totals ?? [] : null;
+      if (groups && groups.length > 0) {
+        for (const group of groups) {
+          const requested = Number(group.requested) || 0;
+          const sold = Number(group.sold ?? group.reconfirmed ?? group.requested) || 0;
+          add(group.currency, requested, isConfirmed(f) ? sold : 0);
+        }
+        continue;
       }
-      byCurrency.set(currency, bucket);
+      if (groups) continue; // manual sem serviços lançados não soma nada
+      add(
+        f.currency || "BRL",
+        Number(f.requested_amount) || 0,
+        isConfirmed(f)
+          ? Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0
+          : 0,
+      );
     }
     return Array.from(byCurrency.entries()).map(([currency, totals]) => ({ currency, ...totals }));
   }, [items]);
+
 
   const hasFilters = !!(urlSearch || filter !== "all" || from || to || responsible !== "all" || unreadOnly);
 
@@ -491,13 +531,11 @@ export function ReservasTab() {
 
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                   {can.revenue && (
-                    <span className="text-sm font-semibold tabular-nums text-foreground">
-                      {money(
-                        file.final_sale_amount ?? file.reconfirmed_amount ?? file.requested_amount,
-                        file.currency,
-                      )}
+                    <span className="min-w-0 text-sm font-semibold tabular-nums text-foreground [overflow-wrap:anywhere]">
+                      {fileAmountLabel(file)}
                     </span>
                   )}
+
                   <span className="text-[11px] text-muted-foreground">
                     {file.origin === "manual" ? "Cadastrada em " : "Solicitado em "}
                     {format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}

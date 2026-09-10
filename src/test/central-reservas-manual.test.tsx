@@ -184,7 +184,7 @@ const draftFile = {
 } as unknown as TravelFile;
 
 describe("edição do rascunho manual", () => {
-  it("reenvia o contratante original e envia os dados ajustados", async () => {
+  it("não toca no contratante quando só o destino muda (patch parcial)", async () => {
     const user = userEvent.setup();
     const onSave = vi.fn().mockResolvedValue(undefined);
     wrap(<EditarRascunhoDialog open onOpenChange={() => {}} file={draftFile} onSave={onSave} />);
@@ -197,11 +197,14 @@ describe("edição do rascunho manual", () => {
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     const input = onSave.mock.calls[0][0];
-    expect(input.contractorType).toBe("company");
-    expect(input.companyId).toBe(SYNTHETIC_COMPANY.id);
-    expect(input.clientId).toBeNull();
+    // Campos não alterados ficam fora do payload: o servidor preserva o vínculo.
+    expect(input).not.toHaveProperty("contractorType");
+    expect(input).not.toHaveProperty("companyId");
+    expect(input).not.toHaveProperty("clientId");
+    expect(input).not.toHaveProperty("contactClientId");
     expect(input.primaryDestination).toBe("Outro destino");
   });
+
 
   it("bloqueia salvar sem viagem nem destino", async () => {
     const user = userEvent.setup();
