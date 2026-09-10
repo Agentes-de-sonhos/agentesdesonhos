@@ -33,6 +33,7 @@ vi.mock("@/hooks/useTravelFiles", () => ({
     isLoading: false,
     isFetching: false,
     error: null,
+    refetch: vi.fn(),
     saveCompany: { mutateAsync: vi.fn(), isPending: false },
   }),
 }));
@@ -165,10 +166,11 @@ describe("edição de rascunho: correção de contratante", () => {
     expect(screen.queryByText("Quem está contratando")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /Salvar alterações/i }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
-    expect(onSave.mock.calls[0][0]).toMatchObject({
-      contractorType: "individual",
-      clientId: SYNTHETIC_CLIENT.id,
-      companyId: null,
-    });
+    // Nenhum vínculo é reenviado: campo oculto não é alterado nem apagado.
+    const sent = onSave.mock.calls[0][0];
+    expect("contractorType" in sent).toBe(false);
+    expect("clientId" in sent).toBe(false);
+    expect("companyId" in sent).toBe(false);
+    expect("contactClientId" in sent).toBe(false);
   });
 });
