@@ -43,10 +43,12 @@ import { FILE_STATUS_LABELS, SERVICE_STATUS_LABELS } from "@/lib/travelFiles";
 import {
   describeFileEvent,
   fileStatusStep,
+  groupServiceFinancialsByCurrency,
   nextFileStatus,
   summarizeServiceFinancials,
   suggestFileStatusFromServices,
 } from "@/lib/travelFileWorkflow";
+
 import type {
   TravelFileService,
   TravelFileServiceStatus,
@@ -179,7 +181,17 @@ export default function ProcessoReserva() {
 
   const services = data?.services ?? [];
   const totals = useMemo(() => summarizeServiceFinancials(services), [services]);
+  /**
+   * Reserva manual: o valor efetivo é o dos serviços lançados, agrupado por
+   * moeda. Solicitações do site continuam com os valores congelados do file —
+   * nada é recalculado nem convertido sem taxa de câmbio.
+   */
+  const currencyGroups = useMemo(() => {
+    if (file?.origin !== "manual") return [];
+    return groupServiceFinancialsByCurrency(services, file?.currency);
+  }, [services, file?.origin, file?.currency]);
   const suggested = useMemo(() => suggestFileStatusFromServices(services), [services]);
+
 
   const updateFileStatus = async (status: TravelFileStatus, reason?: string) => {
     if (!file) return;
@@ -294,6 +306,31 @@ export default function ProcessoReserva() {
   const next = nextFileStatus(file.status);
   // Reservas cadastradas à mão podem ter dados e serviços editados aqui.
   const isManual = file.origin === "manual";
+
+  /** Um valor por moeda, lado a lado — sem somar nem converter moedas. */
+  const groupedMoney = (key: "requested" | "reconfirmed" | "sold") =>
+    currencyGroups.length === 0
+      ? "—"
+      : currencyGroups.map((group) => money(group[key], group.currency)).join(" · ");
+
+  /**
+   * Cartões financeiros por moeda. A margem só é exibida quando há permissão de
+   * receita E de margem: com a receita removida ela seria calculada contra zero.
+   */
+  const financialCards = (
+    isManual && currencyGroups.length > 0
+      ? currencyGroups
+      : [{ currency: file.currency, ...totals }]
+  ).map((group) => ({
+    currency: group.currency,
+    items: [
+      ...(canMargin ? [{ label: "Custo", value: group.cost }] : []),
+      ...(canCommission ? [{ label: "Comissão", value: group.commission }] : []),
+      ...(canMargin && canRevenue ? [{ label: "Margem", value: group.margin }] : []),
+      ...(canRevenue ? [{ label: "Variação vs. solicitado", value: group.variation }] : []),
+    ],
+  })).filter((card) => card.items.length > 0);
+
 
   return (
     <DashboardLayout>
@@ -490,24 +527,36 @@ export default function ProcessoReserva() {
                 value: `${file.passengers_count} (${file.adults_count} adulto(s), ${file.children_count} criança(s))`,
               },
               ...(canRevenue
-                ? [
-                    { label: "Valor solicitado", value: money(file.requested_amount, file.currency) },
-                    {
-                      label: "Valor reconfirmado",
-                      value:
-                        file.reconfirmed_amount != null
-                          ? money(file.reconfirmed_amount, file.currency)
-                          : "Aguardando reconfirmação",
-                    },
-                    {
-                      label: "Venda final",
-                      value:
-                        file.final_sale_amount != null
-                          ? money(file.final_sale_amount, file.currency)
-                          : "—",
-                    },
-                  ]
+                ? isManual
+                  ? [
+                      // Reserva manual: soma dos serviços por moeda (cada
+                      // requested_amount já é o total do serviço).
+                      {
+                        label: "Valor dos serviços (solicitado)",
+                        value: groupedMoney("requested"),
+                      },
+                      { label: "Valor reconfirmado", value: groupedMoney("reconfirmed") },
+                      { label: "Valor de venda", value: groupedMoney("sold") },
+                    ]
+                  : [
+                      { label: "Valor solicitado", value: money(file.requested_amount, file.currency) },
+                      {
+                        label: "Valor reconfirmado",
+                        value:
+                          file.reconfirmed_amount != null
+                            ? money(file.reconfirmed_amount, file.currency)
+                            : "Aguardando reconfirmação",
+                      },
+                      {
+                        label: "Venda final",
+                        value:
+                          file.final_sale_amount != null
+                            ? money(file.final_sale_amount, file.currency)
+                            : "—",
+                      },
+                    ]
                 : []),
+
               { label: "Aberto em", value: format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR }) },
               { label: "Protocolo original", value: file.protocol_snapshot || "—" },
               {
@@ -581,12 +630,25 @@ export default function ProcessoReserva() {
               {isManual ? "Serviços da reserva" : "Serviços solicitados"}
             </h2>
             <div className="flex flex-wrap items-center gap-2">
-              {canRevenue && (
-                <span className="text-xs text-muted-foreground">
-                  Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-                  {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
-                </span>
-              )}
+              {canRevenue &&
+                (isManual ? (
+                  // Um resumo por moeda: nada é somado entre moedas diferentes.
+                  <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                    {currencyGroups.length === 0
+                      ? "Sem serviços lançados"
+                      : currencyGroups
+                          .map(
+                            (group) =>
+                              `${group.currency}: solicitado ${money(group.requested, group.currency)} · reconfirmado ${money(group.reconfirmed, group.currency)} · venda ${money(group.sold, group.currency)}`,
+                          )
+                          .join(" | ")}
+                  </span>
+                ) : (
+                  <span className="text-xs text-muted-foreground">
+                    Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
+                    {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
+                  </span>
+                ))}
               {isManual && canManage && (
                 <Button
                   variant="outline"
@@ -604,25 +666,31 @@ export default function ProcessoReserva() {
             </div>
           </div>
 
-          <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {[
-              ...(canMargin ? [{ label: "Custo", value: totals.cost }] : []),
-              ...(canCommission ? [{ label: "Comissão", value: totals.commission }] : []),
-              ...(canMargin ? [{ label: "Margem", value: totals.margin }] : []),
-              ...(canRevenue
-                ? [{ label: "Variação vs. solicitado", value: totals.variation }]
-                : []),
-            ].map((item) => (
-              <div key={item.label} className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {item.label}
+          {financialCards.map((card) => (
+            <div key={card.currency} className="mb-3 min-w-0">
+              {financialCards.length > 1 && (
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Totais em {card.currency}
                 </p>
-                <p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
-                  {money(item.value, file.currency)}
-                </p>
+              )}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {card.items.map((item) => (
+                  <div
+                    key={`${card.currency}-${item.label}`}
+                    className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {item.label}
+                    </p>
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
+                      {money(item.value, card.currency)}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+
 
           <div className="space-y-2">
             {services.map((service) => (

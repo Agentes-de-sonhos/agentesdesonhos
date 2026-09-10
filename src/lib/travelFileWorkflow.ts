@@ -116,6 +116,41 @@ export function summarizeServiceFinancials(services: TravelFileService[]): Trave
   };
 }
 
+/** Consolidação financeira de um grupo de moeda (nunca mistura moedas). */
+export interface TravelFileCurrencyFinancials extends TravelFileFinancials {
+  currency: string;
+  servicesCount: number;
+}
+
+/**
+ * Agrupa os serviços por moeda e aplica o MESMO cálculo por grupo.
+ * Valores em moedas diferentes nunca são somados nem convertidos: sem taxa
+ * de câmbio, cada moeda tem o seu próprio total.
+ */
+export function groupServiceFinancialsByCurrency(
+  services: TravelFileService[],
+  fallbackCurrency = "BRL",
+): TravelFileCurrencyFinancials[] {
+  const groups = new Map<string, TravelFileService[]>();
+  for (const service of services) {
+    if (service.status === "cancelled") continue;
+    const currency = (service.currency || fallbackCurrency || "BRL").toUpperCase();
+    const bucket = groups.get(currency);
+    if (bucket) bucket.push(service);
+    else groups.set(currency, [service]);
+  }
+
+  const fallback = (fallbackCurrency || "BRL").toUpperCase();
+  return Array.from(groups.entries())
+    .sort(([a], [b]) => (a === fallback ? -1 : b === fallback ? 1 : a.localeCompare(b)))
+    .map(([currency, list]) => ({
+      currency,
+      servicesCount: list.length,
+      ...summarizeServiceFinancials(list),
+    }));
+}
+
+
 export interface ReservasIndicators {
   total: number;
   unread: number;
@@ -220,4 +255,18 @@ export function describeFileEvent(
     default:
       return event.event_type;
   }
+}
+
+/**
+ * Rótulo curto dos totais por moeda (lista da Central). Cada moeda aparece
+ * separada: sem taxa de câmbio, somar ou converter seria informação errada.
+ */
+export function manualTotalsLabel(
+  groups: { currency: string; requested?: number; reconfirmed?: number; sold?: number }[],
+  format: (value: number, currency: string) => string,
+): string {
+  if (!groups || groups.length === 0) return "Sem valores lançados";
+  return groups
+    .map((g) => format(num(g.sold ?? g.reconfirmed ?? g.requested), g.currency))
+    .join(" · ");
 }

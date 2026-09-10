@@ -80,7 +80,27 @@ export interface TravelFile {
   contact_client_id: string | null;
   contact_snapshot: TravelFileContactSnapshot;
   trip_name: string | null;
+  /**
+   * Totais por moeda derivados dos serviços — só existem em reservas de
+   * origem manual e apenas com as permissões financeiras correspondentes.
+   * Não substituem nem sobrescrevem os valores congelados das solicitações web.
+   */
+  manual_totals?: TravelFileManualCurrencyTotals[] | null;
 }
+
+/** Total por moeda calculado na consulta, sem somar moedas diferentes. */
+export interface TravelFileManualCurrencyTotals {
+  currency: string;
+  services_count: number;
+  requested?: number;
+  reconfirmed?: number;
+  sold?: number;
+  cost?: number;
+  commission?: number;
+  margin?: number;
+  variation?: number;
+}
+
 
 export interface TravelFileService {
   id: string;
