@@ -236,26 +236,27 @@ export function ReservasTab() {
         ))}
       </div>
 
-      {can.revenue && (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Valor solicitado (página atual)
-            </p>
-            <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">
-              {money(pageAmounts.requested, pageAmounts.currency)}
-            </p>
+      {can.revenue &&
+        pageAmounts.map((totals) => (
+          <div key={totals.currency} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Valor solicitado em {totals.currency} (página atual)
+              </p>
+              <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">
+                {money(totals.requested, totals.currency)}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Vendas confirmadas em {totals.currency} (página atual)
+              </p>
+              <p className="mt-0.5 text-base font-semibold tabular-nums text-emerald-600">
+                {money(totals.confirmed, totals.currency)}
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Vendas confirmadas (página atual)
-            </p>
-            <p className="mt-0.5 text-base font-semibold tabular-nums text-emerald-600">
-              {money(pageAmounts.confirmed, pageAmounts.currency)}
-            </p>
-          </div>
-        </div>
-      )}
+        ))}
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 sm:max-w-[420px]">
