@@ -161,3 +161,46 @@ describe("SQL: agregado por moeda é derivação, não gravação", () => {
     expect(migration).not.toMatch(/UPDATE\s+public\.travel_file_services/i);
   });
 });
+
+describe("mapeamento da listagem preserva a projeção do servidor", async () => {
+  const { mapTravelFileRow } = await import("@/hooks/useTravelFiles");
+
+  it("sem permissão financeira não há agregados numéricos no item", () => {
+    const item = mapTravelFileRow({
+      id: "f1",
+      origin: "manual",
+      currency: "BRL",
+      manual_totals: [{ currency: "brl", services_count: 2 }],
+    });
+    expect(item.manual_totals).toEqual([{ currency: "BRL", services_count: 2 }]);
+    expect(item.manual_totals?.[0]).not.toHaveProperty("requested");
+    expect(item.manual_totals?.[0]).not.toHaveProperty("margin");
+  });
+
+  it("reserva do site não recebe agregado derivado", () => {
+    const item = mapTravelFileRow({
+      id: "f2",
+      origin: "web_quote",
+      currency: "BRL",
+      requested_amount: "2500",
+      manual_totals: null,
+    });
+    expect(item.manual_totals).toBeNull();
+    expect(item.requested_amount).toBe(2500);
+  });
+
+  it("agregados presentes são convertidos para número", () => {
+    const item = mapTravelFileRow({
+      id: "f3",
+      origin: "manual",
+      currency: "BRL",
+      manual_totals: [{ currency: "USD", services_count: 1, requested: "100.5", cost: "20" }],
+    });
+    expect(item.manual_totals?.[0]).toEqual({
+      currency: "USD",
+      services_count: 1,
+      requested: 100.5,
+      cost: 20,
+    });
+  });
+});
