@@ -16,6 +16,7 @@ import {
   Calendar,
   Loader2,
   MapPin,
+  Plus,
   RefreshCw,
   Search,
   SlidersHorizontal,
