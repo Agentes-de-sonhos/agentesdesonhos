@@ -95,11 +95,16 @@ Use **dados fictícios**; não é necessário criar usuários ou senhas.
 
 Testado (automatizado, fixtures sintéticas):
 
-- Lote focado da Central/Clientes reexecutado nesta rodada: **12 arquivos, 152 testes**,
-  todos passando. `tsgo --noEmit` e `vite build` sem erros.
+- Rodada da moeda do serviço (mais recente): teste novo atravessa o caminho real
+  ProcessoReserva → diálogo → hook/RPC — **2 testes** passando (edição de serviço USD em
+  reserva BRL preserva USD no rótulo e no payload; serviço novo usa BRL e refaz as consultas
+  de ficha e lista). Regressões relacionadas: **4 arquivos, 61 testes** passando.
+  `tsgo --noEmit` e `vite build` sem erros.
+- Rodada anterior (CRM/edição): 12 arquivos, 152 testes, todos passando.
 - Comportamento de interface: criação PF/PJ, patch parcial da edição, seletor de contratante,
   painel de empresas (abertura única, erro com "Tentar novamente", lista vazia), serviço manual
-  (valores pt-BR "1.500,00"/"1500,50"), totais por moeda, reset ao trocar de identidade.
+  (valores pt-BR "1.500,00"/"1500,50", precedência da moeda do serviço), totais por moeda,
+  reset ao trocar de identidade.
 - Revisão de contrato do SQL efetivamente aplicado: gates, isolamento por agência, projeção
   financeira por permissão, agregado só para origem manual, ausência de gravação nos totais e
   cadastro PJ sem dependência de Reservas.
