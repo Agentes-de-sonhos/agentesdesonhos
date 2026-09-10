@@ -87,7 +87,7 @@ describe("edição de rascunho: correção de contratante", () => {
       <EditarRascunhoDialog
         open
         onOpenChange={() => {}}
-        file={draft()}
+        file={draft({ client_id: "old-id" })}
         currentClient={{ id: "old-id", name: "Pessoa Antiga" }}
         canEditContractor
         onSave={onSave}
@@ -101,11 +101,9 @@ describe("edição de rascunho: correção de contratante", () => {
 
     await userEvent.click(screen.getByRole("button", { name: /Salvar alterações/i }));
     await waitFor(() => expect(onSave).toHaveBeenCalled());
-    expect(onSave.mock.calls[0][0]).toMatchObject({
-      contractorType: "individual",
-      clientId: SYNTHETIC_CLIENT.id,
-      companyId: null,
-    });
+    // só o vínculo realmente alterado é enviado
+    expect(onSave.mock.calls[0][0]).toMatchObject({ clientId: SYNTHETIC_CLIENT.id });
+    expect("contractorType" in onSave.mock.calls[0][0]).toBe(false);
   });
 
   it("troca de PF para PJ mantendo client_id e company_id separados e grava contato", async () => {
