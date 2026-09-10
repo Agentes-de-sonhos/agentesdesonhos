@@ -106,6 +106,13 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
     if (open) setManualKey(newManualKey());
   }, [open]);
 
+  // Trocar de conta na mesma aba nunca mantém contratante de outra agência.
+  useEffect(() => {
+    setSelectedClient(null);
+    setSelectedCompany(null);
+    setSelectedContact(null);
+  }, [user?.id]);
+
   const clientId = selectedClient?.id ?? null;
   const companyId = selectedCompany?.id ?? null;
   const contactClientId = selectedContact?.id ?? null;
