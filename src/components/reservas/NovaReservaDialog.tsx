@@ -67,12 +67,15 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
     if (open) setManualKey(newManualKey());
   }, [open]);
 
-  // Trocar de conta na mesma aba nunca mantém contratante de outra agência.
+  // Trocar de conta/agência na mesma aba descarta TODO o rascunho — inclusive
+  // viagem, datas e o nome de nova empresa — e começa uma nova intenção de
+  // cadastro. Nada da conta anterior pode reaparecer ou ser salvo pela nova.
   useEffect(() => {
-    setSelectedClient(null);
-    setSelectedCompany(null);
-    setSelectedContact(null);
+    reset();
+    setManualKey(newManualKey());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
+
 
   const clientId = selectedClient?.id ?? null;
   const companyId = selectedCompany?.id ?? null;
