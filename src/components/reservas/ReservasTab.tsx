@@ -119,6 +119,7 @@ export function ReservasTab() {
 
   const [search, setSearch] = useState(urlSearch);
   const [showAdvanced, setShowAdvanced] = useState(!!(from || to || responsible !== "all" || unreadOnly));
+  const [novaReserva, setNovaReserva] = useState(false);
 
   /** Valores padrão nunca poluem a URL (o parâmetro é removido). */
   const DEFAULTS: Record<ParamKey, string> = {
