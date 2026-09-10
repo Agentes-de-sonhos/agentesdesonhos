@@ -14,7 +14,8 @@ const all = files.map((f) => readFileSync(join(DIR, f), "utf8")).join("\n");
 function lastDefinition(name: string): string {
   const parts = all.split(new RegExp(`CREATE OR REPLACE FUNCTION (?:public|private)\\.${name}\\b`));
   const tail = parts[parts.length - 1];
-  const end = tail.search(/\nREVOKE ALL ON FUNCTION/);
+  // Corta no fim da definição: REVOKE seguinte ou início de outra definição.
+  const end = tail.search(/\nREVOKE ALL ON FUNCTION|\n-- [-]{4}|\nCREATE OR REPLACE FUNCTION/);
   return end > 0 ? tail.slice(0, end) : tail;
 }
 
