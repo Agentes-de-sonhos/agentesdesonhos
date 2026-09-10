@@ -147,11 +147,29 @@ export function EditarRascunhoDialog({
         <DialogHeader>
           <DialogTitle>Editar dados da reserva</DialogTitle>
           <DialogDescription>
-            Ajuste a viagem, o destino, as datas e os passageiros. Nada aqui confirma a venda.
+            {canEditContractor
+              ? "Corrija o contratante, o contato responsável, a viagem, as datas e os passageiros. Nada aqui confirma a venda."
+              : "Ajuste a viagem, o destino, as datas e os passageiros. Nada aqui confirma a venda."}
           </DialogDescription>
         </DialogHeader>
 
+        {canEditContractor && (
+          <ContractorPicker
+            active={open}
+            idPrefix="rascunho"
+            contractorType={contractorType}
+            onContractorTypeChange={setContractorType}
+            selectedClient={selectedClient}
+            onSelectClient={setSelectedClient}
+            selectedCompany={selectedCompany}
+            onSelectCompany={setSelectedCompany}
+            selectedContact={selectedContact}
+            onSelectContact={setSelectedContact}
+          />
+        )}
+
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+
           <div className="min-w-0 space-y-2">
             <Label htmlFor="rascunho-viagem">Nome da viagem</Label>
             <Input
