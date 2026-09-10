@@ -141,6 +141,7 @@ const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
 const ProcessoReserva = lazy(() => import("./pages/ProcessoReserva"));
+const CentralReservas = lazy(() => import("./pages/CentralReservas"));
 const ProximasViagens = lazy(() => import("./pages/ProximasViagens"));
 const Sorteador = lazy(() => import("./pages/Sorteador"));
 const CardCaptureQuickAccess = lazy(() => import("./pages/CardCaptureQuickAccess"));
@@ -303,6 +304,7 @@ const App = () => {
               <Route path="/agenda-trade" element={<AgendaTrade />} />
               <Route path="/ferramentas-ia" element={<FerramentasIA />} />
               <Route path="/meus-projetos" element={<MeusProjetos />} />
+              <Route path="/reservas" element={<CentralReservas />} />
               <Route path="/reservas/:id" element={<ProcessoReserva />} />
               <Route path="/proximas-viagens" element={<ProximasViagens />} />
               <Route path="/sorteador" element={<Sorteador />} />
