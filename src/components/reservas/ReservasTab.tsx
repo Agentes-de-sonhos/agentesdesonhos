@@ -304,7 +304,19 @@ export function ReservasTab() {
           <SlidersHorizontal className="h-4 w-4" />
           Filtros
         </Button>
+        {can.manage && (
+          <Button type="button" size="sm" className="h-10 gap-2" onClick={() => setNovaReserva(true)}>
+            <Plus className="h-4 w-4" />
+            Nova reserva
+          </Button>
+        )}
       </div>
+
+      <NovaReservaDialog
+        open={novaReserva}
+        onOpenChange={setNovaReserva}
+        onCreated={({ fileId }) => navigate(nav.reservas(fileId))}
+      />
 
       {showAdvanced && (
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:grid-cols-3">
