@@ -67,6 +67,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   const [companySearch, setCompanySearch] = useState("");
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [newCompanyName, setNewCompanyName] = useState("");
+  const [contactSearch, setContactSearch] = useState("");
   const [contactClientId, setContactClientId] = useState<string | null>(null);
   const [tripName, setTripName] = useState("");
   const [destination, setDestination] = useState("");
@@ -78,7 +79,9 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   // Chave de intenção: um clique duplo nunca gera duas reservas.
   const [manualKey, setManualKey] = useState(newManualKey);
 
-  const clients = useClientSearch(clientSearch, open);
+  const clients = useClientSearch(clientSearch, open && contractorType === "individual");
+  // Busca separada para o contato responsável da empresa.
+  const contacts = useClientSearch(contactSearch, open && contractorType === "company");
   const { companies, isFetching: loadingCompanies, saveCompany } = useAgencyCompanies(
     companySearch,
     open && contractorType === "company",
@@ -103,6 +106,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
     setCompanySearch("");
     setCompanyId(null);
     setNewCompanyName("");
+    setContactSearch("");
     setContactClientId(null);
     setTripName("");
     setDestination("");
@@ -315,17 +319,17 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="reserva-contato"
-                    value={clientSearch}
-                    onChange={(e) => setClientSearch(e.target.value)}
+                    value={contactSearch}
+                    onChange={(e) => setContactSearch(e.target.value)}
                     placeholder="Buscar pessoa já cadastrada..."
                     className="pl-9"
                   />
                 </div>
                 <div className="max-h-32 overflow-y-auto rounded-lg border border-border/60">
-                  {(clients.data || []).length === 0 ? (
+                  {(contacts.data || []).length === 0 ? (
                     <p className="p-3 text-xs text-muted-foreground">Nenhuma pessoa encontrada.</p>
                   ) : (
-                    (clients.data || []).map((c) => (
+                    (contacts.data || []).map((c) => (
                       <button
                         key={c.id}
                         type="button"

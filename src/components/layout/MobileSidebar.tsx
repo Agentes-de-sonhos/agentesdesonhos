@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Lock,
   Calculator,
+  ClipboardList,
   Heart,
   ChevronRight,
   ChevronLeft,
@@ -181,6 +182,29 @@ const clientesSection: MenuSection = {
   ],
 };
 
+// Central de Reservas: entra depois da Gestão de Clientes e antes do
+// Financeiro, com a mesma lista compartilhada do painel da agência.
+const reservasSection: MenuSection = {
+  title: "CENTRAL DE RESERVAS",
+  key: "section_reservas",
+  icon: ClipboardList,
+  hoverColor: "hover:bg-indigo-600 hover:text-white",
+  headerBg: "bg-indigo-600 text-white",
+  headerHoverBg: "hover:bg-indigo-700",
+  bgColor: "bg-indigo-50",
+  textColor: "text-indigo-700",
+  borderColor: "border-indigo-600",
+  items: [
+    {
+      key: "central_reservas",
+      title: "Reservas",
+      url: "/reservas",
+      icon: ClipboardList,
+      requiredFeature: "crm_basic",
+    },
+  ],
+};
+
 const financeiroSection: MenuSection = {
   title: "GESTÃO FINANCEIRA",
   key: "section_financeiro",
@@ -247,7 +271,7 @@ export function MobileSidebar() {
 
   // Same order as desktop
   const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, financeiroSection, marketingSection],
+    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, clientesSection, reservasSection, financeiroSection, marketingSection],
     []
   );
 

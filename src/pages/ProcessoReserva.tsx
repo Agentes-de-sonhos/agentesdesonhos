@@ -20,6 +20,8 @@ import {
   FileText,
   Loader2,
   Lock,
+  Pencil,
+  Plus,
   Trash2,
   Users,
 } from "lucide-react";
@@ -49,6 +51,11 @@ import type {
   TravelFileStatus,
 } from "@/types/travelFile";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { EditarRascunhoDialog } from "@/components/reservas/EditarRascunhoDialog";
+import {
+  ManualServiceDialog,
+  type ManualServicePayload,
+} from "@/components/reservas/ManualServiceDialog";
 
 const money = (value: number | null | undefined, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -131,7 +138,11 @@ export default function ProcessoReserva() {
   const backToList = nav.isAgencyAdmin ? nav.reservas() : "/meus-projetos?tab=reservas";
   const { data, isLoading } = useTravelFile(id);
   const { members, memberNames } = useAgencyTeamDirectory();
-  const { setStatus, setResponsibles, saveService } = useTravelFileMutations(id);
+  const { setStatus, setResponsibles, saveService, saveManualData, saveManualService } =
+    useTravelFileMutations(id);
+  const [editDraftOpen, setEditDraftOpen] = useState(false);
+  const [manualServiceOpen, setManualServiceOpen] = useState(false);
+  const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
   const { can } = usePermissions();
   // Interface segue as permissões; a autoridade final é o servidor.
   // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
@@ -272,6 +283,8 @@ export default function ProcessoReserva() {
   }
 
   const next = nextFileStatus(file.status);
+  // Reservas cadastradas à mão podem ter dados e serviços editados aqui.
+  const isManual = file.origin === "manual";
 
   return (
     <DashboardLayout>
@@ -423,11 +436,44 @@ export default function ProcessoReserva() {
 
         {/* Visão geral */}
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">Visão geral</h2>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold text-foreground">Visão geral</h2>
+            {isManual && canManage && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setEditDraftOpen(true)}
+              >
+                <Pencil className="h-4 w-4" />
+                Editar dados
+              </Button>
+            )}
+          </div>
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { label: "Cliente", value: data?.client?.name || file.protocol_snapshot || "—" },
-              { label: "Contato", value: data?.client?.phone || data?.client?.email || "—" },
+              {
+                label: file.contractor_type === "company" ? "Empresa contratante" : "Contratante",
+                value:
+                  data?.company?.name ||
+                  data?.client?.name ||
+                  file.protocol_snapshot ||
+                  "—",
+              },
+              {
+                label: "Contato responsável",
+                value:
+                  data?.contact?.name ||
+                  data?.client?.phone ||
+                  data?.client?.email ||
+                  (file.contact_snapshot as any)?.name ||
+                  "—",
+              },
+              {
+                label: "Origem",
+                value: isManual ? "Cadastro interno da agência" : "Solicitação pelo site",
+              },
+              { label: "Viagem", value: file.trip_name || "—" },
               { label: "Destino", value: file.primary_destination || "—" },
               { label: "Período", value: `${dateLabel(file.start_date)} — ${dateLabel(file.end_date)}` },
               {
@@ -522,13 +568,31 @@ export default function ProcessoReserva() {
         {/* Serviços */}
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-sm font-semibold text-foreground">Serviços solicitados</h2>
-            {canRevenue && (
-              <span className="text-xs text-muted-foreground">
-                Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-                {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
-              </span>
-            )}
+            <h2 className="text-sm font-semibold text-foreground">
+              {isManual ? "Serviços da reserva" : "Serviços solicitados"}
+            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              {canRevenue && (
+                <span className="text-xs text-muted-foreground">
+                  Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
+                  {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
+                </span>
+              )}
+              {isManual && canManage && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    setManualServiceEditing(null);
+                    setManualServiceOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Acrescentar serviço
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -562,6 +626,20 @@ export default function ProcessoReserva() {
                     {service.product_name}
                   </p>
                   {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
+                  {isManual && canManage && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto gap-2"
+                      onClick={() => {
+                        setManualServiceEditing(service);
+                        setManualServiceOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </Button>
+                  )}
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                   {service.city && <span>{service.city}</span>}
@@ -722,6 +800,37 @@ export default function ProcessoReserva() {
             )}
           </ol>
         </Card>
+
+        {isManual && canManage && (
+          <>
+            <EditarRascunhoDialog
+              open={editDraftOpen}
+              onOpenChange={setEditDraftOpen}
+              file={file}
+              onSave={async (input) => {
+                await saveManualData.mutateAsync(input);
+                toast.success("Dados da reserva atualizados.");
+              }}
+            />
+            <ManualServiceDialog
+              open={manualServiceOpen}
+              onOpenChange={(next) => {
+                setManualServiceOpen(next);
+                if (!next) setManualServiceEditing(null);
+              }}
+              service={manualServiceEditing}
+              canEditAmount={canFinancialManage}
+              currency={file.currency}
+              onSave={async (payload: ManualServicePayload) => {
+                await saveManualService.mutateAsync({
+                  ...payload,
+                  currency: file.currency,
+                });
+                toast.success("Serviço salvo.");
+              }}
+            />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );
