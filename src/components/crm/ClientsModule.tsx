@@ -82,6 +82,7 @@ import { CLIENT_STATUS_LABELS, CLIENT_STATUS_COLORS } from "@/types/crm";
 import { cn } from "@/lib/utils";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { useQueryClient } from "@tanstack/react-query";
+import { AgencyCompaniesPanel } from "@/components/crm/AgencyCompaniesPanel";
 import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
 import { KanbanToolbarSlot } from "@/components/crm/kanban/KanbanToolbarSlot";
 import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
@@ -172,6 +173,7 @@ export function ClientsModule() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [contactView, setContactView] = useState<"pessoas" | "empresas">("pessoas");
 
   const debouncedSearch = useDebouncedValue(search);
 
@@ -643,7 +645,31 @@ export function ClientsModule() {
         </Dialog>
       </div>
 
-      {isLoading ? (
+      {/* Pessoas x Empresas: a mesma área atende contratantes PF e PJ. */}
+      <div className="inline-flex rounded-xl border border-border/60 bg-muted/30 p-1">
+        {([
+          { key: "pessoas", label: "Pessoas" },
+          { key: "empresas", label: "Empresas" },
+        ] as const).map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            aria-pressed={contactView === tab.key}
+            onClick={() => setContactView(tab.key)}
+            className={
+              contactView === tab.key
+                ? "rounded-lg bg-background px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm"
+                : "rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+            }
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {contactView === "empresas" ? (
+        <AgencyCompaniesPanel />
+      ) : isLoading ? (
         <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
           <div className="flex items-center justify-center py-16">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
