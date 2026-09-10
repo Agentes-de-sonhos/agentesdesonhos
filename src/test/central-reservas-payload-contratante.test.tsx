@@ -149,7 +149,9 @@ describe("edição de rascunho: campo não alterado nunca é apagado", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Pessoa" }));
+    console.log("PRESSED", screen.getByRole("button", { name: "Pessoa" }).getAttribute("aria-pressed"));
     await user.click(await screen.findByText(SYNTHETIC_CLIENT.name));
+    console.log("SEL", screen.queryByText(/Selecionado:/)?.textContent);
     await user.click(screen.getByRole("button", { name: /Salvar alterações/i }));
 
     await waitFor(() => expect(rpc).toHaveBeenCalled());
