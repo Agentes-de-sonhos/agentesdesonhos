@@ -101,9 +101,12 @@ export function ManualServiceDialog({
     }
     let parsedAmount: number | null = null;
     if (canEditAmount && amount.trim()) {
-      parsedAmount = Number(amount.trim().replace(",", "."));
-      if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
-        setFieldError("Informe um valor válido.");
+      // Aceita o jeito brasileiro de escrever ("1.500,00") e também "1500.50".
+      const digitsOnly = amount.replace(/[^\d.,-]/g, "");
+      const valid = digitsOnly.length > 0 && /^-?[\d.,]+$/.test(digitsOnly);
+      parsedAmount = valid ? parsePastedCurrency(amount) : null;
+      if (parsedAmount == null || !Number.isFinite(parsedAmount) || parsedAmount < 0) {
+        setFieldError("Informe um valor válido, por exemplo 1.500,00.");
         return;
       }
     }
