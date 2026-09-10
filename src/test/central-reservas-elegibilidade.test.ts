@@ -14,7 +14,8 @@ const all = files.map((f) => readFileSync(join(DIR, f), "utf8")).join("\n");
 function lastDefinition(name: string): string {
   const parts = all.split(new RegExp(`CREATE OR REPLACE FUNCTION (?:public|private)\\.${name}\\b`));
   const tail = parts[parts.length - 1];
-  const end = tail.search(/\nREVOKE ALL ON FUNCTION/);
+  // Corta no fim da definição: REVOKE seguinte ou início de outra definição.
+  const end = tail.search(/\nREVOKE ALL ON FUNCTION|\n-- [-]{4}|\nCREATE OR REPLACE FUNCTION/);
   return end > 0 ? tail.slice(0, end) : tail;
 }
 
@@ -197,12 +198,31 @@ describe("cadastro de empresas exige elegibilidade comercial", () => {
   const save = lastDefinition("agency_company_save");
 
   it("grava somente com elegibilidade, além de clients.create/edit", () => {
-    expect(save).toMatch(/IF NOT public\.can_use_reservations_center\(\) THEN/);
+    expect(save).toMatch(/private\.reservations_owner_is_eligible\(v_agency\)/);
     expect(save).toMatch(/can_team\('clients\.create'\)/);
     expect(save).toMatch(/can_team\('clients\.edit'\)/);
-    const gateIndex = save.indexOf("can_use_reservations_center");
+    const gateIndex = save.indexOf("reservations_owner_is_eligible");
     expect(gateIndex).toBeGreaterThan(0);
     expect(gateIndex).toBeLessThan(save.indexOf("INSERT INTO public.companies"));
+  });
+
+  it("colaborador CRM-only grava sem reservations.view", () => {
+    // O gate do cadastro PJ é o da área de Clientes/CRM: não pode depender da
+    // Central de Reservas nem de permissão de reservas.
+    expect(save).not.toMatch(/can_use_reservations_center/);
+    expect(save).not.toMatch(/reservations\.view/);
+  });
+
+  it("nega vínculo inativo e admite admin/promotor", () => {
+    expect(save).toMatch(/v_member_status IS DISTINCT FROM 'active'::public\.team_member_status/);
+    expect(save).toMatch(/has_role\(v_uid, 'admin'::public\.app_role\)/);
+    expect(save).toMatch(/has_role\(v_uid, 'promotor'::public\.app_role\)/);
+  });
+
+  it("mantém isolamento por agência e validação do contato existente", () => {
+    expect(save).toMatch(/v_agency uuid := private\.reservations_agency_id\(\)/);
+    expect(save).toMatch(/co\.id = v_id AND co\.user_id = v_agency/);
+    expect(save).toMatch(/c\.id = v_contact AND c\.user_id = v_agency/);
   });
 
   it("busca e leitura de cadastros históricos não recebem gate", () => {
