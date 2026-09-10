@@ -361,6 +361,11 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                     ))
                   )}
                 </div>
+                {selectedContact && (
+                  <p className="text-xs text-muted-foreground">
+                    Contato: {selectedContact.name}
+                  </p>
+                )}
               </div>
             </div>
           )}
