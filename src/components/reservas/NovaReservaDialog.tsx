@@ -41,14 +41,11 @@ export interface NovaReservaDialogProps {
 export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReservaDialogProps) {
   const { user } = useAuth();
   const [contractorType, setContractorType] = useState<ContractorType>("individual");
-  const [clientSearch, setClientSearch] = useState("");
   // A escolha guarda o registro inteiro: o nome continua visível mesmo depois
   // de digitar outra busca, e nunca é enviado um contratante invisível.
   const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
-  const [companySearch, setCompanySearch] = useState("");
-  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<CompanyOption | null>(null);
   const [newCompanyName, setNewCompanyName] = useState("");
-  const [contactSearch, setContactSearch] = useState("");
   const [selectedContact, setSelectedContact] = useState<ClientOption | null>(null);
   const [tripName, setTripName] = useState("");
   const [destination, setDestination] = useState("");
@@ -60,20 +57,8 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   // Chave de intenção: um clique duplo nunca gera duas reservas.
   const [manualKey, setManualKey] = useState(newManualKey);
 
-  const clients = useClientSearch(
-    clientSearch,
-    open && contractorType === "individual",
-    user?.id,
-  );
-  // Busca separada para o contato responsável da empresa.
-  const contacts = useClientSearch(contactSearch, open && contractorType === "company", user?.id);
-  const {
-    companies,
-    isFetching: loadingCompanies,
-    error: companiesError,
-    refetch: refetchCompanies,
-    saveCompany,
-  } = useAgencyCompanies(companySearch, open && contractorType === "company");
+  // Só o cadastro rápido de empresa é usado aqui; a busca fica no seletor.
+  const { saveCompany } = useAgencyCompanies("", false);
   const createReservation = useCreateManualReservation();
 
   // Ao abrir, começa uma nova intenção de cadastro. O formulário só é limpo
@@ -92,16 +77,12 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   const clientId = selectedClient?.id ?? null;
   const companyId = selectedCompany?.id ?? null;
   const contactClientId = selectedContact?.id ?? null;
-  const clientName = selectedClient?.name || null;
 
   const reset = () => {
     setContractorType("individual");
-    setClientSearch("");
     setSelectedClient(null);
-    setCompanySearch("");
     setSelectedCompany(null);
     setNewCompanyName("");
-    setContactSearch("");
     setSelectedContact(null);
     setTripName("");
     setDestination("");
@@ -111,6 +92,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
     setChildren("0");
     setFieldError(null);
   };
+
 
   const submit = async () => {
     setFieldError(null);
