@@ -140,7 +140,25 @@ export function AgencyCompaniesPanel({
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         </Card>
+      ) : listError ? (
+        // Falha de rede ou de permissão nunca é apresentada como lista vazia:
+        // quem está cadastrando não deve ser levado a duplicar uma empresa.
+        <Card className="rounded-2xl border-border/60 p-10 text-center" role="alert">
+          <p className="text-sm font-medium text-destructive">
+            Não foi possível carregar as empresas agora. Verifique a conexão e tente novamente.
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="mt-3"
+            onClick={() => refetch()}
+          >
+            Tentar novamente
+          </Button>
+        </Card>
       ) : companies.length === 0 ? (
+
         <Card className="rounded-2xl border-border/60 p-10 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
             <Building2 className="h-5 w-5 text-muted-foreground" />
