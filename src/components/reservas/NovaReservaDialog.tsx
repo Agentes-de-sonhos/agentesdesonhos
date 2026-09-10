@@ -309,6 +309,11 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                     ))
                   )}
                 </div>
+                {selectedCompany && (
+                  <p className="text-xs text-muted-foreground">
+                    Selecionada: {selectedCompany.name}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reserva-nova-empresa">Ou cadastre uma nova empresa</Label>
