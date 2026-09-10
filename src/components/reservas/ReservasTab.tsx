@@ -73,10 +73,10 @@ function StatusPill({ status }: { status: TravelFileListItem["status"] }) {
       : status === "draft"
         ? "bg-muted text-muted-foreground ring-border/70"
         : status === "sale_confirmed" || status === "trip_completed"
-        ? "bg-emerald-50 text-emerald-700 ring-emerald-200/70"
-        : status === "request_received"
-          ? "bg-primary/10 text-primary ring-primary/20"
-          : "bg-amber-50 text-amber-700 ring-amber-200/70";
+          ? "bg-emerald-50 text-emerald-700 ring-emerald-200/70"
+          : status === "request_received"
+            ? "bg-primary/10 text-primary ring-primary/20"
+            : "bg-amber-50 text-amber-700 ring-amber-200/70";
   return (
     <span
       className={cn(
