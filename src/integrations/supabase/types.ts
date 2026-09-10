@@ -15767,6 +15767,7 @@ export type Database = {
       }
       can_use_internal_community: { Args: never; Returns: boolean }
       can_use_public_community: { Args: never; Returns: boolean }
+      can_use_reservations_center: { Args: never; Returns: boolean }
       cast_monthly_vote: {
         Args: { _nominee_user_id: string }
         Returns: {
