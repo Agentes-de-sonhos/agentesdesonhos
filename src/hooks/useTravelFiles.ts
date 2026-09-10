@@ -268,7 +268,12 @@ export function useTravelFilesSummary(enabled = true) {
   };
 }
 
-/** Detalhes de um processo de reserva: file, serviços congelados e histórico. */
+/**
+ * Detalhes de um processo de reserva: ficha, serviços, histórico e contratante.
+ * Sempre pela função segura travel_file_detail — o servidor resolve a agência,
+ * exige reservations.view, junta o histórico do site com o histórico interno e
+ * remove valores financeiros de quem não tem permissão para vê-los.
+ */
 export function useTravelFile(fileId?: string) {
   return useQuery({
     queryKey: ["travel-file", fileId],
@@ -276,51 +281,143 @@ export function useTravelFile(fileId?: string) {
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      const { data: file, error } = await sb
-        .from("travel_files")
-        .select("*")
-        .eq("id", fileId)
-        .maybeSingle();
+      const { data, error } = await sb.rpc("travel_file_detail", { _file_id: fileId });
       if (error) throw error;
-      if (!file) return null;
-
-      const typed = file as TravelFile;
-      const [servicesRes, eventsRes, clientRes, quoteRes] = await Promise.all([
-        sb
-          .from("travel_file_services")
-          .select("*")
-          .eq("file_id", typed.id)
-          .order("created_at", { ascending: true }),
-        sb
-          .from("quote_booking_request_events")
-          .select("id, event_type, actor_type, payload, created_at")
-          .eq("request_id", typed.current_request_id ?? typed.root_request_id)
-          .order("created_at", { ascending: true }),
-        typed.client_id
-          ? supabase
-              .from("clients")
-              .select("id, name, email, phone")
-              .eq("id", typed.client_id)
-              .maybeSingle()
-          : Promise.resolve({ data: null, error: null } as any),
-        typed.quote_id
-          ? sb
-              .from("quotes")
-              .select("id, status, public_access_code, client_name, destination, currency")
-              .eq("id", typed.quote_id)
-              .maybeSingle()
-          : Promise.resolve({ data: null, error: null } as any),
-      ]);
-
+      const payload = (data || null) as any;
+      if (!payload?.file) return null;
       return {
-        file: typed,
-        services: (servicesRes.data || []) as TravelFileService[],
-        events: (eventsRes.data || []) as any[],
-        client: (clientRes.data || null) as any,
-        quote: (quoteRes.data || null) as any,
+        file: payload.file as TravelFile,
+        services: (payload.services || []) as TravelFileService[],
+        events: (payload.events || []) as any[],
+        client: (payload.client || null) as any,
+        company: (payload.company || null) as any,
+        contact: (payload.contact || null) as any,
+        quote: (payload.quote || null) as any,
+        can: { ...EMPTY_CAN, ...(payload.can || {}) } as TravelFilesCapabilities,
       };
     },
   });
+}
+
+export interface ManualReservationInput {
+  manualKey: string;
+  contractorType: "individual" | "company";
+  clientId?: string | null;
+  companyId?: string | null;
+  contactClientId?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  tripName?: string | null;
+  primaryDestination?: string | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  adultsCount?: number;
+  childrenCount?: number;
+  currency?: string;
+}
+
+const manualPayload = (input: ManualReservationInput) => ({
+  manual_key: input.manualKey,
+  contractor_type: input.contractorType,
+  client_id: input.clientId || null,
+  company_id: input.companyId || null,
+  contact_client_id: input.contactClientId || null,
+  contact_name: input.contactName || null,
+  contact_email: input.contactEmail || null,
+  contact_phone: input.contactPhone || null,
+  trip_name: input.tripName || null,
+  primary_destination: input.primaryDestination || null,
+  start_date: input.startDate || null,
+  end_date: input.endDate || null,
+  adults_count: input.adultsCount ?? 1,
+  children_count: input.childrenCount ?? 0,
+  currency: input.currency || "BRL",
+});
+
+/**
+ * Cadastro manual de reserva. O registro nasce como RASCUNHO e não cria
+ * oportunidade, operação, orçamento, carteira nem lançamento financeiro.
+ * A chave de intenção evita dois cadastros no clique duplo.
+ */
+export function useCreateManualReservation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (
+      input: ManualReservationInput,
+    ): Promise<{ fileId: string; fileNumber: string; duplicate: boolean }> => {
+      const { data, error } = await sb.rpc("travel_file_create_manual", {
+        _payload: manualPayload(input),
+      });
+      if (error) throw error;
+      const payload = (data || {}) as any;
+      return {
+        fileId: payload.file_id as string,
+        fileNumber: (payload.file_number_display as string) || "",
+        duplicate: !!payload.duplicate,
+      };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["travel-files-page"] });
+      queryClient.invalidateQueries({ queryKey: ["travel-files-summary"] });
+    },
+  });
+}
+
+/** Empresas contratantes da agência (tabela companies), com busca no servidor. */
+export function useAgencyCompanies(search: string, enabled = true) {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["agency-companies", user?.id, search.trim()],
+    enabled: !!user?.id && enabled,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async (): Promise<AgencyCompany[]> => {
+      const { data, error } = await sb.rpc("agency_companies_search", {
+        _search: search.trim() || null,
+        _limit: 20,
+      });
+      if (error) throw error;
+      return (data || []) as AgencyCompany[];
+    },
+  });
+
+  const saveCompany = useMutation({
+    mutationFn: async (input: {
+      companyId?: string | null;
+      name: string;
+      tradeName?: string | null;
+      cnpj?: string | null;
+      email?: string | null;
+      phone?: string | null;
+      contactClientId?: string | null;
+    }): Promise<string> => {
+      const { data, error } = await sb.rpc("agency_company_save", {
+        _payload: {
+          company_id: input.companyId || null,
+          name: input.name,
+          trade_name: input.tradeName || null,
+          cnpj: input.cnpj || null,
+          email: input.email || null,
+          phone: input.phone || null,
+          contact_client_id: input.contactClientId || null,
+        },
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["agency-companies"] }),
+  });
+
+  return {
+    companies: query.data ?? [],
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    error: query.error as Error | null,
+    saveCompany,
+  };
 }
 
 /**
