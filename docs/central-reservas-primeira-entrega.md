@@ -38,3 +38,44 @@
 5. Repetir criando uma reserva de **Empresa**, cadastrando a empresa na hora.
 6. Em **Clientes**, alternar para **Empresas** e conferir busca, cadastro e edição.
 7. Conferir que orçamentos, oportunidades, operações, financeiro e carteiras seguem inalterados.
+
+## Revisão independente — correções aplicadas (10/09)
+
+Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
+`20260910134125_*.sql` (correções) e `20260910134156_*.sql` (permissão de uso das funções internas).
+
+1. Responsável da reserva validado por `agency_team_members.agency_id` + vínculo `active`
+   (a coluna `agency_owner_id` não existe); `reservations.assign` continua exigida.
+2. Serviços de reserva vinda do site não podem ser criados **nem editados** pela Central.
+3. Regras de etapa restauradas conforme o comportamento antigo (bloqueio de volta para
+   "Solicitação recebida" após a venda, `confirmed_at` em todas as etapas vendidas,
+   `completed_at` preservado no cancelamento). "Rascunho" foi somado sem mudar o resto.
+4. Fornecedor aceito só se for do catálogo global aprovado ou da própria agência
+   (`owner_agency_id`/`user_id`), não mais um `EXISTS` simples.
+5. Busca de empresas: parte numérica só é usada quando existe; texto sem números não
+   retorna mais todas as empresas e as letras seguem comparadas em nome e nome fantasia.
+6. Servidor valida intervalo de datas, moeda (BRL/USD/EUR), quantidades inteiras e valores
+   finitos/não negativos. Rascunho pode ficar sem passageiro (não inventa adulto).
+   Histórico interno passou a registrar tipo, quantidade, moeda, fornecedor, datas,
+   observações/snapshot e alterações de valores.
+7. Sanitização financeira recursiva (`private.reservations_redact`) aplicada ao file, aos
+   serviços com snapshot e aos dois históricos, cobrindo as chaves legadas
+   `sold_from/to`, `cost_from/to`, `commission_from/to`, `reconfirmed_from/to`.
+8. Leitura direta (bypass de RPC) das linhas **manuais**, dos seus serviços e da nova
+   `travel_file_events` restrita a quem tem receita + margem + comissão (ou admin), via
+   policies RESTRICTIVE. As linhas antigas (origem web) seguem legíveis como hoje para
+   não quebrar o frontend já publicado.
+9. Policies amplas `companies_agency_members_full_access` e
+   `client_companies_agency_members_full_access` removidas e substituídas por policies
+   por operação que preservam o proprietário e passam a exigir `clients.view/create/edit/delete`.
+10. Nenhuma operação, carteira, orçamento ou lançamento financeiro é criado direta ou
+    indiretamente; apenas `travel_files` manuais e seus serviços/eventos.
+
+### Pendências reais (não resolvidas nesta rodada)
+- **Endurecimento dos dados legados (origem web)**: a leitura direta dessas linhas continua
+  liberada para `reservations.view` porque o frontend publicado depende disso. O endurecimento
+  precisa de deploy coordenado (novo frontend por RPC + policy restritiva também para
+  `origin = 'web_quote'`). **O problema legado NÃO está eliminado.**
+- Validação visual autenticada (navegador, agência real) ainda não foi feita.
+- Rejeição cross-agência e redaction foram verificadas por contrato de SQL e catálogo do banco;
+  não houve execução autenticada em banco com usuários reais (proibido nesta fase).
