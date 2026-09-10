@@ -32,6 +32,11 @@ const SYNTHETIC_COMPANY = {
   contact_client_id: null,
 };
 
+// Identidade sintética: a busca de clientes é isolada por usuário.
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ user: { id: "99999999-9999-4999-8999-999999999999" } }),
+}));
+
 const createReservationMutate = vi.fn();
 const saveCompanyMutate = vi.fn();
 
