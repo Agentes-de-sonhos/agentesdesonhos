@@ -23,13 +23,14 @@ import { toast } from "sonner";
  * Reutiliza a tabela companies existente pelas RPCs seguras; uma empresa pode
  * existir sozinha e o contato responsável é sempre uma pessoa já cadastrada.
  */
-export function AgencyCompaniesPanel() {
+export function AgencyCompaniesPanel({ createSignal = 0 }: { createSignal?: number }) {
   const { can } = usePermissions();
   const canCreate = can("clients.create");
   const canEdit = can("clients.edit");
   const [search, setSearch] = useState("");
   const debounced = useDebouncedValue(search);
   const { companies, isLoading, isFetching, saveCompany } = useAgencyCompanies(debounced);
+
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<AgencyCompany | null>(null);
