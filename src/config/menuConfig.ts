@@ -13,6 +13,7 @@ export const MAIN_MENU_ITEMS: MenuItemConfig[] = [
   { key: "section_criar", label: "Criar", isSection: true, sectionKey: "criar" },
   { key: "section_conhecimento", label: "Conhecimento", isSection: true, sectionKey: "conhecimento" },
   { key: "section_clientes", label: "Clientes", isSection: true, sectionKey: "clientes" },
+  { key: "section_reservas", label: "Central de Reservas" },
   { key: "section_financeiro", label: "Financeiro", isSection: true, sectionKey: "financeiro" },
   { key: "section_marketing", label: "Ferramentas de Marketing", isSection: true, sectionKey: "marketing" },
   { key: "section_guias", label: "Guias e Referências", isSection: true, sectionKey: "guias" },

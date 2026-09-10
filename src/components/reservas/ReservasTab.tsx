@@ -16,6 +16,7 @@ import {
   Calendar,
   Loader2,
   MapPin,
+  Plus,
   RefreshCw,
   Search,
   SlidersHorizontal,
@@ -41,6 +42,7 @@ import {
 import { isFileOverdue } from "@/lib/travelFileWorkflow";
 import type { TravelFileListItem } from "@/types/travelFile";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { NovaReservaDialog } from "@/components/reservas/NovaReservaDialog";
 
 const money = (value: number, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -70,11 +72,13 @@ function StatusPill({ status }: { status: TravelFileListItem["status"] }) {
   const tone =
     status === "cancelled"
       ? "bg-rose-50 text-rose-700 ring-rose-200/70"
-      : status === "sale_confirmed" || status === "trip_completed"
-        ? "bg-emerald-50 text-emerald-700 ring-emerald-200/70"
-        : status === "request_received"
-          ? "bg-primary/10 text-primary ring-primary/20"
-          : "bg-amber-50 text-amber-700 ring-amber-200/70";
+      : status === "draft"
+        ? "bg-muted text-muted-foreground ring-border/70"
+        : status === "sale_confirmed" || status === "trip_completed"
+          ? "bg-emerald-50 text-emerald-700 ring-emerald-200/70"
+          : status === "request_received"
+            ? "bg-primary/10 text-primary ring-primary/20"
+            : "bg-amber-50 text-amber-700 ring-amber-200/70";
   return (
     <span
       className={cn(
@@ -115,6 +119,7 @@ export function ReservasTab() {
 
   const [search, setSearch] = useState(urlSearch);
   const [showAdvanced, setShowAdvanced] = useState(!!(from || to || responsible !== "all" || unreadOnly));
+  const [novaReserva, setNovaReserva] = useState(false);
 
   /** Valores padrão nunca poluem a URL (o parâmetro é removido). */
   const DEFAULTS: Record<ParamKey, string> = {
@@ -190,20 +195,24 @@ export function ReservasTab() {
     { label: "Em operação", value: counts.in_operation, tone: "text-foreground" },
   ];
 
-  /** Somatórios da página atual — só aparecem com permissão financeira. */
+  /**
+   * Somatórios da página atual — só aparecem com permissão financeira e
+   * SEMPRE separados por moeda: valores em reais, dólares e euros nunca são
+   * somados como se fossem a mesma moeda.
+   */
   const pageAmounts = useMemo(() => {
-    let requested = 0;
-    let confirmed = 0;
-    let currency = "BRL";
+    const byCurrency = new Map<string, { requested: number; confirmed: number }>();
     for (const f of items) {
-      currency = f.currency || currency;
       if (f.status === "cancelled") continue;
-      requested += Number(f.requested_amount) || 0;
+      const currency = f.currency || "BRL";
+      const bucket = byCurrency.get(currency) ?? { requested: 0, confirmed: 0 };
+      bucket.requested += Number(f.requested_amount) || 0;
       if (f.status === "sale_confirmed" || f.status === "in_operation" || f.status === "trip_completed") {
-        confirmed += Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0;
+        bucket.confirmed += Number(f.final_sale_amount ?? f.reconfirmed_amount ?? f.requested_amount) || 0;
       }
+      byCurrency.set(currency, bucket);
     }
-    return { requested, confirmed, currency };
+    return Array.from(byCurrency.entries()).map(([currency, totals]) => ({ currency, ...totals }));
   }, [items]);
 
   const hasFilters = !!(urlSearch || filter !== "all" || from || to || responsible !== "all" || unreadOnly);
@@ -232,26 +241,27 @@ export function ReservasTab() {
         ))}
       </div>
 
-      {can.revenue && (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Valor solicitado (página atual)
-            </p>
-            <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">
-              {money(pageAmounts.requested, pageAmounts.currency)}
-            </p>
+      {can.revenue &&
+        pageAmounts.map((totals) => (
+          <div key={totals.currency} className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Valor solicitado em {totals.currency} (página atual)
+              </p>
+              <p className="mt-0.5 text-base font-semibold tabular-nums text-foreground">
+                {money(totals.requested, totals.currency)}
+              </p>
+            </div>
+            <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                Vendas confirmadas em {totals.currency} (página atual)
+              </p>
+              <p className="mt-0.5 text-base font-semibold tabular-nums text-emerald-600">
+                {money(totals.confirmed, totals.currency)}
+              </p>
+            </div>
           </div>
-          <div className="rounded-xl border border-border/60 bg-muted/20 px-3 py-2.5">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-              Vendas confirmadas (página atual)
-            </p>
-            <p className="mt-0.5 text-base font-semibold tabular-nums text-emerald-600">
-              {money(pageAmounts.confirmed, pageAmounts.currency)}
-            </p>
-          </div>
-        </div>
-      )}
+        ))}
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative min-w-0 flex-1 sm:max-w-[420px]">
@@ -297,7 +307,19 @@ export function ReservasTab() {
           <SlidersHorizontal className="h-4 w-4" />
           Filtros
         </Button>
+        {can.manage && (
+          <Button type="button" size="sm" className="h-10 gap-2" onClick={() => setNovaReserva(true)}>
+            <Plus className="h-4 w-4" />
+            Nova reserva
+          </Button>
+        )}
       </div>
+
+      <NovaReservaDialog
+        open={novaReserva}
+        onOpenChange={setNovaReserva}
+        onCreated={({ fileId }) => navigate(nav.reservas(fileId))}
+      />
 
       {showAdvanced && (
         <div className="grid grid-cols-1 gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:grid-cols-3">
@@ -396,12 +418,12 @@ export function ReservasTab() {
               <Ticket className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              {hasFilters ? "Nenhum processo encontrado" : "Nenhuma solicitação de reserva ainda"}
+              {hasFilters ? "Nenhuma reserva encontrada" : "Nenhuma reserva ainda"}
             </p>
             <p className="mt-1 max-w-sm text-xs text-muted-foreground">
               {hasFilters
                 ? "Ajuste a busca ou os filtros para encontrar o processo desejado."
-                : "Quando um cliente escolher os serviços no orçamento web, o processo de reserva aparece aqui."}
+                : "Cadastre uma reserva em \"Nova reserva\" ou aguarde a escolha de serviços no orçamento na internet."}
             </p>
             {hasFilters && (
               <Button size="sm" variant="outline" className="mt-4" onClick={resetFilters}>
@@ -438,7 +460,8 @@ export function ReservasTab() {
                 </div>
 
                 <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                  {file.clientName || "Cliente do orçamento"}
+                  {file.companyName || file.clientName || "Contratante a definir"}
+                  {file.trip_name ? ` · ${file.trip_name}` : ""}
                 </p>
 
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -476,7 +499,8 @@ export function ReservasTab() {
                     </span>
                   )}
                   <span className="text-[11px] text-muted-foreground">
-                    Solicitado em {format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    {file.origin === "manual" ? "Cadastrada em " : "Solicitado em "}
+                    {format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   </span>
                 </div>
               </button>

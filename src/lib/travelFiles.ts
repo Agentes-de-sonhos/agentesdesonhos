@@ -22,6 +22,10 @@ export function bookingProcessLabel(value: number | string | null | undefined): 
 }
 
 export const FILE_STATUS_LABELS: Record<TravelFileStatus, string> = {
+  // "Rascunho" é exclusivo do cadastro manual: salvar NUNCA significa venda
+  // confirmada nem pagamento. "Solicitação recebida" segue sendo o estado
+  // inicial das solicitações que chegam pelo site.
+  draft: "Rascunho",
   request_received: "Solicitação recebida",
   awaiting_reconfirmation: "Aguardando reconfirmação",
   partially_available: "Parcialmente disponível",
@@ -48,6 +52,7 @@ export const SERVICE_STATUS_LABELS: Record<TravelFileServiceStatus, string> = {
 
 export type ReservasFilterId =
   | "all"
+  | "draft"
   | "new"
   | "awaiting_reconfirmation"
   | "awaiting_client"
@@ -59,6 +64,7 @@ export type ReservasFilterId =
 /** A aba Reservas é única: os filtros cobrem novas solicitações e etapas posteriores. */
 export const RESERVAS_FILTERS: { id: ReservasFilterId; label: string; statuses: TravelFileStatus[] }[] = [
   { id: "all", label: "Todas", statuses: [] },
+  { id: "draft", label: "Rascunhos", statuses: ["draft"] },
   { id: "new", label: "Novas solicitações", statuses: ["request_received"] },
   {
     id: "awaiting_reconfirmation",

@@ -37,6 +37,8 @@ export function fileStatusStep(status: TravelFileStatus): number {
 /** Próximo passo natural sugerido — nunca bloqueia a escolha manual da agência. */
 export function nextFileStatus(status: TravelFileStatus): TravelFileStatus | null {
   if (status === "cancelled") return null;
+  // Rascunho fica fora da régua: o passo natural é começar a reconfirmação.
+  if (status === "draft") return "awaiting_reconfirmation";
   const index = FILE_STATUS_ORDER.indexOf(status);
   if (index < 0 || index >= FILE_STATUS_ORDER.length - 1) return null;
   return FILE_STATUS_ORDER[index + 1];
@@ -167,6 +169,9 @@ export function isFileOverdue(
   file: Pick<TravelFile, "opened_at" | "status">,
   now = new Date(),
 ): boolean {
+  // Rascunho é cadastro interno em andamento: nunca entra no alerta de
+  // "aguardando tratamento", que existe para solicitações de clientes.
+  if (file.status === "draft") return false;
   if (isFinalFileStatus(file.status) || file.status === "sale_confirmed") return false;
   return fileAgeInDays(file, now) >= 2;
 }
@@ -203,6 +208,15 @@ export function describeFileEvent(
       return `${payload.service_name || "Serviço"}: "${serviceStatus(payload.from)}" → "${serviceStatus(payload.to)}"`;
     case "service_amounts_changed":
       return `${payload.service_name || "Serviço"}: valores atualizados`;
+    // Histórico das reservas cadastradas na Central (origem manual).
+    case "file_created_manual":
+      return "Reserva cadastrada na Central de Reservas";
+    case "file_data_changed":
+      return "Dados da reserva atualizados";
+    case "file_service_added":
+      return `Serviço acrescentado: ${payload.product_name || "sem nome"}`;
+    case "file_service_changed":
+      return `Serviço atualizado: ${payload.product_name || "sem nome"}`;
     default:
       return event.event_type;
   }

@@ -38,6 +38,9 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { prefix: '/gestao-clientes', any: ['clients.view', 'opportunities.view', 'operations.view', 'goals.view'] },
   { prefix: '/crm', any: ['clients.view'] },
 
+  // Central de Reservas
+  { prefix: '/reservas', any: ['reservations.view'] },
+
   // Financeiro
   { prefix: '/financeiro', any: ['financial.access'] },
   { prefix: '/assinaturas-comerciais', any: ['settings.view'] },

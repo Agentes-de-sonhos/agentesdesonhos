@@ -41,6 +41,25 @@ export const CLIENTES_DIRECT_ITEM: DirectNavItemConfig = {
   },
 };
 
+/**
+ * Central de Reservas: a ficha de cada venda. Fica logo depois da Gestão de
+ * Clientes e antes da Gestão Financeira. Depende apenas das permissões de
+ * reservas — não exige o site white label nem o recurso de solicitação pública.
+ */
+export const RESERVAS_DIRECT_ITEM: DirectNavItemConfig = {
+  key: "section_reservas",
+  title: "CENTRAL DE RESERVAS",
+  url: "/reservas",
+  activePrefix: "/reservas",
+  requiredFeature: "crm_basic",
+  anyPermission: ["reservations.view"],
+  theme: {
+    headerBg: "bg-indigo-600 text-white",
+    headerHoverBg: "hover:bg-indigo-700",
+    hoverColor: "hover:bg-indigo-600 hover:text-white",
+  },
+};
+
 export const FINANCEIRO_DIRECT_ITEM: DirectNavItemConfig = {
   key: "section_financeiro",
   title: "GESTÃO FINANCEIRA",
@@ -55,4 +74,8 @@ export const FINANCEIRO_DIRECT_ITEM: DirectNavItemConfig = {
   },
 };
 
-export const DIRECT_NAV_ITEMS = [CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM];
+export const DIRECT_NAV_ITEMS = [
+  CLIENTES_DIRECT_ITEM,
+  RESERVAS_DIRECT_ITEM,
+  FINANCEIRO_DIRECT_ITEM,
+];

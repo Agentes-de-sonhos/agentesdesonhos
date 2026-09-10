@@ -37,6 +37,7 @@ import {
   UserPlus,
   Headset,
   Building2,
+  ClipboardList,
   DollarSign,
   ArrowDownCircle,
   ShoppingBag,
@@ -66,7 +67,7 @@ import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
+import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM, RESERVAS_DIRECT_ITEM } from "@/config/directNavItems";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS, calculateAnchorScrollDelta } from "@/lib/sidebarAnchor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -193,6 +194,18 @@ const clientesItem: MenuItem = {
   requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
   anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
   sectionStyle: CLIENTES_DIRECT_ITEM.theme,
+};
+
+// Central de Reservas: ficha de cada venda, entre Clientes e Financeiro.
+const reservasItem: MenuItem = {
+  key: RESERVAS_DIRECT_ITEM.key,
+  title: RESERVAS_DIRECT_ITEM.title,
+  url: RESERVAS_DIRECT_ITEM.url,
+  activePrefix: RESERVAS_DIRECT_ITEM.activePrefix,
+  icon: ClipboardList,
+  requiredFeature: RESERVAS_DIRECT_ITEM.requiredFeature as Feature,
+  anyPermission: RESERVAS_DIRECT_ITEM.anyPermission,
+  sectionStyle: RESERVAS_DIRECT_ITEM.theme,
 };
 
 const financeiroItem: MenuItem = {
@@ -385,7 +398,7 @@ export function AppSidebar() {
   );
 
   const standaloneItems: MenuItem[] = useMemo(
-    () => [clientesItem, financeiroItem],
+    () => [clientesItem, reservasItem, financeiroItem],
     []
   );
 
