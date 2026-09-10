@@ -340,6 +340,39 @@ const manualPayload = (input: ManualReservationInput) => ({
 });
 
 /**
+ * Edição: envia apenas o que a tela realmente mudou. Campo ausente é
+ * preservado no servidor — moeda, valores e contato escrito à mão continuam
+ * como estavam quando a tela não mexe neles.
+ */
+export type ManualReservationPatch = Partial<Omit<ManualReservationInput, "manualKey">>;
+
+const manualPatchPayload = (input: ManualReservationPatch) => {
+  const map: Array<[keyof ManualReservationPatch, string]> = [
+    ["contractorType", "contractor_type"],
+    ["clientId", "client_id"],
+    ["companyId", "company_id"],
+    ["contactClientId", "contact_client_id"],
+    ["contactName", "contact_name"],
+    ["contactEmail", "contact_email"],
+    ["contactPhone", "contact_phone"],
+    ["tripName", "trip_name"],
+    ["primaryDestination", "primary_destination"],
+    ["startDate", "start_date"],
+    ["endDate", "end_date"],
+    ["adultsCount", "adults_count"],
+    ["childrenCount", "children_count"],
+    ["currency", "currency"],
+  ];
+  const payload: Record<string, unknown> = {};
+  for (const [key, column] of map) {
+    const value = input[key];
+    if (value === undefined) continue;
+    payload[column] = value === "" ? null : value;
+  }
+  return payload;
+};
+
+/**
  * Cadastro manual de reserva. O registro nasce como RASCUNHO e não cria
  * oportunidade, operação, orçamento, carteira nem lançamento financeiro.
  * A chave de intenção evita dois cadastros no clique duplo.
