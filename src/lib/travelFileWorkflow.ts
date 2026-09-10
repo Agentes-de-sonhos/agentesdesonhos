@@ -208,6 +208,15 @@ export function describeFileEvent(
       return `${payload.service_name || "Serviço"}: "${serviceStatus(payload.from)}" → "${serviceStatus(payload.to)}"`;
     case "service_amounts_changed":
       return `${payload.service_name || "Serviço"}: valores atualizados`;
+    // Histórico das reservas cadastradas na Central (origem manual).
+    case "file_created_manual":
+      return "Reserva cadastrada na Central de Reservas";
+    case "file_data_changed":
+      return "Dados da reserva atualizados";
+    case "file_service_added":
+      return `Serviço acrescentado: ${payload.product_name || "sem nome"}`;
+    case "file_service_changed":
+      return `Serviço atualizado: ${payload.product_name || "sem nome"}`;
     default:
       return event.event_type;
   }
