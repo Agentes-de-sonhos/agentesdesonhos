@@ -103,30 +103,52 @@ export function EditarRascunhoDialog({
       setFieldError("Informe o nome da viagem ou o destino.");
       return;
     }
-    const nextType = canEditContractor
-      ? contractorType
-      : ((file.contractor_type || "individual") as ContractorType);
-    const nextClientId = canEditContractor ? (selectedClient?.id ?? null) : file.client_id;
-    const nextCompanyId = canEditContractor ? (selectedCompany?.id ?? null) : file.company_id;
-    const nextContactId = canEditContractor ? (selectedContact?.id ?? null) : file.contact_client_id;
+    const currentType = (file.contractor_type || "individual") as ContractorType;
+    const nextType = canEditContractor ? contractorType : currentType;
 
-    if (canEditContractor && nextType === "individual" && !nextClientId) {
-      setFieldError("Escolha a pessoa que está contratando.");
-      return;
+    if (canEditContractor) {
+      if (nextType === "individual" && !selectedClient?.id) {
+        setFieldError("Escolha a pessoa que está contratando.");
+        return;
+      }
+      if (nextType === "company" && !selectedCompany?.id) {
+        setFieldError("Escolha a empresa contratante.");
+        return;
+      }
     }
-    if (canEditContractor && nextType === "company" && !nextCompanyId) {
-      setFieldError("Escolha a empresa contratante.");
-      return;
+
+    // Campos de contratante só entram no payload quando o usuário pode editá-los
+    // e realmente mudaram. Nada é apagado por estar oculto ou desabilitado:
+    // a limpeza acontece só quando a troca de tipo a torna explícita.
+    const contractorPatch: {
+      contractorType?: ContractorType;
+      clientId?: string | null;
+      companyId?: string | null;
+      contactClientId?: string | null;
+    } = {};
+
+    if (canEditContractor) {
+      const nextClientId = nextType === "individual" ? (selectedClient?.id ?? null) : null;
+      const nextCompanyId = nextType === "company" ? (selectedCompany?.id ?? null) : null;
+      if (nextType !== currentType) contractorPatch.contractorType = nextType;
+      if (nextClientId !== (file.client_id ?? null)) contractorPatch.clientId = nextClientId;
+      if (nextCompanyId !== (file.company_id ?? null)) contractorPatch.companyId = nextCompanyId;
+
+      if (nextType === "company") {
+        const nextContactId = selectedContact?.id ?? null;
+        if (nextContactId !== (file.contact_client_id ?? null)) {
+          contractorPatch.contactClientId = nextContactId;
+        }
+      } else if (currentType === "company") {
+        // Troca explícita de empresa para pessoa: o contato da empresa sai.
+        contractorPatch.contactClientId = null;
+      }
     }
 
     setSaving(true);
     try {
       await onSave({
-        contractorType: nextType,
-        // Contratante e empresa nunca convivem: o lado não usado vai nulo.
-        clientId: nextType === "individual" ? nextClientId : null,
-        companyId: nextType === "company" ? nextCompanyId : null,
-        contactClientId: nextType === "company" ? nextContactId : null,
+        ...contractorPatch,
         tripName: tripName.trim() || null,
         primaryDestination: destination.trim() || null,
         startDate: startDate || null,
@@ -134,6 +156,7 @@ export function EditarRascunhoDialog({
         adultsCount: Math.max(0, parseInt(adults, 10) || 0),
         childrenCount: Math.max(0, parseInt(children, 10) || 0),
       });
+
       onOpenChange(false);
     } catch (error: any) {
       setFieldError(error?.message || "Não foi possível salvar agora. Tente novamente.");
