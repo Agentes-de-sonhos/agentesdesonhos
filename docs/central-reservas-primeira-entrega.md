@@ -79,3 +79,27 @@ Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
 - Validação visual autenticada (navegador, agência real) ainda não foi feita.
 - Rejeição cross-agência e redaction foram verificadas por contrato de SQL e catálogo do banco;
   não houve execução autenticada em banco com usuários reais (proibido nesta fase).
+
+## Continuação da mesma entrega (correções de comportamento)
+
+1. **Busca isolada por identidade** — a busca de pessoas no cadastro manual passou a
+   guardar o resultado por usuário; trocar de conta na mesma aba não reaproveita nada
+   do que foi carregado antes.
+2. **Escolha sempre visível** — pessoa, empresa e contato responsável guardam o registro
+   escolhido (não apenas o identificador). Depois de escolher, o nome continua na tela
+   mesmo digitando outra busca, e nunca é enviado um contratante invisível.
+3. **Situação do serviço preservada** — editar nome, datas, quantidade ou observações de um
+   serviço já reservado/emitido mantém a situação atual; "solicitado" só é usado na criação.
+4. **Observação pode ser apagada** — esvaziar o campo de observação agora apaga a anterior,
+   em vez de manter o texto antigo.
+5. **Elegibilidade real** — o acesso à Central segue Premium, Fundador ou Promoção Grupo SC
+   dentro da validade. Colaborador ativo não tem mais passe livre: ele herda o plano da conta
+   master. Administrador, promotor e liberação individual continuam com acesso.
+
+### Resultado das verificações
+- 14 testes do cadastro manual/serviços e 28 testes das correções de banco passaram.
+- Verificação de tipos e build do projeto passaram.
+- O relatório de segurança do banco continua com os mesmos 460 avisos gerais anteriores
+  (nenhum novo foi introduzido por esta rodada).
+- Continua pendente a validação visual autenticada em navegador e o endurecimento dos
+  dados legados de origem web (precisa de deploy coordenado). Nada foi publicado.
