@@ -401,7 +401,7 @@ export function ClientsModule() {
               className="h-8 shrink-0 gap-1 px-2.5 text-xs"
               onClick={() =>
                 contactView === "empresas"
-                  ? setCompanyCreateSignal((n) => n + 1)
+                  ? setCompanyCreateRequested(true)
                   : handleOpenDialog()
               }
               title={contactView === "empresas" ? "Nova empresa" : "Novo cliente"}
@@ -678,7 +678,10 @@ export function ClientsModule() {
       </div>
 
       {contactView === "empresas" ? (
-        <AgencyCompaniesPanel createSignal={companyCreateSignal} />
+        <AgencyCompaniesPanel
+          createRequested={companyCreateRequested}
+          onCreateHandled={() => setCompanyCreateRequested(false)}
+        />
 
       ) : isLoading ? (
         <Card className="rounded-2xl border-border/60 bg-card shadow-[0_1px_2px_rgba(0,0,0,0.03)] overflow-hidden">
