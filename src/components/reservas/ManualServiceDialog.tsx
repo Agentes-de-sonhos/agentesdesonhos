@@ -120,7 +120,8 @@ export function ManualServiceDialog({
         startDate: startDate || null,
         endDate: endDate || null,
         quantity: Math.max(1, parseInt(quantity, 10) || 1),
-        notes: notes.trim() || null,
+        // Sempre enviado: vazio significa apagar a observação anterior.
+        notes: notes.trim(),
         requestedAmount: parsedAmount,
       });
       onOpenChange(false);
