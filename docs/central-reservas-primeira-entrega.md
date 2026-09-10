@@ -1,324 +1,129 @@
-# Central de Reservas — primeira entrega
+# Central de Reservas — Fase 1 (entrega atual)
 
-## O que já funciona
+Guia curto do que existe hoje. Substitui os apêndices de revisão anteriores.
 
-- **Menu principal**: item "Reservas" (Central de Reservas) no desktop e no mobile, entre Gestão de Clientes e Financeiro. É a mesma lista usada no painel de Sites ADS/gestão — nenhum menu foi duplicado e os caminhos antigos continuam funcionando, inclusive com prefixo de `/gestao` e `/sitelab-base`.
-- **Lista** (`/reservas`) com busca por contratante/empresa, filtro de **Rascunhos**, paginação no servidor, estados vazios explicativos e totais **separados por moeda** (BRL, USD e EUR nunca são somados juntos).
-- **Nova reserva manual**: contratante Pessoa ou Empresa, contato responsável opcional, nome da viagem ou destino, datas e passageiros opcionais. Salva como **Rascunho**, com numeração de 7 dígitos da agência.
-- **Ficha da reserva** (`/reservas/:id`): mostra contratante, contato responsável, origem (cadastro interno x solicitação pelo site), viagem, destino, período e passageiros; permite **Editar dados** e **Acrescentar/Editar serviços** manuais (tipo, nome, fornecedor, destino, datas, quantidade, observações; valores só com permissão financeira).
-- **Empresas na área de Clientes**: nova visão "Pessoas | Empresas" reutilizando o cadastro de empresas existente. Uma empresa pode existir sozinha, só o nome é obrigatório e nenhum contato é inventado.
+## 1. Escopo da fase 1
 
-## Garantias importantes
+Dentro do escopo:
 
-- Salvar **não** confirma venda nem registra pagamento. Rascunho é um status próprio; "Solicitação recebida" continua exclusivo das solicitações vindas do site, e rascunhos não entram nos alertas de "aguardando tratamento".
-- Nenhuma oportunidade, operação, orçamento, carteira ou lançamento financeiro é criado automaticamente. Reservas internas novas não aparecem para o cliente.
-- Clique duplo não gera duas reservas: cada cadastro tem uma chave de intenção preservada em caso de erro.
-- Todos os IDs (cliente, empresa, contato, fornecedor, responsável) são validados no servidor dentro da própria agência; valores de custo, comissão e margem são omitidos no servidor para quem não tem permissão financeira.
-- O cadastro manual não depende do site White Label nem libera recursos pagos; segue as permissões e assinaturas atuais.
+- Cadastro **manual** de reservas (processos) na Central, além das solicitações que já chegam
+  pelo site white label.
+- Ficha do processo: dados do contratante, viagem, serviços, responsável, status, notas e
+  histórico.
+- Contratante **PF ou PJ**, com cadastro de empresas e contato responsável.
+- Busca, filtros, contadores e paginação executados no servidor.
+- Totais por moeda derivados dos serviços (apresentação).
 
-## Testes executados
+Fora do escopo, para fases posteriores:
 
-- `src/test/central-reservas-manual.test.tsx` — 13 testes: rascunho PF, validação de contratante com formulário preservado, reserva de empresa sem misturar IDs, chave de intenção mantida no retry, cancelar sem salvar, edição de rascunho, serviço manual com e sem permissão financeira, rótulos/filtros/fluxo do rascunho.
-- `src/test/central-reservas-navegacao-empresas.test.tsx` — 5 testes: item único no menu entre clientes e financeiro, permissão da rota, empresas com estado vazio, cadastro só com nome, ocultação de ações sem permissão.
-- Regressão: `travel-files`, `travel-file-workflow`, `crm-toolbar-layout`, `crm-new-client-command`, `agency-admin-menu-order` — 47 testes.
-- `npx tsgo --noEmit -p tsconfig.app.json` sem erros e build OK.
+- Vouchers e documentos do processo.
+- Integração com a Gestão Financeira (lançamentos, faturamento, comissões efetivas).
+- Envio/área do cliente para o processo, conversão de câmbio e regras fiscais.
+- Criação automática de CRM, operação, orçamento ou carteira a partir da reserva.
 
-## Limitações desta etapa
+## 2. Navegação
 
-- A rejeição entre agências e a omissão de valores acontecem nas funções do banco; foram validadas por revisão do SQL, não por teste automatizado com banco real (nenhum dado de cliente real foi usado).
-- Voucher próprio, documentos, vínculo com financeiro/oportunidades/operações e entrega na Área do Cliente ficam para fases seguintes.
-- Nada foi publicado.
+- Menu principal: **Reservas** (`/reservas`, ficha em `/reservas/:id`).
+- Área de Gestão: `/gestao/reservas`.
+- Ambiente de referência SiteLab: `/sitelab-base/gestao/reservas`.
+- O botão "Voltar" da ficha usa a navegação da área ativa, preservando os três caminhos.
 
-## Como o Fernando pode validar
+## 3. Reserva manual: PF/PJ, edição, serviços e histórico
 
-1. Abrir **Reservas** no menu principal.
-2. Clicar em **Nova reserva**, escolher Pessoa, selecionar um contratante, digitar o nome da viagem e salvar.
-3. Conferir que a reserva aparece como **Rascunho** com número e abre a ficha.
-4. Na ficha, usar **Editar dados** e **Acrescentar serviço**; conferir que o histórico registra as alterações.
-5. Repetir criando uma reserva de **Empresa**, cadastrando a empresa na hora.
-6. Em **Clientes**, alternar para **Empresas** e conferir busca, cadastro e edição.
-7. Conferir que orçamentos, oportunidades, operações, financeiro e carteiras seguem inalterados.
+- **Criação**: começa como **rascunho** (`draft`), sem `root_request_id`, com chave de
+  idempotência e numeração sequencial de 7 dígitos por agência. Solicitações do site continuam
+  entrando como `request_received`, sem alteração de comportamento.
+- **PF/PJ**: `client_id` (pessoa) e `company_id` (empresa) são campos distintos; o contato PJ é
+  um cliente vinculado (`contact_client_id`). O seletor de contratante é compartilhado entre
+  criação e edição.
+- **Edição do rascunho**: permite corrigir contratante e contato depois de salvar. O envio é um
+  **patch parcial** — campo não alterado não vai no payload e o servidor preserva o vínculo,
+  a moeda e os valores. Limpar um vínculo é sempre explícito.
+- **Serviços**: cadastro manual com tipo, produto, fornecedor, datas, quantidade, moeda,
+  valores e status. Serviços vindos do site permanecem congelados/imutáveis.
+- **Histórico**: registra criação, mudanças de status, serviços, responsável, notas e também
+  alterações isoladas de moeda, valor solicitado e contato — sem expor valores a quem não tem
+  permissão financeira.
+- **Permissões**: `reservations.view` / `manage` / `assign` / `financial.manage`, somadas às
+  permissões financeiras (`financial.view_revenue`, `financial.view_margin`,
+  `financial.commissions.view`). A elegibilidade comercial da Central considera o plano ou a
+  concessão da conta principal; colaborador precisa de vínculo ativo. Administradores e
+  promotores são exceção.
 
-## Revisão independente — correções aplicadas (10/09)
+## 4. Totais por moeda
 
-Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
-`20260910134125_*.sql` (correções) e `20260910134156_*.sql` (permissão de uso das funções internas).
+- Em reservas **manuais**, o valor apresentado vem dos serviços lançados, agrupado por moeda e
+  derivado na consulta (`travel_file_detail` e `travel_files_page`). Nada é gravado:
+  `travel_files.requested_amount`, snapshots e preços seguem intactos.
+- Moedas diferentes **nunca** são somadas nem convertidas: USD 100 + BRL 200 aparecem como dois
+  grupos. Serviços cancelados ficam fora. `requested_amount` do serviço já é o total do
+  serviço — a quantidade não multiplica de novo.
+- Cada bloco financeiro depende da sua permissão; a **margem exige receita e margem**, para não
+  ser calculada tratando a receita removida como zero. Sem nenhuma permissão financeira o
+  agregado sai vazio.
+- Solicitações do site mantêm os valores congelados do processo.
 
-1. Responsável da reserva validado por `agency_team_members.agency_id` + vínculo `active`
-   (a coluna `agency_owner_id` não existe); `reservations.assign` continua exigida.
-2. Serviços de reserva vinda do site não podem ser criados **nem editados** pela Central.
-3. Regras de etapa restauradas conforme o comportamento antigo (bloqueio de volta para
-   "Solicitação recebida" após a venda, `confirmed_at` em todas as etapas vendidas,
-   `completed_at` preservado no cancelamento). "Rascunho" foi somado sem mudar o resto.
-4. Fornecedor aceito só se for do catálogo global aprovado ou da própria agência
-   (`owner_agency_id`/`user_id`), não mais um `EXISTS` simples.
-5. Busca de empresas: parte numérica só é usada quando existe; texto sem números não
-   retorna mais todas as empresas e as letras seguem comparadas em nome e nome fantasia.
-6. Servidor valida intervalo de datas, moeda (BRL/USD/EUR), quantidades inteiras e valores
-   finitos/não negativos. Rascunho pode ficar sem passageiro (não inventa adulto).
-   Histórico interno passou a registrar tipo, quantidade, moeda, fornecedor, datas,
-   observações/snapshot e alterações de valores.
-7. Sanitização financeira recursiva (`private.reservations_redact`) aplicada ao file, aos
-   serviços com snapshot e aos dois históricos, cobrindo as chaves legadas
-   `sold_from/to`, `cost_from/to`, `commission_from/to`, `reconfirmed_from/to`.
-8. Leitura direta (bypass de RPC) das linhas **manuais**, dos seus serviços e da nova
-   `travel_file_events` restrita a quem tem receita + margem + comissão (ou admin), via
-   policies RESTRICTIVE. As linhas antigas (origem web) seguem legíveis como hoje para
-   não quebrar o frontend já publicado.
-9. Policies amplas `companies_agency_members_full_access` e
-   `client_companies_agency_members_full_access` removidas e substituídas por policies
-   por operação que preservam o proprietário e passam a exigir `clients.view/create/edit/delete`.
-10. Nenhuma operação, carteira, orçamento ou lançamento financeiro é criado direta ou
-    indiretamente; apenas `travel_files` manuais e seus serviços/eventos.
+## 5. Cadastro de empresas (PJ) na área de Clientes
 
-### Pendências reais (não resolvidas nesta rodada)
-- **Endurecimento dos dados legados (origem web)**: a leitura direta dessas linhas continua
-  liberada para `reservations.view` porque o frontend publicado depende disso. O endurecimento
-  precisa de deploy coordenado (novo frontend por RPC + policy restritiva também para
-  `origin = 'web_quote'`). **O problema legado NÃO está eliminado.**
-- Validação visual autenticada (navegador, agência real) ainda não foi feita.
-- Rejeição cross-agência e redaction foram verificadas por contrato de SQL e catálogo do banco;
-  não houve execução autenticada em banco com usuários reais (proibido nesta fase).
+- A gravação passa pela RPC `agency_company_save`, que exige: vínculo **ativo**,
+  `clients.create` (novo) ou `clients.edit` (alteração) e elegibilidade comercial de
+  Clientes/CRM — plano/concessão da conta principal, ou administrador/promotor.
+- **Não** exige permissão de Reservas: colaborador de CRM cadastra e edita empresas sem
+  `reservations.view`.
+- Busca e leitura de cadastros já existentes seguem apenas as permissões, sem gate de plano.
+- A ação principal da área de Clientes acompanha a visão selecionada: "Nova pessoa" na visão
+  Pessoas, "Nova empresa" na visão Empresas.
 
-## Continuação da mesma entrega (correções de comportamento)
+## 6. Como testar na prévia (Fernando)
 
-1. **Busca isolada por identidade** — a busca de pessoas no cadastro manual passou a
-   guardar o resultado por usuário; trocar de conta na mesma aba não reaproveita nada
-   do que foi carregado antes.
-2. **Escolha sempre visível** — pessoa, empresa e contato responsável guardam o registro
-   escolhido (não apenas o identificador). Depois de escolher, o nome continua na tela
-   mesmo digitando outra busca, e nunca é enviado um contratante invisível.
-3. **Situação do serviço preservada** — editar nome, datas, quantidade ou observações de um
-   serviço já reservado/emitido mantém a situação atual; "solicitado" só é usado na criação.
-4. **Observação pode ser apagada** — esvaziar o campo de observação agora apaga a anterior,
-   em vez de manter o texto antigo.
-5. **Elegibilidade real** — o acesso à Central segue Premium, Fundador ou Promoção Grupo SC
-   dentro da validade. Colaborador ativo não tem mais passe livre: ele herda o plano da conta
-   master. Administrador, promotor e liberação individual continuam com acesso.
+Use **dados fictícios**; não é necessário criar usuários ou senhas.
 
-### Resultado das verificações
-- 14 testes do cadastro manual/serviços e 28 testes das correções de banco passaram.
-- Verificação de tipos e build do projeto passaram.
-- O relatório de segurança do banco continua com os mesmos 460 avisos gerais anteriores
-  (nenhum novo foi introduzido por esta rodada).
-- Continua pendente a validação visual autenticada em navegador e o endurecimento dos
-  dados legados de origem web (precisa de deploy coordenado). Nada foi publicado.
+1. Abra **Reservas** e crie uma reserva manual PF (ex.: "Cliente Teste Alfa", destino
+   fictício). Confirme que nasce como rascunho e recebe número.
+2. Repita com contratante **PJ**, cadastrando uma empresa fictícia e um contato.
+3. Abra o rascunho, altere só o destino e salve: contratante e contato devem permanecer.
+4. Lance um serviço de BRL 1.500 e confira o valor na lista e no resumo; edite para 1.600 e
+   confira a atualização.
+5. Acrescente um serviço em USD 100: devem aparecer **dois** grupos de moeda, nunca 300.
+6. Avance status, adicione nota e confira o histórico.
+7. Na área de **Clientes**, alterne entre Pessoas e Empresas e use a ação principal.
 
-## Fechamento da mesma entrega (revisão final)
+## 7. O que foi testado vs. não testado
 
-1. **Editar não apaga mais nada** — a edição envia apenas os campos que a tela mudou e a
-   função do banco preserva o que não foi enviado. Uma reserva em dólar ou euro com contato
-   escrito à mão continua igual depois de mudar só o destino; limpar um dado continua
-   possível quando o usuário pede explicitamente.
-2. **Voltar** — o botão volta sempre para a lista de Reservas do contexto atual
-   (`/reservas`, `/gestao/reservas` e a mesma rota dentro do Site Lab). Ninguém cai mais em
-   uma aba de projetos protegida por outro plano.
-3. **Ficha e notas por conta** — os dados da ficha e as notas internas passaram a ser
-   guardados por identidade; trocar de conta na mesma aba não reaproveita valores ou
-   permissões de quem estava antes.
-4. **Falha de busca aparece como falha** — quando a busca de pessoas ou empresas não
-   responde, a tela mostra o aviso com "Tentar novamente" e preserva o formulário, em vez de
-   dizer que nada foi encontrado (o que levava a cadastrar de novo).
-5. **Valor à brasileira** — o valor do serviço aceita `1.500,00`, `1500,50`, `R$ 1.500,00` e
-   `1500.50`; texto inválido é recusado com aviso, nunca convertido em silêncio.
+Testado (automatizado, fixtures sintéticas):
 
-### O que foi realmente comprovado nesta rodada
-- **Testes de componentes/hooks (executados)**: 8 testes novos, incluindo o pacote real
-  enviado pelo hook na edição (sem moeda, valor ou contato), os formatos de valor aceitos e
-  recusados, e o caminho da lista de Reservas na plataforma tradicional.
-- **Testes já existentes (executados)**: 14 do cadastro manual/serviços, 5 de empresas e
-  navegação, 28 de contrato de banco. Verificação de tipos e build passaram.
-- **Revisão de SQL (estática)**: a semântica de atualização parcial foi revisada linha a
-  linha na função aplicada; não houve execução autenticada em banco com usuários reais.
-- **Não comprovado**: validação visual autenticada em navegador e execução real de
-  isolamento/redaction com contas de agências diferentes.
-- **Continua pendente**: o endurecimento dos dados legados de origem web depende de deploy
-  coordenado, portanto o isolamento financeiro dos registros antigos **não** está completo.
-- Os avisos gerais do relatório de segurança do banco permanecem os mesmos (460), sem novos
-  avisos introduzidos. Nada foi publicado.
+- Lote focado da Central/Clientes reexecutado nesta rodada: **12 arquivos, 152 testes**,
+  todos passando. `tsgo --noEmit` e `vite build` sem erros.
+- Comportamento de interface: criação PF/PJ, patch parcial da edição, seletor de contratante,
+  painel de empresas (abertura única, erro com "Tentar novamente", lista vazia), serviço manual
+  (valores pt-BR "1.500,00"/"1500,50"), totais por moeda, reset ao trocar de identidade.
+- Revisão de contrato do SQL efetivamente aplicado: gates, isolamento por agência, projeção
+  financeira por permissão, agregado só para origem manual, ausência de gravação nos totais e
+  cadastro PJ sem dependência de Reservas.
 
-## Últimos ajustes funcionais (mesma entrega)
+Não testado:
 
-- Em RASCUNHO manual, a edição permite corrigir o contratante (pessoa ou empresa)
-  e adicionar/trocar o contato responsável PJ depois de salvo. O seletor foi
-  extraído para `src/components/reservas/ContractorPicker.tsx` e é o mesmo usado
-  no cadastro — sem duplicar a lógica do `NovaReservaDialog`. `client_id` e
-  `company_id` continuam separados: o lado não usado vai nulo. Fora de rascunho
-  (inclusive reservas vindas do site) o seletor não aparece e os vínculos
-  originais são reenviados sem alteração. Permissões seguem `reservations.manage`
-  e a busca continua limitada pela RLS da própria agência.
-- Na área de Clientes, a ação principal segue a visão selecionada: "Nova pessoa"
-  abre o cadastro PF de sempre e "Nova empresa" abre o cadastro de empresas já
-  existente no painel, sem duas ações incoerentes. Atalhos e fluxos antigos de PF
-  permanecem inalterados fora da visão Empresas.
-- Testes focados: `src/test/central-reservas-rascunho-contratante.test.tsx`
-  (correção PF, troca PF→PJ com contato, validação de empresa obrigatória e caso
-  sem permissão de correção). Regressões da Central, tipos e build passaram.
-  Continua sem validação visual autenticada real.
+- Execução autenticada com contas e planos reais, incluindo teste real de acesso **entre
+  agências diferentes**.
+- Validação visual em navegador autenticado.
+- Testes de banco com dados reais de clientes, empresas ou reservas.
+- O linter do projeto segue com avisos preexistentes de escopo amplo (execução de funções
+  `SECURITY DEFINER`, RLS sem policy, `search_path` mutável, extensão em `public`, proteção de
+  senha vazada); esta fase não os revisou um a um.
 
-## Reauditoria de segurança (fechamento da mesma entrega)
+## 8. Estado de entrega
 
-### 1) Leitura direta de serviços não falha mais aberta
-- A policy `travel_file_services_manual_direct_read_guard` usava
-  `NOT EXISTS (SELECT ... travel_files ... origin='manual')`. Para um membro com
-  `reservations.view` e sem permissões financeiras, a RLS do pai escondia a ficha manual,
-  a subconsulta retornava zero e o `NOT EXISTS` liberava o serviço bruto com todos os valores.
-- Agora a policy chama `private.travel_file_direct_read_is_web(file_id)`, função
-  `SECURITY DEFINER` com `search_path` fixo que **não** depende da RLS do pai, valida o
-  escopo da agência (`agency_id = ANY(private.agency_owner_ids())`) e **nega por padrão**:
-  pai ausente, de outra agência ou de origem manual retorna falso.
-- A compatibilidade pedida foi preservada: reservas de origem web da própria agência
-  continuam legíveis diretamente como hoje.
+- **Banco**: migrations aplicadas (funções, gates, agregados por moeda, histórico e políticas
+  desta fase).
+- **Frontend**: **não publicado** — disponível apenas na prévia.
+- Nada foi publicado e nenhum dado real foi criado ou alterado para os testes.
 
-### 2) Projeção explícita dos snapshots e payloads
-- A sanitização por lista de chaves proibidas deixava passar preços reais de estruturas
-  sintéticas nunca listadas: `total_estimated`, `items_sum`,
-  `snapshot.service_data.adult_price/child_price/fees_amount`,
-  `rooms[].unit_price/total_price` e `imported_summary.total_original/total_brl`.
-- Foi criada `private.reservations_project(jsonb, revenue, margin, commission)`: allowlist
-  recursiva (objetos e listas) que mantém apenas campos operacionais reconhecidos e, por
-  categoria de permissão, apenas os campos financeiros autorizados. Qualquer chave
-  desconhecida é omitida. Comparação por `lower(key)`, então aliases em maiúsculas ou caixa
-  mista também são cortados; contêiner com valor escalar desconhecido é descartado.
-- `travel_file_detail` aplica a projeção em `passengers_snapshot` e `contact_snapshot` da
-  ficha, em `snapshot`/`passengers_snapshot` dos serviços e nos dois históricos. As colunas
-  do esquema continuam sanitizadas por `private.reservations_redact`. A função segue
-  `STABLE`: **nenhum snapshot armazenado é alterado**, a redução acontece só na leitura.
-- Perfis restritos podem receber menos partes do snapshot, mas as observações operacionais
-  necessárias (notas, datas, códigos, tipos de quarto, trechos de voo, moeda) permanecem.
+## 9. Limites conhecidos (sem garantia universal)
 
-### 3) Histórico manual completo sem vazar valores
-- `log_travel_file_manual_change` passou a detectar também alterações isoladas de moeda,
-  de valor solicitado e de contato livre (`contact_snapshot`). O evento registra
-  `currency`, `currency_changed`, `requested_amount_changed` e `contact_changed` —
-  o valor solicitado em si **não** entra no histórico.
-
-### Evidências desta reauditoria
-- **Testes de contrato/lógica (executados)**: `src/test/central-reservas-reauditoria.test.ts`
-  extrai as listas de chaves do SQL aplicado e roda uma réplica fiel da projeção recursiva
-  sobre as estruturas reais (`service_data`, `rooms[]`, `imported_summary`, `segments[]`),
-  provando que nenhum custo/preço/comissão não autorizado escapa, que cada categoria libera
-  só a própria projeção e que aliases em maiúsculas são cortados. Também simula o caso
-  `reservations.view=true` com receita/margem/comissão falsas e pai oculto.
-- **Execução real no banco (leitura)**: `private.reservations_project` e
-  `private.travel_file_direct_read_is_web` foram executadas no banco com JSON sintético e
-  com um id inexistente; o resultado confirmou a omissão dos campos financeiros por
-  categoria e a negação por padrão (`false`) para pai ausente. Nenhum dado real foi lido
-  ou alterado.
-- **Revisão de SQL (estática)**: policies e triggers revisadas linha a linha na definição
-  aplicada.
-- **Não comprovado**: execução autenticada com contas reais de agências diferentes e
-  validação visual em navegador autenticado (o papel disponível não permite autenticar como
-  membro de equipe).
-- **Limitação explícita mantida**: o endurecimento das linhas legadas de origem web depende
-  de **deploy coordenado** (frontend lendo por RPC + policy restritiva estendida a esses
-  registros). Até lá, o isolamento financeiro dos registros antigos de origem web **não**
-  está completo. Os avisos gerais do relatório de segurança do banco continuam os mesmos
-  (460), sem novos avisos. Nada foi publicado.
-
-## Complemento de elegibilidade (fechamento do mesmo lote)
-
-1. **Equipe segue a conta principal.** `can_use_reservations_center()` deixou de tratar
-   colaborador ativo como caso resolvido: agora resolve a agência em
-   `agency_team_members`, exige status ativo e `reservations.view`, e avalia a
-   elegibilidade da master em `private.reservations_owner_is_eligible()` (concessão
-   `crm_basic` da master, ou assinatura ativa, não vencida, em Premium/Fundador/Promoção
-   Grupo SC). Dono e equipe passam a ter a mesma resposta comercial. Exceções de
-   administrador/promotor e a ausência de exigência de site white label continuam como
-   estavam. Nada mudou no bypass global de outros módulos (`has_feature_access` intocado);
-   a correção vale só para a Central.
-2. **Mutações de fichas manuais com gate condicional.** `private.assert_manual_file_gate()`
-   é chamado após a checagem de permissões em `travel_file_set_status`,
-   `travel_file_service_save`, `travel_file_set_responsibles`, `travel_file_note_add` e
-   `travel_file_note_delete`, bloqueando somente `origin = 'manual'` quando a Central não
-   está disponível. Fichas `web_quote` mantêm exatamente a regra anterior e a leitura
-   (`travel_file_detail`, `travel_files_page`) segue sem gate de plano. Na interface,
-   `ProcessoReserva` consulta `useReservationsCenterAccess()` e não oferece ações de
-   alteração em ficha manual quando o servidor as bloquearia.
-3. **Cadastro PJ protegido.** `agency_company_save` exige a mesma elegibilidade comercial da
-   área de Clientes/CRM antes de gravar, além de `clients.create`/`clients.edit`. Busca e
-   leitura de cadastros históricos (`agency_companies_search`, políticas de leitura)
-   permanecem por permissão, para não esconder cadastros após expiração.
-
-**Testes (executados):** `src/test/central-reservas-elegibilidade.test.ts` — 20 casos sobre o
-SQL aplicado e uma réplica fiel da regra: master expirada + colaborador ativo não altera
-ficha manual, agência válida sem site cria, colaborador sem permissão e colaborador
-bloqueado não criam, dono e equipe coincidem, exceções/concessões preservadas, gate presente
-nas cinco mutações manuais, `web_quote` inalterado e leitura de histórico sem gate. Lote
-focado da Central: 4 arquivos, 70 testes; regressões de rascunho/contratante passaram;
-`tsgo` e build passaram. Nenhum plano ou permissão de agência real foi alterado; o relatório
-do banco continua sem novos avisos (456) e nada foi publicado.
-
-## Revisão do seletor compartilhado (fechamento do mesmo lote)
-
-1. **Sem perda de dados na edição do rascunho.** `EditarRascunhoDialog` deixou de reenviar
-   (e de zerar) vínculos: o payload leva apenas os campos de contratante que o usuário pode
-   editar E que realmente mudaram. Sem permissão de corrigir contratante, nenhuma chave de
-   contratante é enviada — uma reserva PF com contato vinculado mantém o contato ao alterar
-   só datas ou destino. A limpeza é explícita: o contato da empresa só vai a nulo quando o
-   usuário troca o tipo de empresa para pessoa. `travel_file_update_manual` já distingue
-   chave ausente de limpeza explícita.
-2. **Pedido de "Nova empresa" consumido uma vez.** O contador `createSignal` foi trocado por
-   um pedido controlado (`createRequested` + `onCreateHandled`). Cancelar o cadastro, ir para
-   Pessoas e voltar para Empresas não reabre o formulário; cada novo clique na ação principal
-   abre normalmente.
-3. **Reset por identidade completo.** Trocar de conta/agência com o diálogo aberto agora
-   descarta todo o rascunho de `NovaReservaDialog` (viagem, destino, datas, passageiros e o
-   nome da nova empresa), gera nova chave de intenção e volta para Pessoa; `ContractorPicker`
-   também limpa os três termos de busca. Nada da conta anterior reaparece na tela nem entra
-   no que a nova conta salva.
-4. **Falha ao listar empresas não é lista vazia.** `AgencyCompaniesPanel` passou a usar
-   `error`/`refetch` de `useAgencyCompanies` e mostra aviso com "Tentar novamente", no mesmo
-   padrão do cadastro de reserva. A busca digitada e o formulário são preservados e nenhum
-   texto sugere cadastrar uma empresa que pode já existir.
-
-**Testes (executados):** novos `src/test/central-reservas-payload-contratante.test.tsx`
-(payload real através do hook `useTravelFileMutations`, inclusive com
-`canEditContractor=false`; identidade mutável real para o reset, sem mock fixo) e
-`src/test/central-reservas-empresas-painel.test.tsx` (navegação entre visões após cancelar e
-após salvar, novo clique reabrindo, erro com retry, lista vazia sem erro, formulário
-acessível durante a falha). Lote focado da Central reexecutado: 7 arquivos, 85 testes;
-`tsgo` e build passaram.
-
-**Limites reais desta revisão:** as verificações são de comportamento em ambiente de teste
-(payload e interface), sem execução autenticada com contas reais e sem validação visual em
-navegador autenticado. O endurecimento financeiro das reservas legadas de origem web continua
-dependendo de deploy coordenado. Nada foi publicado.
-
-## Coerência dos valores da reserva manual (fechamento da primeira entrega)
-
-Correção **apenas de apresentação/consulta** dos totais: nenhum lançamento financeiro,
-nenhuma automação entre módulos e nenhuma conversão de câmbio foi criada.
-
-1. **Valor efetivo vem dos serviços (origem manual).** O agregado é derivado na consulta pelo
-   helper `private.travel_file_manual_currency_totals`, usado por `travel_file_detail` e
-   `travel_files_page` somente quando `origin = 'manual'`. `travel_files.requested_amount`,
-   os snapshots e os preços gravados **não** são alterados. Cada `requested_amount` de serviço
-   já é o total do serviço: a quantidade não multiplica novamente e o rótulo na ficha é
-   "Valor dos serviços (solicitado)". Serviços cancelados ficam fora dos totais.
-2. **Agrupamento por moeda, sem soma nem conversão.** Lista, resumo e cartões da ficha usam
-   `groupServiceFinancialsByCurrency` / `manual_totals`. USD 100 + BRL 200 aparecem como dois
-   grupos; nunca como um total único de 300. Reservas de origem web mantêm os valores
-   congelados do processo e as regras legadas.
-3. **Permissões preservadas no novo campo agregado.** Sem `financial.view_revenue`,
-   `financial.view_margin` e `financial.commissions.view` o agregado sai vazio; com apenas
-   parte das permissões só os blocos autorizados são projetados. A **margem exige receita e
-   margem** — nunca é calculada tratando a receita removida como zero.
-
-**Testes (executados):** novo `src/test/central-reservas-totais-moeda.test.ts` — (a) testes de
-comportamento com fixtures sintéticas: BRL 1.500 exibe 1.500, edição para 1.600 atualiza o
-total, quantidade não multiplica, USD 100 + BRL 200 geram dois grupos, cancelado ignorado,
-reserva sem serviços não inventa valor; (b) mapeamento da listagem: sem permissão financeira o
-item não recebe nenhum agregado numérico, reserva web não recebe agregado, valores presentes
-são convertidos; (c) **revisão do SQL aplicado** (leitura da migration): agrupamento por moeda,
-exclusão de cancelados, projeção por permissão, margem condicionada a receita, agregado só
-para origem manual e ausência de `UPDATE` em `travel_files`/`travel_file_services`.
-Lote focado reexecutado: 8 arquivos, 114 testes; `tsgo --noEmit` e `vite build` passaram.
-
-**Limites reais:** (i) o item (c) é revisão do SQL efetivamente aplicado, não execução do RPC
-com sessão autenticada real — não houve teste de banco com usuários reais nem validação visual
-em navegador autenticado; (ii) o linter do projeto segue com avisos preexistentes de escopo
-amplo (execução de funções `SECURITY DEFINER`, RLS sem policy, `search_path` mutável, extensão
-em `public`, proteção de senha vazada), não verificados um a um nesta correção; (iii) o
-endurecimento financeiro das reservas legadas de origem web continua dependendo do deploy
-coordenado já descrito. Nada foi publicado.
+- **Não há garantia universal de isolamento.** As leituras diretas de reservas de origem
+  `web_quote` continuam compatíveis com o legado; o endurecimento completo depende de um
+  **deploy coordenado** do frontend e das funções.
+- O gate comercial do cadastro PJ vive na RPC `agency_company_save`. Esta rodada **não** blindou
+  todos os caminhos legados de escrita direta na tabela de empresas.
+- Autenticação real entre agências não foi verificada nesta fase.
+- Sem conversão de câmbio: valores em moedas diferentes são sempre exibidos separados.
