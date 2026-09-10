@@ -418,12 +418,12 @@ export function ReservasTab() {
               <Ticket className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              {hasFilters ? "Nenhum processo encontrado" : "Nenhuma solicitação de reserva ainda"}
+              {hasFilters ? "Nenhuma reserva encontrada" : "Nenhuma reserva ainda"}
             </p>
             <p className="mt-1 max-w-sm text-xs text-muted-foreground">
               {hasFilters
                 ? "Ajuste a busca ou os filtros para encontrar o processo desejado."
-                : "Quando um cliente escolher os serviços no orçamento web, o processo de reserva aparece aqui."}
+                : "Cadastre uma reserva em \"Nova reserva\" ou aguarde a escolha de serviços no orçamento na internet."}
             </p>
             {hasFilters && (
               <Button size="sm" variant="outline" className="mt-4" onClick={resetFilters}>
@@ -460,7 +460,8 @@ export function ReservasTab() {
                 </div>
 
                 <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                  {file.clientName || "Cliente do orçamento"}
+                  {file.companyName || file.clientName || "Contratante a definir"}
+                  {file.trip_name ? ` · ${file.trip_name}` : ""}
                 </p>
 
                 <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -498,7 +499,8 @@ export function ReservasTab() {
                     </span>
                   )}
                   <span className="text-[11px] text-muted-foreground">
-                    Solicitado em {format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    {file.origin === "manual" ? "Cadastrada em " : "Solicitado em "}
+                    {format(new Date(file.opened_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   </span>
                 </div>
               </button>
