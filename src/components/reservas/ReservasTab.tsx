@@ -42,6 +42,7 @@ import {
 import { isFileOverdue } from "@/lib/travelFileWorkflow";
 import type { TravelFileListItem } from "@/types/travelFile";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { NovaReservaDialog } from "@/components/reservas/NovaReservaDialog";
 
 const money = (value: number, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
