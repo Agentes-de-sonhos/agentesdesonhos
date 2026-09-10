@@ -466,7 +466,8 @@ export function useTravelFileMutations(fileId?: string) {
   const queryClient = useQueryClient();
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["travel-file", fileId] });
+    // A chave do detalhe inclui a identidade; invalidamos todo o grupo.
+    queryClient.invalidateQueries({ queryKey: ["travel-file"] });
     queryClient.invalidateQueries({ queryKey: ["travel-files-page"] });
     queryClient.invalidateQueries({ queryKey: ["travel-files-summary"] });
     queryClient.invalidateQueries({ queryKey: ["agency-admin-dashboard"] });
