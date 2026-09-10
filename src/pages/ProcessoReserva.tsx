@@ -807,11 +807,16 @@ export default function ProcessoReserva() {
               open={editDraftOpen}
               onOpenChange={setEditDraftOpen}
               file={file}
+              currentClient={data?.client ? { id: data.client.id, name: data.client.name } : null}
+              currentCompany={data?.company ? { id: data.company.id, name: data.company.name } : null}
+              currentContact={data?.contact ? { id: data.contact.id, name: data.contact.name } : null}
+              canEditContractor={file.status === "draft"}
               onSave={async (input) => {
                 await saveManualData.mutateAsync(input);
                 toast.success("Dados da reserva atualizados.");
               }}
             />
+
             <ManualServiceDialog
               open={manualServiceOpen}
               onOpenChange={(next) => {
