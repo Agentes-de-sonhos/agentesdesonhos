@@ -53,6 +53,23 @@ const newManualKey = () =>
   (globalThis.crypto?.randomUUID?.() as string) ||
   `manual-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+/**
+ * Falha de rede ou de permissão na busca. Nunca dizemos "nada encontrado" nesse
+ * caso: quem está cadastrando não deve ser levado a duplicar um cadastro.
+ */
+function SearchErrorNotice({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div role="alert" className="space-y-2 p-3">
+      <p className="text-xs font-medium text-destructive">
+        Não foi possível buscar agora. Verifique a conexão e tente novamente.
+      </p>
+      <Button type="button" size="sm" variant="outline" onClick={onRetry}>
+        Tentar novamente
+      </Button>
+    </div>
+  );
+}
+
 export interface NovaReservaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -94,10 +111,13 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   );
   // Busca separada para o contato responsável da empresa.
   const contacts = useClientSearch(contactSearch, open && contractorType === "company", user?.id);
-  const { companies, isFetching: loadingCompanies, saveCompany } = useAgencyCompanies(
-    companySearch,
-    open && contractorType === "company",
-  );
+  const {
+    companies,
+    isFetching: loadingCompanies,
+    error: companiesError,
+    refetch: refetchCompanies,
+    saveCompany,
+  } = useAgencyCompanies(companySearch, open && contractorType === "company");
   const createReservation = useCreateManualReservation();
 
   // Ao abrir, começa uma nova intenção de cadastro. O formulário só é limpo
@@ -245,6 +265,8 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
               <div className="max-h-40 overflow-y-auto rounded-lg border border-border/60">
                 {clients.isLoading ? (
                   <p className="p-3 text-xs text-muted-foreground">Carregando...</p>
+                ) : clients.error ? (
+                  <SearchErrorNotice onRetry={() => clients.refetch()} />
                 ) : (clients.data || []).length === 0 ? (
                   <p className="p-3 text-xs text-muted-foreground">
                     Nenhuma pessoa encontrada. Cadastre em Clientes e volte aqui.
@@ -288,6 +310,8 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                 <div className="max-h-40 overflow-y-auto rounded-lg border border-border/60">
                   {loadingCompanies ? (
                     <p className="p-3 text-xs text-muted-foreground">Carregando...</p>
+                  ) : companiesError ? (
+                    <SearchErrorNotice onRetry={() => refetchCompanies()} />
                   ) : companies.length === 0 ? (
                     <p className="p-3 text-xs text-muted-foreground">
                       Nenhuma empresa cadastrada ainda. Informe o nome abaixo para criar.
@@ -350,7 +374,9 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                   />
                 </div>
                 <div className="max-h-32 overflow-y-auto rounded-lg border border-border/60">
-                  {(contacts.data || []).length === 0 ? (
+                  {contacts.error ? (
+                    <SearchErrorNotice onRetry={() => contacts.refetch()} />
+                  ) : (contacts.data || []).length === 0 ? (
                     <p className="p-3 text-xs text-muted-foreground">Nenhuma pessoa encontrada.</p>
                   ) : (
                     (contacts.data || []).map((c) => (

@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { parsePastedCurrency } from "@/lib/currencyMask";
 import type { TravelFileService } from "@/types/travelFile";
 
 const SERVICE_TYPES: { value: string; label: string }[] = [
@@ -101,9 +102,15 @@ export function ManualServiceDialog({
     }
     let parsedAmount: number | null = null;
     if (canEditAmount && amount.trim()) {
-      parsedAmount = Number(amount.trim().replace(",", "."));
-      if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
-        setFieldError("Informe um valor válido.");
+      // Aceita o jeito brasileiro de escrever ("1.500,00", "R$ 1 500,00") e
+      // também "1500.50". Qualquer outra coisa é recusada, nunca convertida.
+      const cleaned = amount.replace(/R\$/gi, "").replace(/[\s\u00A0]/g, "").trim();
+      const brFormat = /^\d{1,3}(\.\d{3})+(,\d{1,2})?$/;
+      const simple = /^\d+([.,]\d{1,2})?$/;
+      const valid = brFormat.test(cleaned) || simple.test(cleaned);
+      parsedAmount = valid ? parsePastedCurrency(cleaned) : null;
+      if (parsedAmount == null || !Number.isFinite(parsedAmount) || parsedAmount < 0) {
+        setFieldError("Informe um valor válido, por exemplo 1.500,00.");
         return;
       }
     }

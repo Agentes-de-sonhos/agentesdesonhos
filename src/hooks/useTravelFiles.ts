@@ -276,8 +276,11 @@ export function useTravelFilesSummary(enabled = true) {
  * remove valores financeiros de quem não tem permissão para vê-los.
  */
 export function useTravelFile(fileId?: string) {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ["travel-file", fileId],
+    // A identidade entra na chave: o que um usuário pode ver (inclusive valores)
+    // nunca é reaproveitado por outra conta na mesma aba.
+    queryKey: ["travel-file", user?.id ?? "anon", fileId],
     enabled: !!fileId,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
@@ -335,6 +338,39 @@ const manualPayload = (input: ManualReservationInput) => ({
   children_count: input.childrenCount ?? 0,
   currency: input.currency || "BRL",
 });
+
+/**
+ * Edição: envia apenas o que a tela realmente mudou. Campo ausente é
+ * preservado no servidor — moeda, valores e contato escrito à mão continuam
+ * como estavam quando a tela não mexe neles.
+ */
+export type ManualReservationPatch = Partial<Omit<ManualReservationInput, "manualKey">>;
+
+const manualPatchPayload = (input: ManualReservationPatch) => {
+  const map: Array<[keyof ManualReservationPatch, string]> = [
+    ["contractorType", "contractor_type"],
+    ["clientId", "client_id"],
+    ["companyId", "company_id"],
+    ["contactClientId", "contact_client_id"],
+    ["contactName", "contact_name"],
+    ["contactEmail", "contact_email"],
+    ["contactPhone", "contact_phone"],
+    ["tripName", "trip_name"],
+    ["primaryDestination", "primary_destination"],
+    ["startDate", "start_date"],
+    ["endDate", "end_date"],
+    ["adultsCount", "adults_count"],
+    ["childrenCount", "children_count"],
+    ["currency", "currency"],
+  ];
+  const payload: Record<string, unknown> = {};
+  for (const [key, column] of map) {
+    const value = input[key];
+    if (value === undefined) continue;
+    payload[column] = value === "" ? null : value;
+  }
+  return payload;
+};
 
 /**
  * Cadastro manual de reserva. O registro nasce como RASCUNHO e não cria
@@ -417,6 +453,7 @@ export function useAgencyCompanies(search: string, enabled = true) {
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: query.error as Error | null,
+    refetch: query.refetch,
     saveCompany,
   };
 }
@@ -430,7 +467,8 @@ export function useTravelFileMutations(fileId?: string) {
   const queryClient = useQueryClient();
 
   const invalidate = () => {
-    queryClient.invalidateQueries({ queryKey: ["travel-file", fileId] });
+    // A chave do detalhe inclui a identidade; invalidamos todo o grupo.
+    queryClient.invalidateQueries({ queryKey: ["travel-file"] });
     queryClient.invalidateQueries({ queryKey: ["travel-files-page"] });
     queryClient.invalidateQueries({ queryKey: ["travel-files-summary"] });
     queryClient.invalidateQueries({ queryKey: ["agency-admin-dashboard"] });
@@ -501,10 +539,10 @@ export function useTravelFileMutations(fileId?: string) {
 
   /** Dados básicos do rascunho manual (nunca altera files vindos do site). */
   const saveManualData = useMutation({
-    mutationFn: async (input: Omit<ManualReservationInput, "manualKey">) => {
+    mutationFn: async (input: ManualReservationPatch) => {
       const { error } = await sb.rpc("travel_file_update_manual", {
         _file_id: fileId,
-        _payload: manualPayload({ ...input, manualKey: "" }),
+        _payload: manualPatchPayload(input),
       });
       if (error) throw error;
     },
@@ -565,7 +603,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["travel-file-notes", fileId],
+    queryKey: ["travel-file-notes", user?.id ?? "anon", fileId],
     enabled: !!fileId,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
@@ -590,7 +628,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes", fileId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes"] }),
   });
 
   const deleteNote = useMutation({
@@ -598,7 +636,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
       const { error } = await sb.rpc("travel_file_note_delete", { _note_id: noteId });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes", fileId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes"] }),
   });
 
   return { notes: query.data ?? [], isLoading: query.isLoading, addNote, deleteNote };

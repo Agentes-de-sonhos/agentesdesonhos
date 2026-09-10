@@ -103,3 +103,36 @@ Migrations aplicadas nesta rodada (sem duplicar reservas nem recursos):
   (nenhum novo foi introduzido por esta rodada).
 - Continua pendente a validação visual autenticada em navegador e o endurecimento dos
   dados legados de origem web (precisa de deploy coordenado). Nada foi publicado.
+
+## Fechamento da mesma entrega (revisão final)
+
+1. **Editar não apaga mais nada** — a edição envia apenas os campos que a tela mudou e a
+   função do banco preserva o que não foi enviado. Uma reserva em dólar ou euro com contato
+   escrito à mão continua igual depois de mudar só o destino; limpar um dado continua
+   possível quando o usuário pede explicitamente.
+2. **Voltar** — o botão volta sempre para a lista de Reservas do contexto atual
+   (`/reservas`, `/gestao/reservas` e a mesma rota dentro do Site Lab). Ninguém cai mais em
+   uma aba de projetos protegida por outro plano.
+3. **Ficha e notas por conta** — os dados da ficha e as notas internas passaram a ser
+   guardados por identidade; trocar de conta na mesma aba não reaproveita valores ou
+   permissões de quem estava antes.
+4. **Falha de busca aparece como falha** — quando a busca de pessoas ou empresas não
+   responde, a tela mostra o aviso com "Tentar novamente" e preserva o formulário, em vez de
+   dizer que nada foi encontrado (o que levava a cadastrar de novo).
+5. **Valor à brasileira** — o valor do serviço aceita `1.500,00`, `1500,50`, `R$ 1.500,00` e
+   `1500.50`; texto inválido é recusado com aviso, nunca convertido em silêncio.
+
+### O que foi realmente comprovado nesta rodada
+- **Testes de componentes/hooks (executados)**: 8 testes novos, incluindo o pacote real
+  enviado pelo hook na edição (sem moeda, valor ou contato), os formatos de valor aceitos e
+  recusados, e o caminho da lista de Reservas na plataforma tradicional.
+- **Testes já existentes (executados)**: 14 do cadastro manual/serviços, 5 de empresas e
+  navegação, 28 de contrato de banco. Verificação de tipos e build passaram.
+- **Revisão de SQL (estática)**: a semântica de atualização parcial foi revisada linha a
+  linha na função aplicada; não houve execução autenticada em banco com usuários reais.
+- **Não comprovado**: validação visual autenticada em navegador e execução real de
+  isolamento/redaction com contas de agências diferentes.
+- **Continua pendente**: o endurecimento dos dados legados de origem web depende de deploy
+  coordenado, portanto o isolamento financeiro dos registros antigos **não** está completo.
+- Os avisos gerais do relatório de segurança do banco permanecem os mesmos (460), sem novos
+  avisos introduzidos. Nada foi publicado.
