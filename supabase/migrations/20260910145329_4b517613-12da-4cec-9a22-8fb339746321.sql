@@ -1,6 +1,6 @@
 -- Correção estreita: o gate comercial do cadastro PJ passa a ser o da área de
 -- Clientes/CRM (plano/concessão da conta master), sem exigir reservations.view.
--- Nada mais é alterado: can_use_reservations_center, has_feature_access e as
+-- Nada mais é alterado: o gate global da Central, has_feature_access e as
 -- políticas de companies/client_companies seguem intactos.
 CREATE OR REPLACE FUNCTION public.agency_company_save(_payload jsonb)
  RETURNS uuid
