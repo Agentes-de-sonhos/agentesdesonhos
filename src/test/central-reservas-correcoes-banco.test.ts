@@ -187,8 +187,11 @@ describe("8) bypass de SELECT direto", () => {
 
   it("mantém as reservas do site legíveis para não quebrar o frontend publicado", () => {
     expect(fix).toMatch(/COALESCE\(origin, 'web_quote'\) <> 'manual'/);
-    expect(fix).toMatch(/NOT EXISTS \(SELECT 1 FROM public\.travel_files f/);
+    // A verificação dos serviços foi endurecida na reauditoria (helper seguro):
+    // ver central-reservas-reauditoria.test.ts.
+    expect(all).toMatch(/private\.travel_file_direct_read_is_web\(file_id\)/);
   });
+
 
   it("exige todas as permissões sensíveis para leitura direta", () => {
     const guards = fix.match(/can_team\('financial\.commissions\.view'\)/g) || [];
