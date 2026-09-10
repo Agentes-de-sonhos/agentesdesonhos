@@ -30,7 +30,8 @@ export interface EditarRascunhoDialogProps {
   /** Rascunho manual permite corrigir o contratante; demais casos, não. */
   canEditContractor?: boolean;
   onSave: (input: {
-    contractorType: "individual" | "company";
+    /** Campos de contratante só vêm quando realmente foram alterados. */
+    contractorType?: "individual" | "company";
     clientId?: string | null;
     companyId?: string | null;
     contactClientId?: string | null;
@@ -42,6 +43,7 @@ export interface EditarRascunhoDialogProps {
     childrenCount?: number;
   }) => Promise<void>;
 }
+
 
 /**
  * Edição dos dados básicos de uma reserva cadastrada à mão. Em rascunho também
