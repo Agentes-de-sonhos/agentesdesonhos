@@ -317,7 +317,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                   value={newCompanyName}
                   onChange={(e) => {
                     setNewCompanyName(e.target.value);
-                    if (e.target.value.trim()) setCompanyId(null);
+                    if (e.target.value.trim()) setSelectedCompany(null);
                   }}
                   placeholder="Nome da empresa"
                 />
