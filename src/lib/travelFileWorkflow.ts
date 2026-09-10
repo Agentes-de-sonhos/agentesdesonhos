@@ -13,6 +13,7 @@ import { FILE_STATUS_LABELS, SERVICE_STATUS_LABELS } from "@/lib/travelFiles";
  * sugestão de etapa — nenhuma consulta e nenhuma estrutura nova de dados.
  */
 export const FILE_STATUS_ORDER: TravelFileStatus[] = [
+  "draft",
   "request_received",
   "awaiting_reconfirmation",
   "partially_available",

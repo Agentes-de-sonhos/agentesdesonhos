@@ -64,6 +64,7 @@ export type ReservasFilterId =
 /** A aba Reservas é única: os filtros cobrem novas solicitações e etapas posteriores. */
 export const RESERVAS_FILTERS: { id: ReservasFilterId; label: string; statuses: TravelFileStatus[] }[] = [
   { id: "all", label: "Todas", statuses: [] },
+  { id: "draft", label: "Rascunhos", statuses: ["draft"] },
   { id: "new", label: "Novas solicitações", statuses: ["request_received"] },
   {
     id: "awaiting_reconfirmation",
