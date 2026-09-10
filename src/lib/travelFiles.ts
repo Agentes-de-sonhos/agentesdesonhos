@@ -22,6 +22,10 @@ export function bookingProcessLabel(value: number | string | null | undefined): 
 }
 
 export const FILE_STATUS_LABELS: Record<TravelFileStatus, string> = {
+  // "Rascunho" é exclusivo do cadastro manual: salvar NUNCA significa venda
+  // confirmada nem pagamento. "Solicitação recebida" segue sendo o estado
+  // inicial das solicitações que chegam pelo site.
+  draft: "Rascunho",
   request_received: "Solicitação recebida",
   awaiting_reconfirmation: "Aguardando reconfirmação",
   partially_available: "Parcialmente disponível",
@@ -48,6 +52,7 @@ export const SERVICE_STATUS_LABELS: Record<TravelFileServiceStatus, string> = {
 
 export type ReservasFilterId =
   | "all"
+  | "draft"
   | "new"
   | "awaiting_reconfirmation"
   | "awaiting_client"
