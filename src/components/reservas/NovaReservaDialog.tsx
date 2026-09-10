@@ -87,9 +87,13 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   // Chave de intenção: um clique duplo nunca gera duas reservas.
   const [manualKey, setManualKey] = useState(newManualKey);
 
-  const clients = useClientSearch(clientSearch, open && contractorType === "individual");
+  const clients = useClientSearch(
+    clientSearch,
+    open && contractorType === "individual",
+    user?.id,
+  );
   // Busca separada para o contato responsável da empresa.
-  const contacts = useClientSearch(contactSearch, open && contractorType === "company");
+  const contacts = useClientSearch(contactSearch, open && contractorType === "company", user?.id);
   const { companies, isFetching: loadingCompanies, saveCompany } = useAgencyCompanies(
     companySearch,
     open && contractorType === "company",
@@ -102,20 +106,20 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
     if (open) setManualKey(newManualKey());
   }, [open]);
 
-  const clientName = useMemo(
-    () => clients.data?.find((c) => c.id === clientId)?.name || null,
-    [clients.data, clientId],
-  );
+  const clientId = selectedClient?.id ?? null;
+  const companyId = selectedCompany?.id ?? null;
+  const contactClientId = selectedContact?.id ?? null;
+  const clientName = selectedClient?.name || null;
 
   const reset = () => {
     setContractorType("individual");
     setClientSearch("");
-    setClientId(null);
+    setSelectedClient(null);
     setCompanySearch("");
-    setCompanyId(null);
+    setSelectedCompany(null);
     setNewCompanyName("");
     setContactSearch("");
-    setContactClientId(null);
+    setSelectedContact(null);
     setTripName("");
     setDestination("");
     setStartDate("");
