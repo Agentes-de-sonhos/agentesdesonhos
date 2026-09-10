@@ -1,5 +1,6 @@
 /** Processo de reserva (File): registro central da venda originada no orçamento web. */
 export type TravelFileStatus =
+  | "draft"
   | "request_received"
   | "awaiting_reconfirmation"
   | "partially_available"
@@ -22,6 +23,18 @@ export type TravelFileServiceStatus =
   | "delivered"
   | "cancelled";
 
+/** Origem do processo: solicitação recebida pelo site ou cadastro manual. */
+export type TravelFileOrigin = "web_quote" | "manual";
+
+/** Contratante: pessoa física (cliente) ou empresa (companies). */
+export type TravelFileContractorType = "individual" | "company";
+
+export interface TravelFileContactSnapshot {
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
 export interface TravelFile {
   id: string;
   agency_id: string;
@@ -30,7 +43,7 @@ export interface TravelFile {
   client_id: string | null;
   opportunity_id: string | null;
   quote_id: string | null;
-  root_request_id: string;
+  root_request_id: string | null;
   current_request_id: string | null;
   revision: number;
   protocol_snapshot: string | null;
@@ -60,6 +73,13 @@ export interface TravelFile {
   cancellation_reason: string | null;
   created_at: string;
   updated_at: string;
+  /** Campos da Central de Reservas (cadastro manual). */
+  origin: TravelFileOrigin;
+  contractor_type: TravelFileContractorType;
+  company_id: string | null;
+  contact_client_id: string | null;
+  contact_snapshot: TravelFileContactSnapshot;
+  trip_name: string | null;
 }
 
 export interface TravelFileService {
@@ -68,6 +88,7 @@ export interface TravelFileService {
   service_type: string;
   product_name: string;
   supplier_name: string | null;
+  supplier_id?: string | null;
   city: string | null;
   destination: string | null;
   country: string | null;
@@ -100,12 +121,22 @@ export interface TravelFileNote {
   updated_at: string;
 }
 
+/** Empresa contratante (tabela companies), reaproveitada pelo cadastro PJ. */
+export interface AgencyCompany {
+  id: string;
+  name: string;
+  trade_name: string | null;
+  cnpj: string | null;
+  email: string | null;
+  phone: string | null;
+}
+
 /** Item da lista da aba Reservas, já com dados derivados de leitura. */
 export interface TravelFileListItem extends TravelFile {
   clientName: string | null;
+  companyName?: string | null;
   servicesCount: number;
   serviceNames: string[];
   unread: boolean;
   responsibleName?: string | null;
 }
-
