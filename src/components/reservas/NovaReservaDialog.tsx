@@ -345,7 +345,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                       <button
                         key={c.id}
                         type="button"
-                        onClick={() => setContactClientId(contactClientId === c.id ? null : c.id)}
+                        onClick={() => setSelectedContact(contactClientId === c.id ? null : c)}
                         className={cn(
                           "flex w-full px-3 py-2 text-left text-sm hover:bg-muted/60",
                           contactClientId === c.id && "bg-primary/10",
