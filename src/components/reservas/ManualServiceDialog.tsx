@@ -35,6 +35,8 @@ const SERVICE_TYPES: { value: string; label: string }[] = [
 
 export interface ManualServicePayload {
   serviceId?: string | null;
+  /** Situação atual do serviço, reenviada na edição para não regredir. */
+  status?: TravelFileService["status"];
   serviceType: string;
   productName: string;
   supplierName?: string | null;
@@ -109,6 +111,8 @@ export function ManualServiceDialog({
     try {
       await onSave({
         serviceId: service?.id || null,
+        // Editar nome, datas ou observações não altera a situação já registrada.
+        status: service?.status,
         serviceType,
         productName: productName.trim(),
         supplierName: supplierName.trim() || null,
@@ -116,7 +120,8 @@ export function ManualServiceDialog({
         startDate: startDate || null,
         endDate: endDate || null,
         quantity: Math.max(1, parseInt(quantity, 10) || 1),
-        notes: notes.trim() || null,
+        // Sempre enviado: vazio significa apagar a observação anterior.
+        notes: notes.trim(),
         requestedAmount: parsedAmount,
       });
       onOpenChange(false);

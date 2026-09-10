@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAgencyCompanies, useCreateManualReservation } from "@/hooks/useTravelFiles";
+import { useAuth } from "@/hooks/useAuth";
 
 type ContractorType = "individual" | "company";
 
@@ -26,11 +27,15 @@ interface ClientOption {
   phone: string | null;
 }
 
-/** Busca de clientes da própria agência (RLS garante o isolamento). */
-function useClientSearch(search: string, enabled: boolean) {
+/**
+ * Busca de clientes da própria agência (RLS garante o isolamento). A chave da
+ * consulta inclui a identidade do usuário: ao trocar de conta na mesma aba,
+ * nada do cache anterior é reaproveitado.
+ */
+function useClientSearch(search: string, enabled: boolean, identity?: string | null) {
   return useQuery({
-    queryKey: ["reservas-client-search", search.trim(), enabled],
-    enabled,
+    queryKey: ["reservas-client-search", identity ?? "anon", search.trim()],
+    enabled: !!identity && enabled,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async (): Promise<ClientOption[]> => {
@@ -61,14 +66,17 @@ export interface NovaReservaDialogProps {
  * orçamento, carteira nem lançamento financeiro.
  */
 export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReservaDialogProps) {
+  const { user } = useAuth();
   const [contractorType, setContractorType] = useState<ContractorType>("individual");
   const [clientSearch, setClientSearch] = useState("");
-  const [clientId, setClientId] = useState<string | null>(null);
+  // A escolha guarda o registro inteiro: o nome continua visível mesmo depois
+  // de digitar outra busca, e nunca é enviado um contratante invisível.
+  const [selectedClient, setSelectedClient] = useState<ClientOption | null>(null);
   const [companySearch, setCompanySearch] = useState("");
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<{ id: string; name: string } | null>(null);
   const [newCompanyName, setNewCompanyName] = useState("");
   const [contactSearch, setContactSearch] = useState("");
-  const [contactClientId, setContactClientId] = useState<string | null>(null);
+  const [selectedContact, setSelectedContact] = useState<ClientOption | null>(null);
   const [tripName, setTripName] = useState("");
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -79,9 +87,13 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
   // Chave de intenção: um clique duplo nunca gera duas reservas.
   const [manualKey, setManualKey] = useState(newManualKey);
 
-  const clients = useClientSearch(clientSearch, open && contractorType === "individual");
+  const clients = useClientSearch(
+    clientSearch,
+    open && contractorType === "individual",
+    user?.id,
+  );
   // Busca separada para o contato responsável da empresa.
-  const contacts = useClientSearch(contactSearch, open && contractorType === "company");
+  const contacts = useClientSearch(contactSearch, open && contractorType === "company", user?.id);
   const { companies, isFetching: loadingCompanies, saveCompany } = useAgencyCompanies(
     companySearch,
     open && contractorType === "company",
@@ -94,20 +106,27 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
     if (open) setManualKey(newManualKey());
   }, [open]);
 
-  const clientName = useMemo(
-    () => clients.data?.find((c) => c.id === clientId)?.name || null,
-    [clients.data, clientId],
-  );
+  // Trocar de conta na mesma aba nunca mantém contratante de outra agência.
+  useEffect(() => {
+    setSelectedClient(null);
+    setSelectedCompany(null);
+    setSelectedContact(null);
+  }, [user?.id]);
+
+  const clientId = selectedClient?.id ?? null;
+  const companyId = selectedCompany?.id ?? null;
+  const contactClientId = selectedContact?.id ?? null;
+  const clientName = selectedClient?.name || null;
 
   const reset = () => {
     setContractorType("individual");
     setClientSearch("");
-    setClientId(null);
+    setSelectedClient(null);
     setCompanySearch("");
-    setCompanyId(null);
+    setSelectedCompany(null);
     setNewCompanyName("");
     setContactSearch("");
-    setContactClientId(null);
+    setSelectedContact(null);
     setTripName("");
     setDestination("");
     setStartDate("");
@@ -139,7 +158,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
           name: newCompanyName.trim(),
           contactClientId: contactClientId || null,
         });
-        setCompanyId(finalCompanyId);
+        setSelectedCompany({ id: finalCompanyId, name: newCompanyName.trim() });
       }
 
       const result = await createReservation.mutateAsync({
@@ -235,7 +254,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                     <button
                       key={c.id}
                       type="button"
-                      onClick={() => setClientId(c.id)}
+                      onClick={() => setSelectedClient(c)}
                       className={cn(
                         "flex w-full flex-col px-3 py-2 text-left text-sm hover:bg-muted/60",
                         clientId === c.id && "bg-primary/10",
@@ -279,7 +298,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                         key={co.id}
                         type="button"
                         onClick={() => {
-                          setCompanyId(co.id);
+                          setSelectedCompany({ id: co.id, name: co.name });
                           setNewCompanyName("");
                         }}
                         className={cn(
@@ -297,6 +316,11 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                     ))
                   )}
                 </div>
+                {selectedCompany && (
+                  <p className="text-xs text-muted-foreground">
+                    Selecionada: {selectedCompany.name}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="reserva-nova-empresa">Ou cadastre uma nova empresa</Label>
@@ -305,7 +329,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                   value={newCompanyName}
                   onChange={(e) => {
                     setNewCompanyName(e.target.value);
-                    if (e.target.value.trim()) setCompanyId(null);
+                    if (e.target.value.trim()) setSelectedCompany(null);
                   }}
                   placeholder="Nome da empresa"
                 />
@@ -333,7 +357,7 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                       <button
                         key={c.id}
                         type="button"
-                        onClick={() => setContactClientId(contactClientId === c.id ? null : c.id)}
+                        onClick={() => setSelectedContact(contactClientId === c.id ? null : c)}
                         className={cn(
                           "flex w-full px-3 py-2 text-left text-sm hover:bg-muted/60",
                           contactClientId === c.id && "bg-primary/10",
@@ -344,6 +368,11 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                     ))
                   )}
                 </div>
+                {selectedContact && (
+                  <p className="text-xs text-muted-foreground">
+                    Contato: {selectedContact.name}
+                  </p>
+                )}
               </div>
             </div>
           )}

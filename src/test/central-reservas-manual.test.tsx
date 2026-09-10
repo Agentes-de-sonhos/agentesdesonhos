@@ -32,6 +32,11 @@ const SYNTHETIC_COMPANY = {
   contact_client_id: null,
 };
 
+// Identidade sintética: a busca de clientes é isolada por usuário.
+vi.mock("@/hooks/useAuth", () => ({
+  useAuth: () => ({ user: { id: "99999999-9999-4999-8999-999999999999" } }),
+}));
+
 const createReservationMutate = vi.fn();
 const saveCompanyMutate = vi.fn();
 
@@ -255,6 +260,28 @@ describe("serviço manual da reserva", () => {
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave.mock.calls[0][0].requestedAmount).toBe(1500.5);
+  });
+
+  it("preserva a situação já registrada ao editar e apaga a observação quando esvaziada", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const service: any = {
+      id: "33333333-3333-4333-8333-333333333333",
+      service_type: "hotel",
+      product_name: "Hotel sintético",
+      status: "booked",
+      quantity: 1,
+      snapshot: { notes: "observação antiga" },
+    };
+    wrap(<ManualServiceDialog open onOpenChange={() => {}} onSave={onSave} service={service} />);
+
+    await user.clear(screen.getByLabelText(/Observa/i));
+    await user.click(screen.getByRole("button", { name: /^Salvar/ }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    const payload = onSave.mock.calls[0][0];
+    expect(payload.status).toBe("booked");
+    expect(payload.notes).toBe("");
   });
 });
 

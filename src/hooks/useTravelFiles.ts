@@ -542,8 +542,11 @@ export function useTravelFileMutations(fileId?: string) {
           start_date: input.startDate || null,
           end_date: input.endDate || null,
           quantity: input.quantity ?? 1,
-          status: input.status || "requested",
-          notes: input.notes || null,
+          // A situação só é enviada quando informada: o servidor preserva a
+          // situação atual na edição e usa "solicitado" apenas na criação.
+          ...(input.status ? { status: input.status } : {}),
+          // Observações: string vazia apaga no servidor; omitir preserva.
+          ...(input.notes === undefined ? {} : { notes: input.notes ?? "" }),
           ...(input.requestedAmount == null ? {} : { requested_amount: input.requestedAmount }),
           currency: input.currency || null,
         },
