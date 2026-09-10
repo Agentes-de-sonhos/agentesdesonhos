@@ -276,8 +276,11 @@ export function useTravelFilesSummary(enabled = true) {
  * remove valores financeiros de quem não tem permissão para vê-los.
  */
 export function useTravelFile(fileId?: string) {
+  const { user } = useAuth();
   return useQuery({
-    queryKey: ["travel-file", fileId],
+    // A identidade entra na chave: o que um usuário pode ver (inclusive valores)
+    // nunca é reaproveitado por outra conta na mesma aba.
+    queryKey: ["travel-file", user?.id ?? "anon", fileId],
     enabled: !!fileId,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
