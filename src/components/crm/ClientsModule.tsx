@@ -174,8 +174,9 @@ export function ClientsModule() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [contactView, setContactView] = useState<"pessoas" | "empresas">("pessoas");
-  // Sinal de "criar" enviado ao painel de empresas pela ação principal.
-  const [companyCreateSignal, setCompanyCreateSignal] = useState(0);
+  // Pedido de "criar empresa" enviado ao painel; é consumido uma única vez.
+  const [companyCreateRequested, setCompanyCreateRequested] = useState(false);
+
 
 
   const debouncedSearch = useDebouncedValue(search);
