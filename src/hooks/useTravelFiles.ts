@@ -602,7 +602,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["travel-file-notes", fileId],
+    queryKey: ["travel-file-notes", user?.id ?? "anon", fileId],
     enabled: !!fileId,
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
@@ -627,7 +627,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes", fileId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes"] }),
   });
 
   const deleteNote = useMutation({
@@ -635,7 +635,7 @@ export function useTravelFileNotes(fileId?: string, agencyId?: string) {
       const { error } = await sb.rpc("travel_file_note_delete", { _note_id: noteId });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes", fileId] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["travel-file-notes"] }),
   });
 
   return { notes: query.data ?? [], isLoading: query.isLoading, addNote, deleteNote };
