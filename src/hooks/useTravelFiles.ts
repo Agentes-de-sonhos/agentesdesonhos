@@ -146,6 +146,7 @@ export function mapTravelFileRow(row: any): TravelFileListItem {
     reconfirmed_amount: row.reconfirmed_amount == null ? null : toNumber(row.reconfirmed_amount),
     final_sale_amount: row.final_sale_amount == null ? null : toNumber(row.final_sale_amount),
     clientName: row.client_name ?? null,
+    companyName: row.company_name ?? null,
     servicesCount: toNumber(row.services_count),
     serviceNames: (row.service_names || []) as string[],
     unread: !!row.unread,
