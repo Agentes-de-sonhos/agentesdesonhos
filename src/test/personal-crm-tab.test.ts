@@ -56,7 +56,7 @@ describe("customização individual — segunda aba do CRM", () => {
     expect(hasOpenedPersonalCrmTab(storage)).toBe(false);
   });
 
-  it("abre uma única aba nomeada após login real com senha", () => {
+  it("abre a aba nomeada após login real com senha, sem duplicar", () => {
     const focus = vi.fn();
     const open = vi.fn(() => ({ focus }) as unknown as Window);
     const storage = makeStorage();
@@ -70,16 +70,18 @@ describe("customização individual — segunda aba do CRM", () => {
     expect(first).toBe("opened");
     expect(open).toHaveBeenCalledWith(PERSONAL_CRM_TAB_URL, PERSONAL_CRM_TAB_TARGET);
     expect(focus).toHaveBeenCalledOnce();
+    expect(hasOpenedPersonalCrmTab(storage)).toBe(true);
 
-    // refresh / navegação interna / restauração de sessão na mesma aba
+    // Novo login explícito reaproveita SEMPRE o mesmo target nomeado.
     const second = openPersonalCrmAfterPasswordLogin({
       userId: PERSONAL_CRM_TAB_USER_ID,
       storage,
       isImpersonating: false,
       open,
     });
-    expect(second).toBe("already-opened");
-    expect(open).toHaveBeenCalledTimes(1);
+    expect(second).toBe("opened");
+    expect(open).toHaveBeenCalledTimes(2);
+    expect(open).toHaveBeenLastCalledWith(PERSONAL_CRM_TAB_URL, PERSONAL_CRM_TAB_TARGET);
   });
 
   it("não abre durante impersonação/suporte", () => {
@@ -95,22 +97,20 @@ describe("customização individual — segunda aba do CRM", () => {
     expect(hasOpenedPersonalCrmTab(storage)).toBe(false);
   });
 
-  it("sinaliza pop-up bloqueado sem entrar em loop", () => {
+  it("pop-up bloqueado não marca controle e permite nova tentativa no próximo login", () => {
     const open = vi.fn(() => null);
     const storage = makeStorage();
-    expect(
-      openPersonalCrmAfterPasswordLogin({ userId: PERSONAL_CRM_TAB_USER_ID, storage, isImpersonating: false, open }),
-    ).toBe("blocked");
-    // segunda tentativa não repete a abertura automática
-    expect(
-      openPersonalCrmAfterPasswordLogin({ userId: PERSONAL_CRM_TAB_USER_ID, storage, isImpersonating: false, open }),
-    ).toBe("already-opened");
-    expect(open).toHaveBeenCalledTimes(1);
-    expect(openPersonalCrmFromFallback(open)).toBe(false);
+    const params = { userId: PERSONAL_CRM_TAB_USER_ID, storage, isImpersonating: false, open };
+
+    expect(openPersonalCrmAfterPasswordLogin(params)).toBe("blocked");
+    expect(hasOpenedPersonalCrmTab(storage)).toBe(false);
+    expect(openPersonalCrmAfterPasswordLogin(params)).toBe("blocked");
     expect(open).toHaveBeenCalledTimes(2);
+    expect(openPersonalCrmFromFallback(open)).toBe(false);
+    expect(open).toHaveBeenCalledTimes(3);
   });
 
-  it("permite nova abertura depois do logout limpar o controle compartilhado", () => {
+  it("logout limpa o controle compartilhado", () => {
     const open = vi.fn(() => ({ focus: vi.fn() }) as unknown as Window);
     const storage = makeStorage();
     const params = { userId: PERSONAL_CRM_TAB_USER_ID, storage, isImpersonating: false, open };

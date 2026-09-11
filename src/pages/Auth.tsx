@@ -231,7 +231,7 @@ export default function Auth() {
       }
     } catch { /* segue com o valor digitado */ }
 
-    let { error: signInError } = await signIn(effectiveEmail, data.password);
+    let { error: signInError, userId: signedInUserId } = await signIn(effectiveEmail, data.password);
 
     // Fallback: um login de equipe pode colidir com o e-mail de uma conta real
     // (ex.: o próprio proprietário cadastrado como membro). Nesse caso, tenta
@@ -244,6 +244,7 @@ export default function Auth() {
     ) {
       const retry = await signIn(data.email, data.password);
       signInError = retry.error;
+      signedInUserId = retry.userId ?? null;
     }
 
     if (signInError) {
@@ -269,12 +270,12 @@ export default function Auth() {
     // formulário de senha pode abrir o CRM. Restauração/impersonação não passam aqui.
     let personalCrmResult: ReturnType<typeof openPersonalCrmAfterPasswordLogin> = "skipped";
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const authenticatedUserId = sessionData.session?.user?.id;
+      // Usa o id retornado pelo próprio login (sem novo await) para preservar o
+      // gesto do clique e reduzir o risco de bloqueio de pop-up.
       personalCrmResult = openPersonalCrmAfterPasswordLogin({
-        userId: authenticatedUserId,
+        userId: signedInUserId,
         storage: window.localStorage,
-        isImpersonating: isSupportSessionForUser(authenticatedUserId),
+        isImpersonating: isSupportSessionForUser(signedInUserId),
         open: (url, target) => window.open(url, target),
       });
     } catch {
