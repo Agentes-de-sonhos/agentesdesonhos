@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { SEO } from "@/components/seo/SEO";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
+import { PersonalCrmTabLauncher } from "@/components/personal/PersonalCrmTabLauncher";
 
 /**
  * Layout-route element used to group all authenticated routes.
@@ -18,6 +19,8 @@ export function ProtectedShell() {
       {/* All authenticated routes are private: block indexing globally. */}
       <SEO noindex />
       <DashboardLayout>
+        {/* Customização individual temporária (um único UUID) */}
+        <PersonalCrmTabLauncher />
         <ProtectedAreaBoundary />
       </DashboardLayout>
     </ProtectedRoute>
