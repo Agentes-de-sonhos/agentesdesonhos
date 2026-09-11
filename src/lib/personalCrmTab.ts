@@ -88,7 +88,7 @@ export function openPersonalCrmAfterPasswordLogin(params: {
 
   let win: Window | null = null;
   try {
-    win = open(PERSONAL_CRM_TAB_PATH, PERSONAL_CRM_TAB_TARGET);
+    win = open(PERSONAL_CRM_TAB_URL, PERSONAL_CRM_TAB_TARGET);
     win?.focus();
   } catch {
     win = null;
@@ -102,7 +102,7 @@ export function openPersonalCrmFromFallback(
   open: (url: string, target: string) => Window | null,
 ): boolean {
   try {
-    const win = open(PERSONAL_CRM_TAB_PATH, PERSONAL_CRM_TAB_TARGET);
+    const win = open(PERSONAL_CRM_TAB_URL, PERSONAL_CRM_TAB_TARGET);
     win?.focus();
     return win !== null;
   } catch {
