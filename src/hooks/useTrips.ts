@@ -3,6 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { cloneItineraryForTrip } from "@/lib/roteiro-domain";
+import {
+  createAssetCopyTracker,
+  duplicateAttachmentList,
+  duplicateUrlList,
+  duplicateVoucherFile,
+  rollbackCopiedAssets,
+} from "@/lib/walletDuplicateAssets";
+
 import type { Trip, TripService, TripFormData, TripServiceType, TripServiceData } from "@/types/trip";
 
 function generatePassword(): string {
