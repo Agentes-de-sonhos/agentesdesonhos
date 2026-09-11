@@ -41,7 +41,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useNoindex } from "@/hooks/useNoindex";
-import { openPersonalCrmTab } from "@/lib/personalCrmTab";
+import { ToastAction } from "@/components/ui/toast";
+import { isSupportSessionForUser } from "@/lib/impersonation";
+import {
+  openPersonalCrmAfterPasswordLogin,
+  openPersonalCrmFromFallback,
+} from "@/lib/personalCrmTab";
 
 // Schemas
 const emailSchema = z.object({
@@ -260,24 +265,41 @@ export default function Auth() {
     setIsLoading(false);
     recordSuccess();
 
-    // Customização individual temporária (um único UUID): tenta abrir a segunda
-    // aba já no gesto de login, quando o navegador permite. Ver src/lib/personalCrmTab.ts.
+    // Customização individual temporária: somente este envio explícito do
+    // formulário de senha pode abrir o CRM. Restauração/impersonação não passam aqui.
+    let personalCrmResult: ReturnType<typeof openPersonalCrmAfterPasswordLogin> = "skipped";
     try {
       const { data: sessionData } = await supabase.auth.getSession();
-      openPersonalCrmTab({
-        userId: sessionData.session?.user?.id,
-        storage: window.sessionStorage,
-        pathname: window.location.pathname,
-        open: (url, target, features) => window.open(url, target, features),
+      const authenticatedUserId = sessionData.session?.user?.id;
+      personalCrmResult = openPersonalCrmAfterPasswordLogin({
+        userId: authenticatedUserId,
+        storage: window.localStorage,
+        isImpersonating: isSupportSessionForUser(authenticatedUserId),
+        open: (url, target) => window.open(url, target),
       });
     } catch {
-      /* fallback discreto acontece dentro da área logada */
+      /* login segue normalmente; nenhuma abertura é feita fora deste handler */
     }
 
-    toast({
-      title: "Bem-vindo de volta!",
-      description: "Login realizado com sucesso.",
-    });
+    if (personalCrmResult === "blocked") {
+      toast({
+        title: "Login realizado",
+        description: "O navegador bloqueou a abertura automática do CRM.",
+        action: (
+          <ToastAction
+            altText="Abrir CRM"
+            onClick={() => openPersonalCrmFromFallback((url, target) => window.open(url, target))}
+          >
+            Abrir CRM
+          </ToastAction>
+        ),
+      });
+    } else {
+      toast({
+        title: "Bem-vindo de volta!",
+        description: "Login realizado com sucesso.",
+      });
+    }
   };
 
   // Magic link (secondary)
