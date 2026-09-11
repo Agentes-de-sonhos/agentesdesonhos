@@ -132,7 +132,7 @@ function seed() {
     status: "active",
     trip_title: "Viagem Roma",
     wallet_cover_url: "https://cdn.test/capa.jpg",
-    signature_snapshot: null,
+    signature_snapshot: { name: "Assinatura Original", accepted_at: "2026-09-01T12:00:00Z" },
     itinerary_mode: "none",
     itinerary_id: null,
     share_token: "aaaa",
@@ -165,7 +165,13 @@ function seed() {
     linked_service_id: "svc-1",
   }];
   db.trip_itinerary_period_images = [];
-  db.trip_reminders = [];
+  db.trip_reminders = [{
+    id: "rem-1", trip_id: SOURCE_ID, user_id: USER_ID,
+    days_before: 7, reminder_date: "2026-09-24", follow_up_note: "Ligar cliente", is_completed: false,
+  }, {
+    id: "rem-2", trip_id: SOURCE_ID, user_id: USER_ID,
+    days_before: -1, reminder_date: "2026-10-09", follow_up_note: null, is_completed: true,
+  }];
 
   [
     "voucher1.pdf", "anexo1.pdf", "bilhete.pdf", "seguro.pdf", "roteiro.pdf",
@@ -248,5 +254,19 @@ describe("duplicação completa da Carteira Digital", () => {
     expect(removedFiles.length).toBeGreaterThan(0);
     removedFiles.forEach((p) => expect(storageObjects.has(p)).toBe(false));
     expect(storageObjects.has(`${USER_ID}/${SOURCE_ID}/voucher1.pdf`)).toBe(true);
+  });
+
+  it("não herda assinatura e não copia lembretes", async () => {
+    const { result } = renderHook(() => useTrips(), { wrapper });
+    const copy = await result.current.duplicateTrip(SOURCE_ID);
+
+    const created = db.trips.find((t) => t.id === copy.id)!;
+    expect(created.signature_snapshot).toBeNull();
+
+    const copyReminders = db.trip_reminders.filter((r) => r.trip_id === copy.id);
+    expect(copyReminders).toHaveLength(0);
+
+    // A origem permanece inalterada.
+    expect(db.trip_reminders.filter((r) => r.trip_id === SOURCE_ID)).toHaveLength(2);
   });
 });
