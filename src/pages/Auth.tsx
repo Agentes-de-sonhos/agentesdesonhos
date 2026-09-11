@@ -41,6 +41,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useNoindex } from "@/hooks/useNoindex";
+import { openPersonalCrmTab } from "@/lib/personalCrmTab";
 
 // Schemas
 const emailSchema = z.object({
@@ -258,6 +259,21 @@ export default function Auth() {
 
     setIsLoading(false);
     recordSuccess();
+
+    // Customização individual temporária (um único UUID): tenta abrir a segunda
+    // aba já no gesto de login, quando o navegador permite. Ver src/lib/personalCrmTab.ts.
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      openPersonalCrmTab({
+        userId: sessionData.session?.user?.id,
+        storage: window.sessionStorage,
+        pathname: window.location.pathname,
+        open: (url, target, features) => window.open(url, target, features),
+      });
+    } catch {
+      /* fallback discreto acontece dentro da área logada */
+    }
+
     toast({
       title: "Bem-vindo de volta!",
       description: "Login realizado com sucesso.",
