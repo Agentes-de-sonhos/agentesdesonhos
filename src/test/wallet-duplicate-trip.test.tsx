@@ -132,7 +132,7 @@ function seed() {
     status: "active",
     trip_title: "Viagem Roma",
     wallet_cover_url: "https://cdn.test/capa.jpg",
-    signature_snapshot: null,
+    signature_snapshot: { name: "Assinatura Original", accepted_at: "2026-09-01T12:00:00Z" },
     itinerary_mode: "none",
     itinerary_id: null,
     share_token: "aaaa",
@@ -165,7 +165,13 @@ function seed() {
     linked_service_id: "svc-1",
   }];
   db.trip_itinerary_period_images = [];
-  db.trip_reminders = [];
+  db.trip_reminders = [{
+    id: "rem-1", trip_id: SOURCE_ID, user_id: USER_ID,
+    days_before: 7, reminder_date: "2026-09-24", follow_up_note: "Ligar cliente", is_completed: false,
+  }, {
+    id: "rem-2", trip_id: SOURCE_ID, user_id: USER_ID,
+    days_before: -1, reminder_date: "2026-10-09", follow_up_note: null, is_completed: true,
+  }];
 
   [
     "voucher1.pdf", "anexo1.pdf", "bilhete.pdf", "seguro.pdf", "roteiro.pdf",
