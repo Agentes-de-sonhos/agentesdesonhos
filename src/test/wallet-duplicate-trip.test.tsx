@@ -255,4 +255,18 @@ describe("duplicação completa da Carteira Digital", () => {
     removedFiles.forEach((p) => expect(storageObjects.has(p)).toBe(false));
     expect(storageObjects.has(`${USER_ID}/${SOURCE_ID}/voucher1.pdf`)).toBe(true);
   });
+
+  it("não herda assinatura e não copia lembretes", async () => {
+    const { result } = renderHook(() => useTrips(), { wrapper });
+    const copy = await result.current.duplicateTrip(SOURCE_ID);
+
+    const created = db.trips.find((t) => t.id === copy.id)!;
+    expect(created.signature_snapshot).toBeNull();
+
+    const copyReminders = db.trip_reminders.filter((r) => r.trip_id === copy.id);
+    expect(copyReminders).toHaveLength(0);
+
+    // A origem permanece inalterada.
+    expect(db.trip_reminders.filter((r) => r.trip_id === SOURCE_ID)).toHaveLength(2);
+  });
 });
