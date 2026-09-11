@@ -3,6 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { cloneItineraryForTrip } from "@/lib/roteiro-domain";
+import {
+  createAssetCopyTracker,
+  duplicateAttachmentList,
+  duplicateUrlList,
+  duplicateVoucherFile,
+  rollbackCopiedAssets,
+} from "@/lib/walletDuplicateAssets";
+
 import type { Trip, TripService, TripFormData, TripServiceType, TripServiceData } from "@/types/trip";
 
 function generatePassword(): string {
@@ -195,32 +203,116 @@ export function useTrips() {
         .single();
       if (newErr || !newTrip) throw newErr || new Error("Falha ao criar a cópia da carteira");
 
-      // Serviços: vouchers/anexos ficam de fora (são arquivos da reserva
-      // original e sua substituição removeria o arquivo da carteira de origem).
-      const { data: services } = await supabase
-        .from("trip_services").select("*").eq("trip_id", sourceId)
-        .order("order_index", { ascending: true });
+      // Cópia completa e independente: cada voucher/anexo é duplicado no
+      // storage para um caminho da nova carteira. Falha essencial → rollback.
+      const tracker = createAssetCopyTracker();
+      const rollback = async () => {
+        await rollbackCopiedAssets(supabase as any, tracker);
+        await supabase.from("trips").delete().eq("id", newTrip.id);
+      };
+
       const serviceIdMap = new Map<string, string>();
-      if (services && services.length > 0) {
-        const { data: inserted } = await supabase
-          .from("trip_services")
-          .insert(services.map((s: any) => ({
-            trip_id: newTrip.id,
-            service_type: s.service_type,
-            service_data: s.service_data,
-            order_index: s.order_index,
-            image_url: s.image_url ?? null,
-            image_urls: Array.isArray(s.image_urls) ? [...s.image_urls] : [],
-            place_id: s.place_id ?? null,
-            attachments: [],
-            voucher_url: null,
-            voucher_name: null,
-          })) as any)
-          .select("id, order_index");
-        (services as any[]).forEach((s) => {
-          const created = (inserted ?? []).find((n: any) => n.order_index === s.order_index);
-          if (created) serviceIdMap.set(s.id, created.id);
-        });
+      try {
+        const { data: services, error: svcErr } = await supabase
+          .from("trip_services").select("*").eq("trip_id", sourceId)
+          .order("order_index", { ascending: true });
+        if (svcErr) throw svcErr;
+
+        for (const s of (services ?? []) as any[]) {
+          const voucherUrl = s.voucher_url
+            ? await duplicateVoucherFile(supabase as any, s.voucher_url, user.id, newTrip.id, tracker)
+            : null;
+          const attachments = await duplicateAttachmentList(
+            supabase as any, s.attachments, user.id, newTrip.id, tracker,
+          );
+
+          const { data: inserted, error: insErr } = await supabase
+            .from("trip_services")
+            .insert({
+              trip_id: newTrip.id,
+              service_type: s.service_type,
+              service_data: s.service_data,
+              order_index: s.order_index,
+              image_url: s.image_url ?? null,
+              image_urls: Array.isArray(s.image_urls) ? [...s.image_urls] : [],
+              place_id: s.place_id ?? null,
+              attachments: attachments as any,
+              voucher_url: voucherUrl,
+              voucher_name: voucherUrl ? s.voucher_name ?? null : null,
+            } as any)
+            .select("id")
+            .single();
+          if (insErr || !inserted) throw insErr || new Error("Falha ao duplicar um serviço da carteira");
+          serviceIdMap.set(s.id, (inserted as any).id);
+        }
+      } catch (e) {
+        await rollback();
+        throw e instanceof Error ? e : new Error("Falha ao duplicar os serviços da carteira");
+      }
+
+      try {
+        // Roteiro legado (atividades por período salvas na própria carteira).
+        const { data: legacyActs, error: actsErr } = await supabase
+          .from("trip_itinerary_activities").select("*").eq("trip_id", sourceId)
+          .order("day_date", { ascending: true }).order("order_index", { ascending: true });
+        if (actsErr) throw actsErr;
+        if (legacyActs && legacyActs.length > 0) {
+          const rows: any[] = [];
+          for (const a of legacyActs as any[]) {
+            rows.push({
+              trip_id: newTrip.id,
+              day_date: a.day_date,
+              period: a.period,
+              title: a.title,
+              description: a.description ?? null,
+              location: a.location ?? null,
+              maps_url: a.maps_url ?? null,
+              notes: a.notes ?? null,
+              start_time: a.start_time ?? null,
+              order_index: a.order_index ?? 0,
+              origin: a.origin ?? "manual",
+              photo_urls: Array.isArray(a.photo_urls) ? [...a.photo_urls] : null,
+              document_urls: await duplicateUrlList(
+                supabase as any, a.document_urls, user.id, newTrip.id, tracker,
+              ),
+              linked_service_id: a.linked_service_id ? serviceIdMap.get(a.linked_service_id) ?? null : null,
+            });
+          }
+          const { error } = await supabase.from("trip_itinerary_activities").insert(rows as any);
+          if (error) throw error;
+        }
+
+        const { data: periodImgs } = await supabase
+          .from("trip_itinerary_period_images").select("*").eq("trip_id", sourceId);
+        if (periodImgs && periodImgs.length > 0) {
+          const { error } = await supabase.from("trip_itinerary_period_images").insert(
+            periodImgs.map((p: any) => ({
+              trip_id: newTrip.id,
+              day_date: p.day_date,
+              period: p.period,
+              image_url: p.image_url,
+            })) as any
+          );
+          if (error) throw error;
+        }
+
+        const { data: reminders } = await supabase
+          .from("trip_reminders").select("*").eq("trip_id", sourceId);
+        if (reminders && reminders.length > 0) {
+          await supabase.from("trip_reminders").insert(
+            reminders.map((r: any) => ({
+              trip_id: newTrip.id,
+              user_id: user.id,
+              days_before: r.days_before,
+              reminder_date: r.reminder_date,
+              follow_up_note: r.follow_up_note ?? null,
+              is_completed: false,
+            })) as any
+          );
+        }
+      } catch (e) {
+        await rollback();
+        throw e instanceof Error ? e : new Error("Falha ao duplicar o roteiro da carteira");
       }
 
       // Roteiro V2 vinculado: clona o itinerário (cópia independente) e já
@@ -233,72 +325,20 @@ export function useTrips() {
         }
       }
 
-      // Roteiro legado (atividades por período salvas na própria carteira).
-      const { data: legacyActs } = await supabase
-        .from("trip_itinerary_activities").select("*").eq("trip_id", sourceId)
-        .order("day_date", { ascending: true }).order("order_index", { ascending: true });
-      if (legacyActs && legacyActs.length > 0) {
-        await supabase.from("trip_itinerary_activities").insert(
-          legacyActs.map((a: any) => ({
-            trip_id: newTrip.id,
-            day_date: a.day_date,
-            period: a.period,
-            title: a.title,
-            description: a.description ?? null,
-            location: a.location ?? null,
-            maps_url: a.maps_url ?? null,
-            notes: a.notes ?? null,
-            start_time: a.start_time ?? null,
-            order_index: a.order_index ?? 0,
-            origin: a.origin ?? "manual",
-            photo_urls: Array.isArray(a.photo_urls) ? [...a.photo_urls] : null,
-            document_urls: Array.isArray(a.document_urls) ? [...a.document_urls] : null,
-            linked_service_id: a.linked_service_id ? serviceIdMap.get(a.linked_service_id) ?? null : null,
-          })) as any
-        );
-      }
-
-      const { data: periodImgs } = await supabase
-        .from("trip_itinerary_period_images").select("*").eq("trip_id", sourceId);
-      if (periodImgs && periodImgs.length > 0) {
-        await supabase.from("trip_itinerary_period_images").insert(
-          periodImgs.map((p: any) => ({
-            trip_id: newTrip.id,
-            day_date: p.day_date,
-            period: p.period,
-            image_url: p.image_url,
-          })) as any
-        );
-      }
-
-      const { data: reminders } = await supabase
-        .from("trip_reminders").select("*").eq("trip_id", sourceId);
-      if (reminders && reminders.length > 0) {
-        await supabase.from("trip_reminders").insert(
-          reminders.map((r: any) => ({
-            trip_id: newTrip.id,
-            user_id: user.id,
-            days_before: r.days_before,
-            reminder_date: r.reminder_date,
-            follow_up_note: r.follow_up_note ?? null,
-            is_completed: false,
-          })) as any
-        );
-      }
-
       return newTrip as Trip;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["trips"] });
       toast({
         title: "Carteira duplicada",
-        description: "Cópia criada com nova senha de acesso. Vouchers e anexos não foram copiados.",
+        description: "Cópia completa criada com nova senha de acesso, incluindo serviços e anexos.",
       });
     },
     onError: (error) => {
       toast({ title: "Erro ao duplicar", description: error.message, variant: "destructive" });
     },
   });
+
 
   const updatePasswordMutation = useMutation({
     mutationFn: async ({ id, password }: { id: string; password: string }) => {
