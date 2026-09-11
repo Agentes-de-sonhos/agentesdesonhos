@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   PERSONAL_CRM_TAB_PATH,
   PERSONAL_CRM_TAB_TARGET,
@@ -20,6 +21,19 @@ function makeStorage() {
 }
 
 describe("customização individual — segunda aba do CRM", () => {
+  it("mantém o gatilho somente no login por senha e fora da área autenticada", () => {
+    const authSource = readFileSync("src/pages/Auth.tsx", "utf8");
+    const protectedShellSource = readFileSync("src/components/auth/ProtectedShell.tsx", "utf8");
+    const authProviderSource = readFileSync("src/hooks/useAuth.tsx", "utf8");
+
+    expect(authSource.match(/openPersonalCrmAfterPasswordLogin\(/g)).toHaveLength(1);
+    expect(authSource.indexOf("openPersonalCrmAfterPasswordLogin({")).toBeGreaterThan(authSource.indexOf("const handleLogin"));
+    expect(protectedShellSource).not.toContain("PersonalCrmTabLauncher");
+    expect(protectedShellSource).not.toContain("openPersonalCrm");
+    expect(authProviderSource).toContain('event === "SIGNED_OUT"');
+    expect(authProviderSource).not.toContain("openPersonalCrmAfterPasswordLogin");
+  });
+
   it("é exclusiva do UUID autorizado", () => {
     expect(isPersonalCrmTabUser(PERSONAL_CRM_TAB_USER_ID)).toBe(true);
     expect(isPersonalCrmTabUser(PERSONAL_CRM_TAB_USER_ID.toUpperCase())).toBe(true);
