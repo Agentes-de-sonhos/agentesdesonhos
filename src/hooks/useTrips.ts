@@ -190,7 +190,7 @@ export function useTrips() {
           status: src.status ?? "active",
           trip_title: src.trip_title ? `${src.trip_title} (cópia)` : null,
           wallet_cover_url: src.wallet_cover_url ?? null,
-          signature_snapshot: src.signature_snapshot ?? null,
+          signature_snapshot: null,
           share_token: shareToken,
           access_password: generatePassword(),
           // A cópia não herda vínculos operacionais nem códigos públicos —
@@ -296,20 +296,6 @@ export function useTrips() {
           if (error) throw error;
         }
 
-        const { data: reminders } = await supabase
-          .from("trip_reminders").select("*").eq("trip_id", sourceId);
-        if (reminders && reminders.length > 0) {
-          await supabase.from("trip_reminders").insert(
-            reminders.map((r: any) => ({
-              trip_id: newTrip.id,
-              user_id: user.id,
-              days_before: r.days_before,
-              reminder_date: r.reminder_date,
-              follow_up_note: r.follow_up_note ?? null,
-              is_completed: false,
-            })) as any
-          );
-        }
       } catch (e) {
         await rollback();
         throw e instanceof Error ? e : new Error("Falha ao duplicar o roteiro da carteira");
