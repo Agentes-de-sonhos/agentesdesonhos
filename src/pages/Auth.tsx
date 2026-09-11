@@ -41,6 +41,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useNoindex } from "@/hooks/useNoindex";
+import { openPersonalCrmTab } from "@/lib/personalCrmTab";
 
 // Schemas
 const emailSchema = z.object({
