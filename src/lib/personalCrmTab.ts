@@ -16,8 +16,16 @@ export const PERSONAL_CRM_TAB_USER_ID = "be17e92f-03d7-4f17-acf2-e2ab4d135edb";
 /** CRM > Oportunidades (rota padrão do app). */
 export const PERSONAL_CRM_TAB_PATH = "/gestao-clientes/funil";
 
+/**
+ * URL realmente aberta na segunda aba. Passa por /auth com ?next= para evitar a
+ * corrida em que a nova aba ainda não vê a sessão recém-criada e acaba
+ * redirecionada para o dashboard (tela principal).
+ */
+export const PERSONAL_CRM_TAB_URL = `/auth?next=${encodeURIComponent(PERSONAL_CRM_TAB_PATH)}`;
+
 /** Nome fixo reutilizado pelo navegador para impedir várias abas de CRM. */
 export const PERSONAL_CRM_TAB_TARGET = "ads-ricardo-crm";
+
 
 /** Controle compartilhado entre abas; é removido no logout real. */
 const LOGIN_CONTROL_KEY = "agentesdesonhos-personal-crm:login-opened";
