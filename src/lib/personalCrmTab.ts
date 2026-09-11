@@ -81,11 +81,11 @@ export function openPersonalCrmAfterPasswordLogin(params: {
 
   if (!isPersonalCrmTabUser(userId)) return "skipped";
   if (isImpersonating) return "skipped";
-  if (hasOpenedPersonalCrmTab(storage)) return "already-opened";
 
-  // Marca antes de abrir para que logins concorrentes em abas diferentes não dupliquem.
-  markPersonalCrmTabOpened(storage);
-
+  // Cada login explícito com senha é uma nova sessão e deve resultar em uma
+  // tentativa de abertura. A duplicação é impedida pelo TARGET nomeado, que faz
+  // o navegador reutilizar a mesma aba. O controle em storage serve apenas para
+  // registrar que a abertura ocorreu (e nunca para impedir um novo login real).
   let win: Window | null = null;
   try {
     win = open(PERSONAL_CRM_TAB_URL, PERSONAL_CRM_TAB_TARGET);
@@ -94,7 +94,15 @@ export function openPersonalCrmAfterPasswordLogin(params: {
     win = null;
   }
 
-  return win ? "opened" : "blocked";
+  if (win) {
+    markPersonalCrmTabOpened(storage);
+    return "opened";
+  }
+
+  // Bloqueio de pop-up NÃO marca o controle: a próxima tentativa real de login
+  // continua válida e o fallback manual permanece disponível.
+  clearPersonalCrmLoginControl(storage);
+  return "blocked";
 }
 
 /** Ação manual exibida apenas quando o navegador bloqueou a tentativa do login. */

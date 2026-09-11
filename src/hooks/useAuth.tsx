@@ -12,7 +12,7 @@ interface AuthContextType {
   sendOtp: (email: string) => Promise<{ error: Error | null }>;
   verifyOtp: (email: string, token: string) => Promise<{ error: Error | null }>;
   // Password-based
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null; userId?: string | null }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   setIsNewUser: (value: boolean) => void;
@@ -118,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
-    if (error) return { error: error as Error | null };
+    if (error) return { error: error as Error | null, userId: null };
 
     // Check if user is active
     if (data.user) {
@@ -129,11 +129,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
         return {
           error: new Error("Usuário inativo. Entre em contato com o suporte.") as Error,
+          userId: null,
         };
       }
     }
 
-    return { error: null };
+    return { error: null, userId: data.user?.id ?? null };
   };
 
   const signUp = async (email: string, password: string, name: string) => {
