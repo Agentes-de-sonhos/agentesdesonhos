@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { clearPersonalCrmLoginControl } from "@/lib/personalCrmTab";
 
 interface AuthContextType {
   user: User | null;
@@ -151,6 +152,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    if (typeof window !== "undefined") {
+      clearPersonalCrmLoginControl(window.localStorage);
+    }
   };
 
   return (

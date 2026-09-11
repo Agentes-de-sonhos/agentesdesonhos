@@ -4,12 +4,10 @@
  * Regra exclusiva de UM usuário, identificado SOMENTE pelo UUID abaixo
  * (nunca por nome, e-mail, agência ou plano).
  *
- * Comportamento: a cada nova sessão autenticada, além da aba original com o
- * Dashboard, abre-se uma segunda aba do navegador direto no CRM > Oportunidades.
- * Nada aqui altera rotas, login ou a experiência de qualquer outro usuário.
+ * Comportamento: exclusivamente após login explícito com senha, mantém o
+ * Dashboard na aba original e abre/reutiliza uma aba nomeada no CRM.
  *
- * Como remover: apagar este arquivo e os dois pontos de uso
- * (src/pages/Auth.tsx e src/components/personal/PersonalCrmTabLauncher.tsx).
+ * Como remover: apagar este arquivo e seu uso em src/pages/Auth.tsx.
  */
 
 /** UUID único autorizado para esta customização. */
@@ -18,14 +16,18 @@ export const PERSONAL_CRM_TAB_USER_ID = "be17e92f-03d7-4f17-acf2-e2ab4d135edb";
 /** CRM > Oportunidades (rota padrão do app). */
 export const PERSONAL_CRM_TAB_PATH = "/gestao-clientes/funil";
 
-/** Marca por SESSÃO da aba (sessionStorage): não reabre em refresh/navegação. */
-const SESSION_KEY = "personal-crm-tab:opened";
+/** Nome fixo reutilizado pelo navegador para impedir várias abas de CRM. */
+export const PERSONAL_CRM_TAB_TARGET = "ads-ricardo-crm";
+
+/** Controle compartilhado entre abas; é removido no logout real. */
+const LOGIN_CONTROL_KEY = "agentesdesonhos-personal-crm:login-opened";
 
 export type PersonalCrmTabResult = "skipped" | "already-opened" | "opened" | "blocked";
 
 export interface StorageLike {
   getItem(key: string): string | null;
   setItem(key: string, value: string): void;
+  removeItem(key: string): void;
 }
 
 export function isPersonalCrmTabUser(userId?: string | null): boolean {
@@ -35,7 +37,7 @@ export function isPersonalCrmTabUser(userId?: string | null): boolean {
 
 export function hasOpenedPersonalCrmTab(storage: StorageLike | null | undefined): boolean {
   try {
-    return storage?.getItem(SESSION_KEY) === "1";
+    return storage?.getItem(LOGIN_CONTROL_KEY) === "1";
   } catch {
     return false;
   }
@@ -43,45 +45,59 @@ export function hasOpenedPersonalCrmTab(storage: StorageLike | null | undefined)
 
 export function markPersonalCrmTabOpened(storage: StorageLike | null | undefined): void {
   try {
-    storage?.setItem(SESSION_KEY, "1");
+    storage?.setItem(LOGIN_CONTROL_KEY, "1");
   } catch {
     /* ignora storage indisponível */
   }
 }
 
-/** Já estamos no CRM? Então não faz sentido abrir uma segunda aba. */
-export function isOnPersonalCrmPath(pathname: string | null | undefined): boolean {
-  if (!pathname) return false;
-  const clean = pathname.replace(/\/+$/, "").toLowerCase();
-  return clean.startsWith("/gestao-clientes") || clean.startsWith("/gestao/crm");
+export function clearPersonalCrmLoginControl(storage: StorageLike | null | undefined): void {
+  try {
+    storage?.removeItem(LOGIN_CONTROL_KEY);
+  } catch {
+    /* ignora storage indisponível */
+  }
 }
 
 /**
- * Tenta abrir a segunda aba (uma única vez por sessão, sem duplicar).
- * Retorna "blocked" quando o navegador barrou o pop-up, para que a UI possa
- * oferecer uma ação discreta — sem loop e sem toast repetitivo.
+ * Tenta abrir a aba somente como consequência de login explícito com senha.
+ * Este helper nunca é chamado por montagem, refresh ou restauração de sessão.
  */
-export function openPersonalCrmTab(params: {
+export function openPersonalCrmAfterPasswordLogin(params: {
   userId?: string | null;
   storage: StorageLike | null | undefined;
-  pathname?: string | null;
-  open: (url: string, target: string, features: string) => Window | null;
+  isImpersonating: boolean;
+  open: (url: string, target: string) => Window | null;
 }): PersonalCrmTabResult {
-  const { userId, storage, pathname, open } = params;
+  const { userId, storage, isImpersonating, open } = params;
 
   if (!isPersonalCrmTabUser(userId)) return "skipped";
-  if (isOnPersonalCrmPath(pathname)) return "skipped";
+  if (isImpersonating) return "skipped";
   if (hasOpenedPersonalCrmTab(storage)) return "already-opened";
 
-  // Marca antes de abrir: evita corrida/duplicidade entre login e montagem da área logada.
+  // Marca antes de abrir para que logins concorrentes em abas diferentes não dupliquem.
   markPersonalCrmTabOpened(storage);
 
   let win: Window | null = null;
   try {
-    win = open(PERSONAL_CRM_TAB_PATH, "_blank", "noopener,noreferrer");
+    win = open(PERSONAL_CRM_TAB_PATH, PERSONAL_CRM_TAB_TARGET);
+    win?.focus();
   } catch {
     win = null;
   }
 
   return win ? "opened" : "blocked";
+}
+
+/** Ação manual exibida apenas quando o navegador bloqueou a tentativa do login. */
+export function openPersonalCrmFromFallback(
+  open: (url: string, target: string) => Window | null,
+): boolean {
+  try {
+    const win = open(PERSONAL_CRM_TAB_PATH, PERSONAL_CRM_TAB_TARGET);
+    win?.focus();
+    return win !== null;
+  } catch {
+    return false;
+  }
 }
