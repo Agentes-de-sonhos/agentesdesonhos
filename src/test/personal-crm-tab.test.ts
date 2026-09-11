@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import {
-  PERSONAL_CRM_TAB_PATH,
+  PERSONAL_CRM_TAB_URL,
   PERSONAL_CRM_TAB_TARGET,
   PERSONAL_CRM_TAB_USER_ID,
   clearPersonalCrmLoginControl,
@@ -68,7 +68,7 @@ describe("customização individual — segunda aba do CRM", () => {
       open,
     });
     expect(first).toBe("opened");
-    expect(open).toHaveBeenCalledWith(PERSONAL_CRM_TAB_PATH, PERSONAL_CRM_TAB_TARGET);
+    expect(open).toHaveBeenCalledWith(PERSONAL_CRM_TAB_URL, PERSONAL_CRM_TAB_TARGET);
     expect(focus).toHaveBeenCalledOnce();
 
     // refresh / navegação interna / restauração de sessão na mesma aba
