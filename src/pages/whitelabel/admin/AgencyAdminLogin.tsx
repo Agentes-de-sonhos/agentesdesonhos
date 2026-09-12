@@ -17,6 +17,7 @@ import {
   useAgencyAdminHead,
   AGENCY_ADMIN_FROM_KEY,
 } from "@/lib/agencyAdmin";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 import {
   AgencyAdminLoading,
   AgencyAdminUnavailable,
@@ -326,12 +327,15 @@ function AgencyAdminRedirect({ basePath }: { basePath?: string }) {
     let target = mount.home;
     try {
       const from = sessionStorage.getItem(AGENCY_ADMIN_FROM_KEY);
-      if (from && isAgencyAdminPath(mount.toInternal(from))) target = from;
+      // O destino guardado carrega query (inclui o contexto técnico do
+      // tenant); a validação usa apenas o caminho.
+      const fromPath = (from || "").split("?")[0].split("#")[0];
+      if (from && isAgencyAdminPath(mount.toInternal(fromPath))) target = from;
       sessionStorage.removeItem(AGENCY_ADMIN_FROM_KEY);
     } catch {
       /* storage indisponível: usa a home do painel */
     }
-    window.location.replace(target);
+    window.location.replace(agencyContextHref(target));
   }, []);
   return <AgencyAdminLoading />;
 }

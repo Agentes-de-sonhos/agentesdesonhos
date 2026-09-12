@@ -8,6 +8,7 @@ import {
   fetchAgencyAdminPortal,
   type AgencyAdminPortalInfo,
 } from "@/lib/agencyAdmin";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 import { AgencyAdminLoading, AgencyAdminUnavailable } from "./AgencyAdminStatus";
 
 /**
@@ -75,7 +76,7 @@ export function AgencyAdminShell({
     } catch {
       /* storage indisponível: apenas segue para o login */
     }
-    window.location.replace(mount.login);
+    window.location.replace(agencyContextHref(mount.login));
     return <AgencyAdminLoading />;
   }
 

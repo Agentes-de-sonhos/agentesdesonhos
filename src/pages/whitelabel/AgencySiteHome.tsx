@@ -54,6 +54,7 @@ import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
 import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
@@ -499,14 +500,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 </p>
               </div>
               <Button asChild variant="outline">
-                <a href="/ofertas">Ver todas as ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
+                <a href={agencyContextHref("/ofertas")}>Ver todas as ofertas <ArrowRight className="ml-2 h-4 w-4" /></a>
               </Button>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {destinations.slice(0, 3).map((d) => (
                 <a
                   key={d.key}
-                  href="/ofertas"
+                  href={agencyContextHref("/ofertas")}
                   className="group relative block overflow-hidden rounded-2xl border border-border/60"
                 >
                   <img

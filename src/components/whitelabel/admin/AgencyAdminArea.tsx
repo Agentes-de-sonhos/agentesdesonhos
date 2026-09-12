@@ -15,6 +15,7 @@ import {
   type AgencyAdminPortalInfo,
 } from "@/lib/agencyAdmin";
 import { AgencyAdminNavProvider } from "@/lib/agencyAdminNav";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 import { WorkspaceProvider } from "@/workspace/WorkspaceProvider";
 import { WorkspaceShell } from "@/workspace/WorkspaceShell";
 import { titleForPath } from "@/workspace/routeTitle";
@@ -188,7 +189,7 @@ function AgencyAdminEntry({
   const mount = agencyAdminMount(basePath);
   /* Estável entre renders: o shell usa a função como dependência de efeito. */
   const toExternal = useCallback(
-    (path: string) => agencyAdminMount(basePath).toExternal(path),
+    (path: string) => agencyContextHref(agencyAdminMount(basePath).toExternal(path)),
     [basePath],
   );
   const real = window.location.pathname.replace(/\/+$/, "") || "/";
@@ -215,7 +216,7 @@ function AgencyAdminEntry({
         <AgencyAdminWorkspace
           info={info}
           entryPath={entryPath}
-          toExternalPath={mount.base ? toExternal : undefined}
+          toExternalPath={toExternal}
         />
       )}
     </AgencyAdminShell>

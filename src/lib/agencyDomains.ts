@@ -78,13 +78,17 @@ export function isPotentialAgencyHost(hostname: string): boolean {
  */
 export function agencyHostFromLocation(hostname: string, search: string): string | null {
   const host = normalizeHostname(hostname);
-  const override = new URLSearchParams(search || "").get("__agency_host");
-  if (override) {
-    const candidate = normalizeHostname(override);
-    return isPotentialAgencyHost(candidate) ? candidate : null;
+  // Override aceito SOMENTE em hosts técnicos (prévia Lovable / localhost).
+  // Em domínio real o tenant vem exclusivamente do hostname — sem spoofing.
+  if (isTechnicalPreviewHost(host)) {
+    const override = normalizeHostname(
+      new URLSearchParams(search || "").get("__agency_host") || "",
+    );
+    if (override) return isPotentialAgencyHost(override) ? override : null;
   }
   return isPotentialAgencyHost(host) ? host : null;
 }
+
 
 /**
  * Hosts técnicos onde o override `?__agency_host` é aceito (prévia Lovable e

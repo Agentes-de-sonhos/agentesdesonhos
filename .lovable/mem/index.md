@@ -9,3 +9,4 @@
 - [Faé Viagens](mem://features/whitelabel/fae-viagens-tenant) — Tenant white label faeviagens.com.br, perfil faeCurated, tema roxo/dourado, hosts em construção
 - [SiteLab Base](mem://features/whitelabel/sitelab-base) — Laboratório privado /sitelab-base e contrato de paleta primária/secundária/terciária
 - [Casa Nova Tur](mem://features/whitelabel/casa-nova-tur-tenant) — Tenant white label isolado casanovatur.demo.local, tema verde/mint e provisionamento idempotente
+- [White-label Surface Links](mem://tech/whitelabel-surface-context-links) — Site, Área do Cliente e Gestão como superfícies do mesmo tenant; preservação de __agency_host em hosts técnicos
