@@ -86,6 +86,35 @@ export function agencyHostFromLocation(hostname: string, search: string): string
   return isPotentialAgencyHost(host) ? host : null;
 }
 
+/**
+ * Hosts técnicos onde o override `?__agency_host` é aceito (prévia Lovable e
+ * ambiente local). Domínios reais NUNCA aceitam override — evita spoofing.
+ */
+export function isTechnicalPreviewHost(hostname: string): boolean {
+  const host = normalizeHostname(hostname);
+  if (!host) return false;
+  if (host === "localhost" || host === "[::1]" || host.startsWith("127.")) return true;
+  if (host.endsWith(".localhost")) return true;
+  return (
+    host === "lovable.app" ||
+    host.endsWith(".lovable.app") ||
+    host.endsWith(".lovableproject.com") ||
+    host.endsWith(".lovableproject-dev.com")
+  );
+}
+
+/**
+ * Hostname contextual usado pela Área do Cliente em TODAS as chamadas ao
+ * `client-area-auth`. Em hosts técnicos autorizados o override seguro
+ * `?__agency_host` define o tenant; fora deles o hostname real é mantido.
+ */
+export function clientAreaHostname(hostname: string, search: string): string {
+  const host = normalizeHostname(hostname);
+  if (!isTechnicalPreviewHost(host)) return host;
+  const override = normalizeHostname(new URLSearchParams(search || "").get("__agency_host") || "");
+  return override && isPotentialAgencyHost(override) ? override : host;
+}
+
 export async function fetchAgencyDomain(hostname: string): Promise<AgencyDomainInfo | null> {
   const host = normalizeHostname(hostname);
   if (!host) return null;
