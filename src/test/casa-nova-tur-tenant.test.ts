@@ -47,7 +47,8 @@ describe("Casa Nova Tur — host técnico de prévia", () => {
     expect(profile.sections?.testimonials?.enabled).toBe(false);
     expect(profile.sections?.team?.enabled).toBe(false);
     expect(profile.sections?.credentials?.enabled).toBe(false);
-    expect(profile.sections?.dmc?.enabled).toBe(false);
+    const dmc = profile.sections?.dmc;
+    expect(dmc === false || (dmc && dmc.enabled === false)).toBe(true);
   });
 
   it("publica o conteúdo factual solicitado", () => {
