@@ -43,12 +43,9 @@ describe("Casa Nova Tur — host técnico de prévia", () => {
   it("não é demonstração do SiteLab e não exibe ofertas fictícias", () => {
     const profile = resolveSiteProfile(HOST);
     expect(profile.demo).toBeUndefined();
-    expect(profile.sections?.offers?.enabled).toBe(false);
-    expect(profile.sections?.testimonials?.enabled).toBe(false);
-    expect(profile.sections?.team?.enabled).toBe(false);
-    expect(profile.sections?.credentials?.enabled).toBe(false);
-    const dmc = profile.sections?.dmc;
-    expect(dmc === false || (dmc && dmc.enabled === false)).toBe(true);
+    for (const key of ["offers", "testimonials", "team", "credentials", "dmc"] as const) {
+      expect(sectionOverrideEnabled(profile.sections?.[key])).toBe(false);
+    }
   });
 
   it("publica o conteúdo factual solicitado", () => {
