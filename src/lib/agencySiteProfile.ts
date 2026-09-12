@@ -27,6 +27,8 @@ export type AgencySiteProfileKey =
   | "luxuryCurated"
   | "editorialRose"
   | "faeCurated"
+  /** Casa Nova Tur — viagens planejadas com acompanhamento (Novo Hamburgo/RS). */
+  | "casaNovaCurated"
   /** Laboratório visual neutro (SiteLab Base): estrutura editorial, conteúdo demo. */
   | "siteLabBase";
 
@@ -423,6 +425,134 @@ const FAE_CURATED: AgencySiteProfile = {
 };
 
 /**
+ * Casa Nova Tur — atendimento próximo, planejamento sob medida e suporte antes,
+ * durante e depois. Sem DMC, depoimentos, equipe ou credenciais: nenhum dado
+ * de mercado, número ou parceria é inventado.
+ */
+const CASA_NOVA_CURATED: AgencySiteProfile = {
+  key: "casaNovaCurated",
+  sections: { ...CURATED_SECTIONS, offers: { enabled: false } },
+  heroImage: "praia",
+  hero: [
+    {
+      title: "A viagem dos seus sonhos começa aqui",
+      subtitle:
+        "Planejamento personalizado, com segurança nas escolhas e acompanhamento do primeiro contato ao retorno.",
+      order: 1,
+      enabled: true,
+    },
+    {
+      title: "Cada detalhe planejado com você",
+      subtitle:
+        "Conversamos para entender o seu momento e organizamos a viagem no seu ritmo, com tudo explicado antes de decidir.",
+      order: 2,
+      enabled: true,
+    },
+    {
+      title: "Você tem com quem falar em qualquer etapa",
+      subtitle:
+        "Antes, durante e depois da viagem: atendimento próximo e transparente para viajar tranquilo.",
+      order: 3,
+      enabled: true,
+    },
+  ],
+  signature: {
+    kicker: "CASA NOVA TUR",
+    title: "Não vendemos apenas pacotes. Planejamos experiências que marcam histórias.",
+    text:
+      "O planejamento começa por uma conversa: quem viaja, quando, com quem e o que você quer viver. A partir daí, cada escolha é apresentada com clareza — hospedagem, roteiro, deslocamentos e valores.",
+  },
+  destinations: [
+    { key: "resorts-brasil", image: "resort", label: "Brasil", title: "Resorts no Brasil", text: "Estadias com estrutura completa e programação para todas as idades, escolhidas por localização e serviço.", service: "hospedagem", enabled: true, order: 1 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: "Itinerários, cabines e categorias comparados de forma clara antes de você decidir.", service: "cruzeiros", enabled: true, order: 2 },
+    { key: "orlando-parques", image: "parques", label: "Família", title: "Orlando e parques", text: "Parques, ingressos, hotéis e deslocamentos organizados dia a dia.", service: "ingressos", enabled: true, order: 3 },
+    { key: "europa", image: "europa", label: "Internacional", title: "Europa e roteiros internacionais", text: "Cidades, trajetos e hospedagens combinados em um roteiro coerente e no seu ritmo.", service: "pacotes", enabled: true, order: 4 },
+    { key: "lua-de-mel", image: "luademel", label: "Casais", title: "Lua de mel", text: "Destinos e experiências pensados para a viagem mais especial do casal.", service: "pacotes", enabled: true, order: 5 },
+    { key: "familia", image: "brasil", label: "Família", title: "Viagens em família", text: "Hospedagens e roteiros pensados para crianças e diferentes idades.", service: "pacotes", enabled: true, order: 6 },
+  ],
+  modules: [
+    { key: "nacionais-internacionais", title: "Viagens nacionais e internacionais", text: "Do primeiro rascunho ao roteiro final, com aéreo, hospedagem e traslados integrados.", service: "pacotes", image: "europa", enabled: true, order: 1 },
+    { key: "resorts", title: "Resorts e hospedagens", text: "Endereços indicados por localização, estrutura e adequação ao perfil da viagem.", service: "hospedagem", image: "resort", enabled: true, order: 2 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Comparação transparente de itinerários, cabines e o que está incluído.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 3 },
+    { key: "parques-ingressos", title: "Parques e ingressos", text: "Atrações, ingressos e horários conferidos antes da confirmação.", service: "ingressos", image: "parques", enabled: true, order: 4 },
+    { key: "roteiros-personalizados", title: "Roteiros personalizados", text: "Viagens desenhadas sob medida, com cada etapa explicada e ajustada com você.", service: "pacotes", image: "litoral", enabled: true, order: 5 },
+    { key: "experiencias-especiais", title: "Experiências especiais", text: "Lua de mel, comemorações e datas marcantes planejadas com cuidado.", service: "pacotes", image: "luademel", enabled: true, order: 6 },
+    { key: "aereo-seguro", title: "Aéreo e seguro viagem", text: "Rotas, conexões e coberturas apresentadas com transparência.", service: "aereo", image: "brasil", enabled: true, order: 7 },
+  ],
+  highlights: [
+    { title: "Planejamento sob medida", text: "A viagem nasce da conversa: seu tempo, seu ritmo e o que você quer viver.", service: "pacotes", cta: "Começar a planejar" },
+    { title: "Escolhas com segurança", text: "Hospedagens, roteiros e serviços conferidos antes de qualquer confirmação.", service: "hospedagem", cta: "Falar sobre hospedagem" },
+    { title: "Acompanhamento completo", text: "Suporte antes, durante e depois — sempre com alguém para responder.", service: "pacotes", cta: "Solicitar proposta" },
+  ],
+  differentials: [
+    { title: "Atendimento próximo", text: "Você fala com quem realmente planeja a sua viagem.", icon: "consultivo" },
+    { title: "Transparência em cada etapa", text: "Valores, condições e o que está incluído sempre explicados antes de decidir.", icon: "conferido" },
+    { title: "Planejamento sob medida", text: "Nada de pacote pronto: o roteiro é construído a partir do seu contexto.", icon: "fornecedores" },
+    { title: "Suporte antes, durante e depois", text: "Documentos, vouchers e imprevistos acompanhados em toda a jornada.", icon: "acompanhamento" },
+  ],
+  about: {
+    kicker: "SOBRE A CASA NOVA TUR",
+    title: "Viagens planejadas com cuidado, do começo ao fim.",
+    text:
+      "A Casa Nova Tur organiza viagens nacionais e internacionais, cruzeiros, parques e roteiros personalizados. O atendimento é próximo e transparente: entendemos o que você quer viver, apresentamos as opções com clareza e acompanhamos cada etapa da viagem.",
+    image: "resort",
+  },
+  faq: [
+    {
+      q: "Como funciona o atendimento?",
+      a: "Você envia uma solicitação pela Central ou pelo WhatsApp, conversamos para entender os detalhes e apresentamos uma proposta clara. Confirmada a viagem, seguimos acompanhando antes, durante e depois.",
+    },
+    {
+      q: "Vocês organizam viagens em família?",
+      a: "Sim. Hospedagens, roteiros e deslocamentos são pensados para o grupo que viaja, considerando crianças e diferentes idades.",
+    },
+    {
+      q: "É possível solicitar apenas um serviço?",
+      a: "Sim. Você pode pedir apenas aéreo, hospedagem, transfer, seguro ou ingressos, ou o planejamento completo da viagem.",
+    },
+    {
+      q: "Como funciona o planejamento de cruzeiros e parques?",
+      a: "Comparamos itinerários, cabines, categorias e ingressos, explicando o que está incluído em cada opção antes da decisão.",
+    },
+    {
+      q: "Como começo a planejar?",
+      a: "Basta enviar uma solicitação pela Central ou falar pelo WhatsApp contando a ideia inicial da viagem.",
+    },
+  ],
+  copy: {
+    destinations: {
+      title: "Inspirações para a sua próxima viagem",
+      subtitle: "Escolha um tema e conversamos sobre como ele pode virar a sua viagem.",
+    },
+    modules: {
+      title: "Como podemos planejar com você",
+      subtitle: "Serviços que acompanhamos de perto, do pedido à volta para casa.",
+    },
+    highlights: {
+      title: "Como planejamos",
+      subtitle: "Três princípios que orientam cada viagem que organizamos.",
+    },
+    differentials: {
+      title: "Nossos diferenciais",
+      subtitle: "O que sustenta a experiência, do primeiro contato ao retorno.",
+    },
+    concierge: {
+      kicker: "ATENDIMENTO PERSONALIZADO",
+      title: "Um consultor dedicado à sua viagem",
+      subtitle: "Conversamos, entendemos o seu momento e apresentamos as opções com clareza.",
+      cta: "Planeje sua viagem",
+    },
+    newsletter: {
+      kicker: "INSPIRAÇÕES",
+      title: "Receba inspirações de viagem",
+      subtitle: "Deixe o seu contato e o canal preferido para receber ideias de destinos.",
+      cta: "Quero receber inspirações",
+    },
+    faq: { title: "Perguntas frequentes" },
+  },
+};
+
+/**
  * SiteLab Base — CATÁLOGO MESTRE do template. Mantém a mesma engine e a mesma
  * linguagem editorial de `CURATED_SECTIONS`, mas liga TODAS as seções do
  * catálogo (`sitelabSectionOverrides`) com conteúdo puramente demonstrativo:
@@ -622,6 +752,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "www.faeviagens.com.br": "faeCurated",
   /** Host sintético do laboratório — nunca aponta para tenants reais. */
   "sitelab.local": "siteLabBase",
+  /** Host técnico de prévia da Casa Nova Tur (o domínio real não é vinculado). */
+  "casanovatur.demo.local": "casaNovaCurated",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -630,6 +762,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   luxuryCurated: LUXURY_CURATED,
   editorialRose: EDITORIAL_ROSE,
   faeCurated: FAE_CURATED,
+  casaNovaCurated: CASA_NOVA_CURATED,
   siteLabBase: SITE_LAB_BASE,
 };
 
