@@ -15,6 +15,10 @@ Tenant NORMAL (não é SiteLab): host técnico `casanovatur.demo.local`, slug
 - Contatos opcionais (e-mail/Instagram) em `agencySiteContacts.ts`, exibidos no rodapé editorial.
 - `siteNavLinks(hostname)` em `AgencySiteLayout.tsx` remove `/ofertas` quando o perfil
   desativa a seção — regra declarativa, sem condicional por agência.
+- Superfícies: Site, Área do Cliente e Gestão do MESMO tenant; na prévia todos os
+  links preservam `?__agency_host=casanovatur.demo.local` via `agencyContextLink`.
+- Conta de gestão oficial: `contato@casanovatur.com.br` (a grafia antiga
+  `contato@casanovatour.com.br` é migrada preservando user_id pelo provisionamento).
 - Provisionamento idempotente: Edge Function `casanova-provision`
   (`provision` | `reset_password` | `cleanup`), autorizada por service-role/admin JWT
   ou pelo segredo `CASANOVA_PROVISION_TOKEN`. Senha temporária nunca é persistida.
