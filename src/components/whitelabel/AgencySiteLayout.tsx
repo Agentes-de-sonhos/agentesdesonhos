@@ -35,7 +35,9 @@ export const NAV_LINKS = [
  * por agência). Nenhum tenant atual é afetado — o default mantém o link.
  */
 export function siteNavLinks(hostname?: string | null) {
-  const offersEnabled = resolveSiteProfile(hostname).sections?.offers?.enabled !== false;
+  const offersEnabled = sectionOverrideEnabled(
+    resolveSiteProfile(hostname).sections?.offers,
+  );
   return NAV_LINKS.filter((l) => offersEnabled || l.to !== "/ofertas");
 }
 
