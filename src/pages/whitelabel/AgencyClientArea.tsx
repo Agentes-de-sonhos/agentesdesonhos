@@ -52,7 +52,12 @@ export default function AgencyClientArea({
   basePath?: string;
 }) {
 
-  const hostname = typeof window === "undefined" ? "" : window.location.hostname;
+  // Fonte de verdade única do hostname contextual: em hosts técnicos o override
+  // seguro ?__agency_host define o tenant; em domínios reais é ignorado.
+  const hostname =
+    typeof window === "undefined"
+      ? ""
+      : clientAreaHostname(window.location.hostname, window.location.search);
 
   // Área privada do passageiro: nunca indexada por buscadores.
   useNoindex(true);
