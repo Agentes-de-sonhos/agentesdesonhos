@@ -13,6 +13,7 @@ import { resolveAgencyLogoOverride, logoIncludesWordmark } from "@/lib/agencySit
 import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { resolveSiteStatus } from "@/lib/agencySiteStatus";
 import { agencyHostFromLocation } from "@/lib/agencyDomains";
+import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 
 const HOST = "casanovatur.demo.local";
 
