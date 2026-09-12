@@ -18,6 +18,7 @@ import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
 import { logoIncludesWordmark, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
