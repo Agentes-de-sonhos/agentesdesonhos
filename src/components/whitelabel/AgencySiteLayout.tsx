@@ -19,6 +19,7 @@ import { logoIncludesWordmark, resolveAgencyLogoUrl } from "@/lib/agencySiteBran
 import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -60,7 +61,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
             luxury ? "h-[88px]" : "h-20"
           }`}
         >
-          <Link to="/" className="flex min-w-0 items-center gap-3">
+          <Link to={agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
             {logoUrl ? (
               <img
                 src={logoUrl}
@@ -89,7 +90,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
             {mainLinks.map((l) => (
               <a
                 key={l.to}
-                href={l.to}
+                href={agencyContextHref(l.to)}
                 className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
               >
                 {l.label}
@@ -99,7 +100,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
 
           <div className="hidden items-center gap-5 md:flex">
             <a
-              href="/area-do-cliente"
+              href={agencyContextHref("/area-do-cliente")}
               className="whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Área do Cliente
@@ -134,7 +135,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
               {navAll.map((l) => (
                 <a
                   key={l.to}
-                  href={l.to}
+                  href={agencyContextHref(l.to)}
                   onClick={() => setOpen(false)}
                   className="min-h-[52px] py-3.5 text-[15px] font-medium text-foreground/80"
                 >
@@ -162,7 +163,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link to="/" className="flex items-center gap-3 min-w-0">
+        <Link to={agencyContextHref("/")} className="flex items-center gap-3 min-w-0">
           {logoUrl ? (
             <img src={logoUrl} alt={`Logo ${name}`} className="h-10 w-auto max-w-[160px] object-contain" />
           ) : (
@@ -179,7 +180,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
           {navAll.map((l) => (
             <a
               key={l.to}
-              href={l.to}
+              href={agencyContextHref(l.to)}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {l.label}
@@ -203,7 +204,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
             {navAll.map((l) => (
               <a
                 key={l.to}
-                href={l.to}
+                href={agencyContextHref(l.to)}
                 onClick={() => setOpen(false)}
                 className="py-3 text-sm text-foreground/80"
               >
@@ -266,7 +267,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               {navLinks.map((l) => (
                 <li key={l.to}>
                   <a
-                    href={l.to}
+                    href={agencyContextHref(l.to)}
                     className="inline-block py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     {l.label}
@@ -298,7 +299,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               ) : null}
               <li>
                 <a
-                  href="/area-do-cliente"
+                  href={agencyContextHref("/area-do-cliente")}
                   className="inline-flex items-center gap-2 py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                 >
                   <UserRound className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> Área do Cliente
@@ -313,7 +314,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
-                    href={l.to}
+                    href={agencyContextHref(l.to)}
                     className="inline-block py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     {l.label}
@@ -373,7 +374,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               {navLinks.map((l) => (
                 <li key={l.to}>
                   <a
-                    href={l.to}
+                    href={agencyContextHref(l.to)}
                     className="inline-block py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     {l.label}
@@ -429,7 +430,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               ) : null}
               <li>
                 <a
-                  href="/area-do-cliente"
+                  href={agencyContextHref("/area-do-cliente")}
                   className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                 >
                   <UserRound className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> Área do Cliente
@@ -444,7 +445,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
-                    href={l.to}
+                    href={agencyContextHref(l.to)}
                     className="inline-block py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     {l.label}
@@ -496,17 +497,17 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
             </p>
           )}
           <p className="text-sm text-muted-foreground">
-            <a className="hover:text-foreground" href="/area-do-cliente">Área do Cliente</a>
+            <a className="hover:text-foreground" href={agencyContextHref("/area-do-cliente")}>Área do Cliente</a>
           </p>
         </div>
 
         <div className="space-y-3">
           <p className="text-sm font-semibold text-foreground">Institucional</p>
           <p className="text-sm text-muted-foreground">
-            <a className="hover:text-foreground" href="/politicasdeprivacidade">Política de Privacidade</a>
+            <a className="hover:text-foreground" href={agencyContextHref("/politicasdeprivacidade")}>Política de Privacidade</a>
           </p>
           <p className="text-sm text-muted-foreground">
-            <a className="hover:text-foreground" href="/termosdeuso">Termos de Uso</a>
+            <a className="hover:text-foreground" href={agencyContextHref("/termosdeuso")}>Termos de Uso</a>
           </p>
         </div>
       </div>
