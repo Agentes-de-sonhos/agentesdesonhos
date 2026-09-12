@@ -20,7 +20,13 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const TENANT_EMAIL = "contato@casanovatour.com.br";
+const TENANT_EMAIL = "contato@casanovatur.com.br";
+/**
+ * Grafia incorreta usada na primeira prévia. Quando encontrada, a conta é
+ * MIGRADA para o e-mail oficial preservando user_id e todos os vínculos
+ * (profile, membership, domínio técnico, plano e dados fictícios).
+ */
+const LEGACY_TENANT_EMAILS = ["contato@casanovatour.com.br"];
 const TENANT_HOSTNAME = "casanovatur.demo.local";
 const TENANT_SLUG = "casa-nova-tur";
 const TENANT_NAME = "Casa Nova Tur";
@@ -99,7 +105,29 @@ Deno.serve(async (req) => {
 
     // Conta do tenant (criada apenas uma vez).
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-    let tenantUser = list?.users?.find((u) => u.email?.toLowerCase() === TENANT_EMAIL);
+    const users = list?.users ?? [];
+    let tenantUser = users.find((u) => u.email?.toLowerCase() === TENANT_EMAIL);
+    let emailMigrated = false;
+    if (!tenantUser) {
+      const legacy = users.find((u) =>
+        LEGACY_TENANT_EMAILS.includes((u.email || "").toLowerCase()),
+      );
+      if (legacy) {
+        tenantUser = legacy;
+        if (action !== "cleanup") {
+          const { data: updated, error } = await admin.auth.admin.updateUserById(legacy.id, {
+            email: TENANT_EMAIL,
+            email_confirm: true,
+          });
+          if (error) {
+            console.error("casanova-provision email migration", error.message);
+            return json({ error: "Falha ao corrigir o e-mail do tenant" }, 400);
+          }
+          tenantUser = updated?.user ?? legacy;
+          emailMigrated = true;
+        }
+      }
+    }
 
     if (action === "cleanup") {
       if (!tenantUser) return json({ success: true, cleaned: false });
@@ -353,6 +381,7 @@ Deno.serve(async (req) => {
     return json({
       success: true,
       created,
+      email_migrated: emailMigrated,
       user_id: tenantId,
       email: TENANT_EMAIL,
       hostname: TENANT_HOSTNAME,
