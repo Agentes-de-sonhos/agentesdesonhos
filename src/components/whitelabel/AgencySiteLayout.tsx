@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, MapPin, Menu, X, Phone, UserRound } from "lucide-react";
+import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram } from "lucide-react";
 import { useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,9 @@ import {
 } from "@/lib/agencySiteTheme";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
 import { logoIncludesWordmark, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
+import { resolveSiteContacts } from "@/lib/agencySiteContacts";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -27,6 +30,18 @@ export const NAV_LINKS = [
   { label: "Área do Cliente", to: "/area-do-cliente" },
 ];
 
+/**
+ * Navegação efetiva do hostname: quando o perfil desativa a seção de ofertas,
+ * o link "/ofertas" também sai do menu (config declarativa, sem condicional
+ * por agência). Nenhum tenant atual é afetado — o default mantém o link.
+ */
+export function siteNavLinks(hostname?: string | null) {
+  const offersEnabled = sectionOverrideEnabled(
+    resolveSiteProfile(hostname).sections?.offers,
+  );
+  return NAV_LINKS.filter((l) => offersEnabled || l.to !== "/ofertas");
+}
+
 export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
@@ -34,9 +49,10 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const luxury = isLuxuryTheme(info.hostname);
   const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
+  const navAll = siteNavLinks(info.hostname);
 
   if (editorial) {
-    const mainLinks = NAV_LINKS.filter((l) => l.to !== "/area-do-cliente");
+    const mainLinks = navAll.filter((l) => l.to !== "/area-do-cliente");
     return (
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
         <div
@@ -115,7 +131,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
         {open && (
           <div className="border-t border-border/60 bg-background lg:hidden">
             <nav className={`${siteContainer(true)} flex flex-col py-2`}>
-              {NAV_LINKS.map((l) => (
+              {navAll.map((l) => (
                 <a
                   key={l.to}
                   href={l.to}
@@ -160,7 +176,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
-          {NAV_LINKS.map((l) => (
+          {navAll.map((l) => (
             <a
               key={l.to}
               href={l.to}
@@ -184,7 +200,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
       {open && (
         <div className="border-t border-border/60 bg-background md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col px-4 py-2">
-            {NAV_LINKS.map((l) => (
+            {navAll.map((l) => (
               <a
                 key={l.to}
                 href={l.to}
@@ -208,9 +224,12 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const editorial = isEditorialTheme(info.hostname);
   const luxury = isLuxuryTheme(info.hostname);
   const logoUrl = resolveAgencyLogoUrl(info);
+  /* Canais extras declarativos (e-mail público / Instagram) — vazio por padrão. */
+  const contacts = resolveSiteContacts(info.hostname);
+  const navAll = siteNavLinks(info.hostname);
 
   if (luxury) {
-    const navLinks = NAV_LINKS.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
+    const navLinks = navAll.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
     const legalLinks = [
       { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
       { label: "Termos de Uso", to: "/termosdeuso" },
@@ -314,7 +333,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   }
 
   if (editorial) {
-    const navLinks = NAV_LINKS.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
+    const navLinks = navAll.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
     const legalLinks = [
       { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
       { label: "Termos de Uso", to: "/termosdeuso" },
@@ -382,6 +401,30 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               {info.phone ? (
                 <li className="flex items-center gap-2 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">
                   <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {info.phone}
+                </li>
+              ) : null}
+              {contacts.email ? (
+                <li>
+                  <a
+                    href={`mailto:${contacts.email}`}
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                  >
+                    <Mail className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" />
+                    <span className="break-all">{contacts.email}</span>
+                  </a>
+                </li>
+              ) : null}
+              {contacts.instagram ? (
+                <li>
+                  <a
+                    href={contacts.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                  >
+                    <Instagram className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" />
+                    {contacts.instagramLabel ?? "Instagram"}
+                  </a>
                 </li>
               ) : null}
               <li>

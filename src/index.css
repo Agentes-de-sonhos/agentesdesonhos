@@ -619,6 +619,42 @@ img {
   --wl-sand: 41 40% 95%;
 }
 
+/* Casa Nova Tur — mesmo LAYOUT editorial, identidade verde acessível.
+   Verde floresta nas ações/faixas, verde médio nos detalhes (contraste de
+   texto garantido) e mint nas seções alternadas. Nenhum outro tenant muda. */
+.wl-editorial.wl-casanova {
+  --background: 140 20% 99%;
+  --foreground: 152 22% 14%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 152 22% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 152 22% 14%;
+
+  /* Verde floresta escuro; branco sobre este tom passa com folga (>10:1). */
+  --primary: 150 58% 17%;
+  --primary-foreground: 140 30% 98%;
+
+  --secondary: 146 32% 94%;
+  --secondary-foreground: 152 22% 14%;
+  --muted: 145 20% 96%;
+  --muted-foreground: 152 10% 38%;
+  --accent: 146 38% 93%;
+  --accent-foreground: 152 22% 14%;
+
+  --border: 146 16% 88%;
+  --input: 146 16% 84%;
+  --ring: 150 58% 17%;
+  --radius: 0.75rem;
+
+  /* Detalhes/kickers/ícones em verde médio (≥4.5:1 sobre superfícies claras). */
+  --wl-red: 152 52% 27%;
+  --wl-navy: 152 50% 15%;
+  --wl-ink: 152 55% 12%;
+  /* Mint muito claro nas seções alternadas. */
+  --wl-sand: 146 40% 96%;
+}
+
 .wl-editorial.wl-fae h1,
 .wl-editorial.wl-fae h2,
 .wl-editorial.wl-fae h3 {

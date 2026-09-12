@@ -8,3 +8,4 @@
 - [White-label Brand Identity](mem://features/whitelabel/global-brand-identity) — Cor principal/secundária centralizadas em brandTheme, aplicadas em todas as superfícies da agência
 - [Faé Viagens](mem://features/whitelabel/fae-viagens-tenant) — Tenant white label faeviagens.com.br, perfil faeCurated, tema roxo/dourado, hosts em construção
 - [SiteLab Base](mem://features/whitelabel/sitelab-base) — Laboratório privado /sitelab-base e contrato de paleta primária/secundária/terciária
+- [Casa Nova Tur](mem://features/whitelabel/casa-nova-tur-tenant) — Tenant white label isolado casanovatur.demo.local, tema verde/mint e provisionamento idempotente

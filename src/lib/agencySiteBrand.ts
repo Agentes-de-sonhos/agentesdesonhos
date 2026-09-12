@@ -10,6 +10,7 @@ import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-atualizado.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
+import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
@@ -20,6 +21,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   /** Emblema + assinatura tipográfica oficiais da Faé Viagens. */
   "faeviagens.com.br": faeLogo.url,
   "www.faeviagens.com.br": faeLogo.url,
+  /** Casa Nova Tur — placeholder transparente enviado pela agência (host técnico). */
+  "casanovatur.demo.local": casaNovaLogo.url,
 };
 
 /**
@@ -31,6 +34,7 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "www.paraisoviagens.com",
   "faeviagens.com.br",
   "www.faeviagens.com.br",
+  "casanovatur.demo.local",
 ]);
 
 export function normalizeBrandHost(hostname?: string | null): string {

@@ -54,6 +54,16 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
 /** Override por seção: booleano simples (legado) ou ajuste de enabled/order. */
 export type AgencySectionOverride = boolean | { enabled?: boolean; order?: number };
 
+/** Leitura segura do override (aceita as duas formas). */
+export function sectionOverrideEnabled(
+  o: AgencySectionOverride | undefined,
+  fallback = true,
+): boolean {
+  if (typeof o === "boolean") return o;
+  if (o && typeof o === "object") return o.enabled ?? fallback;
+  return fallback;
+}
+
 export function resolveSections(
   overrides?: Partial<Record<AgencySectionKey, AgencySectionOverride>>,
 ): AgencySectionConfig[] {

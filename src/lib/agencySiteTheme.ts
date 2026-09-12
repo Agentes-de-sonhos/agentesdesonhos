@@ -19,7 +19,9 @@ export type AgencySiteThemeKey =
   /** Mesmo layout editorial, identidade roxo profundo + dourado (Faé Viagens). */
   | "faeEditorial"
   /** Mesmo layout editorial, acabamento base NEUTRO (SiteLab Base). */
-  | "siteBaseEditorial";
+  | "siteBaseEditorial"
+  /** Mesmo layout editorial, identidade verde floresta + mint (Casa Nova Tur). */
+  | "casaNovaEditorial";
 
 const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "100limites.tur.br": "travelEditorial",
@@ -31,6 +33,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "faeviagens.com.br": "faeEditorial",
   "www.faeviagens.com.br": "faeEditorial",
   "sitelab.local": "siteBaseEditorial",
+  "casanovatur.demo.local": "casaNovaEditorial",
 };
 
 function normalizeHost(hostname?: string | null): string {
@@ -52,7 +55,8 @@ export function isEditorialTheme(hostname?: string | null): boolean {
     theme === "luxuryEditorial" ||
     theme === "roseEditorial" ||
     theme === "faeEditorial" ||
-    theme === "siteBaseEditorial"
+    theme === "siteBaseEditorial" ||
+    theme === "casaNovaEditorial"
   );
 }
 
@@ -67,6 +71,7 @@ export const LUXURY_ROOT_CLASS = "wl-luxury";
 export const ROSE_ROOT_CLASS = "wl-rose";
 export const FAE_ROOT_CLASS = "wl-fae";
 export const SITE_BASE_ROOT_CLASS = "wl-site-base";
+export const CASA_NOVA_ROOT_CLASS = "wl-casanova";
 
 /** Classe(s) raiz do tema resolvido — única fonte de verdade para o layout. */
 export function siteThemeRootClass(hostname?: string | null): string {
@@ -75,6 +80,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
   if (theme === "roseEditorial") return `${EDITORIAL_ROOT_CLASS} ${ROSE_ROOT_CLASS}`;
   if (theme === "faeEditorial") return `${EDITORIAL_ROOT_CLASS} ${FAE_ROOT_CLASS}`;
   if (theme === "siteBaseEditorial") return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}`;
+  if (theme === "casaNovaEditorial") return `${EDITORIAL_ROOT_CLASS} ${CASA_NOVA_ROOT_CLASS}`;
   if (theme === "travelEditorial") return EDITORIAL_ROOT_CLASS;
   return "";
 }
