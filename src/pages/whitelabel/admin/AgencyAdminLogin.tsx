@@ -17,6 +17,7 @@ import {
   useAgencyAdminHead,
   AGENCY_ADMIN_FROM_KEY,
 } from "@/lib/agencyAdmin";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 import {
   AgencyAdminLoading,
   AgencyAdminUnavailable,
@@ -331,7 +332,7 @@ function AgencyAdminRedirect({ basePath }: { basePath?: string }) {
     } catch {
       /* storage indisponível: usa a home do painel */
     }
-    window.location.replace(target);
+    window.location.replace(agencyContextHref(target));
   }, []);
   return <AgencyAdminLoading />;
 }
