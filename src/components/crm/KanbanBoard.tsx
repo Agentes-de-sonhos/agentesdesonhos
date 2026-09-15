@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,6 +37,7 @@ import { StageColumnHeader } from "./StageColumnHeader";
 import { AddStageColumn } from "./AddStageColumn";
 import { DeleteStageDialog } from "./DeleteStageDialog";
 import { QuickAddClientDialog } from "./QuickAddClientDialog";
+import { ImportQuoteAsOpportunityDialog } from "./ImportQuoteAsOpportunityDialog";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
 import { usePipelineStages } from "@/hooks/usePipelineStages";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -114,6 +115,8 @@ export function KanbanBoard() {
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -377,6 +380,18 @@ export function KanbanBoard() {
               />
             </DialogContent>
           </Dialog>
+          {canCreateOpp && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 shrink-0 gap-1 px-2.5 text-xs"
+              title="Importar orçamento"
+              aria-label="Importar orçamento"
+              onClick={() => setImportOpen(true)}
+            >
+              <Download className="h-3.5 w-3.5" /> Importar
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -387,6 +402,30 @@ export function KanbanBoard() {
             {isMaximized ? "Minimizar" : "Maximizar"}
           </Button>
         </KanbanToolbarSlot>
+
+        <ImportQuoteAsOpportunityDialog
+          open={importOpen}
+          onOpenChange={setImportOpen}
+          onOpenExisting={(id) => {
+            const found = opportunities.find((o) => o.id === id);
+            if (found) setEditingOpportunity(found);
+            else toast.error("Oportunidade vinculada não encontrada neste funil");
+          }}
+        />
+        <Dialog open={!!editingOpportunity} onOpenChange={(o) => !o && setEditingOpportunity(null)}>
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle>Oportunidade vinculada</DialogTitle>
+            </DialogHeader>
+            {editingOpportunity && (
+              <OpportunityForm
+                opportunity={editingOpportunity}
+                onSuccess={() => setEditingOpportunity(null)}
+                onCancel={() => setEditingOpportunity(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
 
 
         {/* Kanban container: arraste com o mouse + rolagem única (horizontal e vertical) */}

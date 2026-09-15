@@ -74,8 +74,20 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     expect(maximizar).toBeGreaterThan(-1);
     expect(importar).toBeGreaterThan(maximizar);
     expect(slotContent).toContain("ml-auto");
-    expect(kanban).not.toContain("Importar");
+    // A importação de contatos segue exclusiva de Clientes.
+    expect(kanban).not.toContain("ImportContactsDialog");
     expect(operations).not.toContain("Importar");
+  });
+
+  it("Oportunidades ganha apenas a importação de orçamento, ao lado de Nova", () => {
+    const slotStart = kanban.indexOf("<KanbanToolbarSlot>");
+    const slotEnd = kanban.indexOf("</KanbanToolbarSlot>");
+    const slotContent = kanban.slice(slotStart, slotEnd);
+    expect(slotContent).toContain('aria-label="Importar orçamento"');
+    expect(slotContent.indexOf('aria-label="Nova oportunidade"')).toBeLessThan(
+      slotContent.indexOf('aria-label="Importar orçamento"'),
+    );
+    expect(kanban).toContain("ImportQuoteAsOpportunityDialog");
   });
 
   it("remove a posição antiga 'Importar Contatos' sem duplicar botão e preserva o modal", () => {
