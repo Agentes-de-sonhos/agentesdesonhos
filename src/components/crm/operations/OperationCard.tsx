@@ -2,7 +2,7 @@ import { useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import {
   Calendar, Users, DollarSign, AlertCircle, Wallet, Plane,
-  MoreVertical, Tag, MessageSquare, Edit2, History, ListChecks, Paperclip, Trash2, Luggage,
+  MoreVertical, Tag, MessageSquare, Edit2, History, ListChecks, Paperclip, Trash2, Luggage, Download,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { OperationLabelPicker } from "./OperationLabelPicker";
 import { OperationHistoryDialog } from "./OperationHistoryDialog";
 import { QuickOperationNoteDialog } from "./QuickOperationNoteDialog";
 import { OperationDetailDialog, type OperationDetailTab } from "./OperationDetailDialog";
+import { ImportQuoteServicesDialog } from "./ImportQuoteServicesDialog";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useNavigate } from "react-router-dom";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -71,6 +72,7 @@ export function OperationCard({
   const [showNote, setShowNote] = useState(false);
   const [focusedSection, setFocusedSection] = useState<OperationDetailTab | null>(null);
   const [showDelete, setShowDelete] = useState(false);
+  const [showImportServices, setShowImportServices] = useState(false);
 
   const appliedLabels = byOperation[operation.id] || [];
 
@@ -148,6 +150,11 @@ export function OperationCard({
               <DropdownMenuItem onClick={() => setFocusedSection("services")}>
                 <Luggage className="mr-2 h-4 w-4" /> Conferir serviços
               </DropdownMenuItem>
+              {canEdit && (
+                <DropdownMenuItem onClick={() => setShowImportServices(true)}>
+                  <Download className="mr-2 h-4 w-4" /> Importar serviços
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={() => setFocusedSection("checklist")}>
                 <ListChecks className="mr-2 h-4 w-4" /> Fazer checklist
               </DropdownMenuItem>
@@ -256,6 +263,11 @@ export function OperationCard({
       operationId={operation.id}
       open={showHistory}
       onOpenChange={setShowHistory}
+    />
+    <ImportQuoteServicesDialog
+      operation={operation}
+      open={showImportServices}
+      onOpenChange={setShowImportServices}
     />
     <QuickOperationNoteDialog
       operationId={operation.id}
