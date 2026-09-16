@@ -151,3 +151,31 @@ describe("vitrine.tur.br como domínio compartilhado canônico dos Sites ADS", (
     expect(shouldNoindexAgencyPath("sites.agentesdesonhos.com.br", "/")).toBe(true);
   });
 });
+
+describe("links e login preservam o slug do tenant", () => {
+  it("agencySiteHref prefixa o slug no host canônico e não em domínio próprio", async () => {
+    const { agencySiteHref } = await import("@/lib/agencyContextLink");
+    const set = (hostname: string, pathname: string) =>
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: { hostname, pathname, search: "", hash: "", protocol: "https:" },
+      });
+
+    set("vitrine.tur.br", "/casa-nova-tur/gestao");
+    expect(agencySiteHref("/gestao/login")).toBe("/casa-nova-tur/gestao/login");
+    expect(agencySiteHref("/area-do-cliente")).toBe("/casa-nova-tur/area-do-cliente");
+    expect(agencySiteHref("/ofertas")).toBe("/casa-nova-tur/ofertas");
+
+    set("faeviagens.com.br", "/gestao");
+    expect(agencySiteHref("/gestao/login")).toBe("/gestao/login");
+  });
+
+  it("mantém o prefixo do painel de gestão (login/home) sob o slug", async () => {
+    const { agencyAdminMount } = await import("@/lib/agencyAdmin");
+    const mount = agencyAdminMount("/casa-nova-tur");
+    expect(mount.home).toBe("/casa-nova-tur/gestao");
+    expect(mount.login).toBe("/casa-nova-tur/gestao/login");
+    expect(mount.toInternal("/casa-nova-tur/gestao/reservas")).toBe("/gestao/reservas");
+    expect(mount.toExternal("/gestao/reservas")).toBe("/casa-nova-tur/gestao/reservas");
+  });
+});
