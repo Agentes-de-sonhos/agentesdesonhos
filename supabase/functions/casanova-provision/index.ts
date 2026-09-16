@@ -1,4 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  cleanupPlan,
+  newMappings,
+  SCENARIO_SLUG,
+  type ScenarioRecord,
+} from "./scenario.ts";
 
 /**
  * Provisionamento IDEMPOTENTE do tenant de prévia Casa Nova Tur.
@@ -132,14 +138,45 @@ Deno.serve(async (req) => {
     if (action === "cleanup") {
       if (!tenantUser) return json({ success: true, cleaned: false });
       const id = tenantUser.id;
-      await admin.from("operations").delete().eq("user_id", id);
-      await admin.from("opportunities").delete().eq("user_id", id);
-      await admin.from("clients").delete().eq("user_id", id);
+
+      /**
+       * Cleanup MAPEADO: remove apenas os registros criados pelo provisionamento
+       * e mapeados em `demo_scenario_records`. Qualquer dado manual do tenant
+       * (ex.: o cliente "Fernando") é preservado por construção.
+       */
+      const { data: scenario } = await admin
+        .from("demo_scenarios")
+        .select("id")
+        .eq("slug", SCENARIO_SLUG)
+        .eq("user_id", id)
+        .maybeSingle();
+
+      let removed = 0;
+      if (scenario?.id) {
+        const { data: records } = await admin
+          .from("demo_scenario_records")
+          .select("table_name, record_id")
+          .eq("scenario_id", scenario.id);
+        for (const step of cleanupPlan((records ?? []) as ScenarioRecord[])) {
+          const { error } = await admin
+            .from(step.table)
+            .delete()
+            .eq("user_id", id)
+            .in("id", step.ids);
+          if (error) {
+            console.error("casanova-provision cleanup", step.table, error.message);
+            return json({ error: "Falha ao remover os dados do cenário" }, 400);
+          }
+          removed += step.ids.length;
+        }
+        await admin.from("demo_scenario_records").delete().eq("scenario_id", scenario.id);
+      }
+
       await admin
         .from("agency_public_domains")
         .update({ is_active: false, admin_portal_enabled: false })
         .eq("hostname", TENANT_HOSTNAME);
-      return json({ success: true, cleaned: true, user_id: id });
+      return json({ success: true, cleaned: true, user_id: id, removed });
     }
 
     let password: string | null = null;
@@ -233,6 +270,33 @@ Deno.serve(async (req) => {
     });
     if (stagesError) console.error("casanova-provision stages", stagesError.message);
 
+    /**
+     * Cenário demonstrativo: marcação explícita e auditável do tenant. Somente
+     * tenants presentes aqui podem receber automações de demonstração.
+     */
+    const { data: scenarioRow, error: scenarioError } = await admin
+      .from("demo_scenarios")
+      .upsert(
+        {
+          slug: SCENARIO_SLUG,
+          user_id: tenantId,
+          label: `${TENANT_NAME} — cenário demonstrativo`,
+          hostname: TENANT_HOSTNAME,
+          is_demo: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "slug" },
+      )
+      .select("id")
+      .single();
+    if (scenarioError || !scenarioRow) {
+      console.error("casanova-provision scenario", scenarioError?.message);
+      return json({ error: "Falha ao registrar o cenário demonstrativo" }, 400);
+    }
+    const scenarioId = scenarioRow.id;
+    /** Registros que pertencem ao cenário (base do cleanup mapeado). */
+    const mapped: ScenarioRecord[] = [];
+
     /* ------------------ Dados FICTÍCIOS, isolados neste tenant ------------------ */
     const demoClients = [
       { name: "Ana e Roberto Martins", city: "Novo Hamburgo", status: "em_negociacao" },
@@ -250,6 +314,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (existing?.id) {
         clientIds[c.name] = existing.id;
+        mapped.push({ table_name: "clients", record_id: existing.id, record_role: c.name });
         continue;
       }
       const { data: inserted, error } = await admin
@@ -259,7 +324,7 @@ Deno.serve(async (req) => {
           name: c.name,
           city: c.city,
           status: c.status,
-          internal_notes: "Registro de demonstração do ambiente de prévia.",
+          internal_notes: "Cenário demonstrativo — dados fictícios.",
         })
         .select("id")
         .single();
@@ -268,6 +333,7 @@ Deno.serve(async (req) => {
         return json({ error: "Falha ao criar os clientes de demonstração" }, 400);
       }
       clientIds[c.name] = inserted.id;
+      mapped.push({ table_name: "clients", record_id: inserted.id, record_role: c.name });
     }
 
     const demoOpportunities = [
@@ -310,24 +376,40 @@ Deno.serve(async (req) => {
         .eq("user_id", tenantId)
         .eq("destination", o.destination)
         .maybeSingle();
-      if (existing?.id) continue;
-      const { error } = await admin.from("opportunities").insert({
-        user_id: tenantId,
-        client_id: clientId,
-        destination: o.destination,
-        stage: o.stage,
-        adults_count: o.adults,
-        children_count: o.children,
-        passengers_count: o.adults + o.children,
-        estimated_value: o.value,
-        start_date: o.start,
-        end_date: o.end,
-        notes: "Oportunidade de demonstração do ambiente de prévia.",
-      });
-      if (error) {
-        console.error("casanova-provision opportunity", error.message);
+      if (existing?.id) {
+        mapped.push({
+          table_name: "opportunities",
+          record_id: existing.id,
+          record_role: o.destination,
+        });
+        continue;
+      }
+      const { data: insertedOpp, error } = await admin
+        .from("opportunities")
+        .insert({
+          user_id: tenantId,
+          client_id: clientId,
+          destination: o.destination,
+          stage: o.stage,
+          adults_count: o.adults,
+          children_count: o.children,
+          passengers_count: o.adults + o.children,
+          estimated_value: o.value,
+          start_date: o.start,
+          end_date: o.end,
+          notes: "Cenário demonstrativo — dados fictícios.",
+        })
+        .select("id")
+        .single();
+      if (error || !insertedOpp) {
+        console.error("casanova-provision opportunity", error?.message);
         return json({ error: "Falha ao criar as oportunidades de demonstração" }, 400);
       }
+      mapped.push({
+        table_name: "opportunities",
+        record_id: insertedOpp.id,
+        record_role: o.destination,
+      });
     }
 
     const demoOperations = [
@@ -359,22 +441,49 @@ Deno.serve(async (req) => {
         .eq("user_id", tenantId)
         .eq("title", op.title)
         .maybeSingle();
-      if (existing?.id) continue;
-      const { error } = await admin.from("operations").insert({
-        user_id: tenantId,
-        client_id: clientIds[op.client],
-        title: op.title,
-        destination: op.destination,
-        stage: op.stage,
-        passengers_count: op.passengers,
-        sale_amount: op.amount,
-        travel_start_date: op.start,
-        travel_end_date: op.end,
-        notes: "Operação de demonstração do ambiente de prévia.",
-      });
-      if (error) {
-        console.error("casanova-provision operation", error.message);
+      if (existing?.id) {
+        mapped.push({ table_name: "operations", record_id: existing.id, record_role: op.title });
+        continue;
+      }
+      const { data: insertedOp, error } = await admin
+        .from("operations")
+        .insert({
+          user_id: tenantId,
+          client_id: clientIds[op.client],
+          title: op.title,
+          destination: op.destination,
+          stage: op.stage,
+          passengers_count: op.passengers,
+          sale_amount: op.amount,
+          travel_start_date: op.start,
+          travel_end_date: op.end,
+          notes: "Cenário demonstrativo — dados fictícios.",
+        })
+        .select("id")
+        .single();
+      if (error || !insertedOp) {
+        console.error("casanova-provision operation", error?.message);
         return json({ error: "Falha ao criar as operações de demonstração" }, 400);
+      }
+      mapped.push({ table_name: "operations", record_id: insertedOp.id, record_role: op.title });
+    }
+
+    /**
+     * Mapeamento idempotente: só grava vínculos que ainda não existem, de modo
+     * que reexecutar o provisionamento não duplica registros nem mapeamentos.
+     */
+    const { data: existingMappings } = await admin
+      .from("demo_scenario_records")
+      .select("table_name, record_id")
+      .eq("scenario_id", scenarioId);
+    const pending = newMappings((existingMappings ?? []) as ScenarioRecord[], mapped);
+    if (pending.length > 0) {
+      const { error: mapError } = await admin
+        .from("demo_scenario_records")
+        .insert(pending.map((r) => ({ ...r, scenario_id: scenarioId })));
+      if (mapError) {
+        console.error("casanova-provision mapping", mapError.message);
+        return json({ error: "Falha ao mapear os registros do cenário" }, 400);
       }
     }
 
@@ -385,6 +494,9 @@ Deno.serve(async (req) => {
       user_id: tenantId,
       email: TENANT_EMAIL,
       hostname: TENANT_HOSTNAME,
+      scenario_id: scenarioId,
+      scenario_records: mapped.length,
+      scenario_records_added: pending.length,
       /** Presente apenas quando a senha foi gerada nesta chamada. */
       temporary_password: password,
     });

@@ -4203,6 +4203,80 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_scenario_records: {
+        Row: {
+          created_at: string
+          id: string
+          record_id: string
+          record_role: string | null
+          scenario_id: string
+          table_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          record_id: string
+          record_role?: string | null
+          scenario_id: string
+          table_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          record_id?: string
+          record_role?: string | null
+          scenario_id?: string
+          table_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_scenario_records_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "demo_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_scenarios: {
+        Row: {
+          created_at: string
+          dates_locked_at: string | null
+          dates_shifted_on: string | null
+          hostname: string | null
+          id: string
+          is_demo: boolean
+          label: string | null
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dates_locked_at?: string | null
+          dates_shifted_on?: string | null
+          hostname?: string | null
+          id?: string
+          is_demo?: boolean
+          label?: string | null
+          slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dates_locked_at?: string | null
+          dates_shifted_on?: string | null
+          hostname?: string | null
+          id?: string
+          is_demo?: boolean
+          label?: string | null
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dining_places: {
         Row: {
           address: string | null
@@ -16388,6 +16462,7 @@ export type Database = {
       }
       is_agency_member: { Args: { _owner: string }; Returns: boolean }
       is_community_member: { Args: { _user_id: string }; Returns: boolean }
+      is_demo_scenario_tenant: { Args: { _user_id: string }; Returns: boolean }
       is_reserved_slug: { Args: { _slug: string }; Returns: boolean }
       is_team_subuser: { Args: { _uid: string }; Returns: boolean }
       is_user_active: { Args: { _user_id: string }; Returns: boolean }
