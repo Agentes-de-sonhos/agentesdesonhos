@@ -242,10 +242,12 @@ export default function AgencyAdminArea({
    * cópia paralela, nem etapa de "promover" para as agências.
    */
   basePath,
+  /** True apenas quando este painel é montado dentro de um router existente. */
+  hasOuterRouter,
 }: {
   hostname: string;
   basePath?: string;
-  
+  hasOuterRouter?: boolean;
 }) {
   return (
     <AuthProvider>
@@ -253,7 +255,11 @@ export default function AgencyAdminArea({
         <SubscriptionProvider>
           {/* Navegação contextual: páginas reutilizadas geram caminhos /gestao/*. */}
           <AgencyAdminNavProvider>
-            <AgencyAdminEntry hostname={hostname} basePath={basePath} />
+            <AgencyAdminEntry
+              hostname={hostname}
+              basePath={basePath}
+              hasOuterRouter={hasOuterRouter}
+            />
           </AgencyAdminNavProvider>
         </SubscriptionProvider>
       </TeamSessionProvider>
