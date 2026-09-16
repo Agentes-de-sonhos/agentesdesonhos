@@ -18,6 +18,7 @@ export const SCENARIO_SLUG = "casa-nova-tur";
 export const CLEANUP_ORDER = [
   "client_area_wallet_grants",
   "income_entries",
+  "sale_products",
   "sales",
   "trip_services",
   "trips",
@@ -30,10 +31,44 @@ export const CLEANUP_ORDER = [
   "operations",
   "quote_services",
   "quotes",
+  "opportunity_history",
   "opportunities",
   "travelers",
   "clients",
 ] as const;
+
+/**
+ * Coluna que amarra cada tabela ao tenant. Quando existe, o cleanup filtra por
+ * ela ALÉM do id mapeado (defesa em profundidade contra remoção fora do tenant).
+ * `null` = tabela filha, cuja posse é garantida pelo pai já mapeado.
+ */
+export const TENANT_COLUMN: Record<string, "user_id" | "agency_id" | null> = {
+  client_area_wallet_grants: "agency_id",
+  income_entries: "user_id",
+  sale_products: "user_id",
+  sales: "user_id",
+  trip_services: null,
+  trips: "user_id",
+  itinerary_activities: null,
+  itinerary_days: null,
+  itineraries: "user_id",
+  travel_file_services: "agency_id",
+  travel_files: "agency_id",
+  operation_services: "user_id",
+  operations: "user_id",
+  quote_services: null,
+  quotes: "user_id",
+  opportunity_history: null,
+  opportunities: "user_id",
+  travelers: "user_id",
+  clients: "user_id",
+};
+
+/** Coluna de tenant de uma tabela do cenário (undefined = tabela desconhecida). */
+export function tenantColumn(table: string): "user_id" | "agency_id" | null | undefined {
+  return TENANT_COLUMN[table];
+}
+
 
 export type ScenarioRecord = {
   table_name: string;
