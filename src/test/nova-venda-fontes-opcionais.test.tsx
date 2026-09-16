@@ -30,19 +30,20 @@ const candidate = {
 let bundleMock: OperationBundle | null = null;
 let bundleLoading = false;
 
+const searchResults = [candidate];
 vi.mock("@/hooks/useOperationSources", () => ({
-  useOperationSearch: () => ({ data: [candidate], isFetching: false }),
+  useOperationSearch: () => ({ data: searchResults, isFetching: false }),
   useOperationBundle: () => ({ data: bundleMock, isFetching: bundleLoading }),
 }));
-vi.mock("@/hooks/useFinancial", () => ({
-  useFinancial: () => ({ createSale: vi.fn(), createSaleProduct: vi.fn() }),
-}));
-vi.mock("@/hooks/useSellers", () => ({ useSellers: () => ({ sellers: [] }) }));
+const financialApi = { createSale: vi.fn(), createSaleProduct: vi.fn() };
+vi.mock("@/hooks/useFinancial", () => ({ useFinancial: () => financialApi }));
+const sellersResult = { sellers: [] };
+vi.mock("@/hooks/useSellers", () => ({ useSellers: () => sellersResult }));
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "u1" } }) }));
-vi.mock("@/hooks/useAgencySupplierTerms", () => ({
-  useAgencySupplierTerms: () => ({ data: { byOperator: new Map() } }),
-}));
-vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
+const termsResult = { data: { byOperator: new Map() } };
+vi.mock("@/hooks/useAgencySupplierTerms", () => ({ useAgencySupplierTerms: () => termsResult }));
+const toastResult = { toast: vi.fn() };
+vi.mock("@/hooks/use-toast", () => ({ useToast: () => toastResult }));
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { from: () => ({}) } }));
 vi.mock("@/components/shared/ClientSelector", () => ({
   ClientSelector: () => <div data-testid="client-selector" />,
