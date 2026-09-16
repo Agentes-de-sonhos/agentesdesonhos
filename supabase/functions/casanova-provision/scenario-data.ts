@@ -153,6 +153,11 @@ export function servicesTotal(services: ScenarioService[] = SCENARIO_SERVICES): 
   return services.reduce((sum, s) => sum + s.amount, 0);
 }
 
+/** Converte o tipo de serviço para os valores aceitos em sale_products. */
+export function saleProductType(kind: ServiceKind): string {
+  return kind === "ingresso" ? "atracao" : kind;
+}
+
 export type ScenarioTraveler = {
   key: string;
   nome_completo: string;
