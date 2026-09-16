@@ -76,16 +76,21 @@ Deno.serve(async (req) => {
       return json({ success: true, shifted: false, reason: decision.reason, today });
     }
 
-    /** Lock atômico: só um chamador do dia consegue marcar o cenário. */
+    /**
+     * Lock atômico: só um chamador do dia consegue marcar o cenário.
+     * Atenção: comparações de desigualdade ignoram valores nulos, por isso o
+     * caso "nunca executado/nunca travado" precisa ser explícito.
+     */
     const lockedAt = new Date().toISOString();
-    const { data: locked } = await admin
+    let lockQuery = admin
       .from("demo_scenarios")
       .update({ dates_locked_at: lockedAt })
       .eq("id", scenario.id)
-      .neq("dates_shifted_on", today)
-      .or(`dates_locked_at.is.null,dates_locked_at.eq.${scenario.dates_locked_at ?? ""}`)
-      .select("id")
-      .maybeSingle();
+      .or(`dates_shifted_on.is.null,dates_shifted_on.neq.${today}`);
+    lockQuery = scenario.dates_locked_at
+      ? lockQuery.eq("dates_locked_at", scenario.dates_locked_at)
+      : lockQuery.is("dates_locked_at", null);
+    const { data: locked } = await lockQuery.select("id").maybeSingle();
     if (!locked?.id) {
       return json({ success: true, shifted: false, reason: "locked", today });
     }
@@ -109,13 +114,17 @@ Deno.serve(async (req) => {
       idsByTable.set(r.table_name, ids);
     }
 
-    /** Âncora do delta: data de embarque atual da oportunidade do cenário. */
-    const anchorIds = idsByTable.get("opportunities") ?? idsByTable.get("trips") ?? [];
+    /**
+     * Âncora do delta: a VIAGEM principal do cenário (registro único em
+     * `trips`). O cenário também tem oportunidades secundárias com outras datas,
+     * então usá-las como âncora deslocaria a jornada para a janela errada.
+     */
+    const anchorTable = (idsByTable.get("trips")?.length ?? 0) > 0 ? "trips" : "opportunities";
+    const anchorIds = idsByTable.get(anchorTable) ?? [];
     if (anchorIds.length === 0) {
       await releaseLock();
       return json({ success: true, shifted: false, reason: "no_anchor", today });
     }
-    const anchorTable = idsByTable.get("opportunities") ? "opportunities" : "trips";
     const { data: anchors } = await admin
       .from(anchorTable)
       .select("id, start_date")

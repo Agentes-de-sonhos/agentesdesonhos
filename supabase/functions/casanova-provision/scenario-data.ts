@@ -158,6 +158,25 @@ export function saleProductType(kind: ServiceKind): string {
   return kind === "ingresso" ? "atracao" : kind;
 }
 
+/**
+ * Converte o tipo de serviço para os valores aceitos pela Carteira Digital
+ * (`trip_services.service_type`), que usa a taxonomia em inglês da vitrine
+ * pública. Sem essa conversão a carteira pública quebra ao montar as cores.
+ */
+export function walletServiceType(kind: ServiceKind): string {
+  const map: Record<string, string> = {
+    aereo: "flight",
+    hotel: "hotel",
+    transfer: "transfer",
+    locacao: "car_rental",
+    ingresso: "attraction",
+    seguro: "insurance",
+    cruzeiro: "cruise",
+    trem: "train",
+  };
+  return map[kind] ?? "other";
+}
+
 export type ScenarioTraveler = {
   key: string;
   nome_completo: string;

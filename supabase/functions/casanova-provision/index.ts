@@ -15,6 +15,7 @@ import {
   SCENARIO_SERVICES,
   SCENARIO_TRAVELERS,
   saleProductType,
+  walletServiceType,
   servicesTotal,
   TRIP_ADULTS,
   TRIP_CHILDREN,
@@ -98,12 +99,12 @@ Deno.serve(async (req) => {
      * fixo (e-mail, host e slug constantes). Pode ser removido do projeto
      * depois da prévia sem afetar nada.
      */
-    const expectedToken = (Deno.env.get("CASANOVA_PROVISION_TOKEN") || "").trim();
     const providedToken = (req.headers.get("x-provision-token") || "").trim();
-    const isTokenCall =
-      expectedToken.length >= 24 &&
-      providedToken.length === expectedToken.length &&
-      providedToken === expectedToken;
+    const tokenMatches = (expected: string) =>
+      expected.length >= 24 &&
+      providedToken.length === expected.length &&
+      providedToken === expected;
+    const isTokenCall = tokenMatches((Deno.env.get("CASANOVA_PROVISION_TOKEN") || "").trim());
 
     if (!isServiceCall && !isTokenCall) {
       if (!authHeader) return json({ error: "Não autorizado" }, 401);
@@ -132,25 +133,42 @@ Deno.serve(async (req) => {
     // Conta do tenant (criada apenas uma vez).
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     const users = list?.users ?? [];
-    let tenantUser = users.find((u) => u.email?.toLowerCase() === TENANT_EMAIL);
-    let emailMigrated = false;
+
+    /**
+     * Identidade AUTORITATIVA do tenant: o domínio TÉCNICO da prévia. O e-mail
+     * é apenas um dado do cadastro e pode coincidir com o de uma agência REAL —
+     * por isso ele nunca é usado para "adotar" uma conta existente. Sem essa
+     * regra, uma conta real com e-mail parecido poderia ser sobrescrita.
+     */
+    const { data: domainRow } = await admin
+      .from("agency_public_domains")
+      .select("user_id")
+      .eq("hostname", TENANT_HOSTNAME)
+      .maybeSingle();
+
+    let tenantUser = domainRow?.user_id
+      ? users.find((u) => u.id === domainRow.user_id)
+      : undefined;
+    const emailMigrated = false;
+
     if (!tenantUser) {
-      const legacy = users.find((u) =>
-        LEGACY_TENANT_EMAILS.includes((u.email || "").toLowerCase()),
+      /**
+       * Sem domínio técnico registrado: só é permitido adotar uma conta pelo
+       * e-mail quando ela ainda NÃO pertence a outra agência (sem profile ou já
+       * com o slug público deste tenant de prévia).
+       */
+      const candidates = users.filter((u) =>
+        [TENANT_EMAIL, ...LEGACY_TENANT_EMAILS].includes((u.email || "").toLowerCase()),
       );
-      if (legacy) {
-        tenantUser = legacy;
-        if (action !== "cleanup") {
-          const { data: updated, error } = await admin.auth.admin.updateUserById(legacy.id, {
-            email: TENANT_EMAIL,
-            email_confirm: true,
-          });
-          if (error) {
-            console.error("casanova-provision email migration", error.message);
-            return json({ error: "Falha ao corrigir o e-mail do tenant" }, 400);
-          }
-          tenantUser = updated?.user ?? legacy;
-          emailMigrated = true;
+      for (const candidate of candidates) {
+        const { data: prof } = await admin
+          .from("profiles")
+          .select("user_id, public_slug")
+          .eq("user_id", candidate.id)
+          .maybeSingle();
+        if (!prof || prof.public_slug === TENANT_SLUG) {
+          tenantUser = candidate;
+          break;
         }
       }
     }
@@ -304,6 +322,13 @@ Deno.serve(async (req) => {
           label: `${TENANT_NAME} — cenário demonstrativo`,
           hostname: TENANT_HOSTNAME,
           is_demo: true,
+          /**
+           * O provisionamento reescreve as datas-base da jornada, então a marca
+           * de "datas já ajustadas hoje" precisa ser liberada — senão o cenário
+           * ficaria exibindo a janela-base em vez de hoje+3 / hoje+10.
+           */
+          dates_shifted_on: null,
+          dates_locked_at: null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "slug" },
@@ -597,7 +622,7 @@ Deno.serve(async (req) => {
         adults_count: TRIP_ADULTS,
         children_count: TRIP_CHILDREN,
         total_amount: TRIP_TOTAL,
-        status: "approved",
+        status: "published",
         currency: "BRL",
         payment_terms: "Entrada de 30% na confirmação e saldo em até 30 dias antes do embarque.",
       };
@@ -737,7 +762,7 @@ Deno.serve(async (req) => {
         travelers_count: TRIP_ADULTS,
         trip_type: "casal",
         budget_level: "conforto",
-        status: "approved",
+        status: "published",
         headline: TRIP_TITLE,
       };
       const itineraryId = foundItinerary?.id
@@ -746,6 +771,22 @@ Deno.serve(async (req) => {
         : (await admin.from("itineraries").insert(itineraryPayload).select("id").single()).data?.id;
       if (itineraryId) {
         e2e.itinerary_id = itineraryId;
+        /**
+         * A página pública do roteiro resolve o código e depois carrega pelo
+         * share_token, então o roteiro demonstrativo precisa ter um token.
+         * Gerado apenas quando ausente, para manter a idempotência.
+         */
+        const { data: itinToken } = await admin
+          .from("itineraries")
+          .select("share_token")
+          .eq("id", itineraryId)
+          .maybeSingle();
+        if (!itinToken?.share_token) {
+          await admin
+            .from("itineraries")
+            .update({ share_token: crypto.randomUUID().replace(/-/g, "") })
+            .eq("id", itineraryId);
+        }
         mapped.push({
           table_name: "itineraries",
           record_id: itineraryId,
@@ -854,7 +895,12 @@ Deno.serve(async (req) => {
             (r: { service_data: Record<string, unknown> | null }) =>
               (r.service_data as { demo_key?: string } | null)?.demo_key === s.key,
           ) as { id: string } | undefined;
-          const row = { trip_id: tripId, service_type: s.kind, order_index: i, service_data };
+          const row = {
+            trip_id: tripId,
+            service_type: walletServiceType(s.kind),
+            order_index: i,
+            service_data,
+          };
           const id = match?.id
             ? ((await admin.from("trip_services").update(row).eq("id", match.id)), match.id)
             : (await admin.from("trip_services").insert(row).select("id").single()).data?.id;
@@ -1062,13 +1108,22 @@ Deno.serve(async (req) => {
             mapped.push({ table_name: "sale_products", record_id: id, record_role: s.key });
         }
 
-        /** Recebimento parcial: entrada de 30%. */
-        const { data: foundIncome } = await admin
+        /**
+         * Recebimento parcial: entrada de 30%.
+         * A venda gera automaticamente vários lançamentos de comissão, então a
+         * busca precisa apontar exatamente para a entrada manual do cenário —
+         * caso contrário a reexecução duplicaria o recebimento.
+         */
+        const { data: foundIncomeRows } = await admin
           .from("income_entries")
           .select("id")
           .eq("user_id", tenantId)
           .eq("sale_id", saleId)
-          .maybeSingle();
+          .eq("source", "manual")
+          .eq("notes", "Entrada de demonstração (30%) — sem cobrança real.")
+          .order("created_at", { ascending: true })
+          .limit(1);
+        const foundIncome = foundIncomeRows?.[0];
         if (!foundIncome?.id && payment.paid > 0) {
           const { data: income } = await admin
             .from("income_entries")

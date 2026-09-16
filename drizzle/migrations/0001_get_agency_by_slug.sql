@@ -1,10 +1,3 @@
--- Etapa 4 — PENDENTE DE APLICAÇÃO (por decisão do usuário: nenhuma migração
--- executada nesta rodada). Resolve o tenant pelo agency_slug no host
--- compartilhado sites.agentesdesonhos.com.br/{agency_slug}.
---
--- Mesmo payload de get_agency_domain, selecionando pelo slug do domínio ATIVO
--- da agência (preferindo o primário). Somente leitura: expõe exatamente os
--- mesmos campos públicos que o site white label já mostra.
 CREATE OR REPLACE FUNCTION public.get_agency_by_slug(p_slug text)
 RETURNS jsonb
 LANGUAGE sql
