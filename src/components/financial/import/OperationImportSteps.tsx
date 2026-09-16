@@ -146,13 +146,17 @@ export function StepOperationSources({
   }
 
   const noSources = bundle.wallets.length === 0 && bundle.quotes.length === 0;
+  const noImportable = noSources || pairs.length === 0;
+
 
   return (
     <div className="space-y-5">
       <div>
         <h3 className="text-base font-semibold">Fontes encontradas</h3>
         <p className="text-sm text-muted-foreground">
-          Escolha quais fontes usar. Detalhes operacionais vêm da Carteira; valores comerciais vêm do Orçamento.
+          Carteira Digital e Orçamento são opcionais. Se existirem, escolha quais usar: detalhes
+          operacionais vêm da Carteira e valores comerciais vêm do Orçamento. Sem produtos
+          importáveis, você cadastra os produtos manualmente na etapa seguinte.
         </p>
       </div>
 
@@ -163,11 +167,15 @@ export function StepOperationSources({
         </div>
       )}
 
-      {noSources && (
+      {noImportable && (
         <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-          Esta operação não possui Carteira Digital nem Orçamento vinculados. Adicione os produtos manualmente na próxima etapa.
+          {noSources
+            ? "Esta operação não possui Carteira Digital nem Orçamento vinculados — e não precisa ter."
+            : "As fontes vinculadas não possuem serviços importáveis."}{" "}
+          Continue e cadastre os produtos manualmente na etapa Produtos.
         </div>
       )}
+
 
       {bundle.wallets.length > 0 && (
         <div className="space-y-2">
