@@ -134,7 +134,8 @@ export function ManualServiceDialog({
         quantity: Math.max(1, parseInt(quantity, 10) || 1),
         // Sempre enviado: vazio significa apagar a observação anterior.
         notes: notes.trim(),
-        requestedAmount: parsedAmount,
+        // Omitido quando não há permissão financeira: o servidor preserva.
+        ...(parsedAmount === undefined ? {} : { requestedAmount: parsedAmount }),
       });
       onOpenChange(false);
     } catch (error: any) {
