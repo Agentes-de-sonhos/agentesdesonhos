@@ -71,22 +71,41 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
   return <VitrinePublica slugOverride={info.public_slug || info.agency_slug} />;
 }
 
-export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
+/**
+ * `basePath` é o prefixo do tenant no host compartilhado (`/{agency_slug}`).
+ * Em domínio próprio ele é vazio e nada muda no comportamento atual.
+ */
+export default function AgencyDomainRoutes({
+  info,
+  basePath = "",
+}: {
+  info: AgencyDomainInfo;
+  basePath?: string;
+}) {
+  const base = (basePath || "").replace(/\/+$/, "");
+  /** Caminho interno (sem o prefixo do slug) usado nas decisões de rota. */
+  const internalPath =
+    typeof window === "undefined"
+      ? "/"
+      : base && window.location.pathname.startsWith(base)
+        ? window.location.pathname.slice(base.length) || "/"
+        : window.location.pathname;
+
   /**
    * Painel administrativo white label: decidido ANTES do BrowserRouter, pois a
    * área /gestao usa o workspace de abas internas (cada aba tem o seu próprio
    * router) — dois routers aninhados não são permitidos.
    */
-  if (typeof window !== "undefined" && isAgencyAdminPath(window.location.pathname)) {
+  if (typeof window !== "undefined" && isAgencyAdminPath(internalPath)) {
     return (
       <Suspense fallback={<Fallback />}>
-        <AgencyAdminArea hostname={info.hostname} />
+        <AgencyAdminArea hostname={info.hostname} basePath={base || undefined} />
       </Suspense>
     );
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={base || undefined}>
       <Suspense fallback={<Fallback />}>
         <AgencyDomainRoutesInner info={info} />
       </Suspense>
