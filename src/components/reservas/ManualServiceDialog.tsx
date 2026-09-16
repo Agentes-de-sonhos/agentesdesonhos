@@ -100,7 +100,11 @@ export function ManualServiceDialog({
       setFieldError("Informe o nome do serviço.");
       return;
     }
-    let parsedAmount: number | null = null;
+    // Sem permissão financeira o valor nunca é enviado (fica undefined) — o
+    // servidor preserva o preço atual. Com permissão, o campo apagado
+    // representa "sem valor" e é enviado como 0, pois o preço do serviço não
+    // pode ficar vazio no registro.
+    let parsedAmount: number | undefined = canEditAmount ? 0 : undefined;
     if (canEditAmount && amount.trim()) {
       // Aceita o jeito brasileiro de escrever ("1.500,00", "R$ 1 500,00") e
       // também "1500.50". Qualquer outra coisa é recusada, nunca convertida.
