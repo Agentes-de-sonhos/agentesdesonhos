@@ -942,13 +942,22 @@ Deno.serve(async (req) => {
         responsible_user_id: tenantId,
         created_by_user_id: tenantId,
       };
+      /** Número sequencial da ficha, seguindo a numeração já usada na agência. */
+      const { data: lastFile } = await admin
+        .from("travel_files")
+        .select("file_number")
+        .eq("agency_id", tenantId)
+        .order("file_number", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const nextFileNumber = ((lastFile?.file_number as number | null) ?? 0) + 1;
       const fileId = foundFile?.id
         ? ((await admin.from("travel_files").update(filePayload).eq("id", foundFile.id)),
           foundFile.id)
         : (
             await admin
               .from("travel_files")
-              .insert({ ...filePayload, file_number: Date.now() % 100000 })
+              .insert({ ...filePayload, file_number: nextFileNumber })
               .select("id")
               .single()
           ).data?.id;
