@@ -26,6 +26,7 @@ import { agencyWhatsappNumber } from "@/lib/agencyDomains";
 import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput, clientAreaHostname } from "@/lib/agencyDomains";
+import { tenantRequestHostname } from "@/lib/agencySlugRouting";
 
 interface SessionClient {
   id: string | null;
