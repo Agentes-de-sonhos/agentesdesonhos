@@ -49,6 +49,18 @@ import { PRODUCT_TYPES } from "@/types/financial";
 type WizardStep = "origin" | "locate" | "sources" | "confirm" | "client" | "destination" | "date" | "products" | "review";
 const MANUAL_STEPS: WizardStep[] = ["origin", "client", "destination", "date", "products", "review"];
 const CRM_STEPS: WizardStep[] = ["origin", "locate", "sources", "confirm", "review"];
+const CRM_STEPS_WITH_PRODUCTS: WizardStep[] = ["origin", "locate", "sources", "confirm", "products", "review"];
+
+/**
+ * Carteira Digital e Orçamento são opcionais: a operação pode não ter nenhuma
+ * fonte com serviços. Nesse caso o fluxo de importação ganha a etapa Produtos,
+ * reutilizando o cadastro manual já existente, e o bloqueio da venda passa a
+ * ocorrer em Produtos/Revisão — nunca na etapa Fontes.
+ */
+export function crmStepsFor(hasImportableProducts: boolean): WizardStep[] {
+  return hasImportableProducts ? CRM_STEPS : CRM_STEPS_WITH_PRODUCTS;
+}
+
 const STEP_LABELS: Record<WizardStep, string> = {
   origin: "Origem",
   locate: "Operação",
@@ -239,9 +251,6 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     }
   }, [open]);
 
-  const stepOrder = origin === "crm" ? CRM_STEPS : MANUAL_STEPS;
-  const stepIndex = stepOrder.indexOf(step);
-  const progress = ((Math.max(stepIndex, 0) + 1) / stepOrder.length) * 100;
 
   const totals = useMemo(() => {
     const sale = products.reduce((s, p) => s + (Number(p.sale_price) || 0), 0);
@@ -281,6 +290,14 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     [pairs, selectedWallet, selectedQuote],
   );
 
+  /** Sem serviços importáveis (nenhuma fonte, ou fontes sem serviços) → etapa Produtos. */
+  const hasImportableProducts = pairs.length > 0;
+  const stepOrder = origin === "crm" ? crmStepsFor(hasImportableProducts) : MANUAL_STEPS;
+  const stepIndex = stepOrder.indexOf(step);
+  const progress = ((Math.max(stepIndex, 0) + 1) / stepOrder.length) * 100;
+
+
+
   const importSourceLabel = useMemo(() => {
     const parts: string[] = [];
     if (selectedWallet) parts.push("Carteira Digital");
@@ -313,7 +330,10 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
         next.requires_invoice = !!terms.requires_invoice;
         return next;
       });
-    setProducts(drafts);
+    // Produtos cadastrados manualmente (sem proveniência de importação) são
+    // preservados: sem Carteira/Orçamento, eles são a única origem da venda.
+    setProducts((prev) => [...prev.filter((p) => !p.source_provenance), ...drafts]);
+
   }, [origin, pairs, excluded, precedence, termsData]);
 
   // Pre-fill the sale metadata from the resolved bundle
@@ -336,7 +356,9 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     switch (step) {
       case "origin": return origin === "manual" || origin === "crm";
       case "locate": return !!candidate;
-      case "sources": return !bundleLoading && products.length > 0;
+      // Carteira e Orçamento são opcionais: basta o bundle ter resolvido.
+      case "sources": return !bundleLoading;
+
       case "confirm": return !!client && destination.trim().length > 1 && !!saleDate;
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
