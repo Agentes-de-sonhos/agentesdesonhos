@@ -314,6 +314,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (existing?.id) {
         clientIds[c.name] = existing.id;
+        mapped.push({ table_name: "clients", record_id: existing.id, record_role: c.name });
         continue;
       }
       const { data: inserted, error } = await admin
@@ -323,7 +324,7 @@ Deno.serve(async (req) => {
           name: c.name,
           city: c.city,
           status: c.status,
-          internal_notes: "Registro de demonstração do ambiente de prévia.",
+          internal_notes: "Cenário demonstrativo — dados fictícios.",
         })
         .select("id")
         .single();
@@ -332,6 +333,7 @@ Deno.serve(async (req) => {
         return json({ error: "Falha ao criar os clientes de demonstração" }, 400);
       }
       clientIds[c.name] = inserted.id;
+      mapped.push({ table_name: "clients", record_id: inserted.id, record_role: c.name });
     }
 
     const demoOpportunities = [
