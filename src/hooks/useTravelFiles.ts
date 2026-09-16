@@ -624,7 +624,9 @@ export function useTravelFileMutations(fileId?: string) {
           ...(input.status ? { status: input.status } : {}),
           // Observações: string vazia apaga no servidor; omitir preserva.
           ...(input.notes === undefined ? {} : { notes: input.notes ?? "" }),
-          ...(input.requestedAmount == null ? {} : { requested_amount: input.requestedAmount }),
+          // Valor: campo ausente/undefined preserva o valor anterior; enviado
+          // (inclusive 0 ou nulo) representa a intenção explícita do usuário.
+          ...(input.requestedAmount === undefined ? {} : { requested_amount: input.requestedAmount }),
           currency: input.currency || null,
         },
       });

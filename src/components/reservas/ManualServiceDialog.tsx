@@ -100,7 +100,11 @@ export function ManualServiceDialog({
       setFieldError("Informe o nome do serviço.");
       return;
     }
-    let parsedAmount: number | null = null;
+    // Sem permissão financeira o valor nunca é enviado (fica undefined) — o
+    // servidor preserva o preço atual. Com permissão, o campo apagado
+    // representa "sem valor" e é enviado como 0, pois o preço do serviço não
+    // pode ficar vazio no registro.
+    let parsedAmount: number | undefined = canEditAmount ? 0 : undefined;
     if (canEditAmount && amount.trim()) {
       // Aceita o jeito brasileiro de escrever ("1.500,00", "R$ 1 500,00") e
       // também "1500.50". Qualquer outra coisa é recusada, nunca convertida.
@@ -108,8 +112,9 @@ export function ManualServiceDialog({
       const brFormat = /^\d{1,3}(\.\d{3})+(,\d{1,2})?$/;
       const simple = /^\d+([.,]\d{1,2})?$/;
       const valid = brFormat.test(cleaned) || simple.test(cleaned);
-      parsedAmount = valid ? parsePastedCurrency(cleaned) : null;
-      if (parsedAmount == null || !Number.isFinite(parsedAmount) || parsedAmount < 0) {
+      const parsed = valid ? parsePastedCurrency(cleaned) : null;
+      parsedAmount = parsed ?? undefined;
+      if (parsed == null || !Number.isFinite(parsed) || parsed < 0) {
         setFieldError("Informe um valor válido, por exemplo 1.500,00.");
         return;
       }
@@ -129,7 +134,8 @@ export function ManualServiceDialog({
         quantity: Math.max(1, parseInt(quantity, 10) || 1),
         // Sempre enviado: vazio significa apagar a observação anterior.
         notes: notes.trim(),
-        requestedAmount: parsedAmount,
+        // Omitido quando não há permissão financeira: o servidor preserva.
+        ...(parsedAmount === undefined ? {} : { requestedAmount: parsedAmount }),
       });
       onOpenChange(false);
     } catch (error: any) {
