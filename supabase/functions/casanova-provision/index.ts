@@ -1131,6 +1131,18 @@ Deno.serve(async (req) => {
       scenario_id: scenarioId,
       scenario_records: mapped.length,
       scenario_records_added: pending.length,
+      /** Auditoria da jornada ponta a ponta criada/reaproveitada. */
+      journey: {
+        ...e2e,
+        opportunity_id: opportunityIds[TRIP_TITLE] ?? null,
+        operation_id: operationIds[TRIP_TITLE] ?? null,
+        services: SCENARIO_SERVICES.length,
+        services_total: servicesTotal(),
+        expected_total: TRIP_TOTAL,
+        days: TRIP_DAYS,
+        nights: TRIP_NIGHTS,
+        payment: paymentSummary(),
+      },
       /** Presente apenas quando a senha foi gerada nesta chamada. */
       temporary_password: password,
     });
