@@ -22,6 +22,6 @@
 - [x] testes focados + typecheck + build; sem publicar
 
 ## Aba Meus Modelos em Criar Roteiro
-- [ ] terceira opcao na mesma barra abrindo Meus Projetos > Modelos > Roteiros
-- [ ] remover TabsContent morto de templates
-- [ ] testes focados + typecheck + build; sem publicar
+- [x] terceira opcao na mesma barra abrindo Meus Projetos > Modelos > Roteiros
+- [x] remover TabsContent morto de templates
+- [x] testes focados + typecheck + build; sem publicar
