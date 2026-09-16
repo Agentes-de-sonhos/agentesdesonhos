@@ -2814,6 +2814,44 @@ import { optimizeImage, validateImageFile, formatFileSize } from "@/utils/imageO
 
 const MAX_IMAGES_PER_SERVICE = 5;
 
+/**
+ * Miniatura resiliente: resolve referências `gplace://` e aplica fallback.
+ * Declarada no escopo do módulo — se ficasse dentro de outro componente, cada
+ * render criaria um tipo novo e o React remontaria todas as miniaturas,
+ * fazendo as fotos "piscarem" a cada digitação no formulário.
+ */
+export function ResolvedThumb({ imageRef, placeId, alt, className }: { imageRef: string; placeId?: string | null; alt: string; className: string }) {
+  const { usable, loading, markFailed } = useServiceImages(useMemo(() => [imageRef], [imageRef]), placeId);
+  const img = usable[0];
+  if (!img?.src) {
+    return (
+      <div className={`${className} flex flex-col items-center justify-center gap-1 bg-muted/50 text-muted-foreground`} role="img" aria-label={alt}>
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageOff className="h-4 w-4" />}
+        {!loading && <span className="text-[10px] px-1 text-center">Indisponível</span>}
+      </div>
+    );
+  }
+  return (
+    <img src={img.src} alt={alt} className={className} loading="lazy" onError={() => markFailed(img.ref)} />
+  );
+}
+
+/**
+ * Identidade estável por foto: usa a própria referência e, quando a mesma
+ * referência aparece repetida, acrescenta a ocorrência — nunca o índice puro,
+ * que trocaria de dono ao remover/reordenar.
+ */
+export function photoKeys(urls: string[]): string[] {
+  const seen = new Map<string, number>();
+  return (urls || []).map((url) => {
+    const n = (seen.get(url) ?? 0) + 1;
+    seen.set(url, n);
+    return n > 1 ? `${url}#${n}` : url;
+  });
+}
+
+
+
 function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
