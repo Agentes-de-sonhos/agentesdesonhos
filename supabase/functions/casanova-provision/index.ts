@@ -376,24 +376,40 @@ Deno.serve(async (req) => {
         .eq("user_id", tenantId)
         .eq("destination", o.destination)
         .maybeSingle();
-      if (existing?.id) continue;
-      const { error } = await admin.from("opportunities").insert({
-        user_id: tenantId,
-        client_id: clientId,
-        destination: o.destination,
-        stage: o.stage,
-        adults_count: o.adults,
-        children_count: o.children,
-        passengers_count: o.adults + o.children,
-        estimated_value: o.value,
-        start_date: o.start,
-        end_date: o.end,
-        notes: "Oportunidade de demonstração do ambiente de prévia.",
-      });
-      if (error) {
-        console.error("casanova-provision opportunity", error.message);
+      if (existing?.id) {
+        mapped.push({
+          table_name: "opportunities",
+          record_id: existing.id,
+          record_role: o.destination,
+        });
+        continue;
+      }
+      const { data: insertedOpp, error } = await admin
+        .from("opportunities")
+        .insert({
+          user_id: tenantId,
+          client_id: clientId,
+          destination: o.destination,
+          stage: o.stage,
+          adults_count: o.adults,
+          children_count: o.children,
+          passengers_count: o.adults + o.children,
+          estimated_value: o.value,
+          start_date: o.start,
+          end_date: o.end,
+          notes: "Cenário demonstrativo — dados fictícios.",
+        })
+        .select("id")
+        .single();
+      if (error || !insertedOpp) {
+        console.error("casanova-provision opportunity", error?.message);
         return json({ error: "Falha ao criar as oportunidades de demonstração" }, 400);
       }
+      mapped.push({
+        table_name: "opportunities",
+        record_id: insertedOpp.id,
+        record_role: o.destination,
+      });
     }
 
     const demoOperations = [
