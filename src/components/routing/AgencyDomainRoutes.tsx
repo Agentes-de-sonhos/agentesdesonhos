@@ -6,7 +6,7 @@ import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 import { shouldRenderUnderConstruction, resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
-import { isSharedAgencySiteHost } from "@/lib/agencySlugRouting";
+import { shouldNoindexAgencyPath } from "@/lib/agencySlugRouting";
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
@@ -117,10 +117,14 @@ export default function AgencyDomainRoutes({
 
 function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
   /**
-   * Host compartilhado é sempre prévia: noindex/nofollow em todas as páginas.
+   * Indexação centralizada: host técnico compartilhado e áreas
+   * privadas/técnicas ficam noindex; páginas institucionais públicas seguem
+   * indexáveis conforme a configuração atual do tenant.
    */
+  const { pathname } = useLocation();
   useNoindex(
-    typeof window !== "undefined" && isSharedAgencySiteHost(window.location.hostname),
+    typeof window !== "undefined" &&
+      shouldNoindexAgencyPath(window.location.hostname, pathname),
   );
 
   /**

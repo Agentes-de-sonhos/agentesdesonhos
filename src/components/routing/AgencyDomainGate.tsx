@@ -6,7 +6,12 @@ import {
   fetchAgencyBySlug,
   fetchAgencyDomain,
 } from "@/lib/agencyDomains";
-import { isSharedAgencySiteHost, parseAgencySlugLocation } from "@/lib/agencySlugRouting";
+import {
+  isCanonicalAgencySiteHost,
+  isSharedAgencySiteHost,
+  parseAgencySlugLocation,
+} from "@/lib/agencySlugRouting";
+
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
@@ -72,15 +77,24 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
   });
 
   if (shared) {
-    if (!slug) return <SharedHostIndex />;
+    /**
+     * Host compartilhado. No host CANÔNICO (`vitrine.tur.br`) a ausência de
+     * Sites ADS ativo para o slug preserva integralmente o comportamento
+     * antigo: as rotas da plataforma seguem servindo a Vitrine de Ofertas.
+     * No host técnico interno nada é revelado sobre os tenants.
+     */
+    const canonical = isCanonicalAgencySiteHost(browserHost);
+    const noAgency = canonical ? <>{children}</> : <SharedHostIndex />;
+    if (!slug) return noAgency;
     if (slugLoading) return <Spinner />;
-    if (!bySlug) return <SharedHostIndex />;
+    if (!bySlug) return noAgency;
     return (
       <Suspense fallback={<Spinner />}>
         <AgencyDomainRoutes info={bySlug} basePath={slugLocation!.basePath} />
       </Suspense>
     );
   }
+
 
   if (host && isLoading) return <Spinner />;
 

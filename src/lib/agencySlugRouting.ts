@@ -20,14 +20,45 @@
  */
 import { normalizeHostname } from "./agencyDomains";
 
+/**
+ * Host CANÔNICO público dos Sites ADS. `vitrine.tur.br` é o endereço oficial;
+ * `www.` continua funcionando e é redirecionado para o apex.
+ *
+ * Diferença em relação ao host técnico compartilhado: aqui as páginas
+ * institucionais podem ser indexadas e, quando o slug NÃO tem Sites ADS ativo,
+ * a rota continua servindo a Vitrine de Ofertas atual (retrocompatibilidade).
+ */
+export const CANONICAL_AGENCY_SITE_HOST = "vitrine.tur.br";
+export const CANONICAL_AGENCY_SITE_HOSTS = [
+  CANONICAL_AGENCY_SITE_HOST,
+  `www.${CANONICAL_AGENCY_SITE_HOST}`,
+];
+
+/** Host técnico compartilhado (prévia interna), sempre noindex. */
+export const TECHNICAL_SHARED_AGENCY_SITE_HOSTS = ["sites.agentesdesonhos.com.br"];
+
 /** Hosts compartilhados que servem vários tenants por slug. */
-export const SHARED_AGENCY_SITE_HOSTS = ["sites.agentesdesonhos.com.br"];
+export const SHARED_AGENCY_SITE_HOSTS = [
+  ...TECHNICAL_SHARED_AGENCY_SITE_HOSTS,
+  ...CANONICAL_AGENCY_SITE_HOSTS,
+];
 
 /** True quando o host atende múltiplos tenants pelo primeiro segmento da URL. */
 export function isSharedAgencySiteHost(hostname: string | null | undefined): boolean {
   const host = normalizeHostname(hostname || "");
   return SHARED_AGENCY_SITE_HOSTS.includes(host);
 }
+
+/** True no host público canônico (`vitrine.tur.br` e `www.`). */
+export function isCanonicalAgencySiteHost(hostname: string | null | undefined): boolean {
+  return CANONICAL_AGENCY_SITE_HOSTS.includes(normalizeHostname(hostname || ""));
+}
+
+/** True apenas no host técnico interno de prévia por slug. */
+export function isTechnicalSharedAgencySiteHost(hostname: string | null | undefined): boolean {
+  return TECHNICAL_SHARED_AGENCY_SITE_HOSTS.includes(normalizeHostname(hostname || ""));
+}
+
 
 /**
  * Primeiros segmentos que pertencem às superfícies do tenant — nunca podem ser
@@ -51,7 +82,33 @@ export const RESERVED_SLUG_SEGMENTS = new Set([
   "sitelab-base",
   "politicasdeprivacidade",
   "termosdeuso",
+  // Segmentos de primeiro nível da própria plataforma (nunca são agências).
+  "agende",
+  "planos",
+  "blog",
+  "admin",
+  "dashboard",
+  "dashboard-start",
+  "dashboard-fornecedor",
+  "comunidade",
+  "trade-connect",
+  "reset-password",
+  "criar-cartao",
+  "ativar-cartao",
+  "captura-cartao",
+  "cadastro",
+  "cadastro-fornecedor",
+  "cadastro-guia",
+  "convite",
+  "formulario",
+  "lp",
+  "c",
+  "desconto30off",
+  "certificate-test",
+  "google-calendar",
+  "suporte",
 ]);
+
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/;
 
@@ -121,4 +178,55 @@ export function tenantRequestHostname(
     return normalizeHostname(resolvedHostname || "") || fallback;
   }
   return fallback;
+}
+
+/* ------------------------- HOST CANÔNICO E INDEXAÇÃO ------------------------ */
+
+/**
+ * URL canônica (sem `www`) para o host público dos Sites ADS.
+ * Retorna `null` quando não há nada a redirecionar — nunca gera loop, pois o
+ * destino já é o apex e ele não satisfaz mais a condição.
+ */
+export function canonicalAgencySiteRedirectUrl(location: {
+  hostname: string;
+  pathname: string;
+  search?: string;
+  hash?: string;
+  protocol?: string;
+}): string | null {
+  const host = normalizeHostname(location.hostname || "");
+  if (host !== `www.${CANONICAL_AGENCY_SITE_HOST}`) return null;
+  const protocol = location.protocol || "https:";
+  return `${protocol}//${CANONICAL_AGENCY_SITE_HOST}${location.pathname || "/"}${
+    location.search || ""
+  }${location.hash || ""}`;
+}
+
+/** Origem canônica usada em `<link rel="canonical">` do host público. */
+export function canonicalAgencySiteOrigin(): string {
+  return `https://${CANONICAL_AGENCY_SITE_HOST}`;
+}
+
+/** Caminhos institucionais públicos (podem ser indexados). */
+const INDEXABLE_INTERNAL_PATHS = [
+  "/",
+  "/ofertas",
+  "/politicasdeprivacidade",
+  "/termosdeuso",
+];
+
+/**
+ * Regra única de indexação das superfícies white label:
+ * - host técnico compartilhado → sempre noindex;
+ * - áreas privadas/técnicas (gestão, área do cliente, documentos por código,
+ *   prévia protegida) → sempre noindex;
+ * - páginas institucionais públicas → indexáveis conforme configuração atual.
+ */
+export function shouldNoindexAgencyPath(
+  browserHostname: string,
+  internalPath: string,
+): boolean {
+  if (isTechnicalSharedAgencySiteHost(browserHostname)) return true;
+  const clean = (internalPath || "/").split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  return !INDEXABLE_INTERNAL_PATHS.includes(clean);
 }
