@@ -83,7 +83,7 @@ describe("vitrine.tur.br como domínio compartilhado canônico dos Sites ADS", (
   });
 
   it("preserva domínios próprios das agências", () => {
-    expect(isPotentialAgencyHost("100limites.tur.br")).toBe(false);
+    expect(isPotentialAgencyHost("100limites.tur.br")).toBe(true);
     expect(isPotentialAgencyHost("faeviagens.com.br")).toBe(true);
     expect(parseAgencySlugLocation("faeviagens.com.br", "/ofertas")).toBeNull();
     expect(agencyRouteBasePath("faeviagens.com.br", "/gestao")).toBe("");
