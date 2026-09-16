@@ -82,7 +82,33 @@ export const RESERVED_SLUG_SEGMENTS = new Set([
   "sitelab-base",
   "politicasdeprivacidade",
   "termosdeuso",
+  // Segmentos de primeiro nível da própria plataforma (nunca são agências).
+  "agende",
+  "planos",
+  "blog",
+  "admin",
+  "dashboard",
+  "dashboard-start",
+  "dashboard-fornecedor",
+  "comunidade",
+  "trade-connect",
+  "reset-password",
+  "criar-cartao",
+  "ativar-cartao",
+  "captura-cartao",
+  "cadastro",
+  "cadastro-fornecedor",
+  "cadastro-guia",
+  "convite",
+  "formulario",
+  "lp",
+  "c",
+  "desconto30off",
+  "certificate-test",
+  "google-calendar",
+  "suporte",
 ]);
+
 
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$/;
 
