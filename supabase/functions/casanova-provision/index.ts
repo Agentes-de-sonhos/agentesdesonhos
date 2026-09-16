@@ -1204,6 +1204,27 @@ Deno.serve(async (req) => {
             record_role: "entrada-30",
           });
         }
+
+        /**
+         * Comissões automáticas: cada produto da venda gera um lançamento de
+         * receita por trigger. Eles são parte legítima do financeiro do cenário
+         * e por isso também são MAPEADOS, garantindo auditoria e cleanup
+         * completo (a entrada manual de 30% continua mapeada acima).
+         */
+        const { data: autoIncomes } = await admin
+          .from("income_entries")
+          .select("id, sale_product_id")
+          .eq("user_id", tenantId)
+          .eq("sale_id", saleId)
+          .not("sale_product_id", "is", null);
+        for (const row of autoIncomes ?? []) {
+          if (!row?.id) continue;
+          mapped.push({
+            table_name: "income_entries",
+            record_id: row.id as string,
+            record_role: `comissao-${row.sale_product_id}`,
+          });
+        }
       }
     }
 
