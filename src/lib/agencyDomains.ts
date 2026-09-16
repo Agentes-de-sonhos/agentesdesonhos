@@ -130,6 +130,22 @@ export async function fetchAgencyDomain(hostname: string): Promise<AgencyDomainI
 }
 
 /**
+ * Resolução do tenant pelo `agency_slug` — usada apenas no host compartilhado
+ * `sites.agentesdesonhos.com.br/{slug}`. A consulta roda no servidor (RPC
+ * SECURITY DEFINER sobre domínios ativos), então o navegador nunca escolhe o
+ * tenant: ele apenas informa o slug, que é validado no banco.
+ */
+export async function fetchAgencyBySlug(slug: string): Promise<AgencyDomainInfo | null> {
+  const value = (slug || "").trim().toLowerCase();
+  if (!value) return null;
+  const { data, error } = await supabase.rpc("get_agency_by_slug" as any, { p_slug: value });
+  if (error) throw error;
+  const info = data as AgencyDomainInfo | null;
+  if (!info || !info.user_id) return null;
+  return info;
+}
+
+/**
  * Paleta completa (3 cores) do tenant no formato aceito por
  * `useAgencyBrandTheme`/`brandThemeVars`. Fonte ÚNICA de conversão
  * AgencyDomainInfo → tema: site público, área do cliente e painel de gestão
