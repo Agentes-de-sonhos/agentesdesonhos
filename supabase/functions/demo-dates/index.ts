@@ -114,13 +114,17 @@ Deno.serve(async (req) => {
       idsByTable.set(r.table_name, ids);
     }
 
-    /** Âncora do delta: data de embarque atual da oportunidade do cenário. */
-    const anchorIds = idsByTable.get("opportunities") ?? idsByTable.get("trips") ?? [];
+    /**
+     * Âncora do delta: a VIAGEM principal do cenário (registro único em
+     * `trips`). O cenário também tem oportunidades secundárias com outras datas,
+     * então usá-las como âncora deslocaria a jornada para a janela errada.
+     */
+    const anchorTable = (idsByTable.get("trips")?.length ?? 0) > 0 ? "trips" : "opportunities";
+    const anchorIds = idsByTable.get(anchorTable) ?? [];
     if (anchorIds.length === 0) {
       await releaseLock();
       return json({ success: true, shifted: false, reason: "no_anchor", today });
     }
-    const anchorTable = idsByTable.get("opportunities") ? "opportunities" : "trips";
     const { data: anchors } = await admin
       .from(anchorTable)
       .select("id, start_date")
