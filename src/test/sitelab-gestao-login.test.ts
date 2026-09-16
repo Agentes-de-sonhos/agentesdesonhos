@@ -17,16 +17,21 @@ const login = readFileSync(
 );
 
 describe("login da gestão — contexto SiteLab vs domínio próprio", () => {
-  it("SiteLab (basePath presente) renderiza o login sem BrowserRouter aninhado", () => {
-    expect(area).toContain("if (mount.base) {");
+  it("SiteLab (router externo) renderiza o login sem BrowserRouter aninhado", () => {
+    expect(area).toContain("if (hasOuterRouter) {");
     expect(area).toMatch(
-      /if \(mount\.base\) \{\s*return <AgencyAdminLogin hostname=\{hostname\} basePath=\{mount\.base\} \/>;\s*\}/,
+      /if \(hasOuterRouter\) \{\s*return <AgencyAdminLogin hostname=\{hostname\} basePath=\{mount\.base\} \/>;\s*\}/,
     );
+    const entry = readFileSync(
+      resolve(process.cwd(), "src/pages/sitelab/SiteLabAdminEntry.tsx"),
+      "utf8",
+    );
+    expect(entry).toContain("hasOuterRouter");
   });
 
-  it("domínio próprio da agência mantém o BrowserRouter exclusivo do login", () => {
+  it("sem router externo o login mantém o seu BrowserRouter, com o prefixo do tenant", () => {
     expect(area).toMatch(
-      /<BrowserRouter>\s*<AgencyAdminLogin hostname=\{hostname\} basePath=\{mount\.base\} \/>\s*<\/BrowserRouter>/,
+      /<BrowserRouter basename=\{mount\.base \|\| undefined\}>\s*<AgencyAdminLogin hostname=\{hostname\} basePath=\{mount\.base\} \/>\s*<\/BrowserRouter>/,
     );
   });
 
