@@ -2860,6 +2860,8 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
   const [compressionInfo, setCompressionInfo] = useState<string>("");
 
   const canAddMore = imageUrls.length < MAX_IMAGES_PER_SERVICE;
+  const thumbKeys = useMemo(() => photoKeys(imageUrls), [imageUrls]);
+
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -2961,7 +2963,8 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
       {hotelMode && <p className="text-sm font-medium">Fotos selecionadas</p>}
       <div className="flex flex-wrap gap-2">
         {imageUrls.map((url, i) => (
-          <div key={i} className="relative inline-block group">
+          <div key={thumbKeys[i]} className="relative inline-block group">
+
             <ResolvedThumb
               imageRef={url}
               placeId={placeId}
@@ -3006,7 +3009,8 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
       <p className="text-sm font-medium">Fotos do serviço <span className="text-muted-foreground font-normal">(opcional — máx. {MAX_IMAGES_PER_SERVICE})</span></p>
       <div className="flex flex-wrap gap-2">
         {imageUrls.map((url, i) => (
-          <div key={i} className="relative inline-block">
+          <div key={thumbKeys[i]} className="relative inline-block">
+
             <ResolvedThumb
               imageRef={url}
               placeId={placeId}
