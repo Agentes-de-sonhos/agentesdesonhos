@@ -1290,6 +1290,7 @@ Deno.serve(async (req) => {
       scenario_id: scenarioId,
       scenario_records: mapped.length,
       scenario_records_added: pending.length,
+      orphan_mappings_removed: orphanMappingsRemoved,
       /** Auditoria da jornada ponta a ponta criada/reaproveitada. */
       journey: {
         ...e2e,
