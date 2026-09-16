@@ -112,8 +112,9 @@ export function ManualServiceDialog({
       const brFormat = /^\d{1,3}(\.\d{3})+(,\d{1,2})?$/;
       const simple = /^\d+([.,]\d{1,2})?$/;
       const valid = brFormat.test(cleaned) || simple.test(cleaned);
-      parsedAmount = valid ? parsePastedCurrency(cleaned) : null;
-      if (parsedAmount == null || !Number.isFinite(parsedAmount) || parsedAmount < 0) {
+      const parsed = valid ? parsePastedCurrency(cleaned) : null;
+      parsedAmount = parsed ?? undefined;
+      if (parsed == null || !Number.isFinite(parsed) || parsed < 0) {
         setFieldError("Informe um valor válido, por exemplo 1.500,00.");
         return;
       }
