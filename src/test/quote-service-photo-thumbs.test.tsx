@@ -5,6 +5,8 @@ import { ResolvedThumb, photoKeys } from "@/components/quote/ServiceForms";
 import { makeGplaceRef } from "@/lib/serviceImages";
 
 const invoke = vi.fn();
+vi.mock("@/lib/pdfText", () => ({ extractPdfText: vi.fn(async () => "") }));
+
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     functions: { invoke: (...args: any[]) => invoke(...args) },
