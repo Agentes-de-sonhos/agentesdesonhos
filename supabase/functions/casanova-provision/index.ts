@@ -1247,6 +1247,39 @@ Deno.serve(async (req) => {
       }
     }
 
+    /**
+     * Poda de vínculos órfãos: mapeamentos cujo registro já não existe mais
+     * (ex.: a operação duplicada removida acima) são apagados do mapa, para que
+     * a auditoria e o cleanup reflitam exatamente o cenário atual.
+     */
+    let orphanMappingsRemoved = 0;
+    const { data: allMappings } = await admin
+      .from("demo_scenario_records")
+      .select("id, table_name, record_id")
+      .eq("scenario_id", scenarioId);
+    const byTable = new Map<string, { id: string; record_id: string }[]>();
+    for (const row of allMappings ?? []) {
+      const list = byTable.get(row.table_name as string) ?? [];
+      list.push({ id: row.id as string, record_id: row.record_id as string });
+      byTable.set(row.table_name as string, list);
+    }
+    for (const [table, rows] of byTable) {
+      if (tenantColumn(table) === undefined) continue;
+      const ids = rows.map((r) => r.record_id);
+      const { data: alive, error: aliveError } = await admin
+        .from(table)
+        .select("id")
+        .in("id", ids);
+      if (aliveError) continue;
+      const aliveSet = new Set((alive ?? []).map((r) => r.id as string));
+      const orphanIds = rows.filter((r) => !aliveSet.has(r.record_id)).map((r) => r.id);
+      if (orphanIds.length > 0) {
+        await admin.from("demo_scenario_records").delete().in("id", orphanIds);
+        orphanMappingsRemoved += orphanIds.length;
+      }
+    }
+
+
     return json({
       success: true,
       created,
