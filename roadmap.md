@@ -14,3 +14,9 @@
 ## Padronização dos botões de importação
 - [x] Padronizar os cabeçalhos de Roteiro, Carteira Digital e Orçamento
 - [x] Atualizar testes focados e validar tipos/build
+
+## Desativacao rota legada /crm
+- [ ] /crm redireciona com replace para /gestao-clientes/funil
+- [ ] remover import lazy de pages/CRM em App.tsx
+- [ ] teste comprovando redirect sem loop/historico extra; ajustar dashboard-container.test
+- [ ] testes focados + typecheck + build; sem publicar
