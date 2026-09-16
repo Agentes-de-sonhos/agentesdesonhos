@@ -204,6 +204,7 @@ const App = () => {
 
     <TooltipProvider>
       <LaunchOverlay />
+      <DemoDatesRefresher />
       <Toaster />
       <Sonner />
       <AppUpdateModal />
