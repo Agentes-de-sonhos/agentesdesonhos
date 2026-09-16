@@ -237,7 +237,9 @@ describe("serviço manual da reserva", () => {
     const payload = onSave.mock.calls[0][0];
     expect(payload.productName).toBe("Hotel sintético");
     expect(payload.startDate).toBeNull();
-    expect(payload.requestedAmount).toBeNull();
+    // Campo de valor nunca preenchido: a propriedade é OMITIDA (o RPC aplica o
+    // padrão). Apagar um valor existente continua enviando o novo valor.
+    expect(payload.requestedAmount).toBeUndefined();
   });
 
   it("não mostra nem envia valores para quem não tem permissão financeira", async () => {
@@ -249,7 +251,9 @@ describe("serviço manual da reserva", () => {
     await user.type(screen.getByLabelText(/Nome do serviço/i), "Transfer sintético");
     await user.click(screen.getByRole("button", { name: /^Salvar/ }));
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
-    expect(onSave.mock.calls[0][0].requestedAmount).toBeNull();
+    // Sem permissão financeira o valor não é enviado em nenhuma hipótese.
+    expect(onSave.mock.calls[0][0].requestedAmount).toBeUndefined();
+    expect("requestedAmount" in onSave.mock.calls[0][0]).toBe(false);
   });
 
   it("mostra o campo de valor para quem tem permissão financeira", async () => {
