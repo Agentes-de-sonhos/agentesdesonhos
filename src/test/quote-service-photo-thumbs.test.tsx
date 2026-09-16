@@ -120,8 +120,9 @@ describe("photoKeys — identidade estável na lista de fotos", () => {
   it("mantém a chave de cada foto após reordenação", () => {
     const before = photoKeys([a, b, c]);
     const after = photoKeys([c, a, b]);
-    expect(after.sort()).toEqual([...before].sort());
+    expect([...after].sort()).toEqual([...before].sort());
     expect(after[0]).toBe(before[2]);
+
   });
 
   it("inclusão preserva as chaves anteriores", () => {
