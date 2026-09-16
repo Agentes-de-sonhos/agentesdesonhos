@@ -14,6 +14,7 @@
  * novo desenvolvimento.
  */
 import { isPotentialAgencyHost, isTechnicalPreviewHost, normalizeHostname } from "./agencyDomains";
+import { agencyRouteBasePath, withAgencyBasePath } from "./agencySlugRouting";
 
 export const AGENCY_HOST_PARAM = "__agency_host";
 
@@ -74,4 +75,18 @@ export function withAgencyContext(path: string, hostname: string, search: string
 export function agencyContextHref(path: string): string {
   if (typeof window === "undefined") return path;
   return withAgencyContext(path, window.location.hostname, window.location.search);
+}
+
+/**
+ * Etapa 4 — href real do navegador para as superfícies do tenant.
+ *
+ * Usar em `<a href>` (navegação com recarga) e em qualquer `window.location`:
+ * além do contexto técnico, aplica o prefixo `/{agency_slug}` quando o site está
+ * no host compartilhado. Links de `<Link to>` continuam usando
+ * `agencyContextHref`, pois o basename do roteador já injeta o prefixo.
+ */
+export function agencySiteHref(path: string): string {
+  if (typeof window === "undefined" || !path.startsWith("/")) return path;
+  const base = agencyRouteBasePath(window.location.hostname, window.location.pathname);
+  return withAgencyBasePath(base, agencyContextHref(path));
 }
