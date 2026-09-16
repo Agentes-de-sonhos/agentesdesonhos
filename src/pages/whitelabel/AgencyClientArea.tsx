@@ -26,6 +26,7 @@ import { agencyWhatsappNumber } from "@/lib/agencyDomains";
 import { groupTrips, highlightTrip, tripIdFromPath, tripPathFor } from "@/lib/clientAreaTrips";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput, clientAreaHostname } from "@/lib/agencyDomains";
+import { tenantRequestHostname } from "@/lib/agencySlugRouting";
 
 interface SessionClient {
   id: string | null;
@@ -54,10 +55,16 @@ export default function AgencyClientArea({
 
   // Fonte de verdade única do hostname contextual: em hosts técnicos o override
   // seguro ?__agency_host define o tenant; em domínios reais é ignorado.
+  // No host COMPARTILHADO (/{agency_slug}) o tenant vem do registro já resolvido
+  // pelo slug no servidor — nunca do hostname digitado no navegador.
   const hostname =
     typeof window === "undefined"
       ? ""
-      : clientAreaHostname(window.location.hostname, window.location.search);
+      : tenantRequestHostname(
+          window.location.hostname,
+          info.hostname,
+          clientAreaHostname(window.location.hostname, window.location.search),
+        );
 
   // Área privada do passageiro: nunca indexada por buscadores.
   useNoindex(true);

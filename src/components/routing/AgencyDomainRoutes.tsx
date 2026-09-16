@@ -6,6 +6,8 @@ import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 import { shouldRenderUnderConstruction, resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
+import { isSharedAgencySiteHost } from "@/lib/agencySlugRouting";
+import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
@@ -71,22 +73,41 @@ function Ofertas({ info }: { info: AgencyDomainInfo }) {
   return <VitrinePublica slugOverride={info.public_slug || info.agency_slug} />;
 }
 
-export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo }) {
+/**
+ * `basePath` é o prefixo do tenant no host compartilhado (`/{agency_slug}`).
+ * Em domínio próprio ele é vazio e nada muda no comportamento atual.
+ */
+export default function AgencyDomainRoutes({
+  info,
+  basePath = "",
+}: {
+  info: AgencyDomainInfo;
+  basePath?: string;
+}) {
+  const base = (basePath || "").replace(/\/+$/, "");
+  /** Caminho interno (sem o prefixo do slug) usado nas decisões de rota. */
+  const internalPath =
+    typeof window === "undefined"
+      ? "/"
+      : base && window.location.pathname.startsWith(base)
+        ? window.location.pathname.slice(base.length) || "/"
+        : window.location.pathname;
+
   /**
    * Painel administrativo white label: decidido ANTES do BrowserRouter, pois a
    * área /gestao usa o workspace de abas internas (cada aba tem o seu próprio
    * router) — dois routers aninhados não são permitidos.
    */
-  if (typeof window !== "undefined" && isAgencyAdminPath(window.location.pathname)) {
+  if (typeof window !== "undefined" && isAgencyAdminPath(internalPath)) {
     return (
       <Suspense fallback={<Fallback />}>
-        <AgencyAdminArea hostname={info.hostname} />
+        <AgencyAdminArea hostname={info.hostname} basePath={base || undefined} />
       </Suspense>
     );
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={base || undefined}>
       <Suspense fallback={<Fallback />}>
         <AgencyDomainRoutesInner info={info} />
       </Suspense>
@@ -95,6 +116,13 @@ export default function AgencyDomainRoutes({ info }: { info: AgencyDomainInfo })
 }
 
 function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
+  /**
+   * Host compartilhado é sempre prévia: noindex/nofollow em todas as páginas.
+   */
+  useNoindex(
+    typeof window !== "undefined" && isSharedAgencySiteHost(window.location.hostname),
+  );
+
   /**
    * O status governa a home. O bypass explícito de revisão (`?__agency_preview=1`)
    * só vale no hostname técnico de preview do Lovable — nunca no domínio real da

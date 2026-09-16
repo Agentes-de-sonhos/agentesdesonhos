@@ -59,7 +59,12 @@ export default function SiteLabAdminEntry() {
     <div className="min-h-screen bg-white">
       <SiteLabTopBar model={model} view="admin" onExit={exit} useAnchors />
       <Suspense fallback={<SiteLabFallback />}>
-        <AgencyAdminArea hostname={model.adminHostname} basePath={SITELAB_BASE_PATH} />
+        <AgencyAdminArea
+          hostname={model.adminHostname}
+          basePath={SITELAB_BASE_PATH}
+          /* SiteLab vive dentro do router principal do App. */
+          hasOuterRouter
+        />
       </Suspense>
     </div>
   );

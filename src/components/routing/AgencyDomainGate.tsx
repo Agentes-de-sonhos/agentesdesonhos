@@ -1,20 +1,58 @@
 import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { agencyHostFromLocation, fetchAgencyDomain } from "@/lib/agencyDomains";
+import {
+  agencyHostFromLocation,
+  fetchAgencyBySlug,
+  fetchAgencyDomain,
+} from "@/lib/agencyDomains";
+import { isSharedAgencySiteHost, parseAgencySlugLocation } from "@/lib/agencySlugRouting";
+import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
+
+const Spinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  </div>
+);
+
+/** Host compartilhado sem slug válido: nada é revelado sobre os tenants. */
+function SharedHostIndex() {
+  useNoindex(true);
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6 text-center">
+      <div className="max-w-md space-y-2">
+        <h1 className="text-xl font-semibold text-foreground">Endereço incompleto</h1>
+        <p className="text-sm text-muted-foreground">
+          Use o link completo enviado pela sua agência de viagens.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 /**
  * When the current hostname belongs to an agency (custom domain), renders the
  * white-label agency site instead of the platform app. Otherwise renders the
  * platform routes untouched — platform hosts never even hit the network.
+ *
+ * Etapa 4: no host COMPARTILHADO `sites.agentesdesonhos.com.br/{agency_slug}` o
+ * tenant vem do slug (resolvido no servidor) e todas as rotas passam a viver sob
+ * o prefixo `/{slug}`. Domínios próprios continuam sem prefixo.
  */
 export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
-  const host =
+  const browserHost = typeof window === "undefined" ? "" : window.location.hostname;
+  const shared = isSharedAgencySiteHost(browserHost);
+  const slugLocation =
     typeof window === "undefined"
       ? null
-      : agencyHostFromLocation(window.location.hostname, window.location.search);
+      : parseAgencySlugLocation(browserHost, window.location.pathname);
+
+  const host =
+    typeof window === "undefined" || shared
+      ? null
+      : agencyHostFromLocation(browserHost, window.location.search);
 
   const { data, isLoading } = useQuery({
     queryKey: ["agency-domain", host],
@@ -24,23 +62,31 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     queryFn: () => fetchAgencyDomain(host as string),
   });
 
-  if (host && isLoading) {
+  const slug = slugLocation?.slug ?? null;
+  const { data: bySlug, isLoading: slugLoading } = useQuery({
+    queryKey: ["agency-slug", slug],
+    enabled: !!slug,
+    staleTime: 30 * 60 * 1000,
+    retry: 1,
+    queryFn: () => fetchAgencyBySlug(slug as string),
+  });
+
+  if (shared) {
+    if (!slug) return <SharedHostIndex />;
+    if (slugLoading) return <Spinner />;
+    if (!bySlug) return <SharedHostIndex />;
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Suspense fallback={<Spinner />}>
+        <AgencyDomainRoutes info={bySlug} basePath={slugLocation!.basePath} />
+      </Suspense>
     );
   }
 
+  if (host && isLoading) return <Spinner />;
+
   if (host && data) {
     return (
-      <Suspense
-        fallback={
-          <div className="min-h-screen flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        }
-      >
+      <Suspense fallback={<Spinner />}>
         <AgencyDomainRoutes info={data} />
       </Suspense>
     );
