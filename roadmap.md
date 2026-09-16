@@ -20,3 +20,8 @@
 - [x] remover import lazy de pages/CRM em App.tsx
 - [x] teste comprovando redirect sem loop/historico extra; ajustar dashboard-container.test
 - [x] testes focados + typecheck + build; sem publicar
+
+## Aba Meus Modelos em Criar Roteiro
+- [ ] terceira opcao na mesma barra abrindo Meus Projetos > Modelos > Roteiros
+- [ ] remover TabsContent morto de templates
+- [ ] testes focados + typecheck + build; sem publicar

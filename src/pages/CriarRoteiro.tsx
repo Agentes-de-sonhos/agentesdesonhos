@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
 import { Wand2, ArrowLeft, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
-import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
+
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,6 +92,7 @@ export default function CriarRoteiro() {
     : undefined;
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"create" | "list" | "templates">("create");
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
@@ -801,9 +802,6 @@ export default function CriarRoteiro() {
                   </div>
                 );
               })()}
-            </TabsContent>
-            <TabsContent value="templates" className="mt-5">
-              <TemplatesGrid />
             </TabsContent>
           </Tabs>
         ) : (
