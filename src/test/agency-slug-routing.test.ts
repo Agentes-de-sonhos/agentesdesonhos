@@ -151,9 +151,9 @@ describe("Roteador e resolução segura (código)", () => {
     expect(routes).toContain("basePath");
   });
 
-  it("host compartilhado é sempre noindex/nofollow", () => {
+  it("host técnico compartilhado é sempre noindex/nofollow", () => {
     expect(routes).toContain("useNoindex");
-    expect(routes).toContain("isSharedAgencySiteHost");
+    expect(routes).toContain("shouldNoindexAgencyPath");
     expect(gate).toContain("useNoindex");
   });
 
