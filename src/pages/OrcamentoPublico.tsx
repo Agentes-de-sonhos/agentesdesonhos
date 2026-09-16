@@ -1265,12 +1265,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     }
   }, [quote?.services]);
 
-  // Auto-redirect legacy vitrine.tur.br/orcamento/* links to the new domain
-  // so any cached or previously shared link lands on the correct host.
+  // Links LEGADOS `vitrine.tur.br/orcamento/:token` (sem slug de agência) vão
+  // para o domínio especializado. As URLs amigáveis do host compartilhado
+  // (`/{agency_slug}/orcamento/:codigo`) NUNCA são redirecionadas: elas são
+  // renderizadas no próprio host, preservando o contexto do tenant.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const host = window.location.hostname;
-    if (host === "vitrine.tur.br" || host === "www.vitrine.tur.br") {
+    const isSharedHost = host === "vitrine.tur.br" || host === "www.vitrine.tur.br";
+    const isLegacyRootPath = /^\/orcamento\/[^/]+\/?$/.test(window.location.pathname);
+    if (isSharedHost && isLegacyRootPath) {
       const target = `${ORCAMENTO_DOMAIN}${window.location.pathname}${window.location.search}${window.location.hash}`;
       window.location.replace(target);
     }
