@@ -59,8 +59,10 @@ describe("rota legada /crm desativada com segurança", () => {
         </Routes>
       </MemoryRouter>
     );
-    // O navegador nunca "para" em /crm: apenas o destino é registrado.
-    expect(seen.filter((p) => p === "/crm")).toHaveLength(0);
-    expect(seen).toContain("/gestao-clientes/funil");
+    // /crm aparece uma única vez (a entrada inicial) e é substituída de imediato
+    // pelo destino: sem renderização estável da página antiga e sem loop.
+    expect(seen[0]).toBe("/crm");
+    expect(seen.filter((p) => p === "/crm")).toHaveLength(1);
+    expect(seen[seen.length - 1]).toBe("/gestao-clientes/funil");
   });
 });
