@@ -1,58 +1,37 @@
-# Desativação segura da rota legada /crm
+# Problema 14 — Aba "Meus Modelos" na tela Criar Roteiro
 
-## 1. Referências reais encontradas
-- `src/App.tsx:70` — `const CRM = lazy(() => import("./pages/CRM"))`.
-- `src/App.tsx:346` — `<Route path="/crm" element={<CRM />} />`.
-- `src/pages/CRM.tsx` — única página que usa a rota; monta `KanbanBoard` + `ClientsManager` em abas próprias, sem o provedor de maximização.
-- `src/lib/routePermissions.ts:39` — `{ prefix: '/crm', any: ['clients.view'] }`.
-- `src/workspace/routeTitle.ts:36` — título `"/crm": "CRM"` (usado para nomear abas internas do workspace).
-- Testes: `src/test/dashboard-container.test.ts:45` valida o container de `src/pages/CRM.tsx`; `src/test/app-version-context.test.ts:55` usa a URL `/crm` apenas como cenário de navegação; `src/test/workspace-tabs.test.ts` e `workspace-home-navigation.test.ts` usam `/crm` como caminho genérico de abas.
-- Documentação: `docs/base-conhecimento-agentes-de-sonhos/modulos/crm.md`, `docs/central-de-ajuda.../03-MAPA-DE-MODULOS.md` e a base RAG (`rag/BASE-RAG.jsonl`, artigos `crm-visao-geral` e `crm-primeiros-passos`) ainda dizem "Acesso em /crm".
-- Não há nenhum link de menu, botão, redirect, notificação, e-mail, Edge Function ou link público apontando para `/crm`. Menus usam `/gestao-clientes/*` (`AppSidebar`/`MobileDrawerMenu` via `directNavItems.ts:27`, `MobileSidebar.tsx:177-181`, `BottomNavBar.tsx:60-64`).
+## Status: persiste (remoção intencional confirmada)
 
-## 2. Destino equivalente correto
-`/gestao-clientes/funil` (aba "Oportunidades" da tela atual). Não existe `/gestao-clientes/oportunidades`; as abas reais são `funil`, `operacoes`, `clientes`, `dashboard`, `metas` (`GestaoClientes.tsx:58`). `/gestao-clientes/funil` também é o destino do menu principal e o default quando nenhuma aba é reconhecida.
+## Evidências
+- A tela de criação é `src/pages/CriarRoteiro.tsx`. A barra de abas tem hoje apenas **Novo Roteiro** e **Meus Roteiros** (esta última abre "Meus Projetos" em nova janela interna). Não existe mais gatilho para modelos, em desktop nem mobile (é a mesma barra única).
+- O conteúdo da aba ainda existe no código (`<TabsContent value="templates"><TemplatesGrid /></TabsContent>`) e o estado aceita `"templates"`, mas ficou **inalcançável** por não haver botão.
+- A remoção foi intencional: o teste `src/test/criacao-nova-aba-cabecalhos.test.ts` afirma explicitamente "não exibe mais a aba Meus Modelos". Não foi perda de refatoração.
+- Os modelos continuam existindo e preservados: tabelas `itinerary_templates` / `itinerary_template_activities`, hook `useItineraryTemplates`, componente `TemplatesGrid`, página `ModelosRoteiros` em `/ferramentas-ia/modelos-roteiros` e aba "Modelos" em Meus Projetos (`?tab=modelos`, disponível também no plano Start e no painel das agências).
+- Salvar como modelo continua funcionando na própria tela (`SaveAsTemplateDialog`).
 
-## 3. Reuso de componentes
-- `KanbanBoard` é compartilhado com `/gestao-clientes` — deve permanecer.
-- `ClientsManager` (`src/components/crm/ClientsManager.tsx`) é importado somente por `src/pages/CRM.tsx`. A tela atual usa `ClientsModule`. Ou seja, ficaria órfão, mas é o único candidato a remoção futura — e a recomendação é não apagá-lo nesta rodada.
-- `src/pages/CRM.tsx` não é importado por nenhum outro fluxo além da rota `/crm`.
-
-## 4. Comparação das alternativas
-- **Remover a rota (404):** quebra favoritos e abas internas salvas; usuário cai no NotFound sem explicação. Não recomendado.
-- **Redirecionar para o CRM atual (recomendado):** substituir o elemento da rota por `<Navigate to="/gestao-clientes/funil" replace />`. Favoritos e links antigos continuam funcionando e levam à tela certa; nenhuma permissão nova é exigida (o guard já protege o destino por `opportunities.view`). Custo mínimo e reversível.
-- **Manter arquivo e bloquear acesso:** mesmo efeito prático do 404, com código morto; sem vantagem.
-
-## 5. O que sai agora e o que fica
-Sai agora:
-- O `element={<CRM />}` da rota `/crm`, trocado por redirecionamento.
-- O import lazy de `./pages/CRM` em `App.tsx`.
-- A entrada `/crm` de `routePermissions.ts` (o destino já tem regra própria).
-
-Fica (ainda compartilhado ou de baixo risco):
-- `KanbanBoard`, `KanbanMaximizeContext`, `KanbanMaximizeSurface`, `KanbanToolbarSlot` — usados pela tela atual.
-- `src/pages/CRM.tsx` e `ClientsManager.tsx` — conservados um ciclo como reserva; remover só depois de o redirecionamento rodar em produção sem reclamações.
-- Título `"/crm"` em `routeTitle.ts` — mantido para nomear abas antigas já salvas antes do redirecionamento.
-- Documentação e base RAG: atualizar o texto de acesso de `/crm` para `/gestao-clientes/funil` (edição textual, sem mexer em IDs de artigos).
-
-## 6. Testes e critérios de aceite
-Testes:
-- Novo teste de rota: renderizar `/crm` no router e confirmar redirecionamento para `/gestao-clientes/funil` com `replace` (sem entrada extra no histórico).
-- Teste de referência: `App.tsx` não importa mais `pages/CRM` e a rota não renderiza a página antiga.
-- Ajustar `src/test/dashboard-container.test.ts` para não exigir mais o container em `src/pages/CRM.tsx`.
-- Regressão: `workspace-tabs`, `workspace-home-navigation`, `app-version-context`, `routePermissions` e `crm-toolbar-layout`.
-- Rodar suíte afetada, typecheck e build. Sem migração, sem publicação.
-
-Aceite:
-- Abrir `/crm` leva direto a Oportunidades da tela atual, com o botão Maximizar funcionando.
-- Colaborador sem `opportunities.view` vê a tela de permissão do destino, não erro.
-- Voltar no navegador não volta para `/crm` em loop.
-- `/gestao-clientes/*` inalterada.
-
-## 7. Riscos e esforço
-Riscos baixos: o único ponto de atenção é loop de redirecionamento se o destino for digitado errado, e abas internas salvas cujo título "CRM" passa a abrir Oportunidades (comportamento desejado). Sem impacto em modais, toasts, responsividade ou atalhos.
-
-Esforço: muito baixo — poucas linhas em `App.tsx`/`routePermissions.ts`, um teste novo e um ajuste de teste existente, mais revisão textual da documentação.
+## Impacto atual
+Baixo/médio: nada foi perdido, mas o agente precisa sair da tela de criação para consultar ou aplicar um modelo salvo — passo extra num fluxo frequente. Também há código morto (aba `templates`) que confunde manutenção futura.
 
 ## Recomendação
-Descontinuar o acesso a `/crm` por redirecionamento permanente interno para `/gestao-clientes/funil`, mantendo os arquivos por um ciclo antes de excluí-los.
+Não reintroduzir uma terceira aba (a barra foi simplificada de propósito). Em vez disso, adicionar um **atalho discreto "Meus Modelos"** no mesmo cabeçalho, ao lado do bloco de importação, abrindo a biblioteca de modelos em nova janela interna — mesmo padrão já usado por "Meus Roteiros". E remover o resto da aba morta.
+
+## Plano curto
+1. Em `src/pages/CriarRoteiro.tsx`, acrescentar botão/atalho "Meus Modelos" no cabeçalho do card de criação, usando `useAdminNav` + `useOpenInternalWindow` para abrir a aba Modelos de Meus Projetos (funciona igual na plataforma, no SiteLab e nos sites das agências).
+2. Remover o `TabsContent value="templates"` inalcançável e o valor `"templates"` do estado, mantendo `TemplatesGrid` intacto (segue em uso em Meus Projetos e na Biblioteca de Modelos).
+3. Manter `SaveAsTemplateDialog`, importação de roteiro, duplicação, publicação e limites de plano sem alteração.
+4. Atualizar o teste que exige a ausência da aba, para exigir a ausência da **aba** e a presença do **atalho**.
+
+## Dependências verificadas
+- Roteiro V2 / público (`RoteiroPublicoV2`) não usa modelos: sem impacto.
+- Importação (`ImportItineraryWizard`) e duplicação são independentes dos modelos.
+- Permissões: `/ferramentas-ia/modelos-roteiros` exige `itineraries.view`; o atalho deve respeitar a mesma condição de visibilidade usada hoje pelas listas.
+- Plano: a aba Modelos de Meus Projetos está liberada inclusive no Start, então o atalho não cria bloqueio novo.
+- Responsividade: o cabeçalho já usa layout que empilha no mobile; o atalho entra nesse mesmo bloco.
+
+## Testes e critérios de aceite
+- Teste de componente/arquivo: atalho "Meus Modelos" presente no cabeçalho; nenhuma terceira aba na barra; ausência do `TabsContent` de modelos.
+- Regressão: barra continua com Novo Roteiro e Meus Roteiros; "Meus Roteiros" continua abrindo em nova janela; wizard de importação e salvar-como-modelo continuam ligados.
+- Aceite: da tela Criar Roteiro é possível alcançar os modelos salvos em um clique, sem perder o formulário em andamento, e nenhum modelo existente é afetado.
+
+## Esforço
+Pequeno — um arquivo de interface e um arquivo de teste; sem migração e sem mudança de dados.
