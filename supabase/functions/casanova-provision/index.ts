@@ -14,6 +14,7 @@ import {
   SCENARIO_ITINERARY,
   SCENARIO_SERVICES,
   SCENARIO_TRAVELERS,
+  saleProductType,
   servicesTotal,
   TRIP_ADULTS,
   TRIP_CHILDREN,
