@@ -10,3 +10,4 @@
 - [SiteLab Base](mem://features/whitelabel/sitelab-base) — Laboratório privado /sitelab-base e contrato de paleta primária/secundária/terciária
 - [Casa Nova Tur](mem://features/whitelabel/casa-nova-tur-tenant) — Tenant white label isolado casanovatur.demo.local, tema verde/mint e provisionamento idempotente
 - [White-label Surface Links](mem://tech/whitelabel-surface-context-links) — Site, Área do Cliente e Gestão como superfícies do mesmo tenant; preservação de __agency_host em hosts técnicos
+- [Vitrine shared host](mem://features/whitelabel/vitrine-shared-host) — vitrine.tur.br/{agency_slug} canônico para Sites ADS, fallback para Vitrine de Ofertas
