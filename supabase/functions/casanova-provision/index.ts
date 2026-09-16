@@ -1044,7 +1044,7 @@ Deno.serve(async (req) => {
           const row = {
             sale_id: saleId,
             user_id: tenantId,
-            product_type: s.kind,
+            product_type: saleProductType(s.kind),
             description: s.name,
             supplier_name: s.supplier,
             sale_price: s.amount,
