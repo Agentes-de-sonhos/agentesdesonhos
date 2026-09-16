@@ -26,6 +26,7 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { WorkspaceGate } from "@/workspace/WorkspaceGate";
 import { AppUpdateModal } from "./components/common/AppUpdateModal";
 import { AgencyDomainGate } from "@/components/routing/AgencyDomainGate";
+import { DemoDatesRefresher } from "@/components/demo/DemoDatesRefresher";
 
 // ── Lazy-loaded pages ──────────────────────────────────────
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -203,6 +204,7 @@ const App = () => {
 
     <TooltipProvider>
       <LaunchOverlay />
+      <DemoDatesRefresher />
       <Toaster />
       <Sonner />
       <AppUpdateModal />
