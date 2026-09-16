@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
+import { canonicalAgencySiteRedirectUrl } from "@/lib/agencySlugRouting";
 
 // React can crash with DOM NotFoundError when browser translation tools mutate
 // text nodes that React later tries to remove. The platform is already PT-BR,
@@ -18,6 +19,20 @@ import "./index.css";
   const root = document.getElementById("root");
   root?.setAttribute("translate", "no");
   root?.classList.add("notranslate");
+})();
+
+// =============================================================================
+// Host canônico dos Sites ADS
+// =============================================================================
+// `vitrine.tur.br` é o endereço canônico. `www.vitrine.tur.br` continua
+// funcionando e é redirecionado para a MESMA URL sem `www` antes do React
+// montar. O destino não satisfaz mais a condição, então não há loop; nenhuma
+// outra host é afetada e a sessão da plataforma vive em outro domínio.
+// =============================================================================
+(() => {
+  if (typeof window === "undefined") return;
+  const target = canonicalAgencySiteRedirectUrl(window.location);
+  if (target) window.location.replace(target);
 })();
 
 // =============================================================================
