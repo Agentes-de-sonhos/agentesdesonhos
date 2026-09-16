@@ -25,3 +25,5 @@
 - [x] terceira opcao na mesma barra abrindo Meus Projetos > Modelos > Roteiros
 - [x] remover TabsContent morto de templates
 - [x] testes focados + typecheck + build; sem publicar
+
+- [x] Miniaturas de fotos no editor de serviços do orçamento: fim do piscar a cada digitação (ResolvedThumb em escopo de módulo, chaves estáveis por referência, resolução síncrona de URLs/cache da sessão, "Indisponível" só após falha real).
