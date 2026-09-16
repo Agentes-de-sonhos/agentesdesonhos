@@ -1,4 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  cleanupPlan,
+  newMappings,
+  SCENARIO_SLUG,
+  type ScenarioRecord,
+} from "./scenario.ts";
 
 /**
  * Provisionamento IDEMPOTENTE do tenant de prévia Casa Nova Tur.
