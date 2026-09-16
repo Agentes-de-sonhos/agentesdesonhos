@@ -509,14 +509,40 @@ Deno.serve(async (req) => {
       },
     ];
     const operationIds: Record<string, string> = {};
+    /**
+     * O trigger `auto_create_operation_on_close` cria uma operação automática
+     * quando a oportunidade entra em estágio fechado. Para não gerar uma
+     * operação duplicada e vazia, o cenário ADOTA essa operação automática
+     * (atualizando-a com os dados completos) e remove apenas as duplicatas
+     * comprovadas: mesma agência, mesma oportunidade do cenário e sem nenhum
+     * serviço vinculado. Dados manuais nunca entram nesse critério.
+     */
     for (const op of demoOperations) {
-      const { data: existing } = await admin
+      const linkedOpportunityId = opportunityIds[op.title] ?? null;
+      const byTitleQuery = admin
         .from("operations")
-        .select("id")
+        .select("id, created_at")
         .eq("user_id", tenantId)
         .eq("title", op.title)
-        .maybeSingle();
-      const payload = {
+        .order("created_at", { ascending: true });
+      const byOpportunityQuery = linkedOpportunityId
+        ? admin
+            .from("operations")
+            .select("id, created_at")
+            .eq("user_id", tenantId)
+            .eq("opportunity_id", linkedOpportunityId)
+            .order("created_at", { ascending: true })
+        : null;
+      const [{ data: byTitle }, byOpportunity] = await Promise.all([
+        byTitleQuery,
+        byOpportunityQuery ?? Promise.resolve({ data: [] as { id: string }[] }),
+      ]);
+      const candidateIds: string[] = [];
+      for (const row of [...(byTitle ?? []), ...((byOpportunity?.data ?? []) as { id: string }[])]) {
+        if (row?.id && !candidateIds.includes(row.id)) candidateIds.push(row.id);
+      }
+
+      const payload: Record<string, unknown> = {
         user_id: tenantId,
         client_id: clientIds[op.client],
         title: op.title,
@@ -528,10 +554,34 @@ Deno.serve(async (req) => {
         travel_end_date: op.end,
         notes: "Cenário demonstrativo — dados fictícios.",
       };
-      if (existing?.id) {
-        await admin.from("operations").update(payload).eq("id", existing.id);
-        operationIds[op.title] = existing.id;
-        mapped.push({ table_name: "operations", record_id: existing.id, record_role: op.title });
+      if (linkedOpportunityId) payload.opportunity_id = linkedOpportunityId;
+
+      /** A operação com serviços (ou a mais antiga) é a canônica do cenário. */
+      let chosenId: string | null = null;
+      if (candidateIds.length > 0) {
+        const { data: withServices } = await admin
+          .from("operation_services")
+          .select("operation_id")
+          .in("operation_id", candidateIds);
+        const served = new Set((withServices ?? []).map((r) => r.operation_id as string));
+        chosenId = candidateIds.find((id) => served.has(id)) ?? candidateIds[0];
+
+        /** Duplicatas demonstrativas: sem serviços e ligadas à mesma oportunidade. */
+        const duplicates = candidateIds.filter((id) => id !== chosenId && !served.has(id));
+        if (duplicates.length > 0 && linkedOpportunityId) {
+          await admin
+            .from("operations")
+            .delete()
+            .in("id", duplicates)
+            .eq("user_id", tenantId)
+            .eq("opportunity_id", linkedOpportunityId);
+        }
+      }
+
+      if (chosenId) {
+        await admin.from("operations").update(payload).eq("id", chosenId).eq("user_id", tenantId);
+        operationIds[op.title] = chosenId;
+        mapped.push({ table_name: "operations", record_id: chosenId, record_role: op.title });
         continue;
       }
       const { data: insertedOp, error } = await admin
@@ -1154,6 +1204,27 @@ Deno.serve(async (req) => {
             record_role: "entrada-30",
           });
         }
+
+        /**
+         * Comissões automáticas: cada produto da venda gera um lançamento de
+         * receita por trigger. Eles são parte legítima do financeiro do cenário
+         * e por isso também são MAPEADOS, garantindo auditoria e cleanup
+         * completo (a entrada manual de 30% continua mapeada acima).
+         */
+        const { data: autoIncomes } = await admin
+          .from("income_entries")
+          .select("id, sale_product_id")
+          .eq("user_id", tenantId)
+          .eq("sale_id", saleId)
+          .not("sale_product_id", "is", null);
+        for (const row of autoIncomes ?? []) {
+          if (!row?.id) continue;
+          mapped.push({
+            table_name: "income_entries",
+            record_id: row.id as string,
+            record_role: `comissao-${row.sale_product_id}`,
+          });
+        }
       }
     }
 
@@ -1176,6 +1247,39 @@ Deno.serve(async (req) => {
       }
     }
 
+    /**
+     * Poda de vínculos órfãos: mapeamentos cujo registro já não existe mais
+     * (ex.: a operação duplicada removida acima) são apagados do mapa, para que
+     * a auditoria e o cleanup reflitam exatamente o cenário atual.
+     */
+    let orphanMappingsRemoved = 0;
+    const { data: allMappings } = await admin
+      .from("demo_scenario_records")
+      .select("id, table_name, record_id")
+      .eq("scenario_id", scenarioId);
+    const byTable = new Map<string, { id: string; record_id: string }[]>();
+    for (const row of allMappings ?? []) {
+      const list = byTable.get(row.table_name as string) ?? [];
+      list.push({ id: row.id as string, record_id: row.record_id as string });
+      byTable.set(row.table_name as string, list);
+    }
+    for (const [table, rows] of byTable) {
+      if (tenantColumn(table) === undefined) continue;
+      const ids = rows.map((r) => r.record_id);
+      const { data: alive, error: aliveError } = await admin
+        .from(table)
+        .select("id")
+        .in("id", ids);
+      if (aliveError) continue;
+      const aliveSet = new Set((alive ?? []).map((r) => r.id as string));
+      const orphanIds = rows.filter((r) => !aliveSet.has(r.record_id)).map((r) => r.id);
+      if (orphanIds.length > 0) {
+        await admin.from("demo_scenario_records").delete().in("id", orphanIds);
+        orphanMappingsRemoved += orphanIds.length;
+      }
+    }
+
+
     return json({
       success: true,
       created,
@@ -1186,6 +1290,7 @@ Deno.serve(async (req) => {
       scenario_id: scenarioId,
       scenario_records: mapped.length,
       scenario_records_added: pending.length,
+      orphan_mappings_removed: orphanMappingsRemoved,
       /** Auditoria da jornada ponta a ponta criada/reaproveitada. */
       journey: {
         ...e2e,
