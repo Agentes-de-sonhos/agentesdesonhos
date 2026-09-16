@@ -104,14 +104,7 @@ Deno.serve(async (req) => {
       expected.length >= 24 &&
       providedToken.length === expected.length &&
       providedToken === expected;
-    /**
-     * Tokens aceitos: o de bootstrap original e o de ATIVAÇÃO (temporário,
-     * usado apenas na ativação autorizada da prévia; pode ser removido dos
-     * secrets sem afetar nada — sem o secret o caminho fica desligado).
-     */
-    const isTokenCall =
-      tokenMatches((Deno.env.get("CASANOVA_PROVISION_TOKEN") || "").trim()) ||
-      tokenMatches((Deno.env.get("CASANOVA_ACTIVATION_TOKEN") || "").trim());
+    const isTokenCall = tokenMatches((Deno.env.get("CASANOVA_PROVISION_TOKEN") || "").trim());
 
     if (!isServiceCall && !isTokenCall) {
       if (!authHeader) return json({ error: "Não autorizado" }, 401);
