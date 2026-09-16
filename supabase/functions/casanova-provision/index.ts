@@ -1086,13 +1086,22 @@ Deno.serve(async (req) => {
             mapped.push({ table_name: "sale_products", record_id: id, record_role: s.key });
         }
 
-        /** Recebimento parcial: entrada de 30%. */
-        const { data: foundIncome } = await admin
+        /**
+         * Recebimento parcial: entrada de 30%.
+         * A venda gera automaticamente vários lançamentos de comissão, então a
+         * busca precisa apontar exatamente para a entrada manual do cenário —
+         * caso contrário a reexecução duplicaria o recebimento.
+         */
+        const { data: foundIncomeRows } = await admin
           .from("income_entries")
           .select("id")
           .eq("user_id", tenantId)
           .eq("sale_id", saleId)
-          .maybeSingle();
+          .eq("source", "manual")
+          .eq("notes", "Entrada de demonstração (30%) — sem cobrança real.")
+          .order("created_at", { ascending: true })
+          .limit(1);
+        const foundIncome = foundIncomeRows?.[0];
         if (!foundIncome?.id && payment.paid > 0) {
           const { data: income } = await admin
             .from("income_entries")
