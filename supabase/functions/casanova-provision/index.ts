@@ -3,8 +3,27 @@ import {
   cleanupPlan,
   newMappings,
   SCENARIO_SLUG,
+  tenantColumn,
   type ScenarioRecord,
 } from "./scenario.ts";
+import {
+  offsetDate,
+  paymentSummary,
+  publicSafeTraveler,
+  SCENARIO_CLIENT,
+  SCENARIO_ITINERARY,
+  SCENARIO_SERVICES,
+  SCENARIO_TRAVELERS,
+  servicesTotal,
+  TRIP_ADULTS,
+  TRIP_CHILDREN,
+  TRIP_DAYS,
+  TRIP_DESTINATION,
+  TRIP_NIGHTS,
+  TRIP_START_OFFSET,
+  TRIP_TITLE,
+  TRIP_TOTAL,
+} from "./scenario-data.ts";
 
 /**
  * Provisionamento IDEMPOTENTE do tenant de prévia Casa Nova Tur.
@@ -158,11 +177,12 @@ Deno.serve(async (req) => {
           .select("table_name, record_id")
           .eq("scenario_id", scenario.id);
         for (const step of cleanupPlan((records ?? []) as ScenarioRecord[])) {
-          const { error } = await admin
-            .from(step.table)
-            .delete()
-            .eq("user_id", id)
-            .in("id", step.ids);
+          const col = tenantColumn(step.table);
+          let query = admin.from(step.table).delete().in("id", step.ids);
+          // Defesa em profundidade: quando a tabela tem coluna de tenant, o
+          // delete também é filtrado por ela.
+          if (col) query = query.eq(col, id);
+          const { error } = await query;
           if (error) {
             console.error("casanova-provision cleanup", step.table, error.message);
             return json({ error: "Falha ao remover os dados do cenário" }, 400);
@@ -298,8 +318,18 @@ Deno.serve(async (req) => {
     const mapped: ScenarioRecord[] = [];
 
     /* ------------------ Dados FICTÍCIOS, isolados neste tenant ------------------ */
+    // Normalização das versões anteriores do cenário: renomeia em vez de criar
+    // um segundo cliente (idempotência entre execuções).
+    for (const legacy of SCENARIO_CLIENT.legacyNames) {
+      await admin
+        .from("clients")
+        .update({ name: SCENARIO_CLIENT.name })
+        .eq("user_id", tenantId)
+        .eq("name", legacy);
+    }
+
     const demoClients = [
-      { name: "Ana e Roberto Martins", city: "Novo Hamburgo", status: "em_negociacao" },
+      { name: SCENARIO_CLIENT.name, city: SCENARIO_CLIENT.city, status: SCENARIO_CLIENT.status },
       { name: "Juliana Ferreira", city: "Porto Alegre", status: "lead" },
       { name: "Carlos Almeida", city: "São Leopoldo", status: "cliente_ativo" },
       { name: "Mariana Souza", city: "Canoas", status: "em_negociacao" },
@@ -336,16 +366,28 @@ Deno.serve(async (req) => {
       mapped.push({ table_name: "clients", record_id: inserted.id, record_role: c.name });
     }
 
+    /** Datas da viagem principal do cenário (8 dias / 7 noites). */
+    const tripStart = futureDate(TRIP_START_OFFSET);
+    const tripEnd = futureDate(TRIP_START_OFFSET + TRIP_NIGHTS);
+    const tripStartDate = new Date(`${tripStart}T00:00:00Z`);
+
+    // Normaliza a oportunidade das versões anteriores do cenário.
+    await admin
+      .from("opportunities")
+      .update({ destination: TRIP_TITLE })
+      .eq("user_id", tenantId)
+      .eq("destination", "Orlando em família");
+
     const demoOpportunities = [
       {
-        client: "Ana e Roberto Martins",
-        destination: "Orlando em família",
-        stage: "new_contact",
-        adults: 2,
-        children: 2,
-        value: 38000,
-        start: futureDate(150),
-        end: futureDate(162),
+        client: SCENARIO_CLIENT.name,
+        destination: TRIP_TITLE,
+        stage: "closed",
+        adults: TRIP_ADULTS,
+        children: TRIP_CHILDREN,
+        value: TRIP_TOTAL,
+        start: tripStart,
+        end: tripEnd,
       },
       {
         client: "Juliana Ferreira",
@@ -368,6 +410,7 @@ Deno.serve(async (req) => {
         end: futureDate(128),
       },
     ];
+    const opportunityIds: Record<string, string> = {};
     for (const o of demoOpportunities) {
       const clientId = clientIds[o.client];
       const { data: existing } = await admin
@@ -376,7 +419,23 @@ Deno.serve(async (req) => {
         .eq("user_id", tenantId)
         .eq("destination", o.destination)
         .maybeSingle();
+      const payload = {
+        user_id: tenantId,
+        client_id: clientId,
+        destination: o.destination,
+        stage: o.stage,
+        adults_count: o.adults,
+        children_count: o.children,
+        passengers_count: o.adults + o.children,
+        estimated_value: o.value,
+        start_date: o.start,
+        end_date: o.end,
+        notes: "Cenário demonstrativo — dados fictícios.",
+      };
       if (existing?.id) {
+        // Normaliza (sem duplicar) a oportunidade já existente do cenário.
+        await admin.from("opportunities").update(payload).eq("id", existing.id);
+        opportunityIds[o.destination] = existing.id;
         mapped.push({
           table_name: "opportunities",
           record_id: existing.id,
@@ -386,25 +445,14 @@ Deno.serve(async (req) => {
       }
       const { data: insertedOpp, error } = await admin
         .from("opportunities")
-        .insert({
-          user_id: tenantId,
-          client_id: clientId,
-          destination: o.destination,
-          stage: o.stage,
-          adults_count: o.adults,
-          children_count: o.children,
-          passengers_count: o.adults + o.children,
-          estimated_value: o.value,
-          start_date: o.start,
-          end_date: o.end,
-          notes: "Cenário demonstrativo — dados fictícios.",
-        })
+        .insert(payload)
         .select("id")
         .single();
       if (error || !insertedOpp) {
         console.error("casanova-provision opportunity", error?.message);
         return json({ error: "Falha ao criar as oportunidades de demonstração" }, 400);
       }
+      opportunityIds[o.destination] = insertedOpp.id;
       mapped.push({
         table_name: "opportunities",
         record_id: insertedOpp.id,
@@ -424,16 +472,17 @@ Deno.serve(async (req) => {
         end: futureDate(102),
       },
       {
-        client: "Carlos Almeida",
-        title: "Orlando — Disney e Universal",
-        destination: "Orlando, EUA",
+        client: SCENARIO_CLIENT.name,
+        title: TRIP_TITLE,
+        destination: TRIP_DESTINATION,
         stage: "emissao",
-        passengers: 3,
-        amount: 41800,
-        start: futureDate(140),
-        end: futureDate(152),
+        passengers: TRIP_ADULTS + TRIP_CHILDREN,
+        amount: TRIP_TOTAL,
+        start: tripStart,
+        end: tripEnd,
       },
     ];
+    const operationIds: Record<string, string> = {};
     for (const op of demoOperations) {
       const { data: existing } = await admin
         .from("operations")
@@ -441,31 +490,606 @@ Deno.serve(async (req) => {
         .eq("user_id", tenantId)
         .eq("title", op.title)
         .maybeSingle();
+      const payload = {
+        user_id: tenantId,
+        client_id: clientIds[op.client],
+        title: op.title,
+        destination: op.destination,
+        stage: op.stage,
+        passengers_count: op.passengers,
+        sale_amount: op.amount,
+        travel_start_date: op.start,
+        travel_end_date: op.end,
+        notes: "Cenário demonstrativo — dados fictícios.",
+      };
       if (existing?.id) {
+        await admin.from("operations").update(payload).eq("id", existing.id);
+        operationIds[op.title] = existing.id;
         mapped.push({ table_name: "operations", record_id: existing.id, record_role: op.title });
         continue;
       }
       const { data: insertedOp, error } = await admin
         .from("operations")
-        .insert({
-          user_id: tenantId,
-          client_id: clientIds[op.client],
-          title: op.title,
-          destination: op.destination,
-          stage: op.stage,
-          passengers_count: op.passengers,
-          sale_amount: op.amount,
-          travel_start_date: op.start,
-          travel_end_date: op.end,
-          notes: "Cenário demonstrativo — dados fictícios.",
-        })
+        .insert(payload)
         .select("id")
         .single();
       if (error || !insertedOp) {
         console.error("casanova-provision operation", error?.message);
         return json({ error: "Falha ao criar as operações de demonstração" }, 400);
       }
+      operationIds[op.title] = insertedOp.id;
       mapped.push({ table_name: "operations", record_id: insertedOp.id, record_role: op.title });
+    }
+
+    /* ================= Etapa 2 — cenário ponta a ponta (Ana Martins) =================
+     * Encadeia cliente → viajantes → oportunidade → orçamento → operação →
+     * ficha da Central → roteiro → carteira digital → venda/financeiro, sempre
+     * preservando os IDs de origem e sem criar um segundo conjunto de registros.
+     */
+    const anaId = clientIds[SCENARIO_CLIENT.name];
+    const scenarioOpportunityId = opportunityIds[TRIP_TITLE];
+    const scenarioOperationId = operationIds[TRIP_TITLE];
+    const payment = paymentSummary();
+    const e2e: Record<string, string> = {};
+
+    if (anaId && scenarioOpportunityId && scenarioOperationId) {
+      /** Perfil do cliente principal, amplamente preenchido. */
+      await admin
+        .from("clients")
+        .update({
+          email: SCENARIO_CLIENT.email,
+          phone: SCENARIO_CLIENT.phone,
+          city: SCENARIO_CLIENT.city,
+          status: SCENARIO_CLIENT.status,
+          notes: SCENARIO_CLIENT.notes,
+          internal_notes: SCENARIO_CLIENT.internal_notes,
+          travel_preferences: SCENARIO_CLIENT.travel_preferences,
+          birthday_day: SCENARIO_CLIENT.birthday_day,
+          birthday_month: SCENARIO_CLIENT.birthday_month,
+          birthday_year: SCENARIO_CLIENT.birthday_year,
+        })
+        .eq("id", anaId);
+
+      /** Viajantes: Ana (responsável) e Roberto (acompanhante). */
+      for (const t of SCENARIO_TRAVELERS) {
+        const { data: found } = await admin
+          .from("travelers")
+          .select("id")
+          .eq("user_id", tenantId)
+          .eq("client_id", anaId)
+          .eq("nome_completo", t.nome_completo)
+          .maybeSingle();
+        const row = {
+          user_id: tenantId,
+          client_id: anaId,
+          nome_completo: t.nome_completo,
+          data_nascimento: t.data_nascimento,
+          cpf: t.cpf,
+          passaporte: t.passaporte,
+          validade_passaporte: t.validade_passaporte,
+          nacionalidade: t.nacionalidade,
+          observacoes: t.observacoes,
+          is_responsavel: t.is_responsavel,
+        };
+        const id = found?.id
+          ? ((await admin.from("travelers").update(row).eq("id", found.id)), found.id)
+          : (await admin.from("travelers").insert(row).select("id").single()).data?.id;
+        if (id) mapped.push({ table_name: "travelers", record_id: id, record_role: t.key });
+      }
+
+      /** Orçamento aprovado, vinculado à oportunidade. */
+      const { data: foundQuote } = await admin
+        .from("quotes")
+        .select("id")
+        .eq("user_id", tenantId)
+        .eq("opportunity_id", scenarioOpportunityId)
+        .maybeSingle();
+      const quotePayload = {
+        user_id: tenantId,
+        client_id: anaId,
+        client_name: SCENARIO_CLIENT.name,
+        opportunity_id: scenarioOpportunityId,
+        trip_title: TRIP_TITLE,
+        destination: TRIP_DESTINATION,
+        start_date: tripStart,
+        end_date: tripEnd,
+        adults_count: TRIP_ADULTS,
+        children_count: TRIP_CHILDREN,
+        total_amount: TRIP_TOTAL,
+        status: "approved",
+        currency: "BRL",
+        payment_terms: "Entrada de 30% na confirmação e saldo em até 30 dias antes do embarque.",
+      };
+      const quoteId = foundQuote?.id
+        ? ((await admin.from("quotes").update(quotePayload).eq("id", foundQuote.id)),
+          foundQuote.id)
+        : (await admin.from("quotes").insert(quotePayload).select("id").single()).data?.id;
+      if (quoteId) {
+        e2e.quote_id = quoteId;
+        mapped.push({ table_name: "quotes", record_id: quoteId, record_role: "orcamento-orlando" });
+      }
+
+      /** Os oito serviços aprovados — chave natural por serviço. */
+      const quoteServiceIds: Record<string, string> = {};
+      if (quoteId) {
+        for (const [i, s] of SCENARIO_SERVICES.entries()) {
+          const service_data = {
+            demo_key: s.key,
+            name: s.name,
+            supplier: s.supplier,
+            start_date: offsetDate(tripStartDate, s.dayFrom),
+            end_date: offsetDate(tripStartDate, s.dayTo),
+            ...s.details,
+          };
+          const { data: existingSvc } = await admin
+            .from("quote_services")
+            .select("id, service_data")
+            .eq("quote_id", quoteId)
+            .eq("service_type", s.kind)
+            .order("order_index", { ascending: true });
+          const match = (existingSvc ?? []).find(
+            (r: { service_data: Record<string, unknown> | null }) =>
+              (r.service_data as { demo_key?: string } | null)?.demo_key === s.key,
+          ) as { id: string } | undefined;
+          const row = {
+            quote_id: quoteId,
+            service_type: s.kind,
+            amount: s.amount,
+            order_index: i,
+            description: s.name,
+            service_data,
+          };
+          const id = match?.id
+            ? ((await admin.from("quote_services").update(row).eq("id", match.id)), match.id)
+            : (await admin.from("quote_services").insert(row).select("id").single()).data?.id;
+          if (id) {
+            quoteServiceIds[s.key] = id;
+            mapped.push({ table_name: "quote_services", record_id: id, record_role: s.key });
+          }
+        }
+      }
+
+      /** Operação em Emissão/Reservas com os serviços rastreáveis ao orçamento. */
+      await admin
+        .from("operations")
+        .update({
+          opportunity_id: scenarioOpportunityId,
+          quote_id: quoteId ?? null,
+          payment_status: payment.status,
+        })
+        .eq("id", scenarioOperationId);
+
+      for (const [i, s] of SCENARIO_SERVICES.entries()) {
+        const sourceId = quoteServiceIds[s.key] ?? null;
+        const { data: existingOpSvc } = await admin
+          .from("operation_services")
+          .select("id")
+          .eq("operation_id", scenarioOperationId)
+          .eq("name", s.name)
+          .maybeSingle();
+        const row = {
+          operation_id: scenarioOperationId,
+          user_id: tenantId,
+          source_quote_service_id: sourceId,
+          service_type: s.kind,
+          name: s.name,
+          supplier: s.supplier,
+          destination: TRIP_DESTINATION,
+          start_date: offsetDate(tripStartDate, s.dayFrom),
+          end_date: offsetDate(tripStartDate, s.dayTo),
+          amount: s.amount,
+          position: i,
+          is_confirmed: true,
+          service_data: { demo_key: s.key, ...s.details },
+        };
+        const id = existingOpSvc?.id
+          ? ((await admin.from("operation_services").update(row).eq("id", existingOpSvc.id)),
+            existingOpSvc.id)
+          : (await admin.from("operation_services").insert(row).select("id").single()).data?.id;
+        if (id) mapped.push({ table_name: "operation_services", record_id: id, record_role: s.key });
+      }
+
+      /** Histórico da oportunidade até o fechamento. */
+      const { data: history } = await admin
+        .from("opportunity_history")
+        .select("id, to_stage")
+        .eq("opportunity_id", scenarioOpportunityId);
+      for (const step of [
+        { to: "quote_creating", note: "Briefing coletado com Ana e Roberto." },
+        { to: "quote_sent", note: "Orçamento de Orlando enviado ao cliente." },
+        { to: "closed", note: "Cliente aprovou o orçamento e pagou a entrada." },
+      ]) {
+        const found = (history ?? []).find((h: { to_stage: string }) => h.to_stage === step.to) as
+          | { id: string }
+          | undefined;
+        const id = found?.id
+          ? found.id
+          : (
+              await admin
+                .from("opportunity_history")
+                .insert({
+                  opportunity_id: scenarioOpportunityId,
+                  to_stage: step.to,
+                  notes: step.note,
+                })
+                .select("id")
+                .single()
+            ).data?.id;
+        if (id)
+          mapped.push({ table_name: "opportunity_history", record_id: id, record_role: step.to });
+      }
+
+      /** Roteiro de 8 dias. */
+      const { data: foundItinerary } = await admin
+        .from("itineraries")
+        .select("id")
+        .eq("user_id", tenantId)
+        .eq("client_id", anaId)
+        .eq("destination", TRIP_DESTINATION)
+        .maybeSingle();
+      const itineraryPayload = {
+        user_id: tenantId,
+        client_id: anaId,
+        destination: TRIP_DESTINATION,
+        start_date: tripStart,
+        end_date: tripEnd,
+        travelers_count: TRIP_ADULTS,
+        trip_type: "casal",
+        budget_level: "conforto",
+        status: "approved",
+        headline: TRIP_TITLE,
+      };
+      const itineraryId = foundItinerary?.id
+        ? ((await admin.from("itineraries").update(itineraryPayload).eq("id", foundItinerary.id)),
+          foundItinerary.id)
+        : (await admin.from("itineraries").insert(itineraryPayload).select("id").single()).data?.id;
+      if (itineraryId) {
+        e2e.itinerary_id = itineraryId;
+        mapped.push({
+          table_name: "itineraries",
+          record_id: itineraryId,
+          record_role: "roteiro-orlando",
+        });
+        for (const day of SCENARIO_ITINERARY) {
+          const date = offsetDate(tripStartDate, day.day - 1);
+          const { data: foundDay } = await admin
+            .from("itinerary_days")
+            .select("id")
+            .eq("itinerary_id", itineraryId)
+            .eq("day_number", day.day)
+            .maybeSingle();
+          const dayId = foundDay?.id
+            ? ((await admin.from("itinerary_days").update({ date }).eq("id", foundDay.id)),
+              foundDay.id)
+            : (
+                await admin
+                  .from("itinerary_days")
+                  .insert({ itinerary_id: itineraryId, day_number: day.day, date })
+                  .select("id")
+                  .single()
+              ).data?.id;
+          if (!dayId) continue;
+          mapped.push({
+            table_name: "itinerary_days",
+            record_id: dayId,
+            record_role: `dia-${day.day}`,
+          });
+          for (const [ai, act] of day.activities.entries()) {
+            const { data: foundAct } = await admin
+              .from("itinerary_activities")
+              .select("id")
+              .eq("day_id", dayId)
+              .eq("period", act.period)
+              .maybeSingle();
+            const actRow = {
+              day_id: dayId,
+              period: act.period,
+              title: act.title,
+              description: act.description,
+              order_index: ai,
+              is_approved: true,
+            };
+            const actId = foundAct?.id
+              ? ((await admin.from("itinerary_activities").update(actRow).eq("id", foundAct.id)),
+                foundAct.id)
+              : (
+                  await admin.from("itinerary_activities").insert(actRow).select("id").single()
+                ).data?.id;
+            if (actId)
+              mapped.push({
+                table_name: "itinerary_activities",
+                record_id: actId,
+                record_role: `dia-${day.day}-${act.period}`,
+              });
+          }
+        }
+      }
+
+      /** Carteira digital (viagem) com os serviços do cenário. */
+      const { data: foundTrip } = await admin
+        .from("trips")
+        .select("id")
+        .eq("user_id", tenantId)
+        .eq("client_id", anaId)
+        .eq("trip_title", TRIP_TITLE)
+        .maybeSingle();
+      const tripPayload = {
+        user_id: tenantId,
+        client_id: anaId,
+        client_name: SCENARIO_CLIENT.name,
+        trip_title: TRIP_TITLE,
+        destination: TRIP_DESTINATION,
+        start_date: tripStart,
+        end_date: tripEnd,
+        status: "confirmed",
+        opportunity_id: scenarioOpportunityId,
+        itinerary_id: itineraryId ?? null,
+        itinerary_mode: itineraryId ? "legacy" : "none",
+      };
+      const tripId = foundTrip?.id
+        ? ((await admin.from("trips").update(tripPayload).eq("id", foundTrip.id)), foundTrip.id)
+        : (await admin.from("trips").insert(tripPayload).select("id").single()).data?.id;
+      if (tripId) {
+        e2e.trip_id = tripId;
+        mapped.push({ table_name: "trips", record_id: tripId, record_role: "carteira-orlando" });
+        await admin.from("operations").update({ trip_id: tripId }).eq("id", scenarioOperationId);
+        for (const [i, s] of SCENARIO_SERVICES.entries()) {
+          const service_data = {
+            demo_key: s.key,
+            name: s.name,
+            supplier: s.supplier,
+            amount: s.amount,
+            start_date: offsetDate(tripStartDate, s.dayFrom),
+            end_date: offsetDate(tripStartDate, s.dayTo),
+            /** A Área do Cliente exibe apenas nomes — sem CPF ou passaporte. */
+            passengers: SCENARIO_TRAVELERS.map(publicSafeTraveler),
+            ...s.details,
+          };
+          const { data: existingTs } = await admin
+            .from("trip_services")
+            .select("id, service_data")
+            .eq("trip_id", tripId);
+          const match = (existingTs ?? []).find(
+            (r: { service_data: Record<string, unknown> | null }) =>
+              (r.service_data as { demo_key?: string } | null)?.demo_key === s.key,
+          ) as { id: string } | undefined;
+          const row = { trip_id: tripId, service_type: s.kind, order_index: i, service_data };
+          const id = match?.id
+            ? ((await admin.from("trip_services").update(row).eq("id", match.id)), match.id)
+            : (await admin.from("trip_services").insert(row).select("id").single()).data?.id;
+          if (id) mapped.push({ table_name: "trip_services", record_id: id, record_role: s.key });
+        }
+      }
+
+      /** Acesso da Área do Cliente à carteira (grant, sem envio de e-mail). */
+      const { data: account } = await admin
+        .from("client_area_accounts")
+        .select("id")
+        .eq("agency_id", tenantId)
+        .maybeSingle();
+      if (account?.id && tripId) {
+        await admin
+          .from("client_area_accounts")
+          .update({ client_id: anaId })
+          .eq("id", account.id);
+        const { data: foundGrant } = await admin
+          .from("client_area_wallet_grants")
+          .select("id")
+          .eq("agency_id", tenantId)
+          .eq("trip_id", tripId)
+          .maybeSingle();
+        if (!foundGrant?.id) {
+          const { data: grant } = await admin
+            .from("client_area_wallet_grants")
+            .insert({
+              agency_id: tenantId,
+              account_id: account.id,
+              client_id: anaId,
+              operation_id: scenarioOperationId,
+              trip_id: tripId,
+              /** Token apenas de demonstração; nada é enviado externamente. */
+              token_hash: `demo-${tripId}`,
+              expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString(),
+            })
+            .select("id")
+            .single();
+          if (grant?.id)
+            mapped.push({
+              table_name: "client_area_wallet_grants",
+              record_id: grant.id,
+              record_role: "carteira-orlando",
+            });
+        } else {
+          mapped.push({
+            table_name: "client_area_wallet_grants",
+            record_id: foundGrant.id,
+            record_role: "carteira-orlando",
+          });
+        }
+      }
+
+      /** Ficha da Central de Reservas (travel_files) e seus serviços. */
+      const { data: foundFile } = await admin
+        .from("travel_files")
+        .select("id")
+        .eq("agency_id", tenantId)
+        .eq("manual_key", "demo-orlando-ana")
+        .maybeSingle();
+      const filePayload = {
+        agency_id: tenantId,
+        manual_key: "demo-orlando-ana",
+        origin: "manual",
+        contractor_type: "individual",
+        client_id: anaId,
+        contact_client_id: anaId,
+        opportunity_id: scenarioOpportunityId,
+        quote_id: quoteId ?? null,
+        operation_id: scenarioOperationId,
+        trip_name: TRIP_TITLE,
+        primary_destination: TRIP_DESTINATION,
+        start_date: tripStart,
+        end_date: tripEnd,
+        adults_count: TRIP_ADULTS,
+        children_count: TRIP_CHILDREN,
+        passengers_count: TRIP_ADULTS + TRIP_CHILDREN,
+        currency: "BRL",
+        requested_amount: TRIP_TOTAL,
+        final_sale_amount: TRIP_TOTAL,
+        status: "in_operation",
+        operational_status: "in_progress",
+        financial_status: payment.status === "parcial" ? "partial" : "pending",
+        responsible_user_id: tenantId,
+        created_by_user_id: tenantId,
+      };
+      const fileId = foundFile?.id
+        ? ((await admin.from("travel_files").update(filePayload).eq("id", foundFile.id)),
+          foundFile.id)
+        : (
+            await admin
+              .from("travel_files")
+              .insert({ ...filePayload, file_number: Date.now() % 100000 })
+              .select("id")
+              .single()
+          ).data?.id;
+      if (fileId) {
+        e2e.travel_file_id = fileId;
+        mapped.push({ table_name: "travel_files", record_id: fileId, record_role: "ficha-orlando" });
+        for (const s of SCENARIO_SERVICES) {
+          const { data: existingFs } = await admin
+            .from("travel_file_services")
+            .select("id")
+            .eq("file_id", fileId)
+            .eq("product_name", s.name)
+            .maybeSingle();
+          const row = {
+            file_id: fileId,
+            agency_id: tenantId,
+            source_quote_service_id: quoteServiceIds[s.key] ?? null,
+            service_type: s.kind,
+            product_name: s.name,
+            supplier_name: s.supplier,
+            destination: TRIP_DESTINATION,
+            start_date: offsetDate(tripStartDate, s.dayFrom),
+            end_date: offsetDate(tripStartDate, s.dayTo),
+            passengers_count: TRIP_ADULTS,
+            currency: "BRL",
+            requested_amount: s.amount,
+            reconfirmed_amount: s.amount,
+            sold_amount: s.amount,
+            status: "booked",
+            snapshot: { demo_key: s.key, ...s.details },
+          };
+          const id = existingFs?.id
+            ? ((await admin.from("travel_file_services").update(row).eq("id", existingFs.id)),
+              existingFs.id)
+            : (await admin.from("travel_file_services").insert(row).select("id").single()).data?.id;
+          if (id)
+            mapped.push({
+              table_name: "travel_file_services",
+              record_id: id,
+              record_role: s.key,
+            });
+        }
+      }
+
+      /** Venda, produtos e financeiro parcial (nenhuma cobrança real). */
+      const { data: foundSale } = await admin
+        .from("sales")
+        .select("id")
+        .eq("user_id", tenantId)
+        .eq("opportunity_id", scenarioOpportunityId)
+        .maybeSingle();
+      const salePayload = {
+        user_id: tenantId,
+        client_id: anaId,
+        client_name: SCENARIO_CLIENT.name,
+        opportunity_id: scenarioOpportunityId,
+        destination: TRIP_DESTINATION,
+        sale_amount: TRIP_TOTAL,
+        sale_date: new Date().toISOString().slice(0, 10),
+        start_date: tripStart,
+        end_date: tripEnd,
+        trip_type: "casal",
+        trip_status: "confirmada",
+        origin: "importacao",
+        source_quote_id: quoteId ?? null,
+        source_trip_id: tripId ?? null,
+        source_operation_id: scenarioOperationId,
+        import_provenance: { scenario: SCENARIO_SLUG, from: "orcamento-aprovado" },
+        notes: "Venda de demonstração — sem cobrança real.",
+      };
+      const saleId = foundSale?.id
+        ? ((await admin.from("sales").update(salePayload).eq("id", foundSale.id)), foundSale.id)
+        : (await admin.from("sales").insert(salePayload).select("id").single()).data?.id;
+      if (saleId) {
+        e2e.sale_id = saleId;
+        mapped.push({ table_name: "sales", record_id: saleId, record_role: "venda-orlando" });
+        for (const s of SCENARIO_SERVICES) {
+          const { data: existingProd } = await admin
+            .from("sale_products")
+            .select("id")
+            .eq("sale_id", saleId)
+            .eq("description", s.name)
+            .maybeSingle();
+          const row = {
+            sale_id: saleId,
+            user_id: tenantId,
+            product_type: s.kind,
+            description: s.name,
+            supplier_name: s.supplier,
+            sale_price: s.amount,
+            commission_type: "percentage",
+            commission_value: 10,
+            source_kind: "quote_service",
+            source_service_id: quoteServiceIds[s.key] ?? null,
+            source_provenance: { scenario: SCENARIO_SLUG, demo_key: s.key },
+          };
+          const id = existingProd?.id
+            ? ((await admin.from("sale_products").update(row).eq("id", existingProd.id)),
+              existingProd.id)
+            : (await admin.from("sale_products").insert(row).select("id").single()).data?.id;
+          if (id)
+            mapped.push({ table_name: "sale_products", record_id: id, record_role: s.key });
+        }
+
+        /** Recebimento parcial: entrada de 30%. */
+        const { data: foundIncome } = await admin
+          .from("income_entries")
+          .select("id")
+          .eq("user_id", tenantId)
+          .eq("sale_id", saleId)
+          .maybeSingle();
+        if (!foundIncome?.id && payment.paid > 0) {
+          const { data: income } = await admin
+            .from("income_entries")
+            .insert({
+              user_id: tenantId,
+              sale_id: saleId,
+              amount: payment.paid,
+              received_amount: payment.paid,
+              entry_date: new Date().toISOString().slice(0, 10),
+              received_date: new Date().toISOString().slice(0, 10),
+              payment_method: "pix",
+              status: "recebido",
+              source: "manual",
+              notes: "Entrada de demonstração (30%) — sem cobrança real.",
+            })
+            .select("id")
+            .single();
+          if (income?.id)
+            mapped.push({
+              table_name: "income_entries",
+              record_id: income.id,
+              record_role: "entrada-30",
+            });
+        } else if (foundIncome?.id) {
+          mapped.push({
+            table_name: "income_entries",
+            record_id: foundIncome.id,
+            record_role: "entrada-30",
+          });
+        }
+      }
     }
 
     /**
