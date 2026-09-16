@@ -104,9 +104,7 @@ Deno.serve(async (req) => {
       expected.length >= 24 &&
       providedToken.length === expected.length &&
       providedToken === expected;
-    const isTokenCall =
-      tokenMatches((Deno.env.get("CASANOVA_PROVISION_TOKEN") || "").trim()) ||
-      tokenMatches((Deno.env.get("CASANOVA_ACTIVATION_TOKEN") || "").trim());
+    const isTokenCall = tokenMatches((Deno.env.get("CASANOVA_PROVISION_TOKEN") || "").trim());
 
     if (!isServiceCall && !isTokenCall) {
       if (!authHeader) return json({ error: "Não autorizado" }, 401);
