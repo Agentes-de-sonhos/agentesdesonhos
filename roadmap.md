@@ -27,3 +27,9 @@
 - [x] testes focados + typecheck + build; sem publicar
 
 - [x] Miniaturas de fotos no editor de serviços do orçamento: fim do piscar a cada digitação (ResolvedThumb em escopo de módulo, chaves estáveis por referência, resolução síncrona de URLs/cache da sessão, "Indisponível" só após falha real).
+
+## Casa Nova Tur — cenário demonstrativo (plano em 4 etapas)
+- [x] Etapa 1: demo_scenarios + demo_scenario_records (RLS/grants restritos), guarda is_demo_scenario_tenant, cleanup mapeado e mapeamento idempotente em casanova-provision
+- [ ] Etapa 2: cenário ponta a ponta (Ana + Roberto, 8 serviços, CRM, orçamento, roteiro, carteira, file, venda)
+- [ ] Etapa 3: datas relativas restritas a tenants demo (1x/dia, delta único, atômico)
+- [ ] Etapa 4: URLs amigáveis por agency_slug no host compartilhado + bateria de testes
