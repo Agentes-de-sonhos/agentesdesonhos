@@ -20,14 +20,45 @@
  */
 import { normalizeHostname } from "./agencyDomains";
 
+/**
+ * Host CANÔNICO público dos Sites ADS. `vitrine.tur.br` é o endereço oficial;
+ * `www.` continua funcionando e é redirecionado para o apex.
+ *
+ * Diferença em relação ao host técnico compartilhado: aqui as páginas
+ * institucionais podem ser indexadas e, quando o slug NÃO tem Sites ADS ativo,
+ * a rota continua servindo a Vitrine de Ofertas atual (retrocompatibilidade).
+ */
+export const CANONICAL_AGENCY_SITE_HOST = "vitrine.tur.br";
+export const CANONICAL_AGENCY_SITE_HOSTS = [
+  CANONICAL_AGENCY_SITE_HOST,
+  `www.${CANONICAL_AGENCY_SITE_HOST}`,
+];
+
+/** Host técnico compartilhado (prévia interna), sempre noindex. */
+export const TECHNICAL_SHARED_AGENCY_SITE_HOSTS = ["sites.agentesdesonhos.com.br"];
+
 /** Hosts compartilhados que servem vários tenants por slug. */
-export const SHARED_AGENCY_SITE_HOSTS = ["sites.agentesdesonhos.com.br"];
+export const SHARED_AGENCY_SITE_HOSTS = [
+  ...TECHNICAL_SHARED_AGENCY_SITE_HOSTS,
+  ...CANONICAL_AGENCY_SITE_HOSTS,
+];
 
 /** True quando o host atende múltiplos tenants pelo primeiro segmento da URL. */
 export function isSharedAgencySiteHost(hostname: string | null | undefined): boolean {
   const host = normalizeHostname(hostname || "");
   return SHARED_AGENCY_SITE_HOSTS.includes(host);
 }
+
+/** True no host público canônico (`vitrine.tur.br` e `www.`). */
+export function isCanonicalAgencySiteHost(hostname: string | null | undefined): boolean {
+  return CANONICAL_AGENCY_SITE_HOSTS.includes(normalizeHostname(hostname || ""));
+}
+
+/** True apenas no host técnico interno de prévia por slug. */
+export function isTechnicalSharedAgencySiteHost(hostname: string | null | undefined): boolean {
+  return TECHNICAL_SHARED_AGENCY_SITE_HOSTS.includes(normalizeHostname(hostname || ""));
+}
+
 
 /**
  * Primeiros segmentos que pertencem às superfícies do tenant — nunca podem ser
