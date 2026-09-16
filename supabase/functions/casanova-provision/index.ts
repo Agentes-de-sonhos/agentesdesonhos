@@ -778,6 +778,22 @@ Deno.serve(async (req) => {
         : (await admin.from("itineraries").insert(itineraryPayload).select("id").single()).data?.id;
       if (itineraryId) {
         e2e.itinerary_id = itineraryId;
+        /**
+         * A página pública do roteiro resolve o código e depois carrega pelo
+         * share_token, então o roteiro demonstrativo precisa ter um token.
+         * Gerado apenas quando ausente, para manter a idempotência.
+         */
+        const { data: itinToken } = await admin
+          .from("itineraries")
+          .select("share_token")
+          .eq("id", itineraryId)
+          .maybeSingle();
+        if (!itinToken?.share_token) {
+          await admin
+            .from("itineraries")
+            .update({ share_token: crypto.randomUUID().replace(/-/g, "") })
+            .eq("id", itineraryId);
+        }
         mapped.push({
           table_name: "itineraries",
           record_id: itineraryId,
