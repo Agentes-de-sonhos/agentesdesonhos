@@ -13,8 +13,18 @@ import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseHeader } from "@/components/showcase/ShowcaseHeader";
 import { ShowcaseFloatingCTA } from "@/components/showcase/ShowcaseFloatingCTA";
 
+/** Identidade mínima do tenant, usada quando a agência ainda não publicou vitrine. */
+export interface VitrineTenantFallback {
+  agencyName?: string | null;
+  logoUrl?: string | null;
+  phone?: string | null;
+}
+
 /* ─── Main Component ─── */
-export default function VitrinePublica({ slugOverride }: { slugOverride?: string } = {}) {
+export default function VitrinePublica({
+  slugOverride,
+  tenantFallback,
+}: { slugOverride?: string; tenantFallback?: VitrineTenantFallback } = {}) {
   const params = useParams<{ slug: string }>();
   const slug = slugOverride ?? params.slug;
   const { showcase, profile, items, loadingShowcase, trackEvent } = usePublicShowcase(slug);
@@ -67,6 +77,42 @@ export default function VitrinePublica({ slugOverride }: { slugOverride?: string
 
   if (loadingShowcase) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  }
+
+  // Tenant válido (host/slug da agência resolvido) porém sem vitrine publicada:
+  // mostramos a identidade da agência com um estado vazio elegante e CTA de
+  // contato — nunca "vitrine não encontrada".
+  if (!showcase && tenantFallback) {
+    const fallbackPhone = (tenantFallback.phone || profile?.phone || "").replace(/\D/g, "");
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 px-6 py-16 text-center">
+        {tenantFallback.logoUrl && (
+          <img
+            src={tenantFallback.logoUrl}
+            alt={tenantFallback.agencyName || "Logo da agência"}
+            className="h-20 w-auto object-contain mb-6"
+          />
+        )}
+        {tenantFallback.agencyName && (
+          <BrandText as="h1" className="text-2xl font-semibold text-foreground mb-2">
+            {tenantFallback.agencyName}
+          </BrandText>
+        )}
+        <p className="text-base font-medium text-foreground">Nenhuma oferta publicada no momento</p>
+        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+          Estamos preparando novidades. Fale com a nossa equipe e receba uma proposta feita para você.
+        </p>
+        {fallbackPhone && (
+          <Button
+            className="mt-6"
+            onClick={() => window.open(`https://wa.me/55${fallbackPhone}`, "_blank")}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Falar com a equipe
+          </Button>
+        )}
+      </div>
+    );
   }
 
   if (!showcase) {

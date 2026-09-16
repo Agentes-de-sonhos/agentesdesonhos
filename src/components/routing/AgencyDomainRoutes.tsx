@@ -70,7 +70,16 @@ function StandaloneTool({ info, kind }: { info: AgencyDomainInfo; kind: Paramete
 }
 
 function Ofertas({ info }: { info: AgencyDomainInfo }) {
-  return <VitrinePublica slugOverride={info.public_slug || info.agency_slug} />;
+  return (
+    <VitrinePublica
+      slugOverride={info.public_slug || info.agency_slug}
+      tenantFallback={{
+        agencyName: info.agency_name,
+        logoUrl: info.logo_url,
+        phone: info.phone,
+      }}
+    />
+  );
 }
 
 /**
