@@ -66,10 +66,31 @@ describe("Carteira Digital — cabeçalho compacto", () => {
   });
 });
 
-describe("Criar Roteiro — aba Modelos removida e cabeçalho compacto", () => {
-  it("não exibe mais a aba Meus Modelos", () => {
-    expect(itinerary).not.toContain("Meus Modelos");
+describe("Criar Roteiro — barra com três opções e cabeçalho compacto", () => {
+  it("exibe Novo Roteiro, Meus Roteiros e Meus Modelos nessa ordem", () => {
+    const novo = itinerary.indexOf("                  Novo Roteiro\n");
+    const roteiros = itinerary.indexOf("                  Meus Roteiros\n");
+    const modelos = itinerary.indexOf("                  Meus Modelos\n");
+    expect(novo).toBeGreaterThan(0);
+    expect(novo).toBeLessThan(roteiros);
+    expect(roteiros).toBeLessThan(modelos);
+    expect(itinerary).toContain('value="templates"');
+  });
+
+  it("Meus Modelos abre Meus Projetos > Modelos (submenu Roteiros por padrão) em janela interna", () => {
+    expect(itinerary).toContain(
+      'if (v === "templates") { openInternalWindow(nav.projects("modelos")); return; }',
+    );
     expect(itinerary).not.toContain('navigate(nav.projects("modelos"))');
+  });
+
+  it("não recria a antiga aba com TemplatesGrid dentro de Criar Roteiro", () => {
+    expect(itinerary).not.toContain("TemplatesGrid");
+  });
+
+  it("mantém o formulário e o salvar como modelo intactos", () => {
+    expect(itinerary).toContain("<ItineraryForm");
+    expect(itinerary).toContain("<SaveAsTemplateDialog");
   });
 
   it("cabeçalho compacta a importação ao lado do título", () => {

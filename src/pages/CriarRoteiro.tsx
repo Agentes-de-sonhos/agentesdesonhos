@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
 import { Wand2, ArrowLeft, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
-import { TemplatesGrid } from "@/components/itinerary/TemplatesGrid";
+
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,6 +92,7 @@ export default function CriarRoteiro() {
     : undefined;
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"create" | "list" | "templates">("create");
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState<(Itinerary & { days: ItineraryDay[] }) | null>(null);
   const [formData, setFormData] = useState<ItineraryFormData | null>(null);
@@ -541,9 +542,11 @@ export default function CriarRoteiro() {
           <Tabs
             value={activeTab}
             onValueChange={(v) => {
-              // "Meus Roteiros" abre Meus Projetos em NOVA ABA, mantendo esta
-              // página de criação aberta (plataforma, SiteLab e sites das agências).
+              // "Meus Roteiros" e "Meus Modelos" abrem Meus Projetos em NOVA ABA,
+              // mantendo esta página de criação aberta (plataforma, SiteLab e
+              // sites das agências) sem perder o formulário em andamento.
               if (v === "list") { openInternalWindow(nav.projects("roteiros")); return; }
+              if (v === "templates") { openInternalWindow(nav.projects("modelos")); return; }
               setActiveTab(v as "create" | "list" | "templates");
             }}
           >
@@ -560,6 +563,12 @@ export default function CriarRoteiro() {
                   className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
                 >
                   Meus Roteiros
+                </TabsTrigger>
+                <TabsTrigger
+                  value="templates"
+                  className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                >
+                  Meus Modelos
                 </TabsTrigger>
               </TabsList>
 
@@ -801,9 +810,6 @@ export default function CriarRoteiro() {
                   </div>
                 );
               })()}
-            </TabsContent>
-            <TabsContent value="templates" className="mt-5">
-              <TemplatesGrid />
             </TabsContent>
           </Tabs>
         ) : (
