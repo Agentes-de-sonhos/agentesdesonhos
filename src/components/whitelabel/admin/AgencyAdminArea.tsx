@@ -182,9 +182,12 @@ function AgencyAdminWorkspace({
 function AgencyAdminEntry({
   hostname,
   basePath,
+  hasOuterRouter = false,
 }: {
   hostname: string;
   basePath?: string;
+  /** True quando já existe um BrowserRouter acima (Site Lab dentro do App). */
+  hasOuterRouter?: boolean;
 }) {
   const mount = agencyAdminMount(basePath);
   /* Estável entre renders: o shell usa a função como dependência de efeito. */
@@ -198,14 +201,14 @@ function AgencyAdminEntry({
     ? `${clean}${window.location.search}${window.location.hash}`
     : undefined;
   if (clean === AGENCY_ADMIN_LOGIN) {
-    // Com basePath (SiteLab embutido no router principal do App) um
-    // BrowserRouter próprio geraria router aninhado; sem basePath (domínio
-    // próprio da agência) não há router externo e o login precisa do dele.
-    if (mount.base) {
+    // Só dispensa o BrowserRouter quando existe um router acima (Site Lab).
+    // No host compartilhado `/{slug}/gestao/login` há prefixo mas NÃO há router
+    // externo: aí o login monta o seu próprio router com o basename do tenant.
+    if (hasOuterRouter) {
       return <AgencyAdminLogin hostname={hostname} basePath={mount.base} />;
     }
     return (
-      <BrowserRouter>
+      <BrowserRouter basename={mount.base || undefined}>
         <AgencyAdminLogin hostname={hostname} basePath={mount.base} />
       </BrowserRouter>
     );
