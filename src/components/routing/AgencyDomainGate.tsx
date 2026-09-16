@@ -6,7 +6,12 @@ import {
   fetchAgencyBySlug,
   fetchAgencyDomain,
 } from "@/lib/agencyDomains";
-import { isSharedAgencySiteHost, parseAgencySlugLocation } from "@/lib/agencySlugRouting";
+import {
+  isCanonicalAgencySiteHost,
+  isSharedAgencySiteHost,
+  parseAgencySlugLocation,
+} from "@/lib/agencySlugRouting";
+
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
