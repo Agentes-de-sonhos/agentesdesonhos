@@ -84,6 +84,7 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
 
   const { data: profile } = useQuery({
     queryKey: ["my-profile", user?.id],
