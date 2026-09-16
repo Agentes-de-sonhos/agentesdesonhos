@@ -621,7 +621,7 @@ Deno.serve(async (req) => {
         adults_count: TRIP_ADULTS,
         children_count: TRIP_CHILDREN,
         total_amount: TRIP_TOTAL,
-        status: "approved",
+        status: "published",
         currency: "BRL",
         payment_terms: "Entrada de 30% na confirmação e saldo em até 30 dias antes do embarque.",
       };
@@ -761,7 +761,7 @@ Deno.serve(async (req) => {
         travelers_count: TRIP_ADULTS,
         trip_type: "casal",
         budget_level: "conforto",
-        status: "approved",
+        status: "published",
         headline: TRIP_TITLE,
       };
       const itineraryId = foundItinerary?.id
