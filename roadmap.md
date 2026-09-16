@@ -32,4 +32,6 @@
 - [x] Etapa 1: demo_scenarios + demo_scenario_records (RLS/grants restritos), guarda is_demo_scenario_tenant, cleanup mapeado e mapeamento idempotente em casanova-provision
 - [x] Etapa 2: cenário ponta a ponta (Ana + Roberto, 8 serviços, CRM, orçamento, roteiro, carteira, file, venda) — implementada em código no provisionamento idempotente; ainda não executada (sem deploy)
 - [x] Etapa 3: datas relativas restritas a tenants demo (1x/dia, delta único, rollback total) — implementada em código; sem deploy e sem execução no banco
-- [ ] Etapa 4: URLs amigáveis por agency_slug no host compartilhado + bateria de testes
+- [x] Etapa 4: URLs amigáveis por agency_slug no host compartilhado + bateria de testes
+      (implementada em código; a resolução por slug depende da SQL pendente
+      supabase/pending-sql/get_agency_by_slug.sql e da ativação do host — nada publicado)
