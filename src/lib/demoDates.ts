@@ -11,6 +11,16 @@ export const DEMO_SCENARIO_BY_HOST: Record<string, string> = {
   "casanovatur.demo.local": "casa-nova-tur",
 };
 
+/** "Hoje" no fuso America/Sao_Paulo (mesma referência usada no servidor). */
+export function saoPauloToday(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+}
+
 /** Cenário demo do host atual (null quando não é um host de demonstração). */
 export function demoScenarioForHost(hostname: string | null | undefined): string | null {
   if (!hostname) return null;
