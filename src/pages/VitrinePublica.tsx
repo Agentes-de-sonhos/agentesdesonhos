@@ -13,8 +13,18 @@ import { ShowcaseCard } from "@/components/showcase/ShowcaseCard";
 import { ShowcaseHeader } from "@/components/showcase/ShowcaseHeader";
 import { ShowcaseFloatingCTA } from "@/components/showcase/ShowcaseFloatingCTA";
 
+/** Identidade mínima do tenant, usada quando a agência ainda não publicou vitrine. */
+export interface VitrineTenantFallback {
+  agencyName?: string | null;
+  logoUrl?: string | null;
+  phone?: string | null;
+}
+
 /* ─── Main Component ─── */
-export default function VitrinePublica({ slugOverride }: { slugOverride?: string } = {}) {
+export default function VitrinePublica({
+  slugOverride,
+  tenantFallback,
+}: { slugOverride?: string; tenantFallback?: VitrineTenantFallback } = {}) {
   const params = useParams<{ slug: string }>();
   const slug = slugOverride ?? params.slug;
   const { showcase, profile, items, loadingShowcase, trackEvent } = usePublicShowcase(slug);
