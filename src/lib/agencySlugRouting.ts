@@ -179,3 +179,54 @@ export function tenantRequestHostname(
   }
   return fallback;
 }
+
+/* ------------------------- HOST CANÔNICO E INDEXAÇÃO ------------------------ */
+
+/**
+ * URL canônica (sem `www`) para o host público dos Sites ADS.
+ * Retorna `null` quando não há nada a redirecionar — nunca gera loop, pois o
+ * destino já é o apex e ele não satisfaz mais a condição.
+ */
+export function canonicalAgencySiteRedirectUrl(location: {
+  hostname: string;
+  pathname: string;
+  search?: string;
+  hash?: string;
+  protocol?: string;
+}): string | null {
+  const host = normalizeHostname(location.hostname || "");
+  if (host !== `www.${CANONICAL_AGENCY_SITE_HOST}`) return null;
+  const protocol = location.protocol || "https:";
+  return `${protocol}//${CANONICAL_AGENCY_SITE_HOST}${location.pathname || "/"}${
+    location.search || ""
+  }${location.hash || ""}`;
+}
+
+/** Origem canônica usada em `<link rel="canonical">` do host público. */
+export function canonicalAgencySiteOrigin(): string {
+  return `https://${CANONICAL_AGENCY_SITE_HOST}`;
+}
+
+/** Caminhos institucionais públicos (podem ser indexados). */
+const INDEXABLE_INTERNAL_PATHS = [
+  "/",
+  "/ofertas",
+  "/politicasdeprivacidade",
+  "/termosdeuso",
+];
+
+/**
+ * Regra única de indexação das superfícies white label:
+ * - host técnico compartilhado → sempre noindex;
+ * - áreas privadas/técnicas (gestão, área do cliente, documentos por código,
+ *   prévia protegida) → sempre noindex;
+ * - páginas institucionais públicas → indexáveis conforme configuração atual.
+ */
+export function shouldNoindexAgencyPath(
+  browserHostname: string,
+  internalPath: string,
+): boolean {
+  if (isTechnicalSharedAgencySiteHost(browserHostname)) return true;
+  const clean = (internalPath || "/").split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  return !INDEXABLE_INTERNAL_PATHS.includes(clean);
+}
