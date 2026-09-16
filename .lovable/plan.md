@@ -1,59 +1,73 @@
-# Diagnóstico: miniaturas de fotos "piscando" no editor de serviços do orçamento
+# Casa Nova Tur — cenário demonstrativo, datas relativas e URLs amigáveis
 
-Verificação concluída: o problema **persiste** e a causa foi confirmada no código. Nada foi alterado.
+O pedido reúne 12 frentes independentes (marcação de cenário, dados de cliente e
+acompanhante, viagem com 8 serviços atravessando 6 módulos, CRM, orçamento, roteiro,
+carteira, Central de Reservas, financeiro, datas dinâmicas, novo esquema de URLs e uma
+bateria de testes). Não cabe com segurança em uma única rodada: envolve migração de
+banco, ampliação de uma função de servidor, mudanças no roteador de todas as superfícies
+e testes de isolamento entre agências. Entregar tudo de uma vez arriscaria exatamente o
+que você pediu para preservar — dados manuais, isolamento por agência e as rotas atuais.
 
-## O que acontece
+Proposta: quatro etapas, cada uma verificável e sem publicação. Se preferir, aprovo e
+começo pela Etapa 1 já nesta sequência.
 
-No editor de serviços do orçamento, cada digitação ou interação que faz o formulário se redesenhar destrói e recria as miniaturas. Ao serem recriadas, elas começam "vazias" e mostram o aviso "Indisponível" por um instante antes de a foto voltar. É um efeito puramente visual.
+## Etapa 1 — Fundação segura do cenário
 
-## Causa exata (confirmada)
+- Nova tabela `demo_scenarios` (tenant, slug do cenário, flag `is_demo`, data da última
+  atualização de datas, lock) e `demo_scenario_records` (cenário, tabela, id do registro,
+  papel). Grants + RLS restritos: leitura/escrita só pelo dono do tenant e service role.
+- Somente tenants presentes em `demo_scenarios` podem receber deslocamento de datas.
+- Cleanup/reset passa a percorrer apenas `demo_scenario_records` — nunca `user_id` amplo,
+  preservando o cliente “Fernando” e qualquer registro manual.
+- `casanova-provision` ganha registro de tudo que cria nesse mapa, mantendo idempotência
+  por chave natural (sem duplicar em segunda execução).
 
-1. **Causa principal — componente declarado dentro de outro componente.**
-   Em `src/components/quote/ServiceForms.tsx`, a miniatura `ResolvedThumb` (linhas 2902–2917) está declarada **dentro** do corpo de `ServiceImageUpload` (2817–3027). A cada redesenho, ela passa a ser um componente "novo" para o React, que então descarta a miniatura anterior e monta outra do zero — perdendo o estado já resolvido da imagem.
+## Etapa 2 — Cenário ponta a ponta
 
-2. **Causa somada — a resolução da imagem só acontece depois do primeiro desenho.**
-   Em `src/hooks/useServiceImages.ts`, a lista de imagens utilizáveis é preenchida em um efeito posterior ao primeiro desenho, inclusive para fotos enviadas pelo usuário (que não precisam de consulta nenhuma). Assim, no instante em que a miniatura é remontada, ela desenha "sem imagem" e com `loading = false` — exatamente o estado que exibe "Indisponível".
+- Cliente Ana Martins normalizada (Novo Hamburgo/RS, preferências, notas “Cenário
+  demonstrativo — dados fictícios”) e acompanhante Roberto Martins em `travelers`, com
+  documento evidentemente fictício e preferências próprias.
+- Viagem “Orlando — Disney e Universal”, 2 adultos, 8 dias/7 noites, BRL, ~R$ 41.800, com
+  os 8 serviços (aéreo, hotel, 2 traslados, locação, Disney, Universal, seguro).
+- Os mesmos 8 serviços replicados com vínculos reais entre orçamento, operação
+  (`source_quote_service_id` preservado), `travel_files`, venda e carteira; oportunidade em
+  Fechado com histórico das etapas; operação em Emissão/Reservas com pagamento parcial;
+  roteiro de 8 dias; grant da viagem para a conta existente da Área do Cliente.
+- Auditoria de idempotência do fechamento: reabrir/mover para Fechado não cria segunda
+  operação, venda, file ou serviços, e não marca como pago.
 
-3. **Agravante — identidade instável na lista.**
-   As miniaturas do editor são listadas por posição (`key={i}`, linhas 2940 e 2985). Ao remover ou reordenar, o React reaproveita a caixa errada, provocando um segundo piscar.
+## Etapa 3 — Datas relativas restritas a demo
 
-4. **Gatilho dos redesenhos:** `ServiceForm` (linha 3371) mantém estados que mudam durante a edição (`placeId`, `galleryPending`, lista de fotos), e a barra de fotos é recriada em cada redesenho — o que basta para disparar 1 e 2.
+- Função de servidor segura (autorização por tenant marcado como demo + sessão, nunca por
+  hostname enviado pelo cliente) que, no primeiro acesso do dia (America/Sao_Paulo),
+  desloca por um único delta todas as datas mapeadas do cenário: embarque hoje+3, retorno
+  hoje+10.
+- Uma execução por dia com lock; tudo em transação única (falha = nenhum deslocamento);
+  `created_at`, histórico, tokens, códigos e IDs intocados.
 
-## Onde ocorre e onde não ocorre
+## Etapa 4 — URLs amigáveis por slug + testes
 
-- **Ocorre:** todos os tipos de serviço que usam a barra de fotos padrão (passeios/atrações, transfer, seguro, cruzeiro, trem, circuito, locação, outros) — tanto fotos enviadas quanto fotos vindas do Google.
-- **Menos afetada:** a Galeria de fotos da Hospedagem (`src/components/quote/HotelPhotoGallery.tsx`) usa a miniatura compartilhada (estável) e identifica cada foto pela própria referência; ali o piscar aparece apenas pelo item 2 (primeiro desenho sem imagem) quando a galeria é remontada, não a cada tecla.
-- Telas públicas e PDFs usam outros componentes e não apresentam esse remonte.
+- Resolução genérica por `agency_slug` no host compartilhado
+  `sites.agentesdesonhos.com.br/{slug}`, sem hardcode de agência: prefixo aplicado a site,
+  `/gestao`, `/area-do-cliente`, `/orcamento/:codigo`, `/roteiro/:codigo`,
+  `/carteira/:codigo` e `/fatura/:codigo`.
+- Rotas atuais, domínio próprio e `?__agency_host=` continuam funcionando; navegação
+  preserva o prefixo; login/callback preservam o caminho de retorno; prévias no host
+  compartilhado ficam noindex/nofollow.
+- Testes focados: isolamento e cleanup, provisionamento duplo sem duplicação, vínculos
+  entre módulos, serviços e IDs de origem, fechamento repetido, financeiro parcial, grant
+  da Área do Cliente, datas uma vez por dia com rollback, tenant não-demo intocado, URLs
+  com refresh e deep link, ausência de vazamento entre agências e segurança dos documentos
+  públicos. Typecheck e build ao fim de cada etapa.
 
-## Impacto
+## Pendências externas (fora desta implementação)
 
-- **Risco de perda, troca ou duplicação de fotos: nenhum.** A lista de referências salvas não é tocada pelo piscar; nada é reenviado nem apagado. O problema é apenas visual.
-- Impacto real: percepção de instabilidade durante a edição, além de consumo desnecessário de requisições de foto do Google quando o cache em memória ainda não está aquecido.
+- DNS e vinculação de `sites.agentesdesonhos.com.br` e de `casanovatur.com.br` continuam
+  pendentes; o código fica pronto, sem publicar nem conectar domínio.
 
-## Correção mínima proposta (não executada)
+## Observações técnicas
 
-Reaproveitando a arquitetura atual, sem tocar banco nem modelo de dados:
-
-1. Mover `ResolvedThumb` para o escopo do módulo em `ServiceForms.tsx` (ou trocar diretamente pela miniatura compartilhada `ResolvedServiceThumb`), eliminando o remonte.
-2. Em `useServiceImages`, resolver de imediato o que não depende de consulta: fotos com URL própria ficam disponíveis já no primeiro desenho; referências do Google já resolvidas na sessão são lidas do cache em memória sem passar pelo estado "vazio".
-3. Nunca exibir "Indisponível" antes de uma tentativa concluída de resolução — enquanto não houver resposta, manter o estado de carregamento.
-4. Usar a própria referência da foto como identidade na lista (em vez da posição), preservando o cabeçalho e o comportamento de remover.
-
-Escopo: `src/components/quote/ServiceForms.tsx`, `src/hooks/useServiceImages.ts` e, se necessário, `src/components/shared/ResolvedServiceImage.tsx`. Sem mudanças em upload, limites de fotos, galeria de hospedagem, salvamento ou orçamentos publicados.
-
-## Testes de regressão propostos
-
-Novo arquivo focado (ex.: `src/test/quote-service-photo-thumbs.test.tsx`):
-
-- fotos enviadas aparecem já no primeiro desenho, sem passar por "Indisponível";
-- digitação contínua no formulário (vários redesenhos) não remonta as miniaturas nem faz a imagem sumir;
-- foto de hotel (referência do Google) resolve uma vez e permanece após redesenhos, sem nova consulta;
-- adicionar, remover e reordenar fotos mantém cada miniatura ligada à foto correta;
-- salvar o serviço envia exatamente a mesma lista de fotos de antes da correção;
-- regressões existentes de `resolved-service-image` e `hotel-gallery-integration` continuam passando.
-
-## Riscos, esforço e aceite
-
-- **Risco da correção:** baixo. Mudança de apresentação e de momento de resolução; nenhuma escrita de dados envolvida.
-- **Estimativa:** 1 crédito (uma rodada comum), incluindo testes focados, verificação de tipos e build.
-- **Critérios de aceite:** ao digitar em qualquer serviço com fotos, nenhuma miniatura desaparece nem exibe "Indisponível"; fotos de hospedagem seguem intactas; adicionar/remover/reordenar continua correto; a lista salva permanece idêntica; testes, tipos e build passando; nada publicado.
+- Migração aditiva apenas (novas tabelas + grants + RLS); nenhuma coluna existente
+  alterada ou removida.
+- Dados do cenário entram por operações de dados normais, não por migração.
+- Nada de e-mails, convites, cobranças, checkout ou notificações externas.
