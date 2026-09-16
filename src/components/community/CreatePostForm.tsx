@@ -568,7 +568,10 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
         )}
 
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/40">
-          <div className="flex items-center gap-1 flex-wrap">
+          <div
+            className="flex items-center gap-1 flex-wrap"
+            onMouseDown={(e) => e.preventDefault()}
+          >
             <Button
               type="button"
               variant="ghost"
