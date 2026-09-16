@@ -270,6 +270,33 @@ Deno.serve(async (req) => {
     });
     if (stagesError) console.error("casanova-provision stages", stagesError.message);
 
+    /**
+     * Cenário demonstrativo: marcação explícita e auditável do tenant. Somente
+     * tenants presentes aqui podem receber automações de demonstração.
+     */
+    const { data: scenarioRow, error: scenarioError } = await admin
+      .from("demo_scenarios")
+      .upsert(
+        {
+          slug: SCENARIO_SLUG,
+          user_id: tenantId,
+          label: `${TENANT_NAME} — cenário demonstrativo`,
+          hostname: TENANT_HOSTNAME,
+          is_demo: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "slug" },
+      )
+      .select("id")
+      .single();
+    if (scenarioError || !scenarioRow) {
+      console.error("casanova-provision scenario", scenarioError?.message);
+      return json({ error: "Falha ao registrar o cenário demonstrativo" }, 400);
+    }
+    const scenarioId = scenarioRow.id;
+    /** Registros que pertencem ao cenário (base do cleanup mapeado). */
+    const mapped: ScenarioRecord[] = [];
+
     /* ------------------ Dados FICTÍCIOS, isolados neste tenant ------------------ */
     const demoClients = [
       { name: "Ana e Roberto Martins", city: "Novo Hamburgo", status: "em_negociacao" },
