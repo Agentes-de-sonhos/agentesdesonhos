@@ -62,8 +62,23 @@ export interface PlacePhoto {
 // Cache apenas em memória (sessão), sem persistência — conforme termos do Google.
 // Chave: place_id + índice + tamanho, para nunca repetir uma chamada cobrada.
 const placePhotoCache = new Map<string, Promise<PlacePhoto | null>>();
+/** Espelho síncrono do cache: permite entregar a foto já resolvida no primeiro render. */
+const resolvedPhotoCache = new Map<string, PlacePhoto | null>();
 
 const DISPLAY_WIDTH = 1600;
+
+function photoCacheKey(placeId: string, index: number, size: number) {
+  return `${placeId}|${index}|${size}`;
+}
+
+/** Foto já resolvida nesta sessão (`undefined` = ainda não resolvida). */
+export function getCachedPlacePhoto(
+  placeId: string,
+  index: number,
+  size: number = DISPLAY_WIDTH,
+): PlacePhoto | null | undefined {
+  return resolvedPhotoCache.get(photoCacheKey(placeId, index, size));
+}
 
 /**
  * Resolve UMA foto persistida (`gplace://place/index`) com no máximo uma
@@ -74,23 +89,81 @@ export function fetchPlacePhoto(
   index: number,
   size: number = DISPLAY_WIDTH,
 ): Promise<PlacePhoto | null> {
-  const key = `${placeId}|${index}|${size}`;
+  const key = photoCacheKey(placeId, index, size);
   const cached = placePhotoCache.get(key);
   if (cached) return cached;
   const p = supabase.functions
     .invoke("hotel-photos", { body: { place_id: placeId, photo_index: index, size } })
     .then(({ data, error }) => {
       if (error) throw error;
-      return (data?.photo ?? data?.photos?.[0] ?? null) as PlacePhoto | null;
+      const photo = (data?.photo ?? data?.photos?.[0] ?? null) as PlacePhoto | null;
+      resolvedPhotoCache.set(key, photo);
+      return photo;
     })
     .catch((e) => {
       console.warn("[serviceImages] falha ao resolver foto do Google Places", placeId, index, e?.message || e);
       placePhotoCache.delete(key);
+      resolvedPhotoCache.set(key, null);
       return null;
     });
   placePhotoCache.set(key, p);
   return p;
 }
+
+/**
+ * Snapshot SÍNCRONO das imagens: URLs diretas são utilizáveis imediatamente e
+ * referências do Google já resolvidas nesta sessão vêm do cache em memória.
+ * Referências ainda não resolvidas ficam com `src: null` e são completadas pelo
+ * `resolveServiceImages`.
+ */
+export function buildSyncServiceImages(
+  refs: string[],
+  placeId?: string | null,
+): ResolvedServiceImage[] {
+  const list = (refs || []).filter(Boolean);
+  let legacyCursor = 0;
+  return list.map((ref) => {
+    const gp = parseGplaceRef(ref);
+    if (gp) {
+      const photo = getCachedPlacePhoto(gp.placeId, gp.index);
+      return {
+        ref,
+        origin: "google_places" as const,
+        src: photo?.url ?? null,
+        attributions: photo?.attributions ?? [],
+      };
+    }
+    if (isGooglePhotoUrl(ref)) {
+      const photo = placeId ? getCachedPlacePhoto(placeId, legacyCursor) : null;
+      legacyCursor += 1;
+      return {
+        ref,
+        origin: "google_places" as const,
+        src: photo?.url ?? (placeId ? null : ref),
+        attributions: photo?.attributions ?? [],
+      };
+    }
+    return { ref, origin: "uploaded" as const, src: ref, attributions: [] };
+  });
+}
+
+/** Há referências do Google que ainda dependem de resolução assíncrona? */
+export function hasPendingGoogleRefs(refs: string[], placeId?: string | null): boolean {
+  const list = (refs || []).filter(Boolean);
+  let legacyCursor = 0;
+  return list.some((ref) => {
+    const gp = parseGplaceRef(ref);
+    if (gp) return getCachedPlacePhoto(gp.placeId, gp.index) === undefined;
+    if (isGooglePhotoUrl(ref)) {
+      const idx = legacyCursor;
+      legacyCursor += 1;
+      if (!placeId) return false;
+      return getCachedPlacePhoto(placeId, idx) === undefined;
+    }
+    return false;
+  });
+}
+
 
 /**
  * Resolve uma lista persistida de imagens para URLs utilizáveis.
