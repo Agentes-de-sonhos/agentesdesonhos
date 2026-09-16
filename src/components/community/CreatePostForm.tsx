@@ -366,9 +366,23 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
     }
   };
 
+  /**
+   * Collapse only when focus really leaves the composer. Clicking Foto/Vídeo/
+   * Documento/Enquete blurs the textarea, and collapsing there unmounted the
+   * button before its click could run.
+   */
+  const handleComposerBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    if (!collapsible) return;
+    if (content.trim() || hasMedia || pollOpen) return;
+    const next = e.relatedTarget as Node | null;
+    if (next && composerRef.current?.contains(next)) return;
+    setExpanded(false);
+  };
+
   return (
-    <Card className="border-primary/30 shadow-sm ring-1 ring-primary/10">
+    <Card ref={composerRef} className="border-primary/30 shadow-sm ring-1 ring-primary/10">
       <CardContent className={expanded ? "pt-4 pb-3 space-y-3" : "py-2.5 space-y-0"}>
+
         {expanded && (
         <div>
           <p className="text-sm font-semibold text-foreground">Compartilhe com a comunidade</p>
@@ -403,9 +417,7 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
             onPaste={handlePaste}
             rows={expanded ? 3 : 1}
             onFocus={() => setExpanded(true)}
-            onBlur={() => {
-              if (collapsible && !content.trim() && !hasMedia && !pollOpen) setExpanded(false);
-            }}
+            onBlur={handleComposerBlur}
             className={`resize-none text-sm transition-all duration-200 ${expanded ? "min-h-[76px]" : "min-h-[38px] h-[38px] py-2 overflow-hidden"}`}
           />
         </div>
