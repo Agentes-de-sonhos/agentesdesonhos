@@ -328,6 +328,13 @@ Deno.serve(async (req) => {
           label: `${TENANT_NAME} — cenário demonstrativo`,
           hostname: TENANT_HOSTNAME,
           is_demo: true,
+          /**
+           * O provisionamento reescreve as datas-base da jornada, então a marca
+           * de "datas já ajustadas hoje" precisa ser liberada — senão o cenário
+           * ficaria exibindo a janela-base em vez de hoje+3 / hoje+10.
+           */
+          dates_shifted_on: null,
+          dates_locked_at: null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "slug" },
