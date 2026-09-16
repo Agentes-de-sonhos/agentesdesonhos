@@ -139,25 +139,42 @@ Deno.serve(async (req) => {
     // Conta do tenant (criada apenas uma vez).
     const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     const users = list?.users ?? [];
-    let tenantUser = users.find((u) => u.email?.toLowerCase() === TENANT_EMAIL);
-    let emailMigrated = false;
+
+    /**
+     * Identidade AUTORITATIVA do tenant: o domínio TÉCNICO da prévia. O e-mail
+     * é apenas um dado do cadastro e pode coincidir com o de uma agência REAL —
+     * por isso ele nunca é usado para "adotar" uma conta existente. Sem essa
+     * regra, uma conta real com e-mail parecido poderia ser sobrescrita.
+     */
+    const { data: domainRow } = await admin
+      .from("agency_public_domains")
+      .select("user_id")
+      .eq("hostname", TENANT_HOSTNAME)
+      .maybeSingle();
+
+    let tenantUser = domainRow?.user_id
+      ? users.find((u) => u.id === domainRow.user_id)
+      : undefined;
+    const emailMigrated = false;
+
     if (!tenantUser) {
-      const legacy = users.find((u) =>
-        LEGACY_TENANT_EMAILS.includes((u.email || "").toLowerCase()),
+      /**
+       * Sem domínio técnico registrado: só é permitido adotar uma conta pelo
+       * e-mail quando ela ainda NÃO pertence a outra agência (sem profile ou já
+       * com o slug público deste tenant de prévia).
+       */
+      const candidates = users.filter((u) =>
+        [TENANT_EMAIL, ...LEGACY_TENANT_EMAILS].includes((u.email || "").toLowerCase()),
       );
-      if (legacy) {
-        tenantUser = legacy;
-        if (action !== "cleanup") {
-          const { data: updated, error } = await admin.auth.admin.updateUserById(legacy.id, {
-            email: TENANT_EMAIL,
-            email_confirm: true,
-          });
-          if (error) {
-            console.error("casanova-provision email migration", error.message);
-            return json({ error: "Falha ao corrigir o e-mail do tenant" }, 400);
-          }
-          tenantUser = updated?.user ?? legacy;
-          emailMigrated = true;
+      for (const candidate of candidates) {
+        const { data: prof } = await admin
+          .from("profiles")
+          .select("user_id, public_slug")
+          .eq("user_id", candidate.id)
+          .maybeSingle();
+        if (!prof || prof.public_slug === TENANT_SLUG) {
+          tenantUser = candidate;
+          break;
         }
       }
     }
