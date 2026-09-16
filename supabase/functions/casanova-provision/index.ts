@@ -138,14 +138,45 @@ Deno.serve(async (req) => {
     if (action === "cleanup") {
       if (!tenantUser) return json({ success: true, cleaned: false });
       const id = tenantUser.id;
-      await admin.from("operations").delete().eq("user_id", id);
-      await admin.from("opportunities").delete().eq("user_id", id);
-      await admin.from("clients").delete().eq("user_id", id);
+
+      /**
+       * Cleanup MAPEADO: remove apenas os registros criados pelo provisionamento
+       * e mapeados em `demo_scenario_records`. Qualquer dado manual do tenant
+       * (ex.: o cliente "Fernando") é preservado por construção.
+       */
+      const { data: scenario } = await admin
+        .from("demo_scenarios")
+        .select("id")
+        .eq("slug", SCENARIO_SLUG)
+        .eq("user_id", id)
+        .maybeSingle();
+
+      let removed = 0;
+      if (scenario?.id) {
+        const { data: records } = await admin
+          .from("demo_scenario_records")
+          .select("table_name, record_id")
+          .eq("scenario_id", scenario.id);
+        for (const step of cleanupPlan((records ?? []) as ScenarioRecord[])) {
+          const { error } = await admin
+            .from(step.table)
+            .delete()
+            .eq("user_id", id)
+            .in("id", step.ids);
+          if (error) {
+            console.error("casanova-provision cleanup", step.table, error.message);
+            return json({ error: "Falha ao remover os dados do cenário" }, 400);
+          }
+          removed += step.ids.length;
+        }
+        await admin.from("demo_scenario_records").delete().eq("scenario_id", scenario.id);
+      }
+
       await admin
         .from("agency_public_domains")
         .update({ is_active: false, admin_portal_enabled: false })
         .eq("hostname", TENANT_HOSTNAME);
-      return json({ success: true, cleaned: true, user_id: id });
+      return json({ success: true, cleaned: true, user_id: id, removed });
     }
 
     let password: string | null = null;
