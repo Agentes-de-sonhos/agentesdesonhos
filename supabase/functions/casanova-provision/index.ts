@@ -15,6 +15,7 @@ import {
   SCENARIO_SERVICES,
   SCENARIO_TRAVELERS,
   saleProductType,
+  walletServiceType,
   servicesTotal,
   TRIP_ADULTS,
   TRIP_CHILDREN,
@@ -885,7 +886,12 @@ Deno.serve(async (req) => {
             (r: { service_data: Record<string, unknown> | null }) =>
               (r.service_data as { demo_key?: string } | null)?.demo_key === s.key,
           ) as { id: string } | undefined;
-          const row = { trip_id: tripId, service_type: s.kind, order_index: i, service_data };
+          const row = {
+            trip_id: tripId,
+            service_type: walletServiceType(s.kind),
+            order_index: i,
+            service_data,
+          };
           const id = match?.id
             ? ((await admin.from("trip_services").update(row).eq("id", match.id)), match.id)
             : (await admin.from("trip_services").insert(row).select("id").single()).data?.id;
