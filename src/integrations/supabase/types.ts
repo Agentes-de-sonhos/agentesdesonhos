@@ -16093,6 +16093,7 @@ export type Database = {
         Returns: Json
       }
       get_agency_admin_portal: { Args: { p_hostname: string }; Returns: Json }
+      get_agency_by_slug: { Args: { p_slug: string }; Returns: Json }
       get_agency_domain: { Args: { p_hostname: string }; Returns: Json }
       get_agency_signature_base: {
         Args: { _agency_id: string }
