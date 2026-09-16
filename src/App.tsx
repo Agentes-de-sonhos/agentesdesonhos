@@ -67,7 +67,7 @@ const BloqueiosAereos = lazy(() => import("./pages/BloqueiosAereos"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const Agenda = lazy(() => import("./pages/Agenda"));
 const BlocoNotas = lazy(() => import("./pages/BlocoNotas"));
-const CRM = lazy(() => import("./pages/CRM"));
+
 const Financeiro = lazy(() => import("./pages/Financeiro"));
 
 const GestaoClientes = lazy(() => import("./pages/GestaoClientes"));
@@ -343,7 +343,9 @@ const App = () => {
               <Route path="/assinaturas-comerciais" element={<AssinaturasComerciais />} />
               <Route path="/configuracoes/carteira" element={<ConfiguracoesCarteira />} />
               <Route path="/onboarding" element={<Onboarding />} />
-              <Route path="/crm" element={<CRM />} />
+              {/* Rota legada: /crm foi substituída por /gestao-clientes/funil.
+                  Redireciona com replace para não poluir o histórico nem criar loop. */}
+              <Route path="/crm" element={<Navigate to="/gestao-clientes/funil" replace />} />
               <Route path="/financeiro" element={<Financeiro />} />
               <Route path="/hotel-raio-x" element={<HotelRaioX />} />
               <Route path="/requisitos-viagem" element={<RequisitosViagem />} />
