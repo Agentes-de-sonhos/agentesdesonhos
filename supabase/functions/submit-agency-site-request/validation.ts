@@ -78,5 +78,6 @@ export function originAllowed(
   const origin = hostOf(headers.origin) ?? hostOf(headers.referer);
   if (!origin) return false;
   if (isPreviewHost(origin)) return true;
+  if (isSharedCanonicalHost(origin)) return true;
   return origin === normalizeHost(hostname);
 }
