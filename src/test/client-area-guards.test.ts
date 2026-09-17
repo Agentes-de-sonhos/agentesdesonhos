@@ -11,7 +11,7 @@ import {
   assertCanManageAccess, assertClientCanHaveAccess, assertDomainContext,
   assertHostnamePresent, assertOriginMatchesHost, assertSameAgency,
   generateSecurePassword, generatedPasswordEntropyBits, hostFromOrigin, isLockedOut,
-  isObviousPassword, isPlatformOriginHost, isSessionUsable, isValidEmail, nextAttemptState,
+  isObviousPassword, isPlatformOriginHost, isSharedCanonicalOriginHost, isSessionUsable, isValidEmail, nextAttemptState,
   normalizeEmail, normalizeHost, originHashInput, publicAccountView, resolveAllowedOrigin,
   sanitizeAuditDetails, shouldRotateSession, slidingExpiry, validatePassword,
 } from '../../supabase/functions/_shared/clientAreaGuards'
@@ -275,5 +275,44 @@ describe('auditoria', () => {
   it('descarta textos longos que possam vazar conteúdo', () => {
     const clean = sanitizeAuditDetails({ nota: 'x'.repeat(300) })
     expect(clean).toEqual({})
+  })
+})
+
+// ─────────────────────────────────────────────────────────────
+describe('host compartilhado canônico (vitrine.tur.br)', () => {
+  const TECH = 'casanovatur.demo.local'
+
+  it('reconhece exatamente vitrine.tur.br e www.vitrine.tur.br (sem regra por TLD)', () => {
+    expect(isSharedCanonicalOriginHost('vitrine.tur.br')).toBe(true)
+    expect(isSharedCanonicalOriginHost('www.vitrine.tur.br')).toBe(true)
+    expect(isSharedCanonicalOriginHost('outro.tur.br')).toBe(false)
+    expect(isSharedCanonicalOriginHost('evilvitrine.tur.br')).toBe(false)
+    expect(isSharedCanonicalOriginHost('vitrine.tur.br.evil.com')).toBe(false)
+  })
+
+  it('aceita origem vitrine.tur.br apresentando hostname técnico do tenant', () => {
+    expect(assertOriginMatchesHost('https://vitrine.tur.br', TECH)).toBeNull()
+    expect(assertOriginMatchesHost('https://www.vitrine.tur.br', TECH)).toBeNull()
+  })
+
+  it('resolveAllowedOrigin ecoa a origem canônica compartilhada', () => {
+    expect(resolveAllowedOrigin('https://vitrine.tur.br', TECH)).toBe('https://vitrine.tur.br')
+    expect(resolveAllowedOrigin('https://www.vitrine.tur.br', TECH)).toBe('https://www.vitrine.tur.br')
+  })
+
+  it('origens externas continuam recusadas para hostname técnico', () => {
+    expect(assertOriginMatchesHost('https://site-qualquer.com', TECH)?.status).toBe(403)
+    expect(assertOriginMatchesHost('https://vitrine.tur.br.evil.com', TECH)?.status).toBe(403)
+    expect(resolveAllowedOrigin('https://site-qualquer.com', TECH)).toBeNull()
+  })
+
+  it('domínio próprio continua exigindo correspondência exata', () => {
+    expect(assertOriginMatchesHost('https://outra-agencia.com.br', 'agencia-a.com.br')?.status).toBe(403)
+    expect(assertOriginMatchesHost('https://agencia-a.com.br', 'agencia-a.com.br')).toBeNull()
+  })
+
+  it('sessão de uma agência não serve em outra', () => {
+    expect(assertSameAgency(AGENCY_B, AGENCY_A)?.status).toBe(403)
+    expect(assertSameAgency(AGENCY_A, AGENCY_A)).toBeNull()
   })
 })
