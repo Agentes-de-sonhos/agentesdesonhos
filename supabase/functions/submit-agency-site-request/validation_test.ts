@@ -32,3 +32,20 @@ Deno.test("allowlist de service_key", () => {
 Deno.test("normalizeHost remove porta e www", () => {
   assertEquals(normalizeHost("WWW.Exemplo.Tur.BR:443"), "exemplo.tur.br");
 });
+
+Deno.test("host canônico compartilhado vitrine.tur.br aceita hostname técnico do tenant", () => {
+  assertEquals(originAllowed(h("https://vitrine.tur.br"), "casanovatur.demo.local"), true);
+  assertEquals(originAllowed(h("https://www.vitrine.tur.br"), "casanovatur.demo.local"), true);
+});
+
+Deno.test("origens externas/falsificadas continuam recusadas no host compartilhado", () => {
+  assertEquals(originAllowed(h("https://vitrine.tur.br.evil.com"), "casanovatur.demo.local"), false);
+  assertEquals(originAllowed(h("https://outro.tur.br"), "casanovatur.demo.local"), false);
+  assertEquals(originAllowed(h("https://site-externo.com"), "casanovatur.demo.local"), false);
+  assertEquals(originAllowed(h(null, null), "casanovatur.demo.local"), false);
+});
+
+Deno.test("domínio próprio: correspondente aceito, divergente recusado", () => {
+  assertEquals(originAllowed(h("https://100limites.tur.br"), "100limites.tur.br"), true);
+  assertEquals(originAllowed(h("https://outraagencia.tur.br"), "100limites.tur.br"), false);
+});
