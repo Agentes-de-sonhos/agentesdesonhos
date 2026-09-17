@@ -79,6 +79,18 @@ export function isPlatformOriginHost(host: string): boolean {
 }
 
 /**
+ * Hosts canônicos compartilhados dos Sites ADS (lista EXATA, sem regra por
+ * TLD): páginas servidas em `vitrine.tur.br/{agency_slug}/area-do-cliente`
+ * enviam o hostname técnico do tenant, que é resolvido no servidor. Apenas
+ * estes hosts podem apresentar um hostname diferente da origem.
+ */
+const SHARED_CANONICAL_HOSTS = ['vitrine.tur.br', 'www.vitrine.tur.br']
+
+export function isSharedCanonicalOriginHost(host: string): boolean {
+  return SHARED_CANONICAL_HOSTS.includes(normalizeHost(host))
+}
+
+/**
  * Origem permitida para uma ação pública: precisa ser o próprio domínio White
  * Label da agência ou um ambiente autorizado da plataforma (app/prévia/dev).
  * Retorna a origem a ecoar em `Access-Control-Allow-Origin`, ou `null` quando
@@ -95,6 +107,7 @@ export function resolveAllowedOrigin(
   const agency = normalizeHost(agencyHostname)
   if (agency && host === agency) return raw
   if (isPlatformOriginHost(host)) return raw
+  if (isSharedCanonicalOriginHost(host)) return raw
   return null
 }
 
@@ -110,6 +123,7 @@ export function assertOriginMatchesHost(
   if (!host) return null // sem Origin: não é navegador; hostname já é validado no servidor
   if (host === normalizeHost(hostname)) return null
   if (isPlatformOriginHost(host)) return null
+  if (isSharedCanonicalOriginHost(host)) return null
   return { status: 403, error: 'Origem não autorizada para este domínio.' }
 }
 
