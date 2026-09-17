@@ -32,6 +32,19 @@ export function normalizeHost(host: string): string {
   return host.trim().toLowerCase().replace(/:\d+$/, "").replace(/^www\./, "");
 }
 
+/**
+ * Canonical shared hosts (Sites ADS on vitrine.tur.br). On these exact hosts the
+ * white-label site is reached via /{agency_slug} and the browser submits the
+ * tenant's technical hostname, so the Origin can never equal it. Exact match
+ * only — no TLD/suffix rule. The tenant is still resolved server-side from
+ * p_hostname against active agency_public_domains.
+ */
+export const SHARED_CANONICAL_HOSTS = ["vitrine.tur.br", "www.vitrine.tur.br"];
+
+export function isSharedCanonicalHost(host: string): boolean {
+  return SHARED_CANONICAL_HOSTS.includes(host.trim().toLowerCase().replace(/:\d+$/, ""));
+}
+
 export function hostOf(raw: string | null): string | null {
   if (!raw) return null;
   try {
