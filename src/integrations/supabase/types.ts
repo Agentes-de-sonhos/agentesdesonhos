@@ -15799,6 +15799,19 @@ export type Database = {
         Args: { p_quote_user_id: string; p_slug: string }
         Returns: boolean
       }
+      agency_request_client_notes: {
+        Args: { p_checkout_notes: string; p_details: Json }
+        Returns: string
+      }
+      agency_request_date: {
+        Args: { p_details: Json; p_keys: string[] }
+        Returns: string
+      }
+      agency_request_detail: {
+        Args: { p_details: Json; p_keys: string[] }
+        Returns: string
+      }
+      agency_request_service_label: { Args: { p_key: string }; Returns: string }
       agency_team_directory: {
         Args: never
         Returns: {
@@ -15811,6 +15824,10 @@ export type Database = {
           status: Database["public"]["Enums"]["team_member_status"]
           team_name: string
         }[]
+      }
+      apply_agency_request_to_opportunity: {
+        Args: { p_opportunity_id: string; p_request_id: string }
+        Returns: undefined
       }
       booking_request_file_number: {
         Args: { p_request_id: string }
