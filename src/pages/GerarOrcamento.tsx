@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, UserCircle2,
+  Pencil, MoreHorizontal,
 } from "lucide-react";
 import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -57,11 +57,10 @@ import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
 import { QuoteStepsGuide, type QuoteStepMeta } from "@/components/quote/QuoteStepsGuide";
 
 const QUOTE_STEPS: QuoteStepMeta[] = [
-  { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e os demais itens da viagem.", accentClass: "bg-sky-500" },
-  { step: 2, short: "Organizar serviços", hint: "Revise, edite e agrupe os serviços por destino ou seção.", accentClass: "bg-emerald-500" },
-  { step: 3, short: "Configurar cotação", hint: "Defina capa, detalhes, valores, condições e documentos.", accentClass: "bg-violet-500" },
-  { step: 4, short: "Revisar orçamento", hint: "Confira cliente, viagem, passageiros, destino, datas e total.", accentClass: "bg-amber-500" },
-  { step: 5, short: "Escolher assinatura", hint: "Selecione o responsável que aparecerá no orçamento.", accentClass: "bg-sky-600" },
+  { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e demais itens da viagem.", accentClass: "bg-sky-500" },
+  { step: 2, short: "Organizar serviços", hint: "Revise, edite, ordene e agrupe os serviços por destino ou seção.", accentClass: "bg-emerald-500" },
+  { step: 3, short: "Configurar orçamento", hint: "Confira os dados principais, personalize capa e apresentação, valores, condições, documentos e assinatura.", accentClass: "bg-violet-500" },
+  { step: 4, short: "Publicar", hint: "Gere a versão web para compartilhamento ou o arquivo PDF do orçamento.", accentClass: "bg-amber-500" },
 ];
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
@@ -466,35 +465,14 @@ export default function GerarOrcamento() {
   const [useServicePayment, setUseServicePayment] = useState(false);
   const [servicePaymentConfigs, setServicePaymentConfigs] = useState<Record<string, ServicePaymentConfig>>({});
   const [newServicePaymentConfig, setNewServicePaymentConfig] = useState<ServicePaymentConfig>({ is_custom_payment: false, payment_type: null, installments: null, entry_value: null, discount_type: null, discount_value: null, payment_method: null });
-  const [openSections, setOpenSections] = useState<
-    Record<"add" | "services" | "settings" | "summary" | "signature", boolean>
-  >({
+  const [openSections, setOpenSections] = useState<Record<"add" | "services", boolean>>({
     add: false,
     services: false,
-    settings: false,
-    summary: false,
-    signature: false,
   });
-  const toggleSection = (key: "add" | "services" | "settings" | "summary" | "signature") =>
+  const toggleSection = (key: "add" | "services") =>
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  const STEP_KEYS = ["add", "services", "settings", "summary", "signature"] as const;
-  const openStep = (step: number) => {
-    // Etapa 3 abre diretamente o wizard de configurações (sem expandir o card).
-    if (step === 3) {
-      setSettingsStep("destination");
-      setSettingsOpen(true);
-      return;
-    }
-    const key = STEP_KEYS[step - 1];
-    setOpenSections((prev) => ({ ...prev, [key]: true }));
-    requestAnimationFrame(() => {
-      const el = document.getElementById(`quote-step-${step}`);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
-      el?.querySelector("button")?.focus();
-    });
-  };
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("destination");
+  const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("initial");
   /** Etapa 6 — seção expansível aberta (uma por vez, para reduzir a altura). */
   const [advancedSection, setAdvancedSection] = useState<"currency" | "booking" | null>(null);
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
@@ -1330,34 +1308,6 @@ export default function GerarOrcamento() {
                 Erro ao salvar
               </span>
             )}
-            <TooltipProvider delayDuration={150}>
-              <div className="flex items-center gap-2 flex-wrap sm:justify-end">
-                {!quote.share_token && (
-                  <>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
-                        <Globe className="mr-1 sm:mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">Gerar orçamento web</span>
-                        <span className="sm:hidden">Orçamento web</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Cria um link para você enviar ao cliente.</TooltipContent>
-                  </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" onClick={handleGeneratePDF}>
-                      <FileText className="mr-1 sm:mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">Gerar orçamento PDF</span>
-                      <span className="sm:hidden">Orçamento PDF</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Gera uma versão em PDF para compartilhar ou imprimir.</TooltipContent>
-                </Tooltip>
-                  </>
-                )}
-              </div>
-            </TooltipProvider>
             </div>
           </div>
           </div>
@@ -1395,7 +1345,33 @@ export default function GerarOrcamento() {
 
         <div className="grid w-full min-w-0 max-w-full grid-cols-[minmax(0,1fr)] gap-4 sm:gap-6">
           <div className="min-w-0 space-y-4">
-            <QuoteStepsGuide steps={QUOTE_STEPS} onSelect={openStep} />
+            <QuoteStepsGuide
+              steps={QUOTE_STEPS}
+              actions={!quote.share_token ? (
+                <TooltipProvider delayDuration={150}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
+                        <Globe className="mr-1 sm:mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">Gerar orçamento web</span>
+                        <span className="sm:hidden">Orçamento web</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Cria um link para você enviar ao cliente.</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" onClick={handleGeneratePDF}>
+                        <FileText className="mr-1 sm:mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">Gerar orçamento PDF</span>
+                        <span className="sm:hidden">Orçamento PDF</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Gera uma versão em PDF para compartilhar ou imprimir.</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : undefined}
+            />
 
             {/* 1. Adicionar serviços */}
             <QuoteStepCard
@@ -1461,53 +1437,18 @@ export default function GerarOrcamento() {
               </div>
             </QuoteStepCard>
 
-            {/* 3. Configurar apresentação */}
+            {/* 3. Configurar orçamento */}
             <QuoteStepCard
               step={3}
               id="quote-step-3"
-              title="Configurar apresentação"
+              title="Configurar orçamento"
               hint={QUOTE_STEPS[2].hint}
               accentClass="bg-violet-500"
               icon={<CreditCard className="h-5 w-5 text-violet-500" />}
               direct
               open={false}
-              onToggle={() => { setSettingsStep("destination"); setSettingsOpen(true); }}
+              onToggle={() => { setSettingsStep("initial"); setSettingsOpen(true); }}
             />
-
-            {/* 4. Revisar orçamento */}
-            <QuoteStepCard
-              step={4}
-              id="quote-step-4"
-              title="Revisar orçamento"
-              hint={QUOTE_STEPS[3].hint}
-              accentClass="bg-amber-500"
-              icon={<FileText className="h-5 w-5 text-amber-500" />}
-              open={openSections.summary}
-              onToggle={() => toggleSection("summary")}
-            >
-              <QuoteSummary quote={quote} />
-            </QuoteStepCard>
-
-            {/* 5. Escolher assinatura */}
-            <QuoteStepCard
-              step={5}
-              id="quote-step-5"
-              title="Escolher assinatura"
-              hint={QUOTE_STEPS[4].hint}
-              accentClass="bg-sky-600"
-              icon={<UserCircle2 className="h-5 w-5 text-sky-600" />}
-              open={openSections.signature}
-              onToggle={() => toggleSection("signature")}
-            >
-              <DocumentSignatureCard
-                table="quotes"
-                docId={quote.id}
-                initialSnapshot={(quote as any).signature_snapshot ?? null}
-                onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-                unwrapped
-                hideHeader
-              />
-            </QuoteStepCard>
           </div>
         </div>
       </div>
@@ -1573,7 +1514,7 @@ export default function GerarOrcamento() {
           await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
         }}
         stepHeaderActions={{
-          destination: (
+          initial: (
             <DestinationIntroSwitch
               quoteId={quote.id}
               destination={quote.destination}
@@ -1586,16 +1527,25 @@ export default function GerarOrcamento() {
             />
           ),
         }}
-        renderDestination={() => (
-          <DestinationIntroEditor
-            embedded
-            quoteId={quote.id}
-            destination={quote.destination}
-            showIntro={(quote as any).show_destination_intro !== false}
-            introText={(quote as any).destination_intro_text || null}
-            introImages={(quote as any).destination_intro_images || []}
-            onUpdate={() => {}}
-          />
+        renderInitial={() => (
+          <div className="space-y-6">
+            <section aria-labelledby="quote-initial-data-title" className="space-y-3">
+              <h4 id="quote-initial-data-title" className="text-sm font-semibold text-foreground">Dados principais</h4>
+              <QuoteSummary quote={quote} />
+            </section>
+            <section aria-labelledby="quote-cover-title" className="space-y-3 border-t border-border pt-5">
+              <h4 id="quote-cover-title" className="text-sm font-semibold text-foreground">Configuração da capa</h4>
+              <DestinationIntroEditor
+                embedded
+                quoteId={quote.id}
+                destination={quote.destination}
+                showIntro={(quote as any).show_destination_intro !== false}
+                introText={(quote as any).destination_intro_text || null}
+                introImages={(quote as any).destination_intro_images || []}
+                onUpdate={() => {}}
+              />
+            </section>
+          </div>
         )}
         renderIncluded={() => (
           <WhatsIncludedEditor
@@ -1930,6 +1880,15 @@ export default function GerarOrcamento() {
                 setAdvancedSection((prev) => (prev === "booking" ? null : "booking"))
               }
             />
+            <div className="border-t border-border pt-4">
+              <DocumentSignatureCard
+                table="quotes"
+                docId={quote.id}
+                initialSnapshot={(quote as any).signature_snapshot ?? null}
+                onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+                unwrapped
+              />
+            </div>
           </div>
         )}
       />
