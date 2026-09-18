@@ -590,16 +590,25 @@ Deno.serve(async (req) => {
           return json({ error: `Falha ao criar a conta da Área do Cliente: ${accError.message}` }, 400);
         }
         accountId = inserted?.id as string;
-      } else if (body.reset_client_area_password === true) {
-        clientAreaPassword = strongPassword();
-        await admin
-          .from("client_area_accounts")
-          .update({
-            password_hash: await bcrypt.hash(clientAreaPassword, 10),
-            password_updated_at: new Date().toISOString(),
-            password_set_by: "agency_generated",
-          })
-          .eq("id", accountId);
+      } else {
+        /* Corrige vínculo se a conta ficou apontada para outro cliente. */
+        if (account?.client_id && account.client_id !== mainClientId) {
+          await admin
+            .from("client_area_accounts")
+            .update({ client_id: mainClientId })
+            .eq("id", accountId);
+        }
+        if (body.reset_client_area_password === true) {
+          clientAreaPassword = strongPassword();
+          await admin
+            .from("client_area_accounts")
+            .update({
+              password_hash: await bcrypt.hash(clientAreaPassword, 10),
+              password_updated_at: new Date().toISOString(),
+              password_set_by: "agency_generated",
+            })
+            .eq("id", accountId);
+        }
       }
 
       if (accountId && mainTripId) {
