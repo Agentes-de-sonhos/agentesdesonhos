@@ -37,9 +37,15 @@ import {
 } from "../_shared/demoCanonical.ts";
 import { computeDelta, saoPauloToday, targetWindow } from "../_shared/dateShift.ts";
 
+/*
+ * Função SERVER-TO-SERVER: não existe chamada de navegador para esta rota
+ * (provisionamento e materialização são administrativos). Por isso não há
+ * `Access-Control-Allow-Origin: *`; requisições com Origin de navegador são
+ * recusadas antes de qualquer trabalho.
+ */
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-provision-token",
+  "Cache-Control": "no-store",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -100,6 +106,9 @@ async function mappedIds(admin: Admin, scenarioId: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
+  // Sem origem de navegador: uso exclusivamente server-to-server.
+  const originHeader = (req.headers.get("Origin") || "").trim();
+  if (originHeader && originHeader !== "null") return json({ error: "Origem não permitida" }, 403);
 
   try {
     const url = Deno.env.get("SUPABASE_URL")!;
@@ -187,11 +196,23 @@ Deno.serve(async (req) => {
       }
       sourceSlug = CANONICAL_SLUG;
       targetHostname = body.target_hostname ? String(body.target_hostname) : null;
-      targetUserId = body.target_user_id
-        ? String(body.target_user_id)
-        : targetHostname
-        ? await tenantByHostname(admin, targetHostname)
-        : null;
+      /*
+       * Destino AUTORITATIVO pelo hostname provisionado. `target_user_id` nunca
+       * é aceito quando há hostname (não pode contradizê-lo) e é proibido em
+       * chamadas por token de provisionamento — assim um token não aponta para
+       * um tenant arbitrário fora do fluxo autorizado.
+       */
+      const requestedUserId = body.target_user_id ? String(body.target_user_id) : null;
+      if (targetHostname) {
+        targetUserId = await tenantByHostname(admin, targetHostname);
+        if (requestedUserId && requestedUserId !== targetUserId) {
+          return json({ error: "Destino não corresponde ao hostname provisionado" }, 400);
+        }
+      } else if (requestedUserId && isServiceCall) {
+        targetUserId = requestedUserId;
+      } else {
+        return json({ error: "Informe o hostname provisionado do tenant de destino" }, 400);
+      }
       targetSlug = targetUserId ? demoLoadSlug(targetUserId) : "";
       targetLabel = "White label demonstrativo — carga copiada do SiteLab Base";
     } else {
@@ -466,6 +487,12 @@ Deno.serve(async (req) => {
         city: "Porto Alegre",
         destination: "Buenos Aires — primeira viagem",
         stage: "new_contact",
+      },
+      {
+        client: "Camila Duarte (demonstração)",
+        city: "Curitiba",
+        destination: "Santiago e Valle Nevado — proposta enviada",
+        stage: "quote_sent",
       },
       {
         client: "Mariana Souza",

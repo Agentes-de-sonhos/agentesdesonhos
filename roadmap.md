@@ -35,3 +35,10 @@
 - [x] Etapa 4: URLs amigáveis por agency_slug no host compartilhado + bateria de testes
       (implementada em código; a resolução por slug depende da SQL pendente
       supabase/pending-sql/get_agency_by_slug.sql e da ativação do host — nada publicado)
+
+## SiteLab Base — correção final da carga canônica (commit 46a369a)
+- [x] cartão auxiliar do funil em quote_sent (idempotente, sem operação/venda)
+- [x] include_demo_load integrado ao sitelab-provision, reusando demo-canonical-load
+- [x] destino autoritativo por hostname; sem CORS "*" em demo-canonical-load (server-to-server)
+- [x] senha temporária da conta técnica pelo fluxo administrativo (set_password), sem e-mail
+- [x] links públicos do mestre validados no preview
