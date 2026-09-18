@@ -6,7 +6,7 @@ import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
 import { copyTextToClipboard } from "@/lib/public-share-message";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile, type AgentProfile } from "@/hooks/useAgentProfile";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
@@ -37,7 +37,7 @@ import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
-import { Wand2, ArrowLeft, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
+import { Wand2, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
@@ -68,7 +68,6 @@ import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 
 export default function CriarRoteiro() {
-  const navigate = useNavigate();
   const nav = useAdminNav();
   const openInternalWindow = useOpenInternalWindow();
   const { id } = useParams();
@@ -455,12 +454,6 @@ export default function CriarRoteiro() {
     });
   };
 
-  const handleBack = () => {
-    setCurrentItinerary(null);
-    setFormData(null);
-    setGeneratedLinkUrl(null);
-    navigate(nav.itinerary());
-  };
 
   const areAllActivitiesApproved = (itinerary: Itinerary & { days: ItineraryDay[] }) => {
     if (!itinerary.days || itinerary.days.length === 0) return false;
@@ -814,21 +807,7 @@ export default function CriarRoteiro() {
           </Tabs>
         ) : (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (fromTripId) {
-                    navigate(nav.wallet(fromTripId));
-                  } else {
-                    handleBack();
-                  }
-                }}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {fromTripId ? "Voltar para Carteira" : "Voltar"}
-              </Button>
-              <div className="flex gap-2">
+            <div className="flex items-center justify-end gap-2">
                 {currentItinerary && !areAllActivitiesApproved(currentItinerary) && (
                   <Button variant="outline" onClick={() => setApproveAllConfirmOpen(true)}>
                     <Check className="mr-2 h-4 w-4" />
@@ -852,7 +831,7 @@ export default function CriarRoteiro() {
                   </Button>
                 )}
               </div>
-            </div>
+
 
             {generatedLinkUrl && (
               <Card className="border-primary/30 bg-primary/5">
