@@ -68,7 +68,8 @@ export interface TripDatePickerProps {
  */
 export function TripDatePicker({
   id, label, mode, start, end, onChange, editorial, error, help, required,
-  className, triggerClassName, placeholder,
+  className, triggerClassName, placeholder, labelVariant = "site",
+  dateFormat = "long", allowClear,
 }: TripDatePickerProps) {
   const [open, setOpen] = useState(false);
   const startDate = useMemo(() => parseYMD(start), [start]);
@@ -77,15 +78,18 @@ export function TripDatePicker({
   const months = typeof window !== "undefined" && window.matchMedia?.("(min-width: 768px)")?.matches ? 2 : 1;
   const describedBy = error ? `${id}-error` : help ? `${id}-help` : undefined;
 
+  const fmt = dateFormat === "short" ? formatShortPtBR : formatPtBR;
+  const sep = dateFormat === "short" ? "a" : "—";
+
   const summary =
     mode === "range"
       ? startDate
         ? endDate
-          ? `${formatPtBR(start)} — ${formatPtBR(end)}`
-          : `${formatPtBR(start)} — selecione a volta`
+          ? `${fmt(start)} ${sep} ${fmt(end)}`
+          : `${fmt(start)} ${sep} selecione a volta`
         : ""
       : startDate
-      ? formatPtBR(start)
+      ? fmt(start)
       : "";
 
   return (
@@ -93,7 +97,9 @@ export function TripDatePicker({
       <label
         htmlFor={id}
         className={
-          editorial
+          labelVariant === "form"
+            ? "block text-sm font-medium leading-none"
+            : editorial
             ? "block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
             : "block text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground"
         }
