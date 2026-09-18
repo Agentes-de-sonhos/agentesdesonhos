@@ -268,50 +268,24 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
             control={form.control}
             name="start_date"
             render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data Início</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-                      >
-                        {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="end_date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Data Fim</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-                      >
-                        {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                  </PopoverContent>
-                </Popover>
+              <FormItem className="flex flex-col md:col-span-2">
+                <FormControl>
+                  <TripDatePicker
+                    id="opportunity-trip-period"
+                    label="Período da viagem"
+                    mode="range"
+                    labelVariant="form"
+                    dateFormat="short"
+                    allowClear
+                    placeholder="Selecione ida e volta"
+                    start={toYMD(field.value)}
+                    end={toYMD(form.watch("end_date"))}
+                    onChange={({ start, end }) => {
+                      field.onChange(parseYMD(start));
+                      form.setValue("end_date", parseYMD(end), { shouldDirty: true });
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
