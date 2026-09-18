@@ -31,6 +31,12 @@ export function formatPtBR(value?: string | null): string {
   return date ? format(date, "dd 'de' MMM 'de' yyyy", { locale: ptBR }) : "";
 }
 
+/** "dd/MM/yyyy" — usado pelos módulos internos (CRM, orçamentos). */
+export function formatShortPtBR(value?: string | null): string {
+  const date = parseYMD(value);
+  return date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "";
+}
+
 export interface TripDatePickerProps {
   id: string;
   label: string;
@@ -46,6 +52,12 @@ export interface TripDatePickerProps {
   className?: string;
   triggerClassName?: string;
   placeholder?: string;
+  /** `editorial`/`site` = rótulo caixa-alta dos sites; `form` = rótulo padrão dos formulários internos. */
+  labelVariant?: "site" | "form";
+  /** `long` = "17 de ago de 2026"; `short` = "17/08/2026". */
+  dateFormat?: "long" | "short";
+  /** Exibe a ação "Limpar período" dentro do calendário. */
+  allowClear?: boolean;
 }
 
 /**
@@ -56,7 +68,8 @@ export interface TripDatePickerProps {
  */
 export function TripDatePicker({
   id, label, mode, start, end, onChange, editorial, error, help, required,
-  className, triggerClassName, placeholder,
+  className, triggerClassName, placeholder, labelVariant = "site",
+  dateFormat = "long", allowClear,
 }: TripDatePickerProps) {
   const [open, setOpen] = useState(false);
   const startDate = useMemo(() => parseYMD(start), [start]);
@@ -65,15 +78,18 @@ export function TripDatePicker({
   const months = typeof window !== "undefined" && window.matchMedia?.("(min-width: 768px)")?.matches ? 2 : 1;
   const describedBy = error ? `${id}-error` : help ? `${id}-help` : undefined;
 
+  const fmt = dateFormat === "short" ? formatShortPtBR : formatPtBR;
+  const sep = dateFormat === "short" ? "a" : "—";
+
   const summary =
     mode === "range"
       ? startDate
         ? endDate
-          ? `${formatPtBR(start)} — ${formatPtBR(end)}`
-          : `${formatPtBR(start)} — selecione a volta`
+          ? `${fmt(start)} ${sep} ${fmt(end)}`
+          : `${fmt(start)} ${sep} selecione a volta`
         : ""
       : startDate
-      ? formatPtBR(start)
+      ? fmt(start)
       : "";
 
   return (
@@ -81,7 +97,9 @@ export function TripDatePicker({
       <label
         htmlFor={id}
         className={
-          editorial
+          labelVariant === "form"
+            ? "block text-sm font-medium leading-none"
+            : editorial
             ? "block text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground"
             : "block text-xs font-semibold uppercase tracking-[0.06em] text-muted-foreground"
         }
@@ -120,19 +138,50 @@ export function TripDatePicker({
           )}
         >
           {mode === "range" ? (
-            <Calendar
-              mode="range"
-              numberOfMonths={months}
-              defaultMonth={startDate}
-              selected={{ from: startDate, to: endDate } as DateRange}
-              onSelect={(range) => {
-                const next = (range ?? {}) as DateRange;
-                onChange({ start: toYMD(next.from), end: toYMD(next.to) });
-                if (next.from && next.to) setOpen(false);
-              }}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
+            <div>
+              <Calendar
+                mode="range"
+                numberOfMonths={months}
+                defaultMonth={startDate}
+                selected={{ from: startDate, to: endDate } as DateRange}
+                onSelect={(range) => {
+                  const next = (range ?? {}) as DateRange;
+                  // Clicar de novo no mesmo dia da ida conclui o período em um
+                  // único dia (react-day-picker devolveria "vazio" nesse caso).
+                  if (!next.from && startDate && !endDate) {
+                    onChange({ start: toYMD(startDate), end: toYMD(startDate) });
+                    setOpen(false);
+                    return;
+                  }
+                  onChange({ start: toYMD(next.from), end: toYMD(next.to) });
+                  if (next.from && next.to) setOpen(false);
+                }}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+              {allowClear ? (
+              <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
+                <span className="text-xs text-muted-foreground">
+                  {startDate && !endDate
+                    ? "Selecione a data de volta"
+                    : startDate
+                    ? summary
+                    : "Selecione a data de ida"}
+                </span>
+                {(startDate || endDate) ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => onChange({ start: "", end: "" })}
+                  >
+                    Limpar período
+                  </Button>
+                ) : null}
+              </div>
+              ) : null}
+            </div>
           ) : (
             <Calendar
               mode="single"
