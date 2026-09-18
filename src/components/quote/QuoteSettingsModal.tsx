@@ -184,16 +184,15 @@ export function QuoteSettingsModal({
 
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-muted/20 px-4 sm:px-6 py-5">
           <header className="mb-5 min-w-0">
-              <div className="w-fit max-w-full">
-                <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-foreground sm:text-base">
-                  <CurrentIcon className="h-4 w-4 shrink-0" />
-                  {current.title}
-                </h3>
-                <div className={cn("mt-2 h-1 w-full rounded-full", current.accentClass)} />
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">{current.description}</p>
-            </header>
-          )}
+            <div className="w-fit max-w-full">
+              <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-foreground sm:text-base">
+                <CurrentIcon className="h-4 w-4 shrink-0" />
+                {current.title}
+              </h3>
+              <div className={cn("mt-2 h-1 w-full rounded-full", current.accentClass)} />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">{current.description}</p>
+          </header>
           {content[active]}
         </div>
 
