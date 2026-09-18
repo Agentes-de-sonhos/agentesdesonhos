@@ -15,6 +15,7 @@ import { PricingSectionCard } from "@/components/itinerary/PricingSectionCard";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
+import { BrandCloudLoader } from "@/components/shared/BrandCloudLoader";
 import { ItineraryCard } from "@/components/itinerary/ItineraryCard";
 import {
   ItineraryListItem,
@@ -558,11 +559,7 @@ export default function CriarRoteiro() {
   if (id && (isRouteItineraryLoading || !currentItinerary)) {
     return (
       <DashboardLayout>
-        <div
-          className="flex min-h-[40vh] w-full items-center justify-center"
-          role="status"
-          aria-label="Carregando roteiro"
-        >
+        <div className="flex min-h-[40vh] w-full items-center justify-center">
           {routeItineraryLoadFailed ? (
             <CriticalErrorState
               title="Não foi possível carregar o roteiro"
@@ -571,7 +568,7 @@ export default function CriarRoteiro() {
               retryLabel="Tentar novamente"
             />
           ) : (
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            <BrandCloudLoader label="Carregando roteiro" />
           )}
         </div>
       </DashboardLayout>

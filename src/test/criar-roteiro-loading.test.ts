@@ -15,7 +15,10 @@ describe("Criar Roteiro — resolução inicial da rota", () => {
     expect(source).toContain(
       "if (id && (isRouteItineraryLoading || !currentItinerary))",
     );
-    expect(source).toContain('aria-label="Carregando roteiro"');
+    expect(source).toContain('<BrandCloudLoader label="Carregando roteiro" />');
+    expect(source).not.toContain(
+      '<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />',
+    );
   });
 
   it("não usa o formulário de criação como fallback de erro da edição", () => {
