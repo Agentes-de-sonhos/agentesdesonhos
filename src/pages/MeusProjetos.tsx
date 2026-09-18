@@ -76,6 +76,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Itinerary } from "@/types/itinerary";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { ProjectRowActions } from "@/components/shared/ProjectRowActions";
+import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
+import { buildProjectPublicUrl } from "@/lib/projectPublicUrl";
+import { useAgencyPublicLinkContext } from "@/hooks/useAgencyPublicLinkContext";
 
 type StatusFilter = "all" | "draft" | "published";
 type SortOrder = "recent" | "az";
@@ -89,6 +93,9 @@ interface ProjectItem {
   status: "draft" | "published";
   type: ProjectType;
   clientName?: string | null;
+  /** Status bruto do banco, usado para decidir o link público. */
+  rawStatus?: string | null;
+  publicAccessCode?: string | null;
 }
 
 const TYPE_LABELS: Record<ProjectType, string> = {
