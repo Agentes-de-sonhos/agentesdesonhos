@@ -59,13 +59,47 @@ describe("Editor de orçamento reorganizado", () => {
 
   it("compacta dados principais em duas linhas e remove o resumo financeiro", () => {
     expect(page).toContain('data-testid="quote-main-data-card"');
-    expect(summary).toContain("md:grid-cols-6");
+    expect(summary).toContain("md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(19rem,1.3fr)]");
     expect(summary).toContain('data-testid="quote-main-data-grid"');
-    expect(summary.match(/md:col-span-2/g)?.length).toBeGreaterThanOrEqual(3);
-    expect(summary.match(/md:col-span-3/g)?.length).toBeGreaterThanOrEqual(2);
     expect(summary).not.toContain("Total Geral");
     expect(summary).not.toContain("serviço(s) incluído(s)");
     expect(summary).not.toContain("getEffectiveQuoteTotal");
+  });
+
+  it("organiza os dados principais em três colunas e duas linhas", () => {
+    const client = summary.indexOf('data-testid="quote-main-client"');
+    const destination = summary.indexOf('data-testid="quote-main-destination"');
+    const period = summary.indexOf('data-testid="quote-main-period"');
+    const title = summary.indexOf('data-testid="quote-main-title"');
+    const passengers = summary.indexOf('data-testid="quote-main-passengers"');
+    const reserved = summary.indexOf('data-testid="quote-main-reserved-cell"');
+
+    expect(client).toBeGreaterThan(-1);
+    expect(client).toBeLessThan(destination);
+    expect(destination).toBeLessThan(period);
+    expect(period).toBeLessThan(title);
+    expect(title).toBeLessThan(passengers);
+    expect(passengers).toBeLessThan(reserved);
+    expect(summary).toContain('data-testid="quote-main-reserved-cell"');
+    expect(summary).toContain('className="hidden min-h-14 border-l border-border/60 md:block"');
+  });
+
+  it("mantém passageiros à esquerda e período legível sem sobreposição", () => {
+    const passengers = summary.match(/data-testid="quote-main-passengers"[\s\S]{0,240}/g) ?? [];
+    expect(passengers).toHaveLength(2);
+    passengers.forEach((cell) => {
+      expect(cell).toContain("justify-start");
+      expect(cell).toContain("text-left");
+      expect(cell).toContain("md:border-l");
+    });
+
+    expect(summary).toContain('data-testid="quote-period-dates"');
+    expect(summary).toContain("block whitespace-nowrap font-medium");
+    expect(summary).toContain('data-testid="quote-period-days"');
+    expect(summary).toContain("block text-center text-muted-foreground");
+    expect(summary).toContain('title="Editar datas"');
+    expect(summary).toMatch(/title="Editar datas"[\s\S]{0,100}<Pencil/);
+    expect(summary).toContain('className="h-6 w-6 shrink-0"');
   });
 
   it("mantém os subtítulos internos simples e os dois cartões de capa equilibrados", () => {

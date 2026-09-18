@@ -89,10 +89,10 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   return (
     <div
       data-testid="quote-main-data-grid"
-      className="grid min-w-0 overflow-hidden rounded-lg border border-border/60 bg-background md:grid-cols-6"
+      className="grid min-w-0 overflow-hidden rounded-lg border border-border/60 bg-background md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(19rem,1.3fr)]"
     >
           {/* Cliente editável */}
-          <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:col-span-2">
+          <div data-testid="quote-main-client" className="flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cliente:</span>
             {editingClient ? (
@@ -118,8 +118,70 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             )}
           </div>
 
+          {/* Destino editável */}
+          <div data-testid="quote-main-destination" className="flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:border-l">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Destino:</span>
+            {editingDest ? (
+              <span className="flex items-center gap-1 flex-1">
+                <Input
+                  className="h-7 text-sm"
+                  value={destDraft}
+                  onChange={(e) => setDestDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") saveDestination();
+                    if (e.key === "Escape") { setDestDraft(quote.destination); setEditingDest(false); }
+                  }}
+                  autoFocus
+                />
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveDestination} title="Salvar">
+                  <Check className="h-3.5 w-3.5" />
+                </Button>
+              </span>
+            ) : (
+              <>
+                <span
+                  className="font-medium cursor-pointer hover:underline truncate"
+                  onClick={() => { setDestDraft(quote.destination); setEditingDest(true); }}
+                >
+                  {quote.destination}
+                </span>
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setDestDraft(quote.destination); setEditingDest(true); }} title="Editar destino">
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Período editável */}
+          {editing ? (
+            <div data-testid="quote-main-period" className="min-h-14 min-w-0 border-b border-border/60 px-3 py-3 md:border-l">
+              <QuoteDateEditor
+                quoteId={quote.id}
+                startDateStr={quote.start_date}
+                endDateStr={quote.end_date}
+                onClose={() => setEditing(false)}
+              />
+            </div>
+          ) : (
+            <div data-testid="quote-main-period" className="flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:border-l">
+              <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="shrink-0 text-muted-foreground">Período:</span>
+              <span className="min-w-0 flex-1 text-center">
+                <span data-testid="quote-period-dates" className="block whitespace-nowrap font-medium">
+                  {format(displayStart, "dd/MM/yyyy", { locale: ptBR })} a{" "}
+                  {format(displayEnd, "dd/MM/yyyy", { locale: ptBR })}
+                </span>
+                <span data-testid="quote-period-days" className="mt-0.5 block text-center text-muted-foreground">({days} dias)</span>
+              </span>
+              <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => setEditing(true)} title="Editar datas">
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
           {/* Título da viagem (opcional) */}
-          <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:order-4 md:col-span-3 md:border-b-0">
+          <div data-testid="quote-main-title" className="flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:border-b-0">
             <Plane className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Título:</span>
             {editingTitle ? (
@@ -156,7 +218,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           
           {/* Passageiros editáveis */}
           {editingPax ? (
-            <div className="flex min-w-0 items-center gap-2 border-border/60 px-3 py-3 text-sm flex-wrap md:order-5 md:col-span-3 md:border-l">
+            <div data-testid="quote-main-passengers" className="flex min-h-14 min-w-0 items-center justify-start gap-2 border-b border-border/60 px-3 py-3 text-left text-sm flex-wrap md:border-b-0 md:border-l">
               <Users className="h-4 w-4 text-muted-foreground" />
               <label className="text-muted-foreground">Adultos:</label>
               <Input
@@ -180,7 +242,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
               </Button>
             </div>
           ) : (
-            <div className="flex min-w-0 items-center gap-4 border-border/60 px-3 py-3 text-sm md:order-5 md:col-span-3 md:border-l">
+            <div data-testid="quote-main-passengers" className="flex min-h-14 min-w-0 items-center justify-start gap-4 border-b border-border/60 px-3 py-3 text-left text-sm md:border-b-0 md:border-l">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span>{quote.adults_count} adulto(s)</span>
@@ -197,64 +259,11 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
             </div>
           )}
 
-          {/* Destino editável */}
-          <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:col-span-2 md:border-l">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">Destino:</span>
-            {editingDest ? (
-              <span className="flex items-center gap-1 flex-1">
-                <Input
-                  className="h-7 text-sm"
-                  value={destDraft}
-                  onChange={(e) => setDestDraft(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveDestination();
-                    if (e.key === "Escape") { setDestDraft(quote.destination); setEditingDest(false); }
-                  }}
-                  autoFocus
-                />
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveDestination} title="Salvar">
-                  <Check className="h-3.5 w-3.5" />
-                </Button>
-              </span>
-            ) : (
-              <>
-                <span
-                  className="font-medium cursor-pointer hover:underline truncate"
-                  onClick={() => { setDestDraft(quote.destination); setEditingDest(true); }}
-                >
-                  {quote.destination}
-                </span>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setDestDraft(quote.destination); setEditingDest(true); }} title="Editar destino">
-                  <Pencil className="h-3.5 w-3.5" />
-                </Button>
-              </>
-            )}
-          </div>
-
-          {editing ? (
-            <div className="min-w-0 border-b border-border/60 px-3 py-3 md:col-span-2 md:border-l">
-              <QuoteDateEditor
-                quoteId={quote.id}
-                startDateStr={quote.start_date}
-                endDateStr={quote.end_date}
-                onClose={() => setEditing(false)}
-              />
-            </div>
-          ) : (
-            <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:col-span-2 md:border-l">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Período:</span>
-              <span className="font-medium">
-                {format(displayStart, "dd/MM/yyyy", { locale: ptBR })} a{" "}
-                {format(displayEnd, "dd/MM/yyyy", { locale: ptBR })}
-              </span>
-              <span className="text-muted-foreground">({days} dias)</span>
-              <Button variant="ghost" size="icon" className="h-6 w-6 ml-1" onClick={() => setEditing(true)} title="Editar datas">
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          )}
+          <div
+            data-testid="quote-main-reserved-cell"
+            aria-hidden="true"
+            className="hidden min-h-14 border-l border-border/60 md:block"
+          />
     </div>
   );
 }
