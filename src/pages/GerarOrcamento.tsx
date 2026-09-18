@@ -1295,9 +1295,6 @@ export default function GerarOrcamento() {
         <div className="flex w-full min-w-0 flex-col gap-3">
           <div className="flex w-full min-w-0 flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3 min-w-0">
-            <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" onClick={() => navigate(nav.quote())}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h1 className="font-display text-lg sm:text-2xl font-bold truncate">

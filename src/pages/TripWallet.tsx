@@ -1047,9 +1047,6 @@ function TripWalletContent() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(nav.wallet())}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
             <div>
               <h1 className="font-display text-2xl font-bold flex items-center gap-2">
                 <Wallet className="h-6 w-6 text-primary" />
