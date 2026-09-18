@@ -37,7 +37,7 @@ import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
-import { Wand2, ArrowLeft, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
+import { Wand2, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
@@ -68,7 +68,6 @@ import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 
 export default function CriarRoteiro() {
-  const navigate = useNavigate();
   const nav = useAdminNav();
   const openInternalWindow = useOpenInternalWindow();
   const { id } = useParams();
