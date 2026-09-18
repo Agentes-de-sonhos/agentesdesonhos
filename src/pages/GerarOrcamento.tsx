@@ -1650,28 +1650,45 @@ export default function GerarOrcamento() {
 
                   </div>
 
-                  {/* Valor total do orçamento: soma automática com edição manual */}
-                  <QuoteTotalAmountCard
-                    quote={quote}
-                    onSavePricing={(input) => setPricingMode(input)}
-                    saving={isSavingPricingMode}
-                  />
-
-                  {/* Toggle do total geral: só nas modalidades detalhada/agrupada */}
-                  {(effectiveLayout === "ungrouped" || effectiveLayout === "grouped") && (
-                    <div className="flex items-start justify-between gap-3 rounded-xl border bg-card p-4 shadow-sm">
+                  {/* Valor total + toggle: duas colunas em desktop nas modalidades detalhada/agrupada */}
+                  {(effectiveLayout === "ungrouped" || effectiveLayout === "grouped") ? (
+                    <div
+                      data-testid="investment-total-row"
+                      className="grid grid-cols-1 items-start gap-4 md:grid-cols-2"
+                    >
                       <div className="min-w-0">
-                        <Label htmlFor="show-investment-total" className="text-sm font-medium">
-                          Exibir valor total do investimento
-                        </Label>
-                        <p className="text-xs text-muted-foreground">
-                          Quando ligado, o cliente vê também o valor total geral no final da apresentação.
-                        </p>
+                        <QuoteTotalAmountCard
+                          quote={quote}
+                          onSavePricing={(input) => setPricingMode(input)}
+                          saving={isSavingPricingMode}
+                        />
                       </div>
-                      <Switch
-                        id="show-investment-total"
-                        checked={!hideInvestmentTotal}
-                        onCheckedChange={(checked) => handleToggleHideInvestmentTotal(!checked)}
+                      <div
+                        data-testid="investment-visibility-toggle"
+                        className="flex h-full min-w-0 items-start justify-between gap-3 self-stretch rounded-xl border bg-card p-4 shadow-sm"
+                      >
+                        <div className="min-w-0">
+                          <Label htmlFor="show-investment-total" className="text-sm font-medium">
+                            Exibir valor total do investimento
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            Quando ligado, o cliente vê também o valor total geral no final da apresentação.
+                          </p>
+                        </div>
+                        <Switch
+                          id="show-investment-total"
+                          checked={!hideInvestmentTotal}
+                          onCheckedChange={(checked) => handleToggleHideInvestmentTotal(!checked)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    /* Modalidade consolidada: card em largura total */
+                    <div data-testid="investment-total-fullwidth">
+                      <QuoteTotalAmountCard
+                        quote={quote}
+                        onSavePricing={(input) => setPricingMode(input)}
+                        saving={isSavingPricingMode}
                       />
                     </div>
                   )}
