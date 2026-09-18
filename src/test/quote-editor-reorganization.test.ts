@@ -7,6 +7,7 @@ const settings = readFileSync("src/components/quote/QuoteSettingsModal.tsx", "ut
 const summary = readFileSync("src/components/quote/QuoteSummary.tsx", "utf8");
 const destination = readFileSync("src/components/quote/DestinationIntroEditor.tsx", "utf8");
 const advancedSection = readFileSync("src/components/quote/AdvancedSettingsSection.tsx", "utf8");
+const advanced = readFileSync("src/components/quote/QuoteAdvancedSettings.tsx", "utf8");
 
 describe("Editor de orçamento reorganizado", () => {
   it("tem somente quatro passos explicativos na ordem aprovada", () => {
@@ -82,7 +83,7 @@ describe("Editor de orçamento reorganizado", () => {
     expect(settings).toContain("CurrentIcon");
     expect(advancedSection).toContain("accentClass");
     expect(advancedSection).toContain("h-1 w-full rounded-full");
-    expect(page).toContain('title="Moeda do orçamento"');
+    expect(advanced).toContain('title="Moeda do orçamento"');
     expect(page).toContain("QuoteBookingRequestSettings");
     expect(page).toContain("DocumentSignatureCard");
   });
