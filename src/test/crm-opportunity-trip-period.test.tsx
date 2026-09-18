@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
 const createOpportunity = vi.fn((_payload: any, opts: any) => opts?.onSuccess?.({ id: "opp-new" }));
-const updateOpportunity = vi.fn(async () => ({}));
+const updateOpportunity = vi.fn(async (_payload: any) => ({}) as any);
 const syncFollowups = vi.fn(async () => ({}));
 
 vi.mock("@/hooks/useCRM", () => ({
@@ -71,7 +71,7 @@ describe("Oportunidade — Período da viagem", () => {
     clickDay(17);
     fireEvent.click(screen.getByRole("button", { name: "Criar" }));
     await waitFor(() => expect(createOpportunity).toHaveBeenCalled());
-    const payload = createOpportunity.mock.calls[0][0];
+    const payload = (createOpportunity.mock.calls[0] as any[])[0];
     expect(payload.start_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(payload.end_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(payload.end_date >= payload.start_date).toBe(true);
@@ -86,7 +86,7 @@ describe("Oportunidade — Período da viagem", () => {
     clickDay(12);
     fireEvent.click(screen.getByRole("button", { name: "Criar" }));
     await waitFor(() => expect(createOpportunity).toHaveBeenCalled());
-    const payload = createOpportunity.mock.calls[0][0];
+    const payload = (createOpportunity.mock.calls[0] as any[])[0];
     expect(payload.start_date).toBe(payload.end_date);
   });
 
@@ -96,7 +96,7 @@ describe("Oportunidade — Período da viagem", () => {
     fireEvent.change(screen.getByPlaceholderText("Paris, França"), { target: { value: "Orlando" } });
     fireEvent.click(screen.getByRole("button", { name: "Criar" }));
     await waitFor(() => expect(createOpportunity).toHaveBeenCalled());
-    const payload = createOpportunity.mock.calls[0][0];
+    const payload = (createOpportunity.mock.calls[0] as any[])[0];
     expect(payload.start_date).toBeUndefined();
     expect(payload.end_date).toBeUndefined();
   });
@@ -119,8 +119,8 @@ describe("Oportunidade — Período da viagem", () => {
     fireEvent.click(screen.getByRole("button", { name: "Limpar período" }));
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
     await waitFor(() => expect(updateOpportunity).toHaveBeenCalled());
-    expect(updateOpportunity.mock.calls[0][0].start_date).toBeUndefined();
-    expect(updateOpportunity.mock.calls[0][0].end_date).toBeUndefined();
+    expect((updateOpportunity.mock.calls[0] as any[])[0].start_date).toBeUndefined();
+    expect((updateOpportunity.mock.calls[0] as any[])[0].end_date).toBeUndefined();
   });
 
   it("edição com somente start_date mantém a ida e permite completar a volta", async () => {
@@ -141,7 +141,7 @@ describe("Oportunidade — Período da viagem", () => {
     clickDay(25);
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
     await waitFor(() => expect(updateOpportunity).toHaveBeenCalled());
-    const payload = updateOpportunity.mock.calls[0][0];
+    const payload = (updateOpportunity.mock.calls[0] as any[])[0];
     expect(payload.start_date).toBe("2026-10-18");
     expect(payload.end_date).toBe("2026-10-25");
   });
