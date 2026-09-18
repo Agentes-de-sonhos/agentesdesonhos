@@ -102,6 +102,18 @@ describe("Editor de orçamento reorganizado", () => {
     expect(summary).toContain('className="h-6 w-6 shrink-0"');
   });
 
+  it("mantém o gatilho de validade compacto, responsivo e com calendário", () => {
+    const validityBlock = page.match(/renderValidity=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
+    expect(validityBlock).toContain("Válido até");
+    expect(validityBlock).toContain('sm:w-[13rem]');
+    expect(validityBlock).toContain("w-full");
+    expect(validityBlock).toMatch(/w-full sm:w-\[13rem\]/);
+    expect(validityBlock).not.toMatch(/<Button[^>]*className=\{cn\("w-full justify-start/);
+    expect(validityBlock).toContain("CalendarIcon");
+    expect(validityBlock).toContain("pointer-events-auto");
+    expect(validityBlock).toContain('onSelect={setValidUntil}');
+  });
+
   it("mantém os subtítulos internos simples e os dois cartões de capa equilibrados", () => {
     const initial = page.match(/renderInitial=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
     const dataHeading = initial.match(/<h4 id="quote-initial-data-title"[\s\S]*?<\/h4>/)?.[0] ?? "";

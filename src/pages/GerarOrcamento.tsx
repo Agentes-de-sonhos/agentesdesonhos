@@ -1847,7 +1847,7 @@ export default function GerarOrcamento() {
                       <Label className="text-sm">Válido até</Label>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !validUntil && "text-muted-foreground")}>
+                          <Button variant="outline" className={cn("w-full sm:w-[13rem] max-w-full justify-start text-left font-normal", !validUntil && "text-muted-foreground")}>
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {validUntil ? format(validUntil, "dd/MM/yyyy", { locale: ptBR }) : "Selecione uma data"}
                           </Button>
