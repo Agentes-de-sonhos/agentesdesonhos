@@ -32,18 +32,19 @@ function fakeStorage() {
 }
 
 describe("Datas relativas do cenário demo — janela e delta", () => {
-  it("coloca embarque em hoje+3 e retorno em hoje+10", () => {
-    expect(START_OFFSET_DAYS).toBe(3);
-    expect(END_OFFSET_DAYS).toBe(10);
+  it("coloca embarque em hoje+7 e retorno em hoje+14", () => {
+    expect(START_OFFSET_DAYS).toBe(7);
+    expect(END_OFFSET_DAYS).toBe(14);
+    expect(END_OFFSET_DAYS - START_OFFSET_DAYS).toBe(7);
     const w = targetWindow(TODAY);
-    expect(w.start).toBe("2026-09-19");
-    expect(w.end).toBe("2026-09-26");
+    expect(w.start).toBe("2026-09-23");
+    expect(w.end).toBe("2026-09-30");
   });
 
-  it("usa um único delta para levar o embarque atual até hoje+3", () => {
-    expect(computeDelta("2026-09-09", TODAY)).toBe(10);
-    expect(computeDelta("2026-10-19", TODAY)).toBe(-30);
-    expect(computeDelta("2026-09-19", TODAY)).toBe(0);
+  it("usa um único delta para levar o embarque atual até hoje+7", () => {
+    expect(computeDelta("2026-09-09", TODAY)).toBe(14);
+    expect(computeDelta("2026-10-19", TODAY)).toBe(-26);
+    expect(computeDelta("2026-09-23", TODAY)).toBe(0);
   });
 
   it("calcula 'hoje' no fuso America/Sao_Paulo", () => {
