@@ -151,7 +151,7 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
   const guide = readFileSync("src/components/quote/QuoteStepsGuide.tsx", "utf8");
 
   it("mostra os dois botões de geração apenas enquanto não há URL pública", () => {
-    expect(page).toContain("{!quote.share_token && (");
+    expect(page).toContain("actions={!quote.share_token ? (");
     expect(page).not.toContain("PublicLinkActions");
     // A barra de compartilhamento só existe com share_token.
     const barIndex = page.indexOf("<QuoteShareBar");
@@ -168,7 +168,7 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
   });
 
   it("no estado sem URL, o botão PDF também usa estilo primário", () => {
-    const preIndex = page.indexOf("{!quote.share_token && (");
+    const preIndex = page.indexOf("actions={!quote.share_token ? (");
     const block = page.slice(preIndex, preIndex + 1200);
     expect(block).toContain("Gerar orçamento PDF");
     expect(block).not.toContain('variant="outline"');
