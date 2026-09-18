@@ -33,8 +33,9 @@ function ExplanatoryStep({
           size="sm"
           aria-label={`${step.short}: ${step.hint}`}
           aria-expanded={open}
-          onClick={(event) => {
+          onClickCapture={(event) => {
             event.preventDefault();
+            event.stopPropagation();
             onOpenChange(!open);
           }}
           className="h-8 w-full min-w-0 gap-1 rounded-full px-1.5 text-[10px] font-medium text-muted-foreground hover:bg-background hover:text-muted-foreground sm:gap-1.5 sm:px-2 sm:text-[11px] xl:gap-2 xl:px-2.5 xl:text-xs"
