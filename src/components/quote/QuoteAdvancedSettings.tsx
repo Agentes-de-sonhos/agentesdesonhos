@@ -75,7 +75,9 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle, always
   const body = (
     <div className="space-y-5">
       <div className="space-y-1">
-        {typeof open !== "boolean" && <p className="text-sm font-semibold">Moeda do orçamento</p>}
+        {typeof open !== "boolean" && !alwaysOpen && (
+          <p className="text-sm font-semibold">Moeda do orçamento</p>
+        )}
         <p className="text-xs text-muted-foreground">
           Altere a moeda a qualquer momento. Os valores cadastrados nos serviços não são modificados —
           apenas a forma como eles são apresentados no link público, no PDF e no total do orçamento.
