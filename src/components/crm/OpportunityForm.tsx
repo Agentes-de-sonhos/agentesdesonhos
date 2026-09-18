@@ -32,18 +32,25 @@ import { useOpportunityFollowups, type FollowupDraft } from "@/hooks/useOpportun
 import type { Opportunity } from "@/types/crm";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import { OpportunityRequestedServices } from "./OpportunityRequestedServices";
+import { TripDatePicker, parseYMD, toYMD } from "@/components/whitelabel/TripDatePicker";
 
-const opportunitySchema = z.object({
-  client_id: z.string().min(1, "Selecione um cliente"),
-  destination: z.string().min(2, "Destino é obrigatório"),
-  start_date: z.date().optional(),
-  end_date: z.date().optional(),
-  adults_count: z.number().min(1, "Mínimo 1 adulto"),
-  children_count: z.number().min(0, "Não pode ser negativo"),
-  estimated_value: z.number().min(0),
-  notes: z.string().optional(),
-  assigned_team_member_id: z.string().optional(),
-});
+export const opportunitySchema = z
+  .object({
+    client_id: z.string().min(1, "Selecione um cliente"),
+    destination: z.string().min(2, "Destino é obrigatório"),
+    start_date: z.date().optional(),
+    end_date: z.date().optional(),
+    adults_count: z.number().min(1, "Mínimo 1 adulto"),
+    children_count: z.number().min(0, "Não pode ser negativo"),
+    estimated_value: z.number().min(0),
+    notes: z.string().optional(),
+    assigned_team_member_id: z.string().optional(),
+  })
+  // Período opcional, mas a volta nunca pode anteceder a ida.
+  .refine(
+    (v) => !v.start_date || !v.end_date || v.end_date.getTime() >= v.start_date.getTime(),
+    { path: ["start_date"], message: "A data de volta não pode ser anterior à data de ida." },
+  );
 
 type FormData = z.infer<typeof opportunitySchema>;
 
