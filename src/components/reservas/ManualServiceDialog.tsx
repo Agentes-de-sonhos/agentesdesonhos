@@ -21,6 +21,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { parsePastedCurrency } from "@/lib/currencyMask";
 import type { TravelFileService } from "@/types/travelFile";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const SERVICE_TYPES: { value: string; label: string }[] = [
   { value: "aereo", label: "Passagem aérea" },
@@ -199,24 +200,14 @@ export function ManualServiceDialog({
                 onChange={(e) => setDestination(e.target.value)}
               />
             </div>
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="servico-inicio">Início (opcional)</Label>
-              <Input
-                id="servico-inicio"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="servico-fim">Fim (opcional)</Label>
-              <Input
-                id="servico-fim"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
+            <TripPeriodField
+              id="servico-periodo"
+              label="Período do serviço (opcional)"
+              className="min-w-0 sm:col-span-2"
+              start={startDate}
+              end={endDate}
+              onChange={({ start, end }) => { setStartDate(start); setEndDate(end); }}
+            />
             <div className="min-w-0 space-y-2">
               <Label htmlFor="servico-qtd">Quantidade</Label>
               <Input

@@ -74,6 +74,7 @@ import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
 import { fetchPlaceMetadata, extractPlaceDescription } from "@/lib/hotelMetadata";
 import { suggestServiceDescription } from "@/lib/serviceDescriptionSuggestion";
+import { TripPeriodField, parseYMD, toYMD } from "@/components/shared/TripPeriodField";
 
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
@@ -1072,29 +1073,24 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         {/* 2. Google photos (auto after hotel selection) */}
         {photoSlot}
 
-        {/* 3. Dates */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="check_in" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Check-in</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
-          <FormField control={form.control} name="check_out" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Check-out</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
+        {/* 3. Período da hospedagem (seletor único de intervalo) */}
+        <div className="grid gap-4">
+          <FormField control={form.control} name="check_in" render={() => (
+            <FormItem className="flex flex-col">
+              <TripPeriodField
+                id="hotel-periodo"
+                label="Período da hospedagem"
+                start={toYMD(form.watch("check_in"))}
+                end={toYMD(form.watch("check_out"))}
+                onChange={({ start, end }) => {
+                  form.setValue("check_in", parseYMD(start) as Date, { shouldValidate: true, shouldDirty: true });
+                  form.setValue("check_out", parseYMD(end) as Date, { shouldValidate: true, shouldDirty: true });
+                }}
+                disabledDates={disableDate}
+                defaultMonth={defaultMonth(tripStartDate)}
+              />
+              <FormMessage />
+            </FormItem>
           )} />
         </div>
 
@@ -1349,80 +1345,29 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           )} />
         </div>
 
-        {/* Date/Time fields */}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <FormField control={form.control} name="pickup_date" render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="flex items-center gap-1.5">
-                  <CalendarIcon className="h-3.5 w-3.5" /> Data de Retirada
-                </FormLabel>
-                <Popover open={pickupOpen} onOpenChange={setPickupOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={(d) => {
-                        if (d) {
-                          field.onChange(d);
-                          setDaysManual(false);
-                          const currentDropoff = form.getValues("dropoff_date");
-                          if (currentDropoff && d > currentDropoff) {
-                            form.setValue("dropoff_date", d);
-                          }
-                        }
-                        setPickupOpen(false);
-                      }}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )} />
+        {/* Período da locação + horários das respectivas pontas */}
+        <div className="space-y-4">
+          <FormField control={form.control} name="pickup_date" render={() => (
+            <FormItem className="flex flex-col">
+              <TripPeriodField
+                id="car-rental-periodo"
+                label="Período da locação"
+                start={toYMD(form.watch("pickup_date"))}
+                end={toYMD(form.watch("dropoff_date"))}
+                onChange={({ start, end }) => {
+                  setDaysManual(false);
+                  form.setValue("pickup_date", parseYMD(start) ?? null, { shouldValidate: true, shouldDirty: true });
+                  form.setValue("dropoff_date", parseYMD(end) ?? null, { shouldValidate: true, shouldDirty: true });
+                }}
+              />
+              <FormMessage />
+            </FormItem>
+          )} />
+          <div className="grid gap-4 sm:grid-cols-2">
             <FormField control={form.control} name="pickup_time" render={({ field }) => (
               <FormItem>
                 <FormLabel>Hora de Retirada</FormLabel>
                 <FormControl><Input type="time" {...field} /></FormControl>
-              </FormItem>
-            )} />
-          </div>
-          <div className="space-y-2">
-            <FormField control={form.control} name="dropoff_date" render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel className="flex items-center gap-1.5">
-                  <CalendarIcon className="h-3.5 w-3.5" /> Data de Devolução
-                </FormLabel>
-                <Popover open={dropoffOpen} onOpenChange={setDropoffOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={(d) => { if (d) { field.onChange(d); setDaysManual(false); } setDropoffOpen(false); }}
-                      disabled={(d) => pickupDate ? d < pickupDate : false}
-                      initialFocus
-                      className="p-3 pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
               </FormItem>
             )} />
             <FormField control={form.control} name="dropoff_time" render={({ field }) => (
@@ -1909,30 +1854,23 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
         <FormField control={form.control} name="provider" render={({ field }) => (
           <FormItem><FormLabel>Seguradora</FormLabel><FormControl><Input placeholder="Assist Card, Travel Ace..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="start_date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data Início</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
-          <FormField control={form.control} name="end_date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data Fim</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
-        </div>
+        <FormField control={form.control} name="start_date" render={() => (
+          <FormItem className="flex flex-col">
+            <TripPeriodField
+              id="insurance-periodo"
+              label="Período do seguro"
+              start={toYMD(form.watch("start_date"))}
+              end={toYMD(form.watch("end_date"))}
+              onChange={({ start, end }) => {
+                form.setValue("start_date", parseYMD(start) as Date, { shouldValidate: true, shouldDirty: true });
+                form.setValue("end_date", parseYMD(end) as Date, { shouldValidate: true, shouldDirty: true });
+              }}
+              disabledDates={disableDate}
+              defaultMonth={defaultMonth(tripStartDate)}
+            />
+            <FormMessage />
+          </FormItem>
+        )} />
         <FormField control={form.control} name="coverage" render={({ field }) => (
           <FormItem><FormLabel>Cobertura</FormLabel><FormControl><Input placeholder="USD 60.000, USD 100.000..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -2135,30 +2073,23 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             <FormMessage />
           </FormItem>
         )} />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <FormField control={form.control} name="start_date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data Embarque</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
-          <FormField control={form.control} name="end_date" render={({ field }) => (
-            <FormItem className="flex flex-col"><FormLabel>Data Desembarque</FormLabel>
-              <Popover><PopoverTrigger asChild><FormControl>
-                <Button variant="outline" className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                  {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </Button></FormControl></PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
-                </PopoverContent>
-              </Popover><FormMessage /></FormItem>
-          )} />
-        </div>
+        <FormField control={form.control} name="start_date" render={() => (
+          <FormItem className="flex flex-col">
+            <TripPeriodField
+              id="cruise-periodo"
+              label="Período do cruzeiro"
+              start={toYMD(form.watch("start_date"))}
+              end={toYMD(form.watch("end_date"))}
+              onChange={({ start, end }) => {
+                form.setValue("start_date", parseYMD(start) as Date, { shouldValidate: true, shouldDirty: true });
+                form.setValue("end_date", parseYMD(end) as Date, { shouldValidate: true, shouldDirty: true });
+              }}
+              disabledDates={disableDate}
+              defaultMonth={defaultMonth(tripStartDate)}
+            />
+            <FormMessage />
+          </FormItem>
+        )} />
         {/* ─────────── Opções de cabine ─────────── */}
         <div className="rounded-lg border bg-card/50 p-4 space-y-3">
           <div>

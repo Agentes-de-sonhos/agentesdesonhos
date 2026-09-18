@@ -7,6 +7,7 @@ import { Pencil, Check, X, CalendarDays, User } from "lucide-react";
 import { Booking, BOOKING_STATUSES, STATUS_COLORS, useClients } from "@/hooks/useBookings";
 import { useBookings } from "@/hooks/useBookings";
 import { format } from "date-fns";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 interface Props {
   booking: Booking;
@@ -67,16 +68,12 @@ export function BookingHeader({ booking }: Props) {
                 {Object.entries(BOOKING_STATUSES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Início</label>
-                <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-1" />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Fim</label>
-                <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="mt-1" />
-              </div>
-            </div>
+            <TripPeriodField
+              id="booking-header-periodo"
+              start={startDate}
+              end={endDate}
+              onChange={({ start, end }) => { setStartDate(start); setEndDate(end); }}
+            />
           </div>
           <div className="flex gap-2 justify-end">
             <Button variant="outline" size="sm" onClick={cancel} className="gap-1"><X className="h-3 w-3" /> Cancelar</Button>

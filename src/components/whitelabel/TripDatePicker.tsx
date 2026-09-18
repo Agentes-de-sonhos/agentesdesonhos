@@ -58,6 +58,10 @@ export interface TripDatePickerProps {
   dateFormat?: "long" | "short";
   /** Exibe a ação "Limpar período" dentro do calendário. */
   allowClear?: boolean;
+  /** Mesma assinatura do `disabled` do Calendar — preserva regras já existentes. */
+  disabledDates?: (date: Date) => boolean;
+  /** Mês inicial exibido quando não há data selecionada. */
+  defaultMonth?: Date;
 }
 
 /**
@@ -69,7 +73,7 @@ export interface TripDatePickerProps {
 export function TripDatePicker({
   id, label, mode, start, end, onChange, editorial, error, help, required,
   className, triggerClassName, placeholder, labelVariant = "site",
-  dateFormat = "long", allowClear,
+  dateFormat = "long", allowClear, disabledDates, defaultMonth,
 }: TripDatePickerProps) {
   const [open, setOpen] = useState(false);
   const startDate = useMemo(() => parseYMD(start), [start]);
@@ -142,7 +146,8 @@ export function TripDatePicker({
               <Calendar
                 mode="range"
                 numberOfMonths={months}
-                defaultMonth={startDate}
+                disabled={disabledDates}
+                defaultMonth={startDate ?? defaultMonth}
                 selected={{ from: startDate, to: endDate } as DateRange}
                 onSelect={(range) => {
                   const next = (range ?? {}) as DateRange;
@@ -186,7 +191,8 @@ export function TripDatePicker({
             <Calendar
               mode="single"
               numberOfMonths={months}
-              defaultMonth={startDate}
+              disabled={disabledDates}
+              defaultMonth={startDate ?? defaultMonth}
               selected={startDate}
               onSelect={(date) => {
                 onChange({ start: toYMD(date ?? undefined), end: "" });

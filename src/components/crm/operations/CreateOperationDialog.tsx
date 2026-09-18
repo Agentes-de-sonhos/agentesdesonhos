@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useClients } from "@/hooks/useCRM";
 import { useOperations } from "@/hooks/useOperations";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 interface Props {
   open: boolean;
@@ -75,15 +76,13 @@ export function CreateOperationDialog({ open, onOpenChange }: Props) {
             <Label>Destino</Label>
             <Input value={destination} onChange={(e) => setDestination(e.target.value)} />
           </div>
+          <TripPeriodField
+            id="operation-period"
+            start={startDate}
+            end={endDate}
+            onChange={({ start, end }) => { setStartDate(start); setEndDate(end); }}
+          />
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>Embarque</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            </div>
-            <div>
-              <Label>Retorno</Label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-            </div>
             <div>
               <Label>Passageiros</Label>
               <Input type="number" min={1} value={pax} onChange={(e) => setPax(Number(e.target.value))} />

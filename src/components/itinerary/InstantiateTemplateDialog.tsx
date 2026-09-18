@@ -10,6 +10,7 @@ import { ClientSelector } from "@/components/shared/ClientSelector";
 import { TRIP_PROFILE_LABELS } from "@/types/itinerary";
 import { useItineraryTemplates, type ItineraryTemplate } from "@/hooks/useItineraryTemplates";
 import { toast } from "sonner";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const STYLE_LABELS = {
   economico: "Econômico",
@@ -99,16 +100,12 @@ export function InstantiateTemplateDialog({ open, onOpenChange, template }: Prop
             <ClientSelector value={client} onChange={setClient} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5" /> Início</Label>
-              <Input type="date" value={startStr} onChange={(e) => setStartStr(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="flex items-center gap-1"><CalendarDays className="h-3.5 w-3.5" /> Volta</Label>
-              <Input type="date" value={endStr} onChange={(e) => setEndStr(e.target.value)} />
-            </div>
-          </div>
+          <TripPeriodField
+            id="template-period"
+            start={startStr}
+            end={endStr}
+            onChange={({ start, end }) => { setStartStr(start); setEndStr(end); }}
+          />
 
           <div className="text-xs text-muted-foreground">
             {nightsNew} noites • modelo original: {template.nights_count} noites

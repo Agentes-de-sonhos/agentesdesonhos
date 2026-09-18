@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -35,8 +36,6 @@ export function QuoteDateEditor({ quoteId, startDateStr, endDateStr, onClose }: 
   const [saving, setSaving] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(() => parseLocalDate(startDateStr));
   const [endDate, setEndDate] = useState<Date | undefined>(() => parseLocalDate(endDateStr));
-  const [startOpen, setStartOpen] = useState(false);
-  const [endOpen, setEndOpen] = useState(false);
 
   const handleSave = async () => {
     if (!startDate || !endDate) {
@@ -69,55 +68,15 @@ export function QuoteDateEditor({ quoteId, startDateStr, endDateStr, onClose }: 
         <CalendarIcon className="h-4 w-4 text-primary" />
         Editar Datas
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <span className="text-xs text-muted-foreground mb-1 block">Ida</span>
-          <Popover open={startOpen} onOpenChange={setStartOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={(d) => {
-                  if (d) {
-                    setStartDate(d);
-                    if (endDate && d > endDate) setEndDate(undefined);
-                  }
-                  setStartOpen(false);
-                }}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-        <div>
-          <span className="text-xs text-muted-foreground mb-1 block">Volta</span>
-          <Popover open={endOpen} onOpenChange={setEndOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
-                <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={(d) => { if (d) setEndDate(d); setEndOpen(false); }}
-                disabled={(d) => startDate ? d < startDate : false}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
+      <TripPeriodField
+        id="quote-date-editor-periodo"
+        start={startDate ? toYMD(startDate) : ""}
+        end={endDate ? toYMD(endDate) : ""}
+        onChange={({ start, end }) => {
+          setStartDate(start ? parseLocalDate(start) : undefined);
+          setEndDate(end ? parseLocalDate(end) : undefined);
+        }}
+      />
       <div className="flex gap-2 justify-end">
         <Button variant="ghost" size="sm" onClick={onClose} disabled={saving}>Cancelar</Button>
         <Button size="sm" onClick={handleSave} disabled={saving || !startDate || !endDate}>

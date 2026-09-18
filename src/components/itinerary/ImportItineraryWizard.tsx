@@ -27,6 +27,7 @@ import type {
   ItineraryFormData,
 } from "@/types/itinerary";
 import { useNavigate } from "react-router-dom";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 type Period = "manha" | "tarde" | "noite";
 
@@ -459,24 +460,14 @@ export function ImportItineraryWizard({ open, onOpenChange }: Props) {
                     className="mt-1"
                   />
                 </div>
-                <div>
-                  <div className="text-xs uppercase text-muted-foreground">Início</div>
-                  <Input
-                    type="date"
-                    value={parsed.start_date ?? ""}
-                    onChange={(e) => setParsed({ ...parsed, start_date: e.target.value || null })}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <div className="text-xs uppercase text-muted-foreground">Fim</div>
-                  <Input
-                    type="date"
-                    value={parsed.end_date ?? ""}
-                    onChange={(e) => setParsed({ ...parsed, end_date: e.target.value || null })}
-                    className="mt-1"
-                  />
-                </div>
+                <TripPeriodField
+                  id="import-itinerary-period"
+                  start={parsed.start_date ?? ""}
+                  end={parsed.end_date ?? ""}
+                  onChange={({ start, end }) =>
+                    setParsed({ ...parsed, start_date: start || null, end_date: end || null })
+                  }
+                />
               </div>
               <div className="mt-3 text-sm text-muted-foreground">
                 {parsed.days.length} dia(s) identificado(s) · {totalActivities} atividade(s)
