@@ -31,16 +31,11 @@ import {
   Wallet,
   Route,
   StickyNote,
-  Pencil,
-  Copy,
-  Trash2,
   Loader2,
   FolderOpen,
   MapPin,
   Calendar,
   Star,
-  Eye,
-  Link2,
   Plus,
 } from "lucide-react";
 import { Ticket } from "lucide-react";
