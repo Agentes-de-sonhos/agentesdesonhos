@@ -116,6 +116,9 @@ export default function CriarRoteiro() {
   const [listSearch, setListSearch] = useState("");
   const debouncedListSearch = useDebounce(listSearch, 200);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [isRouteItineraryLoading, setIsRouteItineraryLoading] = useState(Boolean(id));
+  const [routeItineraryLoadFailed, setRouteItineraryLoadFailed] = useState(false);
+  const [routeLoadAttempt, setRouteLoadAttempt] = useState(0);
 
   const {
     itineraries,
@@ -165,10 +168,41 @@ export default function CriarRoteiro() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (id) {
-      loadItinerary(id);
+    if (!id) {
+      setIsRouteItineraryLoading(false);
+      setRouteItineraryLoadFailed(false);
+      return;
     }
-  }, [id]);
+
+    let isCurrentRequest = true;
+    setCurrentItinerary(null);
+    setIsRouteItineraryLoading(true);
+    setRouteItineraryLoadFailed(false);
+
+    getItineraryWithDetails(id)
+      .then((data) => {
+        if (!isCurrentRequest) return;
+        setCurrentItinerary(data);
+        setActiveTab("create");
+        if (data.status === "published" && data.shareToken) {
+          setGeneratedLinkUrl(buildItineraryUrl(data));
+        }
+      })
+      .catch(() => {
+        if (!isCurrentRequest) return;
+        setRouteItineraryLoadFailed(true);
+        toast.error("Erro ao carregar roteiro");
+      })
+      .finally(() => {
+        if (isCurrentRequest) setIsRouteItineraryLoading(false);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+    // A nova tentativa é intencionalmente controlada pelo botão de erro.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, routeLoadAttempt]);
 
   // Recompute the public link once the agency profile finishes loading, so
   // we always prefer seuroteiro.tur.br/{agencia}/{code} over the legacy
@@ -520,6 +554,29 @@ export default function CriarRoteiro() {
       setIsProcessingAction(false);
     }
   };
+
+  if (id && (isRouteItineraryLoading || !currentItinerary)) {
+    return (
+      <DashboardLayout>
+        <div
+          className="flex min-h-[40vh] w-full items-center justify-center"
+          role="status"
+          aria-label="Carregando roteiro"
+        >
+          {routeItineraryLoadFailed ? (
+            <CriticalErrorState
+              title="Não foi possível carregar o roteiro"
+              description="Tente novamente para abrir este roteiro."
+              onRetry={() => setRouteLoadAttempt((attempt) => attempt + 1)}
+              retryLabel="Tentar novamente"
+            />
+          ) : (
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden="true" />
+          )}
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
