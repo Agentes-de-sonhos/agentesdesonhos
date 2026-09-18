@@ -159,6 +159,7 @@ export function TripDatePicker({
                 initialFocus
                 className={cn("p-3 pointer-events-auto")}
               />
+              {allowClear ? (
               <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
                 <span className="text-xs text-muted-foreground">
                   {startDate && !endDate
@@ -167,7 +168,7 @@ export function TripDatePicker({
                     ? summary
                     : "Selecione a data de ida"}
                 </span>
-                {allowClear && (startDate || endDate) ? (
+                {(startDate || endDate) ? (
                   <Button
                     type="button"
                     variant="ghost"
@@ -179,6 +180,7 @@ export function TripDatePicker({
                   </Button>
                 ) : null}
               </div>
+              ) : null}
             </div>
           ) : (
             <Calendar
