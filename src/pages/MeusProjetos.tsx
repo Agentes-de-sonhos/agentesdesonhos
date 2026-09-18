@@ -274,6 +274,10 @@ export default function MeusProjetos() {
   const [deleteTarget, setDeleteTarget] = useState<ProjectItem | null>(null);
   const [templateTarget, setTemplateTarget] = useState<Itinerary | null>(null);
 
+  /** Abre a edição em nova aba interna (gerenciador existente, limite de 10). */
+  const openInternalWindow = useOpenInternalWindow();
+  const { agencyName, customDomain } = useAgencyPublicLinkContext();
+
   const { quotes, isLoading: quotesLoading, deleteQuote, duplicateQuote } = useQuotes();
   const { trips, isLoading: tripsLoading, deleteTrip, duplicateTrip } = useTrips();
   const { itineraries, isLoading: itinerariesLoading, deleteItinerary, duplicateItinerary } = useItineraries();
