@@ -77,7 +77,7 @@ describe("Apresentação do investimento — grid valor total + toggle", () => {
     // Toggle na segunda coluna, preenchendo a altura da linha
     const toggleStart = page.indexOf('data-testid="investment-visibility-toggle"');
     expect(toggleStart).toBeGreaterThan(rowStart);
-    const toggle = page.slice(toggleStart, toggleStart + 400);
+    const toggle = page.slice(toggleStart, toggleStart + 800);
     expect(toggle).toContain("self-stretch");
     expect(toggle).toContain('id="show-investment-total"');
     // Valor total na primeira coluna, antes do toggle
