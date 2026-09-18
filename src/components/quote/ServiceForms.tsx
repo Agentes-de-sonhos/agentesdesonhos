@@ -73,6 +73,8 @@ import { SEGMENT_TYPE_OPTIONS, classifySegments, classifyReturnSegments, splitFl
 import type { SegmentType } from "@/types/quote";
 import { useAirports } from "@/hooks/useAirports";
 import { fetchPlaceMetadata, extractPlaceDescription } from "@/lib/hotelMetadata";
+import { suggestServiceDescription } from "@/lib/serviceDescriptionSuggestion";
+
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
  * Returns undefined for empty/invalid input (e.g. "25 Set" from AI import
@@ -110,8 +112,11 @@ interface ServiceFormProps {
   paymentSlot?: ((liveAmount: number) => React.ReactNode) | React.ReactNode;
   /** Optional slot for photo upload */
   photoSlot?: React.ReactNode;
+  /** Destino/contexto do orçamento — usado para priorizar buscas de lugares. */
+  destinationContext?: string | null;
   /** Called when the service mode chooser becomes active/inactive so the parent modal can adapt its layout */
   onChooserActiveChange?: (active: boolean) => void;
+
 }
 
 /** Resolve paymentSlot: if it's a function, call with amount; otherwise render as-is */
@@ -2650,8 +2655,21 @@ function RailTransportForm({
   );
 }
 
-function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+export const OTHER_SERVICE_NAME_LABEL = "Nome do serviço, atividade ou empresa";
+export const OTHER_SERVICE_NAME_PLACEHOLDER = "Digite o nome do passeio, atividade, atração ou empresa…";
+/** Ordem oficial dos campos do formulário manual de Outros Serviços. */
+export const OTHER_FORM_FIELD_ORDER = [
+  "company_name",
+  "description",
+  "photos",
+  "price",
+  "payment",
+  "custom_title",
+] as const;
+
+function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData, paymentSlot, photoSlot, onPlaceIdChange, destinationContext }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
+  const [placeId, setPlaceId] = useState<string | null>((init as any)?.place_id ?? null);
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
     defaultValues: {
@@ -2663,18 +2681,78 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
     },
   });
 
+  // Serviço salvo/duplicado já vinculado a um lugar: a galeria fica disponível
+  // sem exigir nova seleção. Serviços antigos (sem place_id) seguem manuais.
+  useEffect(() => {
+    const persisted = (init as any)?.place_id ?? null;
+    if (persisted) onPlaceIdChange?.(persisted);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const descriptionRequestRef = useRef<string | null>(null);
+
+  const handlePlaceSelect = useCallback((prediction: { place_id: string; name: string; secondary?: string }) => {
+    setPlaceId(prediction.place_id);
+    onPlaceIdChange?.(prediction.place_id);
+    form.setValue("company_name", prediction.name);
+    descriptionRequestRef.current = prediction.place_id;
+    void suggestServiceDescription({
+      placeId: prediction.place_id,
+      name: prediction.name,
+      context: prediction.secondary || destinationContext || null,
+    }).then((text) => {
+      if (descriptionRequestRef.current !== prediction.place_id) return;
+      if (!text) return;
+      // Nunca sobrescreve texto já digitado pelo usuário.
+      if ((form.getValues("description") || "").trim()) return;
+      form.setValue("description", text);
+    });
+  }, [form, onPlaceIdChange, destinationContext]);
+
   const handleSubmit = (values: z.infer<typeof otherSchema>) => {
     onSubmit({
       custom_title: values.custom_title?.trim() || "",
       company_name: values.company_name || "",
       description: values.description,
       price: values.price,
+      ...(placeId ? { place_id: placeId } : {}),
     }, values.price, values.option_label || undefined);
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="company_name" render={({ field }) => (
+          <FormItem><FormLabel>{OTHER_SERVICE_NAME_LABEL}</FormLabel><FormControl>
+            <PlacesAutocomplete
+              value={field.value || ""}
+              onChange={(v) => {
+                field.onChange(v);
+                setPlaceId(null);
+                descriptionRequestRef.current = null;
+                onPlaceIdChange?.(null);
+              }}
+              onPlaceSelect={(p) => handlePlaceSelect(p)}
+              placeType="general"
+              contextCity={destinationContext || undefined}
+              maxResults={5}
+              fetchDetailsOnSelect={false}
+              placeholder={OTHER_SERVICE_NAME_PLACEHOLDER}
+            />
+          </FormControl>
+          <p className="text-xs text-muted-foreground">
+            Busque pelo nome do passeio, atração, restaurante, experiência ou empresa — ou digite livremente se preferir.
+          </p>
+          <FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><TextareaWithTemplate placeholder="Descreva o serviço..." rows={3} onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+        {photoSlot}
+        <FormField control={form.control} name="price" render={({ field }) => (
+          <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+        )} />
+        {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <FormField control={form.control} name="custom_title" render={({ field }) => (
           <FormItem>
             <FormLabel className="flex items-center gap-2">
@@ -2694,24 +2772,6 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
             <FormMessage />
           </FormItem>
         )} />
-        <FormField control={form.control} name="company_name" render={({ field }) => (
-          <FormItem><FormLabel>Nome da Empresa</FormLabel><FormControl>
-            <PlacesAutocomplete
-              value={field.value || ""}
-              onChange={(v) => { field.onChange(v); onPlaceIdChange?.(null); }}
-              onPlaceSelect={(p) => onPlaceIdChange?.(p.place_id)}
-              placeType="general"
-              placeholder="Nome da empresa..."
-            />
-          </FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="description" render={({ field }) => (
-          <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><TextareaWithTemplate placeholder="Descreva o serviço..." rows={3} onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
-        )} />
-        <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
-        )} />
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Opção recomendada" />
         <div className="flex gap-2 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
@@ -2721,6 +2781,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
     </Form>
   );
 }
+
 
 /* ━━━━━━━━━━━━━━━━━━━ CIRCUIT FORM ━━━━━━━━━━━━━━━━━━━ */
 const circuitSchema = z.object({
@@ -2852,7 +2913,7 @@ export function photoKeys(urls: string[]): string[] {
 
 
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -3046,10 +3107,19 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
           onPhotosSelected={handleGooglePhotosSelected}
                 onPhotoRemoved={handleGooglePhotoRemoved}
           existingUrls={imageUrls}
-          autoShow={placeKind === 'attraction'}
+          autoShow={placeKind === 'attraction' || placeKind === 'other_service'}
           {...(placeKind === 'attraction' ? { loadingLabel: 'Buscando fotos do local...', buttonLabel: undefined } : {})}
+          {...(placeKind === 'other_service'
+            ? {
+                loadingLabel: 'Buscando fotos do local...',
+                headingLabel: 'Fotos sugeridas',
+                maxPhotos: 5,
+                autoSelectFirst: true,
+              }
+            : {})}
         />
       )}
+
     </div>
   );
 }
@@ -3396,7 +3466,7 @@ function GenericModeChooser({
   );
 }
 
-export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot }: ServiceFormProps) {
+export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, destinationContext }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
@@ -3427,14 +3497,14 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       isUploading={isImgUploading}
       placeId={placeId}
       hotelMode={isHotel}
-      placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : 'other'}
+      placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : serviceType === 'other' ? 'other_service' : 'other'}
       hasSavedService={!!initialData}
       onGalleryPendingChange={isHotel ? setGalleryPending : undefined}
     />
   );
   const formProps = {
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
-    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
     ...(serviceType === 'hotel' && onSubmitMany ? { onSubmitMany } : {}),
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
   };

@@ -36,6 +36,8 @@ interface Props {
   tripEndDate?: Date;
   adultsCount: number;
   childrenCount: number;
+  /** Destino do orçamento — prioriza a busca inteligente de lugares. */
+  destinationContext?: string | null;
   isLoading: boolean;
   onSubmit: (
     service_data: ServiceData,
@@ -59,7 +61,7 @@ interface Props {
 export function ServiceModal(props: Props) {
   const {
     open, onOpenChange, serviceType, editingService, serviceCountByType,
-    tripStartDate, tripEndDate, adultsCount, childrenCount, isLoading, onSubmit, onSubmitMany,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, isLoading, onSubmit, onSubmitMany, destinationContext,
     newServicePaymentConfig, setNewServicePaymentConfig,
     servicePaymentConfigs, onServicePaymentChange,
   } = props;
@@ -201,6 +203,7 @@ export function ServiceModal(props: Props) {
                 tripEndDate={tripEndDate}
                 adultsCount={adultsCount}
                 childrenCount={childrenCount}
+                destinationContext={destinationContext}
                 initialData={editingService ? {
                   service_data: editingService.service_data,
                   amount: editingService.amount,
@@ -331,6 +334,7 @@ export function ServiceModal(props: Props) {
                 tripEndDate={tripEndDate}
                 adultsCount={adultsCount}
                 childrenCount={childrenCount}
+                destinationContext={destinationContext}
                 initialData={editingService ? {
                   service_data: editingService.service_data,
                   amount: editingService.amount,
