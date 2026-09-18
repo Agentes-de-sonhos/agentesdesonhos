@@ -503,15 +503,18 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
         {/* Coluna 1 — Capa e fotos */}
         <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold flex items-center gap-2">
-              <Images className="h-4 w-4 text-primary" />
-              Capa e fotos
-              {images.length > 0 && (
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                  {images.length}
-                </span>
-              )}
-            </h4>
+            <div className="w-fit">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Images className="h-4 w-4 text-sky-500" />
+                Capa e fotos
+                {images.length > 0 && (
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    {images.length}
+                  </span>
+                )}
+              </h4>
+              <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
+            </div>
             <Button variant="ghost" size="sm" onClick={() => setPhotosOpen(true)} className="h-7 gap-1.5 text-xs">
               <Pencil className="h-3.5 w-3.5" />
               Gerenciar

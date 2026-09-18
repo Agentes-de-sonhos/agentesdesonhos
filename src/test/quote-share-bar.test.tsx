@@ -233,7 +233,9 @@ describe("QuoteStepsGuide — trilha explicativa", () => {
     await waitFor(() => expect(screen.queryByText("Gere a versão web ou PDF.")).toBeNull());
     fireEvent.click(first);
     expect(await screen.findByText("Inclua passagens.")).toBeTruthy();
-    fireEvent.pointerDown(document.body);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    fireEvent.pointerDown(document.body, { pointerType: "mouse", button: 0 });
+    fireEvent.click(document.body);
     await waitFor(() => expect(screen.queryByText("Inclua passagens.")).toBeNull());
     expect(screen.queryByText("Ver mais")).toBeNull();
   });
