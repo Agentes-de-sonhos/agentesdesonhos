@@ -1,73 +1,95 @@
-# Casa Nova Tur — cenário demonstrativo, datas relativas e URLs amigáveis
+# Auditoria de períodos de datas — plataforma Agentes de Sonhos
 
-O pedido reúne 12 frentes independentes (marcação de cenário, dados de cliente e
-acompanhante, viagem com 8 serviços atravessando 6 módulos, CRM, orçamento, roteiro,
-carteira, Central de Reservas, financeiro, datas dinâmicas, novo esquema de URLs e uma
-bateria de testes). Não cabe com segurança em uma única rodada: envolve migração de
-banco, ampliação de uma função de servidor, mudanças no roteador de todas as superfícies
-e testes de isolamento entre agências. Entregar tudo de uma vez arriscaria exatamente o
-que você pediu para preservar — dados manuais, isolamento por agência e as rotas atuais.
+Auditoria de leitura apenas. Nenhum arquivo do sistema foi alterado.
 
-Proposta: quatro etapas, cada uma verificável e sem publicação. Se preferir, aprovo e
-começo pela Etapa 1 já nesta sequência.
+## Resumo executivo
 
-## Etapa 1 — Fundação segura do cenário
+Foram inspecionadas 40 telas/formulários reais com datas relacionadas.
 
-- Nova tabela `demo_scenarios` (tenant, slug do cenário, flag `is_demo`, data da última
-  atualização de datas, lock) e `demo_scenario_records` (cenário, tabela, id do registro,
-  papel). Grants + RLS restritos: leitura/escrita só pelo dono do tenant e service role.
-- Somente tenants presentes em `demo_scenarios` podem receber deslocamento de datas.
-- Cleanup/reset passa a percorrer apenas `demo_scenario_records` — nunca `user_id` amplo,
-  preservando o cliente “Fernando” e qualquer registro manual.
-- `casanova-provision` ganha registro de tudo que cria nesse mapa, mantendo idempotência
-  por chave natural (sem duplicar em segunda execução).
+| Categoria | Qtde | Leitura |
+|---|---|---|
+| A — já usa seletor único de intervalo | 6 | período geral da viagem em orçamento, carteira (criar e editar), roteiro, oportunidade do CRM e cotação dos sites públicos |
+| B — campos separados e bom candidato à unificação | 17 | serviços com período contínuo e vários formulários de viagem/operação |
+| C — deve continuar separado | 9 | trechos aéreos, paradas de cruzeiro, datas com horário próprio, eventos independentes |
+| D — só exibição / filtro, sem entrada de período | 8 | Área do Cliente, drawer da oportunidade, filtros de relatório e da Central de Reservas |
 
-## Etapa 2 — Cenário ponta a ponta
+Padrão encontrado: o seletor único só existe hoje no **período total** da viagem. Todo **serviço individual** (hospedagem, locação, seguro, cruzeiro, transfer) ainda usa dois calendários ou dois campos de data, tanto em Orçamentos quanto na Carteira Digital. O seletor de intervalo é um componente único, compartilhado entre plataforma principal, SiteLab Base e white-labels (nenhuma cópia por agência).
 
-- Cliente Ana Martins normalizada (Novo Hamburgo/RS, preferências, notas “Cenário
-  demonstrativo — dados fictícios”) e acompanhante Roberto Martins em `travelers`, com
-  documento evidentemente fictício e preferências próprias.
-- Viagem “Orlando — Disney e Universal”, 2 adultos, 8 dias/7 noites, BRL, ~R$ 41.800, com
-  os 8 serviços (aéreo, hotel, 2 traslados, locação, Disney, Universal, seguro).
-- Os mesmos 8 serviços replicados com vínculos reais entre orçamento, operação
-  (`source_quote_service_id` preservado), `travel_files`, venda e carteira; oportunidade em
-  Fechado com histórico das etapas; operação em Emissão/Reservas com pagamento parcial;
-  roteiro de 8 dias; grant da viagem para a conta existente da Área do Cliente.
-- Auditoria de idempotência do fechamento: reabrir/mover para Fechado não cria segunda
-  operação, venda, file ou serviços, e não marca como pago.
+## Tabela completa
 
-## Etapa 3 — Datas relativas restritas a demo
+| Módulo / recurso | Situação atual | Campos | Arquivo | Classe | Recomendação |
+|---|---|---|---|---|---|
+| Orçamento — dados gerais da viagem | 1 seletor de intervalo | start_date/end_date | quote/QuoteClientForm.tsx:330 | A | manter |
+| Orçamento — edição rápida de datas | 2 calendários | start_date/end_date | quote/QuoteDateEditor.tsx:76 | B | unificar (mesma viagem) |
+| Orçamento — hospedagem | 2 calendários | check_in/check_out | quote/ServiceForms.tsx:1077 | B | unificar |
+| Orçamento — seguro | 2 calendários | start_date/end_date | quote/ServiceForms.tsx:1913 | B | unificar |
+| Orçamento — cruzeiro (vigência) | 2 calendários | start_date/end_date | quote/ServiceForms.tsx:2139 | B | unificar |
+| Orçamento — locação de carro | 2 calendários + 2 horas | pickup_date/time, dropoff_date/time | quote/ServiceForms.tsx:1355 | B | unificar datas, manter horas |
+| Orçamento — transfer ida e volta | 2 calendários | arrival_date/departure_date | quote/ServiceForms.tsx:1600 | C | manter (eventos distintos) |
+| Orçamento — aéreo (ida/volta) | 2 calendários | departure_date/return_date | quote/ServiceForms.tsx:567 | C/B | avaliar (ver dúvidas) |
+| Orçamento — assistente de voo | 2 calendários + data por trecho | departure_date/return_date, leg_date | quote/flight-wizard/FlightWizard.tsx:489 | C/B | avaliar junto do aéreo |
+| Orçamento — cruzeiro (paradas) | 1 data por porto + horas | itinerary[].date | quote/ServiceForms.tsx:2036 | C | manter |
+| Orçamento — trem | 1 data + 2 horas | travel_date | quote/ServiceForms.tsx:2515 | C | manter |
+| Orçamento — blocos/seções de serviços | 2 campos de data | start_date/end_date | quote/QuoteServicesOrganizer.tsx:103 | B | unificar |
+| Orçamento — validade/prazo de solicitação | 1 data | valid_until, booking_deadline | GerarOrcamento.tsx:1890; QuoteBookingRequestSettings.tsx:169 | C | manter |
+| Orçamento — ingresso/atração, outros, circuito, pacote | sem par de datas | — | quote/ServiceForms.tsx | D | nada a fazer |
+| Carteira — criar viagem | 1 seletor de intervalo | start_date/end_date | trip/TripForm.tsx:187 | A | manter |
+| Carteira — editar viagem | 1 seletor de intervalo (componente separado) | start_date/end_date | trip/TripEditForm.tsx:158 | A | manter; avaliar unificar componentes |
+| Carteira — edição direta na página | 2 campos independentes | start_date/end_date | pages/TripWallet.tsx:1633 | B | unificar |
+| Carteira — hospedagem | 2 calendários + horas | check_in/check_out | trip/TripServiceForms.tsx:1322 | B | unificar datas |
+| Carteira — locação de carro | 2 campos + horas | pickup_date/dropoff_date | trip/TripServiceForms.tsx:2222 | B | unificar datas |
+| Carteira — seguro | 2 calendários | start_date/end_date | trip/TripServiceForms.tsx:4248 | B | unificar |
+| Carteira — cruzeiro (vigência) | 2 calendários | start_date/end_date | trip/TripServiceForms.tsx:4927 | B | unificar |
+| Carteira — voo por segmento, cruzeiro paradas, trem, transfer | data por evento + horas | flight_date, date, travel_date | trip/TripServiceForms.tsx:640, 5089, 6350, 2866 | C | manter |
+| Roteiro — dados gerais | 1 seletor de intervalo | start_date/end_date | itinerary/ItineraryForm.tsx:249 | A | manter |
+| Roteiro — importar com IA | 2 campos de data | start_date/end_date | itinerary/ImportItineraryWizard.tsx:465 | B | unificar |
+| Roteiro — usar modelo/template | 2 campos de data | start/end | itinerary/InstantiateTemplateDialog.tsx:104 | B | unificar |
+| Roteiro — dias e atividades | dia derivado do início | day_number | itinerary/ItineraryEditor.tsx | D | nada a fazer |
+| CRM — oportunidade (criar/editar) | 1 seletor de intervalo | start_date/end_date | crm/OpportunityForm.tsx:276 | A | manter |
+| CRM — detalhe da oportunidade | só exibição | start_date/end_date | crm/OpportunityDetailsDrawer.tsx:127 | D | nada a fazer |
+| CRM — viagem do cliente (criar/editar) | 2 calendários | start_date/end_date | crm/AddTripDialog.tsx:213 | B | unificar |
+| CRM — importar orçamento como oportunidade | 2 campos de data | start_date/end_date | crm/ImportQuoteAsOpportunityDialog.tsx:253 | B | unificar |
+| CRM — criar operação | 2 campos de data | travel_start_date/travel_end_date | crm/operations/CreateOperationDialog.tsx:81 | B | unificar |
+| CRM — editar operação | 2 campos de data (outro componente) | travel_start_date/travel_end_date | crm/operations/OperationDetailDialog.tsx:202 | B | unificar |
+| CRM — serviço da operação | 2 campos de data | start_date/end_date | crm/operations/OperationServicesTab.tsx:263 | B | unificar |
+| CRM — viajantes | validade de passaporte | validade_passaporte | crm/TravelersSection.tsx:291 | C | manter |
+| Reservas — nova reserva | 2 campos "Ida"/"Volta" | start_date/end_date | reservas/NovaReservaDialog.tsx:202 | B | unificar |
+| Reservas — editar processo | 2 campos de data | start_date/end_date | reservas/EditarRascunhoDialog.tsx:218 | B | unificar |
+| Reservas — serviço manual | 2 campos de data | start_date/end_date | reservas/ManualServiceDialog.tsx:206 | B | unificar |
+| Reservas — filtros da listagem | 2 campos (filtro) | from/to | reservas/ReservasTab.tsx:371 | D | opcional |
+| Vendas — cabeçalho e criação de venda/viagem | 2 campos de data | start_date/end_date | vendas/BookingHeader.tsx:73; vendas/BookingFormDialog.tsx:78 | B | unificar |
+| Financeiro — venda, produtos, recebimentos, notas | datas contábeis isoladas | sale_date, expected_date, invoice_* | financial/* | C | manter (fora do escopo) |
+| Requisitos de viagem — etapa da viagem | 2 campos de data | departure_date/return_date | travel-requirements/TripStep.tsx:46 | B | unificar |
+| Sites ADS / SiteLab / white-labels — cotação | 1 seletor de intervalo compartilhado | data_ida/data_volta, check_in/check_out, retirada/devolução | whitelabel/ServiceInitialFields.tsx:65 | A | manter |
+| Sites — multitrechos aéreos | 1 data por trecho | leg.data | whitelabel/RouteLegsEditor.tsx:70 | C | manter |
+| Landing Orlando Magic | 2 campos de data, sem o componente compartilhado | arrival/departure (demo) | landing/orlando-magic/TripDatesForm.tsx:66 | B | unificar (baixa prioridade) |
+| Área do Cliente | só exibição | — | clientarea/ClientAreaTripDetail.tsx:176 | D | nada a fazer |
+| Admin — bloqueios aéreos, popups, relatórios | 2 campos de data | start_date/end_date, filtros | admin/* | B/D | opcional, baixa prioridade |
 
-- Função de servidor segura (autorização por tenant marcado como demo + sessão, nunca por
-  hostname enviado pelo cliente) que, no primeiro acesso do dia (America/Sao_Paulo),
-  desloca por um único delta todas as datas mapeadas do cenário: embarque hoje+3, retorno
-  hoje+10.
-- Uma execução por dia com lock; tudo em transação única (falha = nenhum deslocamento);
-  `created_at`, histórico, tokens, códigos e IDs intocados.
+## Ordem de implementação sugerida
 
-## Etapa 4 — URLs amigáveis por slug + testes
+1. **CRM completo** (viagem do cliente, criar e editar operação, serviço da operação, importar orçamento): mesmo módulo, já com o padrão novo na oportunidade.
+2. **Central de Reservas** (nova reserva, editar processo, serviço manual) + cabeçalho/criação de venda: mesmo fluxo operacional.
+3. **Serviços com período contínuo em Orçamentos** (hospedagem, seguro, cruzeiro, locação) e a edição rápida de datas do orçamento.
+4. **Os mesmos serviços na Carteira Digital** e a edição direta de datas na página da viagem.
+5. **Roteiros** (importar com IA, usar modelo) e requisitos de viagem.
+6. **Itens opcionais**: landing Orlando Magic, telas de administração e filtros por período.
 
-- Resolução genérica por `agency_slug` no host compartilhado
-  `sites.agentesdesonhos.com.br/{slug}`, sem hardcode de agência: prefixo aplicado a site,
-  `/gestao`, `/area-do-cliente`, `/orcamento/:codigo`, `/roteiro/:codigo`,
-  `/carteira/:codigo` e `/fatura/:codigo`.
-- Rotas atuais, domínio próprio e `?__agency_host=` continuam funcionando; navegação
-  preserva o prefixo; login/callback preservam o caminho de retorno; prévias no host
-  compartilhado ficam noindex/nofollow.
-- Testes focados: isolamento e cleanup, provisionamento duplo sem duplicação, vínculos
-  entre módulos, serviços e IDs de origem, fechamento repetido, financeiro parcial, grant
-  da Área do Cliente, datas uma vez por dia com rollback, tenant não-demo intocado, URLs
-  com refresh e deep link, ausência de vazamento entre agências e segurança dos documentos
-  públicos. Typecheck e build ao fim de cada etapa.
+## Impacto, risco e dependências
 
-## Pendências externas (fora desta implementação)
+- Baixo risco: CRM, reservas, roteiros e requisitos de viagem gravam apenas duas datas simples; a troca é de interface.
+- Risco médio: hospedagem e locação, porque a data vem acompanhada de horário e a locação já sincroniza retirada/devolução; é preciso preservar as horas e o cálculo de diárias, além do orçamento web, PDF, duplicação e importação.
+- Dependência comum: todos passariam a usar o mesmo seletor de intervalo já existente, sem migração de banco — os campos continuam gravados separadamente.
+- Criação e edição compartilham o formulário na maioria dos casos; exceções que exigem dois ajustes: viagem da carteira (criar/editar), operação do CRM (criar/editar) e a edição direta de datas na página da viagem.
 
-- DNS e vinculação de `sites.agentesdesonhos.com.br` e de `casanovatur.com.br` continuam
-  pendentes; o código fica pronto, sem publicar nem conectar domínio.
+## Dúvidas que precisam da sua decisão
 
-## Observações técnicas
+1. **Aéreo**: ida e volta devem virar um período único, ou continuam separados por causa de trechos, escalas e horários?
+2. **Transfer in/out**: unificar como período ou manter como dois eventos independentes?
+3. **Hospedagem e locação**: manter os horários visíveis ao lado do período unificado, como hoje?
+4. **Telas de administração e filtros de relatório** entram nesta padronização ou ficam de fora?
+5. Quer que a edição rápida de datas do orçamento e a edição direta na página da viagem passem a usar exatamente o mesmo campo dos formulários?
 
-- Migração aditiva apenas (novas tabelas + grants + RLS); nenhuma coluna existente
-  alterada ou removida.
-- Dados do cenário entram por operações de dados normais, não por migração.
-- Nada de e-mails, convites, cobranças, checkout ou notificações externas.
+## Custo
+
+Não tenho acesso à contagem de créditos neste ambiente; esta rodada consistiu apenas em leitura de código (três varreduras paralelas), sem alterações, commit ou publicação.
