@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export interface QuoteStepMeta {
@@ -30,7 +30,7 @@ function ExplanatoryStep({
     <Popover open={open} onOpenChange={(nextOpen) => {
       if (!nextOpen) onDismiss();
     }}>
-      <PopoverTrigger asChild>
+      <PopoverAnchor asChild>
         <Button
           type="button"
           variant="outline"
@@ -45,7 +45,7 @@ function ExplanatoryStep({
           </span>
           <span className="min-w-0 truncate whitespace-nowrap">{step.short}</span>
         </Button>
-      </PopoverTrigger>
+      </PopoverAnchor>
       <PopoverContent
         side="bottom"
         align="start"
