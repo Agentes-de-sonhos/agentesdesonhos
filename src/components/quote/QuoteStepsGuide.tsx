@@ -33,7 +33,10 @@ function ExplanatoryStep({
           size="sm"
           aria-label={`${step.short}: ${step.hint}`}
           aria-expanded={open}
-          onClick={() => onOpenChange(!open)}
+          onClick={(event) => {
+            event.preventDefault();
+            onOpenChange(!open);
+          }}
           className="h-8 w-full min-w-0 gap-1 rounded-full px-1.5 text-[10px] font-medium text-muted-foreground hover:bg-background hover:text-muted-foreground sm:gap-1.5 sm:px-2 sm:text-[11px] xl:gap-2 xl:px-2.5 xl:text-xs"
         >
           <span className={cn("inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-md text-[9px] font-bold text-primary-foreground sm:h-5 sm:w-5 sm:text-[10px]", step.accentClass)}>
