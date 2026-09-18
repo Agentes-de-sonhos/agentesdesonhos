@@ -1,21 +1,15 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Users, Baby, MapPin, Calendar as CalendarIcon, DollarSign, Pencil, ChevronDown, Check, Plane } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Users, Baby, MapPin, Calendar as CalendarIcon, Pencil, Check, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { QuoteDateEditor } from "./QuoteDateEditor";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import type { Quote } from "@/types/quote";
-import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencyFlag } from "@/lib/quoteCurrency";
-import { getEffectiveQuoteTotal } from "@/lib/quotePricing";
 
 function parseLocalDate(dateStr: string) {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -92,14 +86,10 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const displayEnd = parseLocalDate(quote.end_date);
   const days = Math.ceil((displayEnd.getTime() - displayStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-  // Total efetivo: soma dos serviços ou valor fechado do pacote.
-  const computedTotal = getEffectiveQuoteTotal(quote, quote.services);
-
   return (
-    <div className="space-y-4">
-        <div className="space-y-3">
+    <div className="grid min-w-0 gap-x-5 gap-y-3 md:grid-cols-6">
           {/* Cliente editável */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex min-w-0 items-center gap-2 text-sm md:col-span-2">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cliente:</span>
             {editingClient ? (
@@ -126,7 +116,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           </div>
 
           {/* Título da viagem (opcional) */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex min-w-0 items-center gap-2 text-sm md:order-4 md:col-span-3">
             <Plane className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Título:</span>
             {editingTitle ? (
@@ -163,7 +153,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           
           {/* Passageiros editáveis */}
           {editingPax ? (
-            <div className="flex items-center gap-2 text-sm flex-wrap">
+            <div className="flex min-w-0 items-center gap-2 text-sm flex-wrap md:order-5 md:col-span-3">
               <Users className="h-4 w-4 text-muted-foreground" />
               <label className="text-muted-foreground">Adultos:</label>
               <Input
@@ -187,7 +177,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex min-w-0 items-center gap-4 text-sm md:order-5 md:col-span-3">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span>{quote.adults_count} adulto(s)</span>
@@ -205,7 +195,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           )}
 
           {/* Destino editável */}
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex min-w-0 items-center gap-2 text-sm md:col-span-2">
             <MapPin className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Destino:</span>
             {editingDest ? (
@@ -240,14 +230,16 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           </div>
 
           {editing ? (
-            <QuoteDateEditor
-              quoteId={quote.id}
-              startDateStr={quote.start_date}
-              endDateStr={quote.end_date}
-              onClose={() => setEditing(false)}
-            />
+            <div className="min-w-0 md:col-span-2">
+              <QuoteDateEditor
+                quoteId={quote.id}
+                startDateStr={quote.start_date}
+                endDateStr={quote.end_date}
+                onClose={() => setEditing(false)}
+              />
+            </div>
           ) : (
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex min-w-0 items-center gap-2 text-sm md:col-span-2">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Período:</span>
               <span className="font-medium">
@@ -260,40 +252,6 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
               </Button>
             </div>
           )}
-        </div>
-
-        <Separator />
-
-        {(() => {
-          const { currency } = getQuoteCurrencyInfo(quote);
-          return (
-            <>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                  <span className="font-medium">Total Geral</span>
-                </div>
-                <span className="text-2xl font-bold text-primary">
-                  {formatQuoteCurrency(computedTotal, currency)}
-                </span>
-              </div>
-
-              {currency !== 'BRL' && (
-                <div className="flex justify-center">
-                  <Badge variant="secondary" className="text-xs">
-                    {getCurrencyFlag(currency)} Moeda: {currency}
-                  </Badge>
-                </div>
-              )}
-
-              {quote.services && quote.services.length > 0 && (
-                <p className="text-xs text-muted-foreground text-center">
-                  {quote.services.length} serviço(s) incluído(s)
-                </p>
-              )}
-            </>
-          );
-        })()}
     </div>
   );
 }

@@ -15,35 +15,36 @@ interface Props {
   actions?: ReactNode;
 }
 
-function ExplanatoryStep({ step }: { step: QuoteStepMeta }) {
-  const [open, setOpen] = useState(false);
-
+function ExplanatoryStep({
+  step,
+  open,
+  onOpenChange,
+}: {
+  step: QuoteStepMeta;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
         <Button
           type="button"
           variant="outline"
           size="sm"
           aria-label={`${step.short}: ${step.hint}`}
-          className="h-8 shrink-0 gap-2 rounded-full px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
+          aria-expanded={open}
+          className="h-8 w-full min-w-0 gap-1 rounded-full px-1.5 text-[10px] font-medium text-muted-foreground hover:bg-background hover:text-muted-foreground sm:gap-1.5 sm:px-2 sm:text-[11px] xl:gap-2 xl:px-2.5 xl:text-xs"
         >
-          <span className={cn("inline-flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold text-primary-foreground", step.accentClass)}>
+          <span className={cn("inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-md text-[9px] font-bold text-primary-foreground sm:h-5 sm:w-5 sm:text-[10px]", step.accentClass)}>
             {step.step}
           </span>
-          <span className="whitespace-nowrap">{step.short}</span>
+          <span className="min-w-0 truncate whitespace-nowrap">{step.short}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="start"
         className="w-[min(20rem,calc(100vw-2rem))] p-3"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
       >
         <p className="text-sm font-medium text-foreground">{step.short}</p>
         <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{step.hint}</p>
@@ -53,19 +54,24 @@ function ExplanatoryStep({ step }: { step: QuoteStepMeta }) {
 }
 
 export function QuoteStepsGuide({ steps, actions }: Props) {
+  const [openStep, setOpenStep] = useState<number | null>(null);
+
   return (
-    <div className="my-1 flex w-full min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <nav aria-label="Etapas do orçamento" className="-mx-1 min-w-0 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <ol className="flex w-max items-center gap-x-2">
+    <div className="my-1 flex w-full min-w-0 flex-col gap-2 md:flex-row md:items-center">
+      <nav aria-label="Etapas do orçamento" className="min-w-0 flex-1">
+        <ol className="grid min-w-0 grid-cols-2 items-center gap-1 sm:grid-cols-4 xl:gap-2">
           {steps.map((step, index) => (
-            <li key={step.step} className="flex items-center gap-2">
-              <ExplanatoryStep step={step} />
-              {index < steps.length - 1 && <span className="h-px w-4 bg-border" aria-hidden="true" />}
+            <li key={step.step} className="min-w-0">
+              <ExplanatoryStep
+                step={step}
+                open={openStep === step.step}
+                onOpenChange={(open) => setOpenStep(open ? step.step : null)}
+              />
             </li>
           ))}
         </ol>
       </nav>
-      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">{actions}</div>}
+      {actions && <div className="flex shrink-0 items-center justify-end gap-1.5 xl:gap-2">{actions}</div>}
     </div>
   );
 }

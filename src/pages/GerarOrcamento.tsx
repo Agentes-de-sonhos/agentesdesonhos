@@ -79,7 +79,7 @@ import { ServicePaymentForm } from "@/components/quote/ServicePaymentForm";
 import type { ServicePaymentConfig } from "@/lib/servicePayment";
 import { extractServicePaymentConfig } from "@/lib/servicePayment";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
-import { DestinationIntroEditor, DestinationIntroSwitch } from "@/components/quote/DestinationIntroEditor";
+import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
@@ -1352,9 +1352,8 @@ export default function GerarOrcamento() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
-                        <Globe className="mr-1 sm:mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">Gerar orçamento web</span>
-                        <span className="sm:hidden">Orçamento web</span>
+                        <Globe className="mr-1 h-3.5 w-3.5 xl:mr-2 xl:h-4 xl:w-4" />
+                        <span className="whitespace-nowrap text-[11px] xl:text-sm">Gerar orçamento web</span>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Cria um link para você enviar ao cliente.</TooltipContent>
@@ -1362,9 +1361,8 @@ export default function GerarOrcamento() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button size="sm" onClick={handleGeneratePDF}>
-                        <FileText className="mr-1 sm:mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">Gerar orçamento PDF</span>
-                        <span className="sm:hidden">Orçamento PDF</span>
+                        <FileText className="mr-1 h-3.5 w-3.5 xl:mr-2 xl:h-4 xl:w-4" />
+                        <span className="whitespace-nowrap text-[11px] xl:text-sm">Gerar orçamento PDF</span>
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Gera uma versão em PDF para compartilhar ou imprimir.</TooltipContent>
@@ -1513,28 +1511,24 @@ export default function GerarOrcamento() {
         onBeforeNavigate={async () => {
           await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
         }}
-        stepHeaderActions={{
-          initial: (
-            <DestinationIntroSwitch
-              quoteId={quote.id}
-              destination={quote.destination}
-              checked={(quote as any).show_destination_intro !== false}
-              hasContent={
-                !!(quote as any).destination_intro_text ||
-                ((quote as any).destination_intro_images || []).length > 0
-              }
-              onUpdate={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-            />
-          ),
-        }}
         renderInitial={() => (
           <div className="space-y-6">
             <section aria-labelledby="quote-initial-data-title" className="space-y-3">
-              <h4 id="quote-initial-data-title" className="text-sm font-semibold text-foreground">Dados principais</h4>
+              <div className="w-fit">
+                <h4 id="quote-initial-data-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Users className="h-4 w-4 text-sky-500" /> Dados principais
+                </h4>
+                <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
+              </div>
               <QuoteSummary quote={quote} />
             </section>
             <section aria-labelledby="quote-cover-title" className="space-y-3 border-t border-border pt-5">
-              <h4 id="quote-cover-title" className="text-sm font-semibold text-foreground">Configuração da capa</h4>
+              <div className="w-fit">
+                <h4 id="quote-cover-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                  <Images className="h-4 w-4 text-sky-500" /> Configuração da capa
+                </h4>
+                <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
+              </div>
               <DestinationIntroEditor
                 embedded
                 quoteId={quote.id}

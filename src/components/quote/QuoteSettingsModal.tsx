@@ -13,6 +13,7 @@ interface StepDef {
   short: string;
   description: string;
   icon: typeof ClipboardCheck;
+  accentClass: string;
 }
 
 const STEPS: StepDef[] = [
@@ -22,6 +23,7 @@ const STEPS: StepDef[] = [
     short: "Inicial",
     description: "Confira os dados principais e personalize a capa e a apresentação do destino.",
     icon: ClipboardCheck,
+    accentClass: "bg-sky-500",
   },
   {
     key: "included",
@@ -29,6 +31,7 @@ const STEPS: StepDef[] = [
     short: "Incluso",
     description: "Revise a lista de itens que o cliente verá como incluídos na viagem.",
     icon: ListChecks,
+    accentClass: "bg-emerald-500",
   },
   {
     key: "payment",
@@ -36,6 +39,7 @@ const STEPS: StepDef[] = [
     short: "Investimento",
     description: "Defina como os valores e as condições de pagamento aparecem para o cliente.",
     icon: CreditCard,
+    accentClass: "bg-violet-500",
   },
   {
     key: "validity",
@@ -43,6 +47,7 @@ const STEPS: StepDef[] = [
     short: "Validade",
     description: "Informe até quando a proposta é válida e os termos que a acompanham.",
     icon: CalendarIcon,
+    accentClass: "bg-amber-500",
   },
   {
     key: "documents",
@@ -50,6 +55,7 @@ const STEPS: StepDef[] = [
     short: "Documentos",
     description: "Anexe arquivos de apoio e escolha quais ficam visíveis no link público.",
     icon: Paperclip,
+    accentClass: "bg-cyan-500",
   },
   {
     key: "advanced",
@@ -57,6 +63,7 @@ const STEPS: StepDef[] = [
     short: "Avançado",
     description: "Defina moeda, solicitação de reserva e a assinatura responsável pelo orçamento.",
     icon: Settings2,
+    accentClass: "bg-rose-500",
   },
 ];
 
@@ -71,14 +78,11 @@ interface Props {
   renderValidity: () => ReactNode;
   renderDocuments: () => ReactNode;
   renderAdvanced: () => ReactNode;
-  /** Optional compact action rendered at the right of the contextual step header. */
-  stepHeaderActions?: Partial<Record<QuoteSettingsStep, ReactNode>>;
 }
 
 export function QuoteSettingsModal({
   open, onOpenChange, initialStep = "initial", onBeforeNavigate,
   renderInitial, renderIncluded, renderPayment, renderValidity, renderDocuments, renderAdvanced,
-  stepHeaderActions,
 }: Props) {
   const [active, setActive] = useState<QuoteSettingsStep>(initialStep);
   const idx = STEPS.findIndex(s => s.key === active);
@@ -163,22 +167,18 @@ export function QuoteSettingsModal({
         </nav>
 
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-muted/20 px-4 sm:px-6 py-5">
-          <header className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <CurrentIcon className="h-4 w-4" />
-              </span>
-              <div className="min-w-0">
-                <h3 className="font-display text-sm sm:text-base font-semibold text-foreground">
+          {active !== "advanced" && (
+            <header className="mb-5 min-w-0">
+              <div className="w-fit max-w-full">
+                <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-foreground sm:text-base">
+                  <CurrentIcon className="h-4 w-4 shrink-0" />
                   {current.title}
                 </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{current.description}</p>
+                <div className={cn("mt-2 h-1 w-full rounded-full", current.accentClass)} />
               </div>
-            </div>
-            {stepHeaderActions?.[active] && (
-              <div className="shrink-0 sm:pt-1">{stepHeaderActions[active]}</div>
-            )}
-          </header>
+              <p className="mt-2 text-xs text-muted-foreground">{current.description}</p>
+            </header>
+          )}
           {content[active]}
         </div>
 
