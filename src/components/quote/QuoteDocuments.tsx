@@ -238,20 +238,6 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
             </p>
           </div>
         )}
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={(e) => {
-              e.stopPropagation();
-              inputRef.current?.click();
-            }}
-            disabled={!!uploadProgress}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Adicionar documento
-          </Button>
-        </div>
         <input
           ref={inputRef}
           type="file"
@@ -262,6 +248,9 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
         />
 
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Selecionar documentos para o orçamento"
           onDragOver={(e) => {
             e.preventDefault();
             setIsDragging(true);
@@ -269,6 +258,12 @@ export function QuoteDocuments({ quoteId, userId, isOpen, onToggle, embedded = f
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => !uploadProgress && inputRef.current?.click()}
+          onKeyDown={(event) => {
+            if ((event.key === "Enter" || event.key === " ") && !uploadProgress) {
+              event.preventDefault();
+              inputRef.current?.click();
+            }
+          }}
           className={cn(
             "border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors bg-card/60",
             isDragging

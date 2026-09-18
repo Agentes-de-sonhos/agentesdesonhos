@@ -218,26 +218,34 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           
           {/* Passageiros editáveis */}
           {editingPax ? (
-            <div data-testid="quote-main-passengers" className="flex min-h-14 min-w-0 items-center justify-start gap-2 border-b border-border/60 px-3 py-3 text-left text-sm flex-wrap md:border-b-0 md:border-l">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <label className="text-muted-foreground">Adultos:</label>
-              <Input
-                type="number"
-                min={1}
-                className="h-7 w-16 text-sm"
-                value={adultsDraft}
-                onChange={(e) => setAdultsDraft(Number(e.target.value))}
-              />
-              <Baby className="h-4 w-4 text-muted-foreground" />
-              <label className="text-muted-foreground">Crianças:</label>
-              <Input
-                type="number"
-                min={0}
-                className="h-7 w-16 text-sm"
-                value={childrenDraft}
-                onChange={(e) => setChildrenDraft(Number(e.target.value))}
-              />
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={savePax} title="Salvar">
+            <div data-testid="quote-main-passengers" className="flex min-h-14 min-w-0 items-center justify-start gap-2 border-b border-border/60 px-3 py-3 text-left text-sm md:border-b-0 md:border-l">
+              <div className="min-w-0 space-y-2">
+                <div data-testid="quote-adults-edit-row" className="flex items-center gap-2 whitespace-nowrap">
+                  <Users className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <label htmlFor="quote-adults-count" className="shrink-0 text-muted-foreground">Adultos:</label>
+                  <Input
+                    id="quote-adults-count"
+                    type="number"
+                    min={1}
+                    className="h-7 w-16 shrink-0 text-sm"
+                    value={adultsDraft}
+                    onChange={(e) => setAdultsDraft(Number(e.target.value))}
+                  />
+                </div>
+                <div data-testid="quote-children-edit-row" className="flex items-center gap-2 whitespace-nowrap">
+                  <Baby className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <label htmlFor="quote-children-count" className="shrink-0 text-muted-foreground">Crianças:</label>
+                  <Input
+                    id="quote-children-count"
+                    type="number"
+                    min={0}
+                    className="h-7 w-16 shrink-0 text-sm"
+                    value={childrenDraft}
+                    onChange={(e) => setChildrenDraft(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={savePax} title="Salvar">
                 <Check className="h-3.5 w-3.5" />
               </Button>
             </div>

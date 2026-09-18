@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, Images,
+  Pencil, MoreHorizontal, Images, UserCircle2,
 } from "lucide-react";
 import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -82,6 +82,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
+import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles } from "lucide-react";
@@ -473,8 +474,14 @@ export default function GerarOrcamento() {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("initial");
-  /** Etapa 6 — seção expansível aberta (uma por vez, para reduzir a altura). */
-  const [advancedSection, setAdvancedSection] = useState<"currency" | "booking" | null>(null);
+  /** Etapa 6 — blocos independentes, abertos inicialmente e recolhíveis. */
+  const [advancedSections, setAdvancedSections] = useState({
+    currency: true,
+    signature: true,
+    booking: false,
+  });
+  const toggleAdvancedSection = (key: keyof typeof advancedSections) =>
+    setAdvancedSections((previous) => ({ ...previous, [key]: !previous[key] }));
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
@@ -1842,9 +1849,9 @@ export default function GerarOrcamento() {
         }}
         renderValidity={() => (
           <div className="space-y-3">
-                  <div className="grid gap-4 sm:grid-cols-2 rounded-xl border bg-card p-4 shadow-sm">
-                    <div className="space-y-1.5">
-                      <Label className="text-sm">Válido até</Label>
+                  <div className="rounded-xl border bg-card p-4 shadow-sm">
+                    <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                      <Label className="shrink-0 text-sm">Válido até</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button variant="outline" className={cn("w-full sm:w-[13rem] max-w-full justify-start text-left font-normal", !validUntil && "text-muted-foreground")}>
@@ -1881,11 +1888,16 @@ export default function GerarOrcamento() {
             <QuoteAdvancedSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-              alwaysOpen
+              open={advancedSections.currency}
+              onToggle={() => toggleAdvancedSection("currency")}
             />
-            <section
-              data-testid="quote-signature-card"
-              className="rounded-xl border bg-card p-4 shadow-sm"
+            <AdvancedSettingsSection
+              title="Escolha uma assinatura"
+              icon={<UserCircle2 className="h-4 w-4 text-rose-500" />}
+              accentClass="bg-rose-500"
+              open={advancedSections.signature}
+              onToggle={() => toggleAdvancedSection("signature")}
+              testId="quote-signature-card"
             >
               <DocumentSignatureCard
                 table="quotes"
@@ -1893,16 +1905,15 @@ export default function GerarOrcamento() {
                 initialSnapshot={(quote as any).signature_snapshot ?? null}
                 onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
                 unwrapped
+                hideHeader
                 inlineSelector
               />
-            </section>
+            </AdvancedSettingsSection>
             <QuoteBookingRequestSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-              open={advancedSection === "booking"}
-              onToggle={() =>
-                setAdvancedSection((prev) => (prev === "booking" ? null : "booking"))
-              }
+              open={advancedSections.booking}
+              onToggle={() => toggleAdvancedSection("booking")}
             />
           </div>
         )}

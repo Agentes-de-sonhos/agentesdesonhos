@@ -21,7 +21,7 @@ interface Props {
   /** Quando informado, o bloco é renderizado como seção expansível. */
   open?: boolean;
   onToggle?: () => void;
-  /** Card branco sempre aberto (sem chevron), usado na etapa Avançado do orçamento. */
+  /** Card branco sempre aberto (sem chevron), usado em contextos que não permitem recolher. */
   alwaysOpen?: boolean;
 }
 
@@ -205,6 +205,7 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle, always
 
   return (
     <AdvancedSettingsSection
+      testId="quote-currency-card"
       title="Moeda do orçamento"
       icon={<DollarSign className="h-4 w-4 text-rose-500" />}
       accentClass="bg-rose-500"
