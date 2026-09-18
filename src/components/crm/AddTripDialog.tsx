@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { TripPeriodField, parseYMD, toYMD } from "@/components/shared/TripPeriodField";
 
 export interface TripFormData {
   destination: string;
@@ -121,17 +122,16 @@ export function AddTripDialog({ onSubmit, isSubmitting, initialData, trigger }: 
             />
           </div>
 
-          {/* Dates */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Data de início</Label>
-              <DatePicker date={startDate} onSelect={setStartDate} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Data de fim</Label>
-              <DatePicker date={endDate} onSelect={setEndDate} />
-            </div>
-          </div>
+          {/* Período da viagem (seletor único de intervalo) */}
+          <TripPeriodField
+            id="trip-period"
+            start={toYMD(startDate)}
+            end={toYMD(endDate)}
+            onChange={({ start, end }) => {
+              setStartDate(parseYMD(start));
+              setEndDate(parseYMD(end));
+            }}
+          />
 
           {/* Trip type & status */}
           <div className="grid grid-cols-2 gap-3">

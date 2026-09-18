@@ -28,6 +28,7 @@ import type { QuoteCurrency } from "@/lib/quoteCurrency";
 import {
   buildQuoteSectionLayout, flattenServiceOrder, moveServiceInLayout, type QuoteSectionLayout,
 } from "@/lib/quoteSections";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const UNSECTIONED = "__unsectioned__";
 
@@ -95,26 +96,13 @@ function SectionMetaFields({
           placeholder="Orlando, EUA"
         />
       </div>
-      <div className="grid gap-2 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-section-start`} className="text-xs">Data inicial</Label>
-          <Input
-            id={`${idPrefix}-section-start`}
-            type="date"
-            value={value.start_date}
-            onChange={(e) => set({ start_date: e.target.value })}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${idPrefix}-section-end`} className="text-xs">Data final</Label>
-          <Input
-            id={`${idPrefix}-section-end`}
-            type="date"
-            value={value.end_date}
-            onChange={(e) => set({ end_date: e.target.value })}
-          />
-        </div>
-      </div>
+      <TripPeriodField
+        id={`${idPrefix}-section-period`}
+        label="Período do bloco"
+        start={value.start_date}
+        end={value.end_date}
+        onChange={({ start, end }) => set({ start_date: start, end_date: end })}
+      />
       <div className="space-y-2">
         <Label className="text-xs">Tipo de serviço</Label>
         <Select

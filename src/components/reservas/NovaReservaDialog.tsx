@@ -20,6 +20,7 @@ import {
   type CompanyOption,
   type ContractorType,
 } from "@/components/reservas/ContractorPicker";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const newManualKey = () =>
   (globalThis.crypto?.randomUUID?.() as string) ||
@@ -199,24 +200,14 @@ export function NovaReservaDialog({ open, onOpenChange, onCreated }: NovaReserva
                 placeholder="Ex.: Lisboa"
               />
             </div>
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="reserva-inicio">Ida (opcional)</Label>
-              <Input
-                id="reserva-inicio"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
-            </div>
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="reserva-fim">Volta (opcional)</Label>
-              <Input
-                id="reserva-fim"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
-            </div>
+            <TripPeriodField
+              id="reserva-periodo"
+              label="Período da viagem (opcional)"
+              className="min-w-0 sm:col-span-2"
+              start={startDate}
+              end={endDate}
+              onChange={({ start, end }) => { setStartDate(start); setEndDate(end); }}
+            />
             <div className="min-w-0 space-y-2">
               <Label htmlFor="reserva-adultos">Adultos</Label>
               <Input

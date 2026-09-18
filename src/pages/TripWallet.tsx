@@ -65,6 +65,7 @@ import { ptBR } from "date-fns/locale";
 import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -506,10 +507,23 @@ function TripWalletContent() {
   // Inline edit state for the Resumo block
   const [editingField, setEditingField] = useState<null | "client_name" | "trip_title" | "destination" | "start_date" | "end_date" | "status">(null);
   const [fieldDraft, setFieldDraft] = useState<string>("");
+  const [periodDraft, setPeriodDraft] = useState<{ start: string; end: string }>({ start: "", end: "" });
 
   const startEditField = (field: typeof editingField, currentValue: string) => {
     setEditingField(field);
     setFieldDraft(currentValue ?? "");
+  };
+
+  const startEditPeriod = (start: string, end: string) => {
+    setPeriodDraft({ start: start || "", end: end || "" });
+    setEditingField("start_date");
+  };
+
+  const savePeriodEdit = async () => {
+    if (!id || !periodDraft.start || !periodDraft.end) return;
+    await updateTrip({ id, start_date: periodDraft.start, end_date: periodDraft.end } as any);
+    setEditingField(null);
+    setPeriodDraft({ start: "", end: "" });
   };
 
   const cancelEditField = () => {
@@ -1627,41 +1641,27 @@ function TripWalletContent() {
                   )}
                 </div>
 
-                {/* Período — editáveis (data início + fim) */}
+                {/* Período — seletor único de intervalo (mesmo par start_date/end_date) */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-muted-foreground">Período:</span>
                   {editingField === "start_date" ? (
                     <>
-                      <Input
-                        type="date"
-                        value={fieldDraft}
-                        onChange={(e) => setFieldDraft(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
-                        className="h-7 text-sm w-[160px]"
-                        autoFocus
+                      <TripPeriodField
+                        id="trip-wallet-periodo"
+                        label=""
+                        className="w-[260px]"
+                        start={periodDraft.start}
+                        end={periodDraft.end}
+                        onChange={setPeriodDraft}
                       />
-                      <span className="text-muted-foreground">a</span>
-                      <span className="font-medium">{format(endDate, "dd/MM/yyyy", { locale: ptBR })}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : editingField === "end_date" ? (
-                    <>
-                      <span className="font-medium">{format(startDate, "dd/MM/yyyy", { locale: ptBR })}</span>
-                      <span className="text-muted-foreground">a</span>
-                      <Input
-                        type="date"
-                        value={fieldDraft}
-                        onChange={(e) => setFieldDraft(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
-                        className="h-7 text-sm w-[160px]"
-                        autoFocus
-                      />
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={savePeriodEdit}
+                        disabled={isUpdating || !periodDraft.start || !periodDraft.end}
+                        title="Salvar"
+                      >
                         <Check className="h-3.5 w-3.5" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
@@ -1674,10 +1674,13 @@ function TripWalletContent() {
                         {format(startDate, "dd/MM/yyyy", { locale: ptBR })} a {format(endDate, "dd/MM/yyyy", { locale: ptBR })}
                       </span>
                       <span className="text-muted-foreground">({days} dias)</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("start_date", trip.start_date)} title="Editar data de início">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("end_date", trip.end_date)} title="Editar data de fim">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => startEditPeriod(trip.start_date, trip.end_date)}
+                        title="Editar período da viagem"
+                      >
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
                     </>

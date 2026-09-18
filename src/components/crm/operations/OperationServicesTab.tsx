@@ -12,6 +12,7 @@ import { useOperationServices, type OperationService, type OperationServiceFlag 
 import { OPERATION_SERVICE_LABELS, serviceTypeLabel, mapServiceDataToOperationService } from "@/lib/operationServiceMap";
 import { AIImportServiceModal } from "@/components/shared/AIImportServiceModal";
 import type { Operation } from "@/types/operations";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const FLAGS: { key: OperationServiceFlag; label: string }[] = [
   { key: "is_confirmed", label: "Confirmado" },
@@ -258,13 +259,14 @@ export function OperationServicesTab({ operation }: Props) {
                 <Label>Destino</Label>
                 <Input value={draft.destination ?? ""} onChange={(e) => setDraft({ ...draft, destination: e.target.value })} />
               </div>
-              <div>
-                <Label>Início</Label>
-                <Input type="date" value={draft.start_date ?? ""} onChange={(e) => setDraft({ ...draft, start_date: e.target.value })} />
-              </div>
-              <div>
-                <Label>Fim</Label>
-                <Input type="date" value={draft.end_date ?? ""} onChange={(e) => setDraft({ ...draft, end_date: e.target.value })} />
+              <div className="sm:col-span-2">
+                <TripPeriodField
+                  id="operation-service-period"
+                  label="Período do serviço"
+                  start={draft.start_date ?? ""}
+                  end={draft.end_date ?? ""}
+                  onChange={({ start, end }) => setDraft({ ...draft, start_date: start, end_date: end })}
+                />
               </div>
               <div className="sm:col-span-2">
                 <Label>Observações</Label>

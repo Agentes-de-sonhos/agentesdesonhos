@@ -18,6 +18,7 @@ import {
   type CompanyOption,
   type ContractorType,
 } from "@/components/reservas/ContractorPicker";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 export interface EditarRascunhoDialogProps {
   open: boolean;
@@ -211,24 +212,14 @@ export function EditarRascunhoDialog({
               onChange={(e) => setDestination(e.target.value)}
             />
           </div>
-          <div className="min-w-0 space-y-2">
-            <Label htmlFor="rascunho-inicio">Ida (opcional)</Label>
-            <Input
-              id="rascunho-inicio"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-          </div>
-          <div className="min-w-0 space-y-2">
-            <Label htmlFor="rascunho-fim">Volta (opcional)</Label>
-            <Input
-              id="rascunho-fim"
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
-          </div>
+          <TripPeriodField
+            id="rascunho-periodo"
+            label="Período da viagem (opcional)"
+            className="min-w-0 sm:col-span-2"
+            start={startDate}
+            end={endDate}
+            onChange={({ start, end }) => { setStartDate(start); setEndDate(end); }}
+          />
           <div className="min-w-0 space-y-2">
             <Label htmlFor="rascunho-adultos">Adultos</Label>
             <Input

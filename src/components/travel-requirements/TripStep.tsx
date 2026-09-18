@@ -8,6 +8,7 @@ import { Plus, Trash2, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { TripData, ConnectionStop } from "@/types/travelRequirements";
 import { cn } from "@/lib/utils";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 interface Props {
   data: TripData;
@@ -41,14 +42,13 @@ export function TripStep({ data, onChange }: Props) {
             <Label>Cidade de destino *</Label>
             <Input value={data.destination_city} onChange={(e) => set("destination_city", e.target.value)} placeholder="Ex: Nova York" />
           </div>
-          <div className="space-y-2">
-            <Label>Data de ida *</Label>
-            <Input type="date" value={data.departure_date} onChange={(e) => set("departure_date", e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label>Data de retorno</Label>
-            <Input type="date" value={data.return_date} onChange={(e) => set("return_date", e.target.value)} />
-          </div>
+          <TripPeriodField
+            id="requirements-trip-period"
+            required
+            start={data.departure_date}
+            end={data.return_date}
+            onChange={({ start, end }) => { set("departure_date", start); set("return_date", end); }}
+          />
           <div className="space-y-2">
             <Label>Companhia aérea</Label>
             <Input value={data.airline} onChange={(e) => set("airline", e.target.value)} placeholder="Ex: LATAM" />

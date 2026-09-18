@@ -17,6 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useImportableQuotes } from "@/hooks/useImportableQuotes";
 import { useOpportunities, useClients } from "@/hooks/useCRM";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 import {
   buildOpportunityDraftFromQuote,
   missingOpportunityFields,
@@ -246,22 +247,12 @@ export function ImportQuoteAsOpportunityDialog({ open, onOpenChange, onOpenExist
                   onChange={(e) => setDraft({ ...draft, destination: e.target.value })}
                 />
               </div>
-              <div>
-                <Label htmlFor="import-start">Início</Label>
-                <Input
-                  id="import-start"
-                  type="date"
-                  value={draft.start_date}
-                  onChange={(e) => setDraft({ ...draft, start_date: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="import-end">Fim</Label>
-                <Input
-                  id="import-end"
-                  type="date"
-                  value={draft.end_date}
-                  onChange={(e) => setDraft({ ...draft, end_date: e.target.value })}
+              <div className="sm:col-span-2">
+                <TripPeriodField
+                  id="import-period"
+                  start={draft.start_date}
+                  end={draft.end_date}
+                  onChange={({ start, end }) => setDraft({ ...draft, start_date: start, end_date: end })}
                 />
               </div>
               <div>

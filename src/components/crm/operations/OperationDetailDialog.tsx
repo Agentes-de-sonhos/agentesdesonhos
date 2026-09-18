@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 import {
   Plus, Trash2, Upload, FileText, Clock, ListChecks, Paperclip,
   Info, Copy, ExternalLink, MessageCircle, ArrowRight, MoreVertical, Save, RotateCcw,
@@ -197,13 +198,13 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
                 <Label>Destino</Label>
                 <Input value={form.destination ?? ""} onChange={(e) => setForm({ ...form, destination: e.target.value })} />
               </div>
-              <div>
-                <Label>Embarque</Label>
-                <Input type="date" value={form.travel_start_date ?? ""} onChange={(e) => setForm({ ...form, travel_start_date: e.target.value })} />
-              </div>
-              <div>
-                <Label>Retorno</Label>
-                <Input type="date" value={form.travel_end_date ?? ""} onChange={(e) => setForm({ ...form, travel_end_date: e.target.value })} />
+              <div className="sm:col-span-2">
+                <TripPeriodField
+                  id="operation-detail-period"
+                  start={form.travel_start_date ?? ""}
+                  end={form.travel_end_date ?? ""}
+                  onChange={({ start, end }) => setForm({ ...form, travel_start_date: start, travel_end_date: end })}
+                />
               </div>
               <div>
                 <Label>Passageiros</Label>

@@ -95,6 +95,27 @@ function EditHarness({ file, canEdit }: { file: TravelFile; canEdit?: boolean })
   );
 }
 
+
+const openPeriodo = async (user: any) => {
+  const trigger = screen.getAllByLabelText(/Período/i, { selector: "button" })[0];
+  await user.click(trigger);
+};
+
+const clickDia = async (user: any, day: number) => {
+  const cells = Array.from(document.querySelectorAll<HTMLElement>("table td, table th"));
+  const candidates = cells.flatMap((c) => {
+    const btn = c.querySelector("button");
+    return btn ? [btn] : c.getAttribute("role") === "gridcell" ? [c as unknown as HTMLButtonElement] : [];
+  });
+  const target = candidates.find(
+    (b) => b.textContent?.trim() === String(day) && !b.hasAttribute("disabled") && !b.className.includes("outside"),
+  );
+  if (!target) throw new Error("dia não encontrado no calendário");
+  await user.click(target);
+};
+
+const periodoTexto = () => screen.getAllByLabelText(/Período/i, { selector: "button" })[0].textContent || "";
+
 const lastPayload = () => {
   const call = rpc.mock.calls.find((c) => c[0] === "travel_file_update_manual");
   return (call?.[1]?._payload || {}) as Record<string, unknown>;
@@ -111,13 +132,15 @@ describe("edição de rascunho: campo não alterado nunca é apagado", () => {
     const user = userEvent.setup();
     wrap(<EditHarness file={draft({ status: "request_received" })} />);
 
-    await user.clear(screen.getByLabelText(/Ida \(opcional\)/i));
-    await user.type(screen.getByLabelText(/Ida \(opcional\)/i), "2030-05-10");
+    await openPeriodo(user);
+    await clickDia(user, 10);
+    await clickDia(user, 15);
     await user.click(screen.getByRole("button", { name: /Salvar alterações/i }));
 
     await waitFor(() => expect(rpc).toHaveBeenCalled());
     const payload = lastPayload();
-    expect(payload.start_date).toBe("2030-05-10");
+    expect(String(payload.start_date)).toMatch(/^\d{4}-\d{2}-10$/);
+    expect(String(payload.end_date)).toMatch(/^\d{4}-\d{2}-15$/);
     // Nenhum campo de contratante é enviado: o servidor preserva os vínculos.
     expect("contact_client_id" in payload).toBe(false);
     expect("client_id" in payload).toBe(false);
@@ -170,7 +193,8 @@ describe("reset por identidade no cadastro manual", () => {
 
     await user.type(screen.getByLabelText(/Nome da viagem/i), "Viagem da Conta Antiga");
     await user.type(screen.getByLabelText(/Destino/i), "Destino Antigo");
-    await user.type(screen.getByLabelText(/Ida \(opcional\)/i), "2030-01-02");
+    await openPeriodo(user);
+    await clickDia(user, 12);
     await user.type(screen.getByLabelText(/Pessoa contratante/i), "Alfa");
     await user.click(await screen.findByText(SYNTHETIC_CLIENT.name));
     expect(screen.getByText(`Selecionado: ${SYNTHETIC_CLIENT.name}`)).toBeTruthy();
@@ -187,7 +211,7 @@ describe("reset por identidade no cadastro manual", () => {
       expect((screen.getByLabelText(/Nome da viagem/i) as HTMLInputElement).value).toBe(""),
     );
     expect((screen.getByLabelText(/Destino/i) as HTMLInputElement).value).toBe("");
-    expect((screen.getByLabelText(/Ida \(opcional\)/i) as HTMLInputElement).value).toBe("");
+    expect(periodoTexto()).not.toMatch(/\d{2}\/\d{2}\/\d{4}/);
     // voltou para Pessoa e sem contratante selecionado nem termo digitado
     expect(screen.queryByText(/Selecionado:/)).toBeNull();
     expect((screen.getByLabelText(/Pessoa contratante/i) as HTMLInputElement).value).toBe("");

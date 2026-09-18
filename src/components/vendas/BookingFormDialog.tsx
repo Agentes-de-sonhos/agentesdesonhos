@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BOOKING_STATUSES, useClients } from "@/hooks/useBookings";
 import { Loader2 } from "lucide-react";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 interface Props {
   open: boolean;
@@ -72,16 +73,12 @@ export function BookingFormDialog({ open, onOpenChange, onSubmit, isLoading }: P
               ))}
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Data Início</Label>
-              <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-            </div>
-            <div>
-              <Label>Data Fim</Label>
-              <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-            </div>
-          </div>
+          <TripPeriodField
+            id="booking-form-periodo"
+            start={startDate}
+            end={endDate}
+            onChange={({ start, end }) => { setStartDate(start); setEndDate(end); }}
+          />
           <div>
             <Label>Status</Label>
             <select
