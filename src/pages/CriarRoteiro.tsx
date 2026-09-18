@@ -455,12 +455,6 @@ export default function CriarRoteiro() {
     });
   };
 
-  const handleBack = () => {
-    setCurrentItinerary(null);
-    setFormData(null);
-    setGeneratedLinkUrl(null);
-    navigate(nav.itinerary());
-  };
 
   const areAllActivitiesApproved = (itinerary: Itinerary & { days: ItineraryDay[] }) => {
     if (!itinerary.days || itinerary.days.length === 0) return false;
@@ -814,21 +808,7 @@ export default function CriarRoteiro() {
           </Tabs>
         ) : (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (fromTripId) {
-                    navigate(nav.wallet(fromTripId));
-                  } else {
-                    handleBack();
-                  }
-                }}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {fromTripId ? "Voltar para Carteira" : "Voltar"}
-              </Button>
-              <div className="flex gap-2">
+            <div className="flex items-center justify-end gap-2">
                 {currentItinerary && !areAllActivitiesApproved(currentItinerary) && (
                   <Button variant="outline" onClick={() => setApproveAllConfirmOpen(true)}>
                     <Check className="mr-2 h-4 w-4" />
