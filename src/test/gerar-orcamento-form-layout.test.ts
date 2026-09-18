@@ -67,3 +67,31 @@ describe("Gerar Orçamento — navegação e layout", () => {
     expect(form).not.toContain(".delete(");
   });
 });
+
+describe("Apresentação do investimento — grid valor total + toggle", () => {
+  it("exibe duas colunas em desktop quando o toggle aparece (detalhada/agrupada)", () => {
+    const rowStart = page.indexOf('data-testid="investment-total-row"');
+    expect(rowStart).toBeGreaterThan(-1);
+    const row = page.slice(rowStart, rowStart + 600);
+    expect(row).toContain("grid grid-cols-1 items-start gap-4 md:grid-cols-2");
+    // Toggle na segunda coluna, preenchendo a altura da linha
+    const toggleStart = page.indexOf('data-testid="investment-visibility-toggle"');
+    expect(toggleStart).toBeGreaterThan(rowStart);
+    const toggle = page.slice(toggleStart, toggleStart + 400);
+    expect(toggle).toContain("self-stretch");
+    expect(toggle).toContain('id="show-investment-total"');
+    // Valor total na primeira coluna, antes do toggle
+    const cardInRow = page.slice(rowStart, toggleStart);
+    expect(cardInRow).toContain("<QuoteTotalAmountCard");
+  });
+
+  it("mantém o valor total em largura total na modalidade consolidada", () => {
+    const fullStart = page.indexOf('data-testid="investment-total-fullwidth"');
+    expect(fullStart).toBeGreaterThan(-1);
+    expect(page.slice(fullStart, fullStart + 400)).toContain("<QuoteTotalAmountCard");
+    // Ramo do toggle não deve estar presente dentro do bloco fullwidth
+    const block = page.slice(fullStart, fullStart + 400);
+    expect(block).not.toContain("investment-total-row");
+    expect(block).not.toContain("md:grid-cols-2");
+  });
+});
