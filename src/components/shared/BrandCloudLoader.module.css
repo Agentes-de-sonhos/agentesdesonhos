@@ -1,0 +1,19 @@
+.trace {
+  stroke-dasharray: 22 78;
+  stroke-dashoffset: 100;
+  animation: brand-cloud-trace 1.65s linear infinite;
+}
+
+@keyframes brand-cloud-trace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+}
