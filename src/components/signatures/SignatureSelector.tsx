@@ -17,9 +17,11 @@ interface Props {
   label?: string;
   /** Exibe todas as assinaturas diretamente em grade, sem popover. */
   inline?: boolean;
+  /** Oculta somente a ação auxiliar de retorno ao padrão, sem remover o card padrão. */
+  hideUseDefaultAction?: boolean;
 }
 
-export function SignatureSelector({ value, onChange, className, label, inline = false }: Props) {
+export function SignatureSelector({ value, onChange, className, label, inline = false, hideUseDefaultAction = false }: Props) {
   const { allSignatures, effectiveSignature, isLoading, create } = useCommercialSignatures();
   const [open, setOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -102,7 +104,7 @@ export function SignatureSelector({ value, onChange, className, label, inline = 
                 <Plus className="h-4 w-4" /> Nova assinatura
               </button>
             </div>
-            {current && (
+            {current && !hideUseDefaultAction && (
               <button
                 type="button"
                 onClick={() => onChange(null)}
