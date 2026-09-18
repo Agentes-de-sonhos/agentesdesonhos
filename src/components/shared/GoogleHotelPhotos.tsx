@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Check, Loader2, Camera } from "lucide-react";
@@ -30,6 +30,10 @@ interface GoogleHotelPhotosProps {
   disabled?: boolean;
   /** Controlled use: hides the internal selected counter. */
   hideCounter?: boolean;
+  /** Limita quantas opções são exibidas. Sem valor = todas (comportamento atual). */
+  maxPhotos?: number;
+  /** Seleciona automaticamente a primeira foto quando nenhuma estiver selecionada. */
+  autoSelectFirst?: boolean;
 }
 
 // In-memory cache to avoid re-fetching
@@ -47,7 +51,10 @@ export function GoogleHotelPhotos({
   alwaysOpen = false,
   disabled = false,
   hideCounter = false,
+  maxPhotos,
+  autoSelectFirst = false,
 }: GoogleHotelPhotosProps) {
+
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
   const [loading, setLoading] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
@@ -93,6 +100,11 @@ export function GoogleHotelPhotos({
       .finally(() => setLoading(false));
   }, [placeId, requested]);
 
+  const visiblePhotos = useMemo(
+    () => (typeof maxPhotos === "number" && maxPhotos > 0 ? photos.slice(0, maxPhotos) : photos),
+    [photos, maxPhotos],
+  );
+
   const togglePhoto = useCallback((index: number) => {
     const photo = photos[index];
     if (!photo || !placeId) return;
@@ -113,7 +125,22 @@ export function GoogleHotelPhotos({
     [existingUrls, placeId],
   );
 
-  const selectedCount = photos.filter((p, i) => isPhotoSelected(p, i)).length;
+  // Pré-seleção de cortesia: uma única foto, apenas quando o usuário ainda não
+  // escolheu nenhuma. Nunca sobrescreve nem repete a seleção do usuário.
+  const autoSelectedRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!autoSelectFirst || !placeId || disabled) return;
+    if (autoSelectedRef.current === placeId) return;
+    const first = visiblePhotos[0];
+    if (!first) return;
+    autoSelectedRef.current = placeId;
+    if (existingUrls.length > 0) return;
+    onPhotosSelected([makeGplaceRef(placeId, 0)]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoSelectFirst, placeId, disabled, visiblePhotos]);
+
+  const selectedCount = visiblePhotos.filter((p, i) => isPhotoSelected(p, i)).length;
+
 
   if (!placeId) return null;
 
@@ -132,7 +159,7 @@ export function GoogleHotelPhotos({
     );
   }
 
-  if (!loading && photos.length === 0) return null;
+  if (!loading && visiblePhotos.length === 0) return null;
 
   if (loading) {
     return (
@@ -153,7 +180,7 @@ export function GoogleHotelPhotos({
         className="text-xs gap-1.5 h-8"
       >
         <Camera className="h-3.5 w-3.5" />
-        {buttonLabel ?? `Sugerir fotos do Google (${photos.length})`}
+        {buttonLabel ?? `Sugerir fotos do Google (${visiblePhotos.length})`}
       </Button>
     );
   }
@@ -178,7 +205,7 @@ export function GoogleHotelPhotos({
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
-        {photos.map((photo, i) => {
+        {visiblePhotos.map((photo, i) => {
           const isSelected = isPhotoSelected(photo, i);
           return (
             <button

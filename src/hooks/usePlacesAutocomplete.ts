@@ -28,7 +28,10 @@ interface UsePlacesAutocompleteOptions {
   contextCity?: string;
   onSelect?: (prediction: PlacePrediction, details?: PlaceDetails) => void;
   fetchDetailsOnSelect?: boolean;
+  /** Limita quantos resultados são exibidos. Sem valor = todos (comportamento atual). */
+  maxResults?: number;
 }
+
 
 export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
   const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
@@ -41,12 +44,19 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
+  const limitPredictions = useCallback((list: PlacePrediction[]) => {
+    const max = optionsRef.current?.maxResults;
+    return typeof max === "number" && max > 0 ? list.slice(0, max) : list;
+  }, []);
+
   const fetchAutocomplete = useCallback(async (input: string) => {
     if (input.trim().length < 3) {
       setPredictions([]);
       setShowDropdown(false);
       return;
     }
+
+
 
     setIsSearching(true);
     try {
@@ -77,8 +87,10 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
               matched_type: true,
             };
           });
-          setPredictions(preds);
-          setShowDropdown(preds.length > 0);
+          const limited = limitPredictions(preds);
+          setPredictions(limited);
+          setShowDropdown(limited.length > 0);
+
         } else {
           setPredictions([]);
           setShowDropdown(false);
@@ -95,15 +107,18 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
       });
 
       if (!error && data?.predictions) {
-        setPredictions(data.predictions);
-        setShowDropdown(data.predictions.length > 0);
+        const limited = limitPredictions(data.predictions as PlacePrediction[]);
+        setPredictions(limited);
+        setShowDropdown(limited.length > 0);
       }
+
     } catch {
       // silently fail
     } finally {
       setIsSearching(false);
     }
-  }, []);
+  }, [limitPredictions]);
+
 
   const fetchDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
     // Place IDs gerados pela base interna de cidades não possuem detalhes

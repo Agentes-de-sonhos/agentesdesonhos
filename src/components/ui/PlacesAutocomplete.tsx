@@ -23,11 +23,13 @@ interface PlacesAutocompleteProps {
   className?: string;
   disabled?: boolean;
   fetchDetailsOnSelect?: boolean;
+  /** Limita a quantidade de sugestões exibidas. Sem valor = todas. */
+  maxResults?: number;
 }
 
 export const PlacesAutocomplete = forwardRef<HTMLInputElement, PlacesAutocompleteProps>(
   function PlacesAutocomplete(
-    { value, onChange, onPlaceSelect, placeType = "general", contextCity, placeholder, className, disabled, fetchDetailsOnSelect = true },
+    { value, onChange, onPlaceSelect, placeType = "general", contextCity, placeholder, className, disabled, fetchDetailsOnSelect = true, maxResults },
     ref
   ) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -43,11 +45,13 @@ export const PlacesAutocomplete = forwardRef<HTMLInputElement, PlacesAutocomplet
       placeType,
       contextCity,
       fetchDetailsOnSelect,
+      maxResults,
       onSelect: (pred, details) => {
         onChange(pred.name);
         onPlaceSelect?.(pred, details);
       },
     });
+
 
     // Close dropdown on outside click
     useEffect(() => {

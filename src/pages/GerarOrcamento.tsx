@@ -1556,6 +1556,8 @@ export default function GerarOrcamento() {
         tripEndDate={tripEndDate}
         adultsCount={quote.adults_count}
         childrenCount={quote.children_count}
+        destinationContext={quote.destination}
+
         isLoading={isAddingService}
         onSubmit={handleAddService}
         onSubmitMany={handleAddManyServices}
