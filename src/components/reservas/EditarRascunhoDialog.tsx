@@ -13,12 +13,12 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import type { TravelFile } from "@/types/travelFile";
 import {
-import { TripPeriodField } from "@/components/shared/TripPeriodField";
   ContractorPicker,
   type ClientOption,
   type CompanyOption,
   type ContractorType,
 } from "@/components/reservas/ContractorPicker";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 export interface EditarRascunhoDialogProps {
   open: boolean;

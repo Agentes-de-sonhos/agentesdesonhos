@@ -15,12 +15,12 @@ import { toast } from "sonner";
 import { useAgencyCompanies, useCreateManualReservation } from "@/hooks/useTravelFiles";
 import { useAuth } from "@/hooks/useAuth";
 import {
-import { TripPeriodField } from "@/components/shared/TripPeriodField";
   ContractorPicker,
   type ClientOption,
   type CompanyOption,
   type ContractorType,
 } from "@/components/reservas/ContractorPicker";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const newManualKey = () =>
   (globalThis.crypto?.randomUUID?.() as string) ||
