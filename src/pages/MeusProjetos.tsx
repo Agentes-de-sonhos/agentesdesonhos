@@ -545,39 +545,12 @@ export default function MeusProjetos() {
         </div>
 
         <div className="flex items-center gap-0.5 md:justify-self-end opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity">
-          <IconAction label="Visualizar" onClick={() => handleEdit(item)}>
-            <Eye className="h-4 w-4" />
-          </IconAction>
-          <IconAction label="Editar" onClick={() => handleEdit(item)}>
-            <Pencil className="h-4 w-4" />
-          </IconAction>
-          <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
-            <Copy className="h-4 w-4" />
-          </IconAction>
-          {item.type === "itinerary" && (
-            <IconAction
-              label="Salvar como modelo"
-              onClick={() => {
-                const found = itineraries.find((i: any) => i.id === item.id);
-                if (found) setTemplateTarget(found as Itinerary);
-              }}
-            >
-              <Star className="h-4 w-4" />
-            </IconAction>
-          )}
-          {item.type === "itinerary" && (
-            <IconAction label="Publicar / Link" onClick={() => handleEdit(item)}>
-              <Link2 className="h-4 w-4" />
-            </IconAction>
-          )}
-          {item.type === "itinerary" && (
-            <IconAction label="Gerar PDF" onClick={() => handleEdit(item)}>
-              <FileText className="h-4 w-4" />
-            </IconAction>
-          )}
-          <IconAction label="Excluir" destructive onClick={() => setDeleteTarget(item)}>
-            <Trash2 className="h-4 w-4" />
-          </IconAction>
+          <ProjectRowActions
+            publicUrl={publicUrlFor(item)}
+            onEdit={() => handleEdit(item)}
+            onDuplicate={() => handleDuplicate(item)}
+            onDelete={() => setDeleteTarget(item)}
+          />
         </div>
       </div>
     );
