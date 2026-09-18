@@ -9,6 +9,8 @@
 /** Hosts técnicos de demonstração e o cenário correspondente. */
 export const DEMO_SCENARIO_BY_HOST: Record<string, string> = {
   "casanovatur.demo.local": "casa-nova-tur",
+  /** Carga demonstrativa canônica, editável pelas telas reais da Gestão. */
+  "sitelab.local": "sitelab-base-canonical",
 };
 
 /** "Hoje" no fuso America/Sao_Paulo (mesma referência usada no servidor). */
