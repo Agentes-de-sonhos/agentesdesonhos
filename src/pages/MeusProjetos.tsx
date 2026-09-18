@@ -362,19 +362,37 @@ export default function MeusProjetos() {
 
   const isLoading = quotesLoading || tripsLoading || itinerariesLoading;
 
-  const handleEdit = (item: ProjectItem) => {
+  /** Caminho de edição de cada projeto — chave estável por tipo + ID. */
+  const editPathFor = (item: ProjectItem): string => {
     switch (item.type) {
       case "quote":
-        navigate(nav.quote(item.id));
-        break;
+        return nav.quote(item.id);
       case "trip":
-        navigate(nav.wallet(item.id));
-        break;
+        return nav.wallet(item.id);
       case "itinerary":
-        navigate(nav.itinerary(item.id));
-        break;
+        return nav.itinerary(item.id);
     }
   };
+
+  /**
+   * Clicar no nome do projeto e clicar no lápis executam exatamente esta ação:
+   * abrir a edição em nova aba interna (ou focar a aba já aberta do mesmo
+   * projeto), respeitando o limite de 10 abas do gerenciador atual.
+   */
+  const handleEdit = (item: ProjectItem) => {
+    openInternalWindow(editPathFor(item), `${TYPE_LABELS[item.type]} — ${item.name}`);
+  };
+
+  /** Link público oficial, ou `null` quando não há versão publicada válida. */
+  const publicUrlFor = (item: ProjectItem): string | null =>
+    buildProjectPublicUrl({
+      kind: item.type,
+      status: item.rawStatus,
+      publicAccessCode: item.publicAccessCode,
+      agencyName,
+      customDomain,
+    });
+
 
   const handleDuplicate = (item: ProjectItem) => {
     switch (item.type) {
