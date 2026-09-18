@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal,
+  Pencil, MoreHorizontal, Images,
 } from "lucide-react";
 import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

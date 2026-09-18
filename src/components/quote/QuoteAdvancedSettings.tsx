@@ -185,6 +185,7 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Prop
     <AdvancedSettingsSection
       title="Moeda do orçamento"
       icon={<DollarSign className="h-4 w-4 text-primary" />}
+      accentClass="bg-rose-500"
       summary={
         <>
           {currencyOption?.flag} {currencyOption?.label} ({getCurrencySymbol(currency)})

@@ -163,8 +163,8 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(page.slice(barIndex, barIndex + 400)).toContain('className="justify-start sm:pl-[52px]"');
     expect(page).toContain("<QuoteStepsGuide");
     expect(page).toContain("actions={!quote.share_token ? (");
-    expect(guide).toContain("lg:flex-row lg:items-center lg:justify-between");
-    expect(guide).toContain("lg:justify-end");
+    expect(guide).toContain("md:flex-row md:items-center");
+    expect(guide).toContain("justify-end");
   });
 
   it("no estado sem URL, o botão PDF também usa estilo primário", () => {
@@ -216,19 +216,30 @@ describe("QuoteStepsGuide — trilha explicativa", () => {
     expect(guideSource).not.toContain("onSelect");
   });
 
-  it("expõe a explicação por foco e toque sem renderizar Ver mais", async () => {
+  it("abre somente por clique/teclado, alterna e troca a explicação", async () => {
     render(<QuoteStepsGuide steps={steps} />);
     const first = screen.getByRole("button", { name: /Adicionar serviços: Inclua passagens/ });
+    fireEvent.mouseEnter(first);
+    expect(screen.queryByText("Inclua passagens.")).toBeNull();
     fireEvent.focus(first);
+    expect(screen.queryByText("Inclua passagens.")).toBeNull();
+    fireEvent.click(first);
     expect(await screen.findByText("Inclua passagens.")).toBeTruthy();
-    fireEvent.blur(first);
-    fireEvent.click(screen.getByRole("button", { name: /Publicar: Gere a versão web/ }));
+    const publish = screen.getByRole("button", { name: /Publicar: Gere a versão web/ });
+    fireEvent.click(publish);
     expect(await screen.findByText("Gere a versão web ou PDF.")).toBeTruthy();
+    expect(screen.queryByText("Inclua passagens.")).toBeNull();
+    fireEvent.click(publish);
+    await waitFor(() => expect(screen.queryByText("Gere a versão web ou PDF.")).toBeNull());
     expect(screen.queryByText("Ver mais")).toBeNull();
   });
 
-  it("trilha em linha única com rolagem local, sem overflow global", () => {
-    expect(guideSource).toContain("overflow-x-auto");
-    expect(guideSource).toContain('className="flex w-max items-center gap-x-2"');
+  it("trilha fluida sem rolagem e sem hover semântico", () => {
+    expect(guideSource).not.toContain("overflow-x-auto");
+    expect(guideSource).toContain("grid-cols-2");
+    expect(guideSource).toContain("sm:grid-cols-4");
+    expect(guideSource).not.toContain("onMouseEnter");
+    expect(guideSource).not.toContain("hover:text-foreground");
+    expect(guideSource).not.toContain("orange");
   });
 });
