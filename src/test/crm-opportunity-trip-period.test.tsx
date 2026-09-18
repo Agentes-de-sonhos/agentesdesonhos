@@ -31,8 +31,14 @@ import { OpportunityForm } from "@/components/crm/OpportunityForm";
 const openPeriod = () => fireEvent.click(screen.getByLabelText("Período da viagem", { selector: "button" }));
 
 const clickDay = (day: number) => {
-  const buttons = screen.getAllByRole("gridcell").flatMap((c) => Array.from(c.querySelectorAll("button")));
-  const target = buttons.find((b) => b.textContent?.trim() === String(day) && !b.disabled);
+  const cells = Array.from(document.querySelectorAll<HTMLElement>("table td, table th"));
+  const candidates = cells.flatMap((c) => {
+    const btn = c.querySelector("button");
+    return btn ? [btn] : (c.getAttribute("role") === "gridcell" ? [c as unknown as HTMLButtonElement] : []);
+  });
+  const target = candidates.find(
+    (b) => b.textContent?.trim() === String(day) && !b.hasAttribute("disabled") && !b.className.includes("outside"),
+  );
   expect(target).toBeTruthy();
   fireEvent.click(target!);
 };
