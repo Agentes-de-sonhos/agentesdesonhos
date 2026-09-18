@@ -8,6 +8,7 @@ const summary = readFileSync("src/components/quote/QuoteSummary.tsx", "utf8");
 const destination = readFileSync("src/components/quote/DestinationIntroEditor.tsx", "utf8");
 const advancedSection = readFileSync("src/components/quote/AdvancedSettingsSection.tsx", "utf8");
 const advanced = readFileSync("src/components/quote/QuoteAdvancedSettings.tsx", "utf8");
+const documents = readFileSync("src/components/quote/QuoteDocuments.tsx", "utf8");
 
 describe("Editor de orçamento reorganizado", () => {
   it("tem somente quatro passos explicativos na ordem aprovada", () => {
@@ -46,11 +47,16 @@ describe("Editor de orçamento reorganizado", () => {
     expect(advanced).toContain("DocumentSignatureCard");
   });
 
-  it("mantém moeda sempre aberta e assinatura inline antes da solicitação de reserva", () => {
+  it("mantém moeda e assinatura como accordions independentes, abertos inicialmente", () => {
     const advanced = page.match(/renderAdvanced=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
-    expect(advanced).toContain("alwaysOpen");
-    expect(advanced).not.toContain('advancedSection === "currency"');
+    expect(page).toContain("currency: true");
+    expect(page).toContain("signature: true");
+    expect(advanced).toContain("advancedSections.currency");
+    expect(advanced).toContain('toggleAdvancedSection("currency")');
+    expect(advanced).toContain("advancedSections.signature");
+    expect(advanced).toContain('toggleAdvancedSection("signature")');
     expect(advanced).toContain("inlineSelector");
+    expect(advanced).toContain("hideHeader");
     expect(advanced.indexOf("DocumentSignatureCard")).toBeLessThan(
       advanced.indexOf("QuoteBookingRequestSettings"),
     );
@@ -59,6 +65,7 @@ describe("Editor de orçamento reorganizado", () => {
     const currency = readFileSync("src/components/quote/QuoteAdvancedSettings.tsx", "utf8");
     expect(currency).toContain('data-testid="quote-currency-card"');
     expect(currency).toContain("Moeda do orçamento");
+    expect(currency).toContain("AdvancedSettingsSection");
 
     const selector = readFileSync("src/components/signatures/SignatureSelector.tsx", "utf8");
     expect(selector).toContain('data-testid="signature-inline-grid"');
@@ -69,6 +76,14 @@ describe("Editor de orçamento reorganizado", () => {
     expect(selector).toContain("<Popover ");
     const inlineBranch = selector.slice(selector.indexOf("if (inline) {"), selector.indexOf("<Popover "));
     expect(inlineBranch).not.toContain("<Popover");
+  });
+
+  it("padroniza cabeçalhos avançados e faz o traço incluir ícone e título", () => {
+    expect(advancedSection).toContain("min-h-[4.5rem]");
+    expect(advancedSection).toContain("flex w-fit max-w-full flex-col");
+    expect(advancedSection).toMatch(/icon[\s\S]*text-sm font-semibold[\s\S]*h-1 w-full/);
+    expect(page).toContain('title="Escolha uma assinatura"');
+    expect(page).toContain('<UserCircle2 className="h-4 w-4 text-rose-500" />');
   });
 
   it("preserva handlers de geração e layout responsivo das ações", () => {
@@ -137,6 +152,27 @@ describe("Editor de orçamento reorganizado", () => {
     expect(validityBlock).toContain("CalendarIcon");
     expect(validityBlock).toContain("pointer-events-auto");
     expect(validityBlock).toContain('onSelect={setValidUntil}');
+    expect(validityBlock).toContain("flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4");
+  });
+
+  it("mantém a edição de passageiros em duas linhas atômicas", () => {
+    expect(summary).toContain('data-testid="quote-adults-edit-row"');
+    expect(summary).toContain('data-testid="quote-children-edit-row"');
+    expect(summary.match(/items-center gap-2 whitespace-nowrap/g)).toHaveLength(2);
+    expect(summary).toContain('htmlFor="quote-adults-count"');
+    expect(summary).toContain('htmlFor="quote-children-count"');
+    expect(summary).toContain('title="Salvar"');
+  });
+
+  it("remove o botão redundante e mantém a dropzone clicável, por teclado e por arraste", () => {
+    expect(documents).not.toContain("Adicionar documento");
+    expect(documents).toContain("Arraste arquivos aqui ou clique para selecionar");
+    expect(documents).toContain('role="button"');
+    expect(documents).toContain('tabIndex={0}');
+    expect(documents).toContain("onDrop={handleDrop}");
+    expect(documents).toContain("inputRef.current?.click()");
+    expect(documents).toContain('event.key === "Enter" || event.key === " "');
+    expect(documents).toContain("até 25MB por arquivo");
   });
 
   it("mantém os subtítulos internos simples e os dois cartões de capa equilibrados", () => {

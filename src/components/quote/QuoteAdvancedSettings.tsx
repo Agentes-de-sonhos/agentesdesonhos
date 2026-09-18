@@ -21,7 +21,7 @@ interface Props {
   /** Quando informado, o bloco é renderizado como seção expansível. */
   open?: boolean;
   onToggle?: () => void;
-  /** Card branco sempre aberto (sem chevron), usado na etapa Avançado do orçamento. */
+  /** Card branco sempre aberto (sem chevron), usado em contextos que não permitem recolher. */
   alwaysOpen?: boolean;
 }
 

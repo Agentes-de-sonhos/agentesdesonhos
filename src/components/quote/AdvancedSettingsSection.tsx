@@ -32,21 +32,21 @@ export function AdvancedSettingsSection({
 }) {
   return (
     <section className={cn("rounded-xl border bg-card shadow-sm overflow-hidden", className)}>
-      <div className="flex items-start gap-2 px-3 sm:px-4 py-3">
+      <div className="flex min-h-[4.5rem] items-start gap-2 px-3 py-3 sm:px-4">
         <button
           type="button"
           onClick={onToggle}
           aria-expanded={open}
           className="flex min-w-0 flex-1 items-start gap-2.5 text-left"
         >
-          {icon && <span className="mt-0.5 shrink-0">{icon}</span>}
           <span className="min-w-0 flex-1">
-            <span className="flex flex-wrap items-center gap-2">
-              <span className="w-fit max-w-full">
-                <span className="block text-sm font-semibold text-foreground">{title}</span>
-                <span className={cn("mt-1.5 block h-1 w-full rounded-full", accentClass)} aria-hidden="true" />
+            <span className="flex w-fit max-w-full flex-col">
+              <span className="flex flex-wrap items-center gap-2">
+                {icon && <span className="shrink-0">{icon}</span>}
+                <span className="text-sm font-semibold text-foreground">{title}</span>
+                {badge}
               </span>
-              {badge}
+              <span className={cn("mt-1.5 block h-1 w-full rounded-full", accentClass)} aria-hidden="true" />
             </span>
             {summary && (
               <span className="mt-0.5 block text-xs text-muted-foreground [overflow-wrap:anywhere]">
