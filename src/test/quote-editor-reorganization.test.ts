@@ -4,6 +4,10 @@ import { readFileSync } from "node:fs";
 const page = readFileSync("src/pages/GerarOrcamento.tsx", "utf8");
 const guide = readFileSync("src/components/quote/QuoteStepsGuide.tsx", "utf8");
 const settings = readFileSync("src/components/quote/QuoteSettingsModal.tsx", "utf8");
+const summary = readFileSync("src/components/quote/QuoteSummary.tsx", "utf8");
+const destination = readFileSync("src/components/quote/DestinationIntroEditor.tsx", "utf8");
+const advancedSection = readFileSync("src/components/quote/AdvancedSettingsSection.tsx", "utf8");
+const advanced = readFileSync("src/components/quote/QuoteAdvancedSettings.tsx", "utf8");
 
 describe("Editor de orçamento reorganizado", () => {
   it("tem somente quatro passos explicativos na ordem aprovada", () => {
@@ -47,7 +51,40 @@ describe("Editor de orçamento reorganizado", () => {
     expect(page).toContain("onClick={handleGeneratePDF}");
     expect(page).toContain("disabled={isPublishing}");
     expect(page).toContain("actions={!quote.share_token ? (");
-    expect(guide).toContain("flex-col gap-3 lg:flex-row");
-    expect(guide).toContain("flex shrink-0 flex-wrap");
+    expect(guide).toContain("flex-col gap-2 md:flex-row");
+    expect(guide).toContain("flex shrink-0 items-center justify-end");
+    expect(guide).toContain("grid-cols-2");
+    expect(guide).toContain("sm:grid-cols-4");
+  });
+
+  it("compacta dados principais em duas linhas e remove o resumo financeiro", () => {
+    expect(summary).toContain("md:grid-cols-6");
+    expect(summary.match(/md:col-span-2/g)?.length).toBeGreaterThanOrEqual(3);
+    expect(summary.match(/md:col-span-3/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(summary).not.toContain("Total Geral");
+    expect(summary).not.toContain("serviço(s) incluído(s)");
+    expect(summary).not.toContain("getEffectiveQuoteTotal");
+  });
+
+  it("mantém IA dentro da descrição e a chave no rodapé direito", () => {
+    const descriptionStart = destination.indexOf("Descrição do destino");
+    const descriptionEnd = destination.indexOf('data-testid="destination-description-surface"');
+    const aiButton = destination.indexOf("Gerar com IA", descriptionStart);
+    expect(aiButton).toBeGreaterThan(descriptionStart);
+    expect(aiButton).toBeLessThan(descriptionEnd);
+    expect(destination).toContain('data-testid="destination-visibility-action"');
+    expect(destination).toContain("flex justify-end border-t");
+    expect(destination).toContain("Exibir apresentação do destino");
+  });
+
+  it("aplica título com ícone e traço às seis etapas e seções avançadas", () => {
+    expect(settings.match(/accentClass: "bg-/g)).toHaveLength(6);
+    expect(settings).toContain('active !== "advanced"');
+    expect(settings).toContain("CurrentIcon");
+    expect(advancedSection).toContain("accentClass");
+    expect(advancedSection).toContain("h-1 w-full rounded-full");
+    expect(advanced).toContain('title="Moeda do orçamento"');
+    expect(page).toContain("QuoteBookingRequestSettings");
+    expect(page).toContain("DocumentSignatureCard");
   });
 });

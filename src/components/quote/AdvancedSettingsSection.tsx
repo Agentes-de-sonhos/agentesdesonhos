@@ -16,6 +16,7 @@ export function AdvancedSettingsSection({
   open,
   onToggle,
   className,
+  accentClass = "bg-rose-500",
   children,
 }: {
   icon?: ReactNode;
@@ -26,6 +27,7 @@ export function AdvancedSettingsSection({
   open: boolean;
   onToggle: () => void;
   className?: string;
+  accentClass?: string;
   children: ReactNode;
 }) {
   return (
@@ -40,7 +42,10 @@ export function AdvancedSettingsSection({
           {icon && <span className="mt-0.5 shrink-0">{icon}</span>}
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold text-foreground">{title}</span>
+              <span className="w-fit max-w-full">
+                <span className="block text-sm font-semibold text-foreground">{title}</span>
+                <span className={cn("mt-1.5 block h-1 w-full rounded-full", accentClass)} aria-hidden="true" />
+              </span>
               {badge}
             </span>
             {summary && (

@@ -461,7 +461,8 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     <AdvancedSettingsSection
       className="border-amber-300/60 bg-amber-50/40 dark:bg-amber-500/5"
       title="Solicitação de reserva pelo orçamento web"
-      icon={<Globe className="h-4 w-4 text-amber-500" />}
+      icon={<Globe className="h-4 w-4 text-rose-500" />}
+      accentClass="bg-rose-500"
       badge={
         <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">
           White Label Premium

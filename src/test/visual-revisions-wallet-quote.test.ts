@@ -10,9 +10,10 @@ const wallet = readFileSync("src/pages/ViagemPublica.tsx", "utf8");
 
 describe("Orientações do orçamento", () => {
   it("usa popovers acessíveis por etapa, sem o antigo modal geral", () => {
-    expect(guide).toContain("PopoverTrigger");
-    expect(guide).toContain("onMouseEnter");
-    expect(guide).toContain("onFocus");
+    expect(guide).toContain("PopoverAnchor");
+    expect(guide).not.toContain("onMouseEnter");
+    expect(guide).not.toContain("onFocus");
+    expect(guide).toContain("onOpenChange");
     expect(guide).not.toContain("Como montar seu orçamento");
     expect(guide).not.toContain("Ver mais");
   });

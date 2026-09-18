@@ -444,7 +444,7 @@ interface EmbeddedProps {
 
 function EmbeddedDestinationIntro(props: EmbeddedProps) {
   const {
-    destination, text, onTextChange, images,
+    destination, enabled, onToggle, text, onTextChange, images,
     onRemoveImage, onAddGooglePhotos, onUploadImages, onSetCover, onAddByUrl,
     onGenerate, isGenerating, isFetchingPhotos, isUploading,
   } = props;
@@ -503,15 +503,18 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
         {/* Coluna 1 — Capa e fotos */}
         <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold flex items-center gap-2">
-              <Images className="h-4 w-4 text-primary" />
-              Capa e fotos
-              {images.length > 0 && (
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                  {images.length}
-                </span>
-              )}
-            </h4>
+            <div className="w-fit">
+              <h4 className="text-sm font-semibold flex items-center gap-2">
+                <Images className="h-4 w-4 text-sky-500" />
+                Capa e fotos
+                {images.length > 0 && (
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                    {images.length}
+                  </span>
+                )}
+              </h4>
+              <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
+            </div>
             <Button variant="ghost" size="sm" onClick={() => setPhotosOpen(true)} className="h-7 gap-1.5 text-xs">
               <Pencil className="h-3.5 w-3.5" />
               Gerenciar
@@ -597,18 +600,40 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
 
         {/* Coluna 2 — Descrição */}
         <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3 flex flex-col">
-          <div className="flex items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold">Descrição do destino</h4>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTextOpen(true)}
-              className="h-7 w-7"
-              title="Editar descrição"
-              aria-label="Editar descrição"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </Button>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="w-fit">
+              <h4 className="flex items-center gap-2 text-sm font-semibold">
+                <MapPin className="h-4 w-4 text-sky-500" />
+                Descrição do destino
+              </h4>
+              <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onGenerate}
+                disabled={isGenerating || isFetchingPhotos}
+                className="h-7 gap-1.5 text-xs"
+              >
+                {isGenerating || isFetchingPhotos ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="h-3.5 w-3.5" />
+                )}
+                Gerar com IA
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTextOpen(true)}
+                className="h-7 w-7"
+                title="Editar descrição"
+                aria-label="Editar descrição"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
 
           <div
@@ -624,22 +649,13 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
         </section>
       </div>
 
-      {/* Ação de IA — abaixo do conjunto das duas colunas */}
-      <div className="flex" data-testid="destination-ai-action">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onGenerate}
-          disabled={isGenerating || isFetchingPhotos}
-          className="gap-2"
-        >
-          {isGenerating || isFetchingPhotos ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Sparkles className="h-3.5 w-3.5" />
-          )}
-          {text || images.length > 0 ? "Regenerar descrição com IA" : "Gerar descrição com IA"}
-        </Button>
+      <div className="flex justify-end border-t border-border pt-3" data-testid="destination-visibility-action">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="show-destination-inline" className="cursor-pointer text-xs font-medium sm:text-sm">
+            Exibir apresentação do destino
+          </Label>
+          <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
+        </div>
       </div>
 
       {/* Text-only modal */}

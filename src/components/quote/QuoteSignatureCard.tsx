@@ -83,10 +83,10 @@ export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot
       {!hideHeader && (
         <div className="w-fit">
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-            <UserCircle2 className="h-5 w-5 text-sky-500" />
+            <UserCircle2 className="h-5 w-5 text-rose-500" />
             Escolha uma Assinatura
           </h2>
-          <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
+          <div className="mt-2 h-1 w-full rounded-full bg-rose-500" />
         </div>
       )}
       <p className="text-xs text-muted-foreground">

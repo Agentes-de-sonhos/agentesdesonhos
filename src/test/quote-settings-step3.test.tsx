@@ -107,21 +107,22 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
     expect(nav.className).toContain("overflow-x-auto");
   });
 
-  it("renderiza a ação de cabeçalho apenas no passo correspondente", async () => {
-    renderModal({ stepHeaderActions: { initial: <button type="button">switch-destino</button> } });
-    expect(screen.getByRole("button", { name: "switch-destino" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /Documentos/ }));
-    await waitFor(() => expect(screen.queryByRole("button", { name: "switch-destino" })).toBeNull());
+  it("usa ícone e traço semântico no cabeçalho das cinco etapas não avançadas", () => {
+    const source = readFileSync("src/components/quote/QuoteSettingsModal.tsx", "utf8");
+    expect(source.match(/accentClass: "bg-/g)).toHaveLength(6);
+    expect(source).toContain("CurrentIcon");
+    expect(source).toContain("h-1 w-full rounded-full");
   });
 });
 
 describe("Passo 1 — configuração inicial", () => {
-  it("o switch de visibilidade não é mais um card largo no corpo", () => {
-    expect(destinationSource).not.toContain("show-destination-inline");
-    expect(destinationSource).toContain("show-destination-header");
+  it("o switch de visibilidade fica no rodapé direito da descrição", () => {
+    expect(destinationSource).toContain("show-destination-inline");
+    expect(destinationSource).toContain('data-testid="destination-visibility-action"');
+    expect(destinationSource).toContain("flex justify-end border-t");
     expect(destinationSource).toContain("show_destination_intro");
-    expect(pageSource).toContain("stepHeaderActions");
-    expect(pageSource).toContain("DestinationIntroSwitch");
+    expect(pageSource).not.toContain("stepHeaderActions");
+    expect(pageSource).not.toContain("DestinationIntroSwitch");
   });
 
   it("a descrição usa superfície branca e texto legível (text-sm), sem fundo cinza", () => {
@@ -140,14 +141,15 @@ describe("Passo 1 — configuração inicial", () => {
     expect(destinationSource).toContain('title="Editar descrição"');
   });
 
-  it("a ação de IA fica fora/abaixo do grid de duas colunas", () => {
+  it("a ação de IA fica dentro do cartão da descrição", () => {
     const gridStart = destinationSource.indexOf('className="grid gap-4 lg:grid-cols-2"');
-    const aiAction = destinationSource.indexOf('data-testid="destination-ai-action"');
-    const gridClose = destinationSource.indexOf("{/* Ação de IA");
+    const descriptionStart = destinationSource.indexOf("Descrição do destino", gridStart);
+    const aiAction = destinationSource.indexOf("Gerar com IA", descriptionStart);
+    const surface = destinationSource.indexOf('data-testid="destination-description-surface"', descriptionStart);
     expect(gridStart).toBeGreaterThan(-1);
-    expect(aiAction).toBeGreaterThan(gridClose);
-    expect(gridClose).toBeGreaterThan(gridStart);
-    expect(destinationSource).toContain("Regenerar descrição com IA");
+    expect(aiAction).toBeGreaterThan(descriptionStart);
+    expect(aiAction).toBeLessThan(surface);
+    expect(destinationSource).not.toContain("Gerar descrição com IA");
   });
 
   it("o overlay reutiliza a primitiva compartilhada e oferece enviar/substituir, buscar e remover", () => {
