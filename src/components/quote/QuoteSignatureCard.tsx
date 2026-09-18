@@ -8,6 +8,7 @@ import { isSystemSignatureId } from "@/lib/effectiveSignature";
 import type { SignatureSnapshot } from "@/types/signature";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
 
 interface Props {
   /** Document table: quotes | trips | itineraries */
@@ -21,10 +22,14 @@ interface Props {
   hideHeader?: boolean;
   /** When true, renders all signatures inline (no popover) */
   inlineSelector?: boolean;
+  /** Hides the auxiliary reset-to-default action while keeping the default card selectable. */
+  hideUseDefaultAction?: boolean;
+  /** Optional shared accordion shell used by the advanced quote settings. */
+  collapsible?: { open: boolean; onToggle: () => void };
 }
 
 /** Reusable signature card for any document editor */
-export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved, unwrapped = false, hideHeader = false, inlineSelector = false }: Props) {
+export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved, unwrapped = false, hideHeader = false, inlineSelector = false, hideUseDefaultAction = false, collapsible }: Props) {
   const { effectiveSignature, systemSignature } = useCommercialSignatures();
   const [snap, setSnap] = useState<SignatureSnapshot | null>(initialSnapshot ?? null);
   const [saving, setSaving] = useState(false);
@@ -94,9 +99,35 @@ export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot
       <p className="text-xs text-muted-foreground">
         Define quem aparece como responsável neste documento (nome, foto, WhatsApp e e-mail). {saving && "Salvando..."}
       </p>
-      <SignatureSelector value={snap} onChange={handleChange} inline={inlineSelector} />
+      <SignatureSelector
+        value={snap}
+        onChange={handleChange}
+        inline={inlineSelector}
+        hideUseDefaultAction={hideUseDefaultAction}
+      />
     </div>
   );
+
+  if (collapsible) {
+    const effectiveSnapshot = snap ?? buildSnapshot(effectiveSignature);
+    const signatureSummary = effectiveSnapshot?.name
+      ? `${effectiveSnapshot.name}${effectiveSnapshot.title ? ` · ${effectiveSnapshot.title}` : ""}`
+      : "Assinatura não configurada";
+
+    return (
+      <AdvancedSettingsSection
+        testId="quote-signature-card"
+        title="Escolha uma assinatura"
+        icon={<UserCircle2 className="h-4 w-4 text-rose-500" />}
+        accentClass="bg-rose-500"
+        summary={<span className="block truncate" title={signatureSummary}>{signatureSummary}</span>}
+        open={collapsible.open}
+        onToggle={collapsible.onToggle}
+      >
+        {inner}
+      </AdvancedSettingsSection>
+    );
+  }
 
   if (unwrapped) return inner;
 

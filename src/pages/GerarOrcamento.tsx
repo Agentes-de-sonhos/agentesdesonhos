@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, Images, UserCircle2,
+  Pencil, MoreHorizontal, Images,
 } from "lucide-react";
 import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -82,7 +82,6 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
-import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles } from "lucide-react";
@@ -474,14 +473,19 @@ export default function GerarOrcamento() {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsStep, setSettingsStep] = useState<QuoteSettingsStep>("initial");
-  /** Etapa 6 — blocos independentes, abertos inicialmente e recolhíveis. */
+  /** Etapa 6 — blocos independentes, recolhidos ao entrar. */
   const [advancedSections, setAdvancedSections] = useState({
-    currency: true,
-    signature: true,
+    currency: false,
+    signature: false,
     booking: false,
   });
   const toggleAdvancedSection = (key: keyof typeof advancedSections) =>
     setAdvancedSections((previous) => ({ ...previous, [key]: !previous[key] }));
+  useEffect(() => {
+    if (settingsOpen && settingsStep === "advanced") {
+      setAdvancedSections((previous) => ({ ...previous, currency: false, signature: false }));
+    }
+  }, [settingsOpen, settingsStep]);
   const [draftBanner, setDraftBanner] = useState<ReturnType<typeof getLocalDraft>>(null);
 
   // Check for unsaved draft on mount (only on list screen)
@@ -1891,24 +1895,20 @@ export default function GerarOrcamento() {
               open={advancedSections.currency}
               onToggle={() => toggleAdvancedSection("currency")}
             />
-            <AdvancedSettingsSection
-              title="Escolha uma assinatura"
-              icon={<UserCircle2 className="h-4 w-4 text-rose-500" />}
-              accentClass="bg-rose-500"
-              open={advancedSections.signature}
-              onToggle={() => toggleAdvancedSection("signature")}
-              testId="quote-signature-card"
-            >
-              <DocumentSignatureCard
-                table="quotes"
-                docId={quote.id}
-                initialSnapshot={(quote as any).signature_snapshot ?? null}
-                onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-                unwrapped
-                hideHeader
-                inlineSelector
-              />
-            </AdvancedSettingsSection>
+            <DocumentSignatureCard
+              table="quotes"
+              docId={quote.id}
+              initialSnapshot={(quote as any).signature_snapshot ?? null}
+              onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              unwrapped
+              hideHeader
+              inlineSelector
+              hideUseDefaultAction
+              collapsible={{
+                open: advancedSections.signature,
+                onToggle: () => toggleAdvancedSection("signature"),
+              }}
+            />
             <QuoteBookingRequestSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}

@@ -9,6 +9,8 @@ const destination = readFileSync("src/components/quote/DestinationIntroEditor.ts
 const advancedSection = readFileSync("src/components/quote/AdvancedSettingsSection.tsx", "utf8");
 const advanced = readFileSync("src/components/quote/QuoteAdvancedSettings.tsx", "utf8");
 const documents = readFileSync("src/components/quote/QuoteDocuments.tsx", "utf8");
+const signatureCard = readFileSync("src/components/quote/QuoteSignatureCard.tsx", "utf8");
+const signatureSelector = readFileSync("src/components/signatures/SignatureSelector.tsx", "utf8");
 
 describe("Editor de orçamento reorganizado", () => {
   it("tem somente quatro passos explicativos na ordem aprovada", () => {
@@ -47,15 +49,17 @@ describe("Editor de orçamento reorganizado", () => {
     expect(advanced).toContain("DocumentSignatureCard");
   });
 
-  it("mantém moeda e assinatura como accordions independentes, abertos inicialmente", () => {
+  it("mantém moeda e assinatura como accordions independentes, fechados ao entrar", () => {
     const advanced = page.match(/renderAdvanced=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
-    expect(page).toContain("currency: true");
-    expect(page).toContain("signature: true");
+    expect(page).toContain("currency: false");
+    expect(page).toContain("signature: false");
+    expect(page).toContain('{ ...previous, currency: false, signature: false }');
     expect(advanced).toContain("advancedSections.currency");
     expect(advanced).toContain('toggleAdvancedSection("currency")');
     expect(advanced).toContain("advancedSections.signature");
     expect(advanced).toContain('toggleAdvancedSection("signature")');
     expect(advanced).toContain("inlineSelector");
+    expect(advanced).toContain("hideUseDefaultAction");
     expect(advanced).toContain("hideHeader");
     expect(advanced.indexOf("DocumentSignatureCard")).toBeLessThan(
       advanced.indexOf("QuoteBookingRequestSettings"),
@@ -67,23 +71,38 @@ describe("Editor de orçamento reorganizado", () => {
     expect(currency).toContain("Moeda do orçamento");
     expect(currency).toContain("AdvancedSettingsSection");
 
-    const selector = readFileSync("src/components/signatures/SignatureSelector.tsx", "utf8");
-    expect(selector).toContain('data-testid="signature-inline-grid"');
-    expect(selector).toContain("grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3");
-    expect(selector).toContain("Nova assinatura");
-    expect(selector).toContain("Usar a assinatura padrão da agência");
+    expect(signatureSelector).toContain('data-testid="signature-inline-grid"');
+    expect(signatureSelector).toContain("grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3");
+    expect(signatureSelector).toContain("Nova assinatura");
+    expect(signatureSelector).toContain("effectiveSignature?.id === s.id");
+    expect(signatureSelector).toContain("Padrão");
+    expect(signatureSelector).toContain("current && !hideUseDefaultAction");
+    expect(advanced).toContain("hideUseDefaultAction");
     // popover preservado para os demais usos
-    expect(selector).toContain("<Popover ");
-    const inlineBranch = selector.slice(selector.indexOf("if (inline) {"), selector.indexOf("<Popover "));
+    expect(signatureSelector).toContain("Usar a assinatura padrão da agência");
+    expect(signatureSelector).toContain("<Popover ");
+    const inlineBranch = signatureSelector.slice(signatureSelector.indexOf("if (inline) {"), signatureSelector.indexOf("<Popover "));
     expect(inlineBranch).not.toContain("<Popover");
+  });
+
+  it("mostra resumos reais de moeda e assinatura mesmo recolhidos", () => {
+    expect(advanced).toContain("currencyOption?.label");
+    expect(advanced).toContain("getCurrencySymbol(currency)");
+    expect(signatureCard).toContain("snap ?? buildSnapshot(effectiveSignature)");
+    expect(signatureCard).toContain("effectiveSnapshot.name");
+    expect(signatureCard).toContain("effectiveSnapshot.title");
+    expect(signatureCard).toContain('className="block truncate"');
+    expect(signatureCard).toContain("setSnap(next)");
   });
 
   it("padroniza cabeçalhos avançados e faz o traço incluir ícone e título", () => {
     expect(advancedSection).toContain("min-h-[4.5rem]");
     expect(advancedSection).toContain("flex w-fit max-w-full flex-col");
     expect(advancedSection).toMatch(/icon[\s\S]*text-sm font-semibold[\s\S]*h-1 w-full/);
-    expect(page).toContain('title="Escolha uma assinatura"');
-    expect(page).toContain('<UserCircle2 className="h-4 w-4 text-rose-500" />');
+    expect(signatureCard).toContain('title="Escolha uma assinatura"');
+    expect(signatureCard).toContain('<UserCircle2 className="h-4 w-4 text-rose-500" />');
+    expect(advanced).toContain('accentClass="bg-rose-500"');
+    expect(signatureCard).toContain('accentClass="bg-rose-500"');
   });
 
   it("preserva handlers de geração e layout responsivo das ações", () => {
