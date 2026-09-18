@@ -7,7 +7,7 @@ interface BrandCloudLoaderProps {
 
 // Nuvem com base plana e cantos tangentes: o arco direito termina exatamente
 // na linha da base (mesmo y do início), sem bico, cauda ou balão de fala.
-const CLOUD_PATH = "M12.5 21A6.5 6.5 0 1 0 17.8 10.7A5.5 5.5 0 1 1 20.5 21Z";
+const CLOUD_PATH = "M12.5 21A6.5 6.5 0 1 1 17.8 10.7A5.5 5.5 0 1 1 20.5 21Z";
 
 export function BrandCloudLoader({
   label = "Carregando",
