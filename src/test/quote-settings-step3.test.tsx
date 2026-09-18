@@ -133,8 +133,9 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
       expect(pill.className).toContain(accent);
       expect(pill.className).toContain(accent.replace("bg-", "border-"));
       expect(pill.className).not.toContain("bg-primary");
-      // o traço do cabeçalho acompanha a mesma cor
-      expect(container.querySelector("header .h-1")?.className).toContain(accent);
+      // o traço do cabeçalho (portal do dialog) acompanha a mesma cor
+      const underline = document.querySelector("[role='dialog'] header .h-1");
+      expect(underline?.className).toContain(accent);
     }
   });
 
