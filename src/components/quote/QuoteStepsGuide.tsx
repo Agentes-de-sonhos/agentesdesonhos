@@ -18,14 +18,18 @@ interface Props {
 function ExplanatoryStep({
   step,
   open,
-  onOpenChange,
+  onToggle,
+  onDismiss,
 }: {
   step: QuoteStepMeta;
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onToggle: () => void;
+  onDismiss: () => void;
 }) {
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover open={open} onOpenChange={(nextOpen) => {
+      if (!nextOpen) onDismiss();
+    }}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -33,11 +37,7 @@ function ExplanatoryStep({
           size="sm"
           aria-label={`${step.short}: ${step.hint}`}
           aria-expanded={open}
-          onClickCapture={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onOpenChange(!open);
-          }}
+          onClick={onToggle}
           className="h-8 w-full min-w-0 gap-1 rounded-full px-1.5 text-[10px] font-medium text-muted-foreground hover:bg-background hover:text-muted-foreground sm:gap-1.5 sm:px-2 sm:text-[11px] xl:gap-2 xl:px-2.5 xl:text-xs"
         >
           <span className={cn("inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-md text-[9px] font-bold text-primary-foreground sm:h-5 sm:w-5 sm:text-[10px]", step.accentClass)}>
@@ -65,12 +65,13 @@ export function QuoteStepsGuide({ steps, actions }: Props) {
     <div className="my-1 flex w-full min-w-0 flex-col gap-2 md:flex-row md:items-center">
       <nav aria-label="Etapas do orçamento" className="min-w-0 flex-1">
         <ol className="grid min-w-0 grid-cols-2 items-center gap-1 sm:grid-cols-4 xl:gap-2">
-          {steps.map((step, index) => (
+          {steps.map((step) => (
             <li key={step.step} className="min-w-0">
               <ExplanatoryStep
                 step={step}
                 open={openStep === step.step}
-                onOpenChange={(open) => setOpenStep(open ? step.step : null)}
+                onToggle={() => setOpenStep((current) => current === step.step ? null : step.step)}
+                onDismiss={() => setOpenStep((current) => current === step.step ? null : current)}
               />
             </li>
           ))}
