@@ -19,10 +19,12 @@ interface Props {
   unwrapped?: boolean;
   /** When true, omits the internal title/icon/header (useful when the parent already shows it) */
   hideHeader?: boolean;
+  /** When true, renders all signatures inline (no popover) */
+  inlineSelector?: boolean;
 }
 
 /** Reusable signature card for any document editor */
-export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved, unwrapped = false, hideHeader = false }: Props) {
+export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot, onSaved, unwrapped = false, hideHeader = false, inlineSelector = false }: Props) {
   const { effectiveSignature, systemSignature } = useCommercialSignatures();
   const [snap, setSnap] = useState<SignatureSnapshot | null>(initialSnapshot ?? null);
   const [saving, setSaving] = useState(false);
@@ -84,7 +86,7 @@ export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot
         <div className="w-fit">
           <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <UserCircle2 className="h-5 w-5 text-rose-500" />
-            Escolha uma Assinatura
+            Escolha uma assinatura
           </h2>
           <div className="mt-2 h-1 w-full rounded-full bg-rose-500" />
         </div>
@@ -92,7 +94,7 @@ export function DocumentSignatureCard({ table = "quotes", docId, initialSnapshot
       <p className="text-xs text-muted-foreground">
         Define quem aparece como responsável neste documento (nome, foto, WhatsApp e e-mail). {saving && "Salvando..."}
       </p>
-      <SignatureSelector value={snap} onChange={handleChange} />
+      <SignatureSelector value={snap} onChange={handleChange} inline={inlineSelector} />
     </div>
   );
 

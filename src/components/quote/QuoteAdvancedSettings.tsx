@@ -21,9 +21,11 @@ interface Props {
   /** Quando informado, o bloco é renderizado como seção expansível. */
   open?: boolean;
   onToggle?: () => void;
+  /** Card branco sempre aberto (sem chevron), usado na etapa Avançado do orçamento. */
+  alwaysOpen?: boolean;
 }
 
-export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Props) {
+export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle, alwaysOpen = false }: Props) {
   const { toast } = useToast();
   const initial = getQuoteCurrencyInfo(quote);
   const [currency, setCurrency] = useState<QuoteCurrency>(initial.currency);
@@ -73,7 +75,9 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Prop
   const body = (
     <div className="space-y-5">
       <div className="space-y-1">
-        {typeof open !== "boolean" && <p className="text-sm font-semibold">Moeda do orçamento</p>}
+        {typeof open !== "boolean" && !alwaysOpen && (
+          <p className="text-sm font-semibold">Moeda do orçamento</p>
+        )}
         <p className="text-xs text-muted-foreground">
           Altere a moeda a qualquer momento. Os valores cadastrados nos serviços não são modificados —
           apenas a forma como eles são apresentados no link público, no PDF e no total do orçamento.
@@ -176,6 +180,24 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Prop
       </div>
     </div>
   );
+
+  if (alwaysOpen) {
+    return (
+      <section
+        data-testid="quote-currency-card"
+        className="rounded-xl border bg-card p-4 shadow-sm space-y-4"
+      >
+        <div className="flex items-start gap-2.5">
+          <DollarSign className="mt-0.5 h-4 w-4 shrink-0 text-rose-500" />
+          <span className="w-fit max-w-full">
+            <span className="block text-sm font-semibold text-foreground">Moeda do orçamento</span>
+            <span className="mt-1.5 block h-1 w-full rounded-full bg-rose-500" aria-hidden="true" />
+          </span>
+        </div>
+        {body}
+      </section>
+    );
+  }
 
   if (typeof open !== "boolean" || !onToggle) {
     return <section className="rounded-xl border bg-card p-4 shadow-sm">{body}</section>;

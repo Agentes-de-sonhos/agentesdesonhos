@@ -46,6 +46,31 @@ describe("Editor de orçamento reorganizado", () => {
     expect(advanced).toContain("DocumentSignatureCard");
   });
 
+  it("mantém moeda sempre aberta e assinatura inline antes da solicitação de reserva", () => {
+    const advanced = page.match(/renderAdvanced=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
+    expect(advanced).toContain("alwaysOpen");
+    expect(advanced).not.toContain('advancedSection === "currency"');
+    expect(advanced).toContain("inlineSelector");
+    expect(advanced.indexOf("DocumentSignatureCard")).toBeLessThan(
+      advanced.indexOf("QuoteBookingRequestSettings"),
+    );
+    expect(advanced).toContain("QuoteBookingRequestSettings");
+
+    const currency = readFileSync("src/components/quote/QuoteAdvancedSettings.tsx", "utf8");
+    expect(currency).toContain('data-testid="quote-currency-card"');
+    expect(currency).toContain("Moeda do orçamento");
+
+    const selector = readFileSync("src/components/signatures/SignatureSelector.tsx", "utf8");
+    expect(selector).toContain('data-testid="signature-inline-grid"');
+    expect(selector).toContain("grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3");
+    expect(selector).toContain("Nova assinatura");
+    expect(selector).toContain("Usar a assinatura padrão da agência");
+    // popover preservado para os demais usos
+    expect(selector).toContain("<Popover ");
+    const inlineBranch = selector.slice(selector.indexOf("if (inline) {"), selector.indexOf("<Popover "));
+    expect(inlineBranch).not.toContain("<Popover");
+  });
+
   it("preserva handlers de geração e layout responsivo das ações", () => {
     expect(page).toContain("onClick={handlePublish}");
     expect(page).toContain("onClick={handleGeneratePDF}");
@@ -152,7 +177,6 @@ describe("Editor de orçamento reorganizado", () => {
     expect(settings).toContain("CurrentIcon");
     expect(advancedSection).toContain("accentClass");
     expect(advancedSection).toContain("h-1 w-full rounded-full");
-    expect(advanced).toContain('title="Moeda do orçamento"');
     expect(page).toContain("QuoteBookingRequestSettings");
     expect(page).toContain("DocumentSignatureCard");
   });

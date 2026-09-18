@@ -1881,11 +1881,21 @@ export default function GerarOrcamento() {
             <QuoteAdvancedSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-              open={advancedSection === "currency"}
-              onToggle={() =>
-                setAdvancedSection((prev) => (prev === "currency" ? null : "currency"))
-              }
+              alwaysOpen
             />
+            <section
+              data-testid="quote-signature-card"
+              className="rounded-xl border bg-card p-4 shadow-sm"
+            >
+              <DocumentSignatureCard
+                table="quotes"
+                docId={quote.id}
+                initialSnapshot={(quote as any).signature_snapshot ?? null}
+                onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+                unwrapped
+                inlineSelector
+              />
+            </section>
             <QuoteBookingRequestSettings
               quote={quote}
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
@@ -1894,15 +1904,6 @@ export default function GerarOrcamento() {
                 setAdvancedSection((prev) => (prev === "booking" ? null : "booking"))
               }
             />
-            <div className="border-t border-border pt-4">
-              <DocumentSignatureCard
-                table="quotes"
-                docId={quote.id}
-                initialSnapshot={(quote as any).signature_snapshot ?? null}
-                onSaved={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
-                unwrapped
-              />
-            </div>
           </div>
         )}
       />
