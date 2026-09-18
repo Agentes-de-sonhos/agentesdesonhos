@@ -31,6 +31,12 @@ export function formatPtBR(value?: string | null): string {
   return date ? format(date, "dd 'de' MMM 'de' yyyy", { locale: ptBR }) : "";
 }
 
+/** "dd/MM/yyyy" — usado pelos módulos internos (CRM, orçamentos). */
+export function formatShortPtBR(value?: string | null): string {
+  const date = parseYMD(value);
+  return date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : "";
+}
+
 export interface TripDatePickerProps {
   id: string;
   label: string;
@@ -46,6 +52,12 @@ export interface TripDatePickerProps {
   className?: string;
   triggerClassName?: string;
   placeholder?: string;
+  /** `editorial`/`site` = rótulo caixa-alta dos sites; `form` = rótulo padrão dos formulários internos. */
+  labelVariant?: "site" | "form";
+  /** `long` = "17 de ago de 2026"; `short` = "17/08/2026". */
+  dateFormat?: "long" | "short";
+  /** Exibe a ação "Limpar período" dentro do calendário. */
+  allowClear?: boolean;
 }
 
 /**
