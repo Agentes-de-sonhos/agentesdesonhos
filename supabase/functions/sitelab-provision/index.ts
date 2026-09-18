@@ -14,7 +14,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-provision-token",
+  "Cache-Control": "no-store",
 };
 
 const LAB_EMAIL = "sitelab.base@agentesdesonhos.com.br";
@@ -46,9 +47,16 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const isServiceCall = authHeader.replace(/^Bearer\s+/i, "").trim() === serviceKey;
 
+    /*
+     * Token de provisionamento autorizado (server-to-server), o mesmo usado pelo
+     * motor da carga demonstrativa. Comparação exata e tamanho mínimo.
+     */
+    const provisionToken = (Deno.env.get("DEMO_LOAD_PROVISION_TOKEN") || "").trim();
+    const sentToken = (req.headers.get("x-provision-token") || "").trim();
+    const isTokenCall =
+      provisionToken.length >= 24 && sentToken.length >= 24 && sentToken === provisionToken;
 
-
-    if (!isServiceCall) {
+    if (!isServiceCall && !isTokenCall) {
       if (!authHeader) return json({ error: "Não autorizado" }, 401);
       const caller = createClient(url, anonKey, {
         global: { headers: { Authorization: authHeader } },
@@ -96,6 +104,73 @@ Deno.serve(async (req) => {
         return json({ error: "Falha ao atualizar o e-mail da conta técnica" }, 400);
       }
       return json({ success: true, action: "set_email", user_id: targetId, email: updated.user.email });
+    }
+
+    /*
+     * Ação opcional: redefinir a senha da conta TÉCNICA pelo Auth Admin (sem
+     * e-mail, sem criar outra conta, sem gravar senha em texto puro). A senha
+     * forte é devolvida apenas nesta resposta.
+     */
+    if (body.action === "set_password") {
+      const targetId = String(body.user_id || "");
+      if (!targetId) return json({ error: "Parâmetros inválidos" }, 400);
+      const { data: target } = await admin.auth.admin.getUserById(targetId);
+      const isTechnical =
+        target?.user?.email?.toLowerCase() === LAB_EMAIL ||
+        target?.user?.user_metadata?.sitelab_technical_account === true;
+      if (!target?.user || !isTechnical) {
+        return json({ error: "Conta alvo não é a conta técnica do SiteLab" }, 400);
+      }
+      const bytes = crypto.getRandomValues(new Uint8Array(18));
+      const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";
+      const password = Array.from(bytes, (b) => alphabet[b % alphabet.length]).join("");
+      const { error: pwdError } = await admin.auth.admin.updateUserById(targetId, { password });
+      if (pwdError) {
+        console.error("sitelab-provision set_password", pwdError);
+        return json({ error: "Falha ao redefinir a senha da conta técnica" }, 400);
+      }
+      return json({
+        success: true,
+        action: "set_password",
+        user_id: targetId,
+        email: target.user.email,
+        password,
+      });
+    }
+
+    /*
+     * Carga demonstrativa OPCIONAL. Reusa o MOTOR existente
+     * (`demo-canonical-load`) server-to-server, sem duplicar cópia: no hostname
+     * do laboratório materializa a carga canônica; em um white label
+     * provisionado copia a versão MAIS RECENTE do cenário canônico. O destino é
+     * sempre resolvido pelo hostname provisionado. Ausente/false = tenant vazio.
+     */
+    const runDemoLoad = async (rawHostname: unknown) => {
+      const hostname = String(rawHostname || LAB_HOSTNAME).trim().toLowerCase();
+      const loadAction = hostname === LAB_HOSTNAME ? "seed_canonical" : "clone_to_tenant";
+      const res = await fetch(`${url}/functions/v1/demo-canonical-load`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          apikey: serviceKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          action: loadAction,
+          include_demo_load: true,
+          target_hostname: hostname,
+        }),
+      });
+      const payload = await res.json().catch(() => ({}));
+      return { ok: res.ok, load_action: loadAction, result: payload };
+    };
+
+    if (body.action === "demo_load") {
+      if (body.include_demo_load !== true) {
+        return json({ success: true, copied: false, reason: "demo_load_not_requested" });
+      }
+      const out = await runDemoLoad(body.target_hostname);
+      return json({ success: out.ok, action: "demo_load", ...out }, out.ok ? 200 : 400);
     }
 
     // 1) Conta de autenticação exclusiva (criada apenas uma vez).
@@ -161,7 +236,11 @@ Deno.serve(async (req) => {
       .from("subscriptions")
       .upsert({ user_id: labId, plan: "premium" }, { onConflict: "user_id" });
 
-    return json({ success: true, created, user_id: labId, email: LAB_EMAIL });
+    // 6) Carga demonstrativa só quando pedida explicitamente, após o tenant existir.
+    const demoLoad =
+      body.include_demo_load === true ? await runDemoLoad(body.target_hostname) : null;
+
+    return json({ success: true, created, user_id: labId, email: LAB_EMAIL, demo_load: demoLoad });
   } catch (err) {
     console.error("sitelab-provision error", err);
     return json({ error: "Erro ao processar solicitação." }, 500);

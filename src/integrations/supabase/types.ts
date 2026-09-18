@@ -16600,6 +16600,10 @@ export type Database = {
         }
         Returns: string
       }
+      public_slug_alias_matches: {
+        Args: { p_agency_slug: string; p_user_id: string }
+        Returns: boolean
+      }
       purge_google_calendar_local_copies: {
         Args: { p_user_id: string }
         Returns: {

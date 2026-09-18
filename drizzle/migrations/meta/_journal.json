@@ -22,6 +22,27 @@
       "when": 1789667504819,
       "tag": "0002_agency_site_request_opportunity_mapping",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789733809364,
+      "tag": "0003_public_code_slug_alias",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789733853598,
+      "tag": "0004_public_code_slug_alias_apply",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789733953614,
+      "tag": "0005_verify_trip_slug_alias",
+      "breakpoints": true
     }
   ]
 }
