@@ -1512,17 +1512,20 @@ export default function GerarOrcamento() {
           await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
         }}
         renderInitial={() => (
-          <div className="space-y-6">
-            <section aria-labelledby="quote-initial-data-title" className="space-y-3">
-              <div className="w-fit">
-                <h4 id="quote-initial-data-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <Users className="h-4 w-4 text-sky-500" /> Dados principais
-                </h4>
-                <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
+          <div className="space-y-5">
+            <section
+              aria-labelledby="quote-initial-data-title"
+              data-testid="quote-main-data-card"
+              className="rounded-lg border border-border/70 bg-card p-3.5 shadow-sm sm:p-4"
+            >
+              <h4 id="quote-initial-data-title" className="text-sm font-semibold text-foreground">
+                Dados principais
+              </h4>
+              <div className="mt-3">
+                <QuoteSummary quote={quote} />
               </div>
-              <QuoteSummary quote={quote} />
             </section>
-            <section aria-labelledby="quote-cover-title" className="space-y-3 border-t border-border pt-5">
+            <section aria-labelledby="quote-cover-title" className="space-y-3 border-t border-border pt-4">
               <div className="w-fit">
                 <h4 id="quote-cover-title" className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <Images className="h-4 w-4 text-sky-500" /> Configuração da capa

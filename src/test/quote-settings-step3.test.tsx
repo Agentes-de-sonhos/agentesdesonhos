@@ -116,6 +116,17 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
 });
 
 describe("Passo 1 — configuração inicial", () => {
+  it("usa cartões responsivos para fotos e descrição sem ícones ou traços nos títulos internos", () => {
+    expect(pageSource).toContain('data-testid="quote-main-data-card"');
+    expect(destinationSource).toContain('data-testid="destination-cover-grid"');
+    expect(destinationSource).toContain("md:grid-cols-2");
+    expect(destinationSource).toContain('data-testid="destination-photos-card"');
+    expect(destinationSource).toContain('data-testid="destination-description-card"');
+    expect(destinationSource).toContain("min-h-[190px]");
+    expect(destinationSource).not.toContain('<Images className="h-4 w-4 text-sky-500" />');
+    expect(destinationSource).not.toContain('<MapPin className="h-4 w-4 text-sky-500" />');
+  });
+
   it("o switch de visibilidade fica no rodapé direito da descrição", () => {
     expect(destinationSource).toContain("show-destination-inline");
     expect(destinationSource).toContain('data-testid="destination-visibility-action"');
