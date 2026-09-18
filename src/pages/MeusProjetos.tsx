@@ -123,6 +123,8 @@ function normalizeItems(
       date: q.created_at,
       status: q.status === "published" ? "published" : "draft",
       type: "quote" as const,
+      rawStatus: q.status ?? null,
+      publicAccessCode: q.public_access_code ?? null,
     })),
     trips: trips.map((t) => ({
       id: t.id,
@@ -131,6 +133,8 @@ function normalizeItems(
       date: t.created_at,
       status: t.status === "active" ? "published" : "draft",
       type: "trip" as const,
+      rawStatus: t.status ?? null,
+      publicAccessCode: t.public_access_code ?? null,
     })),
     itineraries: itineraries.map((i) => ({
       id: i.id,
@@ -140,6 +144,8 @@ function normalizeItems(
       status: i.status === "published" || i.status === "approved" ? "published" : "draft",
       type: "itinerary" as const,
       clientName: i.clientName ?? null,
+      rawStatus: i.status ?? null,
+      publicAccessCode: i.publicAccessCode ?? i.public_access_code ?? null,
     })),
   };
 }
