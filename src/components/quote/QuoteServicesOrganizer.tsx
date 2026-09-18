@@ -28,6 +28,7 @@ import type { QuoteCurrency } from "@/lib/quoteCurrency";
 import {
   buildQuoteSectionLayout, flattenServiceOrder, moveServiceInLayout, type QuoteSectionLayout,
 } from "@/lib/quoteSections";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const UNSECTIONED = "__unsectioned__";
 

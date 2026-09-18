@@ -12,6 +12,7 @@ import { useOperationServices, type OperationService, type OperationServiceFlag 
 import { OPERATION_SERVICE_LABELS, serviceTypeLabel, mapServiceDataToOperationService } from "@/lib/operationServiceMap";
 import { AIImportServiceModal } from "@/components/shared/AIImportServiceModal";
 import type { Operation } from "@/types/operations";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 
 const FLAGS: { key: OperationServiceFlag; label: string }[] = [
   { key: "is_confirmed", label: "Confirmado" },
