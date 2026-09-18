@@ -138,19 +138,48 @@ export function TripDatePicker({
           )}
         >
           {mode === "range" ? (
-            <Calendar
-              mode="range"
-              numberOfMonths={months}
-              defaultMonth={startDate}
-              selected={{ from: startDate, to: endDate } as DateRange}
-              onSelect={(range) => {
-                const next = (range ?? {}) as DateRange;
-                onChange({ start: toYMD(next.from), end: toYMD(next.to) });
-                if (next.from && next.to) setOpen(false);
-              }}
-              initialFocus
-              className={cn("p-3 pointer-events-auto")}
-            />
+            <div>
+              <Calendar
+                mode="range"
+                numberOfMonths={months}
+                defaultMonth={startDate}
+                selected={{ from: startDate, to: endDate } as DateRange}
+                onSelect={(range) => {
+                  const next = (range ?? {}) as DateRange;
+                  // Clicar de novo no mesmo dia da ida conclui o período em um
+                  // único dia (react-day-picker devolveria "vazio" nesse caso).
+                  if (!next.from && startDate && !endDate) {
+                    onChange({ start: toYMD(startDate), end: toYMD(startDate) });
+                    setOpen(false);
+                    return;
+                  }
+                  onChange({ start: toYMD(next.from), end: toYMD(next.to) });
+                  if (next.from && next.to) setOpen(false);
+                }}
+                initialFocus
+                className={cn("p-3 pointer-events-auto")}
+              />
+              <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
+                <span className="text-xs text-muted-foreground">
+                  {startDate && !endDate
+                    ? "Selecione a data de volta"
+                    : startDate
+                    ? summary
+                    : "Selecione a data de ida"}
+                </span>
+                {allowClear && (startDate || endDate) ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => onChange({ start: "", end: "" })}
+                  >
+                    Limpar período
+                  </Button>
+                ) : null}
+              </div>
+            </div>
           ) : (
             <Calendar
               mode="single"
