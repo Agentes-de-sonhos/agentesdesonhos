@@ -107,11 +107,44 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
     expect(nav.className).toContain("overflow-x-auto");
   });
 
-  it("usa ícone e traço semântico no cabeçalho das cinco etapas não avançadas", () => {
+  it("usa ícone e traço semântico no cabeçalho das seis etapas", () => {
     const source = readFileSync("src/components/quote/QuoteSettingsModal.tsx", "utf8");
     expect(source.match(/accentClass: "bg-/g)).toHaveLength(6);
     expect(source).toContain("CurrentIcon");
     expect(source).toContain("h-1 w-full rounded-full");
+  });
+
+  it("o pill ativo do stepper usa a mesma cor da linha do título em cada etapa", async () => {
+    renderModal();
+    const cases: Array<[RegExp, string]> = [
+      [/Inicial/, "bg-sky-500"],
+      [/Incluso/, "bg-emerald-500"],
+      [/Investimento/, "bg-violet-500"],
+      [/Validade/, "bg-amber-500"],
+      [/Documentos/, "bg-cyan-500"],
+      [/Avançado/, "bg-rose-500"],
+    ];
+    for (const [label, accent] of cases) {
+      fireEvent.click(screen.getByRole("button", { name: label }));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: label }).getAttribute("aria-current")).toBe("step"),
+      );
+      const pill = screen.getByRole("button", { name: label });
+      expect(pill.className).toContain(accent);
+      expect(pill.className).toContain(accent.replace("bg-", "border-"));
+      expect(pill.className).not.toContain("bg-primary");
+      // o traço do cabeçalho (portal do dialog) acompanha a mesma cor
+      const underline = document.querySelector("[role='dialog'] header .h-1");
+      expect(underline?.className).toContain(accent);
+    }
+  });
+
+  it("exibe o cabeçalho da etapa avançada no mesmo padrão das demais", async () => {
+    renderModal();
+    fireEvent.click(screen.getByRole("button", { name: /Avançado/ }));
+    await waitFor(() => expect(screen.getByText("conteudo-avancado")).toBeTruthy());
+    expect(screen.getByRole("heading", { name: /Configurações avançadas/ })).toBeTruthy();
+    expect(screen.getByText(/Defina moeda, solicitação de reserva/)).toBeTruthy();
   });
 });
 

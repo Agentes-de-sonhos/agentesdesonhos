@@ -102,7 +102,7 @@ describe("Editor de orçamento reorganizado", () => {
 
   it("aplica título com ícone e traço às seis etapas e seções avançadas", () => {
     expect(settings.match(/accentClass: "bg-/g)).toHaveLength(6);
-    expect(settings).toContain('active !== "advanced"');
+    expect(settings).not.toContain('active !== "advanced"');
     expect(settings).toContain("CurrentIcon");
     expect(advancedSection).toContain("accentClass");
     expect(advancedSection).toContain("h-1 w-full rounded-full");
