@@ -614,10 +614,16 @@ Deno.serve(async (req) => {
       if (accountId && mainTripId) {
         const { data: grant } = await admin
           .from("client_area_wallet_grants")
-          .select("id")
+          .select("id, client_id, account_id")
           .eq("agency_id", targetUserId)
           .eq("trip_id", mainTripId)
           .maybeSingle();
+        if (grant?.id && (grant.client_id !== mainClientId || grant.account_id !== accountId)) {
+          await admin
+            .from("client_area_wallet_grants")
+            .update({ client_id: mainClientId, account_id: accountId })
+            .eq("id", grant.id);
+        }
         if (!grant?.id) {
           const { data: newGrant } = await admin
             .from("client_area_wallet_grants")
