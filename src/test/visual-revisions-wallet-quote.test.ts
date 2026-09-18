@@ -8,25 +8,13 @@ const carousel = readFileSync("src/components/quote/ServiceImageCarousel.tsx", "
 const docsCard = readFileSync("src/components/wallet/ServiceDocumentsCard.tsx", "utf8");
 const wallet = readFileSync("src/pages/ViagemPublica.tsx", "utf8");
 
-describe("Pop-up 'Como montar seu orçamento'", () => {
-  it("é branco, largo e com rolagem apenas no corpo", () => {
-    expect(guide).toContain("flex max-h-[90vh] w-[95vw] max-w-[95vw] flex-col gap-0 overflow-hidden bg-background p-0 md:max-w-3xl");
-    expect(guide).toContain("min-h-0 flex-1 space-y-4 overflow-y-auto bg-background");
-  });
-
-  it("cabeçalho e rodapé brancos com divisórias sutis", () => {
-    expect(guide).toContain("shrink-0 border-b border-border/60 bg-background");
-    expect(guide).toContain("shrink-0 border-t border-border/60 bg-background");
-  });
-
-  it("cards internos são cinza-claro com borda sutil", () => {
-    expect(guide).toContain("border border-border/70 bg-muted/40");
-  });
-
-  it("instrução final é parágrafo de fluxo normal", () => {
-    expect(guide).toContain('<p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">');
-    expect(guide).not.toContain("mt-3 flex items-center gap-1.5 text-[11px]");
-    expect(guide).toContain("Essas ações estão nos botões");
+describe("Orientações do orçamento", () => {
+  it("usa popovers acessíveis por etapa, sem o antigo modal geral", () => {
+    expect(guide).toContain("PopoverTrigger");
+    expect(guide).toContain("onMouseEnter");
+    expect(guide).toContain("onFocus");
+    expect(guide).not.toContain("Como montar seu orçamento");
+    expect(guide).not.toContain("Ver mais");
   });
 });
 

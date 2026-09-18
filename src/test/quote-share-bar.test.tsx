@@ -158,11 +158,13 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(page.slice(0, barIndex)).toContain("{quote.share_token && (");
   });
 
-  it("cabeçalho em duas linhas: ações abaixo do título e alinhadas à esquerda", () => {
+  it("posiciona as ações de geração na mesma linha responsiva do stepper", () => {
     const barIndex = page.indexOf("<QuoteShareBar");
     expect(page.slice(barIndex, barIndex + 400)).toContain('className="justify-start sm:pl-[52px]"');
-    expect(page).toContain('<div className="flex w-full min-w-0 flex-col gap-3">');
-    expect(page).not.toContain('className="lg:justify-end"');
+    expect(page).toContain("<QuoteStepsGuide");
+    expect(page).toContain("actions={!quote.share_token ? (");
+    expect(guide).toContain("lg:flex-row lg:items-center lg:justify-between");
+    expect(guide).toContain("lg:justify-end");
   });
 
   it("no estado sem URL, o botão PDF também usa estilo primário", () => {
@@ -172,14 +174,8 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(block).not.toContain('variant="outline"');
   });
 
-  it("bloco 'Depois das 5 etapas' com fundo branco e borda neutra sutil", () => {
-    expect(guide).toContain("border border-border bg-background");
-    expect(guide).not.toContain("bg-primary/5");
-    expect(guide).toContain("Depois das 5 etapas: publique e compartilhe");
-  });
-
-  it("rótulo da etapa 3 é 'Configurar cotação'", () => {
-    expect(page).toContain('short: "Configurar cotação"');
+  it("rótulo da etapa 3 é 'Configurar orçamento'", () => {
+    expect(page).toContain('short: "Configurar orçamento"');
   });
 
   it("Criar mensagem reutiliza o verde do botão de suporte (#25D366)", () => {
@@ -193,47 +189,46 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
   });
 });
 
-describe("QuoteStepsGuide — trilha compacta + modal", () => {
+describe("QuoteStepsGuide — trilha explicativa", () => {
   const steps = [
     { step: 1, short: "Adicionar serviços", hint: "Inclua passagens.", accentClass: "bg-sky-500" },
     { step: 2, short: "Organizar serviços", hint: "Revise e agrupe.", accentClass: "bg-emerald-500" },
-    { step: 3, short: "Configurar cotação", hint: "Defina valores.", accentClass: "bg-violet-500" },
-    { step: 4, short: "Revisar orçamento", hint: "Confira os dados.", accentClass: "bg-amber-500" },
-    { step: 5, short: "Escolher assinatura", hint: "Selecione o responsável.", accentClass: "bg-sky-600" },
+    { step: 3, short: "Configurar orçamento", hint: "Defina valores.", accentClass: "bg-violet-500" },
+    { step: 4, short: "Publicar", hint: "Gere a versão web ou PDF.", accentClass: "bg-amber-500" },
   ];
 
   it("não renderiza título, subtítulo nem card antigos", () => {
-    render(<QuoteStepsGuide steps={steps} onSelect={vi.fn()} />);
+    render(<QuoteStepsGuide steps={steps} />);
     expect(screen.queryByText(/Monte seu orçamento em 5 etapas/i)).toBeNull();
     expect(screen.queryByRole("button", { name: /Ver orientações/i })).toBeNull();
   });
 
-  it("mostra as cinco etiquetas na ordem exata e chama onSelect", () => {
-    const onSelect = vi.fn();
-    render(<QuoteStepsGuide steps={steps} onSelect={onSelect} />);
+  it("mostra as quatro etiquetas na ordem exata sem ação de navegação", () => {
+    render(<QuoteStepsGuide steps={steps} />);
     const labels = steps.map((s) => s.short);
     const rendered = screen
       .getAllByRole("button")
       .map((b) => b.textContent || "")
       .filter((t) => labels.some((l) => t.includes(l)));
     labels.forEach((l, i) => expect(rendered[i]).toContain(l));
-    fireEvent.click(screen.getByText("Configurar cotação"));
-    expect(onSelect).toHaveBeenCalledWith(3);
+    expect(rendered).toHaveLength(4);
+    expect(guideSource).not.toContain("scrollIntoView");
+    expect(guideSource).not.toContain("onSelect");
   });
 
-  it("'Ver mais' abre o modal com as explicações e o bloco pós-etapas, e fecha no botão", async () => {
-    render(<QuoteStepsGuide steps={steps} onSelect={vi.fn()} />);
-    fireEvent.click(screen.getByLabelText("Ver mais sobre como montar seu orçamento"));
-    await screen.findByText("Como montar seu orçamento");
-    expect(screen.getByText(/Inclua passagens\./)).toBeTruthy();
-    expect(screen.getByText("Depois das 5 etapas: publique e compartilhe")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Fechar" }));
-    await waitFor(() => expect(screen.queryByText("Como montar seu orçamento")).toBeNull());
+  it("expõe a explicação por foco e toque sem renderizar Ver mais", async () => {
+    render(<QuoteStepsGuide steps={steps} />);
+    const first = screen.getByRole("button", { name: /Adicionar serviços: Inclua passagens/ });
+    fireEvent.focus(first);
+    expect(await screen.findByText("Inclua passagens.")).toBeTruthy();
+    fireEvent.blur(first);
+    fireEvent.click(screen.getByRole("button", { name: /Publicar: Gere a versão web/ }));
+    expect(await screen.findByText("Gere a versão web ou PDF.")).toBeTruthy();
+    expect(screen.queryByText("Ver mais")).toBeNull();
   });
 
   it("trilha em linha única com rolagem local, sem overflow global", () => {
     expect(guideSource).toContain("overflow-x-auto");
     expect(guideSource).toContain('className="flex w-max items-center gap-x-2"');
-    expect(guideSource).toContain("bg-background");
   });
 });
