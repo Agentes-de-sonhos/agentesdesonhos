@@ -14,6 +14,10 @@ interface StepDef {
   description: string;
   icon: typeof ClipboardCheck;
   accentClass: string;
+  /** Classes for the active stepper pill (border + background + accessible text color) */
+  activePillClass: string;
+  /** Inner number circle background while the step is active */
+  activeDotClass: string;
 }
 
 const STEPS: StepDef[] = [
@@ -24,6 +28,8 @@ const STEPS: StepDef[] = [
     description: "Confira os dados principais e personalize a capa e a apresentação do destino.",
     icon: ClipboardCheck,
     accentClass: "bg-sky-500",
+    activePillClass: "border-sky-500 bg-sky-500 text-white",
+    activeDotClass: "bg-white/25",
   },
   {
     key: "included",
@@ -32,6 +38,8 @@ const STEPS: StepDef[] = [
     description: "Revise a lista de itens que o cliente verá como incluídos na viagem.",
     icon: ListChecks,
     accentClass: "bg-emerald-500",
+    activePillClass: "border-emerald-500 bg-emerald-500 text-white",
+    activeDotClass: "bg-white/25",
   },
   {
     key: "payment",
@@ -40,6 +48,8 @@ const STEPS: StepDef[] = [
     description: "Defina como os valores e as condições de pagamento aparecem para o cliente.",
     icon: CreditCard,
     accentClass: "bg-violet-500",
+    activePillClass: "border-violet-500 bg-violet-500 text-white",
+    activeDotClass: "bg-white/25",
   },
   {
     key: "validity",
@@ -48,6 +58,8 @@ const STEPS: StepDef[] = [
     description: "Informe até quando a proposta é válida e os termos que a acompanham.",
     icon: CalendarIcon,
     accentClass: "bg-amber-500",
+    activePillClass: "border-amber-500 bg-amber-500 text-amber-950",
+    activeDotClass: "bg-amber-950/15",
   },
   {
     key: "documents",
@@ -56,6 +68,8 @@ const STEPS: StepDef[] = [
     description: "Anexe arquivos de apoio e escolha quais ficam visíveis no link público.",
     icon: Paperclip,
     accentClass: "bg-cyan-500",
+    activePillClass: "border-cyan-500 bg-cyan-500 text-cyan-950",
+    activeDotClass: "bg-cyan-950/15",
   },
   {
     key: "advanced",
@@ -64,6 +78,8 @@ const STEPS: StepDef[] = [
     description: "Defina moeda, solicitação de reserva e a assinatura responsável pelo orçamento.",
     icon: Settings2,
     accentClass: "bg-rose-500",
+    activePillClass: "border-rose-500 bg-rose-500 text-white",
+    activeDotClass: "bg-white/25",
   },
 ];
 
@@ -141,7 +157,7 @@ export function QuoteSettingsModal({
                     className={cn(
                       "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap",
                       isActive
-                        ? "border-primary bg-primary text-primary-foreground"
+                        ? s.activePillClass
                         : isDone
                         ? "border-primary/30 bg-background text-primary hover:bg-primary/5"
                         : "border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -150,7 +166,7 @@ export function QuoteSettingsModal({
                     <span
                       className={cn(
                         "inline-flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold",
-                        isActive ? "bg-primary-foreground/25" : isDone ? "bg-primary/10" : "bg-muted"
+                        isActive ? s.activeDotClass : isDone ? "bg-primary/10" : "bg-muted"
                       )}
                     >
                       {isDone ? <Check className="h-2.5 w-2.5" /> : i + 1}
@@ -167,8 +183,7 @@ export function QuoteSettingsModal({
         </nav>
 
         <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain bg-muted/20 px-4 sm:px-6 py-5">
-          {active !== "advanced" && (
-            <header className="mb-5 min-w-0">
+          <header className="mb-5 min-w-0">
               <div className="w-fit max-w-full">
                 <h3 className="flex items-center gap-2 font-display text-sm font-semibold text-foreground sm:text-base">
                   <CurrentIcon className="h-4 w-4 shrink-0" />
