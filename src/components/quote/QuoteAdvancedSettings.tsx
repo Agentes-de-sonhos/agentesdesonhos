@@ -21,9 +21,11 @@ interface Props {
   /** Quando informado, o bloco é renderizado como seção expansível. */
   open?: boolean;
   onToggle?: () => void;
+  /** Card branco sempre aberto (sem chevron), usado na etapa Avançado do orçamento. */
+  alwaysOpen?: boolean;
 }
 
-export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle }: Props) {
+export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle, alwaysOpen = false }: Props) {
   const { toast } = useToast();
   const initial = getQuoteCurrencyInfo(quote);
   const [currency, setCurrency] = useState<QuoteCurrency>(initial.currency);
