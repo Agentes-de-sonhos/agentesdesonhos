@@ -6,7 +6,7 @@ import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
 import { copyTextToClipboard } from "@/lib/public-share-message";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile, type AgentProfile } from "@/hooks/useAgentProfile";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
@@ -832,7 +832,7 @@ export default function CriarRoteiro() {
                   </Button>
                 )}
               </div>
-            </div>
+
 
             {generatedLinkUrl && (
               <Card className="border-primary/30 bg-primary/5">
