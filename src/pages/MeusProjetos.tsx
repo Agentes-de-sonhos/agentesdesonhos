@@ -210,37 +210,6 @@ function StatusBadge({ status }: { status: ProjectItem["status"] }) {
   );
 }
 
-function IconAction({
-  label,
-  onClick,
-  children,
-  destructive,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-  destructive?: boolean;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={onClick}
-          aria-label={label}
-          className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
-            "hover:bg-muted/70 hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground",
-            destructive && "hover:bg-rose-50 hover:text-rose-600"
-          )}
-        >
-          {children}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
-  );
-}
 
 function TypeBadge({ type }: { type: ProjectType }) {
   const Icon = TYPE_ICON[type];
