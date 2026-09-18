@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, FileText, Link as LinkIcon, Loader2, Lock, Eye, EyeOff,
   CalendarIcon, CreditCard, Trash2, Copy, ExternalLink, MapPin, Users,
-  Pencil, MoreHorizontal, Images,
+  Pencil, MoreHorizontal, Images, UserCircle2,
 } from "lucide-react";
 import { Search, SlidersHorizontal, Download } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -82,6 +82,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
+import { AdvancedSettingsSection } from "@/components/quote/AdvancedSettingsSection";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles } from "lucide-react";
@@ -1896,7 +1897,7 @@ export default function GerarOrcamento() {
               accentClass="bg-rose-500"
               open={advancedSections.signature}
               onToggle={() => toggleAdvancedSection("signature")}
-              data-testid="quote-signature-card"
+              testId="quote-signature-card"
             >
               <DocumentSignatureCard
                 table="quotes"

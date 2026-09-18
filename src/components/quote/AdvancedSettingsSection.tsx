@@ -16,6 +16,7 @@ export function AdvancedSettingsSection({
   open,
   onToggle,
   className,
+  testId,
   accentClass = "bg-rose-500",
   children,
 }: {
@@ -27,11 +28,12 @@ export function AdvancedSettingsSection({
   open: boolean;
   onToggle: () => void;
   className?: string;
+  testId?: string;
   accentClass?: string;
   children: ReactNode;
 }) {
   return (
-    <section className={cn("rounded-xl border bg-card shadow-sm overflow-hidden", className)}>
+    <section data-testid={testId} className={cn("rounded-xl border bg-card shadow-sm overflow-hidden", className)}>
       <div className="flex min-h-[4.5rem] items-start gap-2 px-3 py-3 sm:px-4">
         <button
           type="button"

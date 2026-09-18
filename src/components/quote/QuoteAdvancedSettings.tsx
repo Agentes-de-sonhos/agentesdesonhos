@@ -205,6 +205,7 @@ export function QuoteAdvancedSettings({ quote, onUpdated, open, onToggle, always
 
   return (
     <AdvancedSettingsSection
+      testId="quote-currency-card"
       title="Moeda do orçamento"
       icon={<DollarSign className="h-4 w-4 text-rose-500" />}
       accentClass="bg-rose-500"
