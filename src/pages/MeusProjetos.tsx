@@ -11,12 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -31,16 +26,11 @@ import {
   Wallet,
   Route,
   StickyNote,
-  Pencil,
-  Copy,
-  Trash2,
   Loader2,
   FolderOpen,
   MapPin,
   Calendar,
   Star,
-  Eye,
-  Link2,
   Plus,
 } from "lucide-react";
 import { Ticket } from "lucide-react";
@@ -76,6 +66,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Itinerary } from "@/types/itinerary";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+import { ProjectRowActions } from "@/components/shared/ProjectRowActions";
+import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
+import { buildProjectPublicUrl } from "@/lib/projectPublicUrl";
+import { useAgencyPublicLinkContext } from "@/hooks/useAgencyPublicLinkContext";
 
 type StatusFilter = "all" | "draft" | "published";
 type SortOrder = "recent" | "az";
@@ -89,6 +83,9 @@ interface ProjectItem {
   status: "draft" | "published";
   type: ProjectType;
   clientName?: string | null;
+  /** Status bruto do banco, usado para decidir o link público. */
+  rawStatus?: string | null;
+  publicAccessCode?: string | null;
 }
 
 const TYPE_LABELS: Record<ProjectType, string> = {
@@ -116,6 +113,8 @@ function normalizeItems(
       date: q.created_at,
       status: q.status === "published" ? "published" : "draft",
       type: "quote" as const,
+      rawStatus: q.status ?? null,
+      publicAccessCode: q.public_access_code ?? null,
     })),
     trips: trips.map((t) => ({
       id: t.id,
@@ -124,6 +123,8 @@ function normalizeItems(
       date: t.created_at,
       status: t.status === "active" ? "published" : "draft",
       type: "trip" as const,
+      rawStatus: t.status ?? null,
+      publicAccessCode: t.public_access_code ?? null,
     })),
     itineraries: itineraries.map((i) => ({
       id: i.id,
@@ -133,6 +134,8 @@ function normalizeItems(
       status: i.status === "published" || i.status === "approved" ? "published" : "draft",
       type: "itinerary" as const,
       clientName: i.clientName ?? null,
+      rawStatus: i.status ?? null,
+      publicAccessCode: i.publicAccessCode ?? i.public_access_code ?? null,
     })),
   };
 }
@@ -202,37 +205,6 @@ function StatusBadge({ status }: { status: ProjectItem["status"] }) {
   );
 }
 
-function IconAction({
-  label,
-  onClick,
-  children,
-  destructive,
-}: {
-  label: string;
-  onClick: () => void;
-  children: React.ReactNode;
-  destructive?: boolean;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          onClick={onClick}
-          aria-label={label}
-          className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
-            "hover:bg-muted/70 hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground",
-            destructive && "hover:bg-rose-50 hover:text-rose-600"
-          )}
-        >
-          {children}
-        </button>
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
-  );
-}
 
 function TypeBadge({ type }: { type: ProjectType }) {
   const Icon = TYPE_ICON[type];
@@ -260,6 +232,10 @@ export default function MeusProjetos() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("recent");
   const [deleteTarget, setDeleteTarget] = useState<ProjectItem | null>(null);
   const [templateTarget, setTemplateTarget] = useState<Itinerary | null>(null);
+
+  /** Abre a edição em nova aba interna (gerenciador existente, limite de 10). */
+  const openInternalWindow = useOpenInternalWindow();
+  const { agencyName, customDomain } = useAgencyPublicLinkContext();
 
   const { quotes, isLoading: quotesLoading, deleteQuote, duplicateQuote } = useQuotes();
   const { trips, isLoading: tripsLoading, deleteTrip, duplicateTrip } = useTrips();
@@ -345,19 +321,37 @@ export default function MeusProjetos() {
 
   const isLoading = quotesLoading || tripsLoading || itinerariesLoading;
 
-  const handleEdit = (item: ProjectItem) => {
+  /** Caminho de edição de cada projeto — chave estável por tipo + ID. */
+  const editPathFor = (item: ProjectItem): string => {
     switch (item.type) {
       case "quote":
-        navigate(nav.quote(item.id));
-        break;
+        return nav.quote(item.id);
       case "trip":
-        navigate(nav.wallet(item.id));
-        break;
+        return nav.wallet(item.id);
       case "itinerary":
-        navigate(nav.itinerary(item.id));
-        break;
+        return nav.itinerary(item.id);
     }
   };
+
+  /**
+   * Clicar no nome do projeto e clicar no lápis executam exatamente esta ação:
+   * abrir a edição em nova aba interna (ou focar a aba já aberta do mesmo
+   * projeto), respeitando o limite de 10 abas do gerenciador atual.
+   */
+  const handleEdit = (item: ProjectItem) => {
+    openInternalWindow(editPathFor(item), `${TYPE_LABELS[item.type]} — ${item.name}`);
+  };
+
+  /** Link público oficial, ou `null` quando não há versão publicada válida. */
+  const publicUrlFor = (item: ProjectItem): string | null =>
+    buildProjectPublicUrl({
+      kind: item.type,
+      status: item.rawStatus,
+      publicAccessCode: item.publicAccessCode,
+      agencyName,
+      customDomain,
+    });
+
 
   const handleDuplicate = (item: ProjectItem) => {
     switch (item.type) {
@@ -455,36 +449,14 @@ export default function MeusProjetos() {
             itinerary={found as Itinerary}
             onTitleClick={() => handleEdit(item)}
             actions={
-              <>
-                <IconAction label="Visualizar" onClick={() => handleEdit(item)}>
-                  <Eye className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Editar" onClick={() => handleEdit(item)}>
-                  <Pencil className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
-                  <Copy className="h-4 w-4" />
-                </IconAction>
-                <IconAction
-                  label="Salvar como modelo"
-                  onClick={() => setTemplateTarget(found as Itinerary)}
-                >
-                  <Star className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Publicar / Link" onClick={() => handleEdit(item)}>
-                  <Link2 className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Gerar PDF" onClick={() => handleEdit(item)}>
-                  <FileText className="h-4 w-4" />
-                </IconAction>
-                <IconAction
-                  label="Excluir"
-                  destructive
-                  onClick={() => setDeleteTarget(item)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </IconAction>
-              </>
+              /* Somente olho, lápis, duplicar e excluir nesta listagem.
+                 Modelo, link e PDF continuam disponíveis no editor. */
+              <ProjectRowActions
+                publicUrl={publicUrlFor(item)}
+                onEdit={() => handleEdit(item)}
+                onDuplicate={() => handleDuplicate(item)}
+                onDelete={() => setDeleteTarget(item)}
+              />
             }
           />
         );
@@ -532,39 +504,12 @@ export default function MeusProjetos() {
         </div>
 
         <div className="flex items-center gap-0.5 md:justify-self-end opacity-100 md:opacity-70 md:group-hover:opacity-100 transition-opacity">
-          <IconAction label="Visualizar" onClick={() => handleEdit(item)}>
-            <Eye className="h-4 w-4" />
-          </IconAction>
-          <IconAction label="Editar" onClick={() => handleEdit(item)}>
-            <Pencil className="h-4 w-4" />
-          </IconAction>
-          <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
-            <Copy className="h-4 w-4" />
-          </IconAction>
-          {item.type === "itinerary" && (
-            <IconAction
-              label="Salvar como modelo"
-              onClick={() => {
-                const found = itineraries.find((i: any) => i.id === item.id);
-                if (found) setTemplateTarget(found as Itinerary);
-              }}
-            >
-              <Star className="h-4 w-4" />
-            </IconAction>
-          )}
-          {item.type === "itinerary" && (
-            <IconAction label="Publicar / Link" onClick={() => handleEdit(item)}>
-              <Link2 className="h-4 w-4" />
-            </IconAction>
-          )}
-          {item.type === "itinerary" && (
-            <IconAction label="Gerar PDF" onClick={() => handleEdit(item)}>
-              <FileText className="h-4 w-4" />
-            </IconAction>
-          )}
-          <IconAction label="Excluir" destructive onClick={() => setDeleteTarget(item)}>
-            <Trash2 className="h-4 w-4" />
-          </IconAction>
+          <ProjectRowActions
+            publicUrl={publicUrlFor(item)}
+            onEdit={() => handleEdit(item)}
+            onDuplicate={() => handleDuplicate(item)}
+            onDelete={() => setDeleteTarget(item)}
+          />
         </div>
       </div>
     );
