@@ -30,7 +30,7 @@ export function useTrips() {
       // continuam restritos pelas políticas de equipe.
       const { data, error } = await supabase
         .from("trips")
-        .select("id, user_id, client_name, client_id, destination, start_date, end_date, status, share_token, access_password, slug, short_code, created_at, updated_at, is_locked, failed_password_attempts")
+        .select("id, user_id, client_name, client_id, destination, start_date, end_date, status, share_token, access_password, slug, short_code, public_access_code, created_at, updated_at, is_locked, failed_password_attempts")
         .order("created_at", { ascending: false })
         .limit(500);
       if (error) throw error;
