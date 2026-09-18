@@ -2,9 +2,9 @@ import { useState, ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MapPin, CreditCard, CalendarIcon, Paperclip, ChevronLeft, ChevronRight, Check, ListChecks, Settings2 } from "lucide-react";
+import { ClipboardCheck, CreditCard, CalendarIcon, Paperclip, ChevronLeft, ChevronRight, Check, ListChecks, Settings2 } from "lucide-react";
 
-export type QuoteSettingsStep = "destination" | "included" | "payment" | "validity" | "documents" | "advanced";
+export type QuoteSettingsStep = "initial" | "included" | "payment" | "validity" | "documents" | "advanced";
 
 interface StepDef {
   key: QuoteSettingsStep;
@@ -12,16 +12,16 @@ interface StepDef {
   /** Short label used in the compact stepper */
   short: string;
   description: string;
-  icon: typeof MapPin;
+  icon: typeof ClipboardCheck;
 }
 
 const STEPS: StepDef[] = [
   {
-    key: "destination",
-    title: "Apresentação do destino",
-    short: "Destino",
-    description: "Escolha a capa, as fotos e o texto que abrem o orçamento do cliente.",
-    icon: MapPin,
+    key: "initial",
+    title: "Configuração inicial",
+    short: "Inicial",
+    description: "Confira os dados principais e personalize a capa e a apresentação do destino.",
+    icon: ClipboardCheck,
   },
   {
     key: "included",
@@ -55,7 +55,7 @@ const STEPS: StepDef[] = [
     key: "advanced",
     title: "Configurações avançadas",
     short: "Avançado",
-    description: "Moeda do orçamento e opções adicionais de solicitação de reserva.",
+    description: "Defina moeda, solicitação de reserva e a assinatura responsável pelo orçamento.",
     icon: Settings2,
   },
 ];
@@ -65,7 +65,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   initialStep?: QuoteSettingsStep;
   onBeforeNavigate?: () => Promise<void> | void;
-  renderDestination: () => ReactNode;
+  renderInitial: () => ReactNode;
   renderIncluded: () => ReactNode;
   renderPayment: () => ReactNode;
   renderValidity: () => ReactNode;
@@ -76,8 +76,8 @@ interface Props {
 }
 
 export function QuoteSettingsModal({
-  open, onOpenChange, initialStep = "destination", onBeforeNavigate,
-  renderDestination, renderIncluded, renderPayment, renderValidity, renderDocuments, renderAdvanced,
+  open, onOpenChange, initialStep = "initial", onBeforeNavigate,
+  renderInitial, renderIncluded, renderPayment, renderValidity, renderDocuments, renderAdvanced,
   stepHeaderActions,
 }: Props) {
   const [active, setActive] = useState<QuoteSettingsStep>(initialStep);
@@ -98,7 +98,7 @@ export function QuoteSettingsModal({
   };
 
   const content: Record<QuoteSettingsStep, ReactNode> = {
-    destination: renderDestination(),
+    initial: renderInitial(),
     included: renderIncluded(),
     payment: renderPayment(),
     validity: renderValidity(),

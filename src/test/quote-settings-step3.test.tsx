@@ -17,7 +17,7 @@ const renderModal = (extra: Record<string, unknown> = {}) =>
     <QuoteSettingsModal
       open
       onOpenChange={vi.fn()}
-      renderDestination={() => <div>conteudo-destino</div>}
+      renderInitial={() => <div>conteudo-inicial</div>}
       renderIncluded={() => <div>conteudo-incluso</div>}
       renderPayment={() => <div>conteudo-investimento</div>}
       renderValidity={() => <div>conteudo-validade</div>}
@@ -34,7 +34,7 @@ describe("QuoteStepCard — modo direto", () => {
       <QuoteStepCard
         step={3}
         id="etapa-3"
-        title="Configurar apresentação"
+        title="Configurar orçamento"
         hint="Ajuste como o cliente verá o orçamento"
         accentClass="bg-primary"
         open={false}
@@ -44,7 +44,7 @@ describe("QuoteStepCard — modo direto", () => {
         <div>painel-filho</div>
       </QuoteStepCard>,
     );
-    const trigger = screen.getByRole("button", { name: /Configurar apresentação/i });
+    const trigger = screen.getByRole("button", { name: /Configurar orçamento/i });
     expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
     expect(trigger.getAttribute("aria-expanded")).toBeNull();
     expect(screen.queryByText("painel-filho")).toBeNull();
@@ -55,7 +55,7 @@ describe("QuoteStepCard — modo direto", () => {
   it("mesmo com open=true o modo direto não expande o corpo", () => {
     render(
       <QuoteStepCard
-        step={3} id="etapa-3" title="Configurar apresentação" hint="hint"
+        step={3} id="etapa-3" title="Configurar orçamento" hint="hint"
         accentClass="bg-primary" open direct onToggle={vi.fn()}
       >
         <div>painel-filho</div>
@@ -69,15 +69,15 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
   it("usa o título consolidado e lista os seis passos", () => {
     renderModal();
     expect(screen.getByText("Configurações do Orçamento")).toBeTruthy();
-    ["Destino", "Incluso", "Investimento", "Validade", "Documentos", "Avançado"].forEach((label) => {
+    ["Inicial", "Incluso", "Investimento", "Validade", "Documentos", "Avançado"].forEach((label) => {
       expect(screen.getByRole("button", { name: new RegExp(label) })).toBeTruthy();
     });
   });
 
   it("marca aria-current no passo atual e conclui/pendente conforme a posição", async () => {
     renderModal();
-    const destino = screen.getByRole("button", { name: /Destino/ });
-    expect(destino.getAttribute("aria-current")).toBe("step");
+    const initial = screen.getByRole("button", { name: /Inicial/ });
+    expect(initial.getAttribute("aria-current")).toBe("step");
     expect(screen.getByRole("button", { name: /Documentos/ }).getAttribute("aria-current")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /Investimento/ }));
@@ -85,7 +85,7 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
       expect(screen.getByRole("button", { name: /Investimento/ }).getAttribute("aria-current")).toBe("step"),
     );
     // passos anteriores ficam concluídos (check em vez de número)
-    expect(screen.getByRole("button", { name: /Destino/ }).textContent).not.toContain("1");
+    expect(screen.getByRole("button", { name: /Inicial/ }).textContent).not.toContain("1");
     expect(screen.getByText("conteudo-investimento")).toBeTruthy();
   });
 
@@ -95,7 +95,7 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
     fireEvent.click(screen.getByRole("button", { name: /Avançar/ }));
     await waitFor(() => expect(screen.getByText("conteudo-incluso")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: /Voltar/ }));
-    await waitFor(() => expect(screen.getByText("conteudo-destino")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText("conteudo-inicial")).toBeTruthy());
     fireEvent.click(screen.getByRole("button", { name: /Avançado/ }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Concluir" })).toBeTruthy());
     expect(screen.queryByRole("button", { name: /Avançar/ })).toBeNull();
@@ -108,14 +108,14 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
   });
 
   it("renderiza a ação de cabeçalho apenas no passo correspondente", async () => {
-    renderModal({ stepHeaderActions: { destination: <button type="button">switch-destino</button> } });
+    renderModal({ stepHeaderActions: { initial: <button type="button">switch-destino</button> } });
     expect(screen.getByRole("button", { name: "switch-destino" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /Documentos/ }));
     await waitFor(() => expect(screen.queryByRole("button", { name: "switch-destino" })).toBeNull());
   });
 });
 
-describe("Passo 1 — destino", () => {
+describe("Passo 1 — configuração inicial", () => {
   it("o switch de visibilidade não é mais um card largo no corpo", () => {
     expect(destinationSource).not.toContain("show-destination-inline");
     expect(destinationSource).toContain("show-destination-header");
