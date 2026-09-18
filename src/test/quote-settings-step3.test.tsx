@@ -116,6 +116,17 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
 });
 
 describe("Passo 1 — configuração inicial", () => {
+  it("usa cartões responsivos para fotos e descrição sem ícones ou traços nos títulos internos", () => {
+    expect(pageSource).toContain('data-testid="quote-main-data-card"');
+    expect(destinationSource).toContain('data-testid="destination-cover-grid"');
+    expect(destinationSource).toContain("md:grid-cols-2");
+    expect(destinationSource).toContain('data-testid="destination-photos-card"');
+    expect(destinationSource).toContain('data-testid="destination-description-card"');
+    expect(destinationSource).toContain("min-h-[190px]");
+    expect(destinationSource).not.toContain('<Images className="h-4 w-4 text-sky-500" />');
+    expect(destinationSource).not.toContain('<MapPin className="h-4 w-4 text-sky-500" />');
+  });
+
   it("o switch de visibilidade fica no rodapé direito da descrição", () => {
     expect(destinationSource).toContain("show-destination-inline");
     expect(destinationSource).toContain('data-testid="destination-visibility-action"');
@@ -142,7 +153,7 @@ describe("Passo 1 — configuração inicial", () => {
   });
 
   it("a ação de IA fica dentro do cartão da descrição", () => {
-    const gridStart = destinationSource.indexOf('className="grid gap-4 lg:grid-cols-2"');
+    const gridStart = destinationSource.indexOf('data-testid="destination-cover-grid"');
     const descriptionStart = destinationSource.indexOf("Descrição do destino", gridStart);
     const aiAction = destinationSource.indexOf("Gerar com IA", descriptionStart);
     const surface = destinationSource.indexOf('data-testid="destination-description-surface"', descriptionStart);

@@ -499,22 +499,18 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
           onClose={() => setSearchOpen(false)}
         />
       )}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div data-testid="destination-cover-grid" className="grid items-stretch gap-3 md:grid-cols-2">
         {/* Coluna 1 — Capa e fotos */}
-        <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3">
+        <section data-testid="destination-photos-card" className="flex min-h-[190px] flex-col rounded-lg border border-border/70 bg-card p-3.5 shadow-sm sm:p-4">
           <div className="flex items-center justify-between gap-2">
-            <div className="w-fit">
-              <h4 className="text-sm font-semibold flex items-center gap-2">
-                <Images className="h-4 w-4 text-sky-500" />
-                Capa e fotos
-                {images.length > 0 && (
-                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                    {images.length}
-                  </span>
-                )}
-              </h4>
-              <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
-            </div>
+            <h4 className="text-sm font-semibold text-foreground">
+              Capa e fotos
+              {images.length > 0 && (
+                <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                  {images.length}
+                </span>
+              )}
+            </h4>
             <Button variant="ghost" size="sm" onClick={() => setPhotosOpen(true)} className="h-7 gap-1.5 text-xs">
               <Pencil className="h-3.5 w-3.5" />
               Gerenciar
@@ -522,7 +518,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
           </div>
 
           {images.length > 0 ? (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="mt-3 grid flex-1 grid-cols-3 gap-2">
               {images.slice(0, 6).map((url, i) => (
                 <div
                   key={i}
@@ -582,7 +578,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
               )}
             </div>
           ) : isFetchingPhotos ? (
-            <div className="flex items-center gap-2 py-8 justify-center text-xs text-muted-foreground">
+            <div className="mt-3 flex flex-1 items-center justify-center gap-2 py-8 text-xs text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" />
               Buscando fotos do destino...
             </div>
@@ -590,7 +586,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
             <button
               type="button"
               onClick={() => setPhotosOpen(true)}
-              className="flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed bg-muted/20 py-10 text-xs text-muted-foreground hover:bg-muted/40"
+              className="mt-3 flex min-h-[118px] w-full flex-1 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed bg-muted/20 px-3 py-8 text-xs text-muted-foreground hover:bg-muted/40"
             >
               <Images className="h-5 w-5 opacity-60" />
               Adicionar fotos do destino
@@ -599,15 +595,9 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
         </section>
 
         {/* Coluna 2 — Descrição */}
-        <section className="rounded-xl border bg-card p-4 shadow-sm space-y-3 flex flex-col">
+        <section data-testid="destination-description-card" className="flex min-h-[190px] flex-col rounded-lg border border-border/70 bg-card p-3.5 shadow-sm sm:p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="w-fit">
-              <h4 className="flex items-center gap-2 text-sm font-semibold">
-                <MapPin className="h-4 w-4 text-sky-500" />
-                Descrição do destino
-              </h4>
-              <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
-            </div>
+            <h4 className="text-sm font-semibold text-foreground">Descrição do destino</h4>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
@@ -638,7 +628,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
 
           <div
             data-testid="destination-description-surface"
-            className="flex-1 rounded-lg border border-border bg-background p-3"
+            className="mt-3 min-h-[118px] flex-1 rounded-lg border border-border/70 bg-background p-3"
           >
             {text ? (
               <p className="whitespace-pre-wrap text-sm leading-6 text-foreground line-clamp-[12]">{text}</p>

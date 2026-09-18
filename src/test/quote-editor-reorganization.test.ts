@@ -58,12 +58,35 @@ describe("Editor de orçamento reorganizado", () => {
   });
 
   it("compacta dados principais em duas linhas e remove o resumo financeiro", () => {
+    expect(page).toContain('data-testid="quote-main-data-card"');
     expect(summary).toContain("md:grid-cols-6");
+    expect(summary).toContain('data-testid="quote-main-data-grid"');
     expect(summary.match(/md:col-span-2/g)?.length).toBeGreaterThanOrEqual(3);
     expect(summary.match(/md:col-span-3/g)?.length).toBeGreaterThanOrEqual(2);
     expect(summary).not.toContain("Total Geral");
     expect(summary).not.toContain("serviço(s) incluído(s)");
     expect(summary).not.toContain("getEffectiveQuoteTotal");
+  });
+
+  it("mantém os subtítulos internos simples e os dois cartões de capa equilibrados", () => {
+    const initial = page.match(/renderInitial=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
+    const dataHeading = initial.match(/<h4 id="quote-initial-data-title"[\s\S]*?<\/h4>/)?.[0] ?? "";
+    expect(dataHeading).toContain("Dados principais");
+    expect(dataHeading).not.toContain("<Users");
+    expect(initial).not.toMatch(/quote-initial-data-title[\s\S]{0,220}bg-sky-500/);
+    expect(initial).toMatch(/Configuração da capa[\s\S]{0,180}bg-sky-500/);
+
+    expect(destination).toContain('data-testid="destination-cover-grid"');
+    expect(destination).toContain("md:grid-cols-2");
+    expect(destination).toContain('data-testid="destination-photos-card"');
+    expect(destination).toContain('data-testid="destination-description-card"');
+
+    const photosHeading = destination.match(/<h4 className="text-sm font-semibold text-foreground">[\s\S]*?Capa e fotos[\s\S]*?<\/h4>/)?.[0] ?? "";
+    const descriptionHeading = destination.match(/<h4 className="text-sm font-semibold text-foreground">Descrição do destino<\/h4>/)?.[0] ?? "";
+    expect(photosHeading).not.toContain("<Images");
+    expect(descriptionHeading).not.toContain("<MapPin");
+    expect(destination).not.toMatch(/Capa e fotos[\s\S]{0,300}h-1 w-full rounded-full bg-sky-500/);
+    expect(destination).not.toMatch(/Descrição do destino[\s\S]{0,180}h-1 w-full rounded-full bg-sky-500/);
   });
 
   it("mantém IA dentro da descrição e a chave no rodapé direito", () => {

@@ -87,9 +87,12 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
   const days = Math.ceil((displayEnd.getTime() - displayStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
   return (
-    <div className="grid min-w-0 gap-x-5 gap-y-3 md:grid-cols-6">
+    <div
+      data-testid="quote-main-data-grid"
+      className="grid min-w-0 overflow-hidden rounded-lg border border-border/60 bg-background md:grid-cols-6"
+    >
           {/* Cliente editável */}
-          <div className="flex min-w-0 items-center gap-2 text-sm md:col-span-2">
+          <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:col-span-2">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cliente:</span>
             {editingClient ? (
@@ -116,7 +119,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           </div>
 
           {/* Título da viagem (opcional) */}
-          <div className="flex min-w-0 items-center gap-2 text-sm md:order-4 md:col-span-3">
+          <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:order-4 md:col-span-3 md:border-b-0">
             <Plane className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Título:</span>
             {editingTitle ? (
@@ -153,7 +156,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           
           {/* Passageiros editáveis */}
           {editingPax ? (
-            <div className="flex min-w-0 items-center gap-2 text-sm flex-wrap md:order-5 md:col-span-3">
+            <div className="flex min-w-0 items-center gap-2 border-border/60 px-3 py-3 text-sm flex-wrap md:order-5 md:col-span-3 md:border-l">
               <Users className="h-4 w-4 text-muted-foreground" />
               <label className="text-muted-foreground">Adultos:</label>
               <Input
@@ -177,7 +180,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
               </Button>
             </div>
           ) : (
-            <div className="flex min-w-0 items-center gap-4 text-sm md:order-5 md:col-span-3">
+            <div className="flex min-w-0 items-center gap-4 border-border/60 px-3 py-3 text-sm md:order-5 md:col-span-3 md:border-l">
               <div className="flex items-center gap-2">
                 <Users className="h-4 w-4 text-muted-foreground" />
                 <span>{quote.adults_count} adulto(s)</span>
@@ -195,7 +198,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           )}
 
           {/* Destino editável */}
-          <div className="flex min-w-0 items-center gap-2 text-sm md:col-span-2">
+          <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:col-span-2 md:border-l">
             <MapPin className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Destino:</span>
             {editingDest ? (
@@ -230,7 +233,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           </div>
 
           {editing ? (
-            <div className="min-w-0 md:col-span-2">
+            <div className="min-w-0 border-b border-border/60 px-3 py-3 md:col-span-2 md:border-l">
               <QuoteDateEditor
                 quoteId={quote.id}
                 startDateStr={quote.start_date}
@@ -239,7 +242,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
               />
             </div>
           ) : (
-            <div className="flex min-w-0 items-center gap-2 text-sm md:col-span-2">
+            <div className="flex min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:col-span-2 md:border-l">
               <CalendarIcon className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Período:</span>
               <span className="font-medium">
