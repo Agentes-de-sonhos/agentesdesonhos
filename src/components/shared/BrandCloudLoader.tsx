@@ -5,7 +5,9 @@ interface BrandCloudLoaderProps {
   className?: string;
 }
 
-const CLOUD_PATH = "M17.5 19H9a7 7 0 1 1 6.71-9h1.79a5.5 5.5 0 1 1 0 11Z";
+// Nuvem com base plana e cantos tangentes: o arco direito termina exatamente
+// na linha da base (mesmo y do início), sem bico, cauda ou balão de fala.
+const CLOUD_PATH = "M12.5 21A6.5 6.5 0 1 0 17.8 10.7A5.5 5.5 0 1 1 20.5 21Z";
 
 export function BrandCloudLoader({
   label = "Carregando",
@@ -13,13 +15,13 @@ export function BrandCloudLoader({
 }: BrandCloudLoaderProps) {
   return (
     <div
-      className={`inline-flex h-12 w-12 items-center justify-center ${className}`}
+      className={`inline-flex h-16 w-16 items-center justify-center ${className}`}
       role="status"
       aria-label={label}
     >
       <svg
         viewBox="0 0 32 32"
-        className="h-11 w-11"
+        className="h-[57px] w-[57px]"
         fill="none"
         aria-hidden="true"
       >
