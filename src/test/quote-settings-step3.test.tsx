@@ -115,7 +115,7 @@ describe("QuoteSettingsModal — título, passos e navegação", () => {
   });
 
   it("o pill ativo do stepper usa a mesma cor da linha do título em cada etapa", async () => {
-    const { container } = renderModal();
+    renderModal();
     const cases: Array<[RegExp, string]> = [
       [/Inicial/, "bg-sky-500"],
       [/Incluso/, "bg-emerald-500"],
