@@ -540,11 +540,26 @@ Deno.serve(async (req) => {
     let clientAreaEmail: string | null = null;
     let clientAreaPassword: string | null = null;
     const anaSourceId = (sourceMap.byTable.get("clients") ?? [])[0];
-    const mainClientId =
-      [...(idMap.get("clients")?.values() ?? [])][0] ??
-      (anaSourceId ? idMapGet(idMap, "clients", anaSourceId) : undefined);
     const mainTripId = [...(idMap.get("trips")?.values() ?? [])][0] ?? null;
     const mainOperationId = [...(idMap.get("operations")?.values() ?? [])][0] ?? null;
+    /*
+     * O cliente principal é SEMPRE o titular da viagem canônica (nunca o
+     * primeiro id do mapa, que depende da ordem de inserção e pode cair em um
+     * cartão sintético do Kanban).
+     */
+    let tripClientId: string | null = null;
+    if (mainTripId) {
+      const { data: tripRow } = await admin
+        .from("trips")
+        .select("client_id")
+        .eq("id", mainTripId)
+        .maybeSingle();
+      tripClientId = (tripRow?.client_id as string | null) ?? null;
+    }
+    const mainClientId =
+      tripClientId ??
+      (anaSourceId ? idMapGet(idMap, "clients", anaSourceId) : undefined) ??
+      [...(idMap.get("clients")?.values() ?? [])][0];
 
     if (mainClientId && body.create_client_area !== false) {
       const emailBase = String(body.client_area_email || "").trim().toLowerCase();
