@@ -15,9 +15,11 @@ interface Props {
   onChange: (snap: SignatureSnapshot | null) => void;
   className?: string;
   label?: string;
+  /** Exibe todas as assinaturas diretamente em grade, sem popover. */
+  inline?: boolean;
 }
 
-export function SignatureSelector({ value, onChange, className, label }: Props) {
+export function SignatureSelector({ value, onChange, className, label, inline = false }: Props) {
   const { allSignatures, effectiveSignature, isLoading, create } = useCommercialSignatures();
   const [open, setOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -31,7 +33,12 @@ export function SignatureSelector({ value, onChange, className, label }: Props) 
       onClick={() => { onChange(buildSnapshot(s)); setOpen(false); }}
       className={cn(
         "w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-colors hover:bg-muted/50",
-        selected ? "border-primary bg-primary/5" : "border-border"
+        inline && "h-full items-start",
+        selected
+          ? inline
+            ? "border-rose-400 bg-rose-50/70"
+            : "border-primary bg-primary/5"
+          : "border-border"
       )}
       aria-label={`Usar assinatura de ${s.name}${isSystemSignatureId(s.id) ? " (do cadastro)" : ""}`}
     >
@@ -56,9 +63,60 @@ export function SignatureSelector({ value, onChange, className, label }: Props) 
           )}
         </div>
       </div>
-      {selected && <Check className="h-4 w-4 text-primary shrink-0" />}
+      {selected && (
+        <Check className={cn("h-4 w-4 shrink-0", inline ? "text-rose-500" : "text-primary")} />
+      )}
     </button>
   );
+
+  const createDialog = (
+    <SignatureFormDialog
+      open={createOpen}
+      onOpenChange={setCreateOpen}
+      initial={null}
+      onSubmit={async (payload) => {
+        const created = await create.mutateAsync(payload);
+        if (created) onChange(buildSnapshot(created));
+      }}
+    />
+  );
+
+  if (inline) {
+    return (
+      <div className={className} data-testid="signature-selector-inline">
+        {label && <p className="text-sm font-medium mb-2">{label}</p>}
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : (
+          <div className="space-y-3">
+            <div
+              data-testid="signature-inline-grid"
+              className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {allSignatures.map((s) => renderCard(s, s.id === current?.id))}
+              <button
+                type="button"
+                onClick={() => setCreateOpen(true)}
+                className="flex h-full min-h-[4.5rem] w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-primary transition-colors hover:bg-muted/40"
+              >
+                <Plus className="h-4 w-4" /> Nova assinatura
+              </button>
+            </div>
+            {current && (
+              <button
+                type="button"
+                onClick={() => onChange(null)}
+                className="text-xs text-primary hover:underline"
+              >
+                Usar a assinatura padrão da agência
+              </button>
+            )}
+          </div>
+        )}
+        {createDialog}
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
