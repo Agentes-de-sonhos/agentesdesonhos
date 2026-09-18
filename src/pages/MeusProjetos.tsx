@@ -490,36 +490,14 @@ export default function MeusProjetos() {
             itinerary={found as Itinerary}
             onTitleClick={() => handleEdit(item)}
             actions={
-              <>
-                <IconAction label="Visualizar" onClick={() => handleEdit(item)}>
-                  <Eye className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Editar" onClick={() => handleEdit(item)}>
-                  <Pencil className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Duplicar" onClick={() => handleDuplicate(item)}>
-                  <Copy className="h-4 w-4" />
-                </IconAction>
-                <IconAction
-                  label="Salvar como modelo"
-                  onClick={() => setTemplateTarget(found as Itinerary)}
-                >
-                  <Star className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Publicar / Link" onClick={() => handleEdit(item)}>
-                  <Link2 className="h-4 w-4" />
-                </IconAction>
-                <IconAction label="Gerar PDF" onClick={() => handleEdit(item)}>
-                  <FileText className="h-4 w-4" />
-                </IconAction>
-                <IconAction
-                  label="Excluir"
-                  destructive
-                  onClick={() => setDeleteTarget(item)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </IconAction>
-              </>
+              /* Somente olho, lápis, duplicar e excluir nesta listagem.
+                 Modelo, link e PDF continuam disponíveis no editor. */
+              <ProjectRowActions
+                publicUrl={publicUrlFor(item)}
+                onEdit={() => handleEdit(item)}
+                onDuplicate={() => handleDuplicate(item)}
+                onDelete={() => setDeleteTarget(item)}
+              />
             }
           />
         );
