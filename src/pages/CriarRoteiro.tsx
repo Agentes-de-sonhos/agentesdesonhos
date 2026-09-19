@@ -13,6 +13,10 @@ import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { PricingSectionCard } from "@/components/itinerary/PricingSectionCard";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
+import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
+import { ItinerarySettingsModal } from "@/components/itinerary/ItinerarySettingsModal";
+import { ItineraryDaysOrganizer } from "@/components/itinerary/ItineraryDaysOrganizer";
+import { TripPeriodField } from "@/components/shared/TripPeriodField";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { BrandCloudLoader } from "@/components/shared/BrandCloudLoader";
@@ -38,7 +42,7 @@ import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { attachItineraryToTrip } from "@/lib/roteiro-domain";
-import { Wand2, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, CalendarIcon, Quote } from "lucide-react";
+import { Wand2, Check, Download, FileText, Link2, Loader2, Lock, Pencil, X, ImageIcon, Sparkles, Star, Users, Quote } from "lucide-react";
 import { SaveAsTemplateDialog } from "@/components/itinerary/SaveAsTemplateDialog";
 
 import { ImportItineraryWizard } from "@/components/itinerary/ImportItineraryWizard";
@@ -50,7 +54,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
-import { Calendar as CalendarPicker } from "@/components/ui/calendar";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -120,6 +123,7 @@ export default function CriarRoteiro() {
   const [isRouteItineraryLoading, setIsRouteItineraryLoading] = useState(Boolean(id));
   const [routeItineraryLoadFailed, setRouteItineraryLoadFailed] = useState(false);
   const [routeLoadAttempt, setRouteLoadAttempt] = useState(0);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const {
     itineraries,
@@ -145,11 +149,9 @@ export default function CriarRoteiro() {
   const [isEditingDestination, setIsEditingDestination] = useState(false);
   const [editDestination, setEditDestination] = useState("");
   const [travelersPopoverOpen, setTravelersPopoverOpen] = useState(false);
-  const [editTravelers, setEditTravelers] = useState(1);
+  const [editAdults, setEditAdults] = useState(1);
+  const [editChildren, setEditChildren] = useState(0);
   const [savingTravelers, setSavingTravelers] = useState(false);
-  const [datesPopoverOpen, setDatesPopoverOpen] = useState(false);
-  const [editStartDate, setEditStartDate] = useState<Date | undefined>(undefined);
-  const [editEndDate, setEditEndDate] = useState<Date | undefined>(undefined);
   const [savingDates, setSavingDates] = useState(false);
   const [isEditingHeadline, setIsEditingHeadline] = useState(false);
   const [editHeadline, setEditHeadline] = useState("");
@@ -218,7 +220,9 @@ export default function CriarRoteiro() {
   const loadItinerary = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
-      setCurrentItinerary(data);
+      setCurrentItinerary((current) => current?.id === data.id
+        ? { ...data, adultsCount: current.adultsCount, childrenCount: current.childrenCount }
+        : data);
       setActiveTab("create");
       if (data.status === "published" && data.shareToken) {
         setGeneratedLinkUrl(buildItineraryUrl(data));
@@ -244,7 +248,7 @@ export default function CriarRoteiro() {
 
       // Load complete itinerary
       const completeItinerary = await getItineraryWithDetails(itinerary.id);
-      setCurrentItinerary(completeItinerary);
+      setCurrentItinerary({ ...completeItinerary, adultsCount: data.adultsCount ?? data.travelersCount, childrenCount: data.childrenCount ?? 0 });
 
       // Only increment usage AFTER successful creation
       await incrementUsage();
@@ -919,6 +923,78 @@ export default function CriarRoteiro() {
               </Card>
             )}
 
+            <QuoteStepCard
+              step={1}
+              id="itinerary-settings"
+              title="Configurar roteiro"
+              hint="Dados iniciais, organização dos dias, valores e condições e assinatura."
+              accentClass="bg-violet-500"
+              icon={<Sparkles className="h-5 w-5 text-violet-500" />}
+              open={false}
+              direct
+              onToggle={() => setSettingsOpen(true)}
+            />
+
+            {currentItinerary.days && currentItinerary.days.length > 0 && (
+              <ItineraryEditor
+                itineraryId={currentItinerary.id}
+                days={currentItinerary.days}
+                onUpdateActivity={handleUpdateActivity}
+                onDeleteActivity={handleDeleteActivity}
+                onAddActivity={handleAddActivity}
+                onMoveActivity={handleMoveActivity}
+                onReorderActivities={handleReorderActivities}
+                onReorderDays={async (orderedDayIds) => {
+                  if (!currentItinerary) return;
+                  await reorderDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    orderedDayIds,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success("Ordem dos dias atualizada");
+                }}
+                itineraryStartDate={currentItinerary.startDate}
+                itineraryEndDate={currentItinerary.endDate}
+                showDayManagement={false}
+                onAddDay={async (plan) => {
+                  if (!currentItinerary) return;
+                  await mutateItineraryDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    sequence: plan.sequence,
+                    newStartDate: plan.newStartDate,
+                    newEndDate: plan.newEndDate,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success("Novo dia adicionado ao roteiro");
+                }}
+                onDeleteDay={async (plan, _mode, day) => {
+                  if (!currentItinerary) return;
+                  await mutateItineraryDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    sequence: plan.sequence,
+                    newStartDate: plan.newStartDate,
+                    newEndDate: plan.newEndDate,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success(`Dia ${day.dayNumber} excluído`);
+                }}
+                onApproveAll={handleApproveAll}
+                aiContext={{
+                  destination: currentItinerary.destination,
+                  tripType: currentItinerary.tripType,
+                  budgetLevel: currentItinerary.budgetLevel,
+                  travelersCount: currentItinerary.travelersCount,
+                  travelPace: lastFormData?.travelPace,
+                  interests: lastFormData?.interests,
+                  observations: lastFormData?.additionalPreferences?.serviceContext,
+                }}
+              />
+            )}
+
+            <ItinerarySettingsModal
+              open={settingsOpen}
+              onOpenChange={setSettingsOpen}
+              renderInitial={() => (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -1011,28 +1087,25 @@ export default function CriarRoteiro() {
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Viajantes</div>
                     <Popover open={travelersPopoverOpen} onOpenChange={(open) => {
                       setTravelersPopoverOpen(open);
-                      if (open) setEditTravelers(currentItinerary.travelersCount);
+                      if (open) {
+                        setEditAdults(currentItinerary.adultsCount ?? currentItinerary.travelersCount);
+                        setEditChildren(currentItinerary.childrenCount ?? 0);
+                      }
                     }}>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-between rounded-xl">
                           <span className="inline-flex items-center gap-2">
                             <Users className="h-4 w-4 text-muted-foreground" />
-                            {currentItinerary.travelersCount} viajante(s)
+                            {currentItinerary.adultsCount ?? currentItinerary.travelersCount} adulto(s) · {currentItinerary.childrenCount ?? 0} criança(s)
                           </span>
                           <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-64 p-3" align="start">
-                        <Label className="text-xs text-muted-foreground">Quantidade de viajantes</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={99}
-                          value={editTravelers}
-                          onChange={(e) => setEditTravelers(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="mt-1.5"
-                          autoFocus
-                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-1.5"><Label htmlFor="itinerary-adults" className="text-xs text-muted-foreground">Adultos</Label><Input id="itinerary-adults" type="number" min={1} max={99} value={editAdults} onChange={(e) => setEditAdults(Math.max(1, parseInt(e.target.value) || 1))} autoFocus /></div>
+                          <div className="space-y-1.5"><Label htmlFor="itinerary-children" className="text-xs text-muted-foreground">Crianças</Label><Input id="itinerary-children" type="number" min={0} max={99} value={editChildren} onChange={(e) => setEditChildren(Math.max(0, parseInt(e.target.value) || 0))} /></div>
+                        </div>
                         <div className="flex justify-end gap-2 mt-3">
                           <Button variant="ghost" size="sm" onClick={() => setTravelersPopoverOpen(false)} disabled={savingTravelers}>
                             Cancelar
@@ -1045,9 +1118,9 @@ export default function CriarRoteiro() {
                               try {
                                 await updateItineraryDetails.mutateAsync({
                                   itineraryId: currentItinerary.id,
-                                  updates: { travelers_count: editTravelers },
+                                  updates: { travelers_count: editAdults + editChildren },
                                 });
-                                setCurrentItinerary({ ...currentItinerary, travelersCount: editTravelers });
+                                setCurrentItinerary({ ...currentItinerary, travelersCount: editAdults + editChildren, adultsCount: editAdults, childrenCount: editChildren });
                                 setTravelersPopoverOpen(false);
                                 toast.success("Viajantes atualizado!");
                               } catch {
@@ -1067,90 +1140,23 @@ export default function CriarRoteiro() {
                   {/* Datas */}
                   <div className="sm:col-span-2">
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Datas da viagem</div>
-                    <Popover open={datesPopoverOpen} onOpenChange={(open) => {
-                      setDatesPopoverOpen(open);
-                      if (open) {
-                        setEditStartDate(parseLocalDate(currentItinerary.startDate));
-                        setEditEndDate(parseLocalDate(currentItinerary.endDate));
-                      }
-                    }}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between rounded-xl">
-                          <span className="inline-flex items-center gap-2 truncate">
-                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                            <span className="truncate">
-                              {format(parseLocalDate(currentItinerary.startDate), "dd MMM", { locale: ptBR })} – {format(parseLocalDate(currentItinerary.endDate), "dd MMM yyyy", { locale: ptBR })}
-                              {" • "}
-                              {currentItinerary.days?.length || 0} dias
-                            </span>
-                          </span>
-                          <Pencil className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-3" align="start">
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Ida</Label>
-                            <CalendarPicker
-                              mode="single"
-                              selected={editStartDate}
-                              onSelect={(d) => {
-                                if (!d) return;
-                                setEditStartDate(d);
-                                if (editEndDate && editEndDate < d) setEditEndDate(d);
-                              }}
-                              className="pointer-events-auto"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Volta</Label>
-                            <CalendarPicker
-                              mode="single"
-                              selected={editEndDate}
-                              onSelect={(d) => d && setEditEndDate(d)}
-                              disabled={(d) => !!editStartDate && d < editStartDate}
-                              className="pointer-events-auto"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-xs text-muted-foreground">
-                            {editStartDate && editEndDate
-                              ? `${Math.max(1, Math.round((editEndDate.getTime() - editStartDate.getTime()) / 86400000) + 1)} dias`
-                              : ""}
-                          </span>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => setDatesPopoverOpen(false)} disabled={savingDates}>
-                              Cancelar
-                            </Button>
-                            <Button
-                              size="sm"
-                              disabled={savingDates || !editStartDate || !editEndDate}
-                              onClick={async () => {
-                                if (!editStartDate || !editEndDate) return;
-                                setSavingDates(true);
-                                try {
-                                  await adjustItineraryDates.mutateAsync({
-                                    itineraryId: currentItinerary.id,
-                                    startDate: editStartDate,
-                                    endDate: editEndDate,
-                                  });
-                                  setDatesPopoverOpen(false);
-                                  await loadItinerary(currentItinerary.id);
-                                  toast.success("Datas atualizadas!");
-                                } catch (err: any) {
-                                  toast.error(err?.message || "Não foi possível salvar.");
-                                } finally {
-                                  setSavingDates(false);
-                                }
-                              }}
-                            >
-                              {savingDates ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}
-                            </Button>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <TripPeriodField
+                      id="itinerary-period"
+                      label=""
+                      start={currentItinerary.startDate}
+                      end={currentItinerary.endDate}
+                      triggerClassName="w-full rounded-xl"
+                      onChange={async ({ start, end }) => {
+                        if (!start || !end || savingDates) return;
+                        setSavingDates(true);
+                        try {
+                          await adjustItineraryDates.mutateAsync({ itineraryId: currentItinerary.id, startDate: parseLocalDate(start), endDate: parseLocalDate(end) });
+                          await loadItinerary(currentItinerary.id);
+                          toast.success("Datas atualizadas!");
+                        } catch (err: any) { toast.error(err?.message || "Não foi possível salvar."); }
+                        finally { setSavingDates(false); }
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -1379,91 +1385,48 @@ export default function CriarRoteiro() {
               </CardContent>
             </Card>
 
-            {currentItinerary.days && currentItinerary.days.length > 0 && (
-              <ItineraryEditor
-                itineraryId={currentItinerary.id}
-                days={currentItinerary.days}
-                onUpdateActivity={handleUpdateActivity}
-                onDeleteActivity={handleDeleteActivity}
-                onAddActivity={handleAddActivity}
-                onMoveActivity={handleMoveActivity}
-                onReorderActivities={handleReorderActivities}
-                onReorderDays={async (orderedDayIds) => {
-                  if (!currentItinerary) return;
-                  await reorderDays.mutateAsync({
-                    itineraryId: currentItinerary.id,
-                    orderedDayIds,
-                  });
-                  await loadItinerary(currentItinerary.id);
-                  toast.success("Ordem dos dias atualizada");
-                }}
-                itineraryStartDate={currentItinerary.startDate}
-                itineraryEndDate={currentItinerary.endDate}
-                onAddDay={async (plan) => {
-                  if (!currentItinerary) return;
-                  await mutateItineraryDays.mutateAsync({
-                    itineraryId: currentItinerary.id,
-                    sequence: plan.sequence,
-                    newStartDate: plan.newStartDate,
-                    newEndDate: plan.newEndDate,
-                  });
-                  await loadItinerary(currentItinerary.id);
-                  toast.success("Novo dia adicionado ao roteiro");
-                }}
-                onDeleteDay={async (plan, _mode, day) => {
-                  if (!currentItinerary) return;
-                  await mutateItineraryDays.mutateAsync({
-                    itineraryId: currentItinerary.id,
-                    sequence: plan.sequence,
-                    newStartDate: plan.newStartDate,
-                    newEndDate: plan.newEndDate,
-                  });
-                  await loadItinerary(currentItinerary.id);
-                  toast.success(`Dia ${day.dayNumber} excluído`);
-                }}
-                onApproveAll={handleApproveAll}
-                aiContext={{
-                  destination: currentItinerary.destination,
-                  tripType: currentItinerary.tripType,
-                  budgetLevel: currentItinerary.budgetLevel,
-                  travelersCount: currentItinerary.travelersCount,
-                  travelPace: lastFormData?.travelPace,
-                  interests: lastFormData?.interests,
-                  observations: lastFormData?.additionalPreferences?.serviceContext,
-                }}
-              />
-            )}
-
-            <PricingSectionCard
-              enabled={currentItinerary.showPricingSection === true}
-              content={currentItinerary.pricingContent || ""}
-              onToggle={async (checked) => {
-                const prev = currentItinerary;
-                setCurrentItinerary({ ...prev, showPricingSection: checked });
-                try {
-                  await updateItineraryDetails.mutateAsync({
-                    itineraryId: prev.id,
-                    updates: { show_pricing_section: checked },
-                  });
-                } catch {
-                  setCurrentItinerary(prev);
-                  toast.error("Não foi possível atualizar a seção comercial.");
-                }
-              }}
-              onSave={async (html) => {
-                await updateItineraryDetails.mutateAsync({
-                  itineraryId: currentItinerary.id,
-                  updates: { pricing_content: html || null },
-                });
-                setCurrentItinerary({ ...currentItinerary, pricingContent: html || null });
-              }}
-            />
-
-            <DocumentSignatureCard
-              table="itineraries"
-              docId={currentItinerary.id}
-              initialSnapshot={(currentItinerary as any).signature_snapshot ?? (currentItinerary as any).signatureSnapshot ?? null}
-              onSaved={() => loadItinerary(currentItinerary.id)}
+              )}
+              renderDays={() => (
+                <ItineraryDaysOrganizer
+                  days={currentItinerary.days || []}
+                  startDate={currentItinerary.startDate}
+                  endDate={currentItinerary.endDate}
+                  onReorder={async (orderedDayIds) => {
+                    await reorderDays.mutateAsync({ itineraryId: currentItinerary.id, orderedDayIds });
+                    await loadItinerary(currentItinerary.id);
+                    toast.success("Ordem dos dias atualizada");
+                  }}
+                  onAdd={async (plan) => {
+                    await mutateItineraryDays.mutateAsync({ itineraryId: currentItinerary.id, sequence: plan.sequence, newStartDate: plan.newStartDate, newEndDate: plan.newEndDate });
+                    await loadItinerary(currentItinerary.id);
+                    toast.success("Novo dia adicionado ao roteiro");
+                  }}
+                  onDelete={async (plan, _mode, day) => {
+                    await mutateItineraryDays.mutateAsync({ itineraryId: currentItinerary.id, sequence: plan.sequence, newStartDate: plan.newStartDate, newEndDate: plan.newEndDate });
+                    await loadItinerary(currentItinerary.id);
+                    toast.success(`Dia ${day.dayNumber} excluído`);
+                  }}
+                />
+              )}
+              renderPricing={() => (
+                <PricingSectionCard
+                  enabled={currentItinerary.showPricingSection === true}
+                  content={currentItinerary.pricingContent || ""}
+                  onToggle={async (checked) => {
+                    const prev = currentItinerary;
+                    setCurrentItinerary({ ...prev, showPricingSection: checked });
+                    try { await updateItineraryDetails.mutateAsync({ itineraryId: prev.id, updates: { show_pricing_section: checked } }); }
+                    catch { setCurrentItinerary(prev); toast.error("Não foi possível atualizar a seção comercial."); }
+                  }}
+                  onSave={async (html) => {
+                    await updateItineraryDetails.mutateAsync({ itineraryId: currentItinerary.id, updates: { pricing_content: html || null } });
+                    setCurrentItinerary({ ...currentItinerary, pricingContent: html || null });
+                  }}
+                />
+              )}
+              renderAdvanced={() => (
+                <DocumentSignatureCard table="itineraries" docId={currentItinerary.id} initialSnapshot={(currentItinerary as any).signature_snapshot ?? (currentItinerary as any).signatureSnapshot ?? null} onSaved={() => loadItinerary(currentItinerary.id)} unwrapped inlineSelector hideUseDefaultAction />
+              )}
             />
           </div>
         )}

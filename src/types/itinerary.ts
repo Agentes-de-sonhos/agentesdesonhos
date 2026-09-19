@@ -234,6 +234,9 @@ export interface Itinerary {
   startDate: string;
   endDate: string;
   travelersCount: number;
+  /** Available during creation/editing; legacy rows fall back to all adults. */
+  adultsCount?: number;
+  childrenCount?: number;
   tripType: string;
   budgetLevel: string;
   status: 'draft' | 'generating' | 'review' | 'approved' | 'published';

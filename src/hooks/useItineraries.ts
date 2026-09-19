@@ -17,6 +17,8 @@ export function useItineraries() {
     startDate: data.start_date as string,
     endDate: data.end_date as string,
     travelersCount: data.travelers_count as number,
+    adultsCount: data.travelers_count as number,
+    childrenCount: 0,
     tripType: data.trip_type as string,
     budgetLevel: data.budget_level as string,
     status: data.status as Itinerary["status"],
