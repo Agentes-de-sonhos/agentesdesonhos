@@ -61,6 +61,8 @@ interface Props {
   autoOpen?: boolean;
   /** When true, hides the trigger button (useful when autoOpen is controlling the flow). */
   hideTrigger?: boolean;
+  /** Optional extra classes for the trigger button (to harmonize with sibling actions). */
+  triggerClassName?: string;
   /** Called when the dialog closes (after pick or cancel). */
   onClose?: () => void;
 }
@@ -82,6 +84,7 @@ export function InternetPhotosPicker({
   purpose = "place",
   autoOpen = false,
   hideTrigger = false,
+  triggerClassName,
   onClose,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -163,7 +166,7 @@ export function InternetPhotosPicker({
           type="button"
           variant="outline"
           size="sm"
-          className="gap-2"
+          className={cn("gap-2", triggerClassName)}
           onClick={() => setOpen(true)}
         >
           <Globe2 className="h-3.5 w-3.5" />
