@@ -35,9 +35,9 @@ describe("sugestões de IA em Ingressos/Atrações", () => {
 
   it("produto só popula o nome depois da seleção e então sugere tipos", async () => {
     invoke.mockImplementation((_fn: string, opts: any) => {
-      if (opts.body.mode === "products")
+      if (opts?.body?.mode === "products")
         return Promise.resolve({ data: { products: [{ name: "Universal Orlando Resort", location: "Orlando" }] }, error: null });
-      if (opts.body.mode === "ticket_types")
+      if (opts?.body?.mode === "ticket_types")
         return Promise.resolve({ data: { ticket_types: [{ label: "2 dias / 2 parques" }] }, error: null });
       return Promise.resolve({ data: { text: "Experiência completa nos parques." }, error: null });
     });
@@ -62,9 +62,9 @@ describe("sugestões de IA em Ingressos/Atrações", () => {
 
   it("tipo selecionado gera descrição e não sobrescreve texto existente sem confirmação", async () => {
     invoke.mockImplementation((_fn: string, opts: any) => {
-      if (opts.body.mode === "ticket_types")
+      if (opts?.body?.mode === "ticket_types")
         return Promise.resolve({ data: { ticket_types: [{ label: "Park Hopper" }] }, error: null });
-      if (opts.body.mode === "description")
+      if (opts?.body?.mode === "description")
         return Promise.resolve({ data: { text: "Acesso aos parques no mesmo dia." }, error: null });
       return Promise.resolve({ data: {}, error: null });
     });
@@ -90,7 +90,7 @@ describe("sugestões de IA em Ingressos/Atrações", () => {
 
   it("preenche a descrição direto quando o campo está vazio", async () => {
     invoke.mockImplementation((_fn: string, opts: any) => {
-      if (opts.body.mode === "ticket_types")
+      if (opts?.body?.mode === "ticket_types")
         return Promise.resolve({ data: { ticket_types: [{ label: "Inteira" }] }, error: null });
       return Promise.resolve({ data: { text: "Espetáculo imperdível na Broadway." }, error: null });
     });
@@ -129,7 +129,7 @@ describe("sugestões de IA em Ingressos/Atrações", () => {
 
 describe("cliente de sugestões", () => {
   it("falha da IA mantém o formulário funcional (listas vazias)", async () => {
-    invoke.mockRejectedValue(new Error("timeout"));
+    invoke.mockImplementation(() => Promise.resolve({ data: null, error: { message: "timeout" } }));
     await expect(fetchProductSuggestions("Universal Orlando")).resolves.toEqual([]);
     await expect(fetchTicketTypeSuggestions("Universal Orlando")).resolves.toEqual([]);
     await expect(fetchTicketDescription("Universal Orlando", "Park Hopper")).resolves.toBe("");
