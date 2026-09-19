@@ -73,9 +73,11 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className={"flex w-full min-w-0 flex-wrap items-center gap-2 " + (className || "")}>
-        {/* 1. Campo com o link público */}
-        <div className="flex h-9 min-w-0 flex-1 basis-[220px] items-center gap-1.5 overflow-hidden rounded-md border bg-background pl-2.5">
+      {/* Faixa sem flex-wrap nem crescimento elástico: larguras fixas, da esquerda
+          para a direita; em telas estreitas rola horizontalmente preservando as larguras. */}
+      <div className={"flex w-full items-center gap-2 overflow-x-auto " + (className || "")}>
+        {/* 1. Campo com o link público — largura fixa (~360px), sem flex-grow/basis. */}
+        <div className="flex h-9 w-[360px] shrink-0 items-center gap-1.5 overflow-hidden rounded-md border bg-background pl-2.5">
           <LinkIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span
             title={publicUrl}
