@@ -3461,6 +3461,8 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : serviceType === 'other' ? 'other_service' : 'other'}
       hasSavedService={!!initialData}
       onGalleryPendingChange={isHotel ? setGalleryPending : undefined}
+      photoQuery={serviceType === 'attraction' ? photoQuery : undefined}
+      photoContext={destinationContext}
     />
   );
   const formProps = {
@@ -3468,6 +3470,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
     ...(serviceType === 'hotel' && onSubmitMany ? { onSubmitMany } : {}),
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
+    ...(serviceType === 'attraction' ? { onPhotoQueryChange: setPhotoQuery } : {}),
   };
 
 
