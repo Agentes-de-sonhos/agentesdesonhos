@@ -3065,17 +3065,29 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             : {})}
         />
       )}
-      {!!photoQuery && photoQuery.trim().length >= 2 && canAddMore && (
-        <div data-testid="attraction-photo-suggestions">
-          <InternetPhotosPicker
-            query={photoQuery}
-            destination={photoContext || undefined}
-            existingUrls={imageUrls}
-            onPick={handleGooglePhotosSelected}
-            limit={MAX_ATTRACTION_PHOTOS}
-            purpose="place"
-            triggerLabel="Buscar fotos sugeridas"
-          />
+      {(placeKind === 'attraction' || (!!photoQuery && photoQuery.trim().length >= 2)) && (
+        <div className="flex flex-wrap items-start gap-2">
+          {!!photoQuery && photoQuery.trim().length >= 2 && canAddMore && (
+            <div data-testid="attraction-photo-suggestions">
+              <InternetPhotosPicker
+                query={photoQuery}
+                destination={photoContext || undefined}
+                existingUrls={imageUrls}
+                onPick={handleGooglePhotosSelected}
+                limit={MAX_ATTRACTION_PHOTOS}
+                purpose="place"
+                triggerLabel="Buscar fotos sugeridas"
+              />
+            </div>
+          )}
+          {placeKind === 'attraction' && (
+            <ImageUrlImportField
+              existingUrls={imageUrls}
+              onAdd={(url) => onImageUrlsChange([...imageUrls, url])}
+              disabled={!canAddMore}
+              limitMessage={`Máximo de ${MAX_IMAGES_PER_SERVICE} fotos por serviço.`}
+            />
+          )}
         </div>
       )}
 
