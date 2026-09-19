@@ -15,6 +15,7 @@ import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { PricingSectionCard } from "@/components/itinerary/PricingSectionCard";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
+import { QuoteStepsGuide } from "@/components/quote/QuoteStepsGuide";
 import { ItinerarySettingsModal } from "@/components/itinerary/ItinerarySettingsModal";
 import { ItineraryDaysOrganizer } from "@/components/itinerary/ItineraryDaysOrganizer";
 import { TripPeriodField } from "@/components/shared/TripPeriodField";
@@ -125,6 +126,7 @@ export default function CriarRoteiro() {
   const [routeItineraryLoadFailed, setRouteItineraryLoadFailed] = useState(false);
   const [routeLoadAttempt, setRouteLoadAttempt] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [isApprovingAll, setIsApprovingAll] = useState(false);
 
   const {
     itineraries,
@@ -371,25 +373,29 @@ export default function CriarRoteiro() {
 
   const handleApproveAll = async () => {
     if (!currentItinerary) return;
-
-    for (const day of currentItinerary.days) {
-      for (const activity of day.activities) {
-        if (!activity.isApproved && activity.id) {
-          await updateActivity.mutateAsync({
-            activityId: activity.id,
-            updates: { is_approved: true },
-          });
+    setIsApprovingAll(true);
+    try {
+      for (const day of currentItinerary.days) {
+        for (const activity of day.activities) {
+          if (!activity.isApproved && activity.id) {
+            await updateActivity.mutateAsync({
+              activityId: activity.id,
+              updates: { is_approved: true },
+            });
+          }
         }
       }
+
+      await updateItineraryStatus.mutateAsync({
+        itineraryId: currentItinerary.id,
+        status: "approved",
+      });
+
+      await loadItinerary(currentItinerary.id);
+      toast.success("Roteiro aprovado!");
+    } finally {
+      setIsApprovingAll(false);
     }
-
-    await updateItineraryStatus.mutateAsync({
-      itineraryId: currentItinerary.id,
-      status: "approved",
-    });
-
-    loadItinerary(currentItinerary.id);
-    toast.success("Roteiro aprovado!");
   };
 
   const handleGeneratePDF = async (itineraryId: string) => {
@@ -587,6 +593,13 @@ export default function CriarRoteiro() {
     agencyName: publicAgencyName || agentProfile?.agency_name,
     customDomain,
   }) : null;
+  const isPublished = currentItinerary?.status === "published";
+  const itineraryGuideSteps = [
+    { step: 1, short: "Revisar e editar", hint: "Revise, edite, adicione ou remova atividades.", accentClass: "bg-sky-500" },
+    { step: 2, short: "Aprovar atividades", hint: "Confirme todas as atividades que farão parte do roteiro.", accentClass: "bg-emerald-500" },
+    { step: 3, short: "Configurar roteiro", hint: "Ajuste dados, dias, valores, condições e assinatura.", accentClass: "bg-violet-500" },
+    ...(!isPublished ? [{ step: 4, short: "Publicar roteiro", hint: "Publique para liberar o link, a mensagem, o PDF e o modelo.", accentClass: "bg-rose-500" }] : []),
+  ];
 
   return (
     <DashboardLayout>
@@ -874,28 +887,18 @@ export default function CriarRoteiro() {
           </Tabs>
         ) : (
           <div className="space-y-6">
-            <div className="flex items-center justify-end gap-2">
-                {currentItinerary && !areAllActivitiesApproved(currentItinerary) && (
-                  <Button variant="outline" onClick={() => setApproveAllConfirmOpen(true)}>
-                    <Check className="mr-2 h-4 w-4" />
-                    Aprovar todas as atividades
-                  </Button>
-                )}
-                {!generatedLinkUrl && (
-                  <Button onClick={() => handleActionClick("link")}>
+            <QuoteStepsGuide
+              ariaLabel="Etapas de revisão e publicação do roteiro"
+              steps={itineraryGuideSteps}
+              actions={!isPublished ? (
+                  <Button onClick={() => handleActionClick("link")} disabled={publishReviewOpen || isProcessingAction || updateItineraryStatus.isPending}>
                     <Link2 className="mr-2 h-4 w-4" />
                     Publicar
                   </Button>
-                )}
-                {currentItinerary && (
-                  <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
-                    <Star className="mr-2 h-4 w-4" />
-                    Salvar como modelo
-                  </Button>
-                )}
-              </div>
+              ) : undefined}
+            />
 
-            <PublicShareBar
+            {isPublished && <PublicShareBar
               type="itinerary"
               publicUrl={itineraryPublicUrl}
               message={{
@@ -912,22 +915,32 @@ export default function CriarRoteiro() {
               pdfLabel="Gerar roteiro PDF"
               description="Preparamos uma mensagem com os principais dados deste roteiro e o link de acesso. Você pode copiá-la e enviá-la pelo WhatsApp, e-mail ou pelo canal que preferir."
               className="justify-start"
-            />
+            />}
 
-            <QuoteStepCard
-              step={1}
-              id="itinerary-settings"
-              title="Configurar roteiro"
-              hint="Dados iniciais, organização dos dias, valores e condições e assinatura."
-              accentClass="bg-violet-500"
-              icon={<Sparkles className="h-5 w-5 text-violet-500" />}
-              open={false}
-              direct
-              onToggle={() => setSettingsOpen(true)}
-            />
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="min-w-0 flex-1">
+                <QuoteStepCard
+                  step={3}
+                  hideStep
+                  id="itinerary-settings"
+                  title="Configurar roteiro"
+                  hint="Dados iniciais, organização dos dias, valores e condições e assinatura."
+                  accentClass="bg-violet-500"
+                  icon={<Sparkles className="h-5 w-5 text-violet-500" />}
+                  open={false}
+                  direct
+                  onToggle={() => setSettingsOpen(true)}
+                />
+              </div>
+              {isPublished && (
+                <Button variant="outline" className="shrink-0" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
+                  <Star className="mr-2 h-4 w-4" />
+                  Salvar como modelo
+                </Button>
+              )}
+            </div>
 
-            {currentItinerary.days && currentItinerary.days.length > 0 && (
-              <ItineraryEditor
+            <ItineraryEditor
                 itineraryId={currentItinerary.id}
                 days={currentItinerary.days}
                 onUpdateActivity={handleUpdateActivity}
@@ -969,7 +982,8 @@ export default function CriarRoteiro() {
                   await loadItinerary(currentItinerary.id);
                   toast.success(`Dia ${day.dayNumber} excluído`);
                 }}
-                onApproveAll={handleApproveAll}
+                onApproveAll={() => setApproveAllConfirmOpen(true)}
+                isApprovingAll={isApprovingAll}
                 aiContext={{
                   destination: currentItinerary.destination,
                   tripType: currentItinerary.tripType,
@@ -980,7 +994,6 @@ export default function CriarRoteiro() {
                   observations: lastFormData?.additionalPreferences?.serviceContext,
                 }}
               />
-            )}
 
             <ItinerarySettingsModal
               open={settingsOpen}
@@ -1516,13 +1529,13 @@ export default function CriarRoteiro() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
+              disabled={isApprovingAll}
               onClick={(e) => {
                 e.preventDefault();
-                setApproveAllConfirmOpen(false);
-                handleApproveAll();
+                void handleApproveAll().then(() => setApproveAllConfirmOpen(false));
               }}
             >
-              Confirmar aprovação
+              {isApprovingAll ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Aprovando...</> : "Confirmar aprovação"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

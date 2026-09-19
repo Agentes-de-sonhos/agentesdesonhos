@@ -16,11 +16,12 @@ export interface QuoteStepCardProps {
   onToggle: () => void;
   /** When true the card acts as a single action (opens a modal) instead of an accordion. */
   direct?: boolean;
+  hideStep?: boolean;
   children?: ReactNode;
 }
 
 export function QuoteStepCard({
-  step, id, title, hint, accentClass, icon, badge, open, onToggle, direct = false, children,
+  step, id, title, hint, accentClass, icon, badge, open, onToggle, direct = false, hideStep = false, children,
 }: QuoteStepCardProps) {
   const panelId = `${id}-panel`;
   const showBody = !direct && open;
@@ -35,15 +36,17 @@ export function QuoteStepCard({
         className="w-full flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 text-left rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <div className="flex items-start gap-3 min-w-0">
-          <span
-            className={cn(
-              "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-white",
-              accentClass
-            )}
-            aria-hidden="true"
-          >
-            {step}
-          </span>
+          {!hideStep && (
+            <span
+              className={cn(
+                "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold text-primary-foreground",
+                accentClass
+              )}
+              aria-hidden="true"
+            >
+              {step}
+            </span>
+          )}
           <div className="min-w-0">
             <div className="w-fit">
               <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">

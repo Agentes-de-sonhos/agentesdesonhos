@@ -274,6 +274,7 @@ interface ItineraryEditorProps {
   itineraryStartDate?: string;
   itineraryEndDate?: string;
   onApproveAll: () => void;
+  isApprovingAll?: boolean;
   aiContext?: AIContext;
   /** Day structure controls can be hosted by the itinerary settings modal. */
   showDayManagement?: boolean;
@@ -293,6 +294,7 @@ export function ItineraryEditor({
   itineraryStartDate,
   itineraryEndDate,
   onApproveAll,
+  isApprovingAll = false,
   aiContext,
   showDayManagement = true,
 }: ItineraryEditorProps) {
@@ -489,15 +491,25 @@ export function ItineraryEditor({
       onDragCancel={() => setActiveDragId(null)}
     >
     <div className="min-w-0 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="font-display text-lg font-semibold">
-            Revisar e Editar Roteiro
-          </h3>
+          <div className="w-fit max-w-full">
+            <h3 className="flex items-center gap-2 font-display text-lg font-semibold">
+              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-sky-500 text-xs font-bold text-primary-foreground" aria-hidden="true">1</span>
+              Revisar e editar roteiro
+            </h3>
+            <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
+          </div>
           <p className="text-sm text-muted-foreground">
             Aprove, edite ou remova atividades
           </p>
         </div>
+        {days.length === 0 && !allApproved && (
+          <Button variant="outline" size="sm" onClick={onApproveAll} disabled={isApprovingAll}>
+            {isApprovingAll ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+            Aprovar todas as atividades
+          </Button>
+        )}
         {showDayManagement && <div className="flex flex-wrap items-center gap-2">
           {onReorderDays && days.length > 1 && (
             <Button
@@ -576,7 +588,13 @@ export function ItineraryEditor({
                     {formatItineraryDayHeader(parseLocalDate(day.date))}
                   </CardDescription>
                 </div>
-                <div className="flex flex-wrap items-center gap-1">
+                <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto">
+                  {day.dayNumber === 1 && !allApproved && (
+                    <Button variant="outline" size="sm" onClick={onApproveAll} disabled={isApprovingAll}>
+                      {isApprovingAll ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                      Aprovar todas as atividades
+                    </Button>
+                  )}
                   {showDayManagement && onDeleteDay && days.length > 1 && (
                     <Button
                       variant="ghost"

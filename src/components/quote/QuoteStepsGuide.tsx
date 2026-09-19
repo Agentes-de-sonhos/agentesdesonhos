@@ -13,6 +13,7 @@ export interface QuoteStepMeta {
 interface Props {
   steps: QuoteStepMeta[];
   actions?: ReactNode;
+  ariaLabel?: string;
 }
 
 function ExplanatoryStep({
@@ -58,13 +59,13 @@ function ExplanatoryStep({
   );
 }
 
-export function QuoteStepsGuide({ steps, actions }: Props) {
+export function QuoteStepsGuide({ steps, actions, ariaLabel = "Etapas do orçamento" }: Props) {
   const [openStep, setOpenStep] = useState<number | null>(null);
 
   return (
     <div className="my-1 flex w-full min-w-0 flex-col gap-2 md:flex-row md:items-center">
-      <nav aria-label="Etapas do orçamento" className="min-w-0 flex-1">
-        <ol className="grid min-w-0 grid-cols-2 items-center gap-1 sm:grid-cols-4 xl:gap-2">
+      <nav aria-label={ariaLabel} className="min-w-0 flex-1">
+        <ol className={cn("grid min-w-0 grid-cols-2 items-center gap-1 xl:gap-2", steps.length === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4")}>
           {steps.map((step) => (
             <li key={step.step} className="min-w-0">
               <ExplanatoryStep
