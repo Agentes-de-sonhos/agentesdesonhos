@@ -924,6 +924,78 @@ export default function CriarRoteiro() {
               </Card>
             )}
 
+            <QuoteStepCard
+              step={1}
+              id="itinerary-settings"
+              title="Configurar roteiro"
+              hint="Dados iniciais, organização dos dias, valores e condições e assinatura."
+              accentClass="bg-violet-500"
+              icon={<Sparkles className="h-5 w-5 text-violet-500" />}
+              open={false}
+              direct
+              onToggle={() => setSettingsOpen(true)}
+            />
+
+            {currentItinerary.days && currentItinerary.days.length > 0 && (
+              <ItineraryEditor
+                itineraryId={currentItinerary.id}
+                days={currentItinerary.days}
+                onUpdateActivity={handleUpdateActivity}
+                onDeleteActivity={handleDeleteActivity}
+                onAddActivity={handleAddActivity}
+                onMoveActivity={handleMoveActivity}
+                onReorderActivities={handleReorderActivities}
+                onReorderDays={async (orderedDayIds) => {
+                  if (!currentItinerary) return;
+                  await reorderDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    orderedDayIds,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success("Ordem dos dias atualizada");
+                }}
+                itineraryStartDate={currentItinerary.startDate}
+                itineraryEndDate={currentItinerary.endDate}
+                showDayManagement={false}
+                onAddDay={async (plan) => {
+                  if (!currentItinerary) return;
+                  await mutateItineraryDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    sequence: plan.sequence,
+                    newStartDate: plan.newStartDate,
+                    newEndDate: plan.newEndDate,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success("Novo dia adicionado ao roteiro");
+                }}
+                onDeleteDay={async (plan, _mode, day) => {
+                  if (!currentItinerary) return;
+                  await mutateItineraryDays.mutateAsync({
+                    itineraryId: currentItinerary.id,
+                    sequence: plan.sequence,
+                    newStartDate: plan.newStartDate,
+                    newEndDate: plan.newEndDate,
+                  });
+                  await loadItinerary(currentItinerary.id);
+                  toast.success(`Dia ${day.dayNumber} excluído`);
+                }}
+                onApproveAll={handleApproveAll}
+                aiContext={{
+                  destination: currentItinerary.destination,
+                  tripType: currentItinerary.tripType,
+                  budgetLevel: currentItinerary.budgetLevel,
+                  travelersCount: currentItinerary.travelersCount,
+                  travelPace: lastFormData?.travelPace,
+                  interests: lastFormData?.interests,
+                  observations: lastFormData?.additionalPreferences?.serviceContext,
+                }}
+              />
+            )}
+
+            <ItinerarySettingsModal
+              open={settingsOpen}
+              onOpenChange={setSettingsOpen}
+              renderInitial={() => (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -1016,28 +1088,25 @@ export default function CriarRoteiro() {
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Viajantes</div>
                     <Popover open={travelersPopoverOpen} onOpenChange={(open) => {
                       setTravelersPopoverOpen(open);
-                      if (open) setEditTravelers(currentItinerary.travelersCount);
+                      if (open) {
+                        setEditAdults(currentItinerary.adultsCount ?? currentItinerary.travelersCount);
+                        setEditChildren(currentItinerary.childrenCount ?? 0);
+                      }
                     }}>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-between rounded-xl">
                           <span className="inline-flex items-center gap-2">
                             <Users className="h-4 w-4 text-muted-foreground" />
-                            {currentItinerary.travelersCount} viajante(s)
+                            {currentItinerary.adultsCount ?? currentItinerary.travelersCount} adulto(s) · {currentItinerary.childrenCount ?? 0} criança(s)
                           </span>
                           <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-64 p-3" align="start">
-                        <Label className="text-xs text-muted-foreground">Quantidade de viajantes</Label>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={99}
-                          value={editTravelers}
-                          onChange={(e) => setEditTravelers(Math.max(1, parseInt(e.target.value) || 1))}
-                          className="mt-1.5"
-                          autoFocus
-                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-1.5"><Label htmlFor="itinerary-adults" className="text-xs text-muted-foreground">Adultos</Label><Input id="itinerary-adults" type="number" min={1} max={99} value={editAdults} onChange={(e) => setEditAdults(Math.max(1, parseInt(e.target.value) || 1))} autoFocus /></div>
+                          <div className="space-y-1.5"><Label htmlFor="itinerary-children" className="text-xs text-muted-foreground">Crianças</Label><Input id="itinerary-children" type="number" min={0} max={99} value={editChildren} onChange={(e) => setEditChildren(Math.max(0, parseInt(e.target.value) || 0))} /></div>
+                        </div>
                         <div className="flex justify-end gap-2 mt-3">
                           <Button variant="ghost" size="sm" onClick={() => setTravelersPopoverOpen(false)} disabled={savingTravelers}>
                             Cancelar
@@ -1050,9 +1119,9 @@ export default function CriarRoteiro() {
                               try {
                                 await updateItineraryDetails.mutateAsync({
                                   itineraryId: currentItinerary.id,
-                                  updates: { travelers_count: editTravelers },
+                                  updates: { travelers_count: editAdults + editChildren },
                                 });
-                                setCurrentItinerary({ ...currentItinerary, travelersCount: editTravelers });
+                                setCurrentItinerary({ ...currentItinerary, travelersCount: editAdults + editChildren, adultsCount: editAdults, childrenCount: editChildren });
                                 setTravelersPopoverOpen(false);
                                 toast.success("Viajantes atualizado!");
                               } catch {
@@ -1384,91 +1453,48 @@ export default function CriarRoteiro() {
               </CardContent>
             </Card>
 
-            {currentItinerary.days && currentItinerary.days.length > 0 && (
-              <ItineraryEditor
-                itineraryId={currentItinerary.id}
-                days={currentItinerary.days}
-                onUpdateActivity={handleUpdateActivity}
-                onDeleteActivity={handleDeleteActivity}
-                onAddActivity={handleAddActivity}
-                onMoveActivity={handleMoveActivity}
-                onReorderActivities={handleReorderActivities}
-                onReorderDays={async (orderedDayIds) => {
-                  if (!currentItinerary) return;
-                  await reorderDays.mutateAsync({
-                    itineraryId: currentItinerary.id,
-                    orderedDayIds,
-                  });
-                  await loadItinerary(currentItinerary.id);
-                  toast.success("Ordem dos dias atualizada");
-                }}
-                itineraryStartDate={currentItinerary.startDate}
-                itineraryEndDate={currentItinerary.endDate}
-                onAddDay={async (plan) => {
-                  if (!currentItinerary) return;
-                  await mutateItineraryDays.mutateAsync({
-                    itineraryId: currentItinerary.id,
-                    sequence: plan.sequence,
-                    newStartDate: plan.newStartDate,
-                    newEndDate: plan.newEndDate,
-                  });
-                  await loadItinerary(currentItinerary.id);
-                  toast.success("Novo dia adicionado ao roteiro");
-                }}
-                onDeleteDay={async (plan, _mode, day) => {
-                  if (!currentItinerary) return;
-                  await mutateItineraryDays.mutateAsync({
-                    itineraryId: currentItinerary.id,
-                    sequence: plan.sequence,
-                    newStartDate: plan.newStartDate,
-                    newEndDate: plan.newEndDate,
-                  });
-                  await loadItinerary(currentItinerary.id);
-                  toast.success(`Dia ${day.dayNumber} excluído`);
-                }}
-                onApproveAll={handleApproveAll}
-                aiContext={{
-                  destination: currentItinerary.destination,
-                  tripType: currentItinerary.tripType,
-                  budgetLevel: currentItinerary.budgetLevel,
-                  travelersCount: currentItinerary.travelersCount,
-                  travelPace: lastFormData?.travelPace,
-                  interests: lastFormData?.interests,
-                  observations: lastFormData?.additionalPreferences?.serviceContext,
-                }}
-              />
-            )}
-
-            <PricingSectionCard
-              enabled={currentItinerary.showPricingSection === true}
-              content={currentItinerary.pricingContent || ""}
-              onToggle={async (checked) => {
-                const prev = currentItinerary;
-                setCurrentItinerary({ ...prev, showPricingSection: checked });
-                try {
-                  await updateItineraryDetails.mutateAsync({
-                    itineraryId: prev.id,
-                    updates: { show_pricing_section: checked },
-                  });
-                } catch {
-                  setCurrentItinerary(prev);
-                  toast.error("Não foi possível atualizar a seção comercial.");
-                }
-              }}
-              onSave={async (html) => {
-                await updateItineraryDetails.mutateAsync({
-                  itineraryId: currentItinerary.id,
-                  updates: { pricing_content: html || null },
-                });
-                setCurrentItinerary({ ...currentItinerary, pricingContent: html || null });
-              }}
-            />
-
-            <DocumentSignatureCard
-              table="itineraries"
-              docId={currentItinerary.id}
-              initialSnapshot={(currentItinerary as any).signature_snapshot ?? (currentItinerary as any).signatureSnapshot ?? null}
-              onSaved={() => loadItinerary(currentItinerary.id)}
+              )}
+              renderDays={() => (
+                <ItineraryDaysOrganizer
+                  days={currentItinerary.days || []}
+                  startDate={currentItinerary.startDate}
+                  endDate={currentItinerary.endDate}
+                  onReorder={async (orderedDayIds) => {
+                    await reorderDays.mutateAsync({ itineraryId: currentItinerary.id, orderedDayIds });
+                    await loadItinerary(currentItinerary.id);
+                    toast.success("Ordem dos dias atualizada");
+                  }}
+                  onAdd={async (plan) => {
+                    await mutateItineraryDays.mutateAsync({ itineraryId: currentItinerary.id, sequence: plan.sequence, newStartDate: plan.newStartDate, newEndDate: plan.newEndDate });
+                    await loadItinerary(currentItinerary.id);
+                    toast.success("Novo dia adicionado ao roteiro");
+                  }}
+                  onDelete={async (plan, _mode, day) => {
+                    await mutateItineraryDays.mutateAsync({ itineraryId: currentItinerary.id, sequence: plan.sequence, newStartDate: plan.newStartDate, newEndDate: plan.newEndDate });
+                    await loadItinerary(currentItinerary.id);
+                    toast.success(`Dia ${day.dayNumber} excluído`);
+                  }}
+                />
+              )}
+              renderPricing={() => (
+                <PricingSectionCard
+                  enabled={currentItinerary.showPricingSection === true}
+                  content={currentItinerary.pricingContent || ""}
+                  onToggle={async (checked) => {
+                    const prev = currentItinerary;
+                    setCurrentItinerary({ ...prev, showPricingSection: checked });
+                    try { await updateItineraryDetails.mutateAsync({ itineraryId: prev.id, updates: { show_pricing_section: checked } }); }
+                    catch { setCurrentItinerary(prev); toast.error("Não foi possível atualizar a seção comercial."); }
+                  }}
+                  onSave={async (html) => {
+                    await updateItineraryDetails.mutateAsync({ itineraryId: currentItinerary.id, updates: { pricing_content: html || null } });
+                    setCurrentItinerary({ ...currentItinerary, pricingContent: html || null });
+                  }}
+                />
+              )}
+              renderAdvanced={() => (
+                <DocumentSignatureCard table="itineraries" docId={currentItinerary.id} initialSnapshot={(currentItinerary as any).signature_snapshot ?? (currentItinerary as any).signatureSnapshot ?? null} onSaved={() => loadItinerary(currentItinerary.id)} unwrapped inlineSelector hideUseDefaultAction />
+              )}
             />
           </div>
         )}
