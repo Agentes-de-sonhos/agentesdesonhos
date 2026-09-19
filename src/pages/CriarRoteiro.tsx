@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { buildRoteiroLink } from "@/lib/roteiro-domain";
-import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
-import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
+import { useAgencyPublicLinkContext } from "@/hooks/useAgencyPublicLinkContext";
+import { PublicShareBar } from "@/components/shared/PublicShareBar";
+import { buildProjectPublicUrl } from "@/lib/projectPublicUrl";
 import { copyTextToClipboard } from "@/lib/public-share-message";
 import { useAuth } from "@/hooks/useAuth";
 import { fetchAgentProfile, type AgentProfile } from "@/hooks/useAgentProfile";
@@ -107,7 +108,7 @@ export default function CriarRoteiro() {
   const [editIntroText, setEditIntroText] = useState("");
   const [savingIntro, setSavingIntro] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
-  const { customDomain } = useAgencyCustomDomain();
+  const { agencyName: publicAgencyName, customDomain } = useAgencyPublicLinkContext();
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [lastFormData, setLastFormData] = useState<ItineraryFormData | null>(null);
   const [approvalPromptOpen, setApprovalPromptOpen] = useState(false);
@@ -215,7 +216,7 @@ export default function CriarRoteiro() {
     if (currentItinerary.status !== "published" || !currentItinerary.shareToken) return;
     setGeneratedLinkUrl(buildItineraryUrl(currentItinerary));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentProfile?.agency_name, currentItinerary?.id, currentItinerary?.publicAccessCode, currentItinerary?.shareToken, currentItinerary?.status]);
+  }, [publicAgencyName, agentProfile?.agency_name, customDomain, currentItinerary?.id, currentItinerary?.publicAccessCode, currentItinerary?.shareToken, currentItinerary?.status]);
 
   const loadItinerary = async (itineraryId: string) => {
     try {
@@ -402,7 +403,7 @@ export default function CriarRoteiro() {
 
   const buildItineraryUrl = (itinerary: Itinerary) => {
     const code = itinerary.publicAccessCode;
-    const agencyName = agentProfile?.agency_name;
+    const agencyName = publicAgencyName || agentProfile?.agency_name;
     if (code && agencyName) {
       return buildRoteiroLink(agencyName, code, customDomain);
     }
@@ -439,7 +440,7 @@ export default function CriarRoteiro() {
       .single();
 
     const code = (refreshed as any)?.public_access_code;
-    const agencyName = agentProfile?.agency_name;
+    const agencyName = publicAgencyName || agentProfile?.agency_name;
     const url = code && agencyName
       ? buildRoteiroLink(agencyName, code, customDomain)
       : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
@@ -578,6 +579,14 @@ export default function CriarRoteiro() {
       </DashboardLayout>
     );
   }
+
+  const itineraryPublicUrl = currentItinerary ? buildProjectPublicUrl({
+    kind: "itinerary",
+    status: currentItinerary.status,
+    publicAccessCode: currentItinerary.publicAccessCode,
+    agencyName: publicAgencyName || agentProfile?.agency_name,
+    customDomain,
+  }) : null;
 
   return (
     <DashboardLayout>
@@ -878,10 +887,6 @@ export default function CriarRoteiro() {
                     Publicar
                   </Button>
                 )}
-                <Button variant="outline" onClick={() => handleActionClick("pdf")}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Gerar PDF
-                </Button>
                 {currentItinerary && (
                   <Button variant="outline" onClick={() => setTemplateTargetItinerary(currentItinerary)}>
                     <Star className="mr-2 h-4 w-4" />
@@ -890,38 +895,25 @@ export default function CriarRoteiro() {
                 )}
               </div>
 
-
-            {generatedLinkUrl && (
-              <Card className="border-primary/30 bg-primary/5">
-                <CardContent className="p-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 flex items-center gap-1.5">
-                      <Link2 className="h-3.5 w-3.5 text-primary" />
-                      Link público do roteiro
-                    </div>
-                    <div className="text-sm font-mono break-all text-foreground">
-                      {generatedLinkUrl}
-                    </div>
-                  </div>
-                  <PublicLinkActions
-                    type="itinerary"
-                    publicUrl={generatedLinkUrl}
-                    message={{
-                      clientFirstName: (currentItinerary as any)?.clientName,
-                      destination: currentItinerary?.destination,
-                      startDate: currentItinerary?.startDate,
-                      endDate: currentItinerary?.endDate,
-                      highlights: (currentItinerary?.days || [])
-                        .flatMap((d) => (d.activities || []).map((a) => a.title))
-                        .filter(Boolean),
-                      agencyName: agentProfile?.agency_name,
-                    }}
-                    size="sm"
-                    className="shrink-0"
-                  />
-                </CardContent>
-              </Card>
-            )}
+            <PublicShareBar
+              type="itinerary"
+              publicUrl={itineraryPublicUrl}
+              message={{
+                clientFirstName: currentItinerary.clientName,
+                destination: currentItinerary.destination,
+                startDate: currentItinerary.startDate,
+                endDate: currentItinerary.endDate,
+                highlights: (currentItinerary.days || [])
+                  .flatMap((day) => (day.activities || []).map((activity) => activity.title))
+                  .filter(Boolean),
+                agencyName: publicAgencyName || agentProfile?.agency_name,
+              }}
+              onGeneratePDF={() => handleActionClick("pdf")}
+              pdfLabel="Gerar roteiro PDF"
+              subjectLabel="do roteiro"
+              description="Preparamos uma mensagem com os principais dados deste roteiro e o link de acesso. Você pode copiá-la e enviá-la pelo WhatsApp, e-mail ou pelo canal que preferir."
+              className="justify-start"
+            />
 
             <QuoteStepCard
               step={1}

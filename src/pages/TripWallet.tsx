@@ -1,5 +1,4 @@
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
-import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Plus, FileText, Copy, Download, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, Share2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, UserCircle2, Building2 } from "lucide-react";
+import { ArrowLeft, Plus, FileText, Copy, Download, Loader2, Wallet, Lock, RefreshCw, Eye, EyeOff, Pencil, Archive, Trash2, ShieldAlert, Unlock, Check, X, Upload, Camera, Image as ImageIcon, Map as MapIcon, Plane, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, TramFront, Package, ClipboardSignature, UserCircle2, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Search, Globe2, Sparkles } from "lucide-react";
 import { parseDestinationParts } from "@/lib/destination-parts";
@@ -35,7 +34,7 @@ import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
-import { ShareTripModal } from "@/components/trip/ShareTripModal";
+import { PublicShareBar } from "@/components/shared/PublicShareBar";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
@@ -71,6 +70,7 @@ import { WalletSettingsModal, type WalletSettingsStep } from "@/components/walle
 import { WalletInitialSettings } from "@/components/wallet/WalletInitialSettings";
 import { WalletAccessSettings } from "@/components/wallet/WalletAccessSettings";
 import { useAgencyPublicLinkContext } from "@/hooks/useAgencyPublicLinkContext";
+import { buildProjectPublicUrl } from "@/lib/projectPublicUrl";
 // A edição do período continua centralizada no TripPeriodField, renderizado por WalletInitialSettings.
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
@@ -492,7 +492,6 @@ function TripWalletContent() {
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
   const [showImportPackage, setShowImportPackage] = useState(false);
@@ -760,18 +759,6 @@ function TripWalletContent() {
     } catch {}
   };
 
-  const handleCopyLink = () => {
-    if (!trip) return;
-    const url = trip.slug 
-      ? `${PUBLIC_DOMAIN}/c/${trip.slug}`
-      : trip.share_token 
-        ? `${PUBLIC_DOMAIN}/viagem/${trip.share_token}` 
-        : '';
-    if (!url) return;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Link copiado!", description: "O link da carteira foi copiado." });
-  };
-
   const handleCopyPassword = () => {
     if (!trip?.access_password) return;
     navigator.clipboard.writeText(trip.access_password);
@@ -991,6 +978,14 @@ function TripWalletContent() {
   const startDate = parseLocalDate(trip.start_date);
   const endDate = parseLocalDate(trip.end_date);
   const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  const walletPublicUrl = buildProjectPublicUrl({
+    kind: "trip",
+    status: trip.status,
+    publicAccessCode: trip.public_access_code,
+    agencyName: publicAgencyName || agentProfile?.agency_name,
+    customDomain,
+  });
+  const walletServiceTypes = (trip.services || []).map((service) => service.service_type);
 
   return (
     <DashboardLayout>
@@ -1008,15 +1003,27 @@ function TripWalletContent() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={handleGeneratePDF}>
-              <FileText className="mr-2 h-4 w-4" /> Gerar PDF
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowShareModal(true)}>
-              <Share2 className="mr-2 h-4 w-4" /> Compartilhar link
-            </Button>
-          </div>
         </div>
+
+        <PublicShareBar
+          type="wallet"
+          publicUrl={walletPublicUrl}
+          message={{
+            clientFirstName: trip.client_name,
+            destination: trip.destination,
+            tripName: trip.trip_title || trip.destination,
+            startDate: trip.start_date,
+            endDate: trip.end_date,
+            serviceTypes: walletServiceTypes,
+            agencyName: publicAgencyName || agentProfile?.agency_name,
+            accessPassword: trip.access_password,
+          }}
+          onGeneratePDF={handleGeneratePDF}
+          pdfLabel="Gerar carteira digital PDF"
+          subjectLabel="da carteira digital"
+          description="Preparamos uma mensagem com os principais dados desta carteira digital e o link de acesso. Você pode copiá-la e enviá-la pelo WhatsApp, e-mail ou pelo canal que preferir."
+          className="justify-start"
+        />
 
         <QuoteStepsGuide
           steps={[
@@ -1322,13 +1329,10 @@ function TripWalletContent() {
           onOpenChange={setSettingsOpen}
           initialStep={settingsStep}
           renderInitial={() => <WalletInitialSettings trip={trip} isSaving={isUpdating} onUpdate={(updates) => updateTrip({ id: trip.id, ...updates } as any)} coverPicker={<WalletCoverPicker trip={trip} isSaving={isUpdating} onChange={(url) => updateTrip({ id: trip.id, wallet_cover_url: url } as any)} />} />}
-          renderAccess={() => <WalletAccessSettings trip={trip} agencyName={publicAgencyName || agentProfile?.agency_name} customDomain={customDomain} onCopyPassword={handleCopyPassword} onUpdatePassword={(password) => updatePassword({ id: trip.id, password })} onRegeneratePassword={handleRegeneratePassword} onUnlock={() => unlockTrip(trip.id)} />}
+          renderAccess={() => <WalletAccessSettings trip={trip} onCopyPassword={handleCopyPassword} onUpdatePassword={(password) => updatePassword({ id: trip.id, password })} onRegeneratePassword={handleRegeneratePassword} onUnlock={() => unlockTrip(trip.id)} />}
           renderItinerary={() => trip.itinerary_mode === "legacy" ? <LegacyItinerarySection trip={trip} onRequestAddService={() => { setSettingsOpen(false); openServicesAccordion(); }} /> : <TripItineraryV2 trip={trip} active={settingsOpen} />}
           renderAdvanced={() => <DocumentSignatureCard table="trips" docId={trip.id} initialSnapshot={(trip as any).signature_snapshot ?? null} onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })} unwrapped inlineSelector hideUseDefaultAction />}
         />
-
-        {/* Share Modal */}
-        <ShareTripModal trip={trip} agencyName={publicAgencyName || agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
 
         {/* AI Import Modal */}
         <AIImportServiceModal
