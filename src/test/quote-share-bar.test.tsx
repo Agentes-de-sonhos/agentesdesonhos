@@ -89,14 +89,19 @@ describe("QuoteShareBar — estado com URL pública", () => {
     expect(url.getAttribute("title")).toBe(publicUrl);
   });
 
-  it("campo da URL tem fundo branco, min-w-0, e os botões de copiar/abrir ficam fora do campo, quadrados", () => {
+  it("campo da URL com largura fixa, fundo branco, truncate, e botões quadrados fora do campo", () => {
     renderBar();
     const url = screen.getByText(publicUrl);
     const field = url.parentElement!;
     expect(field.className).toContain("bg-background");
     expect(field.className).not.toContain("bg-muted");
-    expect(field.className).toContain("min-w-0");
+    expect(field.className).toContain("w-[360px]");
+    expect(field.className).toContain("shrink-0");
     expect(field.className).toContain("overflow-hidden");
+    // Sem regras elásticas no campo da URL.
+    expect(field.className).not.toContain("flex-1");
+    expect(field.className).not.toContain("basis-");
+    expect(field.className).not.toContain("flex-grow");
     const copyBtn = screen.getByRole("button", { name: "Copiar link do orçamento" });
     const openBtn = screen.getByRole("button", { name: "Abrir orçamento em nova aba" });
     // O copiar não vive mais dentro do campo: é um botão quadrado irmão.
@@ -105,7 +110,27 @@ describe("QuoteShareBar — estado com URL pública", () => {
     expect(copyBtn.className).toContain("h-9");
     expect(openBtn.className).toContain("w-9");
     expect(openBtn.className).toContain("h-9");
-    expect(field.parentElement?.className).toContain("flex-wrap");
+  });
+
+  it("faixa sem flex-wrap/flex-1, alinhada à esquerda, com rolagem horizontal em telas estreitas", () => {
+    renderBar();
+    const url = screen.getByText(publicUrl);
+    const bar = url.parentElement!.parentElement!;
+    // Ordem preservada: link → copiar → abrir → Criar mensagem → PDF.
+    const copyBtn = screen.getByRole("button", { name: "Copiar link do orçamento" });
+    const msgBtn = screen.getByRole("button", { name: "Criar mensagem" });
+    const pdfBtn = screen.getByRole("button", { name: /Gerar orçamento PDF/i });
+    const following = Node.DOCUMENT_POSITION_FOLLOWING;
+    expect((url.compareDocumentPosition(copyBtn) & following) !== 0).toBe(true);
+    expect((msgBtn.compareDocumentPosition(pdfBtn) & following) !== 0).toBe(true);
+    // Sem distribuição elástica de espaço nem quebra de linha.
+    expect(bar.className).not.toContain("flex-wrap");
+    expect(bar.className).not.toContain("flex-1");
+    expect(bar.className).not.toContain("basis-");
+    expect(bar.className).not.toContain("justify-between");
+    // Rolagem horizontal preserva larguras fixas e a ordem.
+    expect(bar.className).toContain("overflow-x-auto");
+    expect(bar.className).toContain("items-center");
   });
 
   it("Gerar orçamento PDF usa estilo primário azul (não outline)", () => {
