@@ -42,7 +42,7 @@ describe("fluxo visual de revisão e publicação do roteiro", () => {
 
   it("posiciona a aprovação global no Dia 1 com fallback vazio e loading", () => {
     expect(editor).toContain('day.dayNumber === 1 && !allApproved');
-    expect(editor).toContain('days.length === 0 && !allApproved');
+    expect(editor).toContain('days.length === 0 && (');
     expect(editor).toContain('Aprovar todas as atividades');
     expect(editor).toContain('disabled={isApprovingAll}');
     expect(page).toContain('onApproveAll={() => setApproveAllConfirmOpen(true)}');
@@ -53,6 +53,7 @@ describe("fluxo visual de revisão e publicação do roteiro", () => {
     expect(page).toContain('<AlertDialog open={approveAllConfirmOpen}');
     expect(page).toContain('await handlePublish(pendingPublishId)');
     expect(page).toContain('await loadItinerary(pendingPublishId)');
+    expect(page).toContain('indisponibilidade do clipboard não deve');
     expect(page.indexOf('await handlePublish(pendingPublishId)')).toBeLessThan(page.indexOf('await loadItinerary(pendingPublishId)'));
   });
 });

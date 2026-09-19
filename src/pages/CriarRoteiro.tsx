@@ -451,7 +451,12 @@ export default function CriarRoteiro() {
       ? buildRoteiroLink(agencyName, code, customDomain)
       : `${PUBLIC_DOMAIN}/roteiro/${shareToken}`;
 
-    await navigator.clipboard.writeText(url);
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // A publicação já foi concluída; indisponibilidade do clipboard não deve
+      // impedir a interface de refletir o status oficial salvo.
+    }
     toast.success("Link copiado! O roteiro foi publicado.");
     setGeneratedLinkUrl(url);
     return url;

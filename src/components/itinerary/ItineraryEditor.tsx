@@ -504,7 +504,7 @@ export function ItineraryEditor({
             Aprove, edite ou remova atividades
           </p>
         </div>
-        {days.length === 0 && !allApproved && (
+        {days.length === 0 && (
           <Button variant="outline" size="sm" onClick={onApproveAll} disabled={isApprovingAll}>
             {isApprovingAll ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
             Aprovar todas as atividades
