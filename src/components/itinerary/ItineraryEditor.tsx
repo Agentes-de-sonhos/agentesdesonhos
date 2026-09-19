@@ -67,6 +67,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ItineraryDay, Activity } from "@/types/itinerary";
 import { cn } from "@/lib/utils";
 import { useItineraryPeriodImages, type ItineraryPeriod } from "@/hooks/useItineraryPeriodImages";
@@ -97,6 +98,12 @@ const periodLabels = {
   manha: "Manhã",
   tarde: "Tarde",
   noite: "Noite",
+};
+
+const periodAddLabels = {
+  manha: "Adicionar atividade pela manhã",
+  tarde: "Adicionar atividade pela tarde",
+  noite: "Adicionar atividade pela noite",
 };
 
 function DroppablePeriod({
@@ -290,7 +297,11 @@ export function ItineraryEditor({
   showDayManagement = true,
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
-  const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
+  const [addingTarget, setAddingTarget] = useState<{
+    dayId: string;
+    period: Activity["period"];
+  } | null>(null);
+  const [pendingSlots, setPendingSlots] = useState<Set<string>>(() => new Set());
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [reorderOpen, setReorderOpen] = useState(false);
   const [addDayOpen, setAddDayOpen] = useState(false);
@@ -329,6 +340,40 @@ export function ItineraryEditor({
     estimatedCost: "",
   });
 
+  const slotKey = (dayId: string, period: Activity["period"]) => `${dayId}:${period}`;
+
+  const showPendingSlot = (dayId: string, period: Activity["period"]) => {
+    const key = slotKey(dayId, period);
+    setPendingSlots((current) => current.has(key) ? current : new Set(current).add(key));
+  };
+
+  const dismissPendingSlot = (dayId: string, period: Activity["period"]) => {
+    const key = slotKey(dayId, period);
+    setPendingSlots((current) => {
+      if (!current.has(key)) return current;
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+  };
+
+  const openManualActivity = (dayId: string, period: Activity["period"]) => {
+    setNewActivity({
+      period,
+      title: "",
+      description: "",
+      location: "",
+      estimatedDuration: "",
+      estimatedCost: "",
+    });
+    setAddingTarget({ dayId, period });
+  };
+
+  const cancelManualActivity = () => {
+    if (addingTarget) dismissPendingSlot(addingTarget.dayId, addingTarget.period);
+    setAddingTarget(null);
+  };
+
   const handleSaveEdit = () => {
     if (editingActivity && editingActivity.id) {
       const trimmedMaps = (editingActivity.mapsUrl || "").trim();
@@ -352,16 +397,17 @@ export function ItineraryEditor({
   };
 
   const handleAddActivity = () => {
-    if (addingToDayId && newActivity.title && newActivity.period) {
-      onAddActivity(addingToDayId, {
-        period: newActivity.period as Activity["period"],
+    if (addingTarget && newActivity.title) {
+      onAddActivity(addingTarget.dayId, {
+        period: addingTarget.period,
         title: newActivity.title,
         description: newActivity.description || null,
         location: newActivity.location || null,
         estimatedDuration: newActivity.estimatedDuration || null,
         estimatedCost: newActivity.estimatedCost || null,
       });
-      setAddingToDayId(null);
+      dismissPendingSlot(addingTarget.dayId, addingTarget.period);
+      setAddingTarget(null);
       setNewActivity({
         period: "manha",
         title: "",
@@ -531,115 +577,6 @@ export function ItineraryEditor({
                   </CardDescription>
                 </div>
                 <div className="flex flex-wrap items-center gap-1">
-                  <Dialog
-                    open={addingToDayId === day.id}
-                    onOpenChange={(open) => !open && setAddingToDayId(null)}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={() => setAddingToDayId(day.id!)}
-                        title="Adicionar atividade"
-                        aria-label="Adicionar atividade"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto [&>*]:min-w-0">
-                      <DialogHeader>
-                        <DialogTitle>Adicionar Atividade</DialogTitle>
-                        <DialogDescription>
-                          Adicione uma nova atividade ao dia {day.dayNumber}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label>Período</Label>
-                          <Select
-                            value={newActivity.period}
-                            onValueChange={(value) =>
-                              setNewActivity({ ...newActivity, period: value as Activity["period"] })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="manha">Manhã</SelectItem>
-                              <SelectItem value="tarde">Tarde</SelectItem>
-                              <SelectItem value="noite">Noite</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Título</Label>
-                          <Input
-                            value={newActivity.title}
-                            onChange={(e) =>
-                              setNewActivity({ ...newActivity, title: e.target.value })
-                            }
-                            placeholder="Nome da atividade"
-                          />
-                        </div>
-                         <div className="space-y-2">
-                           <Label>Descrição</Label>
-                           <RichContentEditor
-                             content={descriptionToEditorHtml(newActivity.description)}
-                             onChange={(html) =>
-                               setNewActivity({ ...newActivity, description: html })
-                             }
-                             editorClassName="min-h-[260px] [&_.ProseMirror]:min-h-[240px]"
-                           />
-                         </div>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label>Local</Label>
-                            <Input
-                              value={newActivity.location || ""}
-                              onChange={(e) =>
-                                setNewActivity({ ...newActivity, location: e.target.value })
-                              }
-                              placeholder="Nome do local"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Duração</Label>
-                            <Input
-                              value={newActivity.estimatedDuration || ""}
-                              onChange={(e) =>
-                                setNewActivity({
-                                  ...newActivity,
-                                  estimatedDuration: e.target.value,
-                                })
-                              }
-                              placeholder="Ex: 2 horas"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Custo Estimado</Label>
-                          <Input
-                            value={newActivity.estimatedCost || ""}
-                            onChange={(e) =>
-                              setNewActivity({
-                                ...newActivity,
-                                estimatedCost: e.target.value,
-                              })
-                            }
-                            placeholder="Ex: R$ 50 por pessoa"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setAddingToDayId(null)}>
-                          Cancelar
-                        </Button>
-                        <Button onClick={handleAddActivity}>Adicionar</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
                   {showDayManagement && onDeleteDay && days.length > 1 && (
                     <Button
                       variant="ghost"
@@ -669,19 +606,28 @@ export function ItineraryEditor({
                     period={period}
                     isDragActive={!!activeDragId}
                   >
-                    <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                      <Icon className="h-4 w-4" />
-                      {periodLabels[period]}
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <div className="flex min-w-0 items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <Icon className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{periodLabels[period]}</span>
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                            onClick={() => showPendingSlot(day.id!, period)}
+                            aria-label={periodAddLabels[period]}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{periodAddLabels[period]}</TooltipContent>
+                      </Tooltip>
                     </div>
-                    {periodActivities.length === 0 ? (
-                      <EmptyPeriodAISlot
-                        day={day}
-                        period={period}
-                        context={ctx}
-                        memory={memory}
-                        onCreate={(a) => onAddActivity(day.id!, a)}
-                      />
-                    ) : (
+                    {periodActivities.length > 0 && (
                       <SortableContext
                         items={periodActivities.map((a) => `activity-${a.id}`)}
                         strategy={verticalListSortingStrategy}
@@ -1002,6 +948,20 @@ export function ItineraryEditor({
                       ))}
                       </SortableContext>
                     )}
+                    {pendingSlots.has(slotKey(day.id!, period)) && (
+                      <EmptyPeriodAISlot
+                        day={day}
+                        period={period}
+                        context={ctx}
+                        memory={memory}
+                        onCreate={(a) => {
+                          onAddActivity(day.id!, a);
+                          dismissPendingSlot(day.id!, period);
+                        }}
+                        onManualCreate={() => openManualActivity(day.id!, period)}
+                        onDismiss={() => dismissPendingSlot(day.id!, period)}
+                      />
+                    )}
                   </DroppablePeriod>
                 );
               })}
@@ -1009,6 +969,51 @@ export function ItineraryEditor({
           </Card>
         ))}
       </div>
+      <Dialog
+        open={Boolean(addingTarget)}
+        onOpenChange={(open) => { if (!open) cancelManualActivity(); }}
+      >
+        <DialogContent className="w-[calc(100vw-32px)] sm:w-[calc(100vw-48px)] max-w-[900px] max-h-[calc(100vh-32px)] overflow-x-hidden overflow-y-auto [&>*]:min-w-0">
+          <DialogHeader>
+            <DialogTitle>Adicionar Atividade</DialogTitle>
+            <DialogDescription>
+              Adicione uma nova atividade ao dia {days.find((day) => day.id === addingTarget?.dayId)?.dayNumber}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Período</Label>
+              <Select value={addingTarget?.period ?? "manha"} disabled>
+                <SelectTrigger aria-label="Período da atividade">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manha">Manhã</SelectItem>
+                  <SelectItem value="tarde">Tarde</SelectItem>
+                  <SelectItem value="noite">Noite</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Título</Label>
+              <Input value={newActivity.title} onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })} placeholder="Nome da atividade" />
+            </div>
+            <div className="space-y-2">
+              <Label>Descrição</Label>
+              <RichContentEditor content={descriptionToEditorHtml(newActivity.description)} onChange={(html) => setNewActivity({ ...newActivity, description: html })} editorClassName="min-h-[260px] [&_.ProseMirror]:min-h-[240px]" />
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2"><Label>Local</Label><Input value={newActivity.location || ""} onChange={(e) => setNewActivity({ ...newActivity, location: e.target.value })} placeholder="Nome do local" /></div>
+              <div className="space-y-2"><Label>Duração</Label><Input value={newActivity.estimatedDuration || ""} onChange={(e) => setNewActivity({ ...newActivity, estimatedDuration: e.target.value })} placeholder="Ex: 2 horas" /></div>
+            </div>
+            <div className="space-y-2"><Label>Custo Estimado</Label><Input value={newActivity.estimatedCost || ""} onChange={(e) => setNewActivity({ ...newActivity, estimatedCost: e.target.value })} placeholder="Ex: R$ 50 por pessoa" /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={cancelManualActivity}>Cancelar</Button>
+            <Button onClick={handleAddActivity} disabled={!newActivity.title?.trim()}>Adicionar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0, 0, 1)" }}>
       {activeActivity ? <ActivityDragPreview activity={activeActivity} /> : null}
