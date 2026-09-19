@@ -139,7 +139,7 @@ describe("integração no formulário de Ingressos", () => {
     const block = forms.slice(forms.indexOf("placeKind === 'attraction' || (!!photoQuery"), forms.indexOf("MAIN ROUTER"));
     expect(block).toContain("<ImageUrlImportPanel state={urlImport} />");
     expect(block.indexOf("ImageUrlImportTrigger")).toBeLessThan(block.indexOf("ImageUrlImportPanel"));
- expect(block).toContain("</div>\n          {placeKind === 'attraction' && urlImport.open && (");
+    expect(block).toContain("</div>\n          {placeKind === 'attraction' && urlImport.open && (");
   });
 
   it("preserva as ações existentes de upload e fotos sugeridas", () => {
