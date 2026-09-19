@@ -2859,7 +2859,7 @@ export function photoKeys(urls: string[]): string[] {
 
 
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange, photoQuery, photoContext }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void; photoQuery?: string | null; photoContext?: string | null }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
