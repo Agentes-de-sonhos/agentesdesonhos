@@ -13,7 +13,7 @@ describe("AppSidebar — estado recolhido é visualmente neutro", () => {
 
   it("classes de hover são aplicadas apenas quando expandido", () => {
     // itens simples: ramo collapsed sem hover:
-    expect(src).toContain('collapsed ? cn("text-sidebar-foreground", locked && "opacity-60")');
+    expect(src).toMatch(/collapsed\s*\n\s*\? cn\("text-sidebar-foreground", locked && "opacity-60"\)/);
   });
 
   it("expansão é disparada no container e clique recolhido apenas expande", () => {
