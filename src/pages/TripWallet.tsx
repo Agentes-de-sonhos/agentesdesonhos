@@ -65,7 +65,13 @@ import { ptBR } from "date-fns/locale";
 import type { TripServiceType, TripFormData, TripService } from "@/types/trip";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
-import { TripPeriodField } from "@/components/shared/TripPeriodField";
+import { QuoteStepsGuide } from "@/components/quote/QuoteStepsGuide";
+import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
+import { WalletSettingsModal, type WalletSettingsStep } from "@/components/wallet/WalletSettingsModal";
+import { WalletInitialSettings } from "@/components/wallet/WalletInitialSettings";
+import { WalletAccessSettings } from "@/components/wallet/WalletAccessSettings";
+import { useAgencyPublicLinkContext } from "@/hooks/useAgencyPublicLinkContext";
+// A edição do período continua centralizada no TripPeriodField, renderizado por WalletInitialSettings.
 
 const SERVICE_TYPE_LABELS: Record<TripServiceType, string> = {
   flight: "Passagem Aérea", hotel: "Hospedagem", car_rental: "Locação de Veículo",
@@ -486,58 +492,19 @@ function TripWalletContent() {
   const [isUploading, setIsUploading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const [editingPassword, setEditingPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [isEditingTrip, setIsEditingTrip] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAIImport, setShowAIImport] = useState(false);
   const [showImportQuote, setShowImportQuote] = useState(false);
   const [showImportPackage, setShowImportPackage] = useState(false);
   const [showImportQuoteAsNew, setShowImportQuoteAsNew] = useState(false);
-  const [accordionValue, setAccordionValue] = useState<string[]>([]);
+  const [openSections, setOpenSections] = useState({ add: false, services: false });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsStep, setSettingsStep] = useState<WalletSettingsStep>("initial");
+  const { agencyName: publicAgencyName, customDomain } = useAgencyPublicLinkContext();
 
   const openServicesAccordion = () => {
-    setAccordionValue((prev) => (prev.includes("services") ? prev : [...prev, "services"]));
-    setTimeout(() => {
-      document.getElementById("trip-services-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
-  };
-
-  // Inline edit state for the Resumo block
-  const [editingField, setEditingField] = useState<null | "client_name" | "trip_title" | "destination" | "start_date" | "end_date" | "status">(null);
-  const [fieldDraft, setFieldDraft] = useState<string>("");
-  const [periodDraft, setPeriodDraft] = useState<{ start: string; end: string }>({ start: "", end: "" });
-
-  const startEditField = (field: typeof editingField, currentValue: string) => {
-    setEditingField(field);
-    setFieldDraft(currentValue ?? "");
-  };
-
-  const startEditPeriod = (start: string, end: string) => {
-    setPeriodDraft({ start: start || "", end: end || "" });
-    setEditingField("start_date");
-  };
-
-  const savePeriodEdit = async () => {
-    if (!id || !periodDraft.start || !periodDraft.end) return;
-    await updateTrip({ id, start_date: periodDraft.start, end_date: periodDraft.end } as any);
-    setEditingField(null);
-    setPeriodDraft({ start: "", end: "" });
-  };
-
-  const cancelEditField = () => {
-    setEditingField(null);
-    setFieldDraft("");
-  };
-
-  const saveEditField = async () => {
-    if (!id || !editingField) return;
-    const val = fieldDraft.trim();
-    if (editingField !== "status" && editingField !== "trip_title" && !val) return;
-    await updateTrip({ id, [editingField]: editingField === "trip_title" ? (val || null) : val } as any);
-    setEditingField(null);
-    setFieldDraft("");
+    setOpenSections((current) => ({ ...current, services: true }));
+    setTimeout(() => document.getElementById("trip-services-section")?.scrollIntoView({ behavior: "smooth", block: "start" }), 150);
   };
 
   useEffect(() => {
@@ -559,12 +526,6 @@ function TripWalletContent() {
       } catch { /* non-fatal */ }
     }
     navigate(nav.wallet(newTrip.id), { replace: true });
-  };
-
-  const handleUpdateTrip = async (data: { client_name: string; destination: string; start_date: string; end_date: string; status: string }) => {
-    if (!id) return;
-    await updateTrip({ id, ...data });
-    setIsEditingTrip(false);
   };
 
   // Persist a brand-new service. Supplier is asked AFTER the user fills the form.
@@ -817,16 +778,6 @@ function TripWalletContent() {
     toast({ title: "Senha copiada!", description: "A senha foi copiada." });
   };
 
-  const handleUpdatePassword = async () => {
-    if (!id || !newPassword || newPassword.length < 4) {
-      toast({ title: "Senha inválida", description: "A senha deve ter pelo menos 4 caracteres.", variant: "destructive" });
-      return;
-    }
-    await updatePassword({ id, password: newPassword });
-    setEditingPassword(false);
-    setNewPassword("");
-  };
-
   const handleRegeneratePassword = async () => {
     if (!id) return;
     await regeneratePassword(id);
@@ -1067,80 +1018,25 @@ function TripWalletContent() {
           </div>
         </div>
 
-        {/* Edit Trip Form */}
-        {isEditingTrip && (
-          <Card className="max-w-2xl">
-            <CardHeader>
-              <CardTitle>Editar Carteira</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TripEditForm
-                trip={trip}
-                onSubmit={handleUpdateTrip}
-                onCancel={() => setIsEditingTrip(false)}
-                isLoading={isUpdating}
-              />
-            </CardContent>
-          </Card>
-        )}
+        <QuoteStepsGuide
+          steps={[
+            { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e outros itens da viagem.", accentClass: "bg-sky-500" },
+            { step: 2, short: "Organizar serviços", hint: "Revise, edite e ordene os serviços adicionados.", accentClass: "bg-emerald-500" },
+            { step: 3, short: "Configurar carteira", hint: "Defina dados, acesso, roteiro e assinatura.", accentClass: "bg-violet-500" },
+            { step: 4, short: "Publicar", hint: trip.public_access_code || trip.slug || trip.share_token ? "O link público atual está disponível para compartilhamento." : "Use a ação atual de compartilhamento quando a carteira estiver pronta.", accentClass: "bg-rose-500" },
+          ]}
+        />
 
-        {/* Adicionar Serviços — botões sempre visíveis (padrão Orçamentos) */}
-        <Card className="shadow-card">
-          <CardContent className="pt-5 pb-5 space-y-4">
-            <div className="w-fit">
-              <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                <Plus className="h-5 w-5 text-sky-500" />
-                Adicionar Serviços
-              </h2>
-              <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
-            </div>
-            <TripServiceCategoryGrid
-              services={trip.services || []}
-              onSelect={(type) => setSelectedServiceType(type)}
-              onImportQuote={() => setShowImportQuote(true)}
-              onImportPackage={() => setShowImportPackage(true)}
-            />
-          </CardContent>
-        </Card>
+        <div className="space-y-4 sm:space-y-6" data-testid="wallet-editor-sections">
+          <QuoteStepCard step={1} id="wallet-step-add" title="Adicionar serviços" hint="Inclua serviços ou importe um orçamento completo." accentClass="bg-sky-500" icon={<Plus className="h-5 w-5 text-sky-500" />} open={openSections.add} onToggle={() => setOpenSections((current) => ({ ...current, add: !current.add }))}>
+            <TripServiceCategoryGrid services={trip.services || []} onSelect={(type) => setSelectedServiceType(type)} onImportQuote={() => setShowImportQuote(true)} onImportPackage={() => setShowImportPackage(true)} />
+          </QuoteStepCard>
 
-        <Accordion type="multiple" className="grid gap-4 sm:gap-6" value={accordionValue} onValueChange={(v) => setAccordionValue(v as string[])}>
-          {/* 1. Serviços Incluídos — apenas listagem/edição */}
-          <AccordionItem value="services" id="trip-services-section" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
-            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
-              <div className="w-fit">
-                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-emerald-500" />
-                  Serviços Incluídos
-                  {trip.services && trip.services.length > 0 && (
-                    <Badge variant="secondary" className="text-xs ml-1">{trip.services.length}</Badge>
-                  )}
-                </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-emerald-500" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              {(!trip.services || trip.services.length === 0) ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhum serviço adicionado ainda. Use a área acima para adicionar.
-                </p>
-              ) : (
-                <TripServiceList
-                  services={trip.services || []}
-                  onDeleteService={deleteService}
-                  onEditService={handleEditService}
-                  onReplaceVoucher={handleReplaceVoucher}
-                  onRemoveVoucher={removeVoucher}
-                  onAddAttachment={handleAddAttachment}
-                  onRemoveAttachment={handleRemoveAttachment}
-                  onUploadServiceImage={handleUploadServiceImage}
-                  onRemoveServiceImage={handleRemoveServiceImage}
-                  groupByType={false}
-                  onReorder={(orderedIds) => reorderServices(orderedIds)}
-                />
-              )}
-            </AccordionContent>
-          </AccordionItem>
+          <QuoteStepCard step={2} id="trip-services-section" title="Organizar serviços" hint="Edite, exclua e reorganize todos os serviços da carteira." accentClass="bg-emerald-500" icon={<FileText className="h-5 w-5 text-emerald-500" />} badge={trip.services?.length ? <Badge variant="secondary" className="ml-1 text-xs">{trip.services.length}</Badge> : undefined} open={openSections.services} onToggle={() => setOpenSections((current) => ({ ...current, services: !current.services }))}>
+            {trip.services?.length ? <TripServiceList services={trip.services} onDeleteService={deleteService} onEditService={handleEditService} onReplaceVoucher={handleReplaceVoucher} onRemoveVoucher={removeVoucher} onAddAttachment={handleAddAttachment} onRemoveAttachment={handleRemoveAttachment} onUploadServiceImage={handleUploadServiceImage} onRemoveServiceImage={handleRemoveServiceImage} groupByType={false} onReorder={reorderServices} /> : <p className="py-6 text-center text-sm text-muted-foreground">Nenhum serviço adicionado ainda. Use a etapa anterior para adicionar.</p>}
+          </QuoteStepCard>
 
+          <QuoteStepCard step={3} id="wallet-step-settings" title="Configurar carteira digital" hint="Dados principais, acesso do cliente, roteiro e assinatura." accentClass="bg-violet-500" icon={<Wallet className="h-5 w-5 text-violet-500" />} direct open={false} onToggle={() => { setSettingsStep("initial"); setSettingsOpen(true); }} />
           {/* Add Service Dialog */}
           <Dialog open={!!selectedServiceType && !editingService} onOpenChange={(open) => { if (!open) handleCancelServiceForm(); }}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-card">
@@ -1419,346 +1315,20 @@ function TripWalletContent() {
             </AlertDialogContent>
           </AlertDialog>
 
-          {/* 2. Roteiro dia a dia */}
-          <AccordionItem value="itinerary" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
-            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
-              <div className="w-fit">
-                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <MapIcon className="h-5 w-5 text-amber-500" />
-                  Roteiro dia a dia
-                </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-amber-500" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              {trip.itinerary_mode === "v2" ? (
-                <TripItineraryV2 trip={trip} />
-              ) : trip.itinerary_mode === "legacy" ? (
-                <LegacyItinerarySection trip={trip} onRequestAddService={openServicesAccordion} />
-              ) : (
-                <TripItineraryV2 trip={trip} />
-              )}
-            </AccordionContent>
-          </AccordionItem>
+        </div>
 
-          {/* 3. Acesso do Cliente */}
-          <AccordionItem value="access" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
-            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
-              <div className="w-fit">
-                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <Lock className="h-5 w-5 text-violet-500" />
-                  Acesso do Cliente
-                </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-violet-500" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              <div className="space-y-3">
-                {trip.is_locked ? (
-                  <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 space-y-2">
-                    <div className="flex items-start gap-2">
-                      <ShieldAlert className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-                      <div className="text-xs text-destructive space-y-1">
-                        <p className="font-semibold">Acesso bloqueado por segurança</p>
-                        <p className="text-destructive/90">
-                          O cliente errou a senha 3 vezes e o acesso público foi bloqueado automaticamente.
-                          Desbloqueie abaixo (mantendo a senha atual) ou regenere uma nova senha.
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      className="w-full h-8 text-xs"
-                      onClick={async () => {
-                        await unlockTrip(trip.id);
-                      }}
-                    >
-                      <Unlock className="mr-1 h-3 w-3" /> Desbloquear acesso
-                    </Button>
-                  </div>
-                ) : null}
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Senha de acesso</p>
-                  {editingPassword ? (
-                    <div className="flex gap-2">
-                      <Input
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Nova senha"
-                        className="h-8 text-sm"
-                      />
-                      <Button size="sm" variant="outline" className="h-8" onClick={handleUpdatePassword}>Salvar</Button>
-                      <Button size="sm" variant="ghost" className="h-8" onClick={() => { setEditingPassword(false); setNewPassword(""); }}>✕</Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <code className="bg-muted px-2 py-1 rounded text-sm font-mono flex-1">
-                        {showPassword ? trip.access_password : "••••••"}
-                      </code>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPassword(!showPassword)} title={showPassword ? "Ocultar senha" : "Mostrar senha"}>
-                        {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopyPassword} title="Copiar senha">
-                        <Copy className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditingPassword(true)} title="Editar senha">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleRegeneratePassword} title="Regenerar senha">
-                        <RefreshCw className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground mb-1">Compartilhar</p>
-                  <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setShowShareModal(true)}>
-                    <Share2 className="mr-2 h-3 w-3" /> Compartilhar
-                  </Button>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 4. Resumo */}
-          <AccordionItem value="summary" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
-            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
-              <div className="w-fit">
-                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-emerald-500" />
-                  Resumo
-                </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-emerald-500" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              <div className="space-y-2 text-sm">
-                {/* Cliente — editável */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-muted-foreground">Cliente:</span>
-                  {editingField === "client_name" ? (
-                    <>
-                      <div className="flex-1 min-w-[200px]">
-                        <ClientSelector
-                          value={(trip as any).client_id ? { id: (trip as any).client_id, name: trip.client_name } : null}
-                          onChange={async (c) => {
-                            if (!c) return;
-                            await updateTrip({ id: trip.id, client_name: c.name, client_id: c.id } as any);
-                            cancelEditField();
-                          }}
-                          required
-                        />
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Fechar">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-medium">{trip.client_name}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("client_name", trip.client_name)} title="Editar cliente">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-
-                {/* Título da viagem (opcional) */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-muted-foreground">Título:</span>
-                  {editingField === "trip_title" ? (
-                    <>
-                      <Input
-                        value={fieldDraft}
-                        onChange={(e) => setFieldDraft(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
-                        className="h-7 text-sm flex-1 min-w-[200px]"
-                        placeholder="Título da viagem (opcional)"
-                        autoFocus
-                      />
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span
-                        className="font-medium cursor-pointer hover:underline"
-                        onClick={() => startEditField("trip_title", (trip as any).trip_title || "")}
-                      >
-                        {(trip as any).trip_title || <span className="text-muted-foreground italic font-normal">Adicionar título</span>}
-                      </span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("trip_title", (trip as any).trip_title || "")} title="Editar título">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-
-                {/* Foto de capa — escolhida pelo agente, usada na Carteira pública */}
-                <WalletCoverPicker
-                  trip={trip}
-                  isSaving={isUpdating}
-                  onChange={async (url) => {
-                    await updateTrip({ id: trip.id, wallet_cover_url: url } as any);
-                  }}
-                />
-
-                {/* Destino — editável */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-muted-foreground">Destino:</span>
-                  {editingField === "destination" ? (
-                    <>
-                      <Input
-                        value={fieldDraft}
-                        onChange={(e) => setFieldDraft(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") saveEditField(); if (e.key === "Escape") cancelEditField(); }}
-                        className="h-7 text-sm flex-1 min-w-[160px]"
-                        autoFocus
-                      />
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-medium">{trip.destination}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("destination", trip.destination)} title="Editar destino">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-
-                {/* Período — seletor único de intervalo (mesmo par start_date/end_date) */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-muted-foreground">Período:</span>
-                  {editingField === "start_date" ? (
-                    <>
-                      <TripPeriodField
-                        id="trip-wallet-periodo"
-                        label=""
-                        className="w-[260px]"
-                        start={periodDraft.start}
-                        end={periodDraft.end}
-                        onChange={setPeriodDraft}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={savePeriodEdit}
-                        disabled={isUpdating || !periodDraft.start || !periodDraft.end}
-                        title="Salvar"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-medium">
-                        {format(startDate, "dd/MM/yyyy", { locale: ptBR })} a {format(endDate, "dd/MM/yyyy", { locale: ptBR })}
-                      </span>
-                      <span className="text-muted-foreground">({days} dias)</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        onClick={() => startEditPeriod(trip.start_date, trip.end_date)}
-                        title="Editar período da viagem"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-
-                {/* Serviços — somente leitura (calculado) */}
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Serviços:</span>
-                  <span className="font-medium">{trip.services?.length || 0}</span>
-                </div>
-
-                {/* Documentos — somente leitura (calculado) */}
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Documentos:</span>
-                  <span className="font-medium">{trip.services?.filter(s => s.voucher_url).length || 0}</span>
-                </div>
-
-                {/* Status — toggle editável */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-muted-foreground">Status:</span>
-                  {editingField === "status" ? (
-                    <>
-                      <select
-                        value={fieldDraft}
-                        onChange={(e) => setFieldDraft(e.target.value)}
-                        className="h-7 text-sm rounded border border-input bg-background px-2"
-                        autoFocus
-                      >
-                        <option value="active">Ativa</option>
-                        <option value="archived">Arquivada</option>
-                      </select>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={saveEditField} disabled={isUpdating} title="Salvar">
-                        <Check className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={cancelEditField} title="Cancelar">
-                        <X className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <span className="font-medium">{trip.status === "archived" ? "Arquivada" : "Ativa"}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => startEditField("status", trip.status)} title="Editar status">
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* 4.5. Escolha uma Assinatura */}
-          <AccordionItem value="signature" className="border-0 rounded-lg overflow-hidden bg-card shadow-card">
-            <AccordionTrigger className="px-5 sm:px-6 pt-5 pb-4 hover:no-underline">
-              <div className="w-fit">
-                <h2 className="font-display text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
-                  <UserCircle2 className="h-5 w-5 text-sky-500" />
-                  Escolha uma Assinatura
-                </h2>
-                <div className="mt-2 h-1 w-full rounded-full bg-sky-500" />
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 sm:px-6 pb-5 pt-0">
-              <div className="max-w-2xl">
-                <DocumentSignatureCard
-                  table="trips"
-                  docId={trip.id}
-                  initialSnapshot={(trip as any).signature_snapshot ?? null}
-                  onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })}
-                  unwrapped
-                  hideHeader
-                />
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-        </Accordion>
+        <WalletSettingsModal
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          initialStep={settingsStep}
+          renderInitial={() => <WalletInitialSettings trip={trip} isSaving={isUpdating} onUpdate={(updates) => updateTrip({ id: trip.id, ...updates } as any)} coverPicker={<WalletCoverPicker trip={trip} isSaving={isUpdating} onChange={(url) => updateTrip({ id: trip.id, wallet_cover_url: url } as any)} />} />}
+          renderAccess={() => <WalletAccessSettings trip={trip} agencyName={publicAgencyName || agentProfile?.agency_name} customDomain={customDomain} onCopyPassword={handleCopyPassword} onUpdatePassword={(password) => updatePassword({ id: trip.id, password })} onRegeneratePassword={handleRegeneratePassword} onUnlock={() => unlockTrip(trip.id)} />}
+          renderItinerary={() => trip.itinerary_mode === "legacy" ? <LegacyItinerarySection trip={trip} onRequestAddService={() => { setSettingsOpen(false); openServicesAccordion(); }} /> : <TripItineraryV2 trip={trip} active={settingsOpen} />}
+          renderAdvanced={() => <DocumentSignatureCard table="trips" docId={trip.id} initialSnapshot={(trip as any).signature_snapshot ?? null} onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })} unwrapped inlineSelector hideUseDefaultAction />}
+        />
 
         {/* Share Modal */}
-        <ShareTripModal trip={trip} agencyName={agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
+        <ShareTripModal trip={trip} agencyName={publicAgencyName || agentProfile?.agency_name || undefined} open={showShareModal} onOpenChange={setShowShareModal} />
 
         {/* AI Import Modal */}
         <AIImportServiceModal

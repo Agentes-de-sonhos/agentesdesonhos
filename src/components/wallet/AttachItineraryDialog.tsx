@@ -24,7 +24,14 @@ interface Props {
   onAttached?: () => void;
 }
 
-export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: Props) {
+interface ContentProps {
+  trip: Trip;
+  active: boolean;
+  onAttached?: () => void;
+  onDone?: () => void;
+}
+
+export function AttachItineraryContent({ trip, active, onAttached, onDone }: ContentProps) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -41,13 +48,13 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
       if (error) throw error;
       return data ?? [];
     },
-    enabled: !!user && open,
+    enabled: !!user && active,
   });
 
   const finish = (msg: string) => {
     toast({ title: msg });
     onAttached?.();
-    onOpenChange(false);
+    onDone?.();
   };
 
   const handleAttachExisting = async (itineraryId: string) => {
@@ -68,7 +75,7 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
       const newId = await cloneItineraryForTrip(sourceId, trip.id);
       toast({ title: "Cópia criada e vinculada" });
       onAttached?.();
-      onOpenChange(false);
+      onDone?.();
       navigate(`/ferramentas-ia/criar-roteiro/${newId}?fromTrip=${trip.id}`);
     } catch (err: any) {
       toast({ title: "Erro ao copiar", description: err.message, variant: "destructive" });
@@ -89,21 +96,12 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
     const clientId = (trip as any).client_id as string | null | undefined;
     if (clientId) params.set("clientId", clientId);
     if (trip.client_name) params.set("clientName", trip.client_name);
-    onOpenChange(false);
+    onDone?.();
     navigate(`/ferramentas-ia/criar-roteiro?${params.toString()}`);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Vincular roteiro à carteira</DialogTitle>
-          <DialogDescription>
-            Crie um novo roteiro ou escolha um existente. A edição acontece no módulo Criar Roteiros.
-          </DialogDescription>
-        </DialogHeader>
-
-        <Tabs defaultValue="new" className="w-full">
+        <Tabs defaultValue="existing" className="w-full" data-testid="wallet-itinerary-linker">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="new">Criar novo</TabsTrigger>
             <TabsTrigger value="existing">Usar existente</TabsTrigger>
@@ -160,9 +158,19 @@ export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: 
           </TabsContent>
         </Tabs>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button>
-        </DialogFooter>
+  );
+}
+
+export function AttachItineraryDialog({ trip, open, onOpenChange, onAttached }: Props) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Vincular roteiro à carteira</DialogTitle>
+          <DialogDescription>Crie um novo roteiro ou escolha um existente. A edição acontece no módulo Criar Roteiros.</DialogDescription>
+        </DialogHeader>
+        <AttachItineraryContent trip={trip} active={open} onAttached={onAttached} onDone={() => onOpenChange(false)} />
+        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Fechar</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   );
