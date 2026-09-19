@@ -910,7 +910,6 @@ export default function CriarRoteiro() {
               }}
               onGeneratePDF={() => handleActionClick("pdf")}
               pdfLabel="Gerar roteiro PDF"
-              subjectLabel="do roteiro"
               description="Preparamos uma mensagem com os principais dados deste roteiro e o link de acesso. Você pode copiá-la e enviá-la pelo WhatsApp, e-mail ou pelo canal que preferir."
               className="justify-start"
             />

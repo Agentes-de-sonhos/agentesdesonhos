@@ -26,7 +26,6 @@ interface PublicShareBarProps {
   message: Omit<PublicShareMessageInput, "type" | "publicUrl">;
   onGeneratePDF: () => void;
   pdfLabel: string;
-  subjectLabel: string;
   description: string;
   className?: string;
 }
@@ -37,7 +36,6 @@ export function PublicShareBar({
   message,
   onGeneratePDF,
   pdfLabel,
-  subjectLabel,
   description,
   className,
 }: PublicShareBarProps) {
@@ -45,6 +43,11 @@ export function PublicShareBar({
   const [copiedLink, setCopiedLink] = useState(false);
   const [draft, setDraft] = useState("");
   const hasPublicUrl = Boolean(publicUrl);
+  const actionLabels = type === "quote"
+    ? { copy: "Copiar link do orçamento", open: "Abrir orçamento em nova aba" }
+    : type === "wallet"
+      ? { copy: "Copiar link da carteira digital", open: "Abrir carteira digital em nova aba" }
+      : { copy: "Copiar link do roteiro", open: "Abrir roteiro em nova aba" };
 
   const composedMessage = useMemo(
     () => publicUrl ? buildPublicShareMessage({ type, publicUrl, ...message }) : "",
@@ -95,14 +98,14 @@ export function PublicShareBar({
               size="sm"
               variant="outline"
               className="h-9 w-9 shrink-0 p-0"
-              aria-label={`Copiar link ${subjectLabel}`}
+              aria-label={actionLabels.copy}
               disabled={!hasPublicUrl}
               onClick={handleCopyLink}
             >
               {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{`Copiar link ${subjectLabel}`}</TooltipContent>
+          <TooltipContent>{actionLabels.copy}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -112,14 +115,14 @@ export function PublicShareBar({
               size="sm"
               variant="outline"
               className="h-9 w-9 shrink-0 p-0"
-              aria-label={`Abrir ${subjectLabel} em nova aba`}
+              aria-label={actionLabels.open}
               disabled={!hasPublicUrl}
               onClick={() => publicUrl && window.open(publicUrl, "_blank", "noopener,noreferrer")}
             >
               <ExternalLink className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>{`Abrir ${subjectLabel} em nova aba`}</TooltipContent>
+          <TooltipContent>{actionLabels.open}</TooltipContent>
         </Tooltip>
 
         <Button

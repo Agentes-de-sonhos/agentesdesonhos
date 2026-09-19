@@ -1020,7 +1020,6 @@ function TripWalletContent() {
           }}
           onGeneratePDF={handleGeneratePDF}
           pdfLabel="Gerar carteira digital PDF"
-          subjectLabel="da carteira digital"
           description="Preparamos uma mensagem com os principais dados desta carteira digital e o link de acesso. Você pode copiá-la e enviá-la pelo WhatsApp, e-mail ou pelo canal que preferir."
           className="justify-start"
         />

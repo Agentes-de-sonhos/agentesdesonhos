@@ -20,7 +20,6 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
       message={message}
       onGeneratePDF={onGeneratePDF}
       pdfLabel="Gerar orçamento PDF"
-      subjectLabel="do orçamento"
       description="Preparamos uma mensagem com os principais dados deste orçamento e o link de acesso. Você pode copiá-la e enviá-la pelo WhatsApp, e-mail ou pelo canal que preferir."
       className={className}
     />

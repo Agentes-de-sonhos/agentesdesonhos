@@ -28,14 +28,13 @@ describe("PublicShareBar", () => {
         message={{ clientFirstName: "Ana" }}
         onGeneratePDF={onGeneratePDF}
         pdfLabel="Gerar carteira digital PDF"
-        subjectLabel="da carteira digital"
         description="Mensagem da carteira."
       />,
     );
 
     const url = screen.getByText(walletUrl);
     const copy = screen.getByRole("button", { name: "Copiar link da carteira digital" });
-    const open = screen.getByRole("button", { name: "Abrir da carteira digital em nova aba" });
+    const open = screen.getByRole("button", { name: "Abrir carteira digital em nova aba" });
     const message = screen.getByRole("button", { name: "Criar mensagem" });
     const pdf = screen.getByRole("button", { name: "Gerar carteira digital PDF" });
     const following = Node.DOCUMENT_POSITION_FOLLOWING;
@@ -58,7 +57,6 @@ describe("PublicShareBar", () => {
         message={{ accessPassword: "segura" }}
         onGeneratePDF={vi.fn()}
         pdfLabel="Gerar carteira digital PDF"
-        subjectLabel="da carteira digital"
         description="Mensagem da carteira."
       />,
     );
@@ -82,13 +80,12 @@ describe("PublicShareBar", () => {
         message={{ destination: "Recife" }}
         onGeneratePDF={vi.fn()}
         pdfLabel="Gerar roteiro PDF"
-        subjectLabel="do roteiro"
         description="Mensagem do roteiro."
       />,
     );
     expect(screen.getByText("Link público indisponível")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copiar link do roteiro" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Abrir do roteiro em nova aba" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Abrir roteiro em nova aba" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Criar mensagem" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Gerar roteiro PDF" })).not.toBeDisabled();
   });
