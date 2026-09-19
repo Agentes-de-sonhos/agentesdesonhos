@@ -1334,7 +1334,7 @@ export default function GerarOrcamento() {
                 <QuoteShareBar
                   publicUrl={publicUrl}
                   onGeneratePDF={handleGeneratePDF}
-                  className="justify-start sm:pl-[52px]"
+                  className="justify-start"
                   message={{
                     clientFirstName: quote.client_name,
                     destination: quote.destination,
