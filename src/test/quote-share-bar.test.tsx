@@ -31,15 +31,38 @@ const renderBar = () => render(bar());
 beforeEach(() => vi.clearAllMocks());
 
 describe("QuoteShareBar — estado com URL pública", () => {
-  it("mostra Criar mensagem, URL completa, copiar por ícone e PDF, sem Compartilhar/Abrir/Copiar link", () => {
+  it("mostra link, copiar, abrir em nova aba, Criar mensagem e PDF, sem Compartilhar nem 'Copiar link' textual", () => {
     renderBar();
-    expect(screen.getByRole("button", { name: "Criar mensagem" })).toBeTruthy();
     expect(screen.getByText(publicUrl)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Copiar link do orçamento" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Abrir orçamento em nova aba" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Criar mensagem" })).toBeTruthy();
     expect(screen.getByRole("button", { name: /Gerar orçamento PDF/i })).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Compartilhar/i })).toBeNull();
-    expect(screen.queryByRole("button", { name: /^Abrir$/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^Copiar link$/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Abrir$/i })).toBeNull();
+  });
+
+  it("ordena da esquerda para a direita: link, copiar, abrir, Criar mensagem e PDF", () => {
+    renderBar();
+    const url = screen.getByText(publicUrl);
+    const copyBtn = screen.getByRole("button", { name: "Copiar link do orçamento" });
+    const openBtn = screen.getByRole("button", { name: "Abrir orçamento em nova aba" });
+    const msgBtn = screen.getByRole("button", { name: "Criar mensagem" });
+    const pdfBtn = screen.getByRole("button", { name: /Gerar orçamento PDF/i });
+    const following = Node.DOCUMENT_POSITION_FOLLOWING;
+    expect((url.compareDocumentPosition(copyBtn) & following) !== 0).toBe(true);
+    expect((copyBtn.compareDocumentPosition(openBtn) & following) !== 0).toBe(true);
+    expect((openBtn.compareDocumentPosition(msgBtn) & following) !== 0).toBe(true);
+    expect((msgBtn.compareDocumentPosition(pdfBtn) & following) !== 0).toBe(true);
+  });
+
+  it("abre o orçamento público em nova aba com proteção noopener/noreferrer", () => {
+    const openSpy = vi.spyOn(window, "open").mockReturnValue(null);
+    renderBar();
+    fireEvent.click(screen.getByRole("button", { name: "Abrir orçamento em nova aba" }));
+    expect(openSpy).toHaveBeenCalledWith(publicUrl, "_blank", "noopener,noreferrer");
+    openSpy.mockRestore();
   });
 
   it("copia o link e exibe o toast 'Link copiado!'", async () => {
@@ -66,7 +89,7 @@ describe("QuoteShareBar — estado com URL pública", () => {
     expect(url.getAttribute("title")).toBe(publicUrl);
   });
 
-  it("campo da URL tem fundo branco, min-w-0 e contém o botão de copiar (sem botão externo)", () => {
+  it("campo da URL tem fundo branco, min-w-0, e os botões de copiar/abrir ficam fora do campo, quadrados", () => {
     renderBar();
     const url = screen.getByText(publicUrl);
     const field = url.parentElement!;
@@ -75,8 +98,13 @@ describe("QuoteShareBar — estado com URL pública", () => {
     expect(field.className).toContain("min-w-0");
     expect(field.className).toContain("overflow-hidden");
     const copyBtn = screen.getByRole("button", { name: "Copiar link do orçamento" });
-    expect(field.contains(copyBtn)).toBe(true);
-    expect(copyBtn.className).toContain("border-l");
+    const openBtn = screen.getByRole("button", { name: "Abrir orçamento em nova aba" });
+    // O copiar não vive mais dentro do campo: é um botão quadrado irmão.
+    expect(field.contains(copyBtn)).toBe(false);
+    expect(copyBtn.className).toContain("w-9");
+    expect(copyBtn.className).toContain("h-9");
+    expect(openBtn.className).toContain("w-9");
+    expect(openBtn.className).toContain("h-9");
     expect(field.parentElement?.className).toContain("flex-wrap");
   });
 
@@ -158,9 +186,10 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
     expect(page.slice(0, barIndex)).toContain("{quote.share_token && (");
   });
 
-  it("posiciona as ações de geração na mesma linha responsiva do stepper", () => {
+  it("faixa de ações alinhada à mesma margem esquerda do título e dos cards (sem recuo)", () => {
     const barIndex = page.indexOf("<QuoteShareBar");
-    expect(page.slice(barIndex, barIndex + 400)).toContain('className="justify-start sm:pl-[52px]"');
+    expect(page).not.toContain("sm:pl-[52px]");
+    expect(page.slice(barIndex, barIndex + 400)).toContain('className="justify-start"');
     expect(page).toContain("<QuoteStepsGuide");
     expect(page).toContain("actions={!quote.share_token ? (");
     expect(guide).toContain("md:flex-row md:items-center");
