@@ -220,7 +220,9 @@ export default function CriarRoteiro() {
   const loadItinerary = async (itineraryId: string) => {
     try {
       const data = await getItineraryWithDetails(itineraryId);
-      setCurrentItinerary(data);
+      setCurrentItinerary((current) => current?.id === data.id
+        ? { ...data, adultsCount: current.adultsCount, childrenCount: current.childrenCount }
+        : data);
       setActiveTab("create");
       if (data.status === "published" && data.shareToken) {
         setGeneratedLinkUrl(buildItineraryUrl(data));
