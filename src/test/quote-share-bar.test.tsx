@@ -235,7 +235,7 @@ describe("Cabeçalho e bloco de orientações do orçamento", () => {
   it("Criar mensagem reutiliza o verde do botão de suporte (#25D366)", () => {
     const supportBtn = readFileSync("src/components/layout/WhatsAppSupportButton.tsx", "utf8");
     expect(supportBtn).toContain("#25D366");
-    const shareBar = readFileSync("src/components/quote/QuoteShareBar.tsx", "utf8");
+    const shareBar = readFileSync("src/components/shared/PublicShareBar.tsx", "utf8");
     expect(shareBar).toContain("bg-[#25D366]");
     // campo da URL com fundo branco e borda neutra
     expect(shareBar).toContain("border bg-background");

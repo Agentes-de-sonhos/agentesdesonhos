@@ -6,6 +6,7 @@ const modal = readFileSync("src/components/wallet/WalletSettingsModal.tsx", "utf
 const initial = readFileSync("src/components/wallet/WalletInitialSettings.tsx", "utf8");
 const access = readFileSync("src/components/wallet/WalletAccessSettings.tsx", "utf8");
 const itinerary = readFileSync("src/components/wallet/TripItineraryV2.tsx", "utf8");
+const shareBar = readFileSync("src/components/shared/PublicShareBar.tsx", "utf8");
 
 describe("editor compacto da Carteira Digital", () => {
   it("abre carteiras existentes com os blocos recolhidos e somente três blocos principais", () => {
@@ -48,11 +49,18 @@ describe("modal de configurações da Carteira Digital", () => {
     expect(initial).not.toContain("wallet_cover_url");
   });
 
-  it("expõe acesso e compartilhamento diretamente sem ShareTripModal", () => {
-    expect(access).toContain("PublicLinkActions");
-    expect(access).toContain("buildCarteiraLink");
+  it("concentra compartilhamento na faixa superior e mantém somente a senha no passo Acesso", () => {
+    expect(wallet).toContain("<PublicShareBar");
+    expect(wallet).toContain('type="wallet"');
+    expect(wallet).toContain('pdfLabel="Gerar carteira digital PDF"');
+    expect(wallet).toContain("buildProjectPublicUrl");
+    expect(wallet).not.toContain("<ShareTripModal");
+    expect(wallet).not.toContain("Compartilhar link");
+    expect(access).not.toContain("PublicLinkActions");
     expect(access).not.toContain("ShareTripModal");
     expect(access).toContain("onRegeneratePassword");
+    expect(shareBar).toContain("Link público indisponível");
+    expect(shareBar).toContain("disabled={!hasPublicUrl}");
   });
 
   it("mostra a seleção de roteiro diretamente quando não há vínculo", () => {
