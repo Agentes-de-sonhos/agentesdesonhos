@@ -180,6 +180,9 @@ export interface ItineraryFormData {
   startDate: Date;
   endDate: Date;
   travelersCount: number;
+  /** Creation-session composition; legacy rows persist only travelersCount. */
+  adultsCount?: number;
+  childrenCount?: number;
   adultsCount?: number;
   childrenCount?: number;
   tripType: TripProfile;

@@ -13,6 +13,9 @@ import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
 import { ItineraryEditor } from "@/components/itinerary/ItineraryEditor";
 import { PricingSectionCard } from "@/components/itinerary/PricingSectionCard";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
+import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
+import { ItinerarySettingsModal } from "@/components/itinerary/ItinerarySettingsModal";
+import { ItineraryDaysOrganizer } from "@/components/itinerary/ItineraryDaysOrganizer";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { BrandCloudLoader } from "@/components/shared/BrandCloudLoader";
@@ -120,6 +123,7 @@ export default function CriarRoteiro() {
   const [isRouteItineraryLoading, setIsRouteItineraryLoading] = useState(Boolean(id));
   const [routeItineraryLoadFailed, setRouteItineraryLoadFailed] = useState(false);
   const [routeLoadAttempt, setRouteLoadAttempt] = useState(0);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const {
     itineraries,
@@ -145,7 +149,8 @@ export default function CriarRoteiro() {
   const [isEditingDestination, setIsEditingDestination] = useState(false);
   const [editDestination, setEditDestination] = useState("");
   const [travelersPopoverOpen, setTravelersPopoverOpen] = useState(false);
-  const [editTravelers, setEditTravelers] = useState(1);
+  const [editAdults, setEditAdults] = useState(1);
+  const [editChildren, setEditChildren] = useState(0);
   const [savingTravelers, setSavingTravelers] = useState(false);
   const [datesPopoverOpen, setDatesPopoverOpen] = useState(false);
   const [editStartDate, setEditStartDate] = useState<Date | undefined>(undefined);
@@ -244,7 +249,7 @@ export default function CriarRoteiro() {
 
       // Load complete itinerary
       const completeItinerary = await getItineraryWithDetails(itinerary.id);
-      setCurrentItinerary(completeItinerary);
+      setCurrentItinerary({ ...completeItinerary, adultsCount: data.adultsCount ?? data.travelersCount, childrenCount: data.childrenCount ?? 0 });
 
       // Only increment usage AFTER successful creation
       await incrementUsage();

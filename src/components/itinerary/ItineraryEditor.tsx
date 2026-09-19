@@ -268,6 +268,8 @@ interface ItineraryEditorProps {
   itineraryEndDate?: string;
   onApproveAll: () => void;
   aiContext?: AIContext;
+  /** Day structure controls can be hosted by the itinerary settings modal. */
+  showDayManagement?: boolean;
 }
 
 export function ItineraryEditor({
@@ -285,6 +287,7 @@ export function ItineraryEditor({
   itineraryEndDate,
   onApproveAll,
   aiContext,
+  showDayManagement = true,
 }: ItineraryEditorProps) {
   const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
   const [addingToDayId, setAddingToDayId] = useState<string | null>(null);
@@ -449,7 +452,7 @@ export function ItineraryEditor({
             Aprove, edite ou remova atividades
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        {showDayManagement && <div className="flex flex-wrap items-center gap-2">
           {onReorderDays && days.length > 1 && (
             <Button
               variant="outline"
@@ -470,10 +473,10 @@ export function ItineraryEditor({
               Adicionar dia
             </Button>
           )}
-        </div>
+        </div>}
       </div>
 
-      {onReorderDays && (
+      {showDayManagement && onReorderDays && (
         <DayReorderDialog
           open={reorderOpen}
           onOpenChange={setReorderOpen}
@@ -484,7 +487,7 @@ export function ItineraryEditor({
         />
       )}
 
-      {onAddDay && itineraryStartDate && (
+      {showDayManagement && onAddDay && itineraryStartDate && (
         <AddDayDialog
           open={addDayOpen}
           onOpenChange={setAddDayOpen}
@@ -496,7 +499,7 @@ export function ItineraryEditor({
         />
       )}
 
-      {onDeleteDay && itineraryStartDate && itineraryEndDate && (
+      {showDayManagement && onDeleteDay && itineraryStartDate && itineraryEndDate && (
         <DeleteDayDialog
           open={!!dayPendingDelete}
           onOpenChange={(o) => {
@@ -637,7 +640,7 @@ export function ItineraryEditor({
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                  {onDeleteDay && days.length > 1 && (
+                  {showDayManagement && onDeleteDay && days.length > 1 && (
                     <Button
                       variant="ghost"
                       size="icon"
