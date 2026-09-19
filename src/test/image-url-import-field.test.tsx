@@ -116,7 +116,6 @@ describe("integração no formulário de Ingressos", () => {
     expect(forms).toContain("<ImageUrlImportTrigger");
     expect(forms).toContain("<ImageUrlImportPanel");
     expect(forms).toContain("disabled={!canAddMore}");
-onst
   });
 
   it("botões harmonizados na mesma linha de ações", () => {
