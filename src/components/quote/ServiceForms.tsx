@@ -3065,6 +3065,20 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             : {})}
         />
       )}
+      {!!photoQuery && photoQuery.trim().length >= 2 && canAddMore && (
+        <div data-testid="attraction-photo-suggestions">
+          <InternetPhotosPicker
+            query={photoQuery}
+            destination={photoContext || undefined}
+            existingUrls={imageUrls}
+            onPick={handleGooglePhotosSelected}
+            limit={MAX_ATTRACTION_PHOTOS}
+            purpose="place"
+            triggerLabel="Buscar fotos sugeridas"
+          />
+        </div>
+      )}
+
 
     </div>
   );
