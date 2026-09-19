@@ -128,6 +128,7 @@ export function useImageUrlImport({ existingUrls, onAdd, disabled, limitMessage 
     value,
     loading,
     error,
+    disabled,
     handleAdd,
     handleKeyDown,
     handleValueChange,
@@ -168,6 +169,7 @@ export function ImageUrlImportPanel({ state }: { state: ImageUrlImportState }) {
     value,
     loading,
     error,
+    disabled,
     handleAdd,
     handleKeyDown,
     handleValueChange,
@@ -199,7 +201,7 @@ export function ImageUrlImportPanel({ state }: { state: ImageUrlImportState }) {
           size="sm"
           className="h-8 gap-1.5 text-xs"
           onClick={handleAdd}
-          disabled={loading || state.disabledHint === true}
+          disabled={loading || disabled}
           aria-label="Adicionar foto do link"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
