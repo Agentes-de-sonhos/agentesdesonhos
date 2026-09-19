@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Check, Copy, FileText, Link as LinkIcon, MessageCircle } from "lucide-react";
+import { Check, Copy, ExternalLink, FileText, Link as LinkIcon, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,8 +27,8 @@ interface QuoteShareBarProps {
 }
 
 /**
- * Linha única de ações do orçamento publicado:
- * "Criar mensagem" | URL pública completa | copiar (ícone) | "Gerar orçamento PDF".
+ * Faixa de ações do orçamento publicado, da esquerda para a direita:
+ * link público | copiar (ícone) | abrir em nova aba (ícone) | "Criar mensagem" | "Gerar orçamento PDF".
  */
 export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: QuoteShareBarProps) {
   const [open, setOpen] = useState(false);
@@ -67,9 +67,59 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
     }
   };
 
+  const handleOpenPublicUrl = () => {
+    window.open(publicUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <TooltipProvider delayDuration={150}>
       <div className={"flex w-full min-w-0 flex-wrap items-center gap-2 " + (className || "")}>
+        {/* 1. Campo com o link público */}
+        <div className="flex h-9 min-w-0 flex-1 basis-[220px] items-center gap-1.5 overflow-hidden rounded-md border bg-background pl-2.5">
+          <LinkIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span
+            title={publicUrl}
+            className="min-w-0 flex-1 truncate whitespace-nowrap text-xs leading-4 text-muted-foreground"
+          >
+            {publicUrl}
+          </span>
+        </div>
+
+        {/* 2. Copiar link (botão quadrado compacto) */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-9 w-9 shrink-0 p-0"
+              aria-label="Copiar link do orçamento"
+              onClick={handleCopyLink}
+            >
+              {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Copiar link do orçamento</TooltipContent>
+        </Tooltip>
+
+        {/* 3. Abrir orçamento em nova aba (botão quadrado compacto) */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="h-9 w-9 shrink-0 p-0"
+              aria-label="Abrir orçamento em nova aba"
+              onClick={handleOpenPublicUrl}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Abrir orçamento em nova aba</TooltipContent>
+        </Tooltip>
+
+        {/* 4. Criar mensagem */}
         <Button
           size="sm"
           onClick={handleOpenDialog}
@@ -79,29 +129,7 @@ export function QuoteShareBar({ publicUrl, message, onGeneratePDF, className }: 
           Criar mensagem
         </Button>
 
-        <div className="flex h-9 min-w-0 flex-1 basis-[240px] items-center gap-1.5 overflow-hidden rounded-md border bg-background pl-2 sm:max-w-md">
-          <LinkIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <span
-            title={publicUrl}
-            className="min-w-0 flex-1 truncate whitespace-nowrap text-xs leading-4 text-muted-foreground"
-          >
-            {publicUrl}
-          </span>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="flex h-9 w-9 shrink-0 items-center justify-center border-l text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                aria-label="Copiar link do orçamento"
-                onClick={handleCopyLink}
-              >
-                {copiedLink ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>Copiar link do orçamento</TooltipContent>
-          </Tooltip>
-        </div>
-
+        {/* 5. Gerar orçamento PDF */}
         <Button size="sm" className="shrink-0" onClick={onGeneratePDF}>
           <FileText className="mr-1.5 h-4 w-4" />
           Gerar orçamento PDF
