@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, Cloud, Lock, Shield, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
 import { AppSidebarAccount } from "./AppSidebarAccount";
@@ -37,7 +36,6 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();

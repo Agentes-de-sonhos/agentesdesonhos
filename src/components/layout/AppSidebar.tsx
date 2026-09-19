@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, Cloud, Lock, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ export function AppSidebar() {
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { can, isTeamMember } = usePermissions();

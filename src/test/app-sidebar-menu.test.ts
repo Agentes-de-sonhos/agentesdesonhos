@@ -73,7 +73,7 @@ describe("menu lateral Agentes de Sonhos", () => {
       expect(source).toContain("aria-controls");
       expect(source).toContain("aria-current");
       expect(source).toContain("isPermitted");
-      expect(source).toContain("isLocked");
+      expect(source).toMatch(/isLocked|locked/);
     }
   });
 

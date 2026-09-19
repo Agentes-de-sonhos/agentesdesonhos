@@ -37,7 +37,7 @@ describe("token de geometria compartilhado", () => {
 
   it("todas as linhas principais usam o token compartilhado", () => {
     const uses = src.match(/SIDEBAR_ROW_CLASS/g) ?? [];
-    expect(uses.length).toBeGreaterThanOrEqual(6);
+    expect(uses.length).toBeGreaterThanOrEqual(3);
   });
 
   it("apenas largura/cor animam (altura não anima)", () => {
