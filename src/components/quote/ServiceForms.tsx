@@ -1725,6 +1725,17 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
             <FormItem><FormLabel>Tipo de Ingresso <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Input placeholder="2day-2park, Park Hopper..." {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
+
+        <AttractionAISuggestions
+          productName={form.watch("product_name") || ""}
+          ticketType={form.watch("ticket_type") || ""}
+          destination={destinationContext || null}
+          currentDescription={form.watch("service_description") || ""}
+          onProductSelect={(name) => form.setValue("product_name", name)}
+          onTicketTypeSelect={(label) => form.setValue("ticket_type", label)}
+          onDescriptionSuggest={(text) => form.setValue("service_description", text)}
+          onConfirmedProductChange={(name) => onPhotoQueryChange?.(name)}
+        />
         <FormField control={form.control} name="date" render={({ field }) => (
           <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
             <Popover><PopoverTrigger asChild><FormControl>
@@ -1794,12 +1805,13 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
           </div>
         )}
 
+        {renderPaymentSlot(paymentSlot, totalAmount)}
+
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><TextareaWithTemplate placeholder="Observações sobre o ingresso..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
         {photoSlot}
-        {renderPaymentSlot(paymentSlot, totalAmount)}
         {(compositionError || paxOutOfSync || compositionPending) && (
           <p className="text-xs text-destructive">
             {compositionError ||
