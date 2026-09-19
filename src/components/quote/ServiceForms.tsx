@@ -10,6 +10,9 @@ import { CalendarIcon, Plus, ImageIcon, X, Loader2, Pencil, ChevronDown, Chevron
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
+import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
+import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggestions";
+import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
 import {
@@ -1630,7 +1633,7 @@ const attractionSchema = z.object({
   notes: z.string().optional(),
 });
 
-function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, onPlaceIdChange, destinationContext, onPhotoQueryChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void; onPhotoQueryChange?: (query: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
 
@@ -1725,6 +1728,17 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
             <FormItem><FormLabel>Tipo de Ingresso <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><Input placeholder="2day-2park, Park Hopper..." {...field} /></FormControl><FormMessage /></FormItem>
           )} />
         </div>
+
+        <AttractionAISuggestions
+          productName={form.watch("product_name") || ""}
+          ticketType={form.watch("ticket_type") || ""}
+          destination={destinationContext || null}
+          currentDescription={form.watch("service_description") || ""}
+          onProductSelect={(name) => form.setValue("product_name", name)}
+          onTicketTypeSelect={(label) => form.setValue("ticket_type", label)}
+          onDescriptionSuggest={(text) => form.setValue("service_description", text)}
+          onConfirmedProductChange={(name) => onPhotoQueryChange?.(name)}
+        />
         <FormField control={form.control} name="date" render={({ field }) => (
           <FormItem className="flex flex-col"><FormLabel>Data</FormLabel>
             <Popover><PopoverTrigger asChild><FormControl>
@@ -1794,12 +1808,13 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
           </div>
         )}
 
+        {renderPaymentSlot(paymentSlot, totalAmount)}
+
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel><FormControl><TextareaWithTemplate placeholder="Observações sobre o ingresso..." className="min-h-[80px]" onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
 
         {photoSlot}
-        {renderPaymentSlot(paymentSlot, totalAmount)}
         {(compositionError || paxOutOfSync || compositionPending) && (
           <p className="text-xs text-destructive">
             {compositionError ||
@@ -2844,7 +2859,7 @@ export function photoKeys(urls: string[]): string[] {
 
 
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange, photoQuery, photoContext }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void; photoQuery?: string | null; photoContext?: string | null }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -3050,6 +3065,20 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             : {})}
         />
       )}
+      {!!photoQuery && photoQuery.trim().length >= 2 && canAddMore && (
+        <div data-testid="attraction-photo-suggestions">
+          <InternetPhotosPicker
+            query={photoQuery}
+            destination={photoContext || undefined}
+            existingUrls={imageUrls}
+            onPick={handleGooglePhotosSelected}
+            limit={MAX_ATTRACTION_PHOTOS}
+            purpose="place"
+            triggerLabel="Buscar fotos sugeridas"
+          />
+        </div>
+      )}
+
 
     </div>
   );
@@ -3402,6 +3431,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [placeId, setPlaceId] = useState<string | null>(null);
+  const [photoQuery, setPhotoQuery] = useState<string | null>(null);
   const [galleryPending, setGalleryPending] = useState(false);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
@@ -3431,6 +3461,8 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : serviceType === 'other' ? 'other_service' : 'other'}
       hasSavedService={!!initialData}
       onGalleryPendingChange={isHotel ? setGalleryPending : undefined}
+      photoQuery={serviceType === 'attraction' ? photoQuery : undefined}
+      photoContext={destinationContext}
     />
   );
   const formProps = {
@@ -3438,6 +3470,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
     ...(serviceType === 'hotel' && onSubmitMany ? { onSubmitMany } : {}),
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
+    ...(serviceType === 'attraction' ? { onPhotoQueryChange: setPhotoQuery } : {}),
   };
 
 
