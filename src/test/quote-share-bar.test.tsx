@@ -115,7 +115,7 @@ describe("QuoteShareBar — estado com URL pública", () => {
   it("faixa sem flex-wrap/flex-1, alinhada à esquerda, com rolagem horizontal em telas estreitas", () => {
     renderBar();
     const url = screen.getByText(publicUrl);
-    const bar = field.parentElement!;
+    const bar = url.parentElement!.parentElement!;
     // Ordem preservada: link → copiar → abrir → Criar mensagem → PDF.
     const copyBtn = screen.getByRole("button", { name: "Copiar link do orçamento" });
     const msgBtn = screen.getByRole("button", { name: "Criar mensagem" });
