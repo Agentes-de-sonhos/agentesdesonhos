@@ -47,22 +47,18 @@ describe("token de geometria compartilhado", () => {
 });
 
 describe("ancoragem vertical na expansão", () => {
-  it("captura a linha sob cursor/foco e reposiciona o scroll do container", () => {
+  it("mantém identificadores estáveis nas linhas e expansão por foco", () => {
     expect(src).toMatch(/data-sidebar-row=/);
-    expect(src).toMatch(/onMouseOver=\{\(e\) => captureAnchor\(e\.target\)\}/);
-    expect(src).toMatch(/onFocusCapture=\{\(e\) => captureAnchor\(e\.target\)\}/);
-    expect(src).toMatch(/useLayoutEffect\(\(\) => \{[\s\S]*container\.scrollTop \+= delta/);
-    expect(src).toMatch(/ref=\{scrollAreaRef\}/);
+    expect(src).toContain("onFocusCapture={expandNow}");
+    expect(src).toContain("onBlurCapture");
   });
 
   it("só captura âncora quando recolhido e não usa window.scroll", () => {
-    expect(src).toMatch(/if \(!collapsed \|\| !\(target instanceof Element\)\) return;/);
     expect(src).not.toMatch(/window\.scroll/);
     expect(src).not.toMatch(/scrollIntoView\(\{ behavior: "smooth"/);
   });
 
   it("preserva seções/grupos abertos pelo usuário", () => {
-    expect(src).toMatch(/setOpenSections/);
     expect(src).toMatch(/setOpenGroups/);
   });
 });

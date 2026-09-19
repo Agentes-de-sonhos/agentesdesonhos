@@ -12,6 +12,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
+import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import { canAccessRoute } from "@/lib/routePermissions";
 import { isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import {
@@ -42,6 +43,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { can, isTeamMember } = usePermissions();
   const { trackSectionVisit } = useGamificationLite();
+  const openInternalWindow = useOpenInternalWindow();
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
@@ -75,7 +77,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
     if (item.requiredFeature && !hasFeature(item.requiredFeature)) return setUpgradeFeature(item.requiredFeature);
     trackSectionVisit(item.url);
     onClose();
-    navigate(item.url);
+    openInternalWindow(item.url, item.title);
   };
 
   const renderItem = (item: AppSidebarItem, nested = false) => (

@@ -10,6 +10,7 @@ import {
   Map,
   Newspaper,
   Paintbrush,
+  Plus,
   Route,
   ShoppingCart,
   Store,
@@ -44,7 +45,7 @@ export interface AppSidebarGroup {
 export const APP_CREATE_GROUP: AppSidebarGroup = {
   key: "create",
   title: "Criar novo",
-  icon: UserPlus,
+  icon: Plus,
   emphasis: true,
   items: [
     { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },

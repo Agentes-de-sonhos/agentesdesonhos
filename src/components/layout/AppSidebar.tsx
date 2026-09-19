@@ -233,6 +233,9 @@ export function AppSidebar() {
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
         onFocusCapture={expandNow}
+        onBlurCapture={(event) => {
+          if (!accountOpen && !event.currentTarget.contains(event.relatedTarget)) handleSidebarMouseLeave();
+        }}
       >
         <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-4">
           <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" className="flex min-w-0 items-center gap-3">
