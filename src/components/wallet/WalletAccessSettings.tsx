@@ -2,32 +2,21 @@ import { useState } from "react";
 import { Copy, Eye, EyeOff, Lock, Pencil, RefreshCw, ShieldAlert, Unlock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PublicLinkActions } from "@/components/shared/PublicLinkActions";
-import { buildCarteiraLink } from "@/lib/carteira-domain";
-import { PUBLIC_DOMAIN } from "@/lib/platform-version";
 import type { Trip } from "@/types/trip";
 
 interface Props {
   trip: Trip;
-  agencyName?: string | null;
-  customDomain?: string | null;
   onCopyPassword: () => void;
   onUpdatePassword: (password: string) => Promise<void>;
   onRegeneratePassword: () => Promise<void>;
   onUnlock: () => Promise<void>;
 }
 
-export function WalletAccessSettings({ trip, agencyName, customDomain, onCopyPassword, onUpdatePassword, onRegeneratePassword, onUnlock }: Props) {
+export function WalletAccessSettings({ trip, onCopyPassword, onUpdatePassword, onRegeneratePassword, onUnlock }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [editing, setEditing] = useState(false);
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
-  const publicUrl = trip.public_access_code && agencyName
-    ? buildCarteiraLink(agencyName, trip.public_access_code, customDomain)
-    : trip.slug ? `${PUBLIC_DOMAIN}/c/${trip.slug}`
-    : trip.share_token ? `${PUBLIC_DOMAIN}/viagem/${trip.share_token}` : "";
-  const serviceTypes = (trip.services || []).map((service) => service.service_type);
-
   const save = async () => {
     if (password.trim().length < 4) return;
     setSaving(true);
@@ -60,12 +49,6 @@ export function WalletAccessSettings({ trip, agencyName, customDomain, onCopyPas
             <Button variant="outline" size="icon" className="min-h-11 min-w-11" onClick={onRegeneratePassword} aria-label="Regenerar senha"><RefreshCw className="h-4 w-4" /></Button>
           </div>
         )}
-      </section>
-      <section aria-labelledby="wallet-link-title" className="min-w-0 rounded-lg border bg-card p-4">
-        <h4 id="wallet-link-title" className="text-sm font-semibold">Link público</h4>
-        {publicUrl ? (
-          <><code className="mt-3 block w-full truncate rounded-md bg-muted px-3 py-2 text-sm" title={publicUrl}>{publicUrl}</code><PublicLinkActions className="mt-3" type="wallet" publicUrl={publicUrl} showOpen message={{ clientFirstName: trip.client_name, destination: trip.destination, tripName: trip.trip_title || trip.destination, startDate: trip.start_date, endDate: trip.end_date, serviceTypes, agencyName: agencyName || undefined, accessPassword: trip.access_password }} /></>
-        ) : <p className="mt-2 text-sm text-muted-foreground">O link público ainda não está disponível.</p>}
       </section>
     </div>
   );
