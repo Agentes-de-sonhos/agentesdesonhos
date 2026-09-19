@@ -16,6 +16,7 @@ import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
 import { ItinerarySettingsModal } from "@/components/itinerary/ItinerarySettingsModal";
 import { ItineraryDaysOrganizer } from "@/components/itinerary/ItineraryDaysOrganizer";
+import { TripPeriodField, toYMD } from "@/components/shared/TripPeriodField";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { BrandCloudLoader } from "@/components/shared/BrandCloudLoader";
@@ -1141,90 +1142,23 @@ export default function CriarRoteiro() {
                   {/* Datas */}
                   <div className="sm:col-span-2">
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Datas da viagem</div>
-                    <Popover open={datesPopoverOpen} onOpenChange={(open) => {
-                      setDatesPopoverOpen(open);
-                      if (open) {
-                        setEditStartDate(parseLocalDate(currentItinerary.startDate));
-                        setEditEndDate(parseLocalDate(currentItinerary.endDate));
-                      }
-                    }}>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-between rounded-xl">
-                          <span className="inline-flex items-center gap-2 truncate">
-                            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                            <span className="truncate">
-                              {format(parseLocalDate(currentItinerary.startDate), "dd MMM", { locale: ptBR })} – {format(parseLocalDate(currentItinerary.endDate), "dd MMM yyyy", { locale: ptBR })}
-                              {" • "}
-                              {currentItinerary.days?.length || 0} dias
-                            </span>
-                          </span>
-                          <Pencil className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-3" align="start">
-                        <div className="flex flex-col sm:flex-row gap-3">
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Ida</Label>
-                            <CalendarPicker
-                              mode="single"
-                              selected={editStartDate}
-                              onSelect={(d) => {
-                                if (!d) return;
-                                setEditStartDate(d);
-                                if (editEndDate && editEndDate < d) setEditEndDate(d);
-                              }}
-                              className="pointer-events-auto"
-                            />
-                          </div>
-                          <div>
-                            <Label className="text-xs text-muted-foreground">Volta</Label>
-                            <CalendarPicker
-                              mode="single"
-                              selected={editEndDate}
-                              onSelect={(d) => d && setEditEndDate(d)}
-                              disabled={(d) => !!editStartDate && d < editStartDate}
-                              className="pointer-events-auto"
-                            />
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-xs text-muted-foreground">
-                            {editStartDate && editEndDate
-                              ? `${Math.max(1, Math.round((editEndDate.getTime() - editStartDate.getTime()) / 86400000) + 1)} dias`
-                              : ""}
-                          </span>
-                          <div className="flex gap-2">
-                            <Button variant="ghost" size="sm" onClick={() => setDatesPopoverOpen(false)} disabled={savingDates}>
-                              Cancelar
-                            </Button>
-                            <Button
-                              size="sm"
-                              disabled={savingDates || !editStartDate || !editEndDate}
-                              onClick={async () => {
-                                if (!editStartDate || !editEndDate) return;
-                                setSavingDates(true);
-                                try {
-                                  await adjustItineraryDates.mutateAsync({
-                                    itineraryId: currentItinerary.id,
-                                    startDate: editStartDate,
-                                    endDate: editEndDate,
-                                  });
-                                  setDatesPopoverOpen(false);
-                                  await loadItinerary(currentItinerary.id);
-                                  toast.success("Datas atualizadas!");
-                                } catch (err: any) {
-                                  toast.error(err?.message || "Não foi possível salvar.");
-                                } finally {
-                                  setSavingDates(false);
-                                }
-                              }}
-                            >
-                              {savingDates ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}
-                            </Button>
-                          </div>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
+                    <TripPeriodField
+                      id="itinerary-period"
+                      label=""
+                      start={currentItinerary.startDate}
+                      end={currentItinerary.endDate}
+                      triggerClassName="w-full rounded-xl"
+                      onChange={async ({ start, end }) => {
+                        if (!start || !end || savingDates) return;
+                        setSavingDates(true);
+                        try {
+                          await adjustItineraryDates.mutateAsync({ itineraryId: currentItinerary.id, startDate: parseLocalDate(start), endDate: parseLocalDate(end) });
+                          await loadItinerary(currentItinerary.id);
+                          toast.success("Datas atualizadas!");
+                        } catch (err: any) { toast.error(err?.message || "Não foi possível salvar."); }
+                        finally { setSavingDates(false); }
+                      }}
+                    />
                   </div>
                 </div>
 

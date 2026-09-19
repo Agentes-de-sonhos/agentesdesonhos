@@ -28,7 +28,7 @@ export function ItinerarySettingsModal({ open, onOpenChange, initialStep = "init
   const index = STEPS.findIndex((step) => step.key === active);
   const current = STEPS[index];
   const CurrentIcon = current.icon;
-  const content: Record<ItinerarySettingsStep, ReactNode> = { initial: renderInitial(), days: renderDays(), pricing: renderPricing(), advanced: renderAdvanced() };
+  const renderContent: Record<ItinerarySettingsStep, () => ReactNode> = { initial: renderInitial, days: renderDays, pricing: renderPricing, advanced: renderAdvanced };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -56,7 +56,7 @@ export function ItinerarySettingsModal({ open, onOpenChange, initialStep = "init
             <div className="w-fit max-w-full"><h3 className="flex items-center gap-2 font-display text-sm font-semibold sm:text-base"><CurrentIcon className="h-4 w-4 shrink-0" />{current.title}</h3><div className={cn("mt-2 h-1 w-full rounded-full", current.accent)} /></div>
             <p className="mt-2 text-xs text-muted-foreground">{current.description}</p>
           </header>
-          {content[active]}
+          {renderContent[active]()}
         </div>
         <div className="flex shrink-0 items-center justify-between gap-2 border-t bg-background px-4 py-3 sm:px-6">
           <Button variant="ghost" size="sm" onClick={() => setActive(STEPS[Math.max(0, index - 1)].key)} disabled={index === 0}><ChevronLeft className="mr-1 h-4 w-4" />Voltar</Button>
