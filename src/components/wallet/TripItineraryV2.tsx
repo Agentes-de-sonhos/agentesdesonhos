@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ExternalLink, Link2, Unlink, ImageIcon, MapPin, CalendarDays, Plus } from "lucide-react";
 import { useState } from "react";
-import { AttachItineraryDialog } from "./AttachItineraryDialog";
+import { AttachItineraryContent } from "./AttachItineraryDialog";
 import { detachItineraryFromTrip } from "@/lib/roteiro-domain";
 import { useToast } from "@/hooks/use-toast";
 import { parseLocalDate } from "@/lib/dateParsing";
@@ -20,17 +20,18 @@ import type { Trip } from "@/types/trip";
 
 interface Props {
   trip: Trip;
+  active?: boolean;
 }
 
 /**
  * Roteiro V2 dentro da Carteira Digital — apenas card resumo.
  * A edição completa acontece na rota /ferramentas-ia/criar-roteiro/:id.
  */
-export function TripItineraryV2({ trip }: Props) {
+export function TripItineraryV2({ trip, active = true }: Props) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [attachOpen, setAttachOpen] = useState(false);
+  const [showLinker, setShowLinker] = useState(false);
   const [detachOpen, setDetachOpen] = useState(false);
   const [isDetaching, setIsDetaching] = useState(false);
 
@@ -88,7 +89,7 @@ export function TripItineraryV2({ trip }: Props) {
   // EMPTY STATE
   if (!itineraryId || isInconsistent) {
     return (
-      <>
+      <div className="space-y-4">
         <Card className="border-dashed">
           <CardContent className="py-8 flex flex-col items-center text-center gap-3">
             <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
@@ -105,19 +106,11 @@ export function TripItineraryV2({ trip }: Props) {
                 </p>
               )}
             </div>
-            <Button size="sm" onClick={() => setAttachOpen(true)}>
-              <Plus className="h-4 w-4 mr-1.5" />
-              Vincular roteiro
-            </Button>
+            <p className="text-xs text-muted-foreground">Escolha abaixo um roteiro existente, duplique um modelo ou crie um novo.</p>
           </CardContent>
         </Card>
-        <AttachItineraryDialog
-          trip={trip}
-          open={attachOpen}
-          onOpenChange={setAttachOpen}
-          onAttached={invalidate}
-        />
-      </>
+        <AttachItineraryContent trip={trip} active={active} onAttached={invalidate} />
+      </div>
     );
   }
 
@@ -167,7 +160,7 @@ export function TripItineraryV2({ trip }: Props) {
                   <ExternalLink className="h-4 w-4 mr-1.5" />
                   Abrir roteiro
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setAttachOpen(true)}>
+                <Button size="sm" variant="outline" onClick={() => setShowLinker((value) => !value)} aria-expanded={showLinker}>
                   <Link2 className="h-4 w-4 mr-1.5" />
                   Trocar
                 </Button>
@@ -184,12 +177,7 @@ export function TripItineraryV2({ trip }: Props) {
         </CardContent>
       </Card>
 
-      <AttachItineraryDialog
-        trip={trip}
-        open={attachOpen}
-        onOpenChange={setAttachOpen}
-        onAttached={invalidate}
-      />
+      {showLinker && <AttachItineraryContent trip={trip} active={active} onAttached={() => { invalidate(); setShowLinker(false); }} onDone={() => setShowLinker(false)} />}
 
       <AlertDialog open={detachOpen} onOpenChange={setDetachOpen}>
         <AlertDialogContent>

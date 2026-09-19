@@ -25,6 +25,8 @@ export interface Trip {
   itinerary_mode?: 'none' | 'legacy' | 'v2' | null;
   public_access_code?: string | null;
   wallet_cover_url?: string | null;
+  client_id?: string | null;
+  signature_snapshot?: unknown;
 }
 
 export interface TripService {
