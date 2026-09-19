@@ -3431,6 +3431,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [placeId, setPlaceId] = useState<string | null>(null);
+  const [photoQuery, setPhotoQuery] = useState<string | null>(null);
   const [galleryPending, setGalleryPending] = useState(false);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
