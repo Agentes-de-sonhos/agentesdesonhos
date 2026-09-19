@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Shuffle, Loader2, Wand2, Check, Search, Clock, MapPin, Tag } from "lucide-react";
+import { Sparkles, Shuffle, Loader2, Wand2, Check, Search, Clock, MapPin, Tag, Pencil, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -435,6 +435,8 @@ interface EmptyPeriodAISlotProps {
   context: AIContext;
   memory: ItineraryMemory;
   onCreate: (activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
+  onManualCreate: () => void;
+  onDismiss: () => void;
 }
 
 export function EmptyPeriodAISlot({
@@ -443,6 +445,8 @@ export function EmptyPeriodAISlot({
   context,
   memory,
   onCreate,
+  onManualCreate,
+  onDismiss,
 }: EmptyPeriodAISlotProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -452,6 +456,7 @@ export function EmptyPeriodAISlot({
   const [searching, setSearching] = useState(false);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchCacheRef = useRef<Map<string, Alternative[]>>(new Map());
+  const alternativesRequestRef = useRef(false);
 
   const buildContext = () => ({
     ...context,
@@ -468,7 +473,8 @@ export function EmptyPeriodAISlot({
   });
 
   const loadAlternatives = async () => {
-    if (alternatives.length) return;
+    if (alternatives.length || alternativesRequestRef.current) return;
+    alternativesRequestRef.current = true;
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("refine-itinerary-activity", {
@@ -485,6 +491,7 @@ export function EmptyPeriodAISlot({
       toast.error(e instanceof Error ? e.message : "Erro ao buscar sugestões");
       setOpen(false);
     } finally {
+      alternativesRequestRef.current = false;
       setLoading(false);
     }
   };
@@ -545,8 +552,9 @@ export function EmptyPeriodAISlot({
   };
 
   return (
-    <div className="ml-0 sm:ml-6 min-w-0 max-w-full rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+    <div data-testid={`activity-placeholder-${day.id}-${period}`} className="ml-0 sm:ml-6 min-w-0 max-w-full rounded-lg border border-dashed border-primary/30 bg-primary/5 p-3 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
       <p className="text-sm text-muted-foreground italic min-w-0 break-words">Nenhuma atividade definida</p>
+      <div className="flex w-full items-center justify-end gap-1 sm:w-auto">
       <Popover
         open={open}
         onOpenChange={(o) => {
@@ -564,7 +572,8 @@ export function EmptyPeriodAISlot({
           <Button
             size="sm"
             variant="outline"
-            className="w-full sm:w-auto border-primary/50 text-primary hover:bg-primary/10"
+            disabled={loading}
+            className="min-w-0 flex-1 border-primary/50 text-primary hover:bg-primary/10 sm:flex-none"
           >
             {loading ? (
               <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
@@ -686,6 +695,29 @@ export function EmptyPeriodAISlot({
           </div>
         </PopoverContent>
       </Popover>
+      <Button
+        type="button"
+        variant="outline"
+        size="icon"
+        className="h-9 w-9 shrink-0"
+        onClick={onManualCreate}
+        title="Adicionar manualmente"
+        aria-label="Adicionar atividade manualmente"
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="h-9 w-9 shrink-0 text-muted-foreground"
+        onClick={onDismiss}
+        title="Cancelar adição"
+        aria-label="Cancelar adição de atividade"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+      </div>
     </div>
   );
 }
