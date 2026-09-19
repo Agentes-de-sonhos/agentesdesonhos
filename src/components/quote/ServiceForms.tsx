@@ -11,7 +11,11 @@ import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { Badge } from "@/components/ui/badge";
 import { GoogleHotelPhotos } from "@/components/shared/GoogleHotelPhotos";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
-import { ImageUrlImportField } from "@/components/shared/ImageUrlImportField";
+import {
+  useImageUrlImport,
+  ImageUrlImportTrigger,
+  ImageUrlImportPanel,
+} from "@/components/shared/ImageUrlImportField";
 import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggestions";
 import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
@@ -2869,6 +2873,15 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 
   const canAddMore = imageUrls.length < MAX_IMAGES_PER_SERVICE;
   const thumbKeys = useMemo(() => photoKeys(imageUrls), [imageUrls]);
+
+  // Estado compartilhado do bloco "Adicionar link da internet" (Ingressos):
+  // gatilho na linha de ações, painel em linha própria com largura total.
+  const urlImport = useImageUrlImport({
+    existingUrls: imageUrls,
+    onAdd: (url) => onImageUrlsChange([...imageUrls, url]),
+    disabled: !canAddMore,
+    limitMessage: `Máximo de ${MAX_IMAGES_PER_SERVICE} fotos por serviço.`,
+  });
 
 
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
