@@ -1,588 +1,134 @@
-import React, { useState, useCallback, useMemo } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Map, Newspaper, User, Cloud, LogOut, Shield, Megaphone, Plane, Users,
-  GraduationCap, Lock, Calculator, Heart, ChevronDown, MessageCircleQuestion,
-  Store, CreditCard, Wallet, StickyNote, Home, BookOpen, Compass, CalendarDays, BookMarked,
-  Tag, ShoppingCart, PlusCircle, FileText, Route, Paintbrush, UserPlus, Headset,
-  X, Building2, FolderOpen, DollarSign, ShoppingBag, ArrowUpCircle, ArrowDownCircle, LayoutDashboard,
-  Sparkles, Rss, Receipt, MoreHorizontal, ChevronRight, Globe,
-} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { ChevronDown, ChevronRight, Cloud, Lock, Shield, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/hooks/useAuth";
-import { useGamificationLite } from "@/hooks/useGamificationLite";
-import { useUserRole } from "@/hooks/useUserRole";
-import { useSubscription } from "@/hooks/useSubscription";
-import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
-import { usePermissions } from "@/hooks/usePermissions";
-import { canAccessRoute } from "@/lib/routePermissions";
-import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM } from "@/config/directNavItems";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { Feature } from "@/types/subscription";
-import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
 import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
 import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
+import { AppSidebarAccount } from "./AppSidebarAccount";
+import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useSubscription } from "@/hooks/useSubscription";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useGamificationLite } from "@/hooks/useGamificationLite";
+import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
+import { canAccessRoute } from "@/lib/routePermissions";
+import { isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import {
+  APP_AGENDA_ITEM,
+  APP_CREATE_GROUP,
+  APP_MANAGEMENT_ITEMS,
+  APP_MORE_GROUP,
+  APP_OTHER_ITEMS,
+  APP_PROJECTS_GROUP,
+  type AppSidebarGroup,
+  type AppSidebarItem,
+} from "@/lib/appSidebarMenu";
+import type { Feature } from "@/types/subscription";
 
-interface MenuItem {
-  title: string;
-  url: string;
-  icon: React.ComponentType<{ className?: string }>;
-  requiredFeature?: Feature;
-  adminOnly?: boolean;
-  isPremium?: boolean;
-  isHighlighted?: boolean;
-  key?: string;
-  exactUrl?: boolean;
-  /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
-  activePrefix?: string;
-  children?: MenuItem[];
-  /** Permissão de equipe exigida para exibir o item. */
-  requiredPermission?: string;
-  /** Basta uma destas permissões de equipe. */
-  anyPermission?: string[];
-  /** Aparência de cabeçalho de seção (caixa alta + cor temática). */
-  sectionStyle?: {
-    headerBg: string;
-    headerHoverBg: string;
-    hoverColor: string;
-  };
-}
+const ADMIN_ITEM: AppSidebarItem = { key: "admin", title: "Administração", url: "/admin", icon: Shield };
+const CARTAO_ALLOWED = new Set(["/meu-cartao", "/perfil", "/dashboard", "/mentorias"]);
+const START_LOCKED = new Set(["/beneficios"]);
 
-interface MenuSection {
-  title: string;
-  key?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  items: MenuItem[];
-  hoverColor: string;
-  bgColor: string;
-  textColor: string;
-  borderColor: string;
-  headerBg: string;
-  headerHoverBg: string;
-}
-
-const conhecimentoSection: MenuSection = {
-  title: "Conhecimento", key: "section_conhecimento", icon: BookOpen,
-  hoverColor: "hover:bg-blue-600 hover:text-white", headerBg: "bg-blue-600 text-white", headerHoverBg: "hover:bg-blue-700",
-  bgColor: "bg-blue-50", textColor: "text-blue-700", borderColor: "border-blue-600",
-  items: [
-    { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap },
-    { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
-  ],
-};
-
-const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-
-const guiasSection: MenuSection = {
-  title: "Guias e Referências", key: "section_guias", icon: BookMarked,
-  hoverColor: "hover:bg-emerald-600 hover:text-white", headerBg: "bg-emerald-600 text-white", headerHoverBg: "hover:bg-emerald-700",
-  bgColor: "bg-emerald-50", textColor: "text-emerald-700", borderColor: "border-emerald-600",
-  items: [
-    { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "community" },
-    { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
-    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
-    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass },
-  ],
-};
-
-const recursosVendasSection: MenuSection = {
-  title: "Recursos de Vendas", key: "section_recursos_vendas", icon: ShoppingCart,
-  hoverColor: "hover:bg-orange-600 hover:text-white", headerBg: "bg-orange-600 text-white", headerHoverBg: "hover:bg-orange-700",
-  bgColor: "bg-orange-50", textColor: "text-orange-700", borderColor: "border-orange-600",
-  items: [
-    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane, requiredFeature: "flight_blocks" },
-    { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-  ],
-};
-
-const criarSection: MenuSection = {
-  title: "Criar", key: "section_criar", icon: PlusCircle,
-  hoverColor: "hover:bg-violet-600 hover:text-white", headerBg: "bg-violet-600 text-white", headerHoverBg: "hover:bg-violet-700",
-  bgColor: "bg-violet-50", textColor: "text-violet-700", borderColor: "border-violet-600",
-  items: [
-    { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
-    { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
-    { key: "roteiros", title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
-    { key: "bloco_notas", title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote, requiredFeature: "notepad" },
-  ],
-};
-
-// Links diretos (sem submenu) para as visões gerais das duas áreas.
-const clientesItem: MenuItem = {
-  key: CLIENTES_DIRECT_ITEM.key,
-  title: CLIENTES_DIRECT_ITEM.title,
-  url: CLIENTES_DIRECT_ITEM.url,
-  activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
-  icon: Users,
-  requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
-  anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
-  sectionStyle: CLIENTES_DIRECT_ITEM.theme,
-};
-
-const financeiroItem: MenuItem = {
-  key: FINANCEIRO_DIRECT_ITEM.key,
-  title: FINANCEIRO_DIRECT_ITEM.title,
-  url: FINANCEIRO_DIRECT_ITEM.url,
-  activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
-  icon: DollarSign,
-  requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
-  anyPermission: FINANCEIRO_DIRECT_ITEM.anyPermission,
-  sectionStyle: FINANCEIRO_DIRECT_ITEM.theme,
-};
-
-const marketingSection: MenuSection = {
-  title: "Ferramentas de Marketing", key: "section_marketing", icon: Megaphone,
-  hoverColor: "hover:bg-pink-600 hover:text-white", headerBg: "bg-pink-600 text-white", headerHoverBg: "hover:bg-pink-700",
-  bgColor: "bg-pink-50", textColor: "text-pink-700", borderColor: "border-pink-600",
-  items: [
-    { key: "paginas_vendas", title: "Páginas de vendas personalizadas", url: "/meus-leads/landings", icon: Globe },
-    { key: "captacao_leads", title: "Formulário conversacional", url: "/meus-leads", icon: UserPlus, exactUrl: true },
-    { key: "cartao_visitas", title: "Cartão de visitas", url: "/meu-cartao", icon: CreditCard },
-    {
-      key: "outras_marketing",
-      title: "Outras",
-      url: "",
-      icon: MoreHorizontal,
-      children: [
-        { key: "vitrine_ofertas", title: "Vitrine de ofertas", url: "/minha-vitrine", icon: Store },
-        { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
-        { key: "personalizador_laminas", title: "Personalizador de lâminas", url: "/personalizador-laminas", icon: Paintbrush },
-      ],
-    },
-  ],
-};
-
-
-const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
-const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
-const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
-const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
-
-// Custom section for Start plan users (always pinned to top)
-const planoStartSection: MenuSection = {
-  title: "Plano Start", key: "section_plano_start", icon: Sparkles,
-  hoverColor: "hover:bg-amber-500 hover:text-white", headerBg: "bg-amber-500 text-white", headerHoverBg: "hover:bg-amber-600",
-  bgColor: "bg-amber-50", textColor: "text-amber-700", borderColor: "border-amber-500",
-  items: [
-    { key: "start_mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map },
-    { key: "start_radar_turismo", title: "Radar do Turismo", url: "/noticias", icon: Rss },
-    { key: "start_educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { key: "start_materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone },
-    { key: "start_criar_roteiros", title: "Criar Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route },
-    { key: "start_agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
-  ],
-};
-
-const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: User };
-const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
-const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
-
-interface MobileDrawerMenuProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-export function MobileDrawerMenu({ open, onClose }: MobileDrawerMenuProps) {
+export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
+  const [accountOpen, setAccountOpen] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
-  const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
-  const { hasFeatureAccess } = useFeatureAccess();
+  const { can, isTeamMember } = usePermissions();
   const { trackSectionVisit } = useGamificationLite();
-  const { can: canPerm, isTeamMember } = usePermissions();
-
-  /** Colaborador da equipe: espelha as regras do menu desktop e do guard de rota. */
-  const isPermittedForTeam = useCallback((item: MenuItem): boolean => {
-    if (!isTeamMember) return true;
-    if (item.children?.length) return item.children.some(isPermittedForTeam);
-    if (item.anyPermission?.length) return item.anyPermission.some((p) => canPerm(p));
-    if (item.requiredPermission) return canPerm(item.requiredPermission);
-    if (item.url) return canAccessRoute(item.url.split("?")[0], canPerm);
-    return false;
-  }, [isTeamMember, canPerm]);
-
+  const openInternalWindow = useOpenInternalWindow();
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
 
-  const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, marketingSection],
-    []
-  );
+  const isPermitted = useCallback((item: AppSidebarItem) => {
+    if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;
+    if (!isTeamMember) return true;
+    if (item.anyPermission?.length) return item.anyPermission.some(can);
+    if (item.requiredPermission) return can(item.requiredPermission);
+    return canAccessRoute(item.url.split("?")[0], can);
+  }, [can, isAdmin, isTeamMember, plan]);
+  const filtered = useCallback((group: AppSidebarGroup) => ({ ...group, items: group.items.filter(isPermitted) }), [isPermitted]);
+  const createGroup = useMemo(() => filtered(APP_CREATE_GROUP), [filtered]);
+  const projectsGroup = useMemo(() => filtered(APP_PROJECTS_GROUP), [filtered]);
+  const moreGroup = useMemo(() => filtered(APP_MORE_GROUP), [filtered]);
+  const management = useMemo(() => APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted]);
+  const others = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
 
-  const standaloneItems: MenuItem[] = useMemo(
-    () => [clientesItem, financeiroItem],
-    []
-  );
-
-  const { orderMap } = useFullMenuOrder();
-
-  type MenuEntry =
-    | { type: "section"; section: MenuSection; orderIdx: number }
-    | { type: "item"; item: MenuItem; orderIdx: number };
-
-  const orderedEntries: MenuEntry[] = useMemo(() => {
-    const mainOrder = orderMap["main"] || {};
-    const entries: MenuEntry[] = [];
-
-    for (const section of allSections) {
-      if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
-      const filteredItems = section.items
-        .filter(isPermittedForTeam)
-        .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan))
-        .map((it) => (it.children?.length
-          ? { ...it, children: it.children.filter(isPermittedForTeam) }
-          : it));
-      if (filteredItems.length === 0) continue;
-      const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
-        const sectionKey = section.key?.replace("section_", "") || "";
-        const sectionOrder = orderMap[sectionKey] || {};
-        return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
-      });
-      // Start plan: pin specific items to first place in their sections
-      if (isStartPlan) {
-        const pinFirstByKey: Record<string, string> = {
-          section_criar: "roteiros",
-          section_recursos_vendas: "materiais",
-        };
-        const pinKey = pinFirstByKey[section.key || ""];
-        if (pinKey) {
-          const idx = sortedItems.findIndex((it) => it.key === pinKey);
-          if (idx > 0) {
-            const [pinned] = sortedItems.splice(idx, 1);
-            sortedItems.unshift(pinned);
-          }
-        }
-      }
-      entries.push({
-        type: "section",
-        section: { ...section, items: sortedItems },
-        orderIdx: mainOrder[section.key || ""] ?? 999,
-      });
-    }
-
-    for (const item of standaloneItems) {
-      if (isSectionHiddenForUser(item.key, isAdmin, plan)) continue;
-      if (isItemHiddenForUser(item.key, isAdmin, plan)) continue;
-      if (!isPermittedForTeam(item)) continue;
-      entries.push({
-        type: "item",
-        item,
-        orderIdx: mainOrder[item.key || ""] ?? 999,
-      });
-    }
-
-    const sorted = entries.sort((a, b) => a.orderIdx - b.orderIdx);
-
-    if (isStartPlan) {
-      return [
-        { type: "section" as const, section: planoStartSection, orderIdx: -1 },
-        ...sorted,
-      ];
-    }
-
-    return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan, isAdmin, plan, isPermittedForTeam]);
-
-  const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
-  const startPlanLockedUrls = ["/comunidade", "/cursos", "/beneficios"];
-
-  const toggleSection = (title: string) => {
-    setUserInteracted(true);
-    setOpenSections((prev) => {
-      const isCurrentlyOpen = prev[title];
-      const allClosed: Record<string, boolean | undefined> = {};
-      if (!isCurrentlyOpen) {
-        allClosed[title] = true;
-      }
-      return allClosed;
-    });
+  const isActive = (item: AppSidebarItem) => {
+    const [pathname, query] = item.url.split("?");
+    if (query) return location.pathname === pathname && location.search === `?${query}`;
+    if (item.exactUrl) return location.pathname === pathname;
+    return location.pathname === pathname || location.pathname.startsWith(`${pathname}/`) || Boolean(item.activePrefix && location.pathname.startsWith(item.activePrefix));
   };
+  const locked = (item: AppSidebarItem) => Boolean(item.requiredFeature && !hasFeature(item.requiredFeature)) || (isEducaPass && item.url !== "/educa-academy") || (isCartaoDigital && !CARTAO_ALLOWED.has(item.url)) || (isStartPlan && START_LOCKED.has(item.url));
 
-  const isUrlActive = (url: string, exact?: boolean) => {
-    if (!url) return false;
-    if (exact) return location.pathname === url;
-    return location.pathname === url || location.pathname.startsWith(url);
-  };
-
-  const isSectionActive = (section: MenuSection) =>
-    section.items.some((i) =>
-      i.children ? i.children.some((c) => isUrlActive(c.url, c.exactUrl)) : isUrlActive(i.url, i.exactUrl)
-    );
-
-  const handleMenuClick = useCallback(
-    (item: MenuItem, e: React.MouseEvent) => {
-      if (isEducaPass && item.url !== "/educa-academy") {
-        e.preventDefault();
-        setShowComingSoon(true);
-        return;
-      }
-      if (isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url)) {
-        e.preventDefault();
-        setShowComingSoon(true);
-        return;
-      }
-      if (isStartPlan && startPlanLockedUrls.includes(item.url)) {
-        e.preventDefault();
-        setUpgradeFeature(item.requiredFeature ?? "crm_basic");
-        return;
-      }
-      if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
-        e.preventDefault();
-        setUpgradeFeature(item.requiredFeature);
-        return;
-      }
-      trackSectionVisit(item.url);
-      onClose();
-      navigate(item.url);
-    },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, navigate, onClose]
-  );
-
-  const renderMenuItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string) => {
-    if (item.children) {
-      return renderGroupItem(item, sectionBgColor, sectionTextColor, sectionBorderColor);
-    }
-    const isActive =
-      location.pathname === item.url ||
-      (!!item.activePrefix && location.pathname.startsWith(item.activePrefix)) ||
-      (item.url === "/dashboard" && location.pathname === "/");
-    const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
-    const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-    const isLockedByStart = isStartPlan && startPlanLockedUrls.includes(item.url);
-    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
-
-    const sectionStyle = item.sectionStyle;
-    return (
-      <button
-        key={item.url}
-        onClick={(e) => handleMenuClick(item, e)}
-        className={cn(
-          "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
-          sectionStyle
-            ? isActive && !isLocked
-              ? cn(sectionStyle.headerBg, sectionStyle.headerHoverBg, "font-semibold")
-              : isLocked
-                ? "opacity-60"
-                : cn("text-sidebar-foreground", sectionStyle.hoverColor)
-          : isActive && !isLocked && sectionBgColor
-            ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
-            : isActive && !isLocked
-              ? "bg-muted text-foreground font-semibold shadow-sm"
-              : isLocked
-                ? "opacity-60"
-                : sectionBgColor
-                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
-                  : "text-sidebar-foreground hover:bg-sidebar-accent",
-        )}
-      >
-        <div className="relative flex-shrink-0">
-          <item.icon className={cn(sectionStyle ? "h-4 w-4 transition-colors" : "h-5 w-5 transition-colors", isActive && !isLocked && !sectionBgColor && !sectionStyle ? "text-foreground" : "", isLocked ? "text-muted-foreground" : "")} />
-          {isLocked && <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />}
-        </div>
-        <span
-          className={cn(
-            "truncate flex-1",
-            sectionStyle && "text-[11px] font-bold uppercase tracking-wider whitespace-nowrap",
-            isLocked && "text-muted-foreground"
-          )}
-        >
-          {item.title}
-        </span>
-      </button>
-    );
-  };
-
-  const renderGroupItem = (
-    group: MenuItem,
-    sectionBgColor?: string,
-    sectionTextColor?: string,
-    sectionBorderColor?: string
-  ) => {
-    const children = group.children ?? [];
-    const childActive = children.some((c) => isUrlActive(c.url, c.exactUrl));
-    const groupKey = group.key || group.title;
-    const groupId = `drawer-group-${groupKey}`;
-    const isOpen = openGroups[groupKey] ?? childActive;
-    const GroupIcon = group.icon;
-
-    return (
-      <div key={groupKey} className="flex flex-col">
-        <button
-          type="button"
-          aria-expanded={isOpen}
-          aria-controls={groupId}
-          onClick={() => setOpenGroups((prev) => ({ ...prev, [groupKey]: !isOpen }))}
-          className={cn(
-            "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-left",
-            childActive && sectionBgColor
-              ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
-              : sectionBgColor
-                ? cn(sectionBgColor, sectionTextColor)
-                : "text-sidebar-foreground hover:bg-sidebar-accent"
-          )}
-        >
-          <GroupIcon className="h-5 w-5 flex-shrink-0" />
-          <span className="truncate flex-1">{group.title}</span>
-          {isOpen ? (
-            <ChevronDown className="h-4 w-4 flex-shrink-0" />
-          ) : (
-            <ChevronRight className="h-4 w-4 flex-shrink-0" />
-          )}
-        </button>
-        {isOpen && (
-          <nav
-            id={groupId}
-            className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in [&_button]:text-[13px] [&_button]:py-2"
-          >
-            {children.map((child) => renderMenuItem(child, sectionBgColor, sectionTextColor, sectionBorderColor))}
-          </nav>
-        )}
-      </div>
-    );
-  };
-
-  const renderSection = (section: MenuSection) => {
-    const isActive = isSectionActive(section);
-    const hasExplicitState = section.title in openSections;
-    const isOpen = hasExplicitState ? !!openSections[section.title] : (!userInteracted && isActive);
-    const Icon = section.icon;
-
-    return (
-      <div key={section.title} className="px-3">
-        <button
-          onClick={() => toggleSection(section.title)}
-          className={cn(
-            "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-            isOpen ? cn(section.headerBg, section.headerHoverBg) : cn("text-sidebar-foreground", section.hoverColor)
-          )}
-        >
-          <Icon className="h-4 w-4" />
-          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left whitespace-nowrap">{section.title}</span>
-          <ChevronDown
-            className={cn(
-              "h-3.5 w-3.5 transition-transform duration-200",
-              isOpen ? "rotate-180 text-white/70" : "text-muted-foreground/50"
-            )}
-          />
-        </button>
-        {isOpen && (
-          <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key))).map((item) => renderMenuItem(item, section.bgColor, section.textColor, section.borderColor))}
-          </nav>
-        )}
-      </div>
-    );
-  };
-
-  const handleSignOut = () => {
+  const activate = (item: AppSidebarItem) => {
+    if (isEducaPass && item.url !== "/educa-academy") return setShowComingSoon(true);
+    if (isCartaoDigital && !CARTAO_ALLOWED.has(item.url)) return setShowComingSoon(true);
+    if (isStartPlan && START_LOCKED.has(item.url)) return setUpgradeFeature(item.requiredFeature ?? "crm_basic");
+    if (item.requiredFeature && !hasFeature(item.requiredFeature)) return setUpgradeFeature(item.requiredFeature);
+    trackSectionVisit(item.url);
     onClose();
-    signOut();
+    openInternalWindow(item.url, item.title);
   };
 
+  const renderItem = (item: AppSidebarItem, nested = false) => (
+    <Button
+      key={item.key}
+      type="button"
+      variant="ghost"
+      aria-current={isActive(item) ? "page" : undefined}
+      onClick={() => activate(item)}
+      className={cn("h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-left", isActive(item) && !locked(item) && "bg-sidebar-accent font-semibold", locked(item) && "opacity-60", nested && "text-[13px]")}
+    >
+      <span className="relative shrink-0"><item.icon className="h-5 w-5" />{locked(item) && <Lock className="absolute -right-1 -top-1 h-2.5 w-2.5 text-warning" />}</span>
+      <span className="min-w-0 flex-1 truncate">{item.title}</span>
+    </Button>
+  );
+
+  const renderGroup = (group: AppSidebarGroup) => {
+    if (!group.items.length) return null;
+    const childActive = group.items.some(isActive);
+    const expanded = openGroups[group.key] ?? childActive;
+    const id = `mobile-menu-${group.key}`;
+    return (
+      <div key={group.key}>
+        <Button type="button" variant={group.emphasis ? "default" : "ghost"} aria-expanded={expanded} aria-controls={id} onClick={() => setOpenGroups((prev) => ({ ...prev, [group.key]: !expanded }))} className="h-auto w-full justify-start gap-3 rounded-lg px-3 py-2.5">
+          <group.icon className="h-5 w-5" /><span className="flex-1 truncate text-left">{group.title}</span>{expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </Button>
+        {expanded && <nav id={id} aria-label={group.title} className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">{group.items.map((item) => renderItem(item, true))}</nav>}
+      </div>
+    );
+  };
+
+  const section = (label: string) => <p className="px-3 pt-3 text-[10px] font-bold uppercase text-muted-foreground">{label}</p>;
   return (
     <>
-      {/* Overlay */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] lg:hidden animate-fade-in"
-          onClick={onClose}
-        />
-      )}
-
-      {/* Drawer */}
-      <aside
-        className={cn(
-          "fixed right-0 top-0 z-[70] h-screen w-[300px] max-w-[85vw] bg-sidebar border-l border-sidebar-border flex flex-col lg:hidden",
-          "transition-transform duration-300 ease-out",
-          open ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border flex-shrink-0">
-          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" onClick={onClose} className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary">
-              <Cloud className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <h1 className="font-display text-lg font-semibold text-sidebar-foreground">
-              Agentes de Sonhos
-            </h1>
-          </Link>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-sidebar-foreground" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
+      {open && <div className="fixed inset-0 z-[60] bg-foreground/40 backdrop-blur-sm lg:hidden" onClick={onClose} />}
+      <aside className={cn("fixed right-0 top-0 z-[70] flex h-screen w-[300px] max-w-[85vw] flex-col border-l border-sidebar-border bg-sidebar transition-transform duration-300 lg:hidden", open ? "translate-x-0" : "translate-x-full")}>
+        <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border px-4">
+          <div className="flex items-center gap-3"><div className="gradient-primary flex h-9 w-9 items-center justify-center rounded-xl"><Cloud className="h-5 w-5 text-primary-foreground" /></div><h1 className="font-display text-lg font-semibold">Agentes de Sonhos</h1></div>
+          <Button variant="ghost" size="icon" aria-label="Fechar menu" onClick={onClose}><X className="h-5 w-5" /></Button>
         </div>
-
-        {/* Scrollable Navigation */}
-        <div className="flex-1 overflow-y-auto py-3 space-y-1">
-          <nav className="flex flex-col gap-0.5 px-3">
-            {renderMenuItem(meusProjetosItem)}
-            {renderMenuItem(minhaAgendaItem)}
-            {renderMenuItem(meuPerfilItem)}
-          </nav>
-
-          <div className="py-2 px-3">
-            <Separator className="bg-sidebar-border" />
-          </div>
-
-          {orderedEntries.map((entry) => {
-            if (entry.type === "section") {
-              return <React.Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</React.Fragment>;
-            }
-            return (
-              <nav key={entry.item.key || entry.item.url} className="flex flex-col gap-0.5 px-3">
-                {renderMenuItem(entry.item)}
-              </nav>
-            );
-          })}
+        <div className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
+          {renderGroup(createGroup)}
+          {section("MEU TRABALHO")}{renderGroup(projectsGroup)}{isPermitted(APP_AGENDA_ITEM) && renderItem(APP_AGENDA_ITEM)}
+          {section("GESTÃO")}{management.map((item) => renderItem(item))}
+          {section("OUTRAS")}{others.map((item) => renderItem(item))}{renderGroup(moreGroup)}
         </div>
-
-        {/* Bottom Section */}
-        <div className="flex-shrink-0 border-t border-sidebar-border p-3 space-y-1">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70 px-3 pb-1">
-            Conta
-          </p>
-          {isAdmin && renderMenuItem(adminMenuItem)}
-          {renderMenuItem(suporteMenuItem)}
-          {renderMenuItem(minhaContaMenuItem)}
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            onClick={handleSignOut}
-          >
-            <LogOut className="h-5 w-5 flex-shrink-0" />
-            <span>Sair</span>
-          </Button>
-          <div className="text-center pt-2 space-y-0.5">
-            <Link to="/atualizacoes" onClick={onClose} className="text-[10px] text-muted-foreground/50 hover:text-primary transition-colors">
-              v1.0 Beta
-            </Link>
-            <p className="text-[10px] text-muted-foreground/60">Desenvolvido por</p>
-            <p className="text-[11px] font-medium text-muted-foreground/80">Nobre Digital</p>
-          </div>
+        <div className="shrink-0 border-t border-sidebar-border p-3">
+          {isAdmin && <div className="mb-1">{renderItem(ADMIN_ITEM)}</div>}
+          <AppSidebarAccount open={accountOpen} onOpenChange={setAccountOpen} onNavigate={onClose} onSignOut={() => { onClose(); void signOut(); }} />
         </div>
       </aside>
-
-      <UpgradeDialog
-        open={upgradeFeature !== null}
-        onOpenChange={(open) => !open && setUpgradeFeature(null)}
-        requiredFeature={upgradeFeature || undefined}
-      />
-      <ComingSoonDialog
-        open={showComingSoon}
-        onOpenChange={setShowComingSoon}
-      />
+      <UpgradeDialog open={upgradeFeature !== null} onOpenChange={(value) => !value && setUpgradeFeature(null)} requiredFeature={upgradeFeature || undefined} />
+      <ComingSoonDialog open={showComingSoon} onOpenChange={setShowComingSoon} />
     </>
   );
 }

@@ -1,897 +1,274 @@
-import React, { useState, useCallback, useMemo, useRef, useLayoutEffect, Fragment } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Map,
-  Newspaper,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  Cloud,
-  LogOut,
-  Shield,
-  Megaphone,
-  MonitorPlay,
-  Plane,
-  Users,
-  GraduationCap,
-  Lock,
-  Calculator,
-  MessageCircleQuestion,
-  Store,
-  CreditCard,
-  Wallet,
-  StickyNote,
-  Home,
-  BookOpen,
-  Compass,
-  CalendarDays,
-  BookMarked,
-  Tag,
-  ShoppingCart,
-  PlusCircle,
-  FileText,
-  Route,
-  Heart,
-  Paintbrush,
-  UserPlus,
-  Headset,
-  Building2,
-  ClipboardList,
-  DollarSign,
-  ArrowDownCircle,
-  ShoppingBag,
-  ArrowUpCircle,
-  LayoutDashboard,
-  FolderOpen,
-  Sparkles,
-  Rss,
-  User,
-  Receipt,
-  MoreHorizontal,
-  Globe,
-} from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { ChevronDown, ChevronRight, Cloud, Lock, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
+import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
+import { AppSidebarAccount } from "./AppSidebarAccount";
 import { useAuth } from "@/hooks/useAuth";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { Feature } from "@/types/subscription";
 import { usePermissions } from "@/hooks/usePermissions";
-import { UpgradeDialog } from "@/components/subscription/UpgradeDialog";
-import { useFullMenuOrder } from "@/hooks/useFullMenuOrder";
-import { ComingSoonDialog } from "@/components/subscription/ComingSoonDialog";
-import { isSectionHiddenForUser, isItemHiddenForUser } from "@/lib/sidebarVisibility";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { CLIENTES_DIRECT_ITEM, FINANCEIRO_DIRECT_ITEM, RESERVAS_DIRECT_ITEM } from "@/config/directNavItems";
-import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS, calculateAnchorScrollDelta } from "@/lib/sidebarAnchor";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
+import {
+  APP_AGENDA_ITEM,
+  APP_CREATE_GROUP,
+  APP_MANAGEMENT_ITEMS,
+  APP_MORE_GROUP,
+  APP_OTHER_ITEMS,
+  APP_PROJECTS_GROUP,
+  type AppSidebarGroup,
+  type AppSidebarItem,
+} from "@/lib/appSidebarMenu";
+import type { Feature } from "@/types/subscription";
 
-interface MenuItem {
-  title: string;
-  url: string;
-  icon: React.ComponentType<{ className?: string }>;
-  requiredFeature?: Feature;
-  adminOnly?: boolean;
-  isPremium?: boolean;
-  isHighlighted?: boolean;
-  key?: string;
-  requiredPermission?: string;
-  /** Only match the exact pathname (avoids parent/child URL collisions). */
-  exactUrl?: boolean;
-  /** Marca o item como ativo em qualquer rota que comece com este prefixo. */
-  activePrefix?: string;
-  /** Basta uma destas permissões de equipe para exibir o item. */
-  anyPermission?: string[];
-  /** Expandable group of child tools (no route of its own). */
-  children?: MenuItem[];
-  /** Renderiza o item com aparência de cabeçalho de seção (caixa alta + cor temática). */
-  sectionStyle?: {
-    headerBg: string;
-    headerHoverBg: string;
-    hoverColor: string;
-  };
-}
-
-interface MenuSection {
-  title: string;
-  key?: string;
-  icon: React.ComponentType<{ className?: string }>;
-  items: MenuItem[];
-  hoverColor: string;
-  bgColor: string;
-  textColor: string;
-  borderColor: string;
-  headerBg: string;
-  headerHoverBg: string;
-}
-
-// ── Static sections ──
-
-const conhecimentoSection: MenuSection = {
-  title: "Conhecimento",
-  key: "section_conhecimento",
-  icon: BookOpen,
-  hoverColor: "hover:bg-blue-600 hover:text-white",
-  headerBg: "bg-blue-600 text-white",
-  headerHoverBg: "hover:bg-blue-700",
-  bgColor: "bg-blue-50",
-  textColor: "text-blue-700",
-  borderColor: "border-blue-600",
-  items: [
-    { key: "educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: MonitorPlay },
-    { key: "noticias", title: "Notícias do Trade", url: "/noticias", icon: Newspaper, requiredFeature: "news" },
-  ],
-};
-const meusProjetosItem: MenuItem = { key: "meus_projetos", title: "Meus Projetos", url: "/meus-projetos", icon: FolderOpen };
-const comunidadeItem: MenuItem = { key: "comunidade", title: "Comunidade", url: "/comunidade", icon: Heart };
-
-const guiasSection: MenuSection = {
-  title: "Guias e Referências",
-  key: "section_guias",
-  icon: BookMarked,
-  hoverColor: "hover:bg-emerald-600 hover:text-white",
-  headerBg: "bg-emerald-600 text-white",
-  headerHoverBg: "hover:bg-emerald-700",
-  bgColor: "bg-emerald-50",
-  textColor: "text-emerald-700",
-  borderColor: "border-emerald-600",
-  items: [
-    { key: "mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map, requiredFeature: "tourism_map" },
-    { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "benefits" },
-    { key: "requisitos_viagem", title: "Central de Requisitos", url: "/requisitos-viagem", icon: Shield, requiredFeature: "travel_requirements", isPremium: true },
-    { key: "hotel_raio_x", title: "Raio-X do Hotel", url: "/hotel-raio-x", icon: Building2, requiredFeature: "hotel_raio_x" },
-    { key: "travel_advisor", title: "Travel Advisor", url: "/dream-advisor", icon: Compass, requiredFeature: "travel_advisor" },
-  ],
-};
-
-const recursosVendasSection: MenuSection = {
-  title: "Recursos de Vendas",
-  key: "section_recursos_vendas",
-  icon: ShoppingCart,
-  hoverColor: "hover:bg-orange-600 hover:text-white",
-  headerBg: "bg-orange-600 text-white",
-  headerHoverBg: "hover:bg-orange-700",
-  bgColor: "bg-orange-50",
-  textColor: "text-orange-700",
-  borderColor: "border-orange-600",
-  items: [
-    { key: "bloqueios_aereos", title: "Bloqueios Aéreos", url: "/bloqueios-aereos", icon: Plane, requiredFeature: "flight_blocks" },
-    { key: "materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone, requiredFeature: "materials" },
-  ],
-};
-
-const criarSection: MenuSection = {
-  title: "Criar",
-  key: "section_criar",
-  icon: PlusCircle,
-  hoverColor: "hover:bg-violet-600 hover:text-white",
-  headerBg: "bg-violet-600 text-white",
-  headerHoverBg: "hover:bg-violet-700",
-  bgColor: "bg-violet-50",
-  textColor: "text-violet-700",
-  borderColor: "border-violet-600",
-  items: [
-    { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
-    { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
-    { key: "roteiros", title: "Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
-    { key: "bloco_notas", title: "Bloco de Notas", url: "/bloco-notas", icon: StickyNote, requiredFeature: "notepad" },
-  ],
-};
-
-// Gestão de Clientes e Gestão Financeira são links diretos (sem submenu).
-const clientesItem: MenuItem = {
-  key: CLIENTES_DIRECT_ITEM.key,
-  title: CLIENTES_DIRECT_ITEM.title,
-  url: CLIENTES_DIRECT_ITEM.url,
-  activePrefix: CLIENTES_DIRECT_ITEM.activePrefix,
-  icon: Users,
-  requiredFeature: CLIENTES_DIRECT_ITEM.requiredFeature as Feature,
-  anyPermission: CLIENTES_DIRECT_ITEM.anyPermission,
-  sectionStyle: CLIENTES_DIRECT_ITEM.theme,
-};
-
-// Central de Reservas: ficha de cada venda, entre Clientes e Financeiro.
-const reservasItem: MenuItem = {
-  key: RESERVAS_DIRECT_ITEM.key,
-  title: RESERVAS_DIRECT_ITEM.title,
-  url: RESERVAS_DIRECT_ITEM.url,
-  activePrefix: RESERVAS_DIRECT_ITEM.activePrefix,
-  icon: ClipboardList,
-  requiredFeature: RESERVAS_DIRECT_ITEM.requiredFeature as Feature,
-  anyPermission: RESERVAS_DIRECT_ITEM.anyPermission,
-  sectionStyle: RESERVAS_DIRECT_ITEM.theme,
-};
-
-const financeiroItem: MenuItem = {
-  key: FINANCEIRO_DIRECT_ITEM.key,
-  title: FINANCEIRO_DIRECT_ITEM.title,
-  url: FINANCEIRO_DIRECT_ITEM.url,
-  activePrefix: FINANCEIRO_DIRECT_ITEM.activePrefix,
-  icon: DollarSign,
-  requiredFeature: FINANCEIRO_DIRECT_ITEM.requiredFeature as Feature,
-  anyPermission: FINANCEIRO_DIRECT_ITEM.anyPermission,
-  sectionStyle: FINANCEIRO_DIRECT_ITEM.theme,
-};
-
-const marketingSection: MenuSection = {
-  title: "Ferramentas de Marketing",
-  key: "section_marketing",
-  icon: Megaphone,
-  hoverColor: "hover:bg-pink-600 hover:text-white",
-  headerBg: "bg-pink-600 text-white",
-  headerHoverBg: "hover:bg-pink-700",
-  bgColor: "bg-pink-50",
-  textColor: "text-pink-700",
-  borderColor: "border-pink-600",
-  items: [
-    { key: "paginas_vendas", title: "Páginas de vendas personalizadas", url: "/meus-leads/landings", icon: Globe, requiredFeature: "lead_capture" },
-    { key: "captacao_leads", title: "Formulário conversacional", url: "/meus-leads", icon: UserPlus, requiredFeature: "lead_capture", exactUrl: true },
-    { key: "cartao_visitas", title: "Cartão de visitas", url: "/meu-cartao", icon: CreditCard, requiredFeature: "business_card" },
-    {
-      key: "outras_marketing",
-      title: "Outras",
-      url: "",
-      icon: MoreHorizontal,
-      children: [
-        { key: "vitrine_ofertas", title: "Vitrine de ofertas", url: "/minha-vitrine", icon: Store, requiredFeature: "showcase" },
-        { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
-        { key: "personalizador_laminas", title: "Personalizador de lâminas", url: "/personalizador-laminas", icon: Paintbrush, requiredFeature: "lamina_customizer" },
-      ],
-    },
-  ],
-};
-
-const mentoriasItem: MenuItem = { key: "cursos_mentorias", title: "Cursos e Mentorias", url: "/cursos", icon: GraduationCap };
-
-const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
-const startDashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard-start", icon: Home };
-const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
-const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
-
-
-// Custom section shown ONLY for Start plan users (always at the top)
-const planoStartSection: MenuSection = {
-  title: "Plano Start",
-  key: "section_plano_start",
-  icon: Sparkles,
-  hoverColor: "hover:bg-amber-500 hover:text-white",
-  headerBg: "bg-amber-500 text-white",
-  headerHoverBg: "hover:bg-amber-600",
-  bgColor: "bg-amber-50",
-  textColor: "text-amber-700",
-  borderColor: "border-amber-500",
-  items: [
-    { key: "start_mapa_turismo", title: "Mapa do Turismo", url: "/mapa-turismo", icon: Map },
-    { key: "start_radar_turismo", title: "Radar do Turismo", url: "/noticias", icon: Rss },
-    { key: "start_educa_academy", title: "EducaTravel Academy", url: "/educa-academy", icon: GraduationCap },
-    { key: "start_materiais", title: "Materiais de Divulgação", url: "/materiais", icon: Megaphone },
-    { key: "start_criar_roteiros", title: "Criar Roteiros", url: "/ferramentas-ia/criar-roteiro", icon: Route },
-    { key: "start_agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays },
-  ],
-};
-
-
-const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: CreditCard };
-const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
-const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };
+const ADMIN_ITEM: AppSidebarItem = { key: "admin", title: "Administração", url: "/admin", icon: Shield };
+const CARTAO_ALLOWED = new Set(["/meu-cartao", "/perfil", "/dashboard", "/mentorias"]);
+const START_LOCKED = new Set(["/beneficios"]);
 
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(true);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
+  const [accountOpen, setAccountOpen] = useState(false);
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean | undefined>>({});
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean | undefined>>({});
-  const [userInteracted, setUserInteracted] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { isAdmin, isFornecedor } = useUserRole();
+  const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
-  const { hasFeatureAccess } = useFeatureAccess();
+  const { can, isTeamMember } = usePermissions();
   const { trackSectionVisit } = useGamificationLite();
-  const { can: canPerm, isTeamMember } = usePermissions();
-
-  // Filtra itens por permissão de equipe (master bypassa)
-  const isPermittedForTeam = useCallback((item: MenuItem): boolean => {
-    if (!isTeamMember) return true;
-    // Grupos (ex.: "Outras") aparecem se pelo menos um filho estiver liberado.
-    if (item.children?.length) return item.children.some(isPermittedForTeam);
-    if (item.anyPermission?.length) return item.anyPermission.some((p) => canPerm(p));
-    if (item.requiredPermission) return canPerm(item.requiredPermission);
-    // Fallback central: mapa rota -> permissão (fonte única do guard de rota).
-    if (item.url) return canAccessRoute(item.url.split("?")[0], canPerm);
-    return false;
-  }, [isTeamMember, canPerm]);
-
-  // Hover-to-expand on desktop with delayed expand/collapse to avoid accidental open/close
   const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const clearTimers = () => {
-    if (collapseTimerRef.current) {
-      clearTimeout(collapseTimerRef.current);
-      collapseTimerRef.current = null;
-    }
-    if (expandTimerRef.current) {
-      clearTimeout(expandTimerRef.current);
-      expandTimerRef.current = null;
-    }
-  };
-
-  const handleSidebarMouseEnter = () => {
-    clearTimers();
-    if (collapsed) {
-      expandTimerRef.current = setTimeout(() => {
-        setCollapsed(false);
-      }, 700);
-    }
-  };
-
-  const handleSidebarMouseLeave = () => {
-    clearTimers();
-    collapseTimerRef.current = setTimeout(() => {
-      setCollapsed(true);
-    }, 300);
-  };
-
-  // Âncora vertical: item sob o cursor no momento em que a expansão é disparada
-  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
-  const anchorRef = useRef<{ key: string; top: number } | null>(null);
-
-  /** Registra a linha sob o cursor (apenas enquanto recolhido). */
-  const captureAnchor = (target: EventTarget | null) => {
-    if (!collapsed || !(target instanceof Element)) return;
-    const row = target.closest("[data-sidebar-row]") as HTMLElement | null;
-    if (!row) return;
-    const key = row.getAttribute("data-sidebar-row");
-    if (!key) return;
-    anchorRef.current = { key, top: row.getBoundingClientRect().top };
-  };
-
-  // Após expandir (e montar filhos), reposiciona o scroll para manter a âncora sob o cursor
-  useLayoutEffect(() => {
-    if (collapsed) return;
-    const anchor = anchorRef.current;
-    anchorRef.current = null;
-    const container = scrollAreaRef.current;
-    if (!anchor || !container) return;
-    const row = container.querySelector(
-      `[data-sidebar-row="${CSS.escape(anchor.key)}"]`
-    ) as HTMLElement | null;
-    if (!row) return;
-    const delta = calculateAnchorScrollDelta(anchor.top, row.getBoundingClientRect().top);
-    if (delta !== 0) container.scrollTop += delta;
-  }, [collapsed]);
-
-  /** Expande imediatamente, cancelando timers/estados pendentes de hover. */
-  const expandNow = useCallback(() => {
-    clearTimers();
-    setCollapsed(false);
-  }, []);
+  const pointerInsideRef = useRef(false);
 
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
-  const isRestrictedPlan = isEducaPass || isCartaoDigital;
   const isStartPlan = !isPromotor && plan === "start";
-  // Team members inherit the master's agency context — do not show plan-specific UI.
-  const showStartPlanSection = isStartPlan && !isTeamMember;
 
-  // URLs locked specifically for Start plan users (shows lock icon + opens upgrade dialog)
-  const startPlanLockedUrls = useMemo(
-    () => new Set([
-      "/comunidade",
-      "/cursos",
-      "/beneficios",
-    ]),
-    []
-  );
+  const clearTimers = useCallback(() => {
+    if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
+    if (expandTimerRef.current) clearTimeout(expandTimerRef.current);
+    collapseTimerRef.current = null;
+    expandTimerRef.current = null;
+  }, []);
 
-  const allSections: MenuSection[] = useMemo(
-    () => [conhecimentoSection, guiasSection, recursosVendasSection, criarSection, marketingSection],
-    []
-  );
+  const expandNow = useCallback(() => {
+    clearTimers();
+    setCollapsed(false);
+  }, [clearTimers]);
 
-  const standaloneItems: MenuItem[] = useMemo(
-    () => [clientesItem, reservasItem, financeiroItem],
-    []
-  );
-
-  const { orderMap } = useFullMenuOrder();
-
-  type MenuEntry =
-    | { type: "section"; section: MenuSection; orderIdx: number }
-    | { type: "item"; item: MenuItem; orderIdx: number };
-
-  const orderedEntries: MenuEntry[] = useMemo(() => {
-    const mainOrder = orderMap["main"] || {};
-    const entries: MenuEntry[] = [];
-
-    for (const section of allSections) {
-      if (isSectionHiddenForUser(section.key, isAdmin, plan)) continue;
-      const filteredItems = section.items
-        .filter(isPermittedForTeam)
-        .map((it) => (it.children?.length
-          ? { ...it, children: it.children.filter(isPermittedForTeam) }
-          : it))
-        .filter((it) => !isItemHiddenForUser(it.key, isAdmin, plan));
-      if (filteredItems.length === 0) continue;
-      // Ferramentas de Marketing tem hierarquia fixa (com o grupo "Outras"),
-      // portanto não é reordenada pela configuração administrativa.
-      const sortedItems = section.key === "section_marketing" ? filteredItems : filteredItems.sort((a, b) => {
-        const sectionKey = section.key?.replace("section_", "") || "";
-        const sectionOrder = orderMap[sectionKey] || {};
-        return (sectionOrder[a.key || ""] ?? 999) - (sectionOrder[b.key || ""] ?? 999);
-      });
-      // Start plan: pin specific items to first place in their sections
-      // (the only enabled item is highlighted on top)
-      if (isStartPlan) {
-        const pinFirstByKey: Record<string, string> = {
-          section_criar: "roteiros",
-          section_recursos_vendas: "materiais",
-        };
-        const pinKey = pinFirstByKey[section.key || ""];
-        if (pinKey) {
-          const idx = sortedItems.findIndex((it) => it.key === pinKey);
-          if (idx > 0) {
-            const [pinned] = sortedItems.splice(idx, 1);
-            sortedItems.unshift(pinned);
-          }
-        }
-      }
-      entries.push({
-        type: "section",
-        section: { ...section, items: sortedItems },
-        orderIdx: mainOrder[section.key || ""] ?? 999,
-      });
-    }
-
-    for (const item of standaloneItems) {
-      if (isSectionHiddenForUser(item.key, isAdmin, plan)) continue;
-      if (isItemHiddenForUser(item.key, isAdmin, plan)) continue;
-      if (!isPermittedForTeam(item)) continue;
-      entries.push({
-        type: "item",
-        item,
-        orderIdx: mainOrder[item.key || ""] ?? 999,
-      });
-    }
-
-    const sorted = entries.sort((a, b) => a.orderIdx - b.orderIdx);
-
-    // Start plan users get a custom "Plano Start" section pinned to the top
-    if (showStartPlanSection) {
-      return [
-        { type: "section" as const, section: planoStartSection, orderIdx: -1 },
-        ...sorted,
-      ];
-    }
-
-    return sorted;
-  }, [allSections, standaloneItems, orderMap, isStartPlan, showStartPlanSection, isPermittedForTeam, isAdmin, plan]);
-
-  const toggleSection = (title: string) => {
-    setUserInteracted(true);
-    setOpenSections((prev) => {
-      const isCurrentlyOpen = prev[title];
-      const allClosed: Record<string, boolean | undefined> = {};
-      if (!isCurrentlyOpen) {
-        allClosed[title] = true;
-      }
-      return allClosed;
-    });
+  const handleSidebarMouseEnter = () => {
+    pointerInsideRef.current = true;
+    clearTimers();
+    if (collapsed) expandTimerRef.current = setTimeout(() => setCollapsed(false), 700);
   };
 
-  const isItemActive = (itemUrl: string, exact?: boolean) => {
-    if (!itemUrl) return false;
-    const [pathname, search] = itemUrl.split("?");
-    if (search) {
-      return location.pathname === pathname && location.search === `?${search}`;
-    }
-    if (exact) return location.pathname === itemUrl;
-    return location.pathname === itemUrl || location.pathname.startsWith(itemUrl);
+  const handleSidebarMouseLeave = () => {
+    pointerInsideRef.current = false;
+    clearTimers();
+    if (!accountOpen) collapseTimerRef.current = setTimeout(() => setCollapsed(true), 300);
   };
 
-  const isItemOrChildActive = (item: MenuItem): boolean =>
-    item.children
-      ? item.children.some((c) => isItemActive(c.url, c.exactUrl))
-      : isItemActive(item.url, item.exactUrl);
-
-  const isSectionActive = (section: MenuSection) => section.items.some(isItemOrChildActive);
-
-  const handleMenuClick = useCallback(
-    (item: MenuItem, e: React.MouseEvent) => {
-      // Sidebar recolhida: o clique apenas expande (evita clique fantasma na transição)
-      if (collapsed) {
-        e.preventDefault();
-        expandNow();
-        return;
-      }
-      // Educa Pass: only allow EducaTravel Academy
-      if (isEducaPass && item.url !== "/educa-academy") {
-        e.preventDefault();
-        setShowComingSoon(true);
-        return;
-      }
-      // Cartão Digital Pass: only allow specific pages
-      if (isCartaoDigital && item.url !== "/meu-cartao" && item.url !== "/perfil") {
-        e.preventDefault();
-        setShowComingSoon(true);
-        return;
-      }
-      // Start plan: lock specific premium areas
-      if (isStartPlan && startPlanLockedUrls.has(item.url)) {
-        e.preventDefault();
-        setUpgradeFeature(item.requiredFeature ?? "crm_basic");
-        return;
-      }
-      if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
-        e.preventDefault();
-        setUpgradeFeature(item.requiredFeature);
-        return;
-      }
-      trackSectionVisit(item.url);
-      setCollapsed(true);
-    },
-    [hasFeature, trackSectionVisit, isEducaPass, isCartaoDigital, isStartPlan, startPlanLockedUrls, collapsed, expandNow]
-  );
-
-  const cartaoDigitalAllowedUrls = ["/meu-cartao", "/perfil", "/dashboard", "/mentorias"];
-
-  const renderSingleItem = (item: MenuItem, sectionBgColor?: string, sectionTextColor?: string, sectionBorderColor?: string, forceShowLock?: boolean) => {
-    if (item.children) {
-      return renderGroupItem(item, sectionBgColor, sectionTextColor, sectionBorderColor);
+  const handleAccountOpenChange = (open: boolean) => {
+    setAccountOpen(open);
+    clearTimers();
+    if (!open && !pointerInsideRef.current) {
+      collapseTimerRef.current = setTimeout(() => setCollapsed(true), 300);
     }
-    const isActive =
-      isItemActive(item.url, item.exactUrl) ||
-      (!!item.activePrefix && location.pathname.startsWith(item.activePrefix)) ||
-      (item.url === "/dashboard" && location.pathname === "/");
-    const isLockedByPlan = item.requiredFeature && !hasFeature(item.requiredFeature);
-    const isLockedByEducaPass = isEducaPass && item.url !== "/educa-academy";
-    const isLockedByCartaoDigital = isCartaoDigital && !cartaoDigitalAllowedUrls.includes(item.url);
-    const isLockedByStart = isStartPlan && startPlanLockedUrls.has(item.url);
-    const isLocked = isLockedByPlan || isLockedByEducaPass || isLockedByCartaoDigital || isLockedByStart;
-    const showLockIcon = isLocked || forceShowLock;
+  };
 
-    const sectionStyle = item.sectionStyle;
-    const menuLink = (
+  const isPermitted = useCallback((item: AppSidebarItem) => {
+    if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;
+    if (!isTeamMember) return true;
+    if (item.anyPermission?.length) return item.anyPermission.some(can);
+    if (item.requiredPermission) return can(item.requiredPermission);
+    return canAccessRoute(item.url.split("?")[0], can);
+  }, [can, isAdmin, isTeamMember, plan]);
+
+  const filterGroup = useCallback((group: AppSidebarGroup): AppSidebarGroup => ({
+    ...group,
+    items: group.items.filter(isPermitted),
+  }), [isPermitted]);
+
+  const createGroup = useMemo(() => filterGroup(APP_CREATE_GROUP), [filterGroup]);
+  const projectsGroup = useMemo(() => filterGroup(APP_PROJECTS_GROUP), [filterGroup]);
+  const moreGroup = useMemo(() => filterGroup(APP_MORE_GROUP), [filterGroup]);
+  const managementItems = useMemo(() => APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted]);
+  const otherItems = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
+
+  const isItemActive = (item: AppSidebarItem) => {
+    const [pathname, query] = item.url.split("?");
+    if (query) return location.pathname === pathname && location.search === `?${query}`;
+    if (item.exactUrl) return location.pathname === pathname;
+    return location.pathname === pathname || location.pathname.startsWith(`${pathname}/`) || Boolean(item.activePrefix && location.pathname.startsWith(item.activePrefix));
+  };
+
+  const isLocked = (item: AppSidebarItem) =>
+    Boolean(item.requiredFeature && !hasFeature(item.requiredFeature)) ||
+    (isEducaPass && item.url !== "/educa-academy") ||
+    (isCartaoDigital && !CARTAO_ALLOWED.has(item.url)) ||
+    (isStartPlan && START_LOCKED.has(item.url));
+
+  const handleItemClick = (item: AppSidebarItem, event: React.MouseEvent) => {
+    if (collapsed) {
+      event.preventDefault();
+      expandNow();
+      return;
+    }
+    if (isEducaPass && item.url !== "/educa-academy") {
+      event.preventDefault();
+      setShowComingSoon(true);
+      return;
+    }
+    if (isCartaoDigital && !CARTAO_ALLOWED.has(item.url)) {
+      event.preventDefault();
+      setShowComingSoon(true);
+      return;
+    }
+    if (isStartPlan && START_LOCKED.has(item.url)) {
+      event.preventDefault();
+      setUpgradeFeature(item.requiredFeature ?? "crm_basic");
+      return;
+    }
+    if (item.requiredFeature && !hasFeature(item.requiredFeature)) {
+      event.preventDefault();
+      setUpgradeFeature(item.requiredFeature);
+      return;
+    }
+    trackSectionVisit(item.url);
+    setCollapsed(true);
+  };
+
+  const renderItem = (item: AppSidebarItem, nested = false) => {
+    const active = isItemActive(item);
+    const locked = isLocked(item);
+    return (
       <Link
-        key={item.url}
-        to={isLocked ? "#" : item.url}
+        key={item.key}
+        to={locked ? "#" : item.url}
         aria-label={collapsed ? item.title : undefined}
-        onClick={(e) => handleMenuClick(item, e)}
-        data-sidebar-row={item.key || item.url}
+        aria-current={active ? "page" : undefined}
+        data-workspace-title={item.title}
+        data-sidebar-row={item.key}
+        onClick={(event) => handleItemClick(item, event)}
         className={cn(
           "group rounded-xl px-3 text-sm font-medium transition-[width,background-color,color] duration-300",
           SIDEBAR_ROW_CLASS,
           collapsed
-            ? cn("text-sidebar-foreground", isLocked && "opacity-60")
-            : sectionStyle
-            ? isActive && !isLocked
-              ? cn(sectionStyle.headerBg, sectionStyle.headerHoverBg, "font-semibold")
-              : isLocked
-                ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
-                : cn("text-sidebar-foreground", sectionStyle.hoverColor)
-          : isActive && !isLocked && sectionBgColor
-            ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
-            : isActive && !isLocked
-              ? "bg-muted text-foreground font-semibold shadow-sm"
-              : isLocked
-                ? "opacity-60 cursor-pointer hover:opacity-70 text-sidebar-foreground"
-                : sectionBgColor
-                  ? cn(sectionBgColor, sectionTextColor, "hover:scale-[1.02] hover:font-semibold")
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground",
+            ? cn("text-sidebar-foreground", locked && "opacity-60")
+            : active && !locked
+              ? "bg-sidebar-accent text-sidebar-foreground font-semibold"
+              : locked
+                ? "cursor-pointer text-muted-foreground opacity-60"
+                : "text-sidebar-foreground hover:bg-sidebar-accent",
+          nested && !collapsed && "text-[13px]",
         )}
       >
-        <div className="relative flex-shrink-0">
-          <item.icon
-            className={cn(
-              sectionStyle ? "h-4 w-4 transition-all duration-300" : "h-5 w-5 transition-all duration-300",
-              isActive && !isLocked && !sectionBgColor && !sectionStyle && "text-foreground",
-              isLocked && "text-muted-foreground"
-            )}
-          />
-          {showLockIcon && (
-            <Lock className="h-2.5 w-2.5 absolute -top-1 -right-1 text-warning" />
-          )}
-        </div>
-        {!collapsed && (
-          <>
-            <span
-              className={cn(
-                "truncate flex-1",
-                sectionStyle && "text-[11px] font-bold uppercase tracking-wider text-left whitespace-nowrap",
-                isLocked && "text-muted-foreground"
-              )}
-            >
-              {item.title}
-            </span>
-            {item.isHighlighted && !isActive && !isLocked && (
-              <span className="h-2 w-2 rounded-full bg-primary flex-shrink-0 animate-pulse" />
-            )}
-          </>
-        )}
+        <span className="relative shrink-0">
+          <item.icon className="h-5 w-5" />
+          {locked && <Lock className="absolute -right-1 -top-1 h-2.5 w-2.5 text-warning" />}
+        </span>
+        {!collapsed && <span className="min-w-0 flex-1 truncate">{item.title}</span>}
       </Link>
     );
-
-    return menuLink;
   };
 
-  const renderGroupItem = (
-    group: MenuItem,
-    sectionBgColor?: string,
-    sectionTextColor?: string,
-    sectionBorderColor?: string
-  ) => {
-    const children = group.children ?? [];
-    const childActive = children.some((c) => isItemActive(c.url, c.exactUrl));
-    const groupId = `menu-group-${group.key}`;
-    const isOpen = openGroups[group.key || group.title] ?? childActive;
-    const GroupIcon = group.icon;
-
+  const renderGroup = (group: AppSidebarGroup) => {
+    if (group.items.length === 0) return null;
+    const childActive = group.items.some(isItemActive);
+    const open = openGroups[group.key] ?? childActive;
+    const contentId = `app-sidebar-${group.key}`;
     return (
-      <div key={group.key || group.title} className="flex flex-col">
-        <button
+      <div key={group.key} className="flex flex-col">
+        <Button
           type="button"
-          aria-expanded={isOpen}
-          aria-controls={groupId}
+          variant={group.emphasis ? "default" : "ghost"}
           aria-label={collapsed ? group.title : undefined}
-          onClick={() =>
-            collapsed
-              ? expandNow()
-              : setOpenGroups((prev) => ({
-                  ...prev,
-                  [group.key || group.title]: !isOpen,
-                }))
-          }
-          data-sidebar-row={group.key || group.title}
+          aria-expanded={open}
+          aria-controls={contentId}
+          data-sidebar-row={group.key}
+          onClick={() => collapsed ? expandNow() : setOpenGroups((prev) => ({ ...prev, [group.key]: !open }))}
           className={cn(
-            "group rounded-xl px-3 text-sm font-medium transition-[background-color,color] duration-300 w-full text-left",
+            "h-auto w-full rounded-xl px-3 text-sm",
             SIDEBAR_ROW_CLASS,
-            collapsed
-              ? "text-sidebar-foreground"
-              : childActive && sectionBgColor
-              ? cn(sectionBgColor, sectionTextColor, "border-l-[3px]", sectionBorderColor, "font-semibold")
-              : sectionBgColor
-                ? cn(sectionBgColor, sectionTextColor, "hover:font-semibold")
-                : "text-sidebar-foreground hover:bg-sidebar-accent"
+            collapsed ? "justify-center" : "justify-start gap-3",
+            !group.emphasis && childActive && "bg-sidebar-accent font-semibold",
           )}
         >
-          <GroupIcon className="h-5 w-5 flex-shrink-0" />
+          <group.icon className="h-5 w-5 shrink-0" />
           {!collapsed && (
             <>
-              <span className="truncate flex-1">{group.title}</span>
-              {isOpen ? (
-                <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" />
-              ) : (
-                <ChevronRight className="h-3.5 w-3.5 flex-shrink-0" />
-              )}
+              <span className="min-w-0 flex-1 truncate text-left">{group.title}</span>
+              {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </>
           )}
-        </button>
-        {isOpen && !collapsed && (
-          <nav
-            id={groupId}
-            className="flex flex-col gap-0.5 mt-0.5 ml-4 pl-2 border-l border-border/60 animate-fade-in [&_a]:text-[13px]"
-          >
-            {children.map((child) => (
-              <Fragment key={child.url}>
-                {renderSingleItem(child, sectionBgColor, sectionTextColor, sectionBorderColor)}
-              </Fragment>
-            ))}
+        </Button>
+        {open && !collapsed && (
+          <nav id={contentId} aria-label={group.title} className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-sidebar-border pl-2">
+            {group.items.map((item) => renderItem(item, true))}
           </nav>
         )}
       </div>
     );
   };
 
-  const renderSection = (section: MenuSection) => {
-    const isActive = isSectionActive(section);
-    const hasExplicitState = section.title in openSections;
-    const isOpen = hasExplicitState ? !!openSections[section.title] : (!userInteracted && isActive);
-    const Icon = section.icon;
-
-    if (collapsed) {
-      return (
-        <nav key={section.title} className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
-          <button
-            type="button"
-            aria-label={section.title}
-            data-sidebar-row={section.key || section.title}
-            onClick={expandNow}
-            className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-xl px-3 w-full text-sidebar-foreground")}
-          >
-            <Icon className="h-5 w-5 flex-shrink-0" />
-          </button>
-        </nav>
-      );
-    }
-
-    return (
-      <div key={section.title} className="px-3">
-        <button
-          onClick={() => toggleSection(section.title)}
-          data-sidebar-row={section.key || section.title}
-          className={cn(
-            SIDEBAR_ROW_CLASS,
-            "w-full rounded-xl px-3 text-sm font-medium transition-[background-color,color] duration-200",
-            isOpen
-              ? cn(section.headerBg, section.headerHoverBg)
-              : cn("text-sidebar-foreground", section.hoverColor)
-          )}
-        >
-          <Icon className="h-4 w-4" />
-          <span className="text-[11px] font-bold uppercase tracking-wider flex-1 text-left whitespace-nowrap">
-            {section.title}
-          </span>
-          <ChevronDown
-            className={cn(
-              "h-3.5 w-3.5 transition-transform duration-200",
-              isOpen ? "rotate-180 text-white/70" : "text-muted-foreground/50"
-            )}
-          />
-        </button>
-        {isOpen && (
-          <nav className="flex flex-col gap-0.5 mt-0.5 animate-fade-in">
-            {section.items.filter((item) => !item.adminOnly || isAdmin || (item.key && hasFeatureAccess(item.key))).map((item) => renderSingleItem(item, section.bgColor, section.textColor, section.borderColor))}
-          </nav>
-        )}
-      </div>
-    );
-  };
-
-  const handleLogout = async () => {
-    await signOut();
-  };
+  const sectionLabel = (label: string) => collapsed ? (
+    <Separator className="mx-auto my-1 w-7 bg-sidebar-border" />
+  ) : (
+    <p className="px-3 pt-2 text-[10px] font-bold uppercase text-muted-foreground">{label}</p>
+  );
 
   return (
     <TooltipProvider delayDuration={300}>
       <aside
         id="app-sidebar"
-        style={{ '--sidebar-current-width': collapsed ? '64px' : '288px' } as React.CSSProperties}
-        className={cn(
-          "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 flex-col hidden lg:flex",
-          collapsed ? "w-16" : "w-72"
-        )}
+        className={cn("fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-sidebar-border bg-sidebar transition-all duration-300 lg:flex", collapsed ? "w-16" : "w-72")}
         onMouseEnter={handleSidebarMouseEnter}
         onMouseLeave={handleSidebarMouseLeave}
-        onMouseOver={(e) => captureAnchor(e.target)}
-        onFocusCapture={(e) => captureAnchor(e.target)}
+        onFocusCapture={expandNow}
+        onBlurCapture={(event) => {
+          if (!accountOpen && !event.currentTarget.contains(event.relatedTarget)) handleSidebarMouseLeave();
+        }}
       >
-        <div className="flex h-16 items-center justify-between border-b border-sidebar-border px-4 flex-shrink-0">
-          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" className="flex items-center gap-3 min-w-0">
-            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl gradient-primary">
+        <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-4">
+          <Link to={isStartPlan ? "/dashboard-start" : "/dashboard"} data-workspace-title="Inicial" className="flex min-w-0 items-center gap-3">
+            <div className="gradient-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
               <Cloud className="h-5 w-5 text-primary-foreground" />
             </div>
-            {!collapsed && (
-              <div className="animate-fade-in min-w-0">
-                <h1 className="font-display text-base font-semibold text-sidebar-foreground whitespace-nowrap">
-                  Agentes de Sonhos
-                </h1>
-              </div>
-            )}
+            {!collapsed && <h1 className="whitespace-nowrap font-display text-base font-semibold text-sidebar-foreground">Agentes de Sonhos</h1>}
           </Link>
         </div>
 
-        {/* Toggle visual removido: o hover sobre o menu já expande/recolhe automaticamente */}
-
-        {/* Scrollable Navigation */}
-        <div ref={scrollAreaRef} className={cn("flex-1 py-2 space-y-0.5", collapsed ? "overflow-x-hidden overflow-y-auto scrollbar-hide" : "overflow-y-auto")}>
-          {/* Início */}
+        <div className={cn("flex-1 space-y-0.5 overflow-y-auto overflow-x-hidden py-2", collapsed && "scrollbar-hide")}>
+          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{renderGroup(createGroup)}</nav>
+          <div className="px-3">{sectionLabel("MEU TRABALHO")}</div>
           <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
-            {renderSingleItem(meusProjetosItem)}
-            {renderSingleItem(minhaAgendaItem)}
-            {renderSingleItem(meuPerfilItem)}
-            {!isTeamMember && renderSingleItem(comunidadeItem)}
+            {renderGroup(projectsGroup)}
+            {isPermitted(APP_AGENDA_ITEM) && renderItem(APP_AGENDA_ITEM)}
           </nav>
-
-          <div className="px-3 py-1">
-            <Separator className="bg-sidebar-border" />
-          </div>
-
-          {/* Dynamic menu entries ordered by DB */}
-          {orderedEntries.map((entry) => {
-            if (entry.type === "section") {
-              return <Fragment key={entry.section.key || entry.section.title}>{renderSection(entry.section)}</Fragment>;
-            }
-            return (
-              <nav key={entry.item.key || entry.item.url} className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
-                {renderSingleItem(entry.item)}
-              </nav>
-            );
-          })}
+          <div className="px-3">{sectionLabel("GESTÃO")}</div>
+          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
+          <div className="px-3">{sectionLabel("OUTRAS")}</div>
+          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
+            {otherItems.map((item) => renderItem(item))}
+            {renderGroup(moreGroup)}
+          </nav>
         </div>
 
-        {/* Bottom Section - Compact */}
-        <div className="flex-shrink-0 border-t border-sidebar-border px-3 py-2 space-y-0.5">
-          {isAdmin && renderSingleItem(adminMenuItem)}
-
-          {collapsed ? (
-            <div className={cn("flex flex-col", SIDEBAR_ROW_GAP_CLASS)}>
-              <Link
-                to="/suporte"
-                aria-label="Suporte"
-                data-sidebar-row="bottom-suporte"
-                onClick={(e) => { e.preventDefault(); expandNow(); }}
-                className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-lg text-muted-foreground")}
-              >
-                <Headset className="h-4 w-4" />
-              </Link>
-              {!isFornecedor && (
-                <Link
-                  to="/minha-conta"
-                  aria-label="Minha Conta"
-                  data-sidebar-row="bottom-minha-conta"
-                  onClick={(e) => { e.preventDefault(); expandNow(); }}
-                  className={cn(SIDEBAR_ROW_CLASS, "justify-center rounded-lg text-muted-foreground")}
-                >
-                  <Settings className="h-4 w-4" />
-                </Link>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Sair"
-                data-sidebar-row="bottom-sair"
-                className={cn(SIDEBAR_ROW_CLASS, "w-full h-auto justify-center rounded-lg text-muted-foreground hover:bg-transparent hover:text-muted-foreground")}
-                onClick={expandNow}
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-1">
-                <Link
-                  to="/suporte"
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors whitespace-nowrap"
-                >
-                  <Headset className="h-3.5 w-3.5" />
-                  <span className="whitespace-nowrap">Suporte</span>
-                </Link>
-                {!isFornecedor && (
-                  <Link
-                    to="/minha-conta"
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors whitespace-nowrap"
-                  >
-                    <Settings className="h-3.5 w-3.5" />
-                    <span className="whitespace-nowrap">Minha Conta</span>
-                  </Link>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive text-xs whitespace-nowrap"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-3.5 w-3.5 mr-1" />
-                  <span className="whitespace-nowrap">Sair</span>
-                </Button>
-              </div>
-              <div className="text-center pt-1">
-                <Link to="/atualizacoes" className="text-[9px] text-muted-foreground/50 hover:text-primary transition-colors">
-                  v1.0 Beta · Nobre Digital
-                </Link>
-              </div>
-            </>
-          )}
+        <div className="shrink-0 border-t border-sidebar-border px-3 py-2">
+          {isAdmin && <div className="mb-1">{renderItem(ADMIN_ITEM)}</div>}
+          <AppSidebarAccount collapsed={collapsed} open={accountOpen} onOpenChange={handleAccountOpenChange} onSignOut={() => void signOut()} />
         </div>
       </aside>
-
-      <UpgradeDialog
-        open={upgradeFeature !== null}
-        onOpenChange={(open) => !open && setUpgradeFeature(null)}
-        requiredFeature={upgradeFeature || undefined}
-      />
-      <ComingSoonDialog
-        open={showComingSoon}
-        onOpenChange={setShowComingSoon}
-      />
+      <UpgradeDialog open={upgradeFeature !== null} onOpenChange={(open) => !open && setUpgradeFeature(null)} requiredFeature={upgradeFeature || undefined} />
+      <ComingSoonDialog open={showComingSoon} onOpenChange={setShowComingSoon} />
     </TooltipProvider>
   );
 }
