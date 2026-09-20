@@ -49,7 +49,7 @@ export function PostCard({
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentText, setCommentText] = useState("");
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const name = post.profile?.name || "Membro";
   const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
