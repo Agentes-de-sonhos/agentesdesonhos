@@ -50,6 +50,13 @@
       "when": 1789919617332,
       "tag": "0006_community_network_phase2",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789920258988,
+      "tag": "0007_community_connections_hardening",
+      "breakpoints": true
     }
   ]
 }
