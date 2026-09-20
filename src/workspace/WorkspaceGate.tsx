@@ -1,8 +1,9 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   setWorkspaceEligibleCache,
   isWorkspaceEligible,
@@ -10,6 +11,7 @@ import {
 } from "./featureFlag";
 import { WorkspaceProvider } from "./WorkspaceProvider";
 import { WorkspaceShell } from "./WorkspaceShell";
+import { buildPlatformPinnedGuard } from "./pinnedRestoreGuard";
 import { LoadingScreen } from "@/components/auth/LoadingScreen";
 
 interface Props {
@@ -24,7 +26,12 @@ interface Props {
 export function WorkspaceGate({ children }: Props) {
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
-  const { plan, loading: subLoading } = useSubscription();
+  const { plan, loading: subLoading, hasFeature } = useSubscription();
+  const { can, loading: permLoading } = usePermissions();
+  const pinnedGuard = useMemo(
+    () => buildPlatformPinnedGuard({ can, hasFeature }),
+    [can, hasFeature],
+  );
   const decisionUserRef = useRef<string | null | undefined>(undefined);
   const [decision, setDecision] = useState<{
     workspace: boolean;
@@ -86,6 +93,9 @@ export function WorkspaceGate({ children }: Props) {
       initialPath={decision.initialPath}
       initialTitle={decision.initialTitle}
       homePath={resolveHomePath({ role, plan })}
+      pinnedScope={{ product: "agentes", userId: user?.id ?? null }}
+      pinnedRestoreReady={!permLoading && !subLoading}
+      canRestorePinnedPath={pinnedGuard}
     >
       <WorkspaceShell>{children}</WorkspaceShell>
     </WorkspaceProvider>

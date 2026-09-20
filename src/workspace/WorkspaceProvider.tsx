@@ -1,6 +1,20 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, ReactNode } from "react";
+import { toast } from "sonner";
 import { toTabTitleCase } from "@/lib/tabTitle";
 import { isMultiInstanceRoute } from "./multiInstanceRoutes";
+import { titleForPath } from "./routeTitle";
+import {
+  MAX_PINNED_TABS,
+  buildPinnedStorageKey,
+  isPinnablePath,
+  normalizePinnedPath,
+  readPinnedPaths,
+  restorablePinnedPaths,
+  togglePinnedPath,
+  type TogglePinnedResult,
+  writePinnedPaths,
+  type PinnedScope,
+} from "./pinnedTabs";
 
 /** Maximum number of *content* windows (the pinned home tab does not count). */
 export const MAX_TABS = 10;
@@ -22,6 +36,8 @@ interface WorkspaceState {
   tabs: WorkspaceTab[];
   activeId: string | null;
   homePath: string;
+  /** Caminhos das abas FAVORITAS (fixadas), na ordem salva. Máximo de 4. */
+  pinnedPaths: string[];
 }
 
 type Action =
@@ -30,7 +46,9 @@ type Action =
   | { type: "CLOSE"; id: string }
   | { type: "CLOSE_OTHERS"; id: string }
   | { type: "CLOSE_ALL" }
-  | { type: "ACTIVATE"; id: string };
+  | { type: "ACTIVATE"; id: string }
+  | { type: "SET_PINNED_PATHS"; paths: string[] }
+  | { type: "RESTORE_PINNED"; paths: string[] };
 
 function newId() {
   return `tab_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
@@ -112,6 +130,22 @@ function reducer(state: WorkspaceState, action: Action): WorkspaceState {
     }
     case "ACTIVATE":
       return state.tabs.some((t) => t.id === action.id) ? { ...state, activeId: action.id } : state;
+    case "SET_PINNED_PATHS":
+      return { ...state, pinnedPaths: action.paths.slice(0, MAX_PINNED_TABS) };
+    case "RESTORE_PINNED": {
+      // Restaura as abas fixadas logo após Inicial, na ordem salva, sem
+      // duplicar as que já estão abertas e sem furar o limite de 10 janelas.
+      const paths = restorablePinnedPaths(action.paths, {
+        homePath: state.homePath,
+        openPaths: state.tabs.map((t) => t.path),
+      });
+      let tabs = state.tabs;
+      for (const path of paths) {
+        if (countContentTabs(tabs) >= MAX_TABS) break;
+        tabs = [...tabs, { id: newId(), path, title: titleForPath(path) }];
+      }
+      return { ...state, tabs, pinnedPaths: action.paths.slice(0, MAX_PINNED_TABS) };
+    }
     default:
       return state;
   }
@@ -127,6 +161,11 @@ interface WorkspaceContextValue extends WorkspaceState {
   canOpenMore: boolean;
   max: number;
   contentCount: number;
+  /** Fixar/desfixar uma aba elegível (favoritos restaurados no próximo acesso). */
+  togglePinnedTab: (id: string) => void;
+  isTabPinned: (tab: WorkspaceTab) => boolean;
+  isTabPinnable: (tab: WorkspaceTab) => boolean;
+  maxPinned: number;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
@@ -139,18 +178,56 @@ interface Props {
   initialPath: string;
   initialTitle: string;
   homePath?: string;
+  /**
+   * Escopo das preferências de abas fixadas (produto + tenant + usuário).
+   * Sem escopo (ou sem usuário) a fixação fica apenas na sessão atual.
+   */
+  pinnedScope?: PinnedScope;
+  /** `true` quando os guards já carregaram e a restauração pode acontecer. */
+  pinnedRestoreReady?: boolean;
+  /** Valida rota/guards antes de restaurar uma aba fixada. */
+  canRestorePinnedPath?: (path: string) => boolean;
   children: ReactNode;
 }
 
-export function WorkspaceProvider({ initialPath, initialTitle, homePath = "/dashboard", children }: Props) {
+export function WorkspaceProvider({
+  initialPath,
+  initialTitle,
+  homePath = "/dashboard",
+  pinnedScope,
+  pinnedRestoreReady = true,
+  canRestorePinnedPath,
+  children,
+}: Props) {
   const [state, dispatch] = useReducer(reducer, undefined, () => {
     const initialTabs: WorkspaceTab[] =
       initialPath === homePath
         ? []
         : [{ id: newId(), path: initialPath, title: toTabTitleCase(initialTitle) }];
     const tabs = normalizeTabs(initialTabs, homePath);
-    return { tabs, activeId: tabs[tabs.length - 1].id, homePath };
+    return { tabs, activeId: tabs[tabs.length - 1].id, homePath, pinnedPaths: [] };
   });
+
+  const storageKey = useMemo(
+    () => (pinnedScope ? buildPinnedStorageKey(pinnedScope) : null),
+    [pinnedScope?.product, pinnedScope?.tenant, pinnedScope?.userId],
+  );
+
+  const restoredKeyRef = useRef<string | null>(null);
+  const guardRef = useRef(canRestorePinnedPath);
+  guardRef.current = canRestorePinnedPath;
+
+  // Restauração automática no primeiro acesso/recarregamento, por escopo.
+  useEffect(() => {
+    if (!storageKey || !pinnedRestoreReady) return;
+    if (restoredKeyRef.current === storageKey) return;
+    restoredKeyRef.current = storageKey;
+    const saved = readPinnedPaths(storageKey, homePath);
+    if (saved.length === 0) return;
+    const allowed = saved.filter((path) => !guardRef.current || guardRef.current(path));
+    dispatch({ type: "SET_PINNED_PATHS", paths: saved });
+    if (allowed.length > 0) dispatch({ type: "RESTORE_PINNED", paths: allowed });
+  }, [storageKey, pinnedRestoreReady, homePath]);
 
   const openTab = useCallback((path: string, title: string, navState?: unknown) => {
     dispatch({ type: "OPEN", path, title, state: navState });
@@ -162,6 +239,46 @@ export function WorkspaceProvider({ initialPath, initialTitle, homePath = "/dash
   const closeOtherTabs = useCallback((id: string) => dispatch({ type: "CLOSE_OTHERS", id }), []);
   const closeAllTabs = useCallback(() => dispatch({ type: "CLOSE_ALL" }), []);
   const activateTab = useCallback((id: string) => dispatch({ type: "ACTIVATE", id }), []);
+
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  const togglePinnedTab = useCallback(
+    (id: string) => {
+      const current = stateRef.current;
+      const tab = current.tabs.find((t) => t.id === id);
+      if (!tab || tab.pinned) return;
+      const result: TogglePinnedResult = togglePinnedPath(
+        current.pinnedPaths,
+        tab.path,
+        current.homePath,
+      );
+      if (result.ok === false) {
+        toast.error(
+          result.reason === "limit"
+            ? `Você pode manter até ${MAX_PINNED_TABS} abas fixadas além da Inicial. Desfixe uma para fixar outra.`
+            : "Esta aba não pode ser fixada.",
+        );
+        return;
+      }
+      dispatch({ type: "SET_PINNED_PATHS", paths: result.paths });
+      // Persistência imediata: fechar a aba depois não desfixa a preferência.
+      writePinnedPaths(storageKey, result.paths);
+      toast.success(result.pinned ? `"${tab.title}" fixada.` : `"${tab.title}" desfixada.`);
+    },
+    [storageKey],
+  );
+
+  const isTabPinned = useCallback(
+    (tab: WorkspaceTab) =>
+      !tab.pinned && state.pinnedPaths.includes(normalizePinnedPath(tab.path)),
+    [state.pinnedPaths],
+  );
+
+  const isTabPinnable = useCallback(
+    (tab: WorkspaceTab) => !tab.pinned && isPinnablePath(tab.path, state.homePath),
+    [state.homePath],
+  );
 
   const value = useMemo<WorkspaceContextValue>(
     () => ({
@@ -175,8 +292,23 @@ export function WorkspaceProvider({ initialPath, initialTitle, homePath = "/dash
       canOpenMore: countContentTabs(state.tabs) < MAX_TABS,
       contentCount: countContentTabs(state.tabs),
       max: MAX_TABS,
+      togglePinnedTab,
+      isTabPinned,
+      isTabPinnable,
+      maxPinned: MAX_PINNED_TABS,
     }),
-    [state, openTab, openOrActivateTab, closeTab, closeOtherTabs, closeAllTabs, activateTab],
+    [
+      state,
+      openTab,
+      openOrActivateTab,
+      closeTab,
+      closeOtherTabs,
+      closeAllTabs,
+      activateTab,
+      togglePinnedTab,
+      isTabPinned,
+      isTabPinnable,
+    ],
   );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;

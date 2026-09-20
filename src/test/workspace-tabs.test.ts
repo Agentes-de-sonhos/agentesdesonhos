@@ -7,7 +7,7 @@ import { toTabTitleCase } from "@/lib/tabTitle";
 
 const HOME = "/dashboard";
 const base = (tabs: WorkspaceTab[], activeId = HOME_TAB_ID) => ({
-  tabs: normalizeTabs(tabs, HOME), activeId, homePath: HOME,
+  tabs: normalizeTabs(tabs, HOME), activeId, homePath: HOME, pinnedPaths: [] as string[],
 });
 
 describe("pinned home tab", () => {

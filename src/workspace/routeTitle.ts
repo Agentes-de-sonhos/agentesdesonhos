@@ -32,10 +32,14 @@ const ROUTE_TITLES: Record<string, string> = {
   "/personalizador-laminas": "Personalizador de Lâminas",
   "/bloco-notas": "Bloco de Notas",
   "/gestao-clientes": "Gestão de Clientes",
+  "/gestao-clientes/clientes": "Clientes",
+  "/gestao-clientes/funil": "Oportunidades",
+  "/gestao-clientes/operacoes": "Operações",
   "/financeiro": "Gestão Financeira",
   "/crm": "CRM",
   "/operacoes": "Operações",
   "/oportunidades": "Oportunidades",
+  "/reservas": "Reservas",
   "/ferramentas-ia": "Ferramentas de IA",
   "/ferramentas-ia/trip-wallet": "Carteira Digital",
   "/ferramentas-ia/gerar-orcamento": "Orçamento",
@@ -82,4 +86,13 @@ export function titleForPath(pathname: string): string {
   }
   const raw = best ? ROUTE_TITLES[best] : humanize(clean);
   return toTabTitleCase(raw);
+}
+/**
+ * `true` quando o caminho corresponde EXATAMENTE a uma rota canônica de módulo
+ * do gerenciador de abas. Usado pela fixação de abas para aceitar apenas
+ * identificadores de rota estáveis (nunca detalhes/edições com id temporário).
+ */
+export function hasCanonicalRouteTitle(pathname: string): boolean {
+  const clean = (pathname || "/").split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  return Object.prototype.hasOwnProperty.call(ROUTE_TITLES, clean);
 }

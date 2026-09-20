@@ -88,7 +88,16 @@ vi.mock("@/hooks/useAuth", () => ({
 }));
 vi.mock("@/contexts/TeamSessionContext", () => ({
   TeamSessionProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  useTeamSession: () => ({ session: null, loading: false }),
+  useTeamSession: () => ({
+    session: null,
+    loading: false,
+    member: null,
+    permissions: [],
+    stagePermissions: [],
+    scopes: {},
+    community: {},
+    accessProfile: null,
+  }),
 }));
 vi.mock("@/hooks/useSubscription", () => ({
   SubscriptionProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,

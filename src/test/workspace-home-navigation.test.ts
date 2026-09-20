@@ -87,7 +87,7 @@ describe("home tab navigation boundary", () => {
 });
 
 describe("workspace window identity from the home tab", () => {
-  const base = { tabs: normalizeTabs([], HOME), activeId: HOME_TAB_ID, homePath: HOME };
+  const base = { tabs: normalizeTabs([], HOME), activeId: HOME_TAB_ID, homePath: HOME, pinnedPaths: [] as string[] };
 
   it("dedupes by route and preserves navigation state", () => {
     const s1 = workspaceReducer(base, { type: "OPEN_OR_ACTIVATE", path: "/crm?id=1", title: "CRM", state: { id: 1 } });
