@@ -136,19 +136,19 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
         <div className="px-3 sm:px-4 lg:px-0">
           <MobileTopBar embedded />
         </div>
-        {can("online_users.view") && (
-          <div className="relative z-20 px-3 sm:px-4 lg:px-0" data-dashboard-online-users>
-            <OnlineAgentsStrip compact />
+        <div className="flex min-w-0 flex-col gap-3 px-3 sm:px-4 lg:flex-row lg:items-center lg:px-0" data-dashboard-community-actions>
+          <div className="order-2 min-w-0 flex-1 lg:order-1">
+            <CommunityComposerLauncher compact onSubmit={createPost} isCreating={isCreating} />
           </div>
-        )}
+          {can("online_users.view") && (
+            <div className="relative z-20 order-1 lg:order-2 lg:shrink-0" data-dashboard-online-users>
+              <OnlineAgentsStrip compact />
+            </div>
+          )}
+        </div>
 
         {/* Coluna de leitura ampla, alinhada ao título no dashboard Agentes de Sonhos. */}
         <div className="w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]" data-dashboard-community-feed-column>
-        {/* Composer */}
-        <div className="px-3 sm:px-4 lg:px-0">
-          <CommunityComposerLauncher compact onSubmit={createPost} isCreating={isCreating} />
-        </div>
-
         {/* Feed preview */}
         {loadingPosts ? (
           <div className="flex items-center justify-center py-8 text-muted-foreground">

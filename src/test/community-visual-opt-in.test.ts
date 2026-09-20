@@ -15,11 +15,13 @@ describe("Comunidade — ajustes visuais e opt-in por agência", () => {
     expect(topBar).toContain("Comunidade");
     expect(topBar).toContain("Pesquisar");
     expect(topBar).toContain("OPEN_COMMUNITY_CHAT_EVENT");
+    expect(topBar).toContain("lg:hidden");
   });
 
   it("reutiliza launcher, compositor e cabeçalho compartilhados", () => {
     expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("<CommunityComposerLauncher");
     expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("<CommunityComposerLauncher compact");
+    expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("data-dashboard-community-actions");
     expect(read("src/components/community/CommunityFeedSection.tsx")).toContain("<CommunityComposerLauncher");
     expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("<CommunityPostHeader");
     expect(read("src/components/community/PostCard.tsx")).toContain("<CommunityPostHeader");
