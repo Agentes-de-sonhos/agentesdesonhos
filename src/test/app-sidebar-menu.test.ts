@@ -96,6 +96,37 @@ describe("menu lateral Agentes de Sonhos", () => {
     expect(desktop).toContain("handleAccountOpenChange");
   });
 
+  it("mostra somente Criar novo, Meus projetos e Agenda na área principal recolhida", () => {
+    const collapsedArea = desktop.slice(
+      desktop.indexOf('<div className={cn("flex-1 space-y-0.5'),
+      desktop.indexOf('<div className="shrink-0 border-t'),
+    );
+
+    expect(collapsedArea.indexOf("renderGroup(createGroup)")).toBeLessThan(collapsedArea.indexOf("renderGroup(projectsGroup)"));
+    expect(collapsedArea.indexOf("renderGroup(projectsGroup)")).toBeLessThan(collapsedArea.indexOf("renderItem(APP_AGENDA_ITEM)"));
+    expect(collapsedArea).toContain("{!collapsed && (");
+    expect(collapsedArea).toContain("data-sidebar-expanded-navigation");
+    expect(collapsedArea.indexOf("{!collapsed && (")).toBeLessThan(collapsedArea.indexOf("managementItems.map"));
+    expect(collapsedArea.indexOf("managementItems.map")).toBeLessThan(collapsedArea.indexOf("otherItems.map"));
+    expect(collapsedArea.indexOf("otherItems.map")).toBeLessThan(collapsedArea.indexOf("renderGroup(moreGroup)"));
+  });
+
+  it("remove do DOM e da tabulação os itens inferiores enquanto recolhido", () => {
+    expect(desktop).toContain("{!collapsed && (");
+    expect(desktop).not.toContain('aria-hidden={collapsed}');
+    expect(desktop).not.toContain('tabIndex={collapsed ? -1');
+  });
+
+  it("mantém rodapé e mobile fora da condição visual do desktop", () => {
+    const expandedOnlyEnd = desktop.indexOf("data-sidebar-expanded-navigation");
+    const account = desktop.indexOf("<AppSidebarAccount");
+    expect(expandedOnlyEnd).toBeGreaterThan(-1);
+    expect(account).toBeGreaterThan(expandedOnlyEnd);
+    expect(mobile).not.toContain("data-sidebar-expanded-navigation");
+    expect(mobile).toContain('{section("GESTÃO")}{management.map');
+    expect(mobile).toContain('{section("OUTRAS")}{others.map');
+  });
+
   it("remove perfil, suporte e comunidade do corpo sem remover as rotas da conta", () => {
     expect(desktop).not.toContain("comunidadeItem");
     expect(mobile).not.toContain("comunidadeItem");

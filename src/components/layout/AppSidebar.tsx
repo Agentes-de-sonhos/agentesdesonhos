@@ -253,13 +253,17 @@ export function AppSidebar() {
             {renderGroup(projectsGroup)}
             {isPermitted(APP_AGENDA_ITEM) && renderItem(APP_AGENDA_ITEM)}
           </nav>
-          <div className="px-3">{sectionLabel("GESTÃO")}</div>
-          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
-          <div className="px-3">{sectionLabel("OUTRAS")}</div>
-          <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
-            {otherItems.map((item) => renderItem(item))}
-            {renderGroup(moreGroup)}
-          </nav>
+          {!collapsed && (
+            <div data-sidebar-expanded-navigation>
+              <div className="px-3">{sectionLabel("GESTÃO")}</div>
+              <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
+              <div className="px-3">{sectionLabel("OUTRAS")}</div>
+              <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
+                {otherItems.map((item) => renderItem(item))}
+                {renderGroup(moreGroup)}
+              </nav>
+            </div>
+          )}
         </div>
 
         <div className="shrink-0 border-t border-sidebar-border px-3 py-2">
