@@ -200,8 +200,13 @@ describe("Minha Rede", () => {
 });
 
 describe("busca da comunidade", () => {
-  it("tem os filtros Tudo, Pessoas e Publicações", () => {
-    expect(SEARCH_FILTERS.map((f) => f.label)).toEqual(["Tudo", "Pessoas", "Publicações"]);
+  it("tem os filtros Tudo, Pessoas, Publicações e Mensagens", () => {
+    expect(SEARCH_FILTERS.map((f) => f.label)).toEqual([
+      "Tudo",
+      "Pessoas",
+      "Publicações",
+      "Mensagens",
+    ]);
   });
 
   it("exige termo mínimo e usa debounce", () => {

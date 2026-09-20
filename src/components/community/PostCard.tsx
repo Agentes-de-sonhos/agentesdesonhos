@@ -301,6 +301,17 @@ export function PostCard({
           startIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           authorName={name}
+          social={{
+            post,
+            currentUserId: user?.id,
+            isAdmin,
+            onLike,
+            onAddComment,
+            isAddingComment,
+            fetchComments,
+            onDeleteComment,
+            onToggleCommentLike,
+          }}
         />
       </CardContent>
     </Card>

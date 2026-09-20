@@ -111,11 +111,15 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     isVoting,
   } = useCommunityFeed({ pageSize: DASHBOARD_PAGE_SIZE });
 
-  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [lightbox, setLightbox] = useState<{ postId: string; images: string[]; index: number } | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   // Apenas um post com comentários expandidos por vez neste feed do dashboard.
   const [openCommentsPostId, setOpenCommentsPostId] = useState<string | null>(null);
   const { newCount } = useCommunityUnread();
+  // Mantém o post da galeria sempre com os contadores atuais do feed.
+  const lightboxPost = lightbox
+    ? (posts as CommunityPost[]).find((p) => p.id === lightbox.postId) ?? null
+    : null;
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -192,7 +196,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 }}
                 onEdit={() => setEditingPost(post)}
                 fetchComments={fetchComments}
-                onOpenImage={(index) => setLightbox({ images: postImages(post), index })}
+                onOpenImage={(index) => setLightbox({ postId: post.id, images: postImages(post), index })}
                 onVotePoll={votePoll}
                 isVoting={isVoting}
                 newCount={newCount}
@@ -233,6 +237,22 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           images={lightbox?.images ?? []}
           startIndex={lightbox ? lightbox.index : null}
           onClose={() => setLightbox(null)}
+          authorName={lightboxPost?.profile?.name ?? null}
+          social={
+            lightboxPost
+              ? {
+                  post: lightboxPost,
+                  currentUserId: user?.id,
+                  isAdmin,
+                  onLike: (postId, liked) => toggleLike({ postId, liked }),
+                  onAddComment: addComment,
+                  isAddingComment,
+                  fetchComments,
+                  onDeleteComment: deleteComment,
+                  onToggleCommentLike: toggleCommentLike,
+                }
+              : undefined
+          }
         />
 
         <EditPostDialog
