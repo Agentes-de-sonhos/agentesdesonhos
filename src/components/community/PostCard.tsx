@@ -112,29 +112,35 @@ export function PostCard({
             </div>
           </div>
           {!isOwner && <ConnectButton targetUserId={post.user_id} targetName={name} />}
-          {(isOwner || isAdmin || !isOwner) && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <PostFollowMenuItem authorId={post.user_id} authorName={name} />
-                {isOwner && onEdit && (
-                  <DropdownMenuItem onClick={() => onEdit(post)}>
-                    <Pencil className="h-4 w-4 mr-2" /> Editar publicação
-                  </DropdownMenuItem>
-                )}
-                {(isOwner || isAdmin) && (
-                  <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
-                    <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {!isOwner && <ConnectMenuItem targetUserId={post.user_id} targetName={name} />}
+              <PostFollowMenuItem authorId={post.user_id} authorName={name} />
+              {isOwner && onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(post)}>
+                  <Pencil className="h-4 w-4 mr-2" /> Editar publicação
+                </DropdownMenuItem>
+              )}
+              {!isOwner && (
+                <DropdownMenuItem onClick={() => setReportOpen(true)}>
+                  <ShieldAlert className="h-4 w-4 mr-2" /> Denunciar publicação
+                </DropdownMenuItem>
+              )}
+              {(isOwner || isAdmin) && (
+                <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
+                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={user?.id} />
         </div>
+
 
         {/* Content */}
         {post.content && <PostTextContent text={post.content} />}
