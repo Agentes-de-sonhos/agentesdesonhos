@@ -224,6 +224,9 @@ export function WorkspaceProvider({
     if (restoredKeyRef.current === storageKey) return;
     restoredKeyRef.current = storageKey;
     const saved = readPinnedPaths(storageKey, homePath);
+    // Preferências legadas (ex.: Dashboard Start salvo como favorito) são
+    // descartadas silenciosamente e a versão saneada volta ao armazenamento.
+    writePinnedPaths(storageKey, saved);
     if (saved.length === 0) return;
     const allowed = saved.filter((path) => !guardRef.current || guardRef.current(path));
     dispatch({ type: "SET_PINNED_PATHS", paths: saved });
