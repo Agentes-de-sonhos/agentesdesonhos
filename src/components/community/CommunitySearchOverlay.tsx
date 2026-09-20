@@ -218,10 +218,10 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
     <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : closeOverlay())}>
       <DialogContent
         hideClose
-        className="inset-0 flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-background p-0 pt-[env(safe-area-inset-top)] shadow-none duration-0 data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=closed]:zoom-out-100 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 data-[state=open]:zoom-in-100 md:left-[50%] md:top-[50%] md:grid md:h-auto md:max-h-[85dvh] md:w-full md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%] md:gap-3 md:overflow-visible md:rounded-lg md:border md:p-5 md:shadow-lg md:duration-200"
+        className="inset-0 flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-background p-0 pt-[env(safe-area-inset-top)] shadow-none duration-0 data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=closed]:zoom-out-100 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 data-[state=open]:zoom-in-100 md:left-[50%] md:top-[50%] md:h-auto md:max-h-[85dvh] md:w-full md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%] md:gap-3 md:overflow-visible md:rounded-lg md:border md:p-5 md:shadow-lg md:duration-200"
         data-community-search-overlay
       >
-        <div className="shrink-0 space-y-3 border-b border-border bg-background px-4 pb-3 pt-3 md:contents">
+        <div className="shrink-0 space-y-3 border-b border-border bg-background px-4 pb-3 pt-3 md:border-0 md:p-0">
           <DialogHeader className="pr-0 md:pr-8">
             <div className="flex items-center justify-between gap-3">
               <DialogTitle className="text-left text-base">Buscar na comunidade</DialogTitle>
@@ -268,7 +268,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:max-h-[60vh] md:min-h-24 md:px-0 md:pb-0 md:pt-0">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:max-h-[60vh] md:min-h-24 md:flex-none md:px-0 md:pb-0 md:pt-0">
           {!enabled && (
             <p className="py-6 text-center text-sm text-muted-foreground">
               Digite ao menos {SEARCH_MIN_TERM} letras para buscar.
