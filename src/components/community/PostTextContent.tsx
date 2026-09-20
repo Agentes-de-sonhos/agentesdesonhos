@@ -9,11 +9,13 @@ import { cn } from "@/lib/utils";
 export const POST_TEXT_CLAMP_CHARS = 220;
 export const POST_TEXT_CLAMP_LINES = 3;
 
-export function isPostTextClamped(text: string): boolean {
+export function isPostTextClamped(text: string, clampLines: 2 | 3 = POST_TEXT_CLAMP_LINES): boolean {
   if (!text) return false;
   const lineBreaks = text.split("\n").length;
-  return text.length > POST_TEXT_CLAMP_CHARS || lineBreaks > POST_TEXT_CLAMP_LINES;
+  const maxChars = clampLines === 2 ? 150 : POST_TEXT_CLAMP_CHARS;
+  return text.length > maxChars || lineBreaks > clampLines;
 }
+
 
 interface PostTextContentProps {
   text: string;
