@@ -90,8 +90,8 @@ export function PostCard({
   }, [fetchComments, post.id]);
 
   return (
-    <Card className="border-border/50">
-      <CardContent className="pt-4 pb-3 space-y-3">
+    <Card className="-mx-4 rounded-none border-x-0 border-border/50 sm:mx-0 sm:rounded-lg sm:border-x">
+      <CardContent className="space-y-3 px-3 pb-3 pt-4 sm:px-6">
         {/* Header */}
         <div className="flex items-start gap-3">
           <Avatar className="h-10 w-10">
@@ -100,9 +100,9 @@ export function PostCard({
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-sm text-foreground">{name}</span>
+          <div className="min-w-0 flex-1 overflow-hidden">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="min-w-0 truncate whitespace-nowrap text-sm font-semibold text-foreground">{name}</span>
               {post.member?.status === "verified" && (
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
               )}
@@ -110,14 +110,16 @@ export function PostCard({
                 <Pin className="h-3.5 w-3.5 text-amber-500" />
               )}
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              {post.profile?.agency_name && <span>{post.profile.agency_name}</span>}
+            <div className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+              {post.profile?.agency_name && <span className="min-w-0 truncate whitespace-nowrap">{post.profile.agency_name}</span>}
               <span>·</span>
               <span>{timeAgo}</span>
               {wasEdited && <span className="italic">· Editado</span>}
             </div>
           </div>
-          {!isOwner && <ConnectButton targetUserId={post.user_id} targetName={name} />}
+          <div className="flex shrink-0 flex-col items-end gap-0.5">
+          {!isOwner && <ConnectButton targetUserId={post.user_id} targetName={name} className="h-7" />}
+          <div className="flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
@@ -145,6 +147,8 @@ export function PostCard({
             </DropdownMenuContent>
           </DropdownMenu>
           <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={user?.id} />
+          </div>
+          </div>
         </div>
 
 

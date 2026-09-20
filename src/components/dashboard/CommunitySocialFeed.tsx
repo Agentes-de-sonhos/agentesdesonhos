@@ -50,6 +50,8 @@ import { SharePostDialog } from "@/components/community/SharePostDialog";
 import { Button } from "@/components/ui/button";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 import { usePermissions } from "@/hooks/usePermissions";
+import { MobileTopBar } from "@/components/layout/MobileTopBar";
+import { CommunityComposerLauncher } from "@/components/community/CommunityComposerLauncher";
 
 function timeAgo(date: string) {
   try {
@@ -138,26 +140,33 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <Card className="border-0 shadow-card overflow-visible">
-      <CardContent className="px-3 pt-5 pb-5 space-y-3 min-w-0 sm:px-6">
+    <Card className="-mx-4 overflow-visible rounded-none border-x-0 shadow-card sm:mx-0 sm:rounded-lg sm:border-x">
+      <CardContent className="min-w-0 space-y-3 px-0 pb-5 pt-3 sm:px-6 sm:pt-5">
+        <div className="px-3 sm:px-0">
+          <MobileTopBar embedded />
+        </div>
+        {can("online_users.view") && (
+          <div className="relative z-20 px-3 sm:px-0" data-dashboard-online-users>
+            <OnlineAgentsStrip compact />
+          </div>
+        )}
         {/* Header */}
-        <DashboardSectionHeader
-          icon={Users}
-          title="Comunidade"
-          description="Compartilhe experiências e oportunidades com outros agentes de viagens."
-          iconClassName="text-[hsl(var(--section-community))]"
-          accentClassName="bg-[hsl(var(--section-community))]"
-          action={can("online_users.view") ? (
-            <div className="relative z-20 min-w-0 justify-self-end" data-dashboard-online-users>
-              <OnlineAgentsStrip compact />
-            </div>
-          ) : null}
-        />
+        <div className="px-3 sm:px-0">
+          <DashboardSectionHeader
+            icon={Users}
+            title="Comunidade"
+            description="Compartilhe experiências e oportunidades com outros agentes de viagens."
+            iconClassName="text-[hsl(var(--section-community))]"
+            accentClassName="bg-[hsl(var(--section-community))]"
+          />
+        </div>
 
         {/* Coluna de leitura ampla, alinhada ao título no dashboard Agentes de Sonhos. */}
         <div className="w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]" data-dashboard-community-feed-column>
         {/* Composer */}
-        <CreatePostForm onSubmit={createPost} isCreating={isCreating} collapsible />
+        <div className="px-3 sm:px-0">
+          <CommunityComposerLauncher onSubmit={createPost} isCreating={isCreating} />
+        </div>
 
         {/* Feed preview */}
         {loadingPosts ? (
@@ -326,21 +335,21 @@ function PostCard({
   const latestComment = comments.length > 0 ? comments[comments.length - 1] : null;
 
   return (
-    <article className="min-w-0 rounded-2xl bg-card border border-border/60 overflow-hidden" data-dashboard-community-post>
-      <header className="flex items-start gap-3 px-5 pt-4 pb-3">
+    <article className="min-w-0 overflow-hidden border-y border-border/60 bg-card sm:rounded-lg sm:border" data-dashboard-community-post>
+      <header className="flex items-start gap-3 px-3 pb-3 pt-4 sm:px-5">
         <Avatar className="h-9 w-9 flex-shrink-0">
           <AvatarImage src={post.profile?.avatar_url || undefined} alt={post.profile?.name || "Autor"} />
           <AvatarFallback className="bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
             {initials(post.profile?.name)}
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm text-foreground truncate">
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <div className="min-w-0">
+            <p className="truncate whitespace-nowrap text-sm font-semibold text-foreground">
               {toTitleCase(post.profile?.name) || "Membro da comunidade"}
-            </span>
+            </p>
             {post.profile?.agency_name && (
-              <span className="text-xs text-muted-foreground truncate">· {post.profile.agency_name}</span>
+              <p className="truncate whitespace-nowrap text-xs text-muted-foreground">{post.profile.agency_name}</p>
             )}
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -350,10 +359,12 @@ function PostCard({
             )}
           </p>
         </div>
-        {!isAuthor && (
-          <ConnectButton targetUserId={post.user_id} targetName={post.profile?.name} />
-        )}
-        <DropdownMenu>
+        <div className="flex shrink-0 flex-col items-end gap-0.5">
+          {!isAuthor && (
+            <ConnectButton targetUserId={post.user_id} targetName={post.profile?.name} className="h-7" />
+          )}
+          <div className="flex items-center">
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
               <MoreHorizontal className="h-4 w-4" />
@@ -380,8 +391,10 @@ function PostCard({
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>
-        </DropdownMenu>
-        <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={currentUserId} />
+          </DropdownMenu>
+          <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={currentUserId} />
+          </div>
+        </div>
       </header>
 
       <ReportContentDialog
@@ -393,7 +406,7 @@ function PostCard({
 
 
       {post.content && (
-        <div className="px-5 pb-3">
+          <div className="px-3 pb-3 sm:px-5">
           <PostTextContent text={post.content} />
         </div>
       )}
