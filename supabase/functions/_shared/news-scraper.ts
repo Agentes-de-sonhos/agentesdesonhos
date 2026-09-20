@@ -14,7 +14,17 @@ export interface PortalConfig {
   key: PortalKey;
   slug: string; // used for function name / cron
   feedUrl: string;
+  /**
+   * Feeds públicos alternativos usados quando o feed nativo do portal está
+   * indisponível (ex.: desafio anti-bot do Cloudflare). Nenhuma proteção é
+   * contornada: consumimos apenas agregadores públicos de sindicação.
+   */
+  fallbackFeedUrls?: string[];
   maxItems: number;
+}
+
+function googleNewsSiteFeed(domain: string): string {
+  return `https://news.google.com/rss/search?q=site:${domain}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
 }
 
 export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
@@ -22,21 +32,29 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "PANROTAS",
     slug: "panrotas",
     feedUrl: "https://www.panrotas.com.br/feed",
+    fallbackFeedUrls: [googleNewsSiteFeed("panrotas.com.br")],
     maxItems: 60,
   },
   "Mercado & Eventos": {
     key: "Mercado & Eventos",
     slug: "mercado-eventos",
     feedUrl: "https://www.mercadoeeventos.com.br/feed/",
+    fallbackFeedUrls: [googleNewsSiteFeed("mercadoeeventos.com.br")],
     maxItems: 60,
   },
   "Brasilturis": {
     key: "Brasilturis",
     slug: "brasilturis",
     feedUrl: "https://brasilturis.com.br/feed/?withoutcomments=1",
+    fallbackFeedUrls: [googleNewsSiteFeed("brasilturis.com.br")],
     maxItems: 60,
   },
 };
+
+/** Remove o sufixo " - Portal" que o agregador acrescenta aos títulos. */
+export function stripAggregatorSuffix(title: string): string {
+  return title.replace(/\s+[-–—]\s+[^-–—]{2,40}$/u, "").trim() || title.trim();
+}
 
 // Categorias oficiais (alinhadas com src/pages/Noticias.tsx)
 export const CATEGORIES = [
