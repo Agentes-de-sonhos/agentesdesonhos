@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PostGallerySocialPanel, type PostGallerySocial } from "./PostGallerySocialPanel";
 
 interface PostLightboxProps {
   images: string[];
@@ -8,6 +9,8 @@ interface PostLightboxProps {
   startIndex: number | null;
   onClose: () => void;
   authorName?: string | null;
+  /** Dados/ações sociais da publicação (autor, curtidas, comentários, envio). */
+  social?: PostGallerySocial;
 }
 
 const SWIPE_THRESHOLD = 40;
@@ -17,7 +20,7 @@ const SWIPE_THRESHOLD = 40;
  * gesto horizontal no touch, setas no desktop, teclado, indicador e fechar.
  * Fica acima da barra inferior mobile (z-index dedicado).
  */
-export function PostLightbox({ images, startIndex, onClose, authorName }: PostLightboxProps) {
+export function PostLightbox({ images, startIndex, onClose, authorName, social }: PostLightboxProps) {
   const open = startIndex !== null && images.length > 0;
   const [index, setIndex] = useState(startIndex ?? 0);
   const touchStartX = useRef<number | null>(null);
@@ -57,7 +60,7 @@ export function PostLightbox({ images, startIndex, onClose, authorName }: PostLi
       aria-modal="true"
       aria-label="Galeria de imagens da publicação"
       data-post-lightbox
-      className="fixed inset-0 z-[120] flex flex-col bg-foreground/95"
+      className="fixed inset-0 z-[120] flex flex-col bg-foreground/95 lg:flex-row"
       onClick={onClose}
       onTouchStart={(event) => {
         touchStartX.current = event.touches[0]?.clientX ?? null;
@@ -71,6 +74,7 @@ export function PostLightbox({ images, startIndex, onClose, authorName }: PostLi
         go(delta < 0 ? 1 : -1);
       }}
     >
+      <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-sm font-medium text-background" data-post-lightbox-indicator aria-live="polite">
           {index + 1} / {images.length}
@@ -143,6 +147,9 @@ export function PostLightbox({ images, startIndex, onClose, authorName }: PostLi
           </>
         )}
       </div>
+      </div>
+
+      {social && <PostGallerySocialPanel {...social} />}
     </div>
   );
 }
