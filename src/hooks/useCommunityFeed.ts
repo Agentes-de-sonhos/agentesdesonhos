@@ -122,6 +122,7 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
       videoUrl = null,
       documents = null,
       poll = null,
+      visibility = DEFAULT_COMMUNITY_VISIBILITY,
     }: {
       content: string;
       tags?: string[];
@@ -130,6 +131,7 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
       videoUrl?: string | null;
       documents?: PostDocument[] | null;
       poll?: PostPoll | null;
+      visibility?: CommunityVisibility;
     }) => {
       if (!user?.id) throw new Error("Não autenticado");
       const cleanPoll =
@@ -141,17 +143,24 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
                 .map((o) => ({ id: o.id, text: o.text.trim() })),
             }
           : null;
-      const { error } = await supabase.from("community_posts").insert({
-        user_id: user.id,
-        content,
-        tags,
-        image_url: imageUrl ?? (imageUrls?.[0] ?? null),
-        image_urls: imageUrls ?? (imageUrl ? [imageUrl] : []),
-        video_url: videoUrl,
-        documents: documents ?? [],
-        poll: cleanPoll,
-      } as any);
+      const { data, error } = await supabase
+        .from("community_posts")
+        .insert({
+          user_id: user.id,
+          content,
+          tags,
+          image_url: imageUrl ?? (imageUrls?.[0] ?? null),
+          image_urls: imageUrls ?? (imageUrl ? [imageUrl] : []),
+          video_url: videoUrl,
+          documents: documents ?? [],
+          poll: cleanPoll,
+          visibility,
+        } as any)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      // Marcações @ (somente conexões aceitas, validado por RLS/banco).
+      await persistMentions({ postId: (data as any)?.id ?? null, commentId: null, content, authorId: user.id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["community-feed"] });
@@ -236,7 +245,7 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
     },
   });
 
-  // Comments
+  // Comments: uma consulta por lista (perfis e curtidas em lote, sem consulta por comentário)
   const fetchComments = async (postId: string): Promise<PostComment[]> => {
     const { data, error } = await supabase
       .from("community_post_comments")
@@ -246,28 +255,85 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
     if (error) throw error;
     if (!data || data.length === 0) return [];
     const userIds = [...new Set(data.map((c: any) => c.user_id))];
-    const { data: profiles } = await supabase
-      .from("profiles_public")
-      .select("user_id, name, avatar_url")
-      .in("user_id", userIds);
+    const commentIds = data.map((c: any) => c.id);
+    const [{ data: profiles }, { data: likes }] = await Promise.all([
+      supabase
+        .from("profiles_public")
+        .select("user_id, name, avatar_url, agency_name")
+        .in("user_id", userIds),
+      user?.id
+        ? (supabase as any)
+            .from("community_comment_likes")
+            .select("comment_id")
+            .eq("user_id", user.id)
+            .in("comment_id", commentIds)
+        : Promise.resolve({ data: [] as { comment_id: string }[] }),
+    ]);
+    const likedIds = new Set(((likes ?? []) as { comment_id: string }[]).map((l) => l.comment_id));
     return data.map((c: any) => ({
       ...c,
+      likes_count: c.likes_count ?? 0,
+      user_liked: likedIds.has(c.id),
       profile: profiles?.find((p: any) => p.user_id === c.user_id),
     }));
   };
 
   const addComment = useMutation({
-    mutationFn: async ({ postId, content }: { postId: string; content: string }) => {
+    mutationFn: async ({
+      postId,
+      content,
+      parentCommentId = null,
+    }: {
+      postId: string;
+      content: string;
+      parentCommentId?: string | null;
+    }) => {
       if (!user?.id) throw new Error("Não autenticado");
-      const { error } = await supabase.from("community_post_comments").insert({
-        post_id: postId,
-        user_id: user.id,
-        content,
-      });
+      const { data, error } = await supabase
+        .from("community_post_comments")
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+          content,
+          parent_comment_id: parentCommentId,
+        } as any)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      await persistMentions({
+        postId: null,
+        commentId: (data as any)?.id ?? null,
+        content,
+        authorId: user.id,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["community-feed"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Não foi possível comentar.");
+    },
+  });
+
+  const toggleCommentLike = useMutation({
+    mutationFn: async ({ commentId, liked }: { commentId: string; liked: boolean }) => {
+      if (!user?.id) throw new Error("Não autenticado");
+      if (liked) {
+        const { error } = await (supabase as any)
+          .from("community_comment_likes")
+          .delete()
+          .eq("comment_id", commentId)
+          .eq("user_id", user.id);
+        if (error) throw error;
+        return;
+      }
+      const { error } = await (supabase as any)
+        .from("community_comment_likes")
+        .insert({ comment_id: commentId, user_id: user.id });
+      if (error) throw error;
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Não foi possível atualizar a curtida.");
     },
   });
 
