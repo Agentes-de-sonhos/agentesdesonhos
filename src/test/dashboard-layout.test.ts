@@ -24,7 +24,7 @@ describe("dashboard layout restructure", () => {
   });
 
   it("wraps first-row cards so nothing leaks outside the card", () => {
-    expect(dashboard).toContain("min-h-0 h-full [&>*]:h-full [&>*]:min-h-0");
+    expect(dashboard).toContain("h-full min-h-0 min-w-0 flex-col [&>*]:h-full [&>*]:min-h-0");
     const agenda = read("src/components/dashboard/UpcomingAgendaEventsCard.tsx");
     const trips = read("src/components/dashboard/TripRemindersCard.tsx");
     expect(agenda).toContain("min-h-0 overflow-hidden");
@@ -32,37 +32,26 @@ describe("dashboard layout restructure", () => {
     expect(trips).toContain("min-h-0 overflow-hidden");
   });
 
-  it("renders news, community, academy and tourism map as full-width rows", () => {
-    for (const block of ["<CuratedNewsFeed />", "<CommunitySocialFeed />", "<AcademyCollapsibleCard />", "<MapaTurismoCard />"]) {
-      expect(dashboard).toContain(block);
+  it("renders only community as a full-width row after agenda and trips", () => {
+    expect(dashboard).toContain("<CommunitySocialFeed />");
+    for (const block of ["<CuratedNewsFeed />", "<AcademyCollapsibleCard />", "<MapaTurismoCard />"]) {
+      expect(dashboard).not.toContain(block);
     }
-    expect(dashboard).toContain('<section className="order-4 min-w-0">');
-    expect(dashboard).toContain('<section className="order-5 min-w-0">');
-    // no legacy two-column wrappers pairing these blocks
-    expect(dashboard).not.toContain("<CuratedNewsFeed /></div>");
-    expect(dashboard).not.toContain("<CommunitySocialFeed /></div>");
+    expect(dashboard).toContain('data-dashboard-section="community"');
   });
 
   it("never uses fractional order utilities", () => {
     expect(dashboard).not.toMatch(/order-\[\d+\.\d+\]/);
   });
 
-  it("keeps a valid strictly increasing integer order sequence in every branch", () => {
-    const branches = dashboard.split(/\) : is|\) : \(/).slice(1);
-    expect(branches.length).toBeGreaterThanOrEqual(2);
-    for (const branch of branches) {
-      const orders = [...branch.matchAll(/order-(\d+)\b/g)].map((m) => Number(m[1]));
-      expect(orders.length).toBeGreaterThan(0);
-      for (const value of orders) expect(Number.isInteger(value)).toBe(true);
-      const sorted = [...orders].sort((a, b) => a - b);
-      expect(orders).toEqual(sorted);
-      expect(new Set(orders).size).toBe(orders.length);
-    }
+  it("uses source order instead of CSS order branches", () => {
+    expect(dashboard).not.toMatch(/order-\d+\b/);
   });
 
-  it("does not duplicate the reorganized blocks in the main dashboard branch", () => {
-    expect((dashboard.match(/<CuratedNewsFeed \/>/g) ?? []).length).toBe(2); // main + simplified branch
-    expect((dashboard.match(/<MapaTurismoCard/g) ?? []).length).toBe(2);
+  it("does not duplicate the three dashboard blocks", () => {
+    expect((dashboard.match(/<UpcomingAgendaEventsCard \/>/g) ?? []).length).toBe(1);
+    expect((dashboard.match(/<TripRemindersCard \/>/g) ?? []).length).toBe(1);
+    expect((dashboard.match(/<CommunitySocialFeed \/>/g) ?? []).length).toBe(1);
   });
 
   it("agenda and trips cards fill the row height and paginate instead of scrolling", () => {
@@ -132,9 +121,9 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
   it("keeps the header on one desktop line with nowrap greeting, points and currencies", () => {
     const pill = read("src/components/layout/GamificationPill.tsx");
     const fx = read("src/components/dashboard/ExchangeRateCard.tsx");
-    expect(dashboard).toContain("sm:flex-nowrap sm:items-center sm:justify-between");
+    expect(dashboard).toContain("xl:flex-row xl:items-center xl:justify-between");
     expect(dashboard).toContain("whitespace-nowrap truncate min-w-0");
-    expect(dashboard).toContain("flex flex-nowrap items-center gap-2 lg:gap-1.5 xl:gap-3 shrink-0");
+    expect(dashboard).toContain("flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap xl:justify-end");
     expect(pill).toContain("whitespace-nowrap shrink-0");
     expect(fx).toContain("flex flex-nowrap items-center");
     expect((fx.match(/whitespace-nowrap/g) ?? []).length).toBeGreaterThanOrEqual(3);
