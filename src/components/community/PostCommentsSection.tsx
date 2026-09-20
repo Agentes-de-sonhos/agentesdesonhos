@@ -131,6 +131,8 @@ export function PostCommentsSection({
     const liked = override ? override.liked : !!comment.user_liked;
     const likes = override ? override.count : comment.likes_count ?? 0;
     const canDelete = comment.user_id === currentUserId || isAdmin;
+    const isOwnComment = comment.user_id === currentUserId;
+
 
     return (
       <div key={comment.id} className={`flex gap-2 ${isReply ? "ml-8" : ""}`} data-community-comment>
