@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { buildCommunityPostUrl } from "@/lib/communityPostFocus";
+import { useCommunityHiddenPosts } from "@/hooks/useCommunityHiddenPosts";
 import { ConnectButton } from "./ConnectButton";
+
 
 export const SEARCH_MIN_TERM = 2;
 export const SEARCH_DEBOUNCE_MS = 300;
