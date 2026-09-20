@@ -79,6 +79,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   const [debounced, setDebounced] = useState("");
   const [filter, setFilter] = useState<CommunitySearchFilter>("all");
   const mobileHistoryEntryRef = useRef(false);
+  const actionAfterCloseRef = useRef<(() => void) | null>(null);
 
   const closeOverlay = useCallback(() => {
     if (mobileHistoryEntryRef.current) {
@@ -91,8 +92,8 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   const closeThen = useCallback(
     (action: () => void) => {
       if (mobileHistoryEntryRef.current) {
+        actionAfterCloseRef.current = action;
         window.history.back();
-        window.setTimeout(action, 0);
         return;
       }
       onOpenChange(false);
@@ -124,6 +125,9 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
     const handlePopState = () => {
       mobileHistoryEntryRef.current = false;
       onOpenChange(false);
+      const action = actionAfterCloseRef.current;
+      actionAfterCloseRef.current = null;
+      action?.();
     };
     window.addEventListener("popstate", handlePopState);
     return () => {
@@ -227,7 +231,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                 variant="ghost"
                 aria-label="Fechar busca"
                 onClick={closeOverlay}
-                className="h-9 w-9 shrink-0 md:hidden"
+                className="h-9 w-9 shrink-0"
               >
                 <X className="h-5 w-5" />
               </Button>
