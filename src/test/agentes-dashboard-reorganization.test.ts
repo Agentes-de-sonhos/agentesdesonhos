@@ -73,6 +73,8 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(feed).toContain('w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]');
     expect(feed).not.toContain('className="mx-auto w-full');
     expect(feed).not.toContain("max-w-[780px]");
+    expect(feed).toContain('mx-0 w-full overflow-visible rounded-none border-x-0');
+    expect(feed).not.toContain('-mx-4 overflow-visible');
     expect(feed).toContain('data-dashboard-community-post');
     expect(feed).toContain("min-w-0 overflow-hidden border-y");
     expect(feed).toContain('className="px-3 pb-3 pt-4 sm:px-5"');
