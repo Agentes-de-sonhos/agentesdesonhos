@@ -163,7 +163,10 @@ describe("seguir e parar de seguir", () => {
 
   it("filtra o feed no servidor preservando a paginação", () => {
     expect(feedHook).toContain('query.not("user_id", "in", `(${mutedIds.join(",")})`)');
-    expect(feedHook).toContain('queryKey: ["community-feed", pageSize, mutedIds.join(",")]');
+    expect(feedHook).toContain(
+      'queryKey: ["community-feed", pageSize, mutedIds.join(","), hiddenIds.join(",")]',
+    );
+
     expect(feedHook).toContain(".range(pageParam, pageParam + pageSize)");
     expect(mutedAuthorIds([{ author_id: OTHER }, { author_id: OTHER }])).toEqual([OTHER]);
     expect(mutedAuthorIds(undefined)).toEqual([]);
