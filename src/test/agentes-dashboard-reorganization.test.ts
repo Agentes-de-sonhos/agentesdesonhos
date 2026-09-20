@@ -59,6 +59,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
     expect(dashboard).toContain("data-dashboard-mobile-header");
+    expect(dashboard).toContain('-mx-4 grid w-[calc(100%+2rem)] min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:mx-0 sm:w-auto sm:px-4');
     expect(dashboard).toContain("grid-cols-[minmax(0,1fr)_auto]");
     expect(dashboard).toContain("col-start-1 row-start-1 min-w-0");
     expect(dashboard).toContain("col-span-2 row-start-2");
@@ -75,6 +76,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(shortcuts).toContain("h-14 w-full min-w-0");
     expect(shortcuts).toContain("h-6 w-6 md:h-5 md:w-5");
     expect(shortcuts).not.toContain("overflow-x-auto");
+    expect(dashboard).toContain('col-span-2 row-start-2 w-full min-w-0');
   });
 
   it("remove a instância global do suporte flutuante sem remover a página de suporte", () => {

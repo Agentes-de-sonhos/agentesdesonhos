@@ -72,7 +72,7 @@ export default function Dashboard() {
     <DashboardLayout flushHorizontal>
       <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in">
         <div
-          className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 md:grid-cols-[minmax(0,1fr)_auto_auto] lg:px-0"
+          className="-mx-4 grid w-[calc(100%+2rem)] min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:mx-0 sm:w-auto sm:px-4 md:grid-cols-[minmax(0,1fr)_auto_auto] lg:px-0"
           data-dashboard-mobile-header
         >
           <div className="col-start-1 row-start-1 min-w-0">
