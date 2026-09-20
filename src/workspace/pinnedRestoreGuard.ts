@@ -54,19 +54,33 @@ export function buildPlatformPinnedGuard(deps: {
 }
 
 /**
- * Guard do painel white label / Site Lab Base: apenas rotas do próprio painel
- * (prefixo `/gestao`) e os guards de permissão vigentes. Isso impede que uma
- * preferência da plataforma apareça dentro do painel de uma agência.
+ * Rotas estáveis do painel white label / Site Lab Base elegíveis a fixação,
+ * com as permissões de equipe exigidas. Fora desta lista nada é restaurado,
+ * o que impede que uma preferência da plataforma apareça no painel de uma
+ * agência (e vice-versa).
  */
-export function buildAgencyAdminPinnedGuard(deps: {
-  can: (key: string) => boolean;
-  knownPaths: string[];
-}) {
-  const known = new Set(deps.knownPaths.map(clean));
+export const AGENCY_ADMIN_PINNABLE: Record<string, string[]> = {
+  "/gestao/meus-projetos": ["quotes.view", "itineraries.view", "wallet.view"],
+  "/gestao/agenda": ["agenda.view"],
+  "/gestao/crm/clientes": ["clients.view"],
+  "/gestao/crm/funil": ["opportunities.view"],
+  "/gestao/crm/operacoes": ["operations.view"],
+  "/gestao/reservas": ["reservations.view"],
+  "/gestao/financeiro": ["financial.access"],
+  "/gestao/criar/modelos-roteiros": ["itineraries.view"],
+  "/gestao/perfil": [],
+  "/gestao/minha-conta": [],
+  "/gestao/suporte": [],
+};
+
+/** Guard do painel white label / Site Lab Base. */
+export function buildAgencyAdminPinnedGuard(deps: { can: (key: string) => boolean }) {
   return (path: string): boolean => {
     const target = clean(path);
     if (!target.startsWith("/gestao")) return false;
-    if (!known.has(target)) return false;
-    return canAccessRoute(target, deps.can);
+    const required = AGENCY_ADMIN_PINNABLE[target];
+    if (!required) return false;
+    if (required.length === 0) return true;
+    return required.some((key) => deps.can(key));
   };
 }
