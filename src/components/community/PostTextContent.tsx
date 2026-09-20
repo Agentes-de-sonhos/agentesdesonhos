@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LinkifiedText } from "@/components/community/LinkifiedText";
+import { MentionText } from "@/components/community/MentionText";
 import { cn } from "@/lib/utils";
 
 /**
@@ -32,7 +32,7 @@ export function PostTextContent({ text, className }: PostTextContentProps) {
 
   return (
     <div className="min-w-0" data-post-text>
-      <LinkifiedText
+      <MentionText
         text={text}
         className={cn(
           "text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed",

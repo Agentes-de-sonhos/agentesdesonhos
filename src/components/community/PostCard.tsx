@@ -5,7 +5,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
@@ -14,8 +13,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Heart, MessageCircle, Trash2, Pin, CheckCircle2, Send, Loader2, MoreHorizontal, Pencil,
-  FileText, Download,
+  Heart, MessageCircle, Trash2, Pin, CheckCircle2, MoreHorizontal, Pencil,
+  FileText, Download, Share2,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -272,7 +271,7 @@ export function PostCard({
         <SharePostDialog
           open={shareOpen}
           onOpenChange={setShareOpen}
-          post={post}
+          postId={post.id}
         />
 
 

@@ -24,20 +24,22 @@ describe("comentários inline no feed da Comunidade do dashboard", () => {
     expect(feed).toContain("addComment,");
     expect(feed).toContain("isAddingComment,");
     expect(feed).toContain("deleteComment,");
-    expect(feed).toContain("onAddComment({ postId: post.id, content });");
+    expect(feed).toContain("onAddComment?.(data)");
     expect(feed).toContain("enabled: commentsOpen || post.comments_count > 0,");
   });
 
   it("dá foco ao campo e permite recolher", () => {
-    expect(feed).toContain("input.focus({ preventScroll: true });");
-    expect(feed).toContain('block: "nearest", behavior: "smooth"');
+    // O bloco de comentários passou a ser o componente compartilhado da Fase 3.
+    expect(feed).toContain("PostCommentsSection");
+    expect(feed).toContain("autoFocus");
     expect(feed).toContain("Recolher");
-    expect(feed).toContain('aria-label="Enviar comentário"');
-    expect(feed).toContain('aria-label="Escreva um comentário"');
+    const shared = readFileSync("src/components/community/PostCommentsSection.tsx", "utf8");
+    expect(shared).toContain("focus({ preventScroll: true })");
+    expect(shared).toContain('aria-label="Enviar comentário"');
   });
 
   it("não altera a página completa da Comunidade", () => {
     expect(fullPage).toContain("const handleToggleComments = async () => {");
-    expect(fullPage).toContain("onAddComment({ postId: post.id, content: commentText.trim() });");
+    expect(fullPage).toContain("PostCommentsSection");
   });
 });

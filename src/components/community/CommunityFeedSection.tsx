@@ -36,6 +36,7 @@ export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps)
     addComment,
     isAddingComment,
     deleteComment,
+    toggleCommentLike,
     votePoll,
     fetchNextPage,
     hasNextPage,
@@ -161,6 +162,7 @@ export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps)
                   isAddingComment={isAddingComment}
                   fetchComments={fetchComments}
                   onDeleteComment={deleteComment}
+                  onToggleCommentLike={toggleCommentLike}
                   onVotePoll={votePoll}
                 />
                 </div>

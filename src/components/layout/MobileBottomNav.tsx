@@ -11,7 +11,6 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MobileDrawerMenu } from "./MobileDrawerMenu";
 import { PostComposerDialog } from "@/components/community/PostComposerDialog";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
