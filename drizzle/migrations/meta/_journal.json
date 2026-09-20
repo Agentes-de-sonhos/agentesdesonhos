@@ -71,6 +71,13 @@
       "when": 1789922984375,
       "tag": "0009_community_phase4_reports_hidden_posts",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1789929054857,
+      "tag": "0010_agency_community_experience_opt_in",
+      "breakpoints": true
     }
   ]
 }
