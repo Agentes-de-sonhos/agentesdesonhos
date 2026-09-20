@@ -195,6 +195,26 @@ export function TabBar({ embedded = false }: { embedded?: boolean } = {}) {
                         >
                           {tab.title}
                         </button>
+                        {!tab.pinned && ws.isTabPinnable(tab) && (
+                          <button
+                            type="button"
+                            aria-label={
+                              ws.isTabPinned(tab)
+                                ? `Desfixar aba ${tab.title}`
+                                : `Fixar aba ${tab.title}`
+                            }
+                            aria-pressed={ws.isTabPinned(tab)}
+                            title={ws.isTabPinned(tab) ? "Desfixar aba" : "Fixar aba"}
+                            onClick={() => ws.togglePinnedTab(tab.id)}
+                            className="shrink-0 rounded-sm p-0.5 opacity-60 hover:bg-background hover:opacity-100"
+                          >
+                            {ws.isTabPinned(tab) ? (
+                              <Pin className="h-3.5 w-3.5 fill-current" />
+                            ) : (
+                              <PinOff className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        )}
                         {!tab.pinned && (
                           <button
                             type="button"
