@@ -20,6 +20,7 @@ import { getPersonInitials } from "@/components/shared/ClientAvatar";
 import { useWorkspace } from "@/workspace/WorkspaceProvider";
 import {
   AGENDA_ITEM,
+  COMMUNITY_ITEM,
   CREATE_ITEMS,
   MANAGEMENT_ITEMS,
   PROJECTS_ITEMS,
@@ -29,6 +30,7 @@ import {
   type MenuItemDef,
 } from "@/lib/agencyAdminMenu";
 import { AgencyAdminSidebarView } from "./AgencyAdminSidebarView";
+import { isSiteLabDemoHost } from "@/lib/sitelabModels";
 
 export { useSidebarCollapsed } from "./useSidebarCollapsed";
 
@@ -45,7 +47,7 @@ export function AgencyAdminSidebar({
 }) {
   const { user, signOut } = useAuth();
   const { can } = usePermissions();
-  const { member, accessProfile } = useTeamSession();
+  const { member, accessProfile, community } = useTeamSession();
   const workspace = useWorkspace();
   const navigate = useNavigate();
   const location = useLocation();
@@ -85,6 +87,8 @@ export function AgencyAdminSidebar({
 
   const isProjectsArea =
     location.pathname === PROJECTS_ROOT || location.pathname === "/meus-projetos";
+  const showCommunity = community.community_experience_enabled || isSiteLabDemoHost(info.hostname);
+  const managementItems = showCommunity ? [...MANAGEMENT_ITEMS, COMMUNITY_ITEM] : MANAGEMENT_ITEMS;
 
   const handleSignOut = useCallback(() => {
     void (async () => {
@@ -104,7 +108,7 @@ export function AgencyAdminSidebar({
       createItems={filterMenuByPermission(CREATE_ITEMS, can)}
       projectsItems={PROJECTS_ITEMS}
       agendaItem={AGENDA_ITEM}
-      managementItems={filterMenuByPermission(MANAGEMENT_ITEMS, can)}
+      managementItems={filterMenuByPermission(managementItems, can)}
       userItems={USER_ITEMS}
       projectsTo={PROJECTS_ROOT}
       projectsActive={isProjectsArea}

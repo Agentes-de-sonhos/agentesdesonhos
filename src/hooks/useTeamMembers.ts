@@ -268,6 +268,7 @@ export function useCommunitySettings() {
       const { data, error } = await rpc('agency_community_settings_get')
       if (error) throw error
       return data as unknown as {
+        community_experience_enabled: boolean
         public_community_enabled: boolean
         internal_community_enabled: boolean
         online_users_enabled: boolean
@@ -285,6 +286,7 @@ export function useSaveCommunitySettings() {
   const { agencyId } = useTeamScope()
   return useMutation({
     mutationFn: async (input: {
+      community_experience_enabled: boolean
       public_community_enabled: boolean
       internal_community_enabled: boolean
       online_users_enabled: boolean
@@ -297,6 +299,10 @@ export function useSaveCommunitySettings() {
           action: 'community_save', target_agency_id: agencyId, ...input,
         })
       }
+      const { error: experienceError } = await rpc('agency_community_experience_save', {
+        _enabled: input.community_experience_enabled,
+      })
+      if (experienceError) throw new Error(experienceError.message)
       const { data, error } = await rpc('agency_community_settings_save', {
         _public: input.public_community_enabled,
         _internal: input.internal_community_enabled,

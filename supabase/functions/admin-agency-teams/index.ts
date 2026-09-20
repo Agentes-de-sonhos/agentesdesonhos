@@ -405,6 +405,7 @@ Deno.serve(async (req) => {
         const { data } = await admin.from('agency_community_settings')
           .select('*').eq('agency_id', agencyId).maybeSingle()
         return json({
+          community_experience_enabled: (data as any)?.community_experience_enabled ?? false,
           public_community_enabled: (data as any)?.public_community_enabled ?? true,
           internal_community_enabled: (data as any)?.internal_community_enabled ?? true,
           online_users_enabled: (data as any)?.online_users_enabled ?? true,
@@ -421,6 +422,7 @@ Deno.serve(async (req) => {
         }
         const row = {
           agency_id: agencyId,
+          community_experience_enabled: body.community_experience_enabled === true,
           public_community_enabled: body.public_community_enabled !== false,
           internal_community_enabled: body.internal_community_enabled !== false,
           online_users_enabled: body.online_users_enabled !== false,
