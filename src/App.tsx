@@ -363,6 +363,7 @@ const App = () => {
               <Route path="/comunidade/chat" element={<Navigate to="/comunidade" replace />} />
               <Route path="/comunidade/feed" element={<Community />} />
               <Route path="/comunidade/membros" element={<Community />} />
+              <Route path="/comunidade/minha-rede" element={<MinhaRede />} />
               <Route path="/comunidade/encontros" element={<Community />} />
               <Route path="/comunidade/destaques" element={<Community />} />
               <Route path="/comunidade/oportunidades" element={<Navigate to="/comunidade/destaques" replace />} />

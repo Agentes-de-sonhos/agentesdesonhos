@@ -63,7 +63,7 @@ export function MobileBottomNav() {
   const [managementOpen, setManagementOpen] = useState(false);
 
   const homePath = !isPromotor && plan === "start" ? "/dashboard-start" : "/dashboard";
-  const networkPath = "/comunidade/membros";
+  const networkPath = "/comunidade/minha-rede";
 
   const isActive = (key: BottomNavKey) => {
     if (key === "inicio") return location.pathname === homePath || location.pathname === "/dashboard";

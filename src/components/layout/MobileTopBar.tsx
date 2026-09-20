@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { CommunitySearchOverlay } from "@/components/community/CommunitySearchOverlay";
 
 export const OPEN_COMMUNITY_CHAT_EVENT = "community-chat:open";
 
@@ -19,6 +21,7 @@ function initials(name?: string | null) {
 export function MobileTopBar() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["mobile-topbar-profile", user?.id],
