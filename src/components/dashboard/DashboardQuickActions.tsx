@@ -57,7 +57,11 @@ export function DashboardQuickActions() {
   return (
     <>
       <TooltipProvider delayDuration={200}>
-        <div className="flex flex-nowrap items-center gap-2" aria-label="Atalhos de criação">
+        <div
+          className="grid w-full min-w-0 grid-cols-4 gap-2 sm:gap-3 md:flex md:w-auto md:flex-nowrap md:items-center md:gap-2"
+          aria-label="Atalhos de criação"
+          data-dashboard-quick-actions
+        >
           {actions.map((action) => (
             <Tooltip key={action.key}>
               <TooltipTrigger asChild>
@@ -67,9 +71,9 @@ export function DashboardQuickActions() {
                   size="icon"
                   aria-label={action.label}
                   onClick={() => activate(action)}
-                  className="group relative h-11 w-11 shrink-0 rounded-xl border-border/70 bg-card text-primary shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                  className="group relative h-14 w-full min-w-0 rounded-xl border-border/70 bg-card text-primary shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring md:h-11 md:w-11 md:shrink-0"
                 >
-                  <action.icon className="h-5 w-5" />
+                  <action.icon className="h-6 w-6 md:h-5 md:w-5" />
                   <span className="absolute -right-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-background text-primary shadow-sm ring-1 ring-border/70 group-hover:text-primary">
                     <Plus className="h-3 w-3" strokeWidth={2.5} />
                   </span>

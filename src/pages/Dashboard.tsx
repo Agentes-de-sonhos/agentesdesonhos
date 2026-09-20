@@ -71,20 +71,25 @@ export default function Dashboard() {
   return (
     <DashboardLayout flushHorizontal>
       <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in">
-        <div className="flex min-w-0 flex-col gap-3 px-4 lg:px-0 xl:flex-row xl:items-center xl:justify-between">
-          <div className="min-w-0 flex-1">
+        <div
+          className="flex min-w-0 flex-wrap items-center gap-3 px-4 lg:px-0"
+          data-dashboard-mobile-header
+        >
+          <div className="order-1 min-w-0 flex-1">
             <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
               {getGreeting()}, {firstName}!
             </h1>
           </div>
 
-          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap xl:justify-end">
+          <div className="order-3 w-full min-w-0 md:order-2 md:w-auto md:shrink-0">
             <DashboardQuickActions />
-            <div className="hidden h-7 w-px bg-border sm:block" />
-            <div className="flex flex-nowrap items-center gap-2">
+          </div>
+
+          <div className="order-2 flex shrink-0 flex-nowrap items-center gap-1.5 md:order-3 md:gap-2">
+            <div className="hidden md:flex md:flex-nowrap md:items-center">
               <ExchangeRateCard />
-              <NotificationsDropdown />
             </div>
+            <NotificationsDropdown />
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>

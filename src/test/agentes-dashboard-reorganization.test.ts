@@ -50,15 +50,28 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(shortcuts).toContain("useOpenInternalWindow");
   });
 
-  it("preserva saudação, câmbio, notificações, perfil e logout, sem usuários online no cabeçalho", () => {
+  it("preserva saudação e controles, ocultando o câmbio somente no mobile", () => {
     expect(dashboard).toContain("{getGreeting()}, {firstName}!");
     expect(dashboard).toContain("<ExchangeRateCard />");
+    expect(dashboard).toContain("hidden md:flex");
     expect(dashboard).toContain("<NotificationsDropdown />");
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
+    expect(dashboard).toContain("data-dashboard-mobile-header");
+    expect(dashboard).toContain("order-1 min-w-0 flex-1");
+    expect(dashboard).toContain("order-2 flex shrink-0");
     expect(dashboard).not.toContain("<OnlineAgentsStrip");
     expect(feed).toContain("<OnlineAgentsStrip compact />");
     expect(feed).toContain("overflow-visible");
+  });
+
+  it("distribui os quatro atalhos igualmente na largura mobile sem rolagem horizontal", () => {
+    const shortcuts = read("src/components/dashboard/DashboardQuickActions.tsx");
+    expect(shortcuts).toContain("data-dashboard-quick-actions");
+    expect(shortcuts).toContain("grid w-full min-w-0 grid-cols-4");
+    expect(shortcuts).toContain("h-14 w-full min-w-0");
+    expect(shortcuts).toContain("h-6 w-6 md:h-5 md:w-5");
+    expect(shortcuts).not.toContain("overflow-x-auto");
   });
 
   it("combina compositor e presença na mesma linha no desktop", () => {
