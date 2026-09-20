@@ -325,29 +325,44 @@ function PostCard({
         {!isAuthor && (
           <ConnectButton targetUserId={post.user_id} targetName={post.profile?.name} />
         )}
-        {(canDelete || canEdit || !isAuthor) && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <PostFollowMenuItem authorId={post.user_id} authorName={post.profile?.name} />
-              {canEdit && (
-                <DropdownMenuItem onClick={onEdit}>
-                  <Pencil className="h-4 w-4 mr-2" /> Editar publicação
-                </DropdownMenuItem>
-              )}
-              {canDelete && (
-                <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isAuthor && (
+              <ConnectMenuItem targetUserId={post.user_id} targetName={post.profile?.name} />
+            )}
+            <PostFollowMenuItem authorId={post.user_id} authorName={post.profile?.name} />
+            {canEdit && (
+              <DropdownMenuItem onClick={onEdit}>
+                <Pencil className="h-4 w-4 mr-2" /> Editar publicação
+              </DropdownMenuItem>
+            )}
+            {!isAuthor && (
+              <DropdownMenuItem onClick={() => setReportOpen(true)}>
+                <ShieldAlert className="h-4 w-4 mr-2" /> Denunciar publicação
+              </DropdownMenuItem>
+            )}
+            {canDelete && (
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={currentUserId} />
       </header>
+
+      <ReportContentDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetKind="post"
+        postId={post.id}
+      />
+
 
       {post.content && (
         <div className="px-5 pb-3">
