@@ -17,10 +17,13 @@ import {
   MessageCircle,
   MoreHorizontal,
   Pencil,
+  Send,
   Trash2,
   Users,
   RefreshCw,
+  X,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
@@ -89,12 +92,17 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     updatePost,
     isUpdating,
     fetchComments,
+    addComment,
+    isAddingComment,
+    deleteComment,
     votePoll,
     isVoting,
   } = useCommunityFeed({ pageSize: DASHBOARD_PAGE_SIZE });
 
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
+  // Apenas um post com comentários expandidos por vez neste feed do dashboard.
+  const [openCommentsPostId, setOpenCommentsPostId] = useState<string | null>(null);
   const { newCount } = useCommunityUnread();
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
@@ -176,6 +184,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 onVotePoll={votePoll}
                 isVoting={isVoting}
                 newCount={newCount}
+                commentsOpen={openCommentsPostId === post.id}
+                onToggleComments={() =>
+                  setOpenCommentsPostId((current) => (current === post.id ? null : post.id))
+                }
+                onAddComment={addComment}
+                isAddingComment={isAddingComment}
+                onDeleteComment={deleteComment}
               />
             ))}
             <div ref={sentinelRef} className="h-px" aria-hidden="true" />
@@ -237,6 +252,11 @@ interface PostCardProps {
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
   isVoting?: boolean;
   newCount?: number;
+  commentsOpen?: boolean;
+  onToggleComments?: () => void;
+  onAddComment?: (data: { postId: string; content: string }) => void;
+  isAddingComment?: boolean;
+  onDeleteComment?: (commentId: string) => void;
 }
 
 function PostCard({
@@ -251,19 +271,46 @@ function PostCard({
   onVotePoll,
   isVoting,
   newCount = 0,
+  commentsOpen = false,
+  onToggleComments,
+  onAddComment,
+  isAddingComment,
+  onDeleteComment,
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
   const canEdit = isAuthor;
   const images = postImages(post);
   const wasEdited = !!(post as any).edited_at;
+  const commentsRegionId = `dashboard-post-comments-${post.id}`;
+  const commentInputRef = useRef<HTMLInputElement | null>(null);
+  const [commentText, setCommentText] = useState("");
 
   const { data: comments = [], isLoading: loadingComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
     queryFn: () => fetchComments(post.id),
-    enabled: post.comments_count > 0,
+    enabled: commentsOpen || post.comments_count > 0,
     staleTime: 30 * 1000,
   });
+
+  // Foco no campo após a renderização assíncrona da área expandida.
+  useEffect(() => {
+    if (!commentsOpen) return;
+    const frame = requestAnimationFrame(() => {
+      const input = commentInputRef.current;
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      input.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [commentsOpen]);
+
+  const handleAddComment = () => {
+    const content = commentText.trim();
+    if (!content || isAddingComment || !onAddComment) return;
+    onAddComment({ postId: post.id, content });
+    setCommentText("");
+  };
 
   const latestComment = comments.length > 0 ? comments[comments.length - 1] : null;
 
@@ -362,19 +409,134 @@ function PostCard({
           <span className="text-xs sm:text-sm">Curtir</span>
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="sm"
-          asChild
           className="flex-1 basis-1/2 gap-2 text-muted-foreground"
+          aria-expanded={commentsOpen}
+          aria-controls={commentsRegionId}
+          onClick={(event) => {
+            // Contexto embedded (dashboard): expande inline, nunca navega.
+            event.preventDefault();
+            event.stopPropagation();
+            onToggleComments();
+          }}
         >
-          <Link to="/comunidade">
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-xs sm:text-sm">Comentar</span>
-          </Link>
+          <MessageCircle className="h-4 w-4" />
+          <span className="text-xs sm:text-sm">{commentsOpen ? "Fechar comentários" : "Comentar"}</span>
         </Button>
       </div>
 
-      {(latestComment || loadingComments || newCount > 1) && (
+      {commentsOpen && (
+        <div
+          id={commentsRegionId}
+          className="px-5 pb-4 pt-3 space-y-3 border-t border-border/40 bg-muted/10"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-muted-foreground">Comentários</p>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1 px-2 text-xs text-muted-foreground"
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggleComments();
+              }}
+            >
+              <X className="h-3.5 w-3.5" /> Recolher
+            </Button>
+          </div>
+
+          {loadingComments ? (
+            <div className="flex items-center py-1 text-xs text-muted-foreground" aria-live="polite">
+              <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> Carregando comentários...
+            </div>
+          ) : comments.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Seja o primeiro a comentar nesta publicação.</p>
+          ) : (
+            <ul className="space-y-2">
+              {comments.map((comment) => (
+                <li key={comment.id} className="flex gap-2">
+                  <Avatar className="h-7 w-7 flex-shrink-0">
+                    <AvatarImage src={comment.profile?.avatar_url || undefined} alt={comment.profile?.name || "Autor"} />
+                    <AvatarFallback className="text-[10px] bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
+                      {initials(comment.profile?.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1 rounded-2xl bg-background border border-border/50 px-3 py-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold text-foreground">
+                        {toTitleCase(comment.profile?.name) || "Membro"}
+                      </p>
+                      {(comment.user_id === currentUserId || isAdmin) && onDeleteComment && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 text-muted-foreground hover:text-destructive"
+                          aria-label="Excluir comentário"
+                          onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            onDeleteComment(comment.id);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <LinkifiedText
+                      text={comment.content}
+                      className="mt-0.5 text-sm text-foreground whitespace-pre-wrap break-words"
+                    />
+                    <span className="mt-1 block text-[11px] text-muted-foreground">
+                      {timeAgo(comment.created_at)}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="flex gap-2">
+            <Input
+              ref={commentInputRef}
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Escreva um comentário..."
+              aria-label="Escreva um comentário"
+              className="h-9 text-sm"
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  handleAddComment();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              aria-label="Enviar comentário"
+              disabled={!commentText.trim() || !!isAddingComment}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                handleAddComment();
+              }}
+            >
+              {isAddingComment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {!commentsOpen && (latestComment || loadingComments || newCount > 1) && (
         <div className="px-5 pb-4 pt-3 space-y-2 bg-muted/20 border-t border-border/40">
           {loadingComments && !latestComment ? (
             <div className="flex items-center py-1 text-xs text-muted-foreground">
