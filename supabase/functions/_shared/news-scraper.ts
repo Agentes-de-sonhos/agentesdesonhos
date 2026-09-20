@@ -23,6 +23,10 @@ export interface PortalConfig {
   maxItems: number;
 }
 
+function bingNewsSiteFeed(domain: string): string {
+  return `https://www.bing.com/news/search?q=site%3A${domain}&format=RSS`;
+}
+
 function googleNewsSiteFeed(domain: string): string {
   return `https://news.google.com/rss/search?q=site:${domain}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
 }
@@ -32,21 +36,24 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "PANROTAS",
     slug: "panrotas",
     feedUrl: "https://www.panrotas.com.br/feed",
-    fallbackFeedUrls: [googleNewsSiteFeed("panrotas.com.br")],
+    fallbackFeedUrls: [bingNewsSiteFeed("panrotas.com.br"), googleNewsSiteFeed("panrotas.com.br")],
     maxItems: 60,
   },
   "Mercado & Eventos": {
     key: "Mercado & Eventos",
     slug: "mercado-eventos",
     feedUrl: "https://www.mercadoeeventos.com.br/feed/",
-    fallbackFeedUrls: [googleNewsSiteFeed("mercadoeeventos.com.br")],
+    fallbackFeedUrls: [
+      bingNewsSiteFeed("mercadoeeventos.com.br"),
+      googleNewsSiteFeed("mercadoeeventos.com.br"),
+    ],
     maxItems: 60,
   },
   "Brasilturis": {
     key: "Brasilturis",
     slug: "brasilturis",
     feedUrl: "https://brasilturis.com.br/feed/?withoutcomments=1",
-    fallbackFeedUrls: [googleNewsSiteFeed("brasilturis.com.br")],
+    fallbackFeedUrls: [bingNewsSiteFeed("brasilturis.com.br"), googleNewsSiteFeed("brasilturis.com.br")],
     maxItems: 60,
   },
 };
@@ -54,6 +61,34 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
 /** Remove o sufixo " - Portal" que o agregador acrescenta aos títulos. */
 export function stripAggregatorSuffix(title: string): string {
   return title.replace(/\s+[-–—]\s+[^-–—]{2,40}$/u, "").trim() || title.trim();
+}
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", hellip: "…",
+  ldquo: "“", rdquo: "”", lsquo: "‘", rsquo: "’", ndash: "–", mdash: "—",
+};
+
+/** Decodifica entidades HTML (numéricas e nomeadas usuais) de feeds agregados. */
+export function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-f]+);/gi, (_m, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_m, d) => String.fromCodePoint(parseInt(d, 10)))
+    .replace(/&([a-z]+);/gi, (m, name) => NAMED_ENTITIES[String(name).toLowerCase()] ?? m);
+}
+
+/**
+ * Converte o link de redirecionamento do agregador na URL original da matéria
+ * quando ela vem explícita no parâmetro `url` (padrão do Bing News RSS).
+ */
+export function resolveAggregatorLink(link: string): string {
+  try {
+    const u = new URL(decodeHtmlEntities(link));
+    const target = u.searchParams.get("url");
+    if (target && /^https?:\/\//i.test(target)) return target;
+    return u.toString();
+  } catch {
+    return link;
+  }
 }
 
 // Categorias oficiais (alinhadas com src/pages/Noticias.tsx)
