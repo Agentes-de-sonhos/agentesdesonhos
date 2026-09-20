@@ -96,6 +96,7 @@ function CommunityContent() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <MobileTopBar />
         <PageHeader
           pageKey="comunidade"
           title="Comunidade"

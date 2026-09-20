@@ -71,6 +71,7 @@ export default function Dashboard() {
   return (
     <DashboardLayout flushHorizontal>
       <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in overflow-x-hidden">
+        <MobileTopBar />
         <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
