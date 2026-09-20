@@ -132,13 +132,12 @@ describe("botão Conectar compartilhado pelos dois feeds", () => {
     expect(search).toContain("<ConnectButton targetUserId={person.user_id}");
   });
 
-  it("não adiciona ocultar, denúncia ou compartilhamento interno", () => {
+  it("mantém o compartilhamento interno como ação própria da Fase 3", () => {
     for (const source of [dashboardFeed, postCard]) {
-      expect(source).not.toContain("Denunciar");
-      expect(source).not.toContain("Ocultar publicação");
-      expect(source).not.toContain("Compartilhar internamente");
+      expect(source).toContain("SharePostDialog");
     }
   });
+
 });
 
 describe("seguir e parar de seguir", () => {
