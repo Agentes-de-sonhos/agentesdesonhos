@@ -12,6 +12,6 @@
 - [x] Ajustes visuais pós-Fase 5 e Comunidade opcional no painel SiteLab/white-label:
   - [x] Integrar busca/chat e membros online ao cabeçalho da Comunidade no dashboard.
   - [x] Unificar cabeçalho dos posts e ampliar o uso da largura mobile.
-  - [ ] Refinar compositor fullscreen branco no mobile e modal no desktop.
+  - [x] Refinar compositor fullscreen branco no mobile e modal no desktop.
   - [x] Adicionar opt-in por agência, desligado por padrão, com SiteLab como referência.
   - [x] Validar isolamento, testes específicos, suíte completa, tipos e build sem publicar.
