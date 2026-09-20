@@ -77,15 +77,12 @@ export function PostCard({
     setShowComments(!showComments);
   };
 
-  const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    onAddComment({ postId: post.id, content: commentText.trim() });
-    setCommentText("");
-    setTimeout(async () => {
+  const refreshComments = useCallback(async () => {
+    try {
       const data = await fetchComments(post.id);
       setComments(data);
-    }, 500);
-  };
+    } catch { /* ignore */ }
+  }, [fetchComments, post.id]);
 
   return (
     <Card className="border-border/50">
