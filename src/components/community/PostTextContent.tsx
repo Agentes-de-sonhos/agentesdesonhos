@@ -18,13 +18,15 @@ export function isPostTextClamped(text: string): boolean {
 interface PostTextContentProps {
   text: string;
   className?: string;
+  /** Número de linhas antes do "mais" (3 no feed, 2 na galeria social). */
+  clampLines?: 2 | 3;
 }
 
 /**
- * Texto da publicação limitado visualmente a 3 linhas, com ação "mais" que
- * expande o conteúdo no próprio card (padrão LinkedIn/Facebook).
+ * Texto da publicação limitado visualmente a 3 linhas (2 na galeria), com ação
+ * "mais" que expande o conteúdo no próprio lugar (padrão LinkedIn/Facebook).
  */
-export function PostTextContent({ text, className }: PostTextContentProps) {
+export function PostTextContent({ text, className, clampLines = 3 }: PostTextContentProps) {
   const [expanded, setExpanded] = useState(false);
   const clampable = isPostTextClamped(text);
 
@@ -36,10 +38,11 @@ export function PostTextContent({ text, className }: PostTextContentProps) {
         text={text}
         className={cn(
           "text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed",
-          clampable && !expanded && "line-clamp-3",
+          clampable && !expanded && (clampLines === 2 ? "line-clamp-2" : "line-clamp-3"),
           className,
         )}
       />
+
       {clampable && !expanded && (
         <button
           type="button"
