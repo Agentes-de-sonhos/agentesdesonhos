@@ -1,11 +1,11 @@
 import React, { lazy, Suspense } from "react";
 const FeedbackPopup = lazy(() => import("@/components/feedback/FeedbackPopup").then(m => ({ default: m.FeedbackPopup })));
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { useGamification } from "@/hooks/useGamification";
 import { Loader2, User, LogOut } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { DashboardContainer } from "@/components/dashboard/DashboardContainer";
-import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 import { usePermissions } from "@/hooks/usePermissions";
 
 // Lazy load heavy dashboard cards to reduce initial bundle
@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/tooltip";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const openInternalWindow = useOpenInternalWindow();
   const { signOut, user } = useAuth();
   const { can } = usePermissions();
@@ -39,7 +40,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await signOut();
-    window.location.assign("/auth");
+    navigate("/auth");
   };
 
   // Fetch user profile for first name

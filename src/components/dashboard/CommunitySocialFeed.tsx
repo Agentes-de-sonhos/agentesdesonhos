@@ -35,6 +35,7 @@ import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
 import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
+import { usePermissions } from "@/hooks/usePermissions";
 
 function timeAgo(date: string) {
   try {
@@ -70,6 +71,7 @@ const DASHBOARD_PAGE_SIZE = 5;
 export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const { user } = useAuth();
   const { role } = useUserRole();
+  const { can } = usePermissions();
   const isAdmin = role === "admin";
   const {
     posts,
@@ -130,9 +132,11 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           }}
         />
 
-        <div className="relative z-20 flex min-w-0 justify-start" data-dashboard-online-users>
-          <OnlineAgentsStrip />
-        </div>
+        {can("online_users.view") && (
+          <div className="relative z-20 flex min-w-0 justify-start" data-dashboard-online-users>
+            <OnlineAgentsStrip />
+          </div>
+        )}
 
         {/* Coluna central (padrão LinkedIn) */}
         <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
