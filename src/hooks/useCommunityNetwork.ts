@@ -54,6 +54,11 @@ export function resolveRelation(
   };
 }
 
+/** Filtro do par de usuários, cobrindo remetente e destinatário invertidos. */
+export function pairFilter(userId: string, targetUserId: string): string {
+  return `and(requester_id.eq.${userId},receiver_id.eq.${targetUserId}),and(requester_id.eq.${targetUserId},receiver_id.eq.${userId})`;
+}
+
 /** Lista de ids de autores cujas publicações futuras devem ficar fora do feed. */
 export function mutedAuthorIds(rows: { author_id: string }[] | undefined | null): string[] {
   return [...new Set((rows ?? []).map((row) => row.author_id))];
@@ -111,6 +116,14 @@ export function useCommunityNetwork() {
     mutationFn: async (targetUserId: string) => {
       if (!userId) throw new Error("Não autenticado");
       if (userId === targetUserId) throw new Error("Não é possível conectar consigo mesmo");
+      // Uma recusa anterior (linha legada com status "rejected") não pode impedir
+      // uma nova solicitação: a linha do par é limpa antes de inserir a nova.
+      const { error: cleanupError } = await supabase
+        .from("connections")
+        .delete()
+        .eq("status", "rejected")
+        .or(pairFilter(userId, targetUserId));
+      if (cleanupError) throw cleanupError;
       const { error } = await supabase
         .from("connections")
         .insert({ requester_id: userId, receiver_id: targetUserId, status: "pending" });
@@ -137,9 +150,19 @@ export function useCommunityNetwork() {
 
   const respondRequest = useMutation({
     mutationFn: async ({ connectionId, accept }: { connectionId: string; accept: boolean }) => {
+      if (!accept) {
+        // Recusar remove a solicitação pendente, liberando uma nova tentativa
+        // sem colidir com a prevenção de pares duplicados/invertidos.
+        const { error: rejectError } = await supabase
+          .from("connections")
+          .delete()
+          .eq("id", connectionId);
+        if (rejectError) throw rejectError;
+        return;
+      }
       const { error } = await supabase
         .from("connections")
-        .update({ status: accept ? "accepted" : "rejected", updated_at: new Date().toISOString() })
+        .update({ status: "accepted", updated_at: new Date().toISOString() })
         .eq("id", connectionId);
       if (error) throw error;
     },
