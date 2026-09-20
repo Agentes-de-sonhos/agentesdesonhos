@@ -60,9 +60,10 @@ describe("Dashboard section headers", () => {
     expect(news).not.toContain("reunidas em um só lugar");
   });
 
-  it("preserves CTA routes and internal window titles", () => {
+  it("preserves CTA routes and internal window titles outside the Agentes community block", () => {
     expect(news).toContain('to: "/noticias"');
-    expect(community).toContain('to: "/comunidade"');
+    expect(community).not.toContain('to: "/comunidade"');
+    expect(community).toContain("<OnlineAgentsStrip compact />");
     expect(academy).toContain('to: "/educa-academy"');
     expect(map).toContain("to: DIRECTORY_ROOT");
     expect(header).toContain("SectionCtaLink");

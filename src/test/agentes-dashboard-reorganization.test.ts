@@ -57,8 +57,27 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
     expect(dashboard).not.toContain("<OnlineAgentsStrip");
-    expect(feed).toContain("<OnlineAgentsStrip />");
+    expect(feed).toContain("<OnlineAgentsStrip compact />");
     expect(feed).toContain("overflow-visible");
+  });
+
+  it("substitui o CTA da Comunidade pelo controle de presença no canto superior direito", () => {
+    expect(feed).not.toContain("Ver toda a comunidade");
+    expect(feed).toContain('action={can("online_users.view") ? (');
+    expect(feed).toContain("data-dashboard-online-users");
+    expect(feed).toContain("justify-self-end");
+    expect(feed.match(/<OnlineAgentsStrip compact \/>/g)).toHaveLength(1);
+  });
+
+  it("alinha e amplia compositor e cards responsivamente sem overflow", () => {
+    expect(feed).toContain('data-dashboard-community-feed-column');
+    expect(feed).toContain('w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]');
+    expect(feed).not.toContain('className="mx-auto w-full');
+    expect(feed).not.toContain("max-w-[780px]");
+    expect(feed).toContain('data-dashboard-community-post');
+    expect(feed).toContain("min-w-0 rounded-2xl");
+    expect(feed).toContain("px-5 pt-4 pb-3");
+    expect(feed).toContain("min-w-0 overflow-hidden");
   });
 
   it("não altera o dashboard compartilhado pelo Site Lab e white-labels", () => {

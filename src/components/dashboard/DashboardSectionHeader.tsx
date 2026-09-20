@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { SectionCtaLink } from "./SectionCtaLink";
 
@@ -10,13 +11,14 @@ interface DashboardSectionHeaderProps {
   iconClassName: string;
   /** Tailwind bg color class for the accent underline */
   accentClassName: string;
-  cta: {
+  cta?: {
     to: string;
     label: string;
     shortLabel?: string;
     tabTitle: string;
     className?: string;
   };
+  action?: ReactNode;
   className?: string;
 }
 
@@ -33,6 +35,7 @@ export function DashboardSectionHeader({
   iconClassName,
   accentClassName,
   cta,
+  action,
   className,
 }: DashboardSectionHeaderProps) {
   return (
@@ -56,13 +59,15 @@ export function DashboardSectionHeader({
         {description}
       </p>
 
-      <SectionCtaLink
-        to={cta.to}
-        label={cta.label}
-        shortLabel={cta.shortLabel}
-        tabTitle={cta.tabTitle}
-        className={cn("whitespace-nowrap", cta.className)}
-      />
+      {action ?? (cta ? (
+        <SectionCtaLink
+          to={cta.to}
+          label={cta.label}
+          shortLabel={cta.shortLabel}
+          tabTitle={cta.tabTitle}
+          className={cn("whitespace-nowrap", cta.className)}
+        />
+      ) : null)}
     </div>
   );
 }

@@ -19,15 +19,15 @@ describe("dashboard centered container", () => {
     expect(container).not.toMatch(/scale-|zoom/);
   });
 
-  it("is used by the Dashboard page wrapping every render branch", () => {
+  it("is used once by the simplified Agentes Dashboard", () => {
     expect(dashboard).toContain('from "@/components/dashboard/DashboardContainer"');
     expect((dashboard.match(/<DashboardContainer/g) ?? []).length).toBe(1);
     expect((dashboard.match(/<\/DashboardContainer>/g) ?? []).length).toBe(1);
-    // container wraps loading, simplified, team-member and full branches
+    // The Agentes dashboard now has one intentionally simplified render branch.
     const start = dashboard.indexOf("<DashboardContainer");
     const end = dashboard.indexOf("</DashboardContainer>");
     const inner = dashboard.slice(start, end);
-    for (const marker of ["isLoading ?", "isTeamMember ?", "isSimplifiedDashboard ?", "<CuratedNewsFeed />"]) {
+    for (const marker of ["<DashboardQuickActions />", "<UpcomingAgendaEventsCard />", "<TripRemindersCard />", "<CommunitySocialFeed />"]) {
       expect(inner).toContain(marker);
     }
   });
@@ -68,8 +68,8 @@ describe("inner sections keep their approved rules", () => {
     expect(news).toContain("@[42rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]");
   });
 
-  it("community feed stays a controlled reading column", () => {
-    expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("max-w-[780px]");
+  it("community feed uses the approved responsive reading width", () => {
+    expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("lg:w-[88%] xl:w-[78%]");
   });
 
   it("academy shows at most four cards per row via container queries", () => {

@@ -115,7 +115,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
 
   return (
     <Card className="border-0 shadow-card overflow-visible">
-      <CardContent className="pt-5 pb-5 space-y-3 min-w-0">
+      <CardContent className="px-3 pt-5 pb-5 space-y-3 min-w-0 sm:px-6">
         {/* Header */}
         <DashboardSectionHeader
           icon={Users}
@@ -123,23 +123,15 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           description="Compartilhe experiências e oportunidades com outros agentes de viagens."
           iconClassName="text-[hsl(var(--section-community))]"
           accentClassName="bg-[hsl(var(--section-community))]"
-          cta={{
-            to: "/comunidade",
-            label: "Ver toda a comunidade",
-            shortLabel: "Ver tudo",
-            tabTitle: "Comunidade",
-            className: "text-[hsl(var(--section-community))]",
-          }}
+          action={can("online_users.view") ? (
+            <div className="relative z-20 min-w-0 justify-self-end" data-dashboard-online-users>
+              <OnlineAgentsStrip compact />
+            </div>
+          ) : null}
         />
 
-        {can("online_users.view") && (
-          <div className="relative z-20 flex min-w-0 justify-start" data-dashboard-online-users>
-            <OnlineAgentsStrip />
-          </div>
-        )}
-
-        {/* Coluna central (padrão LinkedIn) */}
-        <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
+        {/* Coluna de leitura ampla, alinhada ao título no dashboard Agentes de Sonhos. */}
+        <div className="w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]" data-dashboard-community-feed-column>
         {/* Composer */}
         <CreatePostForm onSubmit={createPost} isCreating={isCreating} collapsible />
 
@@ -276,8 +268,8 @@ function PostCard({
   const latestComment = comments.length > 0 ? comments[comments.length - 1] : null;
 
   return (
-    <article className="rounded-2xl bg-card border border-border/60 overflow-hidden">
-      <header className="flex items-start gap-3 px-4 pt-3 pb-2">
+    <article className="min-w-0 rounded-2xl bg-card border border-border/60 overflow-hidden" data-dashboard-community-post>
+      <header className="flex items-start gap-3 px-5 pt-4 pb-3">
         <Avatar className="h-9 w-9 flex-shrink-0">
           <AvatarImage src={post.profile?.avatar_url || undefined} alt={post.profile?.name || "Autor"} />
           <AvatarFallback className="bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
@@ -324,7 +316,7 @@ function PostCard({
       </header>
 
       {post.content && (
-        <div className="px-4 pb-2">
+        <div className="px-5 pb-3">
           <LinkifiedText
             text={post.content}
             className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed"
@@ -341,13 +333,13 @@ function PostCard({
       )}
 
       {(post as any).poll && (
-        <div className="px-4 pt-2 min-w-0">
+        <div className="px-5 pt-2 min-w-0 overflow-hidden">
           <PostPoll post={post} onVote={onVotePoll} isVoting={isVoting} />
         </div>
       )}
 
       {(post.likes_count > 0 || post.comments_count > 0) && (
-        <div className="px-4 pt-2 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="px-5 pt-2 flex items-center gap-3 text-xs text-muted-foreground">
           {post.likes_count > 0 && (
             <span>{post.likes_count} {post.likes_count === 1 ? "curtida" : "curtidas"}</span>
           )}
@@ -359,7 +351,7 @@ function PostCard({
         </div>
       )}
 
-      <div className="px-2 sm:px-4 py-1 mt-2 border-t border-border/40 flex items-center">
+      <div className="px-3 sm:px-5 py-1.5 mt-3 border-t border-border/40 flex items-center">
         <Button
           variant="ghost"
           size="sm"
@@ -383,7 +375,7 @@ function PostCard({
       </div>
 
       {(latestComment || loadingComments || newCount > 1) && (
-        <div className="px-4 pb-3 pt-2 space-y-2 bg-muted/20 border-t border-border/40">
+        <div className="px-5 pb-4 pt-3 space-y-2 bg-muted/20 border-t border-border/40">
           {loadingComments && !latestComment ? (
             <div className="flex items-center py-1 text-xs text-muted-foreground">
               <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" /> Carregando comentário...
