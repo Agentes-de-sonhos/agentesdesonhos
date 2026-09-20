@@ -294,16 +294,18 @@ export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
   const items = extractItems(xml).slice(0, portal.maxItems);
   const parsed: RawItem[] = items.map((it) => {
     const rawTitle = extractTag(it, "title");
-    const title = usedFallback ? stripAggregatorSuffix(rawTitle) : rawTitle;
-    const link = extractTag(it, "link");
-    const desc = extractTag(it, "description") || extractTag(it, "content:encoded");
+    const rawDesc = extractTag(it, "description") || extractTag(it, "content:encoded");
+    const rawLink = extractTag(it, "link");
+    const title = usedFallback ? stripAggregatorSuffix(decodeHtmlEntities(rawTitle)) : rawTitle;
+    const desc = usedFallback ? decodeHtmlEntities(rawDesc) : rawDesc;
+    const link = usedFallback ? resolveAggregatorLink(rawLink) : rawLink;
     const pubDate = extractTag(it, "pubDate");
     const canonical = canonicalizeUrl(link);
     const iso = pubDate ? new Date(pubDate).toISOString() : null;
     const dayKey = iso ? iso.slice(0, 10) : "";
     return {
       titulo_original: title,
-      conteudo: usedFallback ? title : desc,
+      conteudo: desc || title,
       url: link,
       url_canonical: canonical,
       data_publicacao: iso && !Number.isNaN(new Date(iso).getTime()) ? iso : null,
