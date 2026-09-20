@@ -3336,6 +3336,27 @@ export type Database = {
           },
         ]
       }
+      community_muted_authors: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       community_post_comments: {
         Row: {
           content: string
