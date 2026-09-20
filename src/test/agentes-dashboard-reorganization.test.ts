@@ -61,9 +61,11 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(feed).toContain("overflow-visible");
   });
 
-  it("move presença para uma linha própria no cabeçalho da Comunidade", () => {
+  it("combina compositor e presença na mesma linha no desktop", () => {
     expect(feed).not.toContain("Ver toda a comunidade");
     expect(feed).toContain('can("online_users.view") && (');
+    expect(feed).toContain("data-dashboard-community-actions");
+    expect(feed).toContain("lg:flex-row lg:items-center");
     expect(feed).toContain("data-dashboard-online-users");
     expect(feed.match(/<OnlineAgentsStrip compact \/>/g)).toHaveLength(1);
   });

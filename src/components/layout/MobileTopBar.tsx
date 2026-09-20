@@ -55,7 +55,7 @@ export function MobileTopBar({ embedded = false }: { embedded?: boolean }) {
             size="icon"
             aria-label="Abrir chat"
             onClick={() => window.dispatchEvent(new CustomEvent(OPEN_COMMUNITY_CHAT_EVENT))}
-            className="h-10 w-10 shrink-0 rounded-full bg-[hsl(var(--section-community))] text-primary-foreground hover:bg-[hsl(var(--section-community))]/90"
+            className="h-10 w-10 shrink-0 rounded-full bg-[hsl(var(--section-community))] text-primary-foreground hover:bg-[hsl(var(--section-community))]/90 lg:hidden"
           >
             <MessageCircle className="h-5 w-5" />
           </Button>
@@ -66,7 +66,7 @@ export function MobileTopBar({ embedded = false }: { embedded?: boolean }) {
           variant="ghost"
           aria-label="Pesquisar na comunidade"
           onClick={() => setSearchOpen(true)}
-          className="h-10 w-full justify-start gap-2 rounded-full bg-muted px-3 text-sm font-normal text-muted-foreground hover:bg-muted/80"
+          className="h-10 w-full justify-start gap-2 rounded-full bg-muted px-3 text-sm font-normal text-muted-foreground hover:bg-muted/80 lg:hidden"
         >
           <Search className="h-4 w-4 shrink-0" />
           <span className="truncate">Pesquisar</span>

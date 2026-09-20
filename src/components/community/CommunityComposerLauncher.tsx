@@ -35,12 +35,10 @@ export function CommunityComposerLauncher({ onSubmit, isCreating, compact = fals
   return (
     <>
       <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/60 bg-card p-2 sm:px-3">
-        {!compact && (
-          <Avatar className="h-9 w-9 shrink-0">
+        <Avatar className={compact ? "hidden h-9 w-9 shrink-0 lg:flex" : "h-9 w-9 shrink-0"}>
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials}</AvatarFallback>
-          </Avatar>
-        )}
+        </Avatar>
         <Button
           type="button"
           variant="ghost"
