@@ -51,7 +51,6 @@ export const APP_CREATE_GROUP: AppSidebarGroup = {
     { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { key: "roteiros", title: "Roteiro", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
     { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
-    { key: "bloco_notas", title: "Bloco de Notas", url: "/bloco-notas", icon: FileText, requiredFeature: "notepad" },
   ],
 };
 
