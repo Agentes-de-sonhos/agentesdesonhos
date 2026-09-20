@@ -461,20 +461,30 @@ export function CreatePostForm({
               {initials}
             </AvatarFallback>
           </Avatar>
-          <Textarea
-            placeholder={
-              expanded
-                ? "O que você quer compartilhar hoje? Dúvida, experiência, dica, oportunidade..."
-                : "O que você quer compartilhar hoje?"
-            }
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onPaste={handlePaste}
-            rows={expanded ? 3 : 1}
-            onFocus={() => setExpanded(true)}
-            onBlur={handleComposerBlur}
-            className={`resize-none text-sm transition-all duration-200 ${expanded ? "min-h-[76px]" : "min-h-[38px] h-[38px] py-2 overflow-hidden"}`}
-          />
+          <div className="min-w-0 flex-1">
+            <MentionTextarea
+              placeholder={
+                expanded
+                  ? "O que você quer compartilhar hoje? Use @ para marcar suas conexões."
+                  : "O que você quer compartilhar hoje?"
+              }
+              aria-label="Texto da publicação"
+              value={content}
+              onChange={setContent}
+              onPaste={handlePaste}
+              rows={variant === "plain" ? 6 : expanded ? 3 : 1}
+              autoFocus={autoFocusText}
+              onFocus={() => setExpanded(true)}
+              onBlur={handleComposerBlur}
+              className={`text-sm transition-all duration-200 ${
+                variant === "plain"
+                  ? "min-h-[160px] border-0 px-0 shadow-none focus-visible:ring-0"
+                  : expanded
+                    ? "min-h-[76px]"
+                    : "min-h-[38px] h-[38px] py-2 overflow-hidden"
+              }`}
+            />
+          </div>
         </div>
         {expanded && (
         <>
