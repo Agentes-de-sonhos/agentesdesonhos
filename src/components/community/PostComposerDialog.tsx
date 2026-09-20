@@ -13,7 +13,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { CreatePostForm, type ComposerDraftState } from "./CreatePostForm";
+import {
+  CreatePostForm,
+  type ComposerDraftState,
+  type CreatePostPayload,
+} from "./CreatePostForm";
 import { PostVisibilitySelector } from "./PostVisibilitySelector";
 import {
   DEFAULT_COMMUNITY_VISIBILITY,
@@ -23,7 +27,7 @@ import {
 interface PostComposerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: Parameters<typeof CreatePostForm>[0]["onSubmit"] extends (d: infer D) => void ? D : never) => void;
+  onSubmit: (data: CreatePostPayload) => void;
   isCreating: boolean;
   authorName?: string | null;
   authorAvatarUrl?: string | null;
