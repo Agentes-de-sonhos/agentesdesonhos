@@ -38,6 +38,10 @@ import { PostMediaGrid } from "@/components/community/PostMediaGrid";
 import { PostLightbox } from "@/components/community/PostLightbox";
 import { ConnectButton } from "@/components/community/ConnectButton";
 import { PostFollowMenuItem } from "@/components/community/PostFollowMenuItem";
+import { ConnectMenuItem } from "@/components/community/ConnectMenuItem";
+import { HidePostButton } from "@/components/community/HidePostButton";
+import { ReportContentDialog } from "@/components/community/ReportContentDialog";
+
 import { PostTextContent } from "@/components/community/PostTextContent";
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
