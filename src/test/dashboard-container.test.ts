@@ -68,8 +68,8 @@ describe("inner sections keep their approved rules", () => {
     expect(news).toContain("@[42rem]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]");
   });
 
-  it("community feed stays a controlled reading column", () => {
-    expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("max-w-[780px]");
+  it("community feed uses the approved responsive reading width", () => {
+    expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("lg:w-[88%] xl:w-[78%]");
   });
 
   it("academy shows at most four cards per row via container queries", () => {

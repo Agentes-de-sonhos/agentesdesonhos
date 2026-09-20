@@ -37,11 +37,11 @@ describe("dashboard block CTAs", () => {
     expect(src).toContain("data-workspace-title");
   });
 
-  it("community block opens its own internal window", () => {
+  it("community block uses the header action space for online presence", () => {
     const src = read("src/components/dashboard/CommunitySocialFeed.tsx");
     expect(src).toContain("DashboardSectionHeader");
-    expect(src).toContain('to: "/comunidade"');
-    expect(src).toContain('tabTitle: "Comunidade"');
+    expect(src).not.toContain("Ver toda a comunidade");
+    expect(src).toContain("data-dashboard-online-users");
   });
 
   it("academy block opens its own internal window from the section header", () => {
