@@ -34,6 +34,8 @@ export interface CommunityPost {
   documents?: PostDocument[] | null;
   poll?: PostPoll | null;
   edited_at?: string | null;
+  /** "public" (qualquer pessoa), "network" (minha rede) ou "internal" (agência). */
+  visibility?: string | null;
   likes_count: number;
   comments_count: number;
   created_at: string;
@@ -80,9 +82,13 @@ export interface PostComment {
   user_id: string;
   content: string;
   created_at: string;
+  parent_comment_id?: string | null;
+  likes_count?: number;
+  user_liked?: boolean;
   profile?: {
     name: string;
     avatar_url: string | null;
+    agency_name?: string | null;
   };
 }
 
