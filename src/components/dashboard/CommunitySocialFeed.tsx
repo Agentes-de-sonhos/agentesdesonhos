@@ -249,6 +249,11 @@ interface PostCardProps {
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
   isVoting?: boolean;
   newCount?: number;
+  commentsOpen?: boolean;
+  onToggleComments?: () => void;
+  onAddComment?: (data: { postId: string; content: string }) => void;
+  isAddingComment?: boolean;
+  onDeleteComment?: (commentId: string) => void;
 }
 
 function PostCard({
@@ -263,19 +268,46 @@ function PostCard({
   onVotePoll,
   isVoting,
   newCount = 0,
+  commentsOpen = false,
+  onToggleComments,
+  onAddComment,
+  isAddingComment,
+  onDeleteComment,
 }: PostCardProps) {
   const isAuthor = currentUserId === post.user_id;
   const canDelete = isAuthor || isAdmin;
   const canEdit = isAuthor;
   const images = postImages(post);
   const wasEdited = !!(post as any).edited_at;
+  const commentsRegionId = `dashboard-post-comments-${post.id}`;
+  const commentInputRef = useRef<HTMLInputElement | null>(null);
+  const [commentText, setCommentText] = useState("");
 
   const { data: comments = [], isLoading: loadingComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
     queryFn: () => fetchComments(post.id),
-    enabled: post.comments_count > 0,
+    enabled: commentsOpen || post.comments_count > 0,
     staleTime: 30 * 1000,
   });
+
+  // Foco no campo após a renderização assíncrona da área expandida.
+  useEffect(() => {
+    if (!commentsOpen) return;
+    const frame = requestAnimationFrame(() => {
+      const input = commentInputRef.current;
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      input.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [commentsOpen]);
+
+  const handleAddComment = () => {
+    const content = commentText.trim();
+    if (!content || isAddingComment || !onAddComment) return;
+    onAddComment({ postId: post.id, content });
+    setCommentText("");
+  };
 
   const latestComment = comments.length > 0 ? comments[comments.length - 1] : null;
 
