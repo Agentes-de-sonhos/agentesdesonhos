@@ -15,6 +15,16 @@ const mobile = readFileSync("src/components/layout/MobileDrawerMenu.tsx", "utf8"
 const whiteLabel = readFileSync("src/components/whitelabel/admin/AgencyAdminSidebarView.tsx", "utf8");
 
 describe("menu lateral Agentes de Sonhos", () => {
+  it('exibe "Criar novo" com exatamente Orçamento, Roteiro e Carteira Digital', () => {
+    expect(APP_CREATE_GROUP.title).toBe("Criar novo");
+    expect(APP_CREATE_GROUP.items.map((item) => item.title)).toEqual([
+      "Orçamento",
+      "Roteiro",
+      "Carteira Digital",
+    ]);
+    expect(APP_CREATE_GROUP.items.some((item) => item.key === "bloco_notas")).toBe(false);
+  });
+
   it("mantém a hierarquia e a ordem fixa solicitadas", () => {
     expect(APP_SIDEBAR_SECTION_ORDER).toEqual(["MEU TRABALHO", "GESTÃO", "OUTRAS"]);
     expect(APP_CREATE_GROUP.title).toBe("Criar novo");
