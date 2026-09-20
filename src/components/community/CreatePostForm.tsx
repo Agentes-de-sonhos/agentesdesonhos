@@ -386,6 +386,7 @@ export function CreatePostForm({
         videoUrl: uploadedVideo,
         documents: uploadedDocs,
         poll: pollValidation.valid ? pollValidation.cleaned : null,
+        visibility,
       });
       reset();
     } catch (err: any) {
@@ -412,9 +413,30 @@ export function CreatePostForm({
     setExpanded(false);
   };
 
+  // Expõe envio e estado do rascunho para o cabeçalho do compositor em modal.
+  if (submitRef) submitRef.current = handleSubmit;
+  const isDirty = content.trim().length > 0 || hasMedia || pollOpen;
+  useEffect(() => {
+    onDraftStateChange?.({ isDirty, canSubmit, isBusy: uploading || isCreating });
+  }, [isDirty, canSubmit, uploading, isCreating, onDraftStateChange]);
+
+  const Wrapper = variant === "plain" ? "div" : Card;
+  const Inner = variant === "plain" ? "div" : CardContent;
+
   return (
-    <Card ref={composerRef} className="border-primary/30 shadow-sm ring-1 ring-primary/10">
-      <CardContent className={expanded ? "pt-4 pb-3 space-y-3" : "py-2.5 space-y-0"}>
+    <Wrapper
+      ref={composerRef as any}
+      className={variant === "plain" ? "w-full" : "border-primary/30 shadow-sm ring-1 ring-primary/10"}
+    >
+      <Inner
+        className={
+          variant === "plain"
+            ? "space-y-3"
+            : expanded
+              ? "pt-4 pb-3 space-y-3"
+              : "py-2.5 space-y-0"
+        }
+      >
 
         {expanded && (
         <div>
