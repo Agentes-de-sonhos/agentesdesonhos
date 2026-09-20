@@ -58,8 +58,10 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
     expect(dashboard).toContain("data-dashboard-mobile-header");
-    expect(dashboard).toContain("order-1 min-w-0 flex-1");
-    expect(dashboard).toContain("order-2 flex shrink-0");
+    expect(dashboard).toContain("grid-cols-[minmax(0,1fr)_auto]");
+    expect(dashboard).toContain("col-start-1 row-start-1 min-w-0");
+    expect(dashboard).toContain("col-span-2 row-start-2");
+    expect(dashboard).toContain("col-start-2 row-start-1 flex shrink-0");
     expect(dashboard).not.toContain("<OnlineAgentsStrip");
     expect(feed).toContain("<OnlineAgentsStrip compact />");
     expect(feed).toContain("overflow-visible");

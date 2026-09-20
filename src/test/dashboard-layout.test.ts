@@ -121,7 +121,7 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
   it("keeps the greeting compact and currencies visible from tablet widths", () => {
     const pill = read("src/components/layout/GamificationPill.tsx");
     const fx = read("src/components/dashboard/ExchangeRateCard.tsx");
-    expect(dashboard).toContain("flex min-w-0 flex-wrap items-center gap-3");
+    expect(dashboard).toContain("grid min-w-0 grid-cols-[minmax(0,1fr)_auto]");
     expect(dashboard).toContain("whitespace-nowrap truncate min-w-0");
     expect(dashboard).toContain("hidden md:flex md:flex-nowrap md:items-center");
     expect(pill).toContain("whitespace-nowrap shrink-0");
