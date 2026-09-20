@@ -76,7 +76,7 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT }: CommunityFeed
       })) as CommunityPost[];
 
       return buildCommunityFeedPage(
-        [...enriched, ...(data.length > pageSize ? [data[pageSize] as CommunityPost] : [])],
+        [...enriched, ...(data.length > pageSize ? [data[pageSize] as unknown as CommunityPost] : [])],
         pageSize,
         pageParam,
       );
