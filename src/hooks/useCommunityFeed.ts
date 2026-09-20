@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import type { CommunityPost, PostComment, PostDocument, PostPoll } from "@/types/community-members";
 import { buildCommunityFeedPage, mergeUniqueCommunityPages } from "@/lib/communityFeedPagination";
 import { mutedAuthorIds } from "@/hooks/useCommunityNetwork";
+import { useCommunityHiddenPosts } from "@/hooks/useCommunityHiddenPosts";
+
 import { extractMentionUserIds } from "@/lib/communityMentions";
 import {
   DEFAULT_COMMUNITY_VISIBILITY,
@@ -70,9 +72,12 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
   const mutedIds = mutedAuthorIds(mutedQuery.data);
   const mutedReady = !user?.id || !mutedQuery.isLoading;
 
+  // Publicações ocultadas por este usuário: filtradas no servidor, sem buracos na paginação.
+  const { hiddenIds, isReady: hiddenReady } = useCommunityHiddenPosts();
+
   const postsQuery = useInfiniteQuery({
-    queryKey: ["community-feed", pageSize, mutedIds.join(",")],
-    enabled: enabled && mutedReady,
+    queryKey: ["community-feed", pageSize, mutedIds.join(","), hiddenIds.join(",")],
+    enabled: enabled && mutedReady && hiddenReady,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       let query = supabase
@@ -85,8 +90,12 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
       if (mutedIds.length > 0) {
         query = query.not("user_id", "in", `(${mutedIds.join(",")})`);
       }
+      if (hiddenIds.length > 0) {
+        query = query.not("id", "in", `(${hiddenIds.join(",")})`);
+      }
       const { data, error } = await query;
       if (error) throw error;
+
 
       if (!data || data.length === 0) return buildCommunityFeedPage([], pageSize, pageParam);
 

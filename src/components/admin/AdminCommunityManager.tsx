@@ -46,8 +46,11 @@ import {
   Trash2,
   Loader2,
   Users,
+  ShieldAlert,
 } from "lucide-react";
 import { ConfirmDeleteDialog } from "./ConfirmDeleteDialog";
+import { AdminCommunityReportsManager } from "./AdminCommunityReportsManager";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -75,7 +78,7 @@ export function AdminCommunityManager() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="members" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="members" className="text-xs sm:text-sm">
               <Users className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Membros</span>
@@ -92,6 +95,10 @@ export function AdminCommunityManager() {
               <Trophy className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">Prêmios</span>
             </TabsTrigger>
+            <TabsTrigger value="reports" className="text-xs sm:text-sm">
+              <ShieldAlert className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Denúncias</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="members">
@@ -106,6 +113,10 @@ export function AdminCommunityManager() {
           <TabsContent value="prizes">
             <PrizesManager />
           </TabsContent>
+          <TabsContent value="reports">
+            <AdminCommunityReportsManager />
+          </TabsContent>
+
         </Tabs>
       </CardContent>
     </Card>

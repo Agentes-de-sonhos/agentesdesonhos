@@ -15,6 +15,8 @@ import {
   Loader2,
   MessageCircle,
   MoreHorizontal,
+  ShieldAlert,
+
   Pencil,
   Share2,
   Trash2,
@@ -36,6 +38,10 @@ import { PostMediaGrid } from "@/components/community/PostMediaGrid";
 import { PostLightbox } from "@/components/community/PostLightbox";
 import { ConnectButton } from "@/components/community/ConnectButton";
 import { PostFollowMenuItem } from "@/components/community/PostFollowMenuItem";
+import { ConnectMenuItem } from "@/components/community/ConnectMenuItem";
+import { HidePostButton } from "@/components/community/HidePostButton";
+import { ReportContentDialog } from "@/components/community/ReportContentDialog";
+
 import { PostTextContent } from "@/components/community/PostTextContent";
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
@@ -287,6 +293,8 @@ function PostCard({
   const wasEdited = !!(post as any).edited_at;
   const commentsRegionId = `dashboard-post-comments-${post.id}`;
   const [shareOpen, setShareOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+
 
   const { data: comments = [], isLoading: loadingComments, refetch: refetchComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
@@ -325,29 +333,44 @@ function PostCard({
         {!isAuthor && (
           <ConnectButton targetUserId={post.user_id} targetName={post.profile?.name} />
         )}
-        {(canDelete || canEdit || !isAuthor) && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <PostFollowMenuItem authorId={post.user_id} authorName={post.profile?.name} />
-              {canEdit && (
-                <DropdownMenuItem onClick={onEdit}>
-                  <Pencil className="h-4 w-4 mr-2" /> Editar publicação
-                </DropdownMenuItem>
-              )}
-              {canDelete && (
-                <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {!isAuthor && (
+              <ConnectMenuItem targetUserId={post.user_id} targetName={post.profile?.name} />
+            )}
+            <PostFollowMenuItem authorId={post.user_id} authorName={post.profile?.name} />
+            {canEdit && (
+              <DropdownMenuItem onClick={onEdit}>
+                <Pencil className="h-4 w-4 mr-2" /> Editar publicação
+              </DropdownMenuItem>
+            )}
+            {!isAuthor && (
+              <DropdownMenuItem onClick={() => setReportOpen(true)}>
+                <ShieldAlert className="h-4 w-4 mr-2" /> Denunciar publicação
+              </DropdownMenuItem>
+            )}
+            {canDelete && (
+              <DropdownMenuItem onClick={onDelete} className="text-destructive">
+                <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={currentUserId} />
       </header>
+
+      <ReportContentDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetKind="post"
+        postId={post.id}
+      />
+
 
       {post.content && (
         <div className="px-5 pb-3">

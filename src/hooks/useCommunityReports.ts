@@ -164,18 +164,19 @@ export function useAdminCommunityReports() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, name, email")
+        .select("id, name")
         .in("id", peopleIds);
       if (error) throw error;
-      return (data ?? []) as { id: string; name: string | null; email: string | null }[];
+      return (data ?? []) as { id: string; name: string | null }[];
     },
   });
 
   const names = useMemo(() => {
     const map = new Map<string, string>();
     (profilesQuery.data ?? []).forEach((row) => {
-      map.set(row.id, row.name || row.email || "Usuário");
+      map.set(row.id, row.name || "Usuário");
     });
+
     return map;
   }, [profilesQuery.data]);
 

@@ -7,12 +7,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Heart, Loader2, MessageCircle, MoreHorizontal, Send, Trash2 } from "lucide-react";
+import { Heart, Loader2, MessageCircle, MoreHorizontal, Send, ShieldAlert, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MentionTextarea } from "./MentionTextarea";
 import { MentionText } from "./MentionText";
+import { PostFollowMenuItem } from "./PostFollowMenuItem";
+import { ReportContentDialog } from "./ReportContentDialog";
 import type { PostComment } from "@/types/community-members";
+
 
 interface PostCommentsSectionProps {
   postId: string;
@@ -57,6 +60,8 @@ export function PostCommentsSection({
   const [likeOverrides, setLikeOverrides] = useState<Record<string, LikeOverride>>({});
   const [pendingLike, setPendingLike] = useState<string | null>(null);
   const [deleted, setDeleted] = useState<string[]>([]);
+  const [reportComment, setReportComment] = useState<PostComment | null>(null);
+
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Foco suave no campo quando a área de comentários é aberta inline.
@@ -131,6 +136,8 @@ export function PostCommentsSection({
     const liked = override ? override.liked : !!comment.user_liked;
     const likes = override ? override.count : comment.likes_count ?? 0;
     const canDelete = comment.user_id === currentUserId || isAdmin;
+    const isOwnComment = comment.user_id === currentUserId;
+
 
     return (
       <div key={comment.id} className={`flex gap-2 ${isReply ? "ml-8" : ""}`} data-community-comment>
@@ -152,7 +159,7 @@ export function PostCommentsSection({
                     .join(" · ")}
                 </span>
               </div>
-              {canDelete && (
+              {(canDelete || !isOwnComment) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -165,18 +172,32 @@ export function PostCommentsSection({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => {
-                        onDeleteComment(comment.id);
-                        setDeleted((prev) => [...prev, comment.id]);
-                      }}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Excluir comentário
-                    </DropdownMenuItem>
+                    {!isOwnComment && (
+                      <PostFollowMenuItem
+                        authorId={comment.user_id}
+                        authorName={cName}
+                      />
+                    )}
+                    {!isOwnComment && (
+                      <DropdownMenuItem onClick={() => setReportComment(comment)}>
+                        <ShieldAlert className="mr-2 h-4 w-4" /> Denunciar comentário
+                      </DropdownMenuItem>
+                    )}
+                    {canDelete && (
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => {
+                          onDeleteComment(comment.id);
+                          setDeleted((prev) => [...prev, comment.id]);
+                        }}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Excluir comentário
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+
             </div>
             <MentionText
               text={comment.content}
@@ -289,6 +310,17 @@ export function PostCommentsSection({
           )}
         </Button>
       </div>
+
+      <ReportContentDialog
+        open={!!reportComment}
+        onOpenChange={(open) => {
+          if (!open) setReportComment(null);
+        }}
+        targetKind="comment"
+        postId={postId}
+        commentId={reportComment?.id ?? null}
+      />
     </div>
+
   );
 }

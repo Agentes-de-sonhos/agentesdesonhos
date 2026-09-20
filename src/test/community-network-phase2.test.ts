@@ -132,13 +132,12 @@ describe("botão Conectar compartilhado pelos dois feeds", () => {
     expect(search).toContain("<ConnectButton targetUserId={person.user_id}");
   });
 
-  it("não adiciona ocultar, denúncia ou compartilhamento interno", () => {
+  it("mantém o compartilhamento interno como ação própria da Fase 3", () => {
     for (const source of [dashboardFeed, postCard]) {
-      expect(source).not.toContain("Denunciar");
-      expect(source).not.toContain("Ocultar publicação");
-      expect(source).not.toContain("Compartilhar internamente");
+      expect(source).toContain("SharePostDialog");
     }
   });
+
 });
 
 describe("seguir e parar de seguir", () => {
@@ -164,7 +163,10 @@ describe("seguir e parar de seguir", () => {
 
   it("filtra o feed no servidor preservando a paginação", () => {
     expect(feedHook).toContain('query.not("user_id", "in", `(${mutedIds.join(",")})`)');
-    expect(feedHook).toContain('queryKey: ["community-feed", pageSize, mutedIds.join(",")]');
+    expect(feedHook).toContain(
+      'queryKey: ["community-feed", pageSize, mutedIds.join(","), hiddenIds.join(",")]',
+    );
+
     expect(feedHook).toContain(".range(pageParam, pageParam + pageSize)");
     expect(mutedAuthorIds([{ author_id: OTHER }, { author_id: OTHER }])).toEqual([OTHER]);
     expect(mutedAuthorIds(undefined)).toEqual([]);

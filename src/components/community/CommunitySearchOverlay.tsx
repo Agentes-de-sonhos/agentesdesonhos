@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { buildCommunityPostUrl } from "@/lib/communityPostFocus";
+import { useCommunityHiddenPosts } from "@/hooks/useCommunityHiddenPosts";
 import { ConnectButton } from "./ConnectButton";
+
 
 export const SEARCH_MIN_TERM = 2;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -85,6 +87,8 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   const enabled = open && isSearchTermValid(debounced);
   const wantsPeople = filter === "all" || filter === "people";
   const wantsPosts = filter === "all" || filter === "posts";
+  const { hiddenIds, isReady: hiddenReady } = useCommunityHiddenPosts();
+
 
   const peopleQuery = useQuery({
     queryKey: ["community-search-people", debounced],
@@ -108,17 +112,22 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   });
 
   const postsQuery = useQuery({
-    queryKey: ["community-search-posts", debounced],
-    enabled: enabled && wantsPosts,
+    queryKey: ["community-search-posts", debounced, hiddenIds.join(",")],
+    enabled: enabled && wantsPosts && hiddenReady,
     staleTime: 30 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      let request = supabase
         .from("community_posts")
         .select("id, user_id, content, created_at")
         .ilike("content", `%${debounced}%`)
         .order("created_at", { ascending: false })
         .limit(RESULT_LIMIT);
+      if (hiddenIds.length > 0) {
+        request = request.not("id", "in", `(${hiddenIds.join(",")})`);
+      }
+      const { data, error } = await request;
       if (error) throw error;
+
       const posts = (data ?? []) as SearchPost[];
       if (posts.length === 0) return posts;
 
