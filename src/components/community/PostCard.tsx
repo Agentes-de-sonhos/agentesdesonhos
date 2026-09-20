@@ -291,17 +291,14 @@ export function PostCard({
           </div>
         )}
 
-        <Dialog open={!!lightboxUrl} onOpenChange={(o) => !o && setLightboxUrl(null)}>
-          <DialogContent className="max-w-5xl p-0 bg-transparent border-0 shadow-none">
-            {lightboxUrl && (
-              <img
-                src={lightboxUrl}
-                alt="Imagem da publicação"
-                className="w-full max-h-[85vh] object-contain rounded-lg bg-black/60"
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        <PostLightbox
+          images={images}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          authorName={name}
+        />
+
+        {/* Compat: mantém LinkifiedText importado onde já era usado nos comentários */}
       </CardContent>
     </Card>
   );
