@@ -183,7 +183,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 }}
                 onEdit={() => setEditingPost(post)}
                 fetchComments={fetchComments}
-                onOpenImage={(url) => setLightboxUrl(url)}
+                onOpenImage={(index) => setLightbox({ images: postImages(post), index })}
                 onVotePoll={votePoll}
                 isVoting={isVoting}
                 newCount={newCount}
@@ -251,7 +251,7 @@ interface PostCardProps {
   onDelete: () => void;
   onEdit: () => void;
   fetchComments: (postId: string) => Promise<PostComment[]>;
-  onOpenImage: (url: string) => void;
+  onOpenImage: (index: number) => void;
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
   isVoting?: boolean;
   newCount?: number;
