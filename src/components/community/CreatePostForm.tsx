@@ -720,7 +720,7 @@ export function CreatePostForm({
         />
         </>
         )}
-      </CardContent>
-    </Card>
+      </Inner>
+    </Wrapper>
   );
 }
