@@ -66,7 +66,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(feed).toContain('action={can("online_users.view") ? (');
     expect(feed).toContain("data-dashboard-online-users");
     expect(feed).toContain("justify-self-end");
-    expect(feed.match(/<OnlineAgentsStrip \/>/g)).toHaveLength(1);
+    expect(feed.match(/<OnlineAgentsStrip compact \/>/g)).toHaveLength(1);
   });
 
   it("alinha e amplia compositor e cards responsivamente sem overflow", () => {

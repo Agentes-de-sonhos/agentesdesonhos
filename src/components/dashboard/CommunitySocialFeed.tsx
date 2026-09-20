@@ -115,7 +115,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
 
   return (
     <Card className="border-0 shadow-card overflow-visible">
-      <CardContent className="pt-5 pb-5 space-y-3 min-w-0">
+      <CardContent className="px-3 pt-5 pb-5 space-y-3 min-w-0 sm:px-6">
         {/* Header */}
         <DashboardSectionHeader
           icon={Users}
@@ -125,7 +125,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           accentClassName="bg-[hsl(var(--section-community))]"
           action={can("online_users.view") ? (
             <div className="relative z-20 min-w-0 justify-self-end" data-dashboard-online-users>
-              <OnlineAgentsStrip />
+              <OnlineAgentsStrip compact />
             </div>
           ) : null}
         />

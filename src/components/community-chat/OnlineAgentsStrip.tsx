@@ -26,9 +26,11 @@ import { Switch } from "@/components/ui/switch";
 import { Users, MessageCircle, User, Building2, MapPin, UserPlus, Check, Clock, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useConnections } from "@/hooks/useTradeConnect";
+import { cn } from "@/lib/utils";
 
 interface OnlineAgentsStripProps {
   onAgentClick?: (agent: OnlineAgent) => void;
+  compact?: boolean;
   /**
    * When true, the current user is treated as offline (Start plan).
    * Any interaction (toggle on, view profile, send message) opens the upgrade dialog.
@@ -254,7 +256,7 @@ function AgentAvatar({
   );
 }
 
-export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: OnlineAgentsStripProps) {
+export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false, compact = false }: OnlineAgentsStripProps) {
   const { onlineUsers, onlineCount, isOnline, isOnlineLoading, toggleOnline } =
     usePresence();
   const { hasFeature } = useSubscription();
@@ -291,7 +293,7 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
 
   if (!restrictedMode && !isAdmin && !hasFeature("community")) return null;
 
-  const maxVisible = isMobile ? 4 : 6;
+  const maxVisible = compact ? (isMobile ? 1 : 3) : (isMobile ? 4 : 6);
   const visibleAgents = onlineUsers.slice(0, maxVisible);
   const overflowCount = onlineUsers.length - maxVisible;
   // In restricted mode, current user is always offline regardless of presence state
@@ -308,7 +310,10 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
 
   return (
     <>
-    <div className="flex items-center gap-3 bg-card rounded-xl px-4 py-2.5 border border-border shadow-sm">
+    <div className={cn(
+      "flex items-center bg-card rounded-xl border border-border shadow-sm",
+      compact ? "gap-2 px-2 py-2" : "gap-3 px-4 py-2.5",
+    )}>
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
         <div className="relative">
           <Users className="h-4 w-4 text-primary" />
