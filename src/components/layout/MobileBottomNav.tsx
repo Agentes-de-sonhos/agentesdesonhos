@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MobileDrawerMenu } from "./MobileDrawerMenu";
-import { CreatePostForm } from "@/components/community/CreatePostForm";
+import { PostComposerDialog } from "@/components/community/PostComposerDialog";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSubscription } from "@/hooks/useSubscription";
