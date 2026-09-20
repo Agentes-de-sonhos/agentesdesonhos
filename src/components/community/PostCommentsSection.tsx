@@ -7,12 +7,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Heart, Loader2, MessageCircle, MoreHorizontal, Send, Trash2 } from "lucide-react";
+import { Heart, Loader2, MessageCircle, MoreHorizontal, Send, ShieldAlert, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MentionTextarea } from "./MentionTextarea";
 import { MentionText } from "./MentionText";
+import { PostFollowMenuItem } from "./PostFollowMenuItem";
+import { ReportContentDialog } from "./ReportContentDialog";
 import type { PostComment } from "@/types/community-members";
+
 
 interface PostCommentsSectionProps {
   postId: string;
