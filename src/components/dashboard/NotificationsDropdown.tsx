@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Megaphone, CheckCheck, UserPlus } from "lucide-react";
+import { AtSign, Bell, CheckCheck, Send, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,6 +11,11 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useLeads, useMarkAllLeadsRead, useMarkLeadRead, type LeadItem } from "@/hooks/useLeadAlerts";
+import {
+  useCommunityNotifications,
+  useMarkCommunityNotificationsRead,
+  type CommunityNotificationItem,
+} from "@/hooks/useCommunityNotifications";
 
 export function NotificationsDropdown() {
   const navigate = useNavigate();
@@ -18,6 +23,8 @@ export function NotificationsDropdown() {
   const { data: leads = [] } = useLeads();
   const markRead = useMarkLeadRead();
   const markAllRead = useMarkAllLeadsRead();
+  const { data: communityNotifications = [] } = useCommunityNotifications();
+  const markCommunityRead = useMarkCommunityNotificationsRead();
 
   // Auto-cleanup (client-side): hide read leads older than 24 hours,
   // and cap the list to the most recent 100 items to keep the panel performant.
@@ -36,8 +43,13 @@ export function NotificationsDropdown() {
     () => cleanedLeads.filter((l) => !l.is_read),
     [cleanedLeads]
   );
-  const unreadCount = unreadLeads.length;
+  const unreadCommunity = useMemo(
+    () => communityNotifications.filter((item) => !item.read_at),
+    [communityNotifications]
+  );
+  const unreadCount = unreadLeads.length + unreadCommunity.length;
   const visibleLeads = cleanedLeads;
+  const hasAnything = visibleLeads.length > 0 || communityNotifications.length > 0;
 
   // Auto-mark all as read as soon as the panel opens. This prevents the badge
   // and unread highlight from staying active after the user has seen the list.
@@ -49,8 +61,25 @@ export function NotificationsDropdown() {
     }
     if (autoMarkedRef.current || unreadCount === 0) return;
     autoMarkedRef.current = true;
-    markAllRead.mutate();
-  }, [isOpen, unreadCount, markAllRead]);
+    if (unreadLeads.length > 0) markAllRead.mutate();
+    if (unreadCommunity.length > 0) markCommunityRead.mutate(undefined);
+  }, [isOpen, unreadCount, unreadLeads.length, unreadCommunity.length, markAllRead, markCommunityRead]);
+
+  const handleCommunityClick = (item: CommunityNotificationItem) => {
+    setIsOpen(false);
+    navigate(item.post_id ? `/comunidade?post=${item.post_id}` : "/comunidade");
+  };
+
+  const communityLabel = (item: CommunityNotificationItem) => {
+    const who = item.actor_name || "Alguém";
+    if (item.type === "mention") {
+      return item.comment_id
+        ? `${who} mencionou você em um comentário`
+        : `${who} mencionou você em uma publicação`;
+    }
+    if (item.type === "share") return `${who} enviou uma publicação para você`;
+    return `${who} interagiu com você na Comunidade`;
+  };
 
   const handleLeadClick = (lead: LeadItem) => {
     if (!lead.is_read) markRead.mutate({ id: lead.id, source: lead.source });
@@ -95,7 +124,10 @@ export function NotificationsDropdown() {
               variant="ghost"
               size="sm"
               className="h-7 text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => markAllRead.mutate()}
+              onClick={() => {
+                markAllRead.mutate();
+                markCommunityRead.mutate(undefined);
+              }}
             >
               <CheckCheck className="h-3.5 w-3.5 mr-1" />
               Marcar todas como lidas
@@ -104,7 +136,7 @@ export function NotificationsDropdown() {
         </div>
 
         <ScrollArea className="h-[420px]">
-          {visibleLeads.length === 0 ? (
+          {!hasAnything ? (
             <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
               <Bell className="h-10 w-10 text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">
@@ -116,6 +148,32 @@ export function NotificationsDropdown() {
             </div>
           ) : (
             <div className="divide-y">
+              {communityNotifications.map((item) => (
+                <button
+                  key={`community-${item.id}`}
+                  onClick={() => handleCommunityClick(item)}
+                  className={cn(
+                    "w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors",
+                    !item.read_at && "bg-primary/5 border-l-2 border-l-primary"
+                  )}
+                >
+                  <div className="mt-0.5">
+                    {item.type === "share" ? (
+                      <Send className="h-4 w-4 text-primary" />
+                    ) : (
+                      <AtSign className="h-4 w-4 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn("text-sm truncate", !item.read_at && "font-semibold text-foreground")}>
+                      {communityLabel(item)}
+                    </p>
+                    <span className="text-[10px] text-muted-foreground">
+                      {new Date(item.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
+                    </span>
+                  </div>
+                </button>
+              ))}
               {visibleLeads.map((lead) => (
                 <button
                   key={`${lead.source}-${lead.id}`}

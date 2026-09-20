@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type MutableRefObject } from "react";
 import { MentionTextarea } from "./MentionTextarea";
+import { PostVisibilitySelector } from "./PostVisibilitySelector";
 import {
   DEFAULT_COMMUNITY_VISIBILITY,
   type CommunityVisibility,
@@ -100,6 +101,8 @@ export function CreatePostForm({
   submitRef,
   onDraftStateChange,
 }: CreatePostFormProps) {
+  const [localVisibility, setLocalVisibility] = useState<CommunityVisibility>(visibility);
+  const effectiveVisibility = hidePublishButton ? visibility : localVisibility;
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [expanded, setExpanded] = useState(!collapsible);
@@ -386,7 +389,7 @@ export function CreatePostForm({
         videoUrl: uploadedVideo,
         documents: uploadedDocs,
         poll: pollValidation.valid ? pollValidation.cleaned : null,
-        visibility,
+        visibility: effectiveVisibility,
       });
       reset();
     } catch (err: any) {
@@ -663,7 +666,7 @@ export function CreatePostForm({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-primary"
+              className="hidden h-8 text-xs gap-1.5 text-muted-foreground hover:text-primary sm:inline-flex"
               onClick={() => docInputRef.current?.click()}
               disabled={uploading || docs.length >= MAX_DOCS}
               title={`Documento — até ${MAX_DOCS} · 25 MB cada`}
@@ -684,14 +687,17 @@ export function CreatePostForm({
           </div>
 
           {!hidePublishButton && (
-            <Button size="sm" onClick={handleSubmit} disabled={!canSubmit} className="gap-1.5">
+            <div className="flex items-center gap-2">
+              <PostVisibilitySelector value={localVisibility} onChange={setLocalVisibility} />
+              <Button size="sm" onClick={handleSubmit} disabled={!canSubmit} className="gap-1.5">
               {uploading || isCreating ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Send className="h-3.5 w-3.5" />
               )}
-              Publicar
-            </Button>
+                Publicar
+              </Button>
+            </div>
           )}
         </div>
 
