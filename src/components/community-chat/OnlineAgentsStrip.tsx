@@ -232,6 +232,8 @@ function AgentAvatar({
   return (
     <AgentHoverCard agent={agent} onMessage={onMessage} onViewProfile={onViewProfile}>
       <button
+        type="button"
+        aria-label={`Abrir ações de ${agent.name}`}
         className="relative flex-shrink-0 transition-all duration-200 hover:scale-110 hover:z-30 focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-full"
         style={{
           marginLeft: stackIndex > 0 ? "-0.5rem" : 0,
@@ -336,6 +338,9 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                 <PopoverTrigger asChild>
                   <button
+                    type="button"
+                    aria-label={`Ver todos os ${onlineUsers.length} usuários online`}
+                    aria-expanded={popoverOpen}
                     className="relative flex-shrink-0 transition-all duration-200 hover:scale-110 hover:z-30 focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-full"
                     style={{ marginLeft: "-0.5rem", zIndex: 10 }}
                   >
@@ -401,6 +406,7 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false }: Onli
         <TooltipTrigger asChild>
           <div className="flex items-center gap-1.5">
             <Switch
+              aria-label={effectiveIsOnline ? "Ficar invisível" : "Ficar visível"}
               checked={effectiveIsOnline}
               onCheckedChange={handleToggle}
               disabled={!restrictedMode && isOnlineLoading}
