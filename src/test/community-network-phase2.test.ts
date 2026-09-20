@@ -99,7 +99,7 @@ describe("ações do ciclo de conexão", () => {
   it("cobre enviar, cancelar, aceitar, recusar e remover", () => {
     expect(networkHook).toContain("requester_id: userId, receiver_id: targetUserId, status: \"pending\"");
     expect(networkHook).toContain("const cancelRequest");
-    expect(networkHook).toContain('accept ? "accepted" : "rejected"');
+    expect(networkHook).toContain('.update({ status: "accepted"');
     expect(networkHook).toContain("const removeConnection");
     expect(networkHook).toContain("Não é possível conectar consigo mesmo");
     expect(networkHook).toContain("toast.success");
