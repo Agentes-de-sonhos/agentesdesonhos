@@ -1,14 +1,14 @@
 # Roadmap
 - [x] Reorganizar o editor de orçamento conforme escopo aprovado, validar testes, tipos e build, sem publicar.
 - [x] Mover a adição de atividades para Manhã, Tarde e Noite, validar fluxos e acessibilidade, sem publicar.
-- [ ] Notícias do Trade: restaurar coleta de Mercado & Eventos e Brasilturis (feeds bloqueados por anti-bot) com fonte pública alternativa.
-- [ ] Comunidade Fase 1 (somente Agentes de Sonhos, sem banco, sem publicar):
-  - [ ] Barra inferior mobile com 5 itens (Início, Minha Rede, Publicação, Gestão, Menu).
-  - [ ] Cabeçalho mobile compacto (avatar, campo Pesquisar, Chat) no dashboard e na Comunidade.
-  - [ ] Card de publicação compartilhado: cabeçalho com agência, texto com 3 linhas + "mais", contadores de curtidas/comentários.
-  - [ ] Grade de fotos 1/2/3/4/+N.
-  - [ ] Galeria em tela cheia com swipe, setas, teclado, indicador e fechar.
-  - [ ] Responsividade, testes (truncamento, grade, galeria, barra mobile), typecheck e build.
+- [x] Notícias do Trade: restaurar coleta de Mercado & Eventos e Brasilturis com fonte pública alternativa.
+- [x] Comunidade Fase 1 (somente Agentes de Sonhos, sem banco, sem publicar):
+  - [x] Barra inferior mobile com 5 itens (Início, Minha Rede, Publicação, Gestão, Menu).
+  - [x] Cabeçalho mobile compacto (avatar, campo Pesquisar, Chat) no dashboard e na Comunidade.
+  - [x] Card de publicação compartilhado: cabeçalho com agência, texto com 3 linhas + "mais", contadores de curtidas/comentários.
+  - [x] Grade de fotos 1/2/3/4/+N.
+  - [x] Galeria em tela cheia com swipe, setas, teclado, indicador e fechar.
+  - [x] Responsividade, testes (truncamento, grade, galeria, barra mobile), typecheck e build.
 - [x] Ajustes visuais pós-Fase 5 e Comunidade opcional no painel SiteLab/white-label:
   - [x] Integrar busca/chat e membros online ao cabeçalho da Comunidade no dashboard.
   - [x] Unificar cabeçalho dos posts e ampliar o uso da largura mobile.
