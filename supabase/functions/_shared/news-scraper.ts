@@ -183,15 +183,15 @@ function isAntiBotChallenge(body: string): boolean {
   );
 }
 
-/** Busca o XML do feed com cabeçalhos de navegador, timeout e retry moderado. */
-export async function fetchFeedXml(portal: PortalConfig): Promise<string> {
+/** Busca o XML de um endereço de feed com cabeçalhos de navegador, timeout e retry moderado. */
+async function fetchFeedXmlFromUrl(feedUrl: string): Promise<{ ok: true; body: string } | { ok: false; error: string }> {
   let lastError = "";
   for (let attempt = 1; attempt <= FEED_MAX_ATTEMPTS; attempt++) {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), FEED_TIMEOUT_MS);
     try {
-      const origin = new URL(portal.feedUrl).origin;
-      const res = await fetch(portal.feedUrl, {
+      const origin = new URL(feedUrl).origin;
+      const res = await fetch(feedUrl, {
         headers: { ...FEED_HEADERS, Referer: `${origin}/` },
         redirect: "follow",
         signal: ctrl.signal,
@@ -199,35 +199,67 @@ export async function fetchFeedXml(portal: PortalConfig): Promise<string> {
       const body = await res.text();
       if (!res.ok) {
         lastError = isAntiBotChallenge(body)
-          ? `HTTP ${res.status} from ${portal.feedUrl} — bloqueio anti-bot do portal (desafio de navegador); não contornado por decisão de conformidade`
-          : `HTTP ${res.status} from ${portal.feedUrl}`;
+          ? `HTTP ${res.status} from ${feedUrl} — bloqueio anti-bot do portal (desafio de navegador); não contornado por decisão de conformidade`
+          : `HTTP ${res.status} from ${feedUrl}`;
         // 403/503 de desafio anti-bot não melhora com retry
         if (isAntiBotChallenge(body)) break;
       } else if (!body || body.length < 100) {
-        lastError = `Empty feed body (${body?.length ?? 0} bytes) from ${portal.feedUrl}`;
+        lastError = `Empty feed body (${body?.length ?? 0} bytes) from ${feedUrl}`;
       } else if (isAntiBotChallenge(body)) {
-        lastError = `Resposta de desafio anti-bot em ${portal.feedUrl}; não contornado por decisão de conformidade`;
+        lastError = `Resposta de desafio anti-bot em ${feedUrl}; não contornado por decisão de conformidade`;
         break;
       } else {
-        return body;
+        return { ok: true, body };
       }
     } catch (e) {
-      lastError = `${(e as Error).name === "AbortError" ? "Timeout" : "Falha de rede"} em ${portal.feedUrl}: ${(e as Error).message}`;
+      lastError = `${(e as Error).name === "AbortError" ? "Timeout" : "Falha de rede"} em ${feedUrl}: ${(e as Error).message}`;
     } finally {
       clearTimeout(timer);
     }
     if (attempt < FEED_MAX_ATTEMPTS) await new Promise((r) => setTimeout(r, attempt * 1500));
   }
-  throw new Error(lastError || `Falha ao buscar ${portal.feedUrl}`);
+  return { ok: false, error: lastError || `Falha ao buscar ${feedUrl}` };
+}
+
+export interface FeedFetchOutcome {
+  xml: string;
+  sourceUrl: string;
+  usedFallback: boolean;
+  primaryError?: string;
+}
+
+/**
+ * Tenta o feed nativo do portal e, se ele estiver indisponível, recorre aos
+ * feeds públicos alternativos configurados (agregadores de sindicação).
+ */
+export async function fetchFeedXmlWithFallback(portal: PortalConfig): Promise<FeedFetchOutcome> {
+  const primary = await fetchFeedXmlFromUrl(portal.feedUrl);
+  if (primary.ok) return { xml: primary.body, sourceUrl: portal.feedUrl, usedFallback: false };
+
+  const errors = [primary.error];
+  for (const url of portal.fallbackFeedUrls ?? []) {
+    const alt = await fetchFeedXmlFromUrl(url);
+    if (alt.ok) {
+      return { xml: alt.body, sourceUrl: url, usedFallback: true, primaryError: primary.error };
+    }
+    errors.push(alt.error);
+  }
+  throw new Error(errors.join(" | "));
+}
+
+/** Compatibilidade: retorna apenas o XML (feed nativo ou alternativo). */
+export async function fetchFeedXml(portal: PortalConfig): Promise<string> {
+  return (await fetchFeedXmlWithFallback(portal)).xml;
 }
 
 export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
-  const xml = await fetchFeedXml(portal);
+  const { xml, usedFallback } = await fetchFeedXmlWithFallback(portal);
   if (!xml || xml.length < 100) throw new Error(`Empty feed body (${xml.length} bytes)`);
 
   const items = extractItems(xml).slice(0, portal.maxItems);
   const parsed: RawItem[] = items.map((it) => {
-    const title = extractTag(it, "title");
+    const rawTitle = extractTag(it, "title");
+    const title = usedFallback ? stripAggregatorSuffix(rawTitle) : rawTitle;
     const link = extractTag(it, "link");
     const desc = extractTag(it, "description") || extractTag(it, "content:encoded");
     const pubDate = extractTag(it, "pubDate");
@@ -236,7 +268,7 @@ export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
     const dayKey = iso ? iso.slice(0, 10) : "";
     return {
       titulo_original: title,
-      conteudo: desc,
+      conteudo: usedFallback ? title : desc,
       url: link,
       url_canonical: canonical,
       data_publicacao: iso && !Number.isNaN(new Date(iso).getTime()) ? iso : null,
