@@ -71,27 +71,32 @@ export default function Dashboard() {
   return (
     <DashboardLayout flushHorizontal>
       <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in">
-        <div className="flex min-w-0 flex-col gap-3 px-4 lg:px-0 xl:flex-row xl:items-center xl:justify-between">
-          <div className="min-w-0 flex-1">
-            <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
+        <div
+          className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 md:grid-cols-[minmax(0,1fr)_auto_auto] lg:px-0"
+          data-dashboard-mobile-header
+        >
+          <div className="col-start-1 row-start-1 min-w-0">
+            <h1 className="min-w-0 truncate whitespace-nowrap font-display text-base font-bold text-foreground min-[360px]:text-xl lg:text-xl xl:text-3xl">
               {getGreeting()}, {firstName}!
             </h1>
           </div>
 
-          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap xl:justify-end">
+          <div className="col-span-2 row-start-2 w-full min-w-0 md:col-span-1 md:col-start-2 md:row-start-1 md:w-auto">
             <DashboardQuickActions />
-            <div className="hidden h-7 w-px bg-border sm:block" />
-            <div className="flex flex-nowrap items-center gap-2">
+          </div>
+
+          <div className="col-start-2 row-start-1 flex shrink-0 flex-nowrap items-center gap-1 md:col-start-3 md:gap-2">
+            <div className="hidden md:flex md:flex-nowrap md:items-center">
               <ExchangeRateCard />
-              <NotificationsDropdown />
             </div>
+            <NotificationsDropdown />
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
+                    className="h-8 w-8 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 sm:h-9 sm:w-9"
                     aria-label="Meu perfil"
                     onClick={() => openInternalWindow("/perfil", "Meu perfil")}
                   >
@@ -107,7 +112,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-destructive text-white hover:bg-destructive/90"
+                    className="h-8 w-8 rounded-full bg-destructive text-white hover:bg-destructive/90 sm:h-9 sm:w-9"
                     aria-label="Sair"
                     onClick={handleLogout}
                   >

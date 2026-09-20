@@ -17,7 +17,6 @@ import { ProtectedShell } from "@/components/auth/ProtectedShell";
 import { AdminRoute } from "@/components/auth/AdminRoute";
 import { LaunchOverlay } from "./components/launch/LaunchOverlay";
 import { ImpersonationBanner } from "./components/admin/ImpersonationBanner";
-import { WhatsAppSupportButton } from "./components/layout/WhatsAppSupportButton";
 import { Loader2 } from "lucide-react";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingScreen } from "./components/auth/LoadingScreen";
@@ -404,7 +403,6 @@ const App = () => {
 </Routes>
           </RoutePermissionGuard>
           </Suspense>
-          <WhatsAppSupportButton />
           </NewLeadAlertProvider>
           </WorkspaceGate>
           </SubscriptionProvider>

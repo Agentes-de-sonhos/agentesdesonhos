@@ -9,6 +9,7 @@ const dashboard = read("src/pages/Dashboard.tsx");
 const feed = read("src/components/dashboard/CommunitySocialFeed.tsx");
 const hook = read("src/hooks/useCommunityFeed.ts");
 const siteLabDashboard = read("src/pages/whitelabel/admin/AgencyAdminHome.tsx");
+const app = read("src/App.tsx");
 
 const post = (id: string): CommunityPost => ({
   id,
@@ -50,15 +51,35 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(shortcuts).toContain("useOpenInternalWindow");
   });
 
-  it("preserva saudação, câmbio, notificações, perfil e logout, sem usuários online no cabeçalho", () => {
+  it("preserva saudação e controles, ocultando o câmbio somente no mobile", () => {
     expect(dashboard).toContain("{getGreeting()}, {firstName}!");
     expect(dashboard).toContain("<ExchangeRateCard />");
+    expect(dashboard).toContain("hidden md:flex");
     expect(dashboard).toContain("<NotificationsDropdown />");
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
+    expect(dashboard).toContain("data-dashboard-mobile-header");
+    expect(dashboard).toContain("grid-cols-[minmax(0,1fr)_auto]");
+    expect(dashboard).toContain("col-start-1 row-start-1 min-w-0");
+    expect(dashboard).toContain("col-span-2 row-start-2");
+    expect(dashboard).toContain("col-start-2 row-start-1 flex shrink-0");
     expect(dashboard).not.toContain("<OnlineAgentsStrip");
     expect(feed).toContain("<OnlineAgentsStrip compact />");
     expect(feed).toContain("overflow-visible");
+  });
+
+  it("distribui os quatro atalhos igualmente na largura mobile sem rolagem horizontal", () => {
+    const shortcuts = read("src/components/dashboard/DashboardQuickActions.tsx");
+    expect(shortcuts).toContain("data-dashboard-quick-actions");
+    expect(shortcuts).toContain("grid w-full min-w-0 grid-cols-4");
+    expect(shortcuts).toContain("h-14 w-full min-w-0");
+    expect(shortcuts).toContain("h-6 w-6 md:h-5 md:w-5");
+    expect(shortcuts).not.toContain("overflow-x-auto");
+  });
+
+  it("remove a instância global do suporte flutuante sem remover a página de suporte", () => {
+    expect(app).not.toContain("WhatsAppSupportButton");
+    expect(app).toContain('<Route path="/suporte" element={<Suporte />} />');
   });
 
   it("combina compositor e presença na mesma linha no desktop", () => {

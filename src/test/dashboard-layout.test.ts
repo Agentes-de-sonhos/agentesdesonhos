@@ -118,12 +118,12 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
     }
   });
 
-  it("keeps the header on one desktop line with nowrap greeting, points and currencies", () => {
+  it("keeps the greeting compact and currencies visible from tablet widths", () => {
     const pill = read("src/components/layout/GamificationPill.tsx");
     const fx = read("src/components/dashboard/ExchangeRateCard.tsx");
-    expect(dashboard).toContain("xl:flex-row xl:items-center xl:justify-between");
-    expect(dashboard).toContain("whitespace-nowrap truncate min-w-0");
-    expect(dashboard).toContain("flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap xl:justify-end");
+    expect(dashboard).toContain("grid min-w-0 grid-cols-[minmax(0,1fr)_auto]");
+    expect(dashboard).toContain("min-w-0 truncate whitespace-nowrap");
+    expect(dashboard).toContain("hidden md:flex md:flex-nowrap md:items-center");
     expect(pill).toContain("whitespace-nowrap shrink-0");
     expect(fx).toContain("flex flex-nowrap items-center");
     expect((fx.match(/whitespace-nowrap/g) ?? []).length).toBeGreaterThanOrEqual(3);

@@ -15,3 +15,4 @@
   - [x] Refinar compositor fullscreen branco no mobile e modal no desktop.
   - [x] Adicionar opt-in por agência, desligado por padrão, com SiteLab como referência.
   - [x] Validar isolamento, testes específicos, suíte completa, tipos e build sem publicar.
+- [x] Compactar o cabeçalho mobile da página inicial, ampliar os quatro atalhos e remover o suporte flutuante global, sem publicar.
