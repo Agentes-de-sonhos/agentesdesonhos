@@ -35,10 +35,11 @@ interface PostCardProps {
   onLike: (postId: string, liked: boolean) => void;
   onDelete: (postId: string) => void;
   onEdit?: (post: CommunityPost) => void;
-  onAddComment: (data: { postId: string; content: string }) => void;
+  onAddComment: (data: { postId: string; content: string; parentCommentId?: string | null }) => void;
   isAddingComment: boolean;
   fetchComments: (postId: string) => Promise<PostComment[]>;
   onDeleteComment: (commentId: string) => void;
+  onToggleCommentLike?: (data: { commentId: string; liked: boolean }) => Promise<unknown>;
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
 }
 
