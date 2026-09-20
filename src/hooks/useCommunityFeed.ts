@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import type { CommunityPost, PostComment, PostDocument, PostPoll } from "@/types/community-members";
 import { buildCommunityFeedPage, mergeUniqueCommunityPages } from "@/lib/communityFeedPagination";
 import { mutedAuthorIds } from "@/hooks/useCommunityNetwork";
+import { useCommunityHiddenPosts } from "@/hooks/useCommunityHiddenPosts";
+
 import { extractMentionUserIds } from "@/lib/communityMentions";
 import {
   DEFAULT_COMMUNITY_VISIBILITY,
