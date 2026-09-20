@@ -57,7 +57,7 @@ export function MobileTopBar() {
       <button
         type="button"
         aria-label="Pesquisar na comunidade"
-        onClick={() => navigate("/comunidade/membros")}
+        onClick={() => setSearchOpen(true)}
         className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full bg-muted px-3 text-left text-sm text-muted-foreground"
       >
         <Search className="h-4 w-4 shrink-0" />
@@ -72,6 +72,8 @@ export function MobileTopBar() {
       >
         <MessageCircle className="h-5 w-5" />
       </button>
+
+      <CommunitySearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
