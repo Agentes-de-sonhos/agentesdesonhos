@@ -1,5 +1,6 @@
-import { LinkifiedText } from "@/components/community/LinkifiedText";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { PostCommentsSection } from "./PostCommentsSection";
+import { SharePostDialog } from "./SharePostDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,14 +45,15 @@ interface PostCardProps {
 }
 
 export function PostCard({
-  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment, onVotePoll,
+  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment,
+  onToggleCommentLike, onVotePoll,
 }: PostCardProps) {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
-  const [commentText, setCommentText] = useState("");
+  const [shareOpen, setShareOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const name = post.profile?.name || "Membro";
