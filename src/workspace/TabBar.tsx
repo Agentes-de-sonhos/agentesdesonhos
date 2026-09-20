@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { X, Plus, ChevronDown } from "lucide-react";
+import { X, Plus, ChevronDown, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspace, type WorkspaceTab } from "./WorkspaceProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
