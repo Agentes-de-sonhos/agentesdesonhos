@@ -297,8 +297,6 @@ export function PostCard({
           onClose={() => setLightboxIndex(null)}
           authorName={name}
         />
-
-        {/* Compat: mantém LinkifiedText importado onde já era usado nos comentários */}
       </CardContent>
     </Card>
   );
