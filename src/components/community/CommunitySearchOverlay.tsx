@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle, Loader2, Search, SearchX } from "lucide-react";
+import { AlertCircle, Loader2, Search, SearchX, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -78,6 +78,28 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   const [term, setTerm] = useState("");
   const [debounced, setDebounced] = useState("");
   const [filter, setFilter] = useState<CommunitySearchFilter>("all");
+  const mobileHistoryEntryRef = useRef(false);
+
+  const closeOverlay = useCallback(() => {
+    if (mobileHistoryEntryRef.current) {
+      window.history.back();
+      return;
+    }
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const closeThen = useCallback(
+    (action: () => void) => {
+      if (mobileHistoryEntryRef.current) {
+        window.history.back();
+        window.setTimeout(action, 0);
+        return;
+      }
+      onOpenChange(false);
+      action();
+    },
+    [onOpenChange],
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => setDebounced(term.trim()), SEARCH_DEBOUNCE_MS);
@@ -91,6 +113,24 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
       setFilter("all");
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open || typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (!isMobile) return;
+
+    window.history.pushState({ communitySearchOpen: true }, "");
+    mobileHistoryEntryRef.current = true;
+    const handlePopState = () => {
+      mobileHistoryEntryRef.current = false;
+      onOpenChange(false);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      mobileHistoryEntryRef.current = false;
+    };
+  }, [open, onOpenChange]);
 
   const enabled = open && isSearchTermValid(debounced);
   const wantsPeople = filter === "all" || filter === "people";
@@ -171,45 +211,60 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(nextOpen) => (nextOpen ? onOpenChange(true) : closeOverlay())}>
       <DialogContent
-        className="max-w-xl gap-3 p-4 sm:p-5"
+        hideClose
+        className="inset-0 flex h-[100dvh] max-h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 bg-background p-0 pt-[env(safe-area-inset-top)] shadow-none duration-0 data-[state=closed]:slide-out-to-left-0 data-[state=closed]:slide-out-to-top-0 data-[state=closed]:zoom-out-100 data-[state=open]:slide-in-from-left-0 data-[state=open]:slide-in-from-top-0 data-[state=open]:zoom-in-100 md:left-[50%] md:top-[50%] md:grid md:h-auto md:max-h-[85dvh] md:w-full md:max-w-xl md:translate-x-[-50%] md:translate-y-[-50%] md:gap-3 md:overflow-visible md:rounded-lg md:border md:p-5 md:shadow-lg md:duration-200"
         data-community-search-overlay
       >
-        <DialogHeader>
-          <DialogTitle className="text-base">Buscar na comunidade</DialogTitle>
-        </DialogHeader>
+        <div className="shrink-0 space-y-3 border-b border-border bg-background px-4 pb-3 pt-3 md:contents">
+          <DialogHeader className="pr-0 md:pr-8">
+            <div className="flex items-center justify-between gap-3">
+              <DialogTitle className="text-left text-base">Buscar na comunidade</DialogTitle>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                aria-label="Fechar busca"
+                onClick={closeOverlay}
+                className="h-9 w-9 shrink-0 md:hidden"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </DialogHeader>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            autoFocus
-            value={term}
-            onChange={(event) => setTerm(event.target.value)}
-            placeholder="Pessoas, publicações ou mensagens"
-            aria-label="Buscar pessoas, publicações ou mensagens"
-            className="pl-9"
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              autoFocus
+              value={term}
+              onChange={(event) => setTerm(event.target.value)}
+              placeholder="Pessoas, publicações ou mensagens"
+              aria-label="Buscar pessoas, publicações ou mensagens"
+              className="pl-9"
+            />
+          </div>
+
+          <div className="flex gap-1 overflow-x-auto" role="tablist" aria-label="Filtros de busca">
+            {SEARCH_FILTERS.map((item) => (
+              <Button
+                key={item.key}
+                type="button"
+                role="tab"
+                size="sm"
+                variant={filter === item.key ? "secondary" : "ghost"}
+                aria-selected={filter === item.key}
+                onClick={() => setFilter(item.key)}
+                className={cn("h-8 shrink-0 px-3 text-xs", filter === item.key && "font-semibold")}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex gap-2" role="tablist" aria-label="Filtros de busca">
-          {SEARCH_FILTERS.map((item) => (
-            <Button
-              key={item.key}
-              type="button"
-              role="tab"
-              size="sm"
-              variant={filter === item.key ? "secondary" : "ghost"}
-              aria-selected={filter === item.key}
-              onClick={() => setFilter(item.key)}
-              className={cn("h-8 px-3 text-xs", filter === item.key && "font-semibold")}
-            >
-              {item.label}
-            </Button>
-          ))}
-        </div>
-
-        <div className="max-h-[60vh] min-h-24 space-y-4 overflow-y-auto">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 md:max-h-[60vh] md:min-h-24 md:px-0 md:pb-0 md:pt-0">
           {!enabled && (
             <p className="py-6 text-center text-sm text-muted-foreground">
               Digite ao menos {SEARCH_MIN_TERM} letras para buscar.
@@ -267,8 +322,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                     type="button"
                     className="min-w-0 flex-1 text-left"
                     onClick={() => {
-                      onOpenChange(false);
-                      navigate(`/comunidade/agente/${person.user_id}`);
+                      closeThen(() => navigate(`/comunidade/agente/${person.user_id}`));
                     }}
                   >
                     <p className="truncate text-sm font-semibold text-foreground">
@@ -294,8 +348,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                   key={post.id}
                   type="button"
                   onClick={() => {
-                    onOpenChange(false);
-                    navigate(buildCommunityPostUrl(post.id));
+                    closeThen(() => navigate(buildCommunityPostUrl(post.id)));
                   }}
                   className="w-full rounded-xl border border-border/60 px-3 py-2 text-left hover:bg-muted"
                 >
@@ -324,11 +377,12 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                   type="button"
                   data-search-message-item
                   onClick={() => {
-                    onOpenChange(false);
-                    openCommunityConversation({
-                      conversationId: message.conversationId,
-                      messageId: message.id,
-                    });
+                    closeThen(() =>
+                      openCommunityConversation({
+                        conversationId: message.conversationId,
+                        messageId: message.id,
+                      }),
+                    );
                   }}
                   className="flex w-full items-center gap-3 rounded-xl border border-border/60 px-3 py-2 text-left hover:bg-muted"
                 >

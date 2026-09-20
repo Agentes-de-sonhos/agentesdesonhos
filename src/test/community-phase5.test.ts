@@ -97,6 +97,23 @@ describe("Fase 5 — busca de mensagens", () => {
     expect(overlay).toContain("messages.length === 0");
     expect(overlay).toContain("if (wantsMessages) messagesQuery.refetch();");
   });
+
+  it("usa tela cheia móvel com topo fixo, rolagem própria e modal no desktop", () => {
+    expect(overlay).toContain("h-[100dvh]");
+    expect(overlay).toContain("pt-[env(safe-area-inset-top)]");
+    expect(overlay).toContain("pb-[max(1rem,env(safe-area-inset-bottom))]");
+    expect(overlay).toContain("min-h-0 flex-1");
+    expect(overlay).toContain("overflow-y-auto overscroll-contain");
+    expect(overlay).toContain("md:left-[50%] md:top-[50%]");
+    expect(overlay).toContain('aria-label="Fechar busca"');
+  });
+
+  it("fecha pelo histórico do celular sem perder a página anterior", () => {
+    expect(overlay).toContain('window.matchMedia("(max-width: 767px)")');
+    expect(overlay).toContain("window.history.pushState({ communitySearchOpen: true }");
+    expect(overlay).toContain('window.addEventListener("popstate", handlePopState)');
+    expect(overlay).toContain("window.history.back()");
+  });
 });
 
 interface OpenCommunityConversationDetailLike {
