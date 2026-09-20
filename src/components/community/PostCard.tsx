@@ -57,6 +57,8 @@ export function PostCard({
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const name = post.profile?.name || "Membro";
