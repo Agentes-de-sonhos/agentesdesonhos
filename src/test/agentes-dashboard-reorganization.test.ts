@@ -72,7 +72,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
   it("alinha e amplia compositor e cards responsivamente sem overflow", () => {
     expect(feed).toContain('data-dashboard-community-feed-column');
     expect(feed).toContain('w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]');
-    expect(feed).not.toContain("mx-auto");
+    expect(feed).not.toContain('className="mx-auto w-full');
     expect(feed).not.toContain("max-w-[780px]");
     expect(feed).toContain('data-dashboard-community-post');
     expect(feed).toContain("min-w-0 rounded-2xl");

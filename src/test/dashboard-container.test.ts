@@ -19,15 +19,15 @@ describe("dashboard centered container", () => {
     expect(container).not.toMatch(/scale-|zoom/);
   });
 
-  it("is used by the Dashboard page wrapping every render branch", () => {
+  it("is used once by the simplified Agentes Dashboard", () => {
     expect(dashboard).toContain('from "@/components/dashboard/DashboardContainer"');
     expect((dashboard.match(/<DashboardContainer/g) ?? []).length).toBe(1);
     expect((dashboard.match(/<\/DashboardContainer>/g) ?? []).length).toBe(1);
-    // container wraps loading, simplified, team-member and full branches
+    // The Agentes dashboard now has one intentionally simplified render branch.
     const start = dashboard.indexOf("<DashboardContainer");
     const end = dashboard.indexOf("</DashboardContainer>");
     const inner = dashboard.slice(start, end);
-    for (const marker of ["isLoading ?", "isTeamMember ?", "isSimplifiedDashboard ?", "<CuratedNewsFeed />"]) {
+    for (const marker of ["<DashboardQuickActions />", "<UpcomingAgendaEventsCard />", "<TripRemindersCard />", "<CommunitySocialFeed />"]) {
       expect(inner).toContain(marker);
     }
   });

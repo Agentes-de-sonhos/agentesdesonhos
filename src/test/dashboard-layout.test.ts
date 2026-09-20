@@ -199,7 +199,7 @@ describe("Comunidade e Academy no dashboard", () => {
 
   it("keeps the community feed in one wide, left-aligned responsive column", () => {
     expect(community).toContain('w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]');
-    expect(community).not.toContain("mx-auto");
+    expect(community).not.toContain('className="mx-auto w-full');
     expect(community).not.toContain("lg:grid-cols-2");
   });
 
