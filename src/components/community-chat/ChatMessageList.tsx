@@ -21,15 +21,24 @@ interface MessageData {
 interface ChatMessageListProps {
   messages: MessageData[];
   showReadStatus?: boolean;
+  /** Mensagem encontrada pela busca da Comunidade: rola até ela e destaca. */
+  highlightMessageId?: string | null;
 }
 
-export function ChatMessageList({ messages, showReadStatus }: ChatMessageListProps) {
+export function ChatMessageList({ messages, showReadStatus, highlightMessageId }: ChatMessageListProps) {
   const { user } = useAuth();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (highlightMessageId) return;
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, [messages.length, highlightMessageId]);
+
+  useEffect(() => {
+    if (!highlightMessageId) return;
+    highlightRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+  }, [highlightMessageId, messages.length]);
 
   if (messages.length === 0) {
     return (
@@ -51,7 +60,11 @@ export function ChatMessageList({ messages, showReadStatus }: ChatMessageListPro
         return (
           <div
             key={msg.id}
-            className={`flex items-end gap-2 ${isOwn ? "flex-row-reverse" : ""}`}
+            ref={highlightMessageId === msg.id ? highlightRef : undefined}
+            data-chat-message-highlight={highlightMessageId === msg.id ? "true" : undefined}
+            className={`flex items-end gap-2 ${isOwn ? "flex-row-reverse" : ""} ${
+              highlightMessageId === msg.id ? "rounded-2xl ring-2 ring-primary/60" : ""
+            }`}
           >
             {!isOwn && showAvatar ? (
               <Avatar className="h-7 w-7 flex-shrink-0">

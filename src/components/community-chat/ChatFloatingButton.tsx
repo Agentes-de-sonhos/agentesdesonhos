@@ -25,6 +25,10 @@ import {
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
 import { useOverlayPresence } from "@/hooks/useOverlayPresence";
+import {
+  OPEN_COMMUNITY_CONVERSATION_EVENT,
+  type OpenCommunityConversationDetail,
+} from "@/lib/communityChatNavigation";
 import { toast } from "sonner";
 
 type ChatView = "menu" | "room" | "dm" | "conversations";
@@ -38,6 +42,7 @@ export function ChatFloatingButton() {
   const [activeRoomId, setActiveRoomId] = useState<string>();
   const [activeConversationId, setActiveConversationId] = useState<string>();
   const [activeRoomName, setActiveRoomName] = useState("");
+  const [highlightMessageId, setHighlightMessageId] = useState<string | null>(null);
 
   const { rooms, messages: roomMessages, sendMessage: sendRoomMessage, isSending: isSendingRoom } =
     useCommunityChat(activeRoomId);
@@ -87,6 +92,20 @@ export function ChatFloatingButton() {
     return () => window.removeEventListener("community-chat:open", openHandler);
   }, []);
 
+  // Abre a conversa vinda da busca de mensagens e destaca a mensagem encontrada.
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const detail = (event as CustomEvent<OpenCommunityConversationDetail>).detail;
+      if (!detail?.conversationId) return;
+      setActiveConversationId(detail.conversationId);
+      setHighlightMessageId(detail.messageId ?? null);
+      setView("dm");
+      setIsOpen(true);
+    };
+    window.addEventListener(OPEN_COMMUNITY_CONVERSATION_EVENT, handler);
+    return () => window.removeEventListener(OPEN_COMMUNITY_CONVERSATION_EVENT, handler);
+  }, []);
+
   // Swipe-to-close support (hooks before early returns)
   const panelRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef<number | null>(null);
@@ -123,6 +142,7 @@ export function ChatFloatingButton() {
       setView("menu");
     } else if (view === "dm") {
       setActiveConversationId(undefined);
+      setHighlightMessageId(null);
       setView("conversations");
     } else if (view === "conversations") {
       setView("menu");
@@ -441,7 +461,11 @@ export function ChatFloatingButton() {
           {/* DM Chat View */}
           {view === "dm" && activeConversationId && (
             <>
-              <ChatMessageList messages={dmMessages} showReadStatus />
+              <ChatMessageList
+                messages={dmMessages}
+                showReadStatus
+                highlightMessageId={highlightMessageId}
+              />
               <ChatInput
                 onSend={(content) =>
                   sendDM({ conversationId: activeConversationId, content })
