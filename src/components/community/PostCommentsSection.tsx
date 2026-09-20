@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,6 +58,18 @@ export function PostCommentsSection({
   const [pendingLike, setPendingLike] = useState<string | null>(null);
   const [deleted, setDeleted] = useState<string[]>([]);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Foco suave no campo quando a área de comentários é aberta inline.
+  useEffect(() => {
+    if (!autoFocus) return;
+    const frame = requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (!input) return;
+      input.focus({ preventScroll: true });
+      input.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [autoFocus]);
 
   const visible = useMemo(
     () => comments.filter((c) => !deleted.includes(c.id)),
