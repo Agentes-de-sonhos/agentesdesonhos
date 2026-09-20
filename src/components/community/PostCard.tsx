@@ -23,6 +23,8 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { postImages } from "./PostImageGallery";
 import { PostMediaGrid } from "./PostMediaGrid";
 import { PostLightbox } from "./PostLightbox";
+import { ConnectButton } from "./ConnectButton";
+import { PostFollowMenuItem } from "./PostFollowMenuItem";
 import { PostTextContent } from "./PostTextContent";
 import { PostPoll } from "./PostPoll";
 import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
