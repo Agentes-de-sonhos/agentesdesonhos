@@ -286,6 +286,15 @@ export function PostCard({
           postId={post.id}
         />
 
+        <ReportContentDialog
+          open={reportOpen}
+          onOpenChange={setReportOpen}
+          targetKind="post"
+          postId={post.id}
+        />
+
+
+
 
         <PostLightbox
           images={images}
