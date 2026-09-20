@@ -310,6 +310,17 @@ export function PostCommentsSection({
           )}
         </Button>
       </div>
+
+      <ReportContentDialog
+        open={!!reportComment}
+        onOpenChange={(open) => {
+          if (!open) setReportComment(null);
+        }}
+        targetKind="comment"
+        postId={postId}
+        commentId={reportComment?.id ?? null}
+      />
     </div>
+
   );
 }
