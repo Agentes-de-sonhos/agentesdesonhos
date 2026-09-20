@@ -176,6 +176,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 onVotePoll={votePoll}
                 isVoting={isVoting}
                 newCount={newCount}
+                commentsOpen={openCommentsPostId === post.id}
+                onToggleComments={() =>
+                  setOpenCommentsPostId((current) => (current === post.id ? null : post.id))
+                }
+                onAddComment={addComment}
+                isAddingComment={isAddingComment}
+                onDeleteComment={deleteComment}
               />
             ))}
             <div ref={sentinelRef} className="h-px" aria-hidden="true" />
