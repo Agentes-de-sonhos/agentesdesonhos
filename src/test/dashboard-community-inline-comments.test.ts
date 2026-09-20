@@ -33,7 +33,7 @@ describe("comentários inline no feed da Comunidade do dashboard", () => {
     expect(feed).toContain("PostCommentsSection");
     expect(feed).toContain("autoFocus");
     expect(feed).toContain("Recolher");
-    const shared = read("src/components/community/PostCommentsSection.tsx");
+    const shared = readFileSync("src/components/community/PostCommentsSection.tsx", "utf8");
     expect(shared).toContain("focus({ preventScroll: true })");
     expect(shared).toContain('aria-label="Enviar comentário"');
   });
