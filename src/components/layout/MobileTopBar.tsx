@@ -18,7 +18,7 @@ function initials(name?: string | null) {
  * Cabeçalho compacto exibido apenas no mobile da plataforma Agentes de Sonhos
  * (Início e Comunidade): avatar, campo de busca e acesso ao chat.
  */
-export function MobileTopBar() {
+export function MobileTopBar({ embedded = false }: { embedded?: boolean }) {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
@@ -40,7 +40,9 @@ export function MobileTopBar() {
 
   return (
     <div
-      className="sticky top-0 z-30 -mx-4 mb-3 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur lg:hidden"
+      className={embedded
+        ? "flex items-center gap-2 py-2 lg:hidden"
+        : "sticky top-0 z-30 -mx-4 mb-3 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur lg:hidden"}
       data-mobile-top-bar
     >
       <button

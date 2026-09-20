@@ -85,10 +85,10 @@ export function PostComposerDialog({
       <Dialog open={open} onOpenChange={(next) => (next ? onOpenChange(true) : requestClose())}>
         <DialogContent
           hideClose
-          className="flex h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-xl sm:rounded-xl"
+          className="flex h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-background p-0 sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-xl sm:rounded-xl sm:border"
           data-post-composer
         >
-          <div className="flex items-center gap-2 border-b border-border/60 px-3 py-2.5">
+          <div className="flex items-center gap-2 border-b border-border/60 bg-background px-3 py-2.5">
             <Button
               type="button"
               variant="ghost"
@@ -106,8 +106,8 @@ export function PostComposerDialog({
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <DialogTitle className="truncate text-sm font-semibold">Criar publicação</DialogTitle>
-              <div className="mt-1">
+              <DialogTitle className="sr-only">Criar publicação</DialogTitle>
+              <div>
                 <PostVisibilitySelector
                   value={visibility}
                   onChange={setVisibility}
@@ -131,7 +131,7 @@ export function PostComposerDialog({
             </Button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3">
+          <div className="min-h-0 flex flex-1 flex-col overflow-y-auto bg-background px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-3 sm:pb-4">
             <CreatePostForm
               key={formKey}
               variant="plain"

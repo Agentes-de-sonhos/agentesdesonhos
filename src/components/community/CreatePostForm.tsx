@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Send, Loader2, Image as ImageIcon, Video, FileText, BarChart3, X } from "lucide-react";
+import { Send, Loader2, Image as ImageIcon, Video, FileText, BarChart3, MoreHorizontal, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -434,14 +434,14 @@ export function CreatePostForm({
       <Inner
         className={
           variant === "plain"
-            ? "space-y-3"
+            ? "flex min-h-[calc(100dvh-5rem)] flex-1 flex-col space-y-3 sm:min-h-0"
             : expanded
               ? "pt-4 pb-3 space-y-3"
               : "py-2.5 space-y-0"
         }
       >
 
-        {expanded && (
+        {expanded && variant !== "plain" && (
         <div>
           <p className="text-sm font-semibold text-foreground">Compartilhe com a comunidade</p>
           <p className="text-xs text-muted-foreground">
@@ -450,7 +450,7 @@ export function CreatePostForm({
         </div>
         )}
         <div
-          className={`flex items-center gap-3 rounded-lg transition-all duration-200 ${dragOver ? "ring-2 ring-primary/40 bg-primary/[0.03]" : ""}`}
+          className={`flex items-start gap-3 rounded-lg transition-all duration-200 ${variant === "plain" ? "flex-1" : ""} ${dragOver ? "ring-2 ring-primary/40 bg-primary/[0.03]" : ""}`}
           onDragOver={(e) => {
             e.preventDefault();
             if (!dragOver) setDragOver(true);
@@ -458,7 +458,7 @@ export function CreatePostForm({
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
         >
-          <Avatar className={`shrink-0 transition-all ${expanded ? "h-10 w-10" : "h-8 w-8"}`}>
+          <Avatar className={`shrink-0 transition-all ${variant === "plain" ? "hidden" : expanded ? "h-10 w-10" : "h-8 w-8"}`}>
             <AvatarImage src={profile?.avatar_url || ""} />
             <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
               {initials}
@@ -481,7 +481,7 @@ export function CreatePostForm({
               onBlur={handleComposerBlur}
               className={`text-sm transition-all duration-200 ${
                 variant === "plain"
-                  ? "min-h-[160px] border-0 px-0 shadow-none focus-visible:ring-0"
+                  ? "min-h-[45vh] resize-none border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0 sm:min-h-[240px]"
                   : expanded
                     ? "min-h-[76px]"
                     : "min-h-[38px] h-[38px] py-2 overflow-hidden"
@@ -635,7 +635,7 @@ export function CreatePostForm({
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-border/40">
+        <div className={variant === "plain" ? "sticky bottom-0 mt-auto flex items-center justify-between gap-2 border-t border-border/40 bg-background pb-[env(safe-area-inset-bottom)] pt-2" : "flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-1"}>
           <div
             className="flex items-center gap-1 flex-wrap"
             onMouseDown={(e) => e.preventDefault()}
@@ -677,13 +677,30 @@ export function CreatePostForm({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-primary"
+              className="hidden h-8 text-xs gap-1.5 text-muted-foreground hover:text-primary sm:inline-flex"
               onClick={openPoll}
               disabled={pollOpen || uploading}
               title="Enquete — 2 a 6 opções · um voto por pessoa"
             >
               <BarChart3 className="h-4 w-4" /> Enquete
             </Button>
+            {variant === "plain" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 sm:hidden" aria-label="Mais opções">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem onClick={() => openPoll()} disabled={pollOpen || uploading}>
+                    <BarChart3 className="mr-2 h-4 w-4" /> Enquete
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => docInputRef.current?.click()} disabled={uploading || docs.length >= MAX_DOCS}>
+                    <FileText className="mr-2 h-4 w-4" /> Documento
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
           {!hidePublishButton && (

@@ -55,7 +55,7 @@ export function DashboardSectionHeader({
         <div className={cn("mt-2 h-1 w-full rounded-full", accentClassName)} />
       </div>
 
-      <p className="order-last col-span-2 min-w-0 truncate text-left text-xs text-muted-foreground @[44rem]:order-none @[44rem]:col-span-1 @[44rem]:whitespace-nowrap @[60rem]:text-sm">
+      <p className="order-last col-span-2 min-w-0 text-left text-xs text-muted-foreground @[44rem]:order-none @[44rem]:col-span-1 @[60rem]:text-sm">
         {description}
       </p>
 
