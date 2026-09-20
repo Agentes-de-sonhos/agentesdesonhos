@@ -14,6 +14,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/agenda-trade": "Agenda do Trade",
   "/proximas-viagens": "Próximas Viagens",
   "/comunidade": "Comunidade",
+  "/comunidade/minha-rede": "Minha Rede",
   "/educa-academy": "EducaTravel Academy",
   "/cursos": "Cursos e Mentorias",
   // Título canônico do módulo no menu do produto (não confundir com o widget
