@@ -335,7 +335,10 @@ function PostCard({
             )}
           </p>
         </div>
-        {(canDelete || canEdit) && (
+        {!isAuthor && (
+          <ConnectButton targetUserId={post.user_id} targetName={post.profile?.name} />
+        )}
+        {(canDelete || canEdit || !isAuthor) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
@@ -343,6 +346,7 @@ function PostCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <PostFollowMenuItem authorId={post.user_id} authorName={post.profile?.name} />
               {canEdit && (
                 <DropdownMenuItem onClick={onEdit}>
                   <Pencil className="h-4 w-4 mr-2" /> Editar publicação

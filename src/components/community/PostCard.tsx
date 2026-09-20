@@ -110,7 +110,8 @@ export function PostCard({
               {wasEdited && <span className="italic">· Editado</span>}
             </div>
           </div>
-          {(isOwner || isAdmin) && (
+          {!isOwner && <ConnectButton targetUserId={post.user_id} targetName={name} />}
+          {(isOwner || isAdmin || !isOwner) && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
@@ -118,14 +119,17 @@ export function PostCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <PostFollowMenuItem authorId={post.user_id} authorName={name} />
                 {isOwner && onEdit && (
                   <DropdownMenuItem onClick={() => onEdit(post)}>
                     <Pencil className="h-4 w-4 mr-2" /> Editar publicação
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
-                </DropdownMenuItem>
+                {(isOwner || isAdmin) && (
+                  <DropdownMenuItem onClick={() => onDelete(post.id)} className="text-destructive">
+                    <Trash2 className="h-4 w-4 mr-2" /> Excluir publicação
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
