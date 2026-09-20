@@ -87,6 +87,8 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   const enabled = open && isSearchTermValid(debounced);
   const wantsPeople = filter === "all" || filter === "people";
   const wantsPosts = filter === "all" || filter === "posts";
+  const { hiddenIds, isReady: hiddenReady } = useCommunityHiddenPosts();
+
 
   const peopleQuery = useQuery({
     queryKey: ["community-search-people", debounced],
