@@ -89,12 +89,17 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     updatePost,
     isUpdating,
     fetchComments,
+    addComment,
+    isAddingComment,
+    deleteComment,
     votePoll,
     isVoting,
   } = useCommunityFeed({ pageSize: DASHBOARD_PAGE_SIZE });
 
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
+  // Apenas um post com comentários expandidos por vez neste feed do dashboard.
+  const [openCommentsPostId, setOpenCommentsPostId] = useState<string | null>(null);
   const { newCount } = useCommunityUnread();
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
