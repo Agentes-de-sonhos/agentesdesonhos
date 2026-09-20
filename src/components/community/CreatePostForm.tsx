@@ -683,14 +683,16 @@ export function CreatePostForm({
             </Button>
           </div>
 
-          <Button size="sm" onClick={handleSubmit} disabled={!canSubmit} className="gap-1.5">
-            {uploading || isCreating ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Send className="h-3.5 w-3.5" />
-            )}
-            Publicar
-          </Button>
+          {!hidePublishButton && (
+            <Button size="sm" onClick={handleSubmit} disabled={!canSubmit} className="gap-1.5">
+              {uploading || isCreating ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Send className="h-3.5 w-3.5" />
+              )}
+              Publicar
+            </Button>
+          )}
         </div>
 
         <input
