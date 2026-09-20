@@ -93,6 +93,9 @@ export function WorkspaceGate({ children }: Props) {
       initialPath={decision.initialPath}
       initialTitle={decision.initialTitle}
       homePath={resolveHomePath({ role, plan })}
+      pinnedScope={{ product: "agentes", userId: user?.id ?? null }}
+      pinnedRestoreReady={!permLoading && !subLoading}
+      canRestorePinnedPath={pinnedGuard}
     >
       <WorkspaceShell>{children}</WorkspaceShell>
     </WorkspaceProvider>
