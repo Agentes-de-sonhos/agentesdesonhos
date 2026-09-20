@@ -128,7 +128,7 @@ export default function Dashboard() {
         </div>
 
         <Suspense fallback={<div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-          <section className="grid items-stretch gap-4 px-2 sm:gap-6 sm:px-4 lg:grid-cols-2 lg:px-0" data-dashboard-section="agenda-trips">
+          <section className="-mx-4 grid w-[calc(100%+2rem)] items-stretch gap-4 px-2 sm:mx-0 sm:w-auto sm:gap-6 sm:px-4 lg:grid-cols-2 lg:px-0" data-dashboard-section="agenda-trips">
             {can("agenda.view") && (
               <div className="flex h-full min-h-0 min-w-0 flex-col [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
             )}
@@ -137,7 +137,7 @@ export default function Dashboard() {
             )}
           </section>
           {can("community.public.view") && (
-            <section className="min-w-0 px-2 sm:px-4 md:px-0" data-dashboard-section="community">
+            <section className="-mx-4 w-[calc(100%+2rem)] min-w-0 px-2 sm:mx-0 sm:w-auto sm:px-4 md:px-0" data-dashboard-section="community">
               <CommunitySocialFeed />
             </section>
           )}
