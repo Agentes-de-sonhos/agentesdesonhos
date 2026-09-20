@@ -26,7 +26,12 @@ interface Props {
 export function WorkspaceGate({ children }: Props) {
   const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
-  const { plan, loading: subLoading } = useSubscription();
+  const { plan, loading: subLoading, hasFeature } = useSubscription();
+  const { can, loading: permLoading } = usePermissions();
+  const pinnedGuard = useMemo(
+    () => buildPlatformPinnedGuard({ can, hasFeature }),
+    [can, hasFeature],
+  );
   const decisionUserRef = useRef<string | null | undefined>(undefined);
   const [decision, setDecision] = useState<{
     workspace: boolean;
