@@ -9,6 +9,7 @@ const dashboard = read("src/pages/Dashboard.tsx");
 const feed = read("src/components/dashboard/CommunitySocialFeed.tsx");
 const hook = read("src/hooks/useCommunityFeed.ts");
 const siteLabDashboard = read("src/pages/whitelabel/admin/AgencyAdminHome.tsx");
+const app = read("src/App.tsx");
 
 const post = (id: string): CommunityPost => ({
   id,
@@ -74,6 +75,11 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(shortcuts).toContain("h-14 w-full min-w-0");
     expect(shortcuts).toContain("h-6 w-6 md:h-5 md:w-5");
     expect(shortcuts).not.toContain("overflow-x-auto");
+  });
+
+  it("remove a instância global do suporte flutuante sem remover a página de suporte", () => {
+    expect(app).not.toContain("WhatsAppSupportButton");
+    expect(app).toContain('<Route path="/suporte" element={<Suporte />} />');
   });
 
   it("combina compositor e presença na mesma linha no desktop", () => {
