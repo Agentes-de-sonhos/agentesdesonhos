@@ -30,7 +30,7 @@ interface PostTextContentProps {
  */
 export function PostTextContent({ text, className, clampLines = 3 }: PostTextContentProps) {
   const [expanded, setExpanded] = useState(false);
-  const clampable = isPostTextClamped(text);
+  const clampable = isPostTextClamped(text, clampLines);
 
   if (!text) return null;
 
