@@ -11,19 +11,27 @@ import { cn } from "@/lib/utils";
 import { buildCommunityPostUrl } from "@/lib/communityPostFocus";
 import { useCommunityHiddenPosts } from "@/hooks/useCommunityHiddenPosts";
 import { ConnectButton } from "./ConnectButton";
+import { useCommunityMessageSearch } from "@/hooks/useCommunityMessageSearch";
+import { openCommunityConversation } from "@/lib/communityChatNavigation";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 
 export const SEARCH_MIN_TERM = 2;
 export const SEARCH_DEBOUNCE_MS = 300;
 const RESULT_LIMIT = 12;
 
-export type CommunitySearchFilter = "all" | "people" | "posts";
+export type CommunitySearchFilter = "all" | "people" | "posts" | "messages";
 
 export const SEARCH_FILTERS: { key: CommunitySearchFilter; label: string }[] = [
   { key: "all", label: "Tudo" },
   { key: "people", label: "Pessoas" },
   { key: "posts", label: "Publicações" },
+  { key: "messages", label: "Mensagens" },
 ];
+
+/** Em "Tudo" a seção de mensagens é compacta; no filtro dedicado, completa. */
+export const MESSAGES_COMPACT_LIMIT = 3;
 
 export interface SearchPerson {
   user_id: string;
@@ -87,6 +95,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
   const enabled = open && isSearchTermValid(debounced);
   const wantsPeople = filter === "all" || filter === "people";
   const wantsPosts = filter === "all" || filter === "posts";
+  const wantsMessages = filter === "all" || filter === "messages";
   const { hiddenIds, isReady: hiddenReady } = useCommunityHiddenPosts();
 
 
@@ -141,14 +150,24 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
     },
   });
 
+  const messagesQuery = useCommunityMessageSearch(debounced, enabled && wantsMessages);
+
   const loading =
-    (wantsPeople && peopleQuery.isLoading) || (wantsPosts && postsQuery.isLoading);
-  const failed = (wantsPeople && peopleQuery.isError) || (wantsPosts && postsQuery.isError);
+    (wantsPeople && peopleQuery.isLoading) ||
+    (wantsPosts && postsQuery.isLoading) ||
+    (wantsMessages && messagesQuery.isLoading);
+  const failed =
+    (wantsPeople && peopleQuery.isError) ||
+    (wantsPosts && postsQuery.isError) ||
+    (wantsMessages && messagesQuery.isError);
   const people = wantsPeople ? peopleQuery.data ?? [] : [];
   const posts = wantsPosts ? postsQuery.data ?? [] : [];
+  const allMessages = wantsMessages ? messagesQuery.data ?? [] : [];
+  const messages = filter === "all" ? allMessages.slice(0, MESSAGES_COMPACT_LIMIT) : allMessages;
   const empty = useMemo(
-    () => enabled && !loading && !failed && people.length === 0 && posts.length === 0,
-    [enabled, loading, failed, people.length, posts.length],
+    () =>
+      enabled && !loading && !failed && people.length === 0 && posts.length === 0 && messages.length === 0,
+    [enabled, loading, failed, people.length, posts.length, messages.length],
   );
 
   return (
@@ -167,8 +186,8 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
             autoFocus
             value={term}
             onChange={(event) => setTerm(event.target.value)}
-            placeholder="Pessoas ou publicações"
-            aria-label="Buscar pessoas ou publicações"
+            placeholder="Pessoas, publicações ou mensagens"
+            aria-label="Buscar pessoas, publicações ou mensagens"
             className="pl-9"
           />
         </div>
@@ -214,6 +233,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                 onClick={() => {
                   if (wantsPeople) peopleQuery.refetch();
                   if (wantsPosts) postsQuery.refetch();
+                  if (wantsMessages) messagesQuery.refetch();
                 }}
               >
                 Tentar novamente
@@ -288,6 +308,52 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                   <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
                     {postSnippet(post.content, debounced)}
                   </p>
+                </button>
+              ))}
+            </section>
+          )}
+
+          {messages.length > 0 && (
+            <section aria-label="Mensagens" className="space-y-2" data-search-messages>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Mensagens
+              </h3>
+              {messages.map((message) => (
+                <button
+                  key={message.id}
+                  type="button"
+                  data-search-message-item
+                  onClick={() => {
+                    onOpenChange(false);
+                    openCommunityConversation({
+                      conversationId: message.conversationId,
+                      messageId: message.id,
+                    });
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl border border-border/60 px-3 py-2 text-left hover:bg-muted"
+                >
+                  <Avatar className="h-9 w-9 shrink-0">
+                    <AvatarImage
+                      src={message.otherUser.avatar_url || undefined}
+                      alt={message.otherUser.name}
+                    />
+                    <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                      {initials(message.otherUser.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center justify-between gap-2">
+                      <span className="truncate text-sm font-semibold text-foreground">
+                        {message.otherUser.name}
+                      </span>
+                      <span className="shrink-0 text-[11px] text-muted-foreground">
+                        {format(new Date(message.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </span>
+                    </span>
+                    <span className="mt-0.5 line-clamp-2 block text-sm text-muted-foreground">
+                      {postSnippet(message.content, debounced)}
+                    </span>
+                  </span>
                 </button>
               ))}
             </section>
