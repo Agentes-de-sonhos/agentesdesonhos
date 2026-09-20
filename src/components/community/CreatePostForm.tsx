@@ -89,7 +89,17 @@ function extOf(name: string) {
   return name.split(".").pop()?.toLowerCase() || "";
 }
 
-export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: CreatePostFormProps) {
+export function CreatePostForm({
+  onSubmit,
+  isCreating,
+  collapsible = false,
+  variant = "card",
+  visibility = DEFAULT_COMMUNITY_VISIBILITY,
+  hidePublishButton = false,
+  autoFocusText = false,
+  submitRef,
+  onDraftStateChange,
+}: CreatePostFormProps) {
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [expanded, setExpanded] = useState(!collapsible);
