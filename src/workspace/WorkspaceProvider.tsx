@@ -91,13 +91,13 @@ function uniqueTitle(tabs: WorkspaceTab[], path: string, title: string): string 
 function reducer(state: WorkspaceState, action: Action): WorkspaceState {
   switch (action.type) {
     case "OPEN": {
-      if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
+      if (isHomeAliasPath(action.path, state.homePath)) return { ...state, activeId: HOME_TAB_ID };
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
       const tab: WorkspaceTab = { id: newId(), path: action.path, title: uniqueTitle(state.tabs, action.path, action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "OPEN_OR_ACTIVATE": {
-      if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
+      if (isHomeAliasPath(action.path, state.homePath)) return { ...state, activeId: HOME_TAB_ID };
       const existing = isMultiInstanceRoute(action.path)
         ? undefined
         : state.tabs.find((t) => t.path === action.path);
@@ -202,7 +202,7 @@ export function WorkspaceProvider({
 }: Props) {
   const [state, dispatch] = useReducer(reducer, undefined, () => {
     const initialTabs: WorkspaceTab[] =
-      initialPath === homePath
+      isHomeAliasPath(initialPath, homePath)
         ? []
         : [{ id: newId(), path: initialPath, title: toTabTitleCase(initialTitle) }];
     const tabs = normalizeTabs(initialTabs, homePath);
