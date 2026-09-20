@@ -1,5 +1,6 @@
-import { LinkifiedText } from "@/components/community/LinkifiedText";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { PostCommentsSection } from "./PostCommentsSection";
+import { SharePostDialog } from "./SharePostDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,22 +36,24 @@ interface PostCardProps {
   onLike: (postId: string, liked: boolean) => void;
   onDelete: (postId: string) => void;
   onEdit?: (post: CommunityPost) => void;
-  onAddComment: (data: { postId: string; content: string }) => void;
+  onAddComment: (data: { postId: string; content: string; parentCommentId?: string | null }) => void;
   isAddingComment: boolean;
   fetchComments: (postId: string) => Promise<PostComment[]>;
   onDeleteComment: (commentId: string) => void;
+  onToggleCommentLike?: (data: { commentId: string; liked: boolean }) => Promise<unknown>;
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
 }
 
 export function PostCard({
-  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment, onVotePoll,
+  post, onLike, onDelete, onEdit, onAddComment, isAddingComment, fetchComments, onDeleteComment,
+  onToggleCommentLike, onVotePoll,
 }: PostCardProps) {
   const { user } = useAuth();
   const { isAdmin } = useUserRole();
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loadingComments, setLoadingComments] = useState(false);
-  const [commentText, setCommentText] = useState("");
+  const [shareOpen, setShareOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const name = post.profile?.name || "Membro";
@@ -74,15 +77,12 @@ export function PostCard({
     setShowComments(!showComments);
   };
 
-  const handleAddComment = () => {
-    if (!commentText.trim()) return;
-    onAddComment({ postId: post.id, content: commentText.trim() });
-    setCommentText("");
-    setTimeout(async () => {
+  const refreshComments = useCallback(async () => {
+    try {
       const data = await fetchComments(post.id);
       setComments(data);
-    }, 500);
-  };
+    } catch { /* ignore */ }
+  }, [fetchComments, post.id]);
 
   return (
     <Card className="border-border/50">
@@ -233,69 +233,48 @@ export function PostCard({
             <MessageCircle className="h-4 w-4" />
             Comentar
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 text-xs text-muted-foreground"
+            onClick={() => setShareOpen(true)}
+          >
+            <Share2 className="h-4 w-4" />
+            Enviar
+          </Button>
         </div>
 
         {/* Comments */}
         {showComments && (
           <div className="space-y-3 pl-2">
-            {loadingComments ? (
-              <p className="text-xs text-muted-foreground">Carregando...</p>
-            ) : (
-              comments.map((c) => {
-                const cName = c.profile?.name || "Membro";
-                const cInitials = cName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
-                return (
-                  <div key={c.id} className="flex gap-2">
-                    <Avatar className="h-7 w-7">
-                      <AvatarImage src={c.profile?.avatar_url || ""} />
-                      <AvatarFallback className="bg-muted text-[10px]">{cInitials}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 bg-muted/50 rounded-lg px-3 py-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-foreground">{cName}</span>
-                        {(c.user_id === user?.id || isAdmin) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 text-muted-foreground hover:text-destructive"
-                            onClick={() => {
-                              onDeleteComment(c.id);
-                              setComments((prev) => prev.filter((x) => x.id !== c.id));
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                      <LinkifiedText
-                        text={c.content}
-                        className="text-xs text-muted-foreground whitespace-pre-line break-words"
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            )}
-
-            <div className="flex gap-2">
-              <Input
-                placeholder="Escreva um comentário..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className="text-sm h-8"
-                onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-              />
-              <Button
-                size="icon"
-                className="h-8 w-8 shrink-0"
-                onClick={handleAddComment}
-                disabled={!commentText.trim() || isAddingComment}
-              >
-                {isAddingComment ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              </Button>
-            </div>
+            <PostCommentsSection
+              postId={post.id}
+              comments={comments}
+              loading={loadingComments}
+              isAddingComment={isAddingComment}
+              currentUserId={user?.id}
+              isAdmin={isAdmin}
+              onAddComment={onAddComment}
+              onDeleteComment={onDeleteComment}
+              onToggleCommentLike={
+                onToggleCommentLike
+                  ? async (data) => {
+                      await onToggleCommentLike(data);
+                      await refreshComments();
+                    }
+                  : undefined
+              }
+              onRefresh={refreshComments}
+            />
           </div>
         )}
+
+        <SharePostDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          post={post}
+        />
+
 
         <PostLightbox
           images={images}

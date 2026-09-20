@@ -2905,6 +2905,35 @@ export type Database = {
           },
         ]
       }
+      community_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_highlights: {
         Row: {
           contribution_summary: string
@@ -3128,6 +3157,48 @@ export type Database = {
           years_experience?: number | null
         }
         Relationships: []
+      }
+      community_mentions: {
+        Row: {
+          author_id: string
+          comment_id: string | null
+          created_at: string
+          id: string
+          mentioned_user_id: string
+          post_id: string | null
+        }
+        Insert: {
+          author_id: string
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          mentioned_user_id: string
+          post_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          mentioned_user_id?: string
+          post_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_mentions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_mentions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       community_messages: {
         Row: {
@@ -3357,11 +3428,61 @@ export type Database = {
         }
         Relationships: []
       }
+      community_notifications: {
+        Row: {
+          actor_id: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          post_id: string | null
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          read_at?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          post_id?: string | null
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_post_comments: {
         Row: {
           content: string
           created_at: string | null
           id: string
+          likes_count: number
+          parent_comment_id: string | null
           post_id: string
           updated_at: string
           user_id: string
@@ -3370,6 +3491,8 @@ export type Database = {
           content: string
           created_at?: string | null
           id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
           post_id: string
           updated_at?: string
           user_id: string
@@ -3378,11 +3501,20 @@ export type Database = {
           content?: string
           created_at?: string | null
           id?: string
+          likes_count?: number
+          parent_comment_id?: string | null
           post_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "community_post_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "community_post_comments_post_id_fkey"
             columns: ["post_id"]
@@ -15850,6 +15982,10 @@ export type Database = {
         Args: { p_opportunity_id: string; p_request_id: string }
         Returns: undefined
       }
+      are_users_connected: {
+        Args: { _a: string; _b: string }
+        Returns: boolean
+      }
       booking_request_file_number: {
         Args: { p_request_id: string }
         Returns: string
@@ -15880,6 +16016,7 @@ export type Database = {
       can_use_internal_community: { Args: never; Returns: boolean }
       can_use_public_community: { Args: never; Returns: boolean }
       can_use_reservations_center: { Args: never; Returns: boolean }
+      can_view_community_post: { Args: { _post_id: string }; Returns: boolean }
       cast_monthly_vote: {
         Args: { _nominee_user_id: string }
         Returns: {
@@ -16721,6 +16858,10 @@ export type Database = {
       set_product_landing_test_mode: {
         Args: { p_landing_id: string; p_minutes?: number }
         Returns: Json
+      }
+      share_community_post: {
+        Args: { _note?: string; _post_id: string; _recipient_ids: string[] }
+        Returns: number
       }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }

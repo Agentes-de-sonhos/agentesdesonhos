@@ -1,4 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import { MentionTextarea } from "./MentionTextarea";
+import {
+  DEFAULT_COMMUNITY_VISIBILITY,
+  type CommunityVisibility,
+} from "@/lib/communityVisibility";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,13 +32,21 @@ import {
 } from "@/lib/communityMedia";
 import type { PostDocument, PostPoll } from "@/types/community-members";
 
-interface CreatePostPayload {
+export interface CreatePostPayload {
   content: string;
   tags: string[];
   imageUrls?: string[];
   videoUrl?: string | null;
   documents?: PostDocument[];
   poll?: PostPoll | null;
+  visibility?: CommunityVisibility;
+}
+
+export interface ComposerDraftState {
+  /** Há conteúdo não enviado (texto, mídia ou enquete). */
+  isDirty: boolean;
+  canSubmit: boolean;
+  isBusy: boolean;
 }
 
 interface CreatePostFormProps {
@@ -41,6 +54,16 @@ interface CreatePostFormProps {
   isCreating: boolean;
   /** Starts as a single-line box and expands on focus (used in the dashboard). */
   collapsible?: boolean;
+  /** "plain" remove o cartão (usado no compositor em tela inteira/modal). */
+  variant?: "card" | "plain";
+  /** Público da publicação; o padrão é "Qualquer pessoa". */
+  visibility?: CommunityVisibility;
+  /** Esconde o botão Publicar interno quando o cabeçalho do modal já o exibe. */
+  hidePublishButton?: boolean;
+  autoFocusText?: boolean;
+  /** Expõe o envio para o cabeçalho do compositor. */
+  submitRef?: MutableRefObject<(() => void) | null>;
+  onDraftStateChange?: (state: ComposerDraftState) => void;
 }
 
 type PickedImage = { file: File; previewUrl: string };
@@ -66,7 +89,17 @@ function extOf(name: string) {
   return name.split(".").pop()?.toLowerCase() || "";
 }
 
-export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: CreatePostFormProps) {
+export function CreatePostForm({
+  onSubmit,
+  isCreating,
+  collapsible = false,
+  variant = "card",
+  visibility = DEFAULT_COMMUNITY_VISIBILITY,
+  hidePublishButton = false,
+  autoFocusText = false,
+  submitRef,
+  onDraftStateChange,
+}: CreatePostFormProps) {
   const { user } = useAuth();
   const [content, setContent] = useState("");
   const [expanded, setExpanded] = useState(!collapsible);
@@ -353,6 +386,7 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
         videoUrl: uploadedVideo,
         documents: uploadedDocs,
         poll: pollValidation.valid ? pollValidation.cleaned : null,
+        visibility,
       });
       reset();
     } catch (err: any) {
@@ -379,9 +413,30 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
     setExpanded(false);
   };
 
+  // Expõe envio e estado do rascunho para o cabeçalho do compositor em modal.
+  if (submitRef) submitRef.current = handleSubmit;
+  const isDirty = content.trim().length > 0 || hasMedia || pollOpen;
+  useEffect(() => {
+    onDraftStateChange?.({ isDirty, canSubmit, isBusy: uploading || isCreating });
+  }, [isDirty, canSubmit, uploading, isCreating, onDraftStateChange]);
+
+  const Wrapper = variant === "plain" ? "div" : Card;
+  const Inner = variant === "plain" ? "div" : CardContent;
+
   return (
-    <Card ref={composerRef} className="border-primary/30 shadow-sm ring-1 ring-primary/10">
-      <CardContent className={expanded ? "pt-4 pb-3 space-y-3" : "py-2.5 space-y-0"}>
+    <Wrapper
+      ref={composerRef as any}
+      className={variant === "plain" ? "w-full" : "border-primary/30 shadow-sm ring-1 ring-primary/10"}
+    >
+      <Inner
+        className={
+          variant === "plain"
+            ? "space-y-3"
+            : expanded
+              ? "pt-4 pb-3 space-y-3"
+              : "py-2.5 space-y-0"
+        }
+      >
 
         {expanded && (
         <div>
@@ -406,20 +461,30 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
               {initials}
             </AvatarFallback>
           </Avatar>
-          <Textarea
-            placeholder={
-              expanded
-                ? "O que você quer compartilhar hoje? Dúvida, experiência, dica, oportunidade..."
-                : "O que você quer compartilhar hoje?"
-            }
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onPaste={handlePaste}
-            rows={expanded ? 3 : 1}
-            onFocus={() => setExpanded(true)}
-            onBlur={handleComposerBlur}
-            className={`resize-none text-sm transition-all duration-200 ${expanded ? "min-h-[76px]" : "min-h-[38px] h-[38px] py-2 overflow-hidden"}`}
-          />
+          <div className="min-w-0 flex-1">
+            <MentionTextarea
+              placeholder={
+                expanded
+                  ? "O que você quer compartilhar hoje? Use @ para marcar suas conexões."
+                  : "O que você quer compartilhar hoje?"
+              }
+              aria-label="Texto da publicação"
+              value={content}
+              onChange={setContent}
+              onPaste={handlePaste}
+              rows={variant === "plain" ? 6 : expanded ? 3 : 1}
+              autoFocus={autoFocusText}
+              onFocus={() => setExpanded(true)}
+              onBlur={handleComposerBlur}
+              className={`text-sm transition-all duration-200 ${
+                variant === "plain"
+                  ? "min-h-[160px] border-0 px-0 shadow-none focus-visible:ring-0"
+                  : expanded
+                    ? "min-h-[76px]"
+                    : "min-h-[38px] h-[38px] py-2 overflow-hidden"
+              }`}
+            />
+          </div>
         </div>
         {expanded && (
         <>
@@ -618,14 +683,16 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
             </Button>
           </div>
 
-          <Button size="sm" onClick={handleSubmit} disabled={!canSubmit} className="gap-1.5">
-            {uploading || isCreating ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Send className="h-3.5 w-3.5" />
-            )}
-            Publicar
-          </Button>
+          {!hidePublishButton && (
+            <Button size="sm" onClick={handleSubmit} disabled={!canSubmit} className="gap-1.5">
+              {uploading || isCreating ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Send className="h-3.5 w-3.5" />
+              )}
+              Publicar
+            </Button>
+          )}
         </div>
 
         <input
@@ -653,7 +720,7 @@ export function CreatePostForm({ onSubmit, isCreating, collapsible = false }: Cr
         />
         </>
         )}
-      </CardContent>
-    </Card>
+      </Inner>
+    </Wrapper>
   );
 }

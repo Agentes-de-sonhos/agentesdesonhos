@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { MobileDrawerMenu } from "./MobileDrawerMenu";
-import { CreatePostForm } from "@/components/community/CreatePostForm";
+import { PostComposerDialog } from "@/components/community/PostComposerDialog";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -179,20 +179,12 @@ export function MobileBottomNav() {
         </div>
       </nav>
 
-      <Dialog open={composerOpen} onOpenChange={setComposerOpen}>
-        <DialogContent className="max-w-lg p-4">
-          <DialogHeader>
-            <DialogTitle className="text-base">Nova publicação</DialogTitle>
-          </DialogHeader>
-          <CreatePostForm
-            onSubmit={(data) => {
-              createPost(data);
-              setComposerOpen(false);
-            }}
-            isCreating={isCreating}
-          />
-        </DialogContent>
-      </Dialog>
+      <PostComposerDialog
+        open={composerOpen}
+        onOpenChange={setComposerOpen}
+        onSubmit={(data) => createPost(data)}
+        isCreating={isCreating}
+      />
 
       <MobileDrawerMenu open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </>
