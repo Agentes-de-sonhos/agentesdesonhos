@@ -104,7 +104,36 @@ export function TabBar({ embedded = false }: { embedded?: boolean } = {}) {
                         : "text-muted-foreground hover:bg-background/60",
                     )}
                   >
+                    {pinned && <Pin className="h-3 w-3 shrink-0 opacity-70" aria-hidden="true" />}
                     <span className="min-w-0 flex-1 truncate whitespace-nowrap">{tab.title}</span>
+                    {!pinned && ws.isTabPinnable(tab) && (
+                      <button
+                        type="button"
+                        aria-label={
+                          ws.isTabPinned(tab)
+                            ? `Desfixar aba ${tab.title}`
+                            : `Fixar aba ${tab.title}`
+                        }
+                        aria-pressed={ws.isTabPinned(tab)}
+                        title={ws.isTabPinned(tab) ? "Desfixar aba" : "Fixar aba"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          ws.togglePinnedTab(tab.id);
+                        }}
+                        className={cn(
+                          "shrink-0 rounded-sm p-0.5 hover:bg-muted",
+                          ws.isTabPinned(tab)
+                            ? "text-foreground opacity-100"
+                            : "opacity-50 hover:opacity-100",
+                        )}
+                      >
+                        {ws.isTabPinned(tab) ? (
+                          <Pin className="h-3.5 w-3.5 fill-current" />
+                        ) : (
+                          <PinOff className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                    )}
                     {!pinned && (
                       <button
                         type="button"
@@ -120,7 +149,9 @@ export function TabBar({ embedded = false }: { embedded?: boolean } = {}) {
                     )}
                   </div>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">{tab.title}</TooltipContent>
+                <TooltipContent side="bottom">
+                  {ws.isTabPinned(tab) ? `${tab.title} (fixada)` : tab.title}
+                </TooltipContent>
               </Tooltip>
             );
           })}
