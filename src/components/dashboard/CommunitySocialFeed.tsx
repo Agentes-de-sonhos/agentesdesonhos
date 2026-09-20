@@ -287,6 +287,8 @@ function PostCard({
   const wasEdited = !!(post as any).edited_at;
   const commentsRegionId = `dashboard-post-comments-${post.id}`;
   const [shareOpen, setShareOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+
 
   const { data: comments = [], isLoading: loadingComments, refetch: refetchComments } = useQuery({
     queryKey: ["community-feed-comments", post.id, post.comments_count],
