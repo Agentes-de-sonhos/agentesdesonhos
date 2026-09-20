@@ -76,7 +76,7 @@ export default function Dashboard() {
           data-dashboard-mobile-header
         >
           <div className="col-start-1 row-start-1 min-w-0">
-            <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
+            <h1 className="min-w-0 truncate whitespace-nowrap font-display text-base font-bold text-foreground min-[360px]:text-xl lg:text-xl xl:text-3xl">
               {getGreeting()}, {firstName}!
             </h1>
           </div>
@@ -85,7 +85,7 @@ export default function Dashboard() {
             <DashboardQuickActions />
           </div>
 
-          <div className="col-start-2 row-start-1 flex shrink-0 flex-nowrap items-center gap-1.5 md:col-start-3 md:gap-2">
+          <div className="col-start-2 row-start-1 flex shrink-0 flex-nowrap items-center gap-1 md:col-start-3 md:gap-2">
             <div className="hidden md:flex md:flex-nowrap md:items-center">
               <ExchangeRateCard />
             </div>
@@ -96,7 +96,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80"
+                    className="h-8 w-8 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 sm:h-9 sm:w-9"
                     aria-label="Meu perfil"
                     onClick={() => openInternalWindow("/perfil", "Meu perfil")}
                   >
@@ -112,7 +112,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full bg-destructive text-white hover:bg-destructive/90"
+                    className="h-8 w-8 rounded-full bg-destructive text-white hover:bg-destructive/90 sm:h-9 sm:w-9"
                     aria-label="Sair"
                     onClick={handleLogout}
                   >
