@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { toTabTitleCase } from "@/lib/tabTitle";
 import { isMultiInstanceRoute } from "./multiInstanceRoutes";
 import { titleForPath } from "./routeTitle";
+import { isHomeAliasPath } from "./homeAliases";
 import {
   MAX_PINNED_TABS,
   buildPinnedStorageKey,
@@ -66,7 +67,7 @@ export function makeHomeTab(homePath: string): WorkspaceTab {
 export function normalizeTabs(tabs: WorkspaceTab[], homePath: string): WorkspaceTab[] {
   const home = makeHomeTab(homePath);
   const rest = tabs
-    .filter((t) => t.id !== HOME_TAB_ID && !t.pinned && t.path !== homePath)
+    .filter((t) => t.id !== HOME_TAB_ID && !t.pinned && !isHomeAliasPath(t.path, homePath))
     .map((t) => ({ ...t, pinned: false, title: toTabTitleCase(t.title) }))
     .slice(0, MAX_TABS);
   return [home, ...rest];
@@ -90,13 +91,13 @@ function uniqueTitle(tabs: WorkspaceTab[], path: string, title: string): string 
 function reducer(state: WorkspaceState, action: Action): WorkspaceState {
   switch (action.type) {
     case "OPEN": {
-      if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
+      if (isHomeAliasPath(action.path, state.homePath)) return { ...state, activeId: HOME_TAB_ID };
       if (countContentTabs(state.tabs) >= MAX_TABS) return state;
       const tab: WorkspaceTab = { id: newId(), path: action.path, title: uniqueTitle(state.tabs, action.path, action.title), state: action.state };
       return { ...state, tabs: [...state.tabs, tab], activeId: tab.id };
     }
     case "OPEN_OR_ACTIVATE": {
-      if (action.path === state.homePath) return { ...state, activeId: HOME_TAB_ID };
+      if (isHomeAliasPath(action.path, state.homePath)) return { ...state, activeId: HOME_TAB_ID };
       const existing = isMultiInstanceRoute(action.path)
         ? undefined
         : state.tabs.find((t) => t.path === action.path);
@@ -201,7 +202,7 @@ export function WorkspaceProvider({
 }: Props) {
   const [state, dispatch] = useReducer(reducer, undefined, () => {
     const initialTabs: WorkspaceTab[] =
-      initialPath === homePath
+      isHomeAliasPath(initialPath, homePath)
         ? []
         : [{ id: newId(), path: initialPath, title: toTabTitleCase(initialTitle) }];
     const tabs = normalizeTabs(initialTabs, homePath);
@@ -223,6 +224,9 @@ export function WorkspaceProvider({
     if (restoredKeyRef.current === storageKey) return;
     restoredKeyRef.current = storageKey;
     const saved = readPinnedPaths(storageKey, homePath);
+    // Preferências legadas (ex.: Dashboard Start salvo como favorito) são
+    // descartadas silenciosamente e a versão saneada volta ao armazenamento.
+    writePinnedPaths(storageKey, saved);
     if (saved.length === 0) return;
     const allowed = saved.filter((path) => !guardRef.current || guardRef.current(path));
     dispatch({ type: "SET_PINNED_PATHS", paths: saved });

@@ -23,6 +23,9 @@ import {
   buildAgencyAdminPinnedGuard,
   buildPlatformPinnedGuard,
 } from "@/workspace/pinnedRestoreGuard";
+import { isHomeAliasPath } from "@/workspace/homeAliases";
+import { titleForPath } from "@/workspace/routeTitle";
+import { readFileSync } from "node:fs";
 
 const HOME = "/dashboard";
 const base = (tabs: WorkspaceTab[] = [], pinnedPaths: string[] = []) => ({
@@ -210,5 +213,50 @@ describe("guards de restauração por produto", () => {
   it("white label: permissão revogada impede a restauração", () => {
     const guard = buildAgencyAdminPinnedGuard({ can: (key) => key !== "financial.access" });
     expect(guard("/gestao/financeiro")).toBe(false);
+  });
+});
+
+describe("correções: título das notícias, aliases da Inicial e pins", () => {
+  it("restaura Notícias do Trade com o título canônico correto", () => {
+    expect(titleForPath("/noticias")).toBe("Notícias do Trade");
+    const state = workspaceReducer(base(), { type: "RESTORE_PINNED", paths: ["/noticias"] });
+    expect(state.tabs[1].title).toBe("Notícias do Trade");
+  });
+
+  it("trata /dashboard-start e outros aliases como a única aba Inicial", () => {
+    for (const alias of ["/", "/dashboard-start", "/dashboard-fornecedor", "/dashboard"]) {
+      expect(isHomeAliasPath(alias, HOME)).toBe(true);
+      expect(isPinnablePath(alias, HOME)).toBe(false);
+    }
+    expect(isHomeAliasPath("/gestao", HOME)).toBe(false);
+    expect(isHomeAliasPath("/gestao", "/gestao")).toBe(true);
+  });
+
+  it("não abre nem restaura uma segunda aba para aliases da Inicial", () => {
+    let state = workspaceReducer(base(), { type: "OPEN_OR_ACTIVATE", path: "/dashboard-start", title: "Dashboard Start" });
+    state = workspaceReducer(state, { type: "OPEN", path: "/dashboard-start", title: "Dashboard Start" });
+    expect(countContentTabs(state.tabs)).toBe(0);
+    expect(state.tabs).toHaveLength(1);
+    expect(state.activeId).toBe(HOME_TAB_ID);
+
+    const restored = workspaceReducer(base(), { type: "RESTORE_PINNED", paths: ["/dashboard-start", "/agenda"] });
+    expect(restored.tabs.map((t) => t.path)).toEqual([HOME, "/agenda"]);
+  });
+
+  it("descarta preferências legadas da Inicial preservando as outras favoritas", () => {
+    expect(sanitizePinnedPaths(["/dashboard-start", "/agenda", "/", "/reservas"], HOME)).toEqual([
+      "/agenda",
+      "/reservas",
+    ]);
+  });
+
+  it("não mostra pin na aba Inicial e mantém pins cinza sem divisor", () => {
+    const src = readFileSync("src/workspace/TabBar.tsx", "utf8");
+    expect(src).not.toContain("PinOff");
+    expect(src).not.toMatch(/\{pinned && <Pin/);
+    expect(src).toContain("text-muted-foreground opacity-60");
+    expect(src).not.toContain("text-foreground opacity-100");
+    expect(src).toContain('aria-pressed={ws.isTabPinned(tab)}');
+    expect(src).toContain('ws.isTabPinned(tab) ? "Desfixar aba" : "Fixar aba"');
   });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { X, Plus, ChevronDown, Pin, PinOff } from "lucide-react";
+import { X, Plus, ChevronDown, Pin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWorkspace, type WorkspaceTab } from "./WorkspaceProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -104,7 +104,6 @@ export function TabBar({ embedded = false }: { embedded?: boolean } = {}) {
                         : "text-muted-foreground hover:bg-background/60",
                     )}
                   >
-                    {pinned && <Pin className="h-3 w-3 shrink-0 opacity-70" aria-hidden="true" />}
                     <span className="min-w-0 flex-1 truncate whitespace-nowrap">{tab.title}</span>
                     {!pinned && ws.isTabPinnable(tab) && (
                       <button
@@ -120,18 +119,11 @@ export function TabBar({ embedded = false }: { embedded?: boolean } = {}) {
                           e.stopPropagation();
                           ws.togglePinnedTab(tab.id);
                         }}
-                        className={cn(
-                          "shrink-0 rounded-sm p-0.5 hover:bg-muted",
-                          ws.isTabPinned(tab)
-                            ? "text-foreground opacity-100"
-                            : "opacity-50 hover:opacity-100",
-                        )}
+                        className="shrink-0 rounded-sm border-0 p-0.5 text-muted-foreground opacity-60 hover:bg-muted hover:opacity-100"
                       >
-                        {ws.isTabPinned(tab) ? (
-                          <Pin className="h-3.5 w-3.5 fill-current" />
-                        ) : (
-                          <PinOff className="h-3.5 w-3.5" />
-                        )}
+                        <Pin
+                          className={cn("h-3.5 w-3.5", ws.isTabPinned(tab) && "fill-current")}
+                        />
                       </button>
                     )}
                     {!pinned && (
@@ -206,13 +198,11 @@ export function TabBar({ embedded = false }: { embedded?: boolean } = {}) {
                             aria-pressed={ws.isTabPinned(tab)}
                             title={ws.isTabPinned(tab) ? "Desfixar aba" : "Fixar aba"}
                             onClick={() => ws.togglePinnedTab(tab.id)}
-                            className="shrink-0 rounded-sm p-0.5 opacity-60 hover:bg-background hover:opacity-100"
+                            className="shrink-0 rounded-sm border-0 p-0.5 text-muted-foreground opacity-60 hover:bg-background hover:opacity-100"
                           >
-                            {ws.isTabPinned(tab) ? (
-                              <Pin className="h-3.5 w-3.5 fill-current" />
-                            ) : (
-                              <PinOff className="h-3.5 w-3.5" />
-                            )}
+                            <Pin
+                              className={cn("h-3.5 w-3.5", ws.isTabPinned(tab) && "fill-current")}
+                            />
                           </button>
                         )}
                         {!tab.pinned && (

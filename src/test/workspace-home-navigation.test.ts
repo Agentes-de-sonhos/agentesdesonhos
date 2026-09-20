@@ -47,7 +47,7 @@ describe("home tab navigation boundary", () => {
       ["/comunidade", "Comunidade"],
       ["/comunidade/perfil/7", "Comunidade"],
       ["/proximas-viagens", "Próximas Viagens"],
-      ["/noticias", "Radar do Turismo"],
+      ["/noticias", "Notícias do Trade"],
     ];
     for (const [path, title] of cases) {
       const d = resolveHomeNavigation(path, HOME, HOME);
