@@ -172,7 +172,7 @@ describe("segurança das denúncias", () => {
   });
 
   it("aplica RLS: criação própria, leitura própria e fila só para admin", () => {
-    expect(migration).toContain("enable row level security");
+    expect(migration.toLowerCase()).toContain("enable row level security");
     expect(migration.toLowerCase()).toContain("has_role");
     expect(migration).toContain("can_view_community_post");
   });
