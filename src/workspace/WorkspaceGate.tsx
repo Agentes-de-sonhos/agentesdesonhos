@@ -1,8 +1,9 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
+import { usePermissions } from "@/hooks/usePermissions";
 import {
   setWorkspaceEligibleCache,
   isWorkspaceEligible,
@@ -10,6 +11,7 @@ import {
 } from "./featureFlag";
 import { WorkspaceProvider } from "./WorkspaceProvider";
 import { WorkspaceShell } from "./WorkspaceShell";
+import { buildPlatformPinnedGuard } from "./pinnedRestoreGuard";
 import { LoadingScreen } from "@/components/auth/LoadingScreen";
 
 interface Props {
