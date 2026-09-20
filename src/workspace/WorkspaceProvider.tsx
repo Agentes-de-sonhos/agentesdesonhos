@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { toTabTitleCase } from "@/lib/tabTitle";
 import { isMultiInstanceRoute } from "./multiInstanceRoutes";
 import { titleForPath } from "./routeTitle";
+import { isHomeAliasPath } from "./homeAliases";
 import {
   MAX_PINNED_TABS,
   buildPinnedStorageKey,
@@ -66,7 +67,7 @@ export function makeHomeTab(homePath: string): WorkspaceTab {
 export function normalizeTabs(tabs: WorkspaceTab[], homePath: string): WorkspaceTab[] {
   const home = makeHomeTab(homePath);
   const rest = tabs
-    .filter((t) => t.id !== HOME_TAB_ID && !t.pinned && t.path !== homePath)
+    .filter((t) => t.id !== HOME_TAB_ID && !t.pinned && !isHomeAliasPath(t.path, homePath))
     .map((t) => ({ ...t, pinned: false, title: toTabTitleCase(t.title) }))
     .slice(0, MAX_TABS);
   return [home, ...rest];
