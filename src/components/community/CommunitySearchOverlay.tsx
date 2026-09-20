@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { buildCommunityPostUrl } from "@/lib/communityPostFocus";
 import { ConnectButton } from "./ConnectButton";
 
 export const SEARCH_MIN_TERM = 2;
@@ -265,7 +266,7 @@ export function CommunitySearchOverlay({ open, onOpenChange }: CommunitySearchOv
                   type="button"
                   onClick={() => {
                     onOpenChange(false);
-                    navigate("/comunidade/feed");
+                    navigate(buildCommunityPostUrl(post.id));
                   }}
                   className="w-full rounded-xl border border-border/60 px-3 py-2 text-left hover:bg-muted"
                 >

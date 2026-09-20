@@ -168,6 +168,11 @@ export function useCommunityNetwork() {
     },
     onSuccess: (_data, variables) => {
       invalidateConnections();
+      if (variables.accept) {
+        // A conexão aceita começa seguindo nos dois sentidos (garantido no banco).
+        queryClient.invalidateQueries({ queryKey: ["community-muted-authors"] });
+        queryClient.invalidateQueries({ queryKey: ["community-feed"] });
+      }
       toast.success(variables.accept ? "Conexão aceita" : "Solicitação recusada");
     },
     onError: () => toast.error("Não foi possível responder à solicitação"),

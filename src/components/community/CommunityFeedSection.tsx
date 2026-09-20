@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
 import { CreatePostForm } from "./CreatePostForm";
 import { PostCard } from "./PostCard";
@@ -11,6 +12,11 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { InPersonEvent } from "@/types/community";
 import type { CommunityPost } from "@/types/community-members";
+import {
+  communityPostElementId,
+  decidePostFocus,
+  readTargetPostId,
+} from "@/lib/communityPostFocus";
 
 interface CommunityFeedSectionProps {
   events?: InPersonEvent[];
@@ -41,6 +47,37 @@ export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps)
 
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  const location = useLocation();
+  const targetPostId = readTargetPostId(location.search);
+  const focusedPostRef = useRef<string | null>(null);
+  const [highlightedPostId, setHighlightedPostId] = useState<string | null>(null);
+
+  // Publicação vinda da busca: rola e foca; se estiver em página seguinte,
+  // continua carregando o feed até encontrá-la (paginação preservada).
+  useEffect(() => {
+    const decision = decidePostFocus({
+      targetPostId,
+      loadedPostIds: posts.map((post) => post.id),
+      hasNextPage: !!hasNextPage,
+      isFetchingNextPage,
+      alreadyFocused: focusedPostRef.current === targetPostId,
+    });
+
+    if (decision.loadMore) {
+      void fetchNextPage();
+      return;
+    }
+    if (!decision.focus || !targetPostId) return;
+
+    focusedPostRef.current = targetPostId;
+    setHighlightedPostId(targetPostId);
+    const element = document.getElementById(communityPostElementId(targetPostId));
+    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    element?.focus?.({ preventScroll: true });
+    const timer = setTimeout(() => setHighlightedPostId(null), 2500);
+    return () => clearTimeout(timer);
+  }, [targetPostId, posts, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -104,8 +141,18 @@ export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps)
           {feedItems.map((item) => {
             if (item.type === "post") {
               return (
-                <PostCard
+                <div
                   key={item.key}
+                  id={communityPostElementId(item.data.id)}
+                  tabIndex={-1}
+                  className={
+                    highlightedPostId === item.data.id
+                      ? "rounded-xl ring-2 ring-primary/60 transition-shadow"
+                      : "outline-none"
+                  }
+                  data-community-post-anchor={item.data.id}
+                >
+                <PostCard
                   post={item.data}
                   onLike={(postId, liked) => toggleLike({ postId, liked })}
                   onDelete={deletePost}
@@ -116,6 +163,7 @@ export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps)
                   onDeleteComment={deleteComment}
                   onVotePoll={votePoll}
                 />
+                </div>
               );
             }
 
