@@ -152,7 +152,7 @@ export function PostCommentsSection({
                     .join(" · ")}
                 </span>
               </div>
-              {canDelete && (
+              {(canDelete || !isOwnComment) && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -165,18 +165,32 @@ export function PostCommentsSection({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => {
-                        onDeleteComment(comment.id);
-                        setDeleted((prev) => [...prev, comment.id]);
-                      }}
-                    >
-                      <Trash2 className="mr-2 h-4 w-4" /> Excluir comentário
-                    </DropdownMenuItem>
+                    {!isOwnComment && (
+                      <PostFollowMenuItem
+                        authorId={comment.user_id}
+                        authorName={cName}
+                      />
+                    )}
+                    {!isOwnComment && (
+                      <DropdownMenuItem onClick={() => setReportComment(comment)}>
+                        <ShieldAlert className="mr-2 h-4 w-4" /> Denunciar comentário
+                      </DropdownMenuItem>
+                    )}
+                    {canDelete && (
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => {
+                          onDeleteComment(comment.id);
+                          setDeleted((prev) => [...prev, comment.id]);
+                        }}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" /> Excluir comentário
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+
             </div>
             <MentionText
               text={comment.content}
