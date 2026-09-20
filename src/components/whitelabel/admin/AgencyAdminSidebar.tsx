@@ -87,7 +87,7 @@ export function AgencyAdminSidebar({
 
   const isProjectsArea =
     location.pathname === PROJECTS_ROOT || location.pathname === "/meus-projetos";
-  const showCommunity = community.community_experience_enabled || isSiteLabDemoHost(info.hostname);
+  const showCommunity = community.community_experience_enabled || isSiteLabDemoHost(info.hostname) || window.location.pathname.startsWith("/sitelab-base");
   const managementItems = showCommunity ? [...MANAGEMENT_ITEMS, COMMUNITY_ITEM] : MANAGEMENT_ITEMS;
 
   const handleSignOut = useCallback(() => {

@@ -77,9 +77,9 @@ function e(Page: ComponentType) {
  * Cada aba do workspace monta esta árvore no seu próprio router de memória,
  * exatamente como a plataforma principal faz com o DashboardLayout.
  */
-function AgencyAdminPages({ info }: { info: AgencyAdminPortalInfo }) {
+function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalInfo; siteLab?: boolean }) {
   const community = (
-    <AgencyCommunityGate siteLab={isSiteLabDemoHost(info.hostname)}>
+    <AgencyCommunityGate siteLab={siteLab || isSiteLabDemoHost(info.hostname)}>
       {e(Community)}
     </AgencyCommunityGate>
   );
@@ -167,12 +167,14 @@ function AgencyAdminWorkspace({
   entryPath,
   toExternalPath,
   tenantKey,
+  siteLab = false,
 }: {
   info: AgencyAdminPortalInfo;
   entryPath?: string;
   toExternalPath?: (path: string) => string;
   /** Tenant das preferências de abas fixadas (hostname + prefixo de montagem). */
   tenantKey: string;
+  siteLab?: boolean;
 }) {
   const initialPath = entryPath ?? initialWorkspacePath();
   const { user } = useAuth();
@@ -188,7 +190,7 @@ function AgencyAdminWorkspace({
       canRestorePinnedPath={pinnedGuard}
     >
       <WorkspaceShell showTabBar={false} toExternalPath={toExternalPath}>
-        <AgencyAdminPages info={info} />
+        <AgencyAdminPages info={info} siteLab={siteLab} />
       </WorkspaceShell>
     </WorkspaceProvider>
   );
@@ -242,6 +244,7 @@ function AgencyAdminEntry({
           entryPath={entryPath}
           toExternalPath={toExternal}
           tenantKey={`${window.location.hostname}${mount.base}`}
+          siteLab={hasOuterRouter}
         />
       )}
     </AgencyAdminShell>

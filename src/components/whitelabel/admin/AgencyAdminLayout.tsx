@@ -43,7 +43,7 @@ export function AgencyAdminLayout({
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
   const { community } = usePermissions();
-  const communityEnabled = community.community_experience_enabled || isSiteLabDemoHost(info.hostname);
+  const communityEnabled = community.community_experience_enabled || isSiteLabDemoHost(info.hostname) || window.location.pathname.startsWith("/sitelab-base");
 
   // Tema global do painel: também cobre dialogs/popovers em Portal.
   useAgencyBrandTheme(agencyBrandInput(info));
