@@ -1,6 +1,6 @@
-import { ComponentType, lazy, useCallback } from "react";
+import { ComponentType, lazy, useCallback, useMemo } from "react";
 import { BrowserRouter, Navigate, useParams, useRoutes } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { TeamSessionProvider } from "@/contexts/TeamSessionContext";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -16,7 +16,9 @@ import {
 } from "@/lib/agencyAdmin";
 import { AgencyAdminNavProvider } from "@/lib/agencyAdminNav";
 import { agencyContextHref } from "@/lib/agencyContextLink";
+import { usePermissions } from "@/hooks/usePermissions";
 import { WorkspaceProvider } from "@/workspace/WorkspaceProvider";
+import { buildAgencyAdminPinnedGuard } from "@/workspace/pinnedRestoreGuard";
 import { WorkspaceShell } from "@/workspace/WorkspaceShell";
 import { titleForPath } from "@/workspace/routeTitle";
 
@@ -229,6 +231,7 @@ function AgencyAdminEntry({
           info={info}
           entryPath={entryPath}
           toExternalPath={toExternal}
+          tenantKey={`${window.location.hostname}${mount.base}`}
         />
       )}
     </AgencyAdminShell>
