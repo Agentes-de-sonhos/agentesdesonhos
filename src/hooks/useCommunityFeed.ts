@@ -1,9 +1,10 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import type { CommunityPost, PostComment, PostDocument, PostPoll } from "@/types/community-members";
 import { buildCommunityFeedPage, mergeUniqueCommunityPages } from "@/lib/communityFeedPagination";
+import { mutedAuthorIds } from "@/hooks/useCommunityNetwork";
 
 interface CommunityFeedOptions {
   pageSize?: number;
@@ -17,18 +18,40 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Autores que o usuário deixou de seguir: filtrados no servidor, preservando paginação.
+  const mutedQuery = useQuery({
+    queryKey: ["community-muted-authors", user?.id ?? null],
+    enabled: enabled && !!user?.id,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("community_muted_authors")
+        .select("author_id")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return (data ?? []) as { author_id: string }[];
+    },
+  });
+  const mutedIds = mutedAuthorIds(mutedQuery.data);
+  const mutedReady = !user?.id || !mutedQuery.isLoading;
+
   const postsQuery = useInfiniteQuery({
-    queryKey: ["community-feed", pageSize],
-    enabled,
+    queryKey: ["community-feed", pageSize, mutedIds.join(",")],
+    enabled: enabled && mutedReady,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("community_posts")
         .select("*")
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
         .range(pageParam, pageParam + pageSize);
+      if (mutedIds.length > 0) {
+        query = query.not("user_id", "in", `(${mutedIds.join(",")})`);
+      }
+      const { data, error } = await query;
       if (error) throw error;
 
       if (!data || data.length === 0) return buildCommunityFeedPage([], pageSize, pageParam);
