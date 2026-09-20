@@ -247,15 +247,17 @@ export function WorkspaceProvider({
       const current = stateRef.current;
       const tab = current.tabs.find((t) => t.id === id);
       if (!tab || tab.pinned) return;
-      const result = togglePinnedPath(current.pinnedPaths, tab.path, current.homePath);
-      if (!result.ok) {
-        if (result.reason === "limit") {
-          toast.error(
-            `Você pode manter até ${MAX_PINNED_TABS} abas fixadas além da Inicial. Desfixe uma para fixar outra.`,
-          );
-        } else {
-          toast.error("Esta aba não pode ser fixada.");
-        }
+      const result: TogglePinnedResult = togglePinnedPath(
+        current.pinnedPaths,
+        tab.path,
+        current.homePath,
+      );
+      if (result.ok === false) {
+        toast.error(
+          result.reason === "limit"
+            ? `Você pode manter até ${MAX_PINNED_TABS} abas fixadas além da Inicial. Desfixe uma para fixar outra.`
+            : "Esta aba não pode ser fixada.",
+        );
         return;
       }
       dispatch({ type: "SET_PINNED_PATHS", paths: result.paths });
