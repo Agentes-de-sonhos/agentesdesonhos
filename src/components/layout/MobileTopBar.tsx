@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageCircle, Search } from "lucide-react";
+import { MessageCircle, Search, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,11 +39,47 @@ export function MobileTopBar({ embedded = false }: { embedded?: boolean }) {
     },
   });
 
+  if (embedded) {
+    return (
+      <div className="space-y-3" data-mobile-top-bar data-dashboard-community-header>
+        <div className="flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="flex items-center gap-2 font-display text-lg font-semibold text-foreground">
+              <Users className="h-5 w-5 shrink-0 text-[hsl(var(--section-community))]" />
+              Comunidade
+            </h2>
+            <div className="mt-1.5 h-1 w-full rounded-full bg-[hsl(var(--section-community))]" />
+          </div>
+          <Button
+            type="button"
+            size="icon"
+            aria-label="Abrir chat"
+            onClick={() => window.dispatchEvent(new CustomEvent(OPEN_COMMUNITY_CHAT_EVENT))}
+            className="h-10 w-10 shrink-0 rounded-full bg-[hsl(var(--section-community))] text-primary-foreground hover:bg-[hsl(var(--section-community))]/90"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Button>
+        </div>
+
+        <Button
+          type="button"
+          variant="ghost"
+          aria-label="Pesquisar na comunidade"
+          onClick={() => setSearchOpen(true)}
+          className="h-10 w-full justify-start gap-2 rounded-full bg-muted px-3 text-sm font-normal text-muted-foreground hover:bg-muted/80"
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="truncate">Pesquisar</span>
+        </Button>
+
+        <CommunitySearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
+      </div>
+    );
+  }
+
   return (
     <div
-      className={embedded
-        ? "flex items-center gap-2 py-2 lg:hidden"
-        : "sticky top-0 z-30 -mx-4 mb-3 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur lg:hidden"}
+      className="sticky top-0 z-30 -mx-4 mb-3 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur lg:hidden"
       data-mobile-top-bar
     >
       <button
