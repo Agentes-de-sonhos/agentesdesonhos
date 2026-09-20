@@ -32,7 +32,7 @@ import {
 } from "@/lib/communityMedia";
 import type { PostDocument, PostPoll } from "@/types/community-members";
 
-interface CreatePostPayload {
+export interface CreatePostPayload {
   content: string;
   tags: string[];
   imageUrls?: string[];
