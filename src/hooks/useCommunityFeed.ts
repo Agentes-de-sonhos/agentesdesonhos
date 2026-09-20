@@ -7,16 +7,19 @@ import { buildCommunityFeedPage, mergeUniqueCommunityPages } from "@/lib/communi
 
 interface CommunityFeedOptions {
   pageSize?: number;
+  /** Permite usar apenas as mutations (ex.: compositor da barra mobile) sem buscar o feed. */
+  enabled?: boolean;
 }
 
 const LEGACY_FEED_LIMIT = 1000;
 
-export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT }: CommunityFeedOptions = {}) {
+export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true }: CommunityFeedOptions = {}) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const postsQuery = useInfiniteQuery({
     queryKey: ["community-feed", pageSize],
+    enabled,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase

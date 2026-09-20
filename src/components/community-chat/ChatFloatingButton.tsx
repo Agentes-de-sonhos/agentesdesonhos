@@ -77,6 +77,16 @@ export function ChatFloatingButton() {
     return () => window.removeEventListener("start-dm", handler);
   }, [handleAgentChat]);
 
+  // Permite abrir o chat a partir do cabeçalho mobile, sem alterar rota.
+  useEffect(() => {
+    const openHandler = () => {
+      setView("menu");
+      setIsOpen(true);
+    };
+    window.addEventListener("community-chat:open", openHandler);
+    return () => window.removeEventListener("community-chat:open", openHandler);
+  }, []);
+
   // Swipe-to-close support (hooks before early returns)
   const panelRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef<number | null>(null);

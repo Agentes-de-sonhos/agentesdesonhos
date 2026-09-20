@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useContext } from "react";
 import { AppSidebar } from "./AppSidebar";
-import { BottomNavBar } from "./BottomNavBar";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { Footer } from "./Footer";
 import { GlobalPopupModal } from "@/components/popup/GlobalPopupModal";
 import { MonthlyPopupModal } from "@/components/popup/MonthlyPopupModal";
@@ -51,8 +51,8 @@ export function DashboardLayout({ children, flushHorizontal = false }: Dashboard
       {/* Desktop Sidebar - hidden on mobile */}
       <AppSidebar />
       
-      {/* Mobile Bottom Navigation */}
-      <BottomNavBar />
+      {/* Mobile Bottom Navigation (Agentes de Sonhos) */}
+      <MobileBottomNav />
       
       {/* Global Popup Modal for admin announcements */}
       <GlobalPopupModal />

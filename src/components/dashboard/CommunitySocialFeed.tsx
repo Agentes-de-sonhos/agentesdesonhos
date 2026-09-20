@@ -8,7 +8,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import {
@@ -33,7 +32,10 @@ import { useCommunityUnread, unreadLabel } from "@/hooks/useCommunityUnread";
 import { useQuery } from "@tanstack/react-query";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
-import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
+import { postImages } from "@/components/community/PostImageGallery";
+import { PostMediaGrid } from "@/components/community/PostMediaGrid";
+import { PostLightbox } from "@/components/community/PostLightbox";
+import { PostTextContent } from "@/components/community/PostTextContent";
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
@@ -99,7 +101,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     isVoting,
   } = useCommunityFeed({ pageSize: DASHBOARD_PAGE_SIZE });
 
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   // Apenas um post com comentários expandidos por vez neste feed do dashboard.
   const [openCommentsPostId, setOpenCommentsPostId] = useState<string | null>(null);
@@ -180,7 +182,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 }}
                 onEdit={() => setEditingPost(post)}
                 fetchComments={fetchComments}
-                onOpenImage={(url) => setLightboxUrl(url)}
+                onOpenImage={(index) => setLightbox({ images: postImages(post), index })}
                 onVotePoll={votePoll}
                 isVoting={isVoting}
                 newCount={newCount}
@@ -215,18 +217,12 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
         )}
         </div>
 
-        {/* Lightbox */}
-        <Dialog open={!!lightboxUrl} onOpenChange={(o) => !o && setLightboxUrl(null)}>
-          <DialogContent className="max-w-5xl p-0 bg-transparent border-0 shadow-none">
-            {lightboxUrl && (
-              <img
-                src={lightboxUrl}
-                alt="Imagem da publicação"
-                className="w-full max-h-[85vh] object-contain rounded-lg bg-black/60"
-              />
-            )}
-          </DialogContent>
-        </Dialog>
+        {/* Galeria em tela cheia */}
+        <PostLightbox
+          images={lightbox?.images ?? []}
+          startIndex={lightbox ? lightbox.index : null}
+          onClose={() => setLightbox(null)}
+        />
 
         <EditPostDialog
           post={editingPost}
@@ -248,7 +244,7 @@ interface PostCardProps {
   onDelete: () => void;
   onEdit: () => void;
   fetchComments: (postId: string) => Promise<PostComment[]>;
-  onOpenImage: (url: string) => void;
+  onOpenImage: (index: number) => void;
   onVotePoll?: (data: { postId: string; optionId: string }) => void;
   isVoting?: boolean;
   newCount?: number;
@@ -364,17 +360,14 @@ function PostCard({
 
       {post.content && (
         <div className="px-5 pb-3">
-          <LinkifiedText
-            text={post.content}
-            className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed"
-          />
+          <PostTextContent text={post.content} />
         </div>
       )}
 
       {images.length > 0 && (
-        <PostImageGallery
+        <PostMediaGrid
           images={images}
-          onOpenImage={onOpenImage}
+          onOpenImage={(index) => onOpenImage(index)}
           authorName={post.profile?.name || undefined}
         />
       )}
@@ -386,14 +379,23 @@ function PostCard({
       )}
 
       {(post.likes_count > 0 || post.comments_count > 0) && (
-        <div className="px-5 pt-2 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="px-5 pt-2 flex items-center gap-3 text-xs text-muted-foreground" data-post-counters>
           {post.likes_count > 0 && (
             <span>{post.likes_count} {post.likes_count === 1 ? "curtida" : "curtidas"}</span>
           )}
           {post.comments_count > 0 && (
-            <Link to="/comunidade" className="hover:underline">
+            <button
+              type="button"
+              className="hover:underline"
+              aria-expanded={commentsOpen}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggleComments?.();
+              }}
+            >
               {post.comments_count} {post.comments_count === 1 ? "comentário" : "comentários"}
-            </Link>
+            </button>
           )}
         </div>
       )}
