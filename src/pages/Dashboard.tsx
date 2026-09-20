@@ -137,7 +137,7 @@ export default function Dashboard() {
             )}
           </section>
           {can("community.public.view") && (
-            <section className="min-w-0" data-dashboard-section="community">
+            <section className="min-w-0 px-4 md:px-0" data-dashboard-section="community">
               <CommunitySocialFeed />
             </section>
           )}
