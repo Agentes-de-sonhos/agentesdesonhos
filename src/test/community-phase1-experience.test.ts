@@ -109,7 +109,7 @@ describe("navegação mobile do Agentes de Sonhos", () => {
   });
 
   it("Publicação reutiliza o compositor existente e Menu abre a gaveta atual", () => {
-    expect(bottomNav).toContain("CreatePostForm");
+    expect(bottomNav).toContain("PostComposerDialog");
     expect(bottomNav).toContain("MobileDrawerMenu");
     expect(bottomNav).toContain("env(safe-area-inset-bottom");
   });

@@ -58,9 +58,13 @@ describe("LinkifiedText", () => {
 describe("uso do componente compartilhado", () => {
   it("PostCard da Comunidade usa LinkifiedText em post e comentarios", () => {
     const src = read("src/components/community/PostCard.tsx");
-    expect(src).toContain("LinkifiedText");
+    const postText = read("src/components/community/PostTextContent.tsx");
+    const comments = read("src/components/community/PostCommentsSection.tsx");
+    const mention = read("src/components/community/MentionText.tsx");
     expect(src).toContain("text={post.content}");
-    expect(src).toContain("text={c.content}");
+    expect(postText).toContain("MentionText");
+    expect(comments).toContain("MentionText");
+    expect(mention).toContain("LinkifiedText");
     expect(src).not.toContain(">{post.content}<");
   });
 
