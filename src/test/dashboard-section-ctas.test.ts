@@ -37,9 +37,10 @@ describe("dashboard block CTAs", () => {
     expect(src).toContain("data-workspace-title");
   });
 
-  it("community block uses the header action space for online presence", () => {
+  it("community block uses the custom reference header and a separate online row", () => {
     const src = read("src/components/dashboard/CommunitySocialFeed.tsx");
-    expect(src).toContain("DashboardSectionHeader");
+    expect(src).toContain("<MobileTopBar embedded />");
+    expect(src).not.toContain("DashboardSectionHeader");
     expect(src).not.toContain("Ver toda a comunidade");
     expect(src).toContain("data-dashboard-online-users");
   });
