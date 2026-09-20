@@ -36,7 +36,7 @@ export default function MinhasDenuncias() {
 
   return (
     <DashboardLayout>
-      <MobileTopBar title="Minhas denúncias" />
+      <MobileTopBar />
       <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-4 sm:px-6">
         <div className="flex items-center justify-between gap-2">
           <div>
