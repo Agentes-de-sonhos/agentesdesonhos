@@ -1,6 +1,19 @@
-import { createContext, useCallback, useContext, useMemo, useReducer, ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, ReactNode } from "react";
+import { toast } from "sonner";
 import { toTabTitleCase } from "@/lib/tabTitle";
 import { isMultiInstanceRoute } from "./multiInstanceRoutes";
+import { titleForPath } from "./routeTitle";
+import {
+  MAX_PINNED_TABS,
+  buildPinnedStorageKey,
+  isPinnablePath,
+  normalizePinnedPath,
+  readPinnedPaths,
+  restorablePinnedPaths,
+  togglePinnedPath,
+  writePinnedPaths,
+  type PinnedScope,
+} from "./pinnedTabs";
 
 /** Maximum number of *content* windows (the pinned home tab does not count). */
 export const MAX_TABS = 10;
@@ -22,6 +35,8 @@ interface WorkspaceState {
   tabs: WorkspaceTab[];
   activeId: string | null;
   homePath: string;
+  /** Caminhos das abas FAVORITAS (fixadas), na ordem salva. Máximo de 4. */
+  pinnedPaths: string[];
 }
 
 type Action =
@@ -30,7 +45,9 @@ type Action =
   | { type: "CLOSE"; id: string }
   | { type: "CLOSE_OTHERS"; id: string }
   | { type: "CLOSE_ALL" }
-  | { type: "ACTIVATE"; id: string };
+  | { type: "ACTIVATE"; id: string }
+  | { type: "SET_PINNED_PATHS"; paths: string[] }
+  | { type: "RESTORE_PINNED"; paths: string[] };
 
 function newId() {
   return `tab_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
