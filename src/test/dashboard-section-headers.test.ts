@@ -22,7 +22,7 @@ describe("Dashboard section headers", () => {
     expect(header).toContain("whitespace-nowrap");
     expect(header).toContain("text-left");
     expect(header).not.toContain("text-center");
-    expect(header).toContain("truncate");
+    expect(header).not.toContain("truncate");
     expect(header).toContain("min-w-0");
   });
 

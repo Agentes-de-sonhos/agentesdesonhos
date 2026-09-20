@@ -61,11 +61,10 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(feed).toContain("overflow-visible");
   });
 
-  it("substitui o CTA da Comunidade pelo controle de presença no canto superior direito", () => {
+  it("move presença para uma linha própria no cabeçalho da Comunidade", () => {
     expect(feed).not.toContain("Ver toda a comunidade");
-    expect(feed).toContain('action={can("online_users.view") ? (');
+    expect(feed).toContain('can("online_users.view") && (');
     expect(feed).toContain("data-dashboard-online-users");
-    expect(feed).toContain("justify-self-end");
     expect(feed.match(/<OnlineAgentsStrip compact \/>/g)).toHaveLength(1);
   });
 
@@ -75,8 +74,8 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(feed).not.toContain('className="mx-auto w-full');
     expect(feed).not.toContain("max-w-[780px]");
     expect(feed).toContain('data-dashboard-community-post');
-    expect(feed).toContain("min-w-0 rounded-2xl");
-    expect(feed).toContain("px-5 pt-4 pb-3");
+    expect(feed).toContain("min-w-0 overflow-hidden border-y");
+    expect(feed).toContain('className="px-3 pb-3 pt-4 sm:px-5"');
     expect(feed).toContain("min-w-0 overflow-hidden");
   });
 
