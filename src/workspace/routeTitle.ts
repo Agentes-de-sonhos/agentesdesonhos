@@ -83,3 +83,12 @@ export function titleForPath(pathname: string): string {
   const raw = best ? ROUTE_TITLES[best] : humanize(clean);
   return toTabTitleCase(raw);
 }
+/**
+ * `true` quando o caminho corresponde EXATAMENTE a uma rota canônica de módulo
+ * do gerenciador de abas. Usado pela fixação de abas para aceitar apenas
+ * identificadores de rota estáveis (nunca detalhes/edições com id temporário).
+ */
+export function hasCanonicalRouteTitle(pathname: string): boolean {
+  const clean = (pathname || "/").split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  return Object.prototype.hasOwnProperty.call(ROUTE_TITLES, clean);
+}
