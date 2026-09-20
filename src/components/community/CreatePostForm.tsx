@@ -1,4 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import { MentionTextarea } from "./MentionTextarea";
+import {
+  DEFAULT_COMMUNITY_VISIBILITY,
+  type CommunityVisibility,
+} from "@/lib/communityVisibility";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +39,14 @@ interface CreatePostPayload {
   videoUrl?: string | null;
   documents?: PostDocument[];
   poll?: PostPoll | null;
+  visibility?: CommunityVisibility;
+}
+
+export interface ComposerDraftState {
+  /** Há conteúdo não enviado (texto, mídia ou enquete). */
+  isDirty: boolean;
+  canSubmit: boolean;
+  isBusy: boolean;
 }
 
 interface CreatePostFormProps {
@@ -41,6 +54,16 @@ interface CreatePostFormProps {
   isCreating: boolean;
   /** Starts as a single-line box and expands on focus (used in the dashboard). */
   collapsible?: boolean;
+  /** "plain" remove o cartão (usado no compositor em tela inteira/modal). */
+  variant?: "card" | "plain";
+  /** Público da publicação; o padrão é "Qualquer pessoa". */
+  visibility?: CommunityVisibility;
+  /** Esconde o botão Publicar interno quando o cabeçalho do modal já o exibe. */
+  hidePublishButton?: boolean;
+  autoFocusText?: boolean;
+  /** Expõe o envio para o cabeçalho do compositor. */
+  submitRef?: MutableRefObject<(() => void) | null>;
+  onDraftStateChange?: (state: ComposerDraftState) => void;
 }
 
 type PickedImage = { file: File; previewUrl: string };
