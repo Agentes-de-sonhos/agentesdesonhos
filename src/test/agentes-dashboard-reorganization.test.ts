@@ -57,7 +57,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
     expect(dashboard).not.toContain("<OnlineAgentsStrip");
-    expect(feed).toContain("<OnlineAgentsStrip />");
+    expect(feed).toContain("<OnlineAgentsStrip compact />");
     expect(feed).toContain("overflow-visible");
   });
 
