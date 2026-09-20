@@ -63,9 +63,9 @@ export function useCommunityMessageSearch(term: string, enabled: boolean) {
 
       const { data: profiles } = await supabase
         .from("profiles_public")
-        .select("id, name, avatar_url")
-        .in("id", otherIds);
-      const profileById = new Map((profiles || []).map((p) => [p.id, p]));
+        .select("user_id, name, avatar_url")
+        .in("user_id", otherIds);
+      const profileById = new Map((profiles || []).map((p) => [p.user_id, p]));
 
       return messages.map((message) => {
         const otherId = otherByConversation.get(message.conversation_id) || "";
