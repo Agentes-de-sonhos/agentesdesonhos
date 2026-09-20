@@ -364,17 +364,14 @@ function PostCard({
 
       {post.content && (
         <div className="px-5 pb-3">
-          <LinkifiedText
-            text={post.content}
-            className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed"
-          />
+          <PostTextContent text={post.content} />
         </div>
       )}
 
       {images.length > 0 && (
-        <PostImageGallery
+        <PostMediaGrid
           images={images}
-          onOpenImage={onOpenImage}
+          onOpenImage={(index) => onOpenImage(index)}
           authorName={post.profile?.name || undefined}
         />
       )}
@@ -386,14 +383,23 @@ function PostCard({
       )}
 
       {(post.likes_count > 0 || post.comments_count > 0) && (
-        <div className="px-5 pt-2 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="px-5 pt-2 flex items-center gap-3 text-xs text-muted-foreground" data-post-counters>
           {post.likes_count > 0 && (
             <span>{post.likes_count} {post.likes_count === 1 ? "curtida" : "curtidas"}</span>
           )}
           {post.comments_count > 0 && (
-            <Link to="/comunidade" className="hover:underline">
+            <button
+              type="button"
+              className="hover:underline"
+              aria-expanded={commentsOpen}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onToggleComments?.();
+              }}
+            >
               {post.comments_count} {post.comments_count === 1 ? "comentário" : "comentários"}
-            </Link>
+            </button>
           )}
         </div>
       )}
