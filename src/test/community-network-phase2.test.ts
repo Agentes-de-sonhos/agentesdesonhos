@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { resolveRelation, mutedAuthorIds } from "@/hooks/useCommunityNetwork";
+import { resolveRelation, mutedAuthorIds, pairFilter } from "@/hooks/useCommunityNetwork";
+import {
+  buildCommunityPostUrl,
+  decidePostFocus,
+  readTargetPostId,
+} from "@/lib/communityPostFocus";
 import {
   SEARCH_FILTERS,
   SEARCH_MIN_TERM,
@@ -94,7 +99,7 @@ describe("ações do ciclo de conexão", () => {
   it("cobre enviar, cancelar, aceitar, recusar e remover", () => {
     expect(networkHook).toContain("requester_id: userId, receiver_id: targetUserId, status: \"pending\"");
     expect(networkHook).toContain("const cancelRequest");
-    expect(networkHook).toContain('accept ? "accepted" : "rejected"');
+    expect(networkHook).toContain('.update({ status: "accepted"');
     expect(networkHook).toContain("const removeConnection");
     expect(networkHook).toContain("Não é possível conectar consigo mesmo");
     expect(networkHook).toContain("toast.success");
@@ -243,5 +248,179 @@ describe("isolamento do Site Lab Base e white-labels", () => {
     ]) {
       expect(agencyAdminArea).not.toContain(marker);
     }
+  });
+});
+
+// ============ Correções de qualidade da Fase 2 ============
+
+const hardening = read("drizzle/migrations/0007_community_connections_hardening.sql");
+const feedSection = read("src/components/community/CommunityFeedSection.tsx");
+const postFocus = read("src/lib/communityPostFocus.ts");
+
+describe("recusar e solicitar novamente", () => {
+  it("recusar remove a solicitação pendente em vez de deixar linha bloqueando o par", () => {
+    expect(networkHook).toContain("if (!accept) {");
+    expect(networkHook).toMatch(/if \(!accept\) \{[\s\S]{0,400}\.delete\(\)/);
+    expect(networkHook).not.toContain('accept ? "accepted" : "rejected"');
+  });
+
+  it("nova solicitação limpa recusa legada do par antes de inserir", () => {
+    expect(networkHook).toContain('.eq("status", "rejected")');
+    expect(networkHook).toContain("pairFilter(userId, targetUserId)");
+    expect(networkHook).toContain('.insert({ requester_id: userId, receiver_id: targetUserId, status: "pending" })');
+  });
+
+  it("o filtro do par cobre remetente e destinatário invertidos", () => {
+    const filter = pairFilter(ME, OTHER);
+    expect(filter).toContain(`and(requester_id.eq.${ME},receiver_id.eq.${OTHER})`);
+    expect(filter).toContain(`and(requester_id.eq.${OTHER},receiver_id.eq.${ME})`);
+  });
+
+  it("ciclo recusar -> solicitar novamente volta ao estado inicial e depois a pendente", () => {
+    const pending = [conn({ requester_id: OTHER, receiver_id: ME })];
+    expect(resolveRelation(pending, ME, OTHER).state).toBe("pending_received");
+    const afterReject: typeof pending = [];
+    expect(resolveRelation(afterReject, ME, OTHER).state).toBe("none");
+    const afterNewRequest = [conn({ id: "c2", requester_id: ME, receiver_id: OTHER })];
+    expect(resolveRelation(afterNewRequest, ME, OTHER).state).toBe("pending_sent");
+  });
+
+  it("mantém a prevenção de pares duplicados e invertidos", () => {
+    expect(migration).toContain("connections_unique_pair");
+    expect(hardening).not.toMatch(/DROP INDEX[\s\S]*connections_unique_pair/i);
+    expect(hardening).not.toMatch(/DROP (POLICY|TABLE|CONSTRAINT)/i);
+  });
+});
+
+describe("conexão nova começa seguindo", () => {
+  it("limpa apenas o par envolvido quando a conexão passa a aceita", () => {
+    expect(hardening).toContain("reset_follow_on_connection_accepted");
+    expect(hardening).toContain("SECURITY DEFINER");
+    expect(hardening).toContain("NEW.status = 'accepted'");
+    expect(hardening).toContain("OLD.status IS DISTINCT FROM 'accepted'");
+    expect(hardening).toContain("DELETE FROM public.community_muted_authors");
+    expect(hardening).toContain("user_id = NEW.requester_id AND author_id = NEW.receiver_id");
+    expect(hardening).toContain("user_id = NEW.receiver_id AND author_id = NEW.requester_id");
+  });
+
+  it("não permite apagar preferências de terceiros fora do par", () => {
+    const deleteBlock = hardening.slice(
+      hardening.indexOf("DELETE FROM public.community_muted_authors"),
+      hardening.indexOf("RETURN NEW;", hardening.indexOf("DELETE FROM public.community_muted_authors")),
+    );
+    expect(deleteBlock).toContain("WHERE");
+    expect(deleteBlock).not.toMatch(/WHERE\s+true/i);
+  });
+
+  it("atualiza o feed do usuário após aceitar", () => {
+    expect(networkHook).toMatch(/if \(variables\.accept\) \{[\s\S]{0,300}community-muted-authors/);
+    expect(networkHook).toMatch(/if \(variables\.accept\) \{[\s\S]{0,400}community-feed/);
+  });
+});
+
+describe("UPDATE de connections endurecido", () => {
+  it("congela os participantes da relação", () => {
+    expect(hardening).toContain("enforce_connection_update");
+    expect(hardening).toContain("NEW.requester_id <> OLD.requester_id OR NEW.receiver_id <> OLD.receiver_id");
+    expect(hardening).toContain("Os participantes da conexão não podem ser alterados");
+    expect(hardening).toContain("BEFORE UPDATE ON public.connections");
+  });
+
+  it("aceita apenas transições válidas e somente pelo destinatário", () => {
+    expect(hardening).toContain("IF OLD.status <> 'pending' THEN");
+    expect(hardening).toContain("NEW.status NOT IN ('accepted', 'rejected')");
+    expect(hardening).toContain("actor <> OLD.receiver_id");
+    expect(hardening).toContain("Somente o destinatário pode responder à solicitação");
+  });
+
+  it("não enfraquece a RLS existente", () => {
+    expect(hardening).not.toMatch(/DISABLE ROW LEVEL SECURITY/i);
+    expect(hardening).not.toMatch(/CREATE POLICY/i);
+    expect(hardening).not.toMatch(/GRANT .* TO anon/i);
+  });
+});
+
+describe("resultado de busca leva à publicação", () => {
+  it("usa a rota do feed com o parâmetro da publicação", () => {
+    expect(postFocus).toContain('export const COMMUNITY_POST_PARAM = "post"');
+    expect(search).toContain("buildCommunityPostUrl(post.id)");
+    expect(search).not.toContain('navigate("/comunidade/feed")');
+  });
+
+  it("decide entre focar, carregar mais páginas ou parar", () => {
+    expect(
+      decidePostFocus({
+        targetPostId: "p1",
+        loadedPostIds: ["p9", "p1"],
+        hasNextPage: true,
+        isFetchingNextPage: false,
+        alreadyFocused: false,
+      }),
+    ).toEqual({ focus: true, loadMore: false });
+
+    expect(
+      decidePostFocus({
+        targetPostId: "p1",
+        loadedPostIds: ["p9"],
+        hasNextPage: true,
+        isFetchingNextPage: false,
+        alreadyFocused: false,
+      }),
+    ).toEqual({ focus: false, loadMore: true });
+
+    expect(
+      decidePostFocus({
+        targetPostId: "p1",
+        loadedPostIds: ["p9"],
+        hasNextPage: true,
+        isFetchingNextPage: true,
+        alreadyFocused: false,
+      }),
+    ).toEqual({ focus: false, loadMore: false });
+
+    expect(
+      decidePostFocus({
+        targetPostId: "p1",
+        loadedPostIds: ["p9"],
+        hasNextPage: false,
+        isFetchingNextPage: false,
+        alreadyFocused: false,
+      }),
+    ).toEqual({ focus: false, loadMore: false });
+
+    expect(
+      decidePostFocus({
+        targetPostId: null,
+        loadedPostIds: ["p1"],
+        hasNextPage: true,
+        isFetchingNextPage: false,
+        alreadyFocused: false,
+      }),
+    ).toEqual({ focus: false, loadMore: false });
+
+    expect(
+      decidePostFocus({
+        targetPostId: "p1",
+        loadedPostIds: ["p1"],
+        hasNextPage: false,
+        isFetchingNextPage: false,
+        alreadyFocused: true,
+      }),
+    ).toEqual({ focus: false, loadMore: false });
+  });
+
+  it("lê o alvo da query string", () => {
+    expect(readTargetPostId("?post=abc")).toBe("abc");
+    expect(readTargetPostId("?post=%20")).toBeNull();
+    expect(readTargetPostId("")).toBeNull();
+    expect(buildCommunityPostUrl("abc")).toBe("/comunidade/feed?post=abc");
+  });
+
+  it("ancora cada publicação do feed e preserva a paginação", () => {
+    expect(feedSection).toContain("id={communityPostElementId(item.data.id)}");
+    expect(feedSection).toContain("data-community-post-anchor");
+    expect(feedSection).toContain('scrollIntoView({ behavior: "smooth", block: "center" })');
+    expect(feedSection).toContain("void fetchNextPage();");
+    expect(feedSection).toContain("sentinelRef");
   });
 });
