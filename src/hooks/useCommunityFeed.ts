@@ -1,26 +1,38 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import type { CommunityPost, PostComment, PostDocument, PostPoll } from "@/types/community-members";
+import { buildCommunityFeedPage, mergeUniqueCommunityPages } from "@/lib/communityFeedPagination";
 
-export function useCommunityFeed() {
+interface CommunityFeedOptions {
+  pageSize?: number;
+}
+
+const LEGACY_FEED_LIMIT = 1000;
+
+export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT }: CommunityFeedOptions = {}) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: posts = [], isLoading: loadingPosts } = useQuery({
-    queryKey: ["community-feed"],
-    queryFn: async () => {
+  const postsQuery = useInfiniteQuery({
+    queryKey: ["community-feed", pageSize],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
       const { data, error } = await supabase
         .from("community_posts")
         .select("*")
         .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(pageParam, pageParam + pageSize);
       if (error) throw error;
 
-      if (!data || data.length === 0) return [] as CommunityPost[];
+      if (!data || data.length === 0) return buildCommunityFeedPage([], pageSize, pageParam);
 
-      const userIds = [...new Set(data.map((p: any) => p.user_id))];
+      const pageRows = data.slice(0, pageSize);
+
+      const userIds = [...new Set(pageRows.map((p: any) => p.user_id))];
       const { data: profiles } = await supabase
         .from("profiles_public")
         .select("user_id, name, avatar_url, agency_name")
@@ -32,7 +44,7 @@ export function useCommunityFeed() {
 
       let userLikes: string[] = [];
       if (user?.id) {
-        const postIds = data.map((p: any) => p.id);
+        const postIds = pageRows.map((p: any) => p.id);
         const { data: likes } = await supabase
           .from("community_post_likes")
           .select("post_id")
@@ -41,7 +53,7 @@ export function useCommunityFeed() {
         userLikes = (likes || []).map((l: any) => l.post_id);
       }
 
-      const pollPostIds = data.filter((p: any) => p.poll).map((p: any) => p.id);
+      const pollPostIds = pageRows.filter((p: any) => p.poll).map((p: any) => p.id);
       let pollVotes: any[] = [];
       if (pollPostIds.length > 0) {
         const { data: votes } = await (supabase as any)
@@ -51,7 +63,7 @@ export function useCommunityFeed() {
         pollVotes = votes || [];
       }
 
-      return data.map((post: any) => ({
+      const enriched = pageRows.map((post: any) => ({
         ...post,
         profile: profiles?.find((p: any) => p.user_id === post.user_id),
         member: members?.find((m: any) => m.user_id === post.user_id),
@@ -62,9 +74,18 @@ export function useCommunityFeed() {
             ? pollVotes.find((v: any) => v.post_id === post.id && v.user_id === user.id)?.option_id ?? null
             : null,
       })) as CommunityPost[];
+
+      return buildCommunityFeedPage(
+        [...enriched, ...(data.length > pageSize ? [data[pageSize] as CommunityPost] : [])],
+        pageSize,
+        pageParam,
+      );
     },
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
     staleTime: 2 * 60 * 1000,
   });
+
+  const posts = mergeUniqueCommunityPages(postsQuery.data?.pages ?? []);
 
   const createPost = useMutation({
     mutationFn: async ({
@@ -257,7 +278,14 @@ export function useCommunityFeed() {
 
   return {
     posts,
-    loadingPosts,
+    loadingPosts: postsQuery.isLoading,
+    postsError: postsQuery.error,
+    isPostsError: postsQuery.isError,
+    refetchPosts: postsQuery.refetch,
+    fetchNextPage: postsQuery.fetchNextPage,
+    hasNextPage: postsQuery.hasNextPage,
+    isFetchingNextPage: postsQuery.isFetchingNextPage,
+    isFetchNextPageError: postsQuery.isFetchNextPageError,
     createPost: createPost.mutate,
     isCreating: createPost.isPending,
     toggleLike: toggleLike.mutate,

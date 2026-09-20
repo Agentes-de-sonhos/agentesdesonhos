@@ -1,5 +1,5 @@
 import { LinkifiedText } from "@/components/community/LinkifiedText";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,6 +19,7 @@ import {
   Pencil,
   Trash2,
   Users,
+  RefreshCw,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -33,6 +34,7 @@ import { PostImageGallery, postImages } from "@/components/community/PostImageGa
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
+import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip";
 
 function timeAgo(date: string) {
   try {
@@ -63,7 +65,7 @@ interface CommunitySocialFeedProps {
   defaultExpanded?: boolean;
 }
 
-const PREVIEW_LIMIT = 1;
+const DASHBOARD_PAGE_SIZE = 5;
 
 export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const { user } = useAuth();
@@ -72,6 +74,12 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   const {
     posts,
     loadingPosts,
+    isPostsError,
+    refetchPosts,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
     createPost,
     isCreating,
     toggleLike,
@@ -81,16 +89,30 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     fetchComments,
     votePoll,
     isVoting,
-  } = useCommunityFeed();
+  } = useCommunityFeed({ pageSize: DASHBOARD_PAGE_SIZE });
 
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   const { newCount } = useCommunityUnread();
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  const visiblePosts = posts.slice(0, PREVIEW_LIMIT);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasNextPage || isFetchingNextPage) return;
+    if (typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && hasNextPage && !isFetchingNextPage) void fetchNextPage();
+      },
+      { rootMargin: "500px 0px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <Card className="border-0 shadow-card overflow-hidden">
+    <Card className="border-0 shadow-card overflow-visible">
       <CardContent className="pt-5 pb-5 space-y-3 min-w-0">
         {/* Header */}
         <DashboardSectionHeader
@@ -108,6 +130,10 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           }}
         />
 
+        <div className="relative z-20 flex min-w-0 justify-start" data-dashboard-online-users>
+          <OnlineAgentsStrip />
+        </div>
+
         {/* Coluna central (padrão LinkedIn) */}
         <div className="mx-auto w-full max-w-[780px] min-w-0 space-y-3">
         {/* Composer */}
@@ -117,6 +143,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
         {loadingPosts ? (
           <div className="flex items-center justify-center py-8 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando publicações...
+          </div>
+        ) : isPostsError ? (
+          <div className="rounded-xl border border-destructive/30 px-5 py-6 text-center" role="alert">
+            <p className="text-sm text-muted-foreground">Não foi possível carregar as publicações.</p>
+            <Button variant="outline" size="sm" className="mt-3 gap-2" onClick={() => void refetchPosts()}>
+              <RefreshCw className="h-4 w-4" /> Tentar novamente
+            </Button>
           </div>
         ) : posts.length === 0 ? (
           <div className="rounded-2xl bg-card border border-dashed border-[hsl(var(--section-community))]/30 px-6 py-8 text-center space-y-2">
@@ -129,7 +162,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           </div>
         ) : (
           <div className="space-y-3">
-            {visiblePosts.map((post: CommunityPost) => (
+            {posts.map((post: CommunityPost) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -149,6 +182,24 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
                 newCount={newCount}
               />
             ))}
+            <div ref={sentinelRef} className="h-px" aria-hidden="true" />
+            <div className="flex min-h-9 items-center justify-center" aria-live="polite">
+              {isFetchingNextPage ? (
+                <span className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Carregando mais publicações...
+                </span>
+              ) : isFetchNextPageError ? (
+                <Button variant="outline" size="sm" onClick={() => void fetchNextPage()}>
+                  Tentar carregar mais
+                </Button>
+              ) : hasNextPage ? (
+                <Button variant="ghost" size="sm" onClick={() => void fetchNextPage()}>
+                  Carregar mais
+                </Button>
+              ) : (
+                <p className="text-xs text-muted-foreground">Você chegou ao fim das publicações.</p>
+              )}
+            </div>
           </div>
         )}
         </div>
