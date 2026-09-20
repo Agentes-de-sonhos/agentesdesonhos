@@ -132,8 +132,8 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <Card className="-mx-4 overflow-visible rounded-none border-x-0 shadow-card sm:mx-0 sm:rounded-lg sm:border-x">
-      <CardContent className="min-w-0 space-y-3 px-0 pb-5 pt-3 sm:px-6 sm:pt-5">
+    <Card className="mx-0 w-full overflow-visible rounded-none border-x-0 shadow-card lg:rounded-lg lg:border-x">
+      <CardContent className="min-w-0 space-y-3 px-0 pb-5 pt-3 lg:px-6 lg:pt-5">
         <div className="px-3 sm:px-0">
           <MobileTopBar embedded />
         </div>

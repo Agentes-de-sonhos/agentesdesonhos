@@ -70,8 +70,8 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout flushHorizontal>
-      <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in overflow-x-hidden">
-        <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+      <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in">
+        <div className="flex min-w-0 flex-col gap-3 px-4 lg:px-0 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0 flex-1">
             <h1 className="font-display text-2xl lg:text-xl xl:text-3xl font-bold text-foreground whitespace-nowrap truncate min-w-0">
               {getGreeting()}, {firstName}!
@@ -123,7 +123,7 @@ export default function Dashboard() {
         </div>
 
         <Suspense fallback={<div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-          <section className="grid items-stretch gap-4 sm:gap-6 lg:grid-cols-2" data-dashboard-section="agenda-trips">
+          <section className="grid items-stretch gap-4 px-4 sm:gap-6 lg:grid-cols-2 lg:px-0" data-dashboard-section="agenda-trips">
             {can("agenda.view") && (
               <div className="flex h-full min-h-0 min-w-0 flex-col [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
             )}

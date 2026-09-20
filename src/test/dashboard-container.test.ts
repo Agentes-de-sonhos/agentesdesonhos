@@ -7,10 +7,11 @@ const dashboard = read("src/pages/Dashboard.tsx");
 const layout = read("src/components/layout/DashboardLayout.tsx");
 
 describe("dashboard centered container", () => {
-  it("caps content width at 1560px and centers it with fluid gutters", () => {
+  it("uses the full mobile width and caps desktop content at 1560px", () => {
     expect(container).toContain("mx-auto");
-    expect(container).toContain("w-[calc(100%_-_clamp(32px,4vw,80px))]");
-    expect(container).toContain("max-w-[1560px]");
+    expect(container).toContain("w-full");
+    expect(container).toContain("lg:w-[calc(100%_-_clamp(32px,4vw,80px))]");
+    expect(container).toContain("lg:max-w-[1560px]");
     // the previous expression was not valid CSS (subtraction without calc())
     expect(container).not.toContain("w-[min(100%-clamp(16px,4vw,80px),1560px)]");
     expect(container).not.toMatch(/100%-clamp/);
@@ -50,7 +51,7 @@ describe("dashboard centered container", () => {
   it("prevents horizontal overflow and keeps sidebar behavior untouched", () => {
     expect(layout).toContain("overflow-x-hidden");
     expect(layout).toContain("pl-0 lg:pl-16");
-    expect(dashboard).toContain("overflow-x-hidden");
+    expect(dashboard).not.toContain('DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in overflow-x-hidden"');
   });
 });
 
