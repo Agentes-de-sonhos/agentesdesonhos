@@ -51,6 +51,16 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { MobileTopBar } from "@/components/layout/MobileTopBar";
 import { CommunityComposerLauncher } from "@/components/community/CommunityComposerLauncher";
 import { CommunityPostHeader } from "@/components/community/CommunityPostHeader";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+function initials(name?: string | null) {
+  return (name || "?").split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() || "").join("");
+}
+
+function toTitleCase(name?: string | null) {
+  if (!name) return "";
+  return name.toLowerCase().replace(/(^|\s|['-])(\p{L})/gu, (_, separator, letter) => separator + letter.toUpperCase());
+}
 
 function timeAgo(date: string) {
   try {
