@@ -122,7 +122,7 @@ describe("primeira linha sem scrollbar (paginação adaptativa)", () => {
     const pill = read("src/components/layout/GamificationPill.tsx");
     const fx = read("src/components/dashboard/ExchangeRateCard.tsx");
     expect(dashboard).toContain("grid min-w-0 grid-cols-[minmax(0,1fr)_auto]");
-    expect(dashboard).toContain("whitespace-nowrap truncate min-w-0");
+    expect(dashboard).toContain("min-w-0 truncate whitespace-nowrap");
     expect(dashboard).toContain("hidden md:flex md:flex-nowrap md:items-center");
     expect(pill).toContain("whitespace-nowrap shrink-0");
     expect(fx).toContain("flex flex-nowrap items-center");
