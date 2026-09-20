@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { DashboardQuickActions } from "@/components/dashboard/DashboardQuickActions";
+import { MobileTopBar } from "@/components/layout/MobileTopBar";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import {
   Tooltip,

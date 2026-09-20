@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { MobileTopBar } from "@/components/layout/MobileTopBar";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useCommunity } from "@/hooks/useCommunity";
 import { useCommunityMembership } from "@/hooks/useCommunityMembership";
