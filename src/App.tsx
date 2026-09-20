@@ -74,6 +74,7 @@ const Financeiro = lazy(() => import("./pages/Financeiro"));
 const GestaoClientes = lazy(() => import("./pages/GestaoClientes"));
 const EducaAcademy = lazy(() => import("./pages/EducaAcademy"));
 const Community = lazy(() => import("./pages/Community"));
+const MinhaRede = lazy(() => import("./pages/MinhaRede"));
 const Beneficios = lazy(() => import("./pages/Beneficios"));
 const Mentorias = lazy(() => import("./pages/Mentorias"));
 const MentoriaDetail = lazy(() => import("./pages/MentoriaDetail"));
@@ -363,6 +364,7 @@ const App = () => {
               <Route path="/comunidade/chat" element={<Navigate to="/comunidade" replace />} />
               <Route path="/comunidade/feed" element={<Community />} />
               <Route path="/comunidade/membros" element={<Community />} />
+              <Route path="/comunidade/minha-rede" element={<MinhaRede />} />
               <Route path="/comunidade/encontros" element={<Community />} />
               <Route path="/comunidade/destaques" element={<Community />} />
               <Route path="/comunidade/oportunidades" element={<Navigate to="/comunidade/destaques" replace />} />

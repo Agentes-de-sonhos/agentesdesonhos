@@ -43,6 +43,13 @@
       "when": 1789733953614,
       "tag": "0005_verify_trip_slug_alias",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789919617332,
+      "tag": "0006_community_network_phase2",
+      "breakpoints": true
     }
   ]
 }

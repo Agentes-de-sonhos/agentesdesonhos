@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { CommunitySearchOverlay } from "@/components/community/CommunitySearchOverlay";
 
 export const OPEN_COMMUNITY_CHAT_EVENT = "community-chat:open";
 
@@ -19,6 +21,7 @@ function initials(name?: string | null) {
 export function MobileTopBar() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const { data: profile } = useQuery({
     queryKey: ["mobile-topbar-profile", user?.id],
@@ -57,7 +60,7 @@ export function MobileTopBar() {
       <button
         type="button"
         aria-label="Pesquisar na comunidade"
-        onClick={() => navigate("/comunidade/membros")}
+        onClick={() => setSearchOpen(true)}
         className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-full bg-muted px-3 text-left text-sm text-muted-foreground"
       >
         <Search className="h-4 w-4 shrink-0" />
@@ -72,6 +75,8 @@ export function MobileTopBar() {
       >
         <MessageCircle className="h-5 w-5" />
       </button>
+
+      <CommunitySearchOverlay open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 }
