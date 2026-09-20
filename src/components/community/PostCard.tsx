@@ -12,7 +12,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Heart, MessageCircle, Trash2, Pin, CheckCircle2, Send, Loader2, MoreHorizontal, Pencil,
   FileText, Download,
@@ -21,7 +20,10 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
-import { PostImageGallery, postImages } from "./PostImageGallery";
+import { postImages } from "./PostImageGallery";
+import { PostMediaGrid } from "./PostMediaGrid";
+import { PostLightbox } from "./PostLightbox";
+import { PostTextContent } from "./PostTextContent";
 import { PostPoll } from "./PostPoll";
 import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
 import type { CommunityPost, PostComment } from "@/types/community-members";
