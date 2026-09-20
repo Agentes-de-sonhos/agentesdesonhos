@@ -10,9 +10,10 @@ import type { CreatePostPayload } from "./CreatePostForm";
 interface CommunityComposerLauncherProps {
   onSubmit: (data: CreatePostPayload) => void;
   isCreating: boolean;
+  compact?: boolean;
 }
 
-export function CommunityComposerLauncher({ onSubmit, isCreating }: CommunityComposerLauncherProps) {
+export function CommunityComposerLauncher({ onSubmit, isCreating, compact = false }: CommunityComposerLauncherProps) {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const { data: profile } = useQuery({
@@ -33,15 +34,17 @@ export function CommunityComposerLauncher({ onSubmit, isCreating }: CommunityCom
 
   return (
     <>
-      <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/60 bg-card px-3 py-2.5 sm:px-4">
-        <Avatar className="h-9 w-9 shrink-0">
-          <AvatarImage src={profile?.avatar_url || undefined} />
-          <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials}</AvatarFallback>
-        </Avatar>
+      <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/60 bg-card p-2 sm:px-3">
+        {!compact && (
+          <Avatar className="h-9 w-9 shrink-0">
+            <AvatarImage src={profile?.avatar_url || undefined} />
+            <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">{initials}</AvatarFallback>
+          </Avatar>
+        )}
         <Button
           type="button"
           variant="ghost"
-          className="h-9 min-w-0 flex-1 justify-start overflow-hidden rounded-full bg-muted px-3 text-left text-[13px] font-normal text-muted-foreground sm:text-sm"
+          className="h-9 min-w-0 flex-1 justify-start overflow-hidden rounded-full bg-muted px-3 text-left text-[13px] font-normal text-muted-foreground hover:bg-muted/80 sm:text-sm"
           onClick={() => setOpen(true)}
         >
           <span className="truncate whitespace-nowrap">O que você quer compartilhar hoje?</span>

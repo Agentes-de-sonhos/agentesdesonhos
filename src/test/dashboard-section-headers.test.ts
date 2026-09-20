@@ -10,10 +10,12 @@ const academy = read("src/components/dashboard/AcademyCollapsibleCard.tsx");
 const map = read("src/components/dashboard/start/MapaTurismoCard.tsx");
 
 describe("Dashboard section headers", () => {
-  it("uses a single reusable header component in the four sections", () => {
-    for (const src of [news, community, academy, map]) {
+  it("uses a reusable header component outside the custom Community header", () => {
+    for (const src of [news, academy, map]) {
       expect(src).toContain("DashboardSectionHeader");
     }
+    expect(community).not.toContain("DashboardSectionHeader");
+    expect(community).toContain("<MobileTopBar embedded />");
   });
 
   it("lays out title, description and CTA in one desktop row", () => {
@@ -48,7 +50,7 @@ describe("Dashboard section headers", () => {
 
   it("uses the new compact descriptions", () => {
     expect(news).toContain("Fique por dentro das principais notícias do turismo em um só lugar.");
-    expect(community).toContain("Compartilhe experiências e oportunidades com outros agentes de viagens.");
+    expect(community).not.toContain("Compartilhe experiências e oportunidades com outros agentes de viagens.");
     expect(academy).toContain("Aprenda sobre destinos e produtos para vender com mais segurança.");
     expect(map).toContain("Encontre e conecte-se com os melhores fornecedores do turismo.");
   });

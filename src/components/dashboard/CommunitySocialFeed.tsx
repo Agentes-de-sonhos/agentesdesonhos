@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "react-router-dom";
-import { DashboardSectionHeader } from "./DashboardSectionHeader";
 import {
   Heart,
   Loader2,
@@ -132,32 +131,22 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   return (
-    <Card className="mx-0 w-full overflow-visible rounded-none border-x-0 shadow-card lg:rounded-lg lg:border-x">
+    <Card className="mx-0 w-full overflow-visible rounded-none border-x-0 shadow-none lg:rounded-lg lg:border-x">
       <CardContent className="min-w-0 space-y-3 px-0 pb-5 pt-3 lg:px-6 lg:pt-5">
-        <div className="px-3 sm:px-0">
+        <div className="px-3 sm:px-4 lg:px-0">
           <MobileTopBar embedded />
         </div>
         {can("online_users.view") && (
-          <div className="relative z-20 px-3 sm:px-0" data-dashboard-online-users>
+          <div className="relative z-20 px-3 sm:px-4 lg:px-0" data-dashboard-online-users>
             <OnlineAgentsStrip compact />
           </div>
         )}
-        {/* Header */}
-        <div className="px-3 sm:px-0">
-          <DashboardSectionHeader
-            icon={Users}
-            title="Comunidade"
-            description="Compartilhe experiências e oportunidades com outros agentes de viagens."
-            iconClassName="text-[hsl(var(--section-community))]"
-            accentClassName="bg-[hsl(var(--section-community))]"
-          />
-        </div>
 
         {/* Coluna de leitura ampla, alinhada ao título no dashboard Agentes de Sonhos. */}
         <div className="w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]" data-dashboard-community-feed-column>
         {/* Composer */}
-        <div className="px-3 sm:px-0">
-          <CommunityComposerLauncher onSubmit={createPost} isCreating={isCreating} />
+        <div className="px-3 sm:px-4 lg:px-0">
+          <CommunityComposerLauncher compact onSubmit={createPost} isCreating={isCreating} />
         </div>
 
         {/* Feed preview */}

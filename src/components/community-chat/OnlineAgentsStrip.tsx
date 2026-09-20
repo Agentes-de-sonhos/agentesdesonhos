@@ -311,8 +311,8 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false, compac
   return (
     <>
     <div className={cn(
-      "flex items-center bg-card rounded-xl border border-border shadow-sm",
-      compact ? "gap-2 px-2 py-2" : "gap-3 px-4 py-2.5",
+      "flex items-center bg-card border border-border",
+      compact ? "w-full gap-3 rounded-lg px-3 py-2 shadow-none" : "gap-3 rounded-xl px-4 py-2.5 shadow-sm",
     )}>
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
         <div className="relative">
@@ -326,8 +326,8 @@ export function OnlineAgentsStrip({ onAgentClick, restrictedMode = false, compac
 
       {onlineUsers.length > 0 && (
         <>
-          <div className="h-5 w-px bg-border" />
-          <div className="flex items-center">
+          <div className={cn("h-5 w-px bg-border", compact && "hidden sm:block")} />
+          <div className={cn("flex items-center", compact && "hidden sm:flex")}>
             {visibleAgents.map((agent, i) => (
               <AgentAvatar
                 key={agent.user_id}

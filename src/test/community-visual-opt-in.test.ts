@@ -4,15 +4,22 @@ import fs from "node:fs";
 const read = (path: string) => fs.readFileSync(path, "utf8");
 
 describe("Comunidade — ajustes visuais e opt-in por agência", () => {
-  it("mantém a busca mobile embutida somente no cabeçalho da Comunidade do dashboard", () => {
+  it("mantém título, chat e busca embutidos somente no cabeçalho da Comunidade do dashboard", () => {
     expect(read("src/pages/Dashboard.tsx")).not.toContain("<MobileTopBar");
     const feed = read("src/components/dashboard/CommunitySocialFeed.tsx");
     expect(feed).toContain("<MobileTopBar embedded />");
     expect(feed).toContain("data-dashboard-online-users");
+    expect(feed).not.toContain("Compartilhe experiências e oportunidades");
+    const topBar = read("src/components/layout/MobileTopBar.tsx");
+    expect(topBar).toContain("data-dashboard-community-header");
+    expect(topBar).toContain("Comunidade");
+    expect(topBar).toContain("Pesquisar");
+    expect(topBar).toContain("OPEN_COMMUNITY_CHAT_EVENT");
   });
 
   it("reutiliza launcher, compositor e cabeçalho compartilhados", () => {
     expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("<CommunityComposerLauncher");
+    expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("<CommunityComposerLauncher compact");
     expect(read("src/components/community/CommunityFeedSection.tsx")).toContain("<CommunityComposerLauncher");
     expect(read("src/components/dashboard/CommunitySocialFeed.tsx")).toContain("<CommunityPostHeader");
     expect(read("src/components/community/PostCard.tsx")).toContain("<CommunityPostHeader");
