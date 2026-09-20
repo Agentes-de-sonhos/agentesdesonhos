@@ -75,6 +75,8 @@ const GestaoClientes = lazy(() => import("./pages/GestaoClientes"));
 const EducaAcademy = lazy(() => import("./pages/EducaAcademy"));
 const Community = lazy(() => import("./pages/Community"));
 const MinhaRede = lazy(() => import("./pages/MinhaRede"));
+const MinhasDenuncias = lazy(() => import("./pages/MinhasDenuncias"));
+
 const Beneficios = lazy(() => import("./pages/Beneficios"));
 const Mentorias = lazy(() => import("./pages/Mentorias"));
 const MentoriaDetail = lazy(() => import("./pages/MentoriaDetail"));
