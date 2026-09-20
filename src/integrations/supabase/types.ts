@@ -2934,6 +2934,35 @@ export type Database = {
           },
         ]
       }
+      community_hidden_posts: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_hidden_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_highlights: {
         Row: {
           contribution_summary: string
@@ -3436,6 +3465,8 @@ export type Database = {
           id: string
           post_id: string | null
           read_at: string | null
+          report_id: string | null
+          report_status: string | null
           type: string
           user_id: string
         }
@@ -3446,6 +3477,8 @@ export type Database = {
           id?: string
           post_id?: string | null
           read_at?: string | null
+          report_id?: string | null
+          report_status?: string | null
           type: string
           user_id: string
         }
@@ -3456,6 +3489,8 @@ export type Database = {
           id?: string
           post_id?: string | null
           read_at?: string | null
+          report_id?: string | null
+          report_status?: string | null
           type?: string
           user_id?: string
         }
@@ -3472,6 +3507,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_notifications_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "community_reports"
             referencedColumns: ["id"]
           },
         ]
@@ -3644,6 +3686,84 @@ export type Database = {
           visibility?: string
         }
         Relationships: []
+      }
+      community_reports: {
+        Row: {
+          admin_notes: string | null
+          assigned_admin_id: string | null
+          closed_at: string | null
+          comment_id: string | null
+          content_author_id: string | null
+          content_snapshot: string | null
+          created_at: string
+          details: string | null
+          id: string
+          parent_post_id: string | null
+          post_id: string | null
+          reason: string
+          reporter_id: string
+          resolution: string | null
+          review_started_at: string | null
+          status: string
+          target_kind: string
+          wants_updates: boolean
+        }
+        Insert: {
+          admin_notes?: string | null
+          assigned_admin_id?: string | null
+          closed_at?: string | null
+          comment_id?: string | null
+          content_author_id?: string | null
+          content_snapshot?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          parent_post_id?: string | null
+          post_id?: string | null
+          reason: string
+          reporter_id: string
+          resolution?: string | null
+          review_started_at?: string | null
+          status?: string
+          target_kind: string
+          wants_updates?: boolean
+        }
+        Update: {
+          admin_notes?: string | null
+          assigned_admin_id?: string | null
+          closed_at?: string | null
+          comment_id?: string | null
+          content_author_id?: string | null
+          content_snapshot?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          parent_post_id?: string | null
+          post_id?: string | null
+          reason?: string
+          reporter_id?: string
+          resolution?: string | null
+          review_started_at?: string | null
+          status?: string
+          target_kind?: string
+          wants_updates?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       community_rooms: {
         Row: {

@@ -64,6 +64,13 @@
       "when": 1789920998732,
       "tag": "0008_community_phase3",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1789922984375,
+      "tag": "0009_community_phase4_reports_hidden_posts",
+      "breakpoints": true
     }
   ]
 }
