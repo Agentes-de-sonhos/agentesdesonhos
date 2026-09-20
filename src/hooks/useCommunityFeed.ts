@@ -5,6 +5,40 @@ import { toast } from "sonner";
 import type { CommunityPost, PostComment, PostDocument, PostPoll } from "@/types/community-members";
 import { buildCommunityFeedPage, mergeUniqueCommunityPages } from "@/lib/communityFeedPagination";
 import { mutedAuthorIds } from "@/hooks/useCommunityNetwork";
+import { extractMentionUserIds } from "@/lib/communityMentions";
+import {
+  DEFAULT_COMMUNITY_VISIBILITY,
+  type CommunityVisibility,
+} from "@/lib/communityVisibility";
+
+/**
+ * Persiste as marcações @ do conteúdo. O banco valida autoria, conexão aceita e
+ * limite por conteúdo; menções inválidas são simplesmente ignoradas e nunca
+ * impedem a publicação ou o comentário.
+ */
+export async function persistMentions({
+  postId,
+  commentId,
+  content,
+  authorId,
+}: {
+  postId: string | null;
+  commentId: string | null;
+  content: string;
+  authorId: string;
+}): Promise<number> {
+  const ids = extractMentionUserIds(content).filter((id) => id !== authorId);
+  if (ids.length === 0 || (!postId && !commentId)) return 0;
+  const rows = ids.map((mentionedUserId) => ({
+    post_id: postId,
+    comment_id: commentId,
+    author_id: authorId,
+    mentioned_user_id: mentionedUserId,
+  }));
+  const { error } = await (supabase as any).from("community_mentions").insert(rows);
+  if (error) return 0;
+  return rows.length;
+}
 
 interface CommunityFeedOptions {
   pageSize?: number;
@@ -388,6 +422,8 @@ export function useCommunityFeed({ pageSize = LEGACY_FEED_LIMIT, enabled = true 
     addComment: addComment.mutate,
     isAddingComment: addComment.isPending,
     deleteComment: deleteComment.mutate,
+    toggleCommentLike: toggleCommentLike.mutateAsync,
+    isTogglingCommentLike: toggleCommentLike.isPending,
     votePoll: votePoll.mutate,
     isVoting: votePoll.isPending,
   };
