@@ -17,10 +17,13 @@ import {
   MessageCircle,
   MoreHorizontal,
   Pencil,
+  Send,
   Trash2,
   Users,
   RefreshCw,
+  X,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
@@ -533,7 +536,7 @@ function PostCard({
         </div>
       )}
 
-      {(latestComment || loadingComments || newCount > 1) && (
+      {!commentsOpen && (latestComment || loadingComments || newCount > 1) && (
         <div className="px-5 pb-4 pt-3 space-y-2 bg-muted/20 border-t border-border/40">
           {loadingComments && !latestComment ? (
             <div className="flex items-center py-1 text-xs text-muted-foreground">
