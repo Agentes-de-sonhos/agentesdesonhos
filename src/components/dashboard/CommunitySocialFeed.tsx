@@ -33,7 +33,10 @@ import { useCommunityUnread, unreadLabel } from "@/hooks/useCommunityUnread";
 import { useQuery } from "@tanstack/react-query";
 import type { CommunityPost, PostComment } from "@/types/community-members";
 import { EditPostDialog } from "@/components/community/EditPostDialog";
-import { PostImageGallery, postImages } from "@/components/community/PostImageGallery";
+import { postImages } from "@/components/community/PostImageGallery";
+import { PostMediaGrid } from "@/components/community/PostMediaGrid";
+import { PostLightbox } from "@/components/community/PostLightbox";
+import { PostTextContent } from "@/components/community/PostTextContent";
 import { PostPoll } from "@/components/community/PostPoll";
 import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { Button } from "@/components/ui/button";
@@ -99,7 +102,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     isVoting,
   } = useCommunityFeed({ pageSize: DASHBOARD_PAGE_SIZE });
 
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [editingPost, setEditingPost] = useState<CommunityPost | null>(null);
   // Apenas um post com comentários expandidos por vez neste feed do dashboard.
   const [openCommentsPostId, setOpenCommentsPostId] = useState<string | null>(null);
