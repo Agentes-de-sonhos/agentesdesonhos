@@ -60,6 +60,8 @@ export function PostCommentsSection({
   const [likeOverrides, setLikeOverrides] = useState<Record<string, LikeOverride>>({});
   const [pendingLike, setPendingLike] = useState<string | null>(null);
   const [deleted, setDeleted] = useState<string[]>([]);
+  const [reportComment, setReportComment] = useState<PostComment | null>(null);
+
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Foco suave no campo quando a área de comentários é aberta inline.
