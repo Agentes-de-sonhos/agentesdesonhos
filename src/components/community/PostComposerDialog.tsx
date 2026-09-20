@@ -142,7 +142,7 @@ export function PostComposerDialog({
               onDraftStateChange={setDraft}
               isCreating={isCreating}
               onSubmit={(data) => {
-                onSubmit(data as never);
+                onSubmit(data);
                 closeNow();
               }}
             />
