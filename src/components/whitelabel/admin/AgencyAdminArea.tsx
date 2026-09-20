@@ -154,17 +154,26 @@ function AgencyAdminWorkspace({
   info,
   entryPath,
   toExternalPath,
+  tenantKey,
 }: {
   info: AgencyAdminPortalInfo;
   entryPath?: string;
   toExternalPath?: (path: string) => string;
+  /** Tenant das preferências de abas fixadas (hostname + prefixo de montagem). */
+  tenantKey: string;
 }) {
   const initialPath = entryPath ?? initialWorkspacePath();
+  const { user } = useAuth();
+  const { can, loading: permLoading } = usePermissions();
+  const pinnedGuard = useMemo(() => buildAgencyAdminPinnedGuard({ can }), [can]);
   return (
     <WorkspaceProvider
       initialPath={initialPath}
       initialTitle={titleForPath(initialPath)}
       homePath={AGENCY_ADMIN_HOME}
+      pinnedScope={{ product: "wl", tenant: tenantKey, userId: user?.id ?? null }}
+      pinnedRestoreReady={!permLoading}
+      canRestorePinnedPath={pinnedGuard}
     >
       <WorkspaceShell showTabBar={false} toExternalPath={toExternalPath}>
         <AgencyAdminPages info={info} />
