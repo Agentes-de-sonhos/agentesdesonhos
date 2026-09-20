@@ -11,6 +11,7 @@ import {
   readPinnedPaths,
   restorablePinnedPaths,
   togglePinnedPath,
+  type TogglePinnedResult,
   writePinnedPaths,
   type PinnedScope,
 } from "./pinnedTabs";
