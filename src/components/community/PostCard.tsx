@@ -130,16 +130,11 @@ export function PostCard({
         </div>
 
         {/* Content */}
-        {post.content && (
-          <LinkifiedText
-            text={post.content}
-            className="text-sm text-foreground whitespace-pre-line leading-relaxed break-words"
-          />
-        )}
+        {post.content && <PostTextContent text={post.content} />}
 
         {images.length > 0 && (
-          <div className="rounded-lg overflow-hidden border border-border/40">
-            <PostImageGallery images={images} onOpenImage={setLightboxUrl} authorName={name} />
+          <div className="-mx-4 overflow-hidden border-y border-border/40 sm:mx-0 sm:rounded-lg sm:border">
+            <PostMediaGrid images={images} onOpenImage={setLightboxIndex} authorName={name} />
           </div>
         )}
 
@@ -196,6 +191,18 @@ export function PostCard({
           </div>
         )}
 
+        {/* Contadores sociais abaixo da mídia */}
+        {(post.likes_count > 0 || post.comments_count > 0) && (
+          <div className="flex items-center gap-3 text-xs text-muted-foreground" data-post-counters>
+            {post.likes_count > 0 && (
+              <span>{post.likes_count} {post.likes_count === 1 ? "curtida" : "curtidas"}</span>
+            )}
+            {post.comments_count > 0 && (
+              <span>{post.comments_count} {post.comments_count === 1 ? "comentário" : "comentários"}</span>
+            )}
+          </div>
+        )}
+
         <Separator />
 
         {/* Actions */}
@@ -207,7 +214,7 @@ export function PostCard({
             onClick={() => onLike(post.id, !!post.user_liked)}
           >
             <Heart className={`h-4 w-4 ${post.user_liked ? "fill-current" : ""}`} />
-            {post.likes_count > 0 && post.likes_count}
+            Curtir
           </Button>
           <Button
             variant="ghost"
@@ -216,7 +223,7 @@ export function PostCard({
             onClick={handleToggleComments}
           >
             <MessageCircle className="h-4 w-4" />
-            {post.comments_count > 0 && post.comments_count}
+            Comentar
           </Button>
         </div>
 
