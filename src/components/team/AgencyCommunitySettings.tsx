@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader2, Globe, Building2, Users, MessageSquare, MessagesSquare } from 'lucide-react'
+import { Loader2, Globe, Building2, Users, MessageSquare, MessagesSquare, PanelsTopLeft } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -11,6 +11,7 @@ import { useTeamSession } from '@/contexts/TeamSessionContext'
 type Preset = 'full' | 'agency_only' | 'disabled' | 'custom'
 
 interface Flags {
+  community_experience_enabled: boolean
   public_community_enabled: boolean
   internal_community_enabled: boolean
   online_users_enabled: boolean
@@ -20,20 +21,24 @@ interface Flags {
 
 const PRESETS: Record<Exclude<Preset, 'custom'>, Flags> = {
   full: {
+    community_experience_enabled: true,
     public_community_enabled: true, internal_community_enabled: true,
     online_users_enabled: true, internal_chat_enabled: true, external_chat_enabled: true,
   },
   agency_only: {
+    community_experience_enabled: true,
     public_community_enabled: false, internal_community_enabled: true,
     online_users_enabled: true, internal_chat_enabled: true, external_chat_enabled: false,
   },
   disabled: {
+    community_experience_enabled: false,
     public_community_enabled: false, internal_community_enabled: false,
     online_users_enabled: false, internal_chat_enabled: false, external_chat_enabled: false,
   },
 }
 
 const ITEMS: { key: keyof Flags; label: string; description: string; Icon: typeof Globe }[] = [
+  { key: 'community_experience_enabled', label: 'Comunidade no painel da agência', description: 'Exibe o acesso à experiência moderna da Comunidade para esta agência.', Icon: PanelsTopLeft },
   { key: 'public_community_enabled', label: 'Comunidade pública', description: 'Participar da comunidade com agentes de outras agências.', Icon: Globe },
   { key: 'internal_community_enabled', label: 'Comunidade interna', description: 'Mural e publicações visíveis apenas para a sua agência.', Icon: Building2 },
   { key: 'online_users_enabled', label: 'Usuários online', description: 'Exibir o painel de agentes online na página inicial.', Icon: Users },
@@ -53,6 +58,7 @@ export function AgencyCommunitySettings() {
     if (!data) return
     setPreset(data.preset ?? 'full')
     setFlags({
+      community_experience_enabled: data.community_experience_enabled ?? false,
       public_community_enabled: data.public_community_enabled,
       internal_community_enabled: data.internal_community_enabled,
       online_users_enabled: data.online_users_enabled,

@@ -341,6 +341,7 @@ export type Database = {
       agency_community_settings: {
         Row: {
           agency_id: string
+          community_experience_enabled: boolean
           created_at: string
           external_chat_enabled: boolean
           internal_chat_enabled: boolean
@@ -353,6 +354,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
+          community_experience_enabled?: boolean
           created_at?: string
           external_chat_enabled?: boolean
           internal_chat_enabled?: boolean
@@ -365,6 +367,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
+          community_experience_enabled?: boolean
           created_at?: string
           external_chat_enabled?: boolean
           internal_chat_enabled?: boolean
@@ -16035,6 +16038,10 @@ export type Database = {
       agency_can_use_booking_requests: {
         Args: { _agency_id: string }
         Returns: boolean
+      }
+      agency_community_experience_save: {
+        Args: { _enabled: boolean }
+        Returns: Json
       }
       agency_community_flags: {
         Args: { _agency: string }

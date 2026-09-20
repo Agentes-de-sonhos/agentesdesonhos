@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import { PostCommentsSection } from "./PostCommentsSection";
 import { SharePostDialog } from "./SharePostDialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Heart, MessageCircle, Trash2, Pin, CheckCircle2, MoreHorizontal, Pencil,
+  Heart, MessageCircle, Trash2, MoreHorizontal, Pencil,
   FileText, Download, Share2, ShieldAlert,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -32,6 +31,7 @@ import { PostTextContent } from "./PostTextContent";
 import { PostPoll } from "./PostPoll";
 import { DOC_EXT_LABEL, formatBytes } from "@/lib/communityMedia";
 import type { CommunityPost, PostComment } from "@/types/community-members";
+import { CommunityPostHeader } from "./CommunityPostHeader";
 
 
 interface PostCardProps {
@@ -62,11 +62,9 @@ export function PostCard({
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const name = post.profile?.name || "Membro";
-  const initials = name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
   const isOwner = user?.id === post.user_id;
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ptBR });
   const images = postImages(post);
-  const wasEdited = !!(post as any).edited_at;
   const videoUrl = (post as any).video_url as string | null | undefined;
   const documents = ((post as any).documents || []) as { name: string; url: string; size: number; mime: string }[];
 
@@ -90,34 +88,15 @@ export function PostCard({
   }, [fetchComments, post.id]);
 
   return (
-    <Card className="border-border/50">
-      <CardContent className="pt-4 pb-3 space-y-3">
+    <Card className="-mx-4 rounded-none border-x-0 border-border/50 sm:mx-0 sm:rounded-lg sm:border-x">
+      <CardContent className="space-y-3 px-3 pb-3 pt-4 sm:px-6">
         {/* Header */}
-        <div className="flex items-start gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={post.profile?.avatar_url || ""} />
-            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-sm text-foreground">{name}</span>
-              {post.member?.status === "verified" && (
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-              )}
-              {post.is_pinned && (
-                <Pin className="h-3.5 w-3.5 text-amber-500" />
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              {post.profile?.agency_name && <span>{post.profile.agency_name}</span>}
-              <span>·</span>
-              <span>{timeAgo}</span>
-              {wasEdited && <span className="italic">· Editado</span>}
-            </div>
-          </div>
-          {!isOwner && <ConnectButton targetUserId={post.user_id} targetName={name} />}
+        <CommunityPostHeader
+          post={post}
+          timeLabel={timeAgo}
+          controls={<>
+          {!isOwner && <ConnectButton targetUserId={post.user_id} targetName={name} className="h-7" />}
+          <div className="flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
@@ -145,7 +124,9 @@ export function PostCard({
             </DropdownMenuContent>
           </DropdownMenu>
           <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={user?.id} />
-        </div>
+          </div>
+          </>}
+        />
 
 
         {/* Content */}

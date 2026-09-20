@@ -18,6 +18,7 @@ import {
   UserCog,
   UserRound,
   UsersRound,
+  MessagesSquare,
   Wallet,
   WalletCards,
   type LucideIcon,
@@ -48,6 +49,13 @@ export const AGENDA_ITEM: MenuItemDef = {
   to: "/gestao/agenda",
   icon: CalendarDays,
   match: (p) => p === "/gestao/agenda" || p === "/agenda",
+};
+
+export const COMMUNITY_ITEM: MenuItemDef = {
+  label: "Comunidade",
+  to: "/gestao/comunidade",
+  icon: MessagesSquare,
+  match: (p) => p === "/gestao/comunidade" || p.startsWith("/comunidade"),
 };
 
 export const PROJECTS_ITEMS: MenuItemDef[] = [

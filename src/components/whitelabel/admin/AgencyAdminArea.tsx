@@ -21,6 +21,8 @@ import { WorkspaceProvider } from "@/workspace/WorkspaceProvider";
 import { buildAgencyAdminPinnedGuard } from "@/workspace/pinnedRestoreGuard";
 import { WorkspaceShell } from "@/workspace/WorkspaceShell";
 import { titleForPath } from "@/workspace/routeTitle";
+import { AgencyCommunityGate } from "./AgencyCommunityGate";
+import { isSiteLabDemoHost } from "@/lib/sitelabModels";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
@@ -41,6 +43,7 @@ const Suporte = lazy(() => import("@/pages/Suporte"));
 const AgencyReservas = lazy(() => import("@/pages/whitelabel/admin/AgencyReservas"));
 const ProcessoReserva = lazy(() => import("@/pages/ProcessoReserva"));
 const AgencyAdminNotFound = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminNotFound"));
+const Community = lazy(() => import("@/pages/Community"));
 
 /** Alias legado /reservas/:id → rota administrativa equivalente. */
 function LegacyReservaRedirect() {
@@ -74,7 +77,12 @@ function e(Page: ComponentType) {
  * Cada aba do workspace monta esta árvore no seu próprio router de memória,
  * exatamente como a plataforma principal faz com o DashboardLayout.
  */
-function AgencyAdminPages({ info }: { info: AgencyAdminPortalInfo }) {
+function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalInfo; siteLab?: boolean }) {
+  const community = (
+    <AgencyCommunityGate siteLab={siteLab || isSiteLabDemoHost(info.hostname)}>
+      {e(Community)}
+    </AgencyCommunityGate>
+  );
   const pagePairs: Array<[string, ComponentType]> = [
     ["meus-projetos", MeusProjetos],
     ["agenda", Agenda],
@@ -125,6 +133,8 @@ function AgencyAdminPages({ info }: { info: AgencyAdminPortalInfo }) {
   const routes = useRoutes([
     { path: AGENCY_ADMIN_HOME, element: home },
     { path: "/dashboard", element: home },
+    { path: "/gestao/comunidade", element: community },
+    { path: "/comunidade/*", element: community },
     ...pagePairs.map(([sub, Page]) => ({ path: `/gestao/${sub}`, element: e(Page) })),
     ...aliasPairs.map(([path, Page]) => ({ path, element: e(Page) })),
     // Alias legado com id: direciona para a rota administrativa segura.
@@ -157,12 +167,14 @@ function AgencyAdminWorkspace({
   entryPath,
   toExternalPath,
   tenantKey,
+  siteLab = false,
 }: {
   info: AgencyAdminPortalInfo;
   entryPath?: string;
   toExternalPath?: (path: string) => string;
   /** Tenant das preferências de abas fixadas (hostname + prefixo de montagem). */
   tenantKey: string;
+  siteLab?: boolean;
 }) {
   const initialPath = entryPath ?? initialWorkspacePath();
   const { user } = useAuth();
@@ -178,7 +190,7 @@ function AgencyAdminWorkspace({
       canRestorePinnedPath={pinnedGuard}
     >
       <WorkspaceShell showTabBar={false} toExternalPath={toExternalPath}>
-        <AgencyAdminPages info={info} />
+        <AgencyAdminPages info={info} siteLab={siteLab} />
       </WorkspaceShell>
     </WorkspaceProvider>
   );
@@ -232,6 +244,7 @@ function AgencyAdminEntry({
           entryPath={entryPath}
           toExternalPath={toExternal}
           tenantKey={`${window.location.hostname}${mount.base}`}
+          siteLab={hasOuterRouter}
         />
       )}
     </AgencyAdminShell>

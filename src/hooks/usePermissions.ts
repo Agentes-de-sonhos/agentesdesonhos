@@ -20,6 +20,7 @@ export type StagePipeline = 'opportunities' | 'operations'
 export type StageAction = 'view' | 'edit' | 'move'
 
 const DEFAULT_COMMUNITY: CommunityFlags = {
+  community_experience_enabled: false,
   public_community_enabled: true,
   internal_community_enabled: true,
   online_users_enabled: true,

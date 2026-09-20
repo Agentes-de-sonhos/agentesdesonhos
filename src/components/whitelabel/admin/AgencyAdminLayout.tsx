@@ -13,6 +13,9 @@ import { TabBar } from "@/workspace/TabBar";
 import { AgencyAdminSidebar } from "./AgencyAdminSidebar";
 import { AgencyAdminShellView } from "./AgencyAdminShellView";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { ChatFloatingButton } from "@/components/community-chat/ChatFloatingButton";
+import { usePermissions } from "@/hooks/usePermissions";
+import { isSiteLabDemoHost } from "@/lib/sitelabModels";
 
 /**
  * Shell administrativo white label. Reutiliza as páginas existentes da
@@ -39,6 +42,8 @@ export function AgencyAdminLayout({
   const secondary = info.secondary_auto === false ? info.secondary_color ?? null : null;
   const agencyName = agencyDisplayName(info);
   const logoUrl = resolveAgencyLogoUrl(info);
+  const { community } = usePermissions();
+  const communityEnabled = community.community_experience_enabled || isSiteLabDemoHost(info.hostname) || window.location.pathname.startsWith("/sitelab-base");
 
   // Tema global do painel: também cobre dialogs/popovers em Portal.
   useAgencyBrandTheme(agencyBrandInput(info));
@@ -63,6 +68,7 @@ export function AgencyAdminLayout({
         tabBar={<TabBar embedded />}
       >
         {children}
+        {communityEnabled && <ChatFloatingButton />}
       </AgencyAdminShellView>
     </DashboardLayoutContext.Provider>
   );

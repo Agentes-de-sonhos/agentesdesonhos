@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCommunityFeed } from "@/hooks/useCommunityFeed";
-import { CreatePostForm } from "./CreatePostForm";
+import { CommunityComposerLauncher } from "./CommunityComposerLauncher";
 import { PostCard } from "./PostCard";
 import { EditPostDialog } from "./EditPostDialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -116,7 +116,7 @@ export function CommunityFeedSection({ events = [] }: CommunityFeedSectionProps)
 
   return (
     <div className="space-y-4">
-      <CreatePostForm onSubmit={createPost} isCreating={isCreating} />
+      <CommunityComposerLauncher onSubmit={createPost} isCreating={isCreating} />
 
       {loadingPosts ? (
         <div className="space-y-4">
