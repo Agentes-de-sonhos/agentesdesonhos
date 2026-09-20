@@ -1,7 +1,6 @@
 import { LinkifiedText } from "@/components/community/LinkifiedText";
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +43,6 @@ import { ReportContentDialog } from "@/components/community/ReportContentDialog"
 
 import { PostTextContent } from "@/components/community/PostTextContent";
 import { PostPoll } from "@/components/community/PostPoll";
-import { CreatePostForm } from "@/components/community/CreatePostForm";
 import { PostCommentsSection } from "@/components/community/PostCommentsSection";
 import { SharePostDialog } from "@/components/community/SharePostDialog";
 import { Button } from "@/components/ui/button";
@@ -52,6 +50,7 @@ import { OnlineAgentsStrip } from "@/components/community-chat/OnlineAgentsStrip
 import { usePermissions } from "@/hooks/usePermissions";
 import { MobileTopBar } from "@/components/layout/MobileTopBar";
 import { CommunityComposerLauncher } from "@/components/community/CommunityComposerLauncher";
+import { CommunityPostHeader } from "@/components/community/CommunityPostHeader";
 
 function timeAgo(date: string) {
   try {
@@ -59,23 +58,6 @@ function timeAgo(date: string) {
   } catch {
     return "";
   }
-}
-
-function initials(name?: string | null) {
-  if (!name) return "?";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-function toTitleCase(name?: string | null) {
-  if (!name) return "";
-  const lower = name.toLowerCase();
-  // Preserve accents; capitalize first letter of each whitespace-separated token
-  return lower.replace(/(^|\s|['-])(\p{L})/gu, (_, sep, ch) => sep + ch.toUpperCase());
 }
 
 interface CommunitySocialFeedProps {
@@ -319,7 +301,6 @@ function PostCard({
   const canDelete = isAuthor || isAdmin;
   const canEdit = isAuthor;
   const images = postImages(post);
-  const wasEdited = !!(post as any).edited_at;
   const commentsRegionId = `dashboard-post-comments-${post.id}`;
   const [shareOpen, setShareOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -336,30 +317,13 @@ function PostCard({
 
   return (
     <article className="min-w-0 overflow-hidden border-y border-border/60 bg-card sm:rounded-lg sm:border" data-dashboard-community-post>
-      <header className="flex items-start gap-3 px-3 pb-3 pt-4 sm:px-5">
-        <Avatar className="h-9 w-9 flex-shrink-0">
-          <AvatarImage src={post.profile?.avatar_url || undefined} alt={post.profile?.name || "Autor"} />
-          <AvatarFallback className="bg-[hsl(var(--section-community))]/15 text-[hsl(var(--section-community))]">
-            {initials(post.profile?.name)}
-          </AvatarFallback>
-        </Avatar>
-        <div className="min-w-0 flex-1 overflow-hidden">
-          <div className="min-w-0">
-            <p className="truncate whitespace-nowrap text-sm font-semibold text-foreground">
-              {toTitleCase(post.profile?.name) || "Membro da comunidade"}
-            </p>
-            {post.profile?.agency_name && (
-              <p className="truncate whitespace-nowrap text-xs text-muted-foreground">{post.profile.agency_name}</p>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {timeAgo(post.created_at)}
-            {wasEdited && (
-              <span className="ml-1 italic text-muted-foreground/80">· Editado</span>
-            )}
-          </p>
-        </div>
-        <div className="flex shrink-0 flex-col items-end gap-0.5">
+      <CommunityPostHeader
+        post={post}
+        timeLabel={timeAgo(post.created_at)}
+        compact
+        normalizeName
+        className="px-3 pb-3 pt-4 sm:px-5"
+        controls={<>
           {!isAuthor && (
             <ConnectButton targetUserId={post.user_id} targetName={post.profile?.name} className="h-7" />
           )}
@@ -394,8 +358,8 @@ function PostCard({
           </DropdownMenu>
           <HidePostButton postId={post.id} authorId={post.user_id} currentUserId={currentUserId} />
           </div>
-        </div>
-      </header>
+        </>}
+      />
 
       <ReportContentDialog
         open={reportOpen}

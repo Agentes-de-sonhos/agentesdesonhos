@@ -55,6 +55,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/calculadora": "Calculadora",
   // Painel white label (/gestao) — mesmos títulos curtos do menu da agência.
   "/gestao": "Inicial",
+  "/gestao/comunidade": "Comunidade",
   "/gestao/meus-projetos": "Meus Projetos",
   "/gestao/agenda": "Minha Agenda",
   "/gestao/crm/funil": "Oportunidades",
