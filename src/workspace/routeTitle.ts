@@ -16,7 +16,9 @@ const ROUTE_TITLES: Record<string, string> = {
   "/comunidade": "Comunidade",
   "/educa-academy": "EducaTravel Academy",
   "/cursos": "Cursos e Mentorias",
-  "/noticias": "Radar do Turismo",
+  // Título canônico do módulo no menu do produto (não confundir com o widget
+  // "Radar do Turismo" do dashboard, que segue com o seu próprio nome).
+  "/noticias": "Notícias do Trade",
   "/mapa-turismo": "Mapa do Turismo",
   "/beneficios": "Benefícios e Descontos",
   "/requisitos-viagem": "Central de Requisitos",

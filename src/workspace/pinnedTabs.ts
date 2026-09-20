@@ -9,6 +9,7 @@
  */
 import { hasCanonicalRouteTitle } from "./routeTitle";
 import { isMultiInstanceRoute } from "./multiInstanceRoutes";
+import { isHomeAliasPath } from "./homeAliases";
 
 /** Máximo de abas fixadas ADICIONAIS (a aba Inicial não conta). */
 export const MAX_PINNED_TABS = 4;
@@ -48,7 +49,9 @@ export function normalizePinnedPath(path: string): string {
 export function isPinnablePath(path: string, homePath: string): boolean {
   if (!path || !path.startsWith("/") || path.startsWith("//")) return false;
   const clean = normalizePinnedPath(path);
-  if (clean === normalizePinnedPath(homePath)) return false;
+  // Inicial e seus aliases (ex.: /dashboard-start) nunca são fixáveis:
+  // preferências legadas com esses caminhos são descartadas silenciosamente.
+  if (isHomeAliasPath(clean, homePath)) return false;
   if (isMultiInstanceRoute(clean)) return false;
   return hasCanonicalRouteTitle(clean);
 }
