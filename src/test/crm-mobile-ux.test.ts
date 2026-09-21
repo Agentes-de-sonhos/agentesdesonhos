@@ -42,7 +42,9 @@ describe("CRM mobile UX — alvos de toque e rolagem por etapa", () => {
   });
 
   it("quadros permitem gestos naturais nos dois eixos sem listeners de toque", () => {
-    expect(scrollArea).toContain("touch-pan-x touch-pan-y");
+    expect(scrollArea).toContain('touchAction: "pan-x pan-y"');
+    expect(scrollArea).toContain('WebkitOverflowScrolling: "touch"');
+    expect(scrollArea).toContain("overflow-x-auto overflow-y-auto overscroll-contain");
     expect(scrollArea).not.toContain("onTouchMove");
     expect(scrollArea).not.toContain("onPointerMove");
   });
