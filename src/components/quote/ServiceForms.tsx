@@ -3419,6 +3419,19 @@ function GenericImportEntry({
                   });
                   setMode("manual");
                 }}
+                {...(props.onSubmitMany
+                  ? {
+                      onConfirmMany: async (items) => {
+                        // Vários serviços no mesmo documento → um serviço por item.
+                        await props.onSubmitMany!(
+                          items.map(({ initialData }) => ({
+                            service_data: initialData.service_data as any,
+                            amount: initialData.amount || 0,
+                          })),
+                        );
+                      },
+                    }
+                  : {})}
               />
             </div>
           </DialogContent>
@@ -3499,7 +3512,9 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const formProps = {
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
-    ...(serviceType === 'hotel' && onSubmitMany ? { onSubmitMany } : {}),
+    // Documentos com vários serviços do mesmo tipo (3 ingressos, 2 transfers...)
+    // criam um serviço por item — disponível para todos os tipos importáveis.
+    ...(onSubmitMany ? { onSubmitMany } : {}),
     ...(['hotel', 'attraction', 'car_rental', 'other'].includes(serviceType) ? { onPlaceIdChange: setPlaceId } : {}),
     ...(serviceType === 'attraction' ? { onPhotoQueryChange: setPhotoQuery } : {}),
   };

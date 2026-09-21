@@ -1031,7 +1031,7 @@ export default function GerarOrcamento() {
       });
     }
     toast({
-      title: items.length > 1 ? `${items.length} hospedagens adicionadas` : "Serviço adicionado",
+      title: items.length > 1 ? `${items.length} serviços adicionados` : "Serviço adicionado",
       description: "Revise os serviços do orçamento.",
     });
     setSelectedServiceType(null);

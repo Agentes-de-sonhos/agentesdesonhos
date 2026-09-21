@@ -10,6 +10,13 @@ const corsHeaders = {
 type ServiceKey = "transfer" | "attraction" | "insurance" | "cruise" | "circuit" | "rail_transport" | "other";
 
 const SHARED_RULES = `
+REGRA #0 — VÁRIOS SERVIÇOS NO MESMO DOCUMENTO.
+- O documento pode conter 1, 2, 5 ou mais serviços do mesmo tipo (ex.: ingressos da Universal, da Disney e do SeaWorld; dois transfers; três seguros).
+- Devolva SEMPRE o array "itens" com UM ITEM POR SERVIÇO identificado, na ordem em que aparecem (ou cronológica, quando houver datas).
+- NUNCA junte dois serviços diferentes no mesmo item e NUNCA repita o mesmo serviço em itens diferentes.
+- NUNCA transforme vários serviços em um "pacote" com valor somado: cada serviço tem seu próprio valor.
+- Se houver apenas um serviço, devolva um array com um único item.
+- Cada item deve conter TODOS os campos que você conseguir ler daquele serviço específico.
 REGRA #1 — POSTURA DE EXTRAÇÃO.
 - NUNCA desista. Mesmo com campos ilegíveis, EXTRAIA TUDO o que conseguir.
 - Deixe vazio/null o que não tiver certeza. Liste em "campos_nao_identificados" o nome dos campos em branco.
@@ -240,11 +247,22 @@ function buildTool(key: ServiceKey) {
     type: "function",
     function: {
       name: s.fnName,
-      description: s.description,
+      description: `${s.description} Always return one item per service inside 'itens'.`,
       parameters: {
         type: "object",
-        properties: s.properties,
-        required: [],
+        properties: {
+          itens: {
+            type: "array",
+            description: "Uma entrada por serviço identificado no documento (mínimo 1).",
+            items: {
+              type: "object",
+              properties: s.properties,
+              required: [],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["itens"],
         additionalProperties: false,
       },
     },
@@ -297,7 +315,7 @@ Deno.serve(async (req) => {
 
     currentStage = "sent_to_ai";
     const userContent: any[] = [
-      { type: "text", text: `${SCHEMAS[serviceType].promptExtras} Se o ANO não estiver visível, preserve a data curta como aparece e adicione 'ano_pendente' em campos_nao_identificados. SEMPRE chame ${SCHEMAS[serviceType].fnName}.` },
+      { type: "text", text: `${SCHEMAS[serviceType].promptExtras} Se o documento tiver VÁRIOS serviços (ex.: ingressos de parques diferentes), devolva UM ITEM POR SERVIÇO no array "itens" — nunca um pacote único somado. Se o ANO não estiver visível, preserve a data curta como aparece e adicione 'ano_pendente' em campos_nao_identificados. SEMPRE chame ${SCHEMAS[serviceType].fnName}.` },
     ];
     if (text) userContent.push({ type: "text", text: `TEXTO EXTRAÍDO DO DOCUMENTO:\n\n${text}` });
     if (fileBase64) {
@@ -360,26 +378,53 @@ Deno.serve(async (req) => {
       return debugFail(currentStage, "parse_error", "A IA retornou uma resposta sem estrutura reconhecível. Tente novamente com uma imagem mais nítida.", 422, { raw_ai_response: rawAiText });
     }
 
-    parsed.observacoes = Array.isArray(parsed.observacoes) ? parsed.observacoes : [];
-    parsed.campos_nao_identificados = Array.isArray(parsed.campos_nao_identificados) ? parsed.campos_nao_identificados : [];
-    parsed.confianca_extracao = parsed.confianca_extracao || {};
-    const confidence = Number(parsed.confianca_extracao?.geral) || 0;
+    // Compatibilidade: aceita { itens: [...] }, array puro ou objeto singular antigo.
+    const rawList: any[] = Array.isArray(parsed?.itens)
+      ? parsed.itens
+      : Array.isArray(parsed?.servicos)
+        ? parsed.servicos
+        : Array.isArray(parsed)
+          ? parsed
+          : [parsed];
 
-    // Check usefulness — generic: any non-empty primary field
-    const valueKeys = Object.keys(parsed).filter((k) => k !== "confianca_extracao" && k !== "campos_nao_identificados");
-    const hasAnyUseful = valueKeys.some((k) => {
-      const v = parsed[k];
-      if (v == null || v === "") return false;
-      if (Array.isArray(v)) return v.length > 0;
-      if (typeof v === "object") return Object.keys(v).length > 0;
-      return true;
-    });
+    const normalizeItem = (item: any) => {
+      const s = item && typeof item === "object" ? { ...item } : {};
+      s.observacoes = Array.isArray(s.observacoes) ? s.observacoes : [];
+      s.campos_nao_identificados = Array.isArray(s.campos_nao_identificados) ? s.campos_nao_identificados : [];
+      s.confianca_extracao = s.confianca_extracao || {};
+      return s;
+    };
 
-    if (!hasAnyUseful) {
-      return debugFail("low_confidence", "no_useful_data", "A IA não conseguiu identificar dados úteis. Tente uma imagem com melhor resolução ou preencha manualmente.", 200, { raw_ai_response: rawAiText, partial_data: parsed, confidence_score: confidence });
+    // Útil = qualquer campo principal preenchido (ignora metadados de confiança).
+    const hasUseful = (s: any) => Object.keys(s)
+      .filter((k) => k !== "confianca_extracao" && k !== "campos_nao_identificados" && k !== "observacoes")
+      .some((k) => {
+        const v = s[k];
+        if (v == null || v === "") return false;
+        if (Array.isArray(v)) return v.length > 0;
+        if (typeof v === "object") return Object.keys(v).length > 0;
+        return true;
+      });
+
+    const normalized = rawList.map(normalizeItem);
+    const items = normalized.filter(hasUseful);
+    const first = items[0] || normalized[0] || normalizeItem(null);
+    const confidence = Number(first.confianca_extracao?.geral) || 0;
+
+    if (items.length === 0) {
+      return debugFail("low_confidence", "no_useful_data", "A IA não conseguiu identificar dados úteis. Tente uma imagem com melhor resolução ou preencha manualmente.", 200, { raw_ai_response: rawAiText, partial_data: first, confidence_score: confidence });
     }
 
-    return json({ success: true, stage: "validation", confidence_score: confidence, data: parsed, ...parsed }, 200);
+    return json({
+      success: true,
+      stage: "validation",
+      confidence_score: confidence,
+      items_count: items.length,
+      items,
+      // Compatibilidade com consumidores singulares existentes.
+      data: first,
+      ...first,
+    }, 200);
   } catch (err) {
     console.error("import-generic-service-document fatal:", err);
     return debugFail(currentStage, "fatal", String((err as any)?.message || err), 500, { raw_ai_response: rawAiText });
