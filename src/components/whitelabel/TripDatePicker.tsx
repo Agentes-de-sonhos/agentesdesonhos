@@ -5,6 +5,7 @@ import { CalendarIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { RangeCalendar, useResponsiveCalendarMonths } from "@/components/ui/range-calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { portalThemeClass } from "@/lib/agencySitePortalTheme";
@@ -79,7 +80,7 @@ export function TripDatePicker({
   const startDate = useMemo(() => parseYMD(start), [start]);
   const endDate = useMemo(() => parseYMD(end), [end]);
 
-  const months = typeof window !== "undefined" && window.matchMedia?.("(min-width: 768px)")?.matches ? 2 : 1;
+  const months = useResponsiveCalendarMonths();
   const describedBy = error ? `${id}-error` : help ? `${id}-help` : undefined;
 
   const fmt = dateFormat === "short" ? formatShortPtBR : formatPtBR;
@@ -143,9 +144,8 @@ export function TripDatePicker({
         >
           {mode === "range" ? (
             <div>
-              <Calendar
-                mode="range"
-                numberOfMonths={months}
+              <RangeCalendar
+                hint={!allowClear}
                 disabled={disabledDates}
                 defaultMonth={startDate ?? defaultMonth}
                 selected={{ from: startDate, to: endDate } as DateRange}
@@ -162,8 +162,8 @@ export function TripDatePicker({
                   if (next.from && next.to) setOpen(false);
                 }}
                 initialFocus
-                className={cn("p-3 pointer-events-auto")}
               />
+
               {allowClear ? (
               <div className="flex items-center justify-between gap-2 border-t px-3 py-2">
                 <span className="text-xs text-muted-foreground">

@@ -8,7 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, MapPin, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
+import { RangeCalendar } from "@/components/ui/range-calendar";
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
@@ -155,8 +155,8 @@ export function TripEditForm({ trip, onSubmit, onCancel, isLoading }: TripEditFo
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
+                  <RangeCalendar
+                    hint
                     selected={field.value as DateRange}
                     onSelect={(range) => {
                       if (!range?.from) {
@@ -181,9 +181,7 @@ export function TripEditForm({ trip, onSubmit, onCancel, isLoading }: TripEditFo
                         field.onChange({ from: range.from, to: undefined });
                       }
                     }}
-                    numberOfMonths={2}
                     initialFocus
-                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>

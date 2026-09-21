@@ -13,6 +13,7 @@ import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { RangeCalendar } from "@/components/ui/range-calendar";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import { Label } from "@/components/ui/label";
 import {
@@ -392,8 +393,8 @@ export function QuoteClientForm({
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="range"
+                    <RangeCalendar
+                    hint
                       selected={field.value?.from ? { from: field.value.from, to: field.value.to ?? undefined } as DateRange : undefined}
                       onSelect={(range: DateRange | undefined) => {
                         field.onChange({ from: range?.from, to: range?.to });
@@ -402,7 +403,6 @@ export function QuoteClientForm({
                         }
                       }}
                       disabled={(date) => date < new Date()}
-                      numberOfMonths={2}
                       locale={ptBR}
                       initialFocus
                     />
