@@ -145,7 +145,18 @@ export function CircularImageCropDialog({
   }, []);
 
   const setZoom = useCallback((next: number) => {
-    setCropState((prev) => ({ ...prev, zoom: clampZoom(next) }));
+    setCropState((prev) => {
+      const zoom = clampZoom(next);
+      return Math.abs(prev.zoom - zoom) < 0.0001 ? prev : { ...prev, zoom };
+    });
+  }, []);
+
+  const setCrop = useCallback((next: { x: number; y: number }) => {
+    setCropState((prev) =>
+      Math.abs(prev.crop.x - next.x) < 0.0001 && Math.abs(prev.crop.y - next.y) < 0.0001
+        ? prev
+        : { ...prev, crop: next },
+    );
   }, []);
 
   const handleRecenter = useCallback(() => {
@@ -225,7 +236,7 @@ export function CircularImageCropDialog({
             objectFit="contain"
             {...(cropSize ? { cropSize } : {})}
             onMediaLoaded={handleMediaLoaded}
-            onCropChange={(next) => setCropState((prev) => ({ ...prev, crop: next }))}
+            onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
           />
