@@ -231,6 +231,8 @@ export function GenericServiceSmartImport({
         item?.operadora || item?.seguradora || item?.navio || item?.trajeto || item?.descricao_cliente || "",
       ).trim();
 
+    const canAddMany = !!onConfirmMany;
+
     const handleConfirm = () => {
       const items = includedIdx.map((i) => ({ initialData: mapToInitialData(parsedList[i]), raw: parsedList[i] }));
       if (items.length === 0) {
@@ -241,7 +243,11 @@ export function GenericServiceSmartImport({
         void onConfirmMany(items);
         return;
       }
-      onConfirm(items[0].initialData, items[0].raw);
+      // Sem adição em lote: aplica o item que está sendo revisado agora.
+      const single = canAddMany || total === 1
+        ? items[0]
+        : { initialData: mapToInitialData(current), raw: current };
+      onConfirm(single.initialData, single.raw);
     };
 
     return (
