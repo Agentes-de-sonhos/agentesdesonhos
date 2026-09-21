@@ -3,12 +3,13 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 
-const updates: any[] = [];
+type UpdatePayload = { whats_included: Array<string | { text: string; icon?: string }> | null };
+const updates: UpdatePayload[] = [];
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: () => ({
-      update: (payload: any) => {
+      update: (payload: UpdatePayload) => {
         updates.push(payload);
         return { eq: async () => ({ error: null }) };
       },
@@ -118,7 +119,7 @@ describe("seletor de ícones da etapa Incluso", () => {
     await waitFor(() => expect(updates.length).toBeGreaterThan(0), { timeout: 4000 });
     const saved = updates.at(-1).whats_included;
     expect(saved[0]).toEqual({ text: "Hotel Praia", icon: "luggage" });
-    expect(saved.some((x: any) => x?.icon === "ship")).toBe(false);
+    expect(saved.some((x) => typeof x !== "string" && x.icon === "ship")).toBe(false);
   });
 
   it("é acessível por teclado com Escape para cancelar", async () => {

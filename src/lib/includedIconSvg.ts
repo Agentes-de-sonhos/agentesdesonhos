@@ -11,7 +11,7 @@ export function includedIconSvgMarkup(id: unknown, size = 14, color = "currentCo
   try {
     const Icon = includedIconComponent(id);
     return renderToStaticMarkup(
-      createElement(Icon, { width: size, height: size, color, strokeWidth: 2, "aria-hidden": true } as any),
+      createElement(Icon, { width: size, height: size, color, strokeWidth: 2, "aria-hidden": true }),
     );
   } catch {
     return "";

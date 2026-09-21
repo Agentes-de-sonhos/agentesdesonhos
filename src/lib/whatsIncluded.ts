@@ -51,29 +51,30 @@ export interface WhatsIncludedItem {
 }
 
 /** Normaliza uma entrada persistida (string antiga ou objeto novo). */
-export function normalizeWhatsIncludedEntry(raw: any): WhatsIncludedItem | null {
+export function normalizeWhatsIncludedEntry(raw: unknown): WhatsIncludedItem | null {
   if (typeof raw === "string") {
     const text = raw.trim();
     return text ? { text } : null;
   }
   if (raw && typeof raw === "object") {
-    const text = String(raw.text ?? "").trim();
+    const entry = raw as { text?: unknown; icon?: unknown };
+    const text = String(entry.text ?? "").trim();
     if (!text) return null;
-    const icon = sanitizeIncludedIconId(raw.icon);
+    const icon = sanitizeIncludedIconId(entry.icon);
     return icon ? { text, icon } : { text };
   }
   return null;
 }
 
 /** Itens personalizados persistidos, já normalizados (vazio se não houver). */
-export function customWhatsIncludedItems(quote: any): WhatsIncludedItem[] {
-  const custom = (quote as any)?.whats_included;
+export function customWhatsIncludedItems(quote: unknown): WhatsIncludedItem[] {
+  const custom = (quote as { whats_included?: unknown } | null)?.whats_included;
   if (!Array.isArray(custom)) return [];
   return custom.map(normalizeWhatsIncludedEntry).filter(Boolean) as WhatsIncludedItem[];
 }
 
 /** Lista final a renderizar: personalizada (se houver) ou automática. */
-export function resolveWhatsIncludedItems(quote: any): WhatsIncludedItem[] {
+export function resolveWhatsIncludedItems(quote: unknown): WhatsIncludedItem[] {
   const custom = customWhatsIncludedItems(quote);
   if (custom.length > 0) return custom;
   return computeAutoWhatsIncluded(quote).map((text) => ({ text }));
@@ -101,7 +102,7 @@ export function autoIncludedIconId(text: string): IncludedIconId {
  * Returns the list to render — custom (if user edited) or auto-generated.
  * Mantido para consumidores que só precisam dos textos.
  */
-export function resolveWhatsIncluded(quote: any): string[] {
+export function resolveWhatsIncluded(quote: unknown): string[] {
   return resolveWhatsIncludedItems(quote).map((item) => item.text);
 }
 
