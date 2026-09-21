@@ -26,6 +26,8 @@ export interface AgencyDomainInfo {
   tertiary_color?: string | null;
   /** Quando true, a terciária é derivada automaticamente da principal. */
   tertiary_auto?: boolean | null;
+  /** Cor do texto/ícones sobre a secundária (null = contraste automático). */
+  on_secondary_color?: string | null;
   phone: string | null;
   city: string | null;
   state: string | null;
@@ -161,6 +163,7 @@ export function agencyBrandInput(info: AgencyDomainInfo | null | undefined) {
     secondaryAuto: info?.secondary_auto !== false,
     tertiary: info?.tertiary_color ?? null,
     tertiaryAuto: info?.tertiary_auto !== false,
+    onSecondary: info?.on_secondary_color ?? null,
   };
 }
 

@@ -116,6 +116,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     primary: agentProfile?.agency_primary_color ?? null,
     secondary: (agentProfile as any)?.agency_secondary_color ?? null,
     secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
+    onSecondary: (agentProfile as any)?.agency_on_secondary_color ?? null,
   });
 
   // Weather + timezone (hook must be called unconditionally before any early return)
