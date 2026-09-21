@@ -7,7 +7,9 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { agencyBrandInputFromProfile, resolveBrandPalette, normalizeBrandHex } from "@/lib/brandTheme";
-import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
+import { includedIconSvgMarkup } from "@/lib/includedIconSvg";
+import { iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
 import { isGoogleImageRef, resolveServiceImages } from "@/lib/serviceImages";
@@ -991,16 +993,18 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         <!-- O que está incluso -->
         ${(() => {
-          const items = resolveWhatsIncluded(quote);
+          const items = resolveWhatsIncludedItems(quote);
           if (!items.length) return "";
           const cells = items
-            .map((text) => {
-              const emoji = INCLUDED_EMOJI[iconKeyForIncludedItem(text)] || "✨";
+            .map((item) => {
+              const text = item.text;
+              const iconSvg = includedIconSvgMarkup(effectiveIncludedIconId(item), 14, C.primaryOnTertiary)
+                || INCLUDED_EMOJI[iconKeyForIncludedItem(text)] || "✨";
               const safe = String(text).replace(/</g, "&lt;");
               return `
                 <td style="width:50%;vertical-align:top;padding:6px 8px;">
                   <div style="display:flex;align-items:flex-start;gap:8px;">
-                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:${C.tertiary};color:${C.primaryOnTertiary};font-size:13px;flex:0 0 auto;">${emoji}</span>
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:999px;background:${C.tertiary};color:${C.primaryOnTertiary};font-size:13px;flex:0 0 auto;">${iconSvg}</span>
                     <span style="font-size:13px;color:${C.text};line-height:1.5;font-weight:500;">${safe}</span>
                   </div>
                 </td>`;
