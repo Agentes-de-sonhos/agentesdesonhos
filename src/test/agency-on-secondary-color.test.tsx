@@ -144,7 +144,11 @@ describe("PDF e preview do orçamento", () => {
       "src/pages/RoteiroPublico.tsx",
       "src/pages/ViagemPublica.tsx",
     ]) {
-      expect(readFileSync(file, "utf8")).toContain("agency_on_secondary_color");
+      // As páginas públicas resolvem a paleta pelo construtor compartilhado,
+      // que já inclui a cor do texto sobre a secundária.
+      const src = readFileSync(file, "utf8");
+      expect(src).toContain("agencyBrandInputFromProfile");
+      expect(src).toContain("useAgencyBrandTheme(");
     }
   });
 });
