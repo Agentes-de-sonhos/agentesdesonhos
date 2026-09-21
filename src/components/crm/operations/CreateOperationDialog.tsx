@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,9 +52,12 @@ export function CreateOperationDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-lg md:rounded-lg md:p-6">
         <DialogHeader>
           <DialogTitle>Nova Operação</DialogTitle>
+          <DialogDescription>
+            Vincule a operação a um cliente e informe os dados da viagem.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-3">
           <div>
