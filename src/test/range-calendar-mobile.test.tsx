@@ -33,7 +33,10 @@ function Harness({ month = new Date(2026, 8, 1) }: { month?: Date }) {
 }
 
 const grid = () => document.querySelectorAll("table").length;
-const caption = () => document.querySelector(".rdp-caption_label, [class*='caption_label']")?.textContent?.trim();
+const caption = () =>
+  document.querySelector("table")?.getAttribute("aria-labelledby")
+    ? document.getElementById(document.querySelector("table")!.getAttribute("aria-labelledby")!)?.textContent?.trim()
+    : document.querySelector(".text-sm.font-medium")?.textContent?.trim();
 const swipe = (dx: number, dy = 0) => {
   const wrapper = document.querySelector("[data-range-calendar]") as HTMLElement;
   fireEvent.touchStart(wrapper, { touches: [{ clientX: 200, clientY: 200 }] });
