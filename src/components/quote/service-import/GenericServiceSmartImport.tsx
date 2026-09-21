@@ -5,10 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, X, Bug } from "lucide-react";
+import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, X, Bug, ChevronLeft, ChevronRight, Ban, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { extractPdfText } from "@/lib/pdfText";
+import { extractParsedServices } from "@/lib/serviceImportList";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -111,7 +112,9 @@ export function GenericServiceSmartImport({
       return;
     }
     setIsUploading(true);
-    setParsed(null);
+    setParsedList(null);
+    setActiveIndex(0);
+    setSkipped([]);
     setDebugInfo(null);
     setHardError(null);
     let storagePath: string | null = null;
