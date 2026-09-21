@@ -124,7 +124,7 @@ export function RangeCalendar({
         month={month}
         onMonthChange={setMonth}
         selected={selected}
-        onSelect={onSelect as CalendarProps["onSelect"]}
+        onSelect={onSelect}
         labels={{
           labelPrevious: () => "Mês anterior",
           labelNext: () => "Próximo mês",
