@@ -95,13 +95,13 @@ export function NotificationsDropdown() {
           size="icon"
           aria-label="Notificações"
           aria-expanded={isOpen}
-          className="relative h-9 w-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 overflow-visible"
+          className="relative h-11 w-11 overflow-visible rounded-full bg-muted text-foreground hover:bg-accent md:h-9 md:w-9"
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <span
               className={cn(
-                "absolute -top-1 -right-1 z-10 flex items-center justify-center rounded-full bg-green-500 text-white text-[10px] font-bold leading-none ring-2 ring-background",
+                "absolute -right-1 -top-1 z-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none ring-2 ring-background",
                 unreadCount > 9 ? "px-1 h-[18px] min-w-[18px]" : "h-[18px] w-[18px]",
                 "animate-[notification-badge-pulse_2s_ease-in-out_infinite] will-change-transform"
               )}
@@ -113,7 +113,7 @@ export function NotificationsDropdown() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[22rem] p-0 overflow-hidden"
+        className="w-[calc(100vw-1rem)] max-w-[22rem] overflow-hidden p-0"
         align="end"
         sideOffset={8}
       >
@@ -123,7 +123,7 @@ export function NotificationsDropdown() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+              className="min-h-11 text-xs text-foreground hover:bg-accent md:min-h-8"
               onClick={() => {
                 markAllRead.mutate();
                 markCommunityRead.mutate(undefined);

@@ -59,7 +59,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
     expect(dashboard).toContain("onClick={handleLogout}");
     expect(dashboard).toContain("data-dashboard-mobile-header");
-    expect(dashboard).toContain('-mx-4 grid w-[calc(100%+2rem)] min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:mx-0 sm:w-auto sm:px-4');
+    expect(dashboard).toContain('grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:px-4');
     expect(dashboard).toContain("grid-cols-[minmax(0,1fr)_auto]");
     expect(dashboard).toContain("col-start-1 row-start-1 min-w-0");
     expect(dashboard).toContain("col-span-2 row-start-2");
@@ -73,8 +73,11 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     const shortcuts = read("src/components/dashboard/DashboardQuickActions.tsx");
     expect(shortcuts).toContain("data-dashboard-quick-actions");
     expect(shortcuts).toContain("grid w-full min-w-0 grid-cols-4");
-    expect(shortcuts).toContain("h-14 w-full min-w-0");
-    expect(shortcuts).toContain("h-6 w-6 md:h-5 md:w-5");
+    expect(shortcuts).toContain("h-[4.5rem] w-full min-w-0");
+    expect(shortcuts).toContain("action.shortLabel");
+    expect(AGENTES_DASHBOARD_ACTIONS.map(({ shortLabel }) => shortLabel)).toEqual([
+      "Cliente", "Orçamento", "Roteiro", "Carteira",
+    ]);
     expect(shortcuts).not.toContain("overflow-x-auto");
     expect(dashboard).toContain('col-span-2 row-start-2 w-full min-w-0');
   });
@@ -94,8 +97,8 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
   });
 
   it("alinha e amplia compositor e cards responsivamente sem overflow", () => {
-    expect(dashboard).toContain('className="-mx-4 w-[calc(100%+2rem)] min-w-0 px-2 sm:mx-0 sm:w-auto sm:px-4 md:px-0" data-dashboard-section="community"');
-    expect(dashboard).toContain('-mx-4 grid w-[calc(100%+2rem)] items-stretch gap-4 px-2 sm:mx-0 sm:w-auto sm:gap-6 sm:px-4 lg:grid-cols-2 lg:px-0');
+    expect(dashboard).toContain('className="w-full min-w-0 px-2 sm:px-4 md:px-0" data-dashboard-section="community"');
+    expect(dashboard).toContain('grid w-full items-stretch gap-4 px-2 sm:gap-6 sm:px-4 lg:grid-cols-2 lg:px-0');
     expect(feed).toContain('data-dashboard-community-feed-column');
     expect(feed).toContain('w-full min-w-0 space-y-4 lg:w-[88%] xl:w-[78%]');
     expect(feed).not.toContain('className="mx-auto w-full');
@@ -154,6 +157,6 @@ describe("paginação contínua da Comunidade no dashboard", () => {
     for (const operation of [
       "createPost", "updatePost", "deletePost", "toggleLike", "fetchComments", "addComment", "deleteComment", "votePoll",
     ]) expect(hook).toContain(operation);
-    expect(hook.match(/invalidateQueries\(\{ queryKey: \[\"community-feed\"\] \}\)/g)?.length).toBeGreaterThanOrEqual(6);
+    expect(hook.match(/invalidateQueries\(\{ queryKey: \["community-feed"\] \}\)/g)?.length).toBeGreaterThanOrEqual(6);
   });
 });

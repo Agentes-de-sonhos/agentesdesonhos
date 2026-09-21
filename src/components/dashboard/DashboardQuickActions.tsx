@@ -22,16 +22,17 @@ import type { Feature } from "@/types/subscription";
 interface DashboardAction {
   key: "client" | "quote" | "itinerary" | "wallet";
   label: string;
+  shortLabel: string;
   icon: LucideIcon;
   permission: string;
   feature?: Feature;
 }
 
 export const AGENTES_DASHBOARD_ACTIONS: DashboardAction[] = [
-  { key: "client", label: "Criar cliente", icon: Users, permission: "clients.create", feature: "crm_basic" },
-  { key: "quote", label: "Criar orçamento", icon: FileText, permission: "quotes.create", feature: "quote_generator" },
-  { key: "itinerary", label: "Criar roteiro", icon: Map, permission: "itineraries.create", feature: "itinerary" },
-  { key: "wallet", label: "Criar carteira digital", icon: Wallet, permission: "wallet.create", feature: "trip_wallet" },
+  { key: "client", label: "Criar cliente", shortLabel: "Cliente", icon: Users, permission: "clients.create", feature: "crm_basic" },
+  { key: "quote", label: "Criar orçamento", shortLabel: "Orçamento", icon: FileText, permission: "quotes.create", feature: "quote_generator" },
+  { key: "itinerary", label: "Criar roteiro", shortLabel: "Roteiro", icon: Map, permission: "itineraries.create", feature: "itinerary" },
+  { key: "wallet", label: "Criar carteira digital", shortLabel: "Carteira", icon: Wallet, permission: "wallet.create", feature: "trip_wallet" },
 ];
 
 export function DashboardQuickActions() {
@@ -68,14 +69,14 @@ export function DashboardQuickActions() {
                 <Button
                   type="button"
                   variant="outline"
-                  size="icon"
                   aria-label={action.label}
                   onClick={() => activate(action)}
-                  className="group relative h-14 w-full min-w-0 rounded-xl border-border/70 bg-card text-primary shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring md:h-11 md:w-11 md:shrink-0"
+                  className="group relative flex h-[4.5rem] w-full min-w-0 flex-col items-center justify-center gap-1 rounded-lg border-border bg-card px-1 text-primary shadow-sm hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring md:h-11 md:w-11 md:shrink-0 md:p-0"
                 >
-                  <action.icon className="h-6 w-6 md:h-5 md:w-5" />
-                  <span className="absolute -right-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-background text-primary shadow-sm ring-1 ring-border/70 group-hover:text-primary">
-                    <Plus className="h-3 w-3" strokeWidth={2.5} />
+                  <action.icon className="h-5 w-5 md:h-5 md:w-5" />
+                  <span className="max-w-full truncate text-[11px] font-medium leading-tight md:sr-only">{action.shortLabel}</span>
+                  <span aria-hidden="true" className="absolute right-1.5 top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-muted text-muted-foreground ring-1 ring-border group-hover:bg-primary-foreground/15 group-hover:text-primary-foreground">
+                    <Plus className="h-2.5 w-2.5" strokeWidth={2.25} />
                   </span>
                 </Button>
               </TooltipTrigger>

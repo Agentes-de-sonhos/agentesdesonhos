@@ -67,8 +67,8 @@ describe("RangeCalendar — intervalo responsivo com setas e swipe", () => {
 
   it("mantém setas com rótulos acessíveis", () => {
     render(<Harness />);
-    expect(screen.getByLabelText("Mês anterior")).toBeInTheDocument();
-    expect(screen.getByLabelText("Próximo mês")).toBeInTheDocument();
+    expect(screen.getByLabelText("Mês anterior")).toHaveClass("h-11", "w-11");
+    expect(screen.getByLabelText("Próximo mês")).toHaveClass("h-11", "w-11");
   });
 
   it("swipe para a esquerda avança e para a direita retorna o mês", () => {

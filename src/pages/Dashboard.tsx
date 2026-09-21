@@ -72,7 +72,7 @@ export default function Dashboard() {
     <DashboardLayout flushHorizontal>
       <DashboardContainer className="space-y-4 sm:space-y-6 animate-fade-in">
         <div
-          className="-mx-4 grid w-[calc(100%+2rem)] min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:mx-0 sm:w-auto sm:px-4 md:grid-cols-[minmax(0,1fr)_auto_auto] lg:px-0"
+          className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:px-4 md:grid-cols-[minmax(0,1fr)_auto_auto] lg:px-0"
           data-dashboard-mobile-header
         >
           <div className="col-start-1 row-start-1 min-w-0">
@@ -96,7 +96,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 sm:h-9 sm:w-9"
+                    className="h-11 w-11 rounded-full bg-muted text-foreground hover:bg-accent sm:h-11 sm:w-11 md:h-9 md:w-9"
                     aria-label="Meu perfil"
                     onClick={() => openInternalWindow("/perfil", "Meu perfil")}
                   >
@@ -112,7 +112,7 @@ export default function Dashboard() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-full bg-destructive text-white hover:bg-destructive/90 sm:h-9 sm:w-9"
+                    className="h-11 w-11 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive sm:h-11 sm:w-11 md:h-9 md:w-9"
                     aria-label="Sair"
                     onClick={handleLogout}
                   >
@@ -128,7 +128,7 @@ export default function Dashboard() {
         </div>
 
         <Suspense fallback={<div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>}>
-          <section className="-mx-4 grid w-[calc(100%+2rem)] items-stretch gap-4 px-2 sm:mx-0 sm:w-auto sm:gap-6 sm:px-4 lg:grid-cols-2 lg:px-0" data-dashboard-section="agenda-trips">
+          <section className="grid w-full items-stretch gap-4 px-2 sm:gap-6 sm:px-4 lg:grid-cols-2 lg:px-0" data-dashboard-section="agenda-trips">
             {can("agenda.view") && (
               <div className="flex h-full min-h-0 min-w-0 flex-col [&>*]:h-full [&>*]:min-h-0"><UpcomingAgendaEventsCard /></div>
             )}
@@ -137,7 +137,7 @@ export default function Dashboard() {
             )}
           </section>
           {can("community.public.view") && (
-            <section className="-mx-4 w-[calc(100%+2rem)] min-w-0 px-2 sm:mx-0 sm:w-auto sm:px-4 md:px-0" data-dashboard-section="community">
+            <section className="w-full min-w-0 px-2 sm:px-4 md:px-0" data-dashboard-section="community">
               <CommunitySocialFeed />
             </section>
           )}

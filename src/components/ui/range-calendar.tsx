@@ -131,7 +131,7 @@ export function RangeCalendar({
           ...props.labels,
         }}
         classNames={{
-          nav_button: "h-9 w-9 rounded-md border border-input bg-background p-0 opacity-100 hover:bg-accent",
+          nav_button: "h-11 w-11 rounded-md border border-input bg-background p-0 opacity-100 hover:bg-accent md:h-9 md:w-9",
           ...props.classNames,
         }}
         className={cn("p-3 pointer-events-auto", className)}
