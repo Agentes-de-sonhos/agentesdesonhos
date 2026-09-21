@@ -191,12 +191,14 @@ function ensureReadable(fg: string, bg: string, min = 4.5): string {
 }
 
 export function getQuotePdfTokens(profile: AgentProfile | null | undefined): PdfTokens {
+  const onSecondaryOverride = normalizeBrandHex(profile?.agency_on_secondary_color ?? null);
   const palette = resolveBrandPalette({
     primary: profile?.agency_primary_color ?? null,
     secondary: profile?.agency_secondary_color ?? null,
     secondaryAuto: profile?.agency_secondary_auto ?? null,
     tertiary: profile?.agency_tertiary_color ?? null,
     tertiaryAuto: profile?.agency_tertiary_auto ?? null,
+    onSecondary: onSecondaryOverride,
   });
   const tertiary = palette.tertiary;
   // Bordas/divisórias/detalhes: SECUNDÁRIA suavizada (misturada com o fundo).
@@ -210,7 +212,9 @@ export function getQuotePdfTokens(profile: AgentProfile | null | undefined): Pdf
     secondary: palette.secondary,
     tertiary,
     border,
-    headerText: ensureReadable(palette.primary, palette.secondary),
+    // Quando a agência escolhe a cor do texto sobre a secundária, ela é
+    // respeitada exatamente; sem escolha, mantém o ajuste automático atual.
+    headerText: onSecondaryOverride ?? ensureReadable(palette.primary, palette.secondary),
     text: ensureReadable("#0F172A", "#FFFFFF"),
     muted: ensureReadable("#475569", "#FFFFFF"),
     faint: ensureReadable("#64748B", "#FFFFFF"),
