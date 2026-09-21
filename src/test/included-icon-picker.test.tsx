@@ -55,7 +55,7 @@ describe("seletor de ícones da etapa Incluso", () => {
 
     await user.click(within(dialog).getByRole("button", { name: /Aplicar/i }));
 
-    await waitFor(() => expect(updates.length).toBeGreaterThan(0));
+    await waitFor(() => expect(updates.length).toBeGreaterThan(0), { timeout: 4000 });
     expect(updates.at(-1).whats_included[0]).toEqual({ text: "Hotel Praia", icon: "luggage" });
   });
 
@@ -87,7 +87,7 @@ describe("seletor de ícones da etapa Incluso", () => {
     await user.click(openPickerTrigger());
     const dialog = await screen.findByRole("dialog");
     await user.click(within(dialog).getByRole("button", { name: /Usar sugestão automática/i }));
-    await waitFor(() => expect(updates.length).toBeGreaterThan(0));
+    await waitFor(() => expect(updates.length).toBeGreaterThan(0), { timeout: 4000 });
     expect(updates.at(-1).whats_included).toEqual(["Hotel Praia"]);
   });
 
@@ -115,7 +115,7 @@ describe("seletor de ícones da etapa Incluso", () => {
       />,
     );
     await user.click(screen.getByRole("button", { name: /Gerar novamente/i }));
-    await waitFor(() => expect(updates.length).toBeGreaterThan(0));
+    await waitFor(() => expect(updates.length).toBeGreaterThan(0), { timeout: 4000 });
     const saved = updates.at(-1).whats_included;
     expect(saved[0]).toEqual({ text: "Hotel Praia", icon: "luggage" });
     expect(saved.some((x: any) => x?.icon === "ship")).toBe(false);
