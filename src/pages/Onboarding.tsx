@@ -88,6 +88,9 @@ export default function Onboarding() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("personal");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropSource, setCropSource] = useState<{ src: string; mime: string; file: File } | null>(
+    null
+  );
 
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -151,47 +154,61 @@ export default function Onboarding() {
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file || !user) return;
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
-    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+    const validation = validateCircularImageFile(file);
+    if (!validation.ok) {
       toast({
-        title: "Formato inválido",
-        description: "Use apenas JPG, PNG ou WebP",
+        title: validation.title,
+        description: validation.message,
         variant: "destructive",
       });
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
+    try {
+      const src = await readImageAsOrientedDataUrl(file);
+      setCropSource({ src, mime: file.type, file });
+    } catch {
       toast({
-        title: "Arquivo muito grande",
-        description: "O tamanho máximo é 5MB",
+        title: "Erro ao abrir imagem",
+        description: "Não foi possível ler este arquivo. Tente outro.",
         variant: "destructive",
       });
-      return;
     }
+  };
+
+  const handleCroppedAvatar = async (blob: Blob, outputMime: string) => {
+    if (!user) return;
 
     setUploadingAvatar(true);
 
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/avatar.${fileExt}`;
+      const { croppedPath, originalPath } = circularImageStoragePaths({
+        userId: user.id,
+        kind: "avatar",
+        outputMime,
+        originalMime: cropSource?.mime || outputMime,
+      });
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(fileName, file, { upsert: true });
+        .upload(croppedPath, blob, { upsert: true, contentType: outputMime });
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
+      if (cropSource?.file) {
+        await supabase.storage
+          .from("avatars")
+          .upload(originalPath, cropSource.file, { upsert: true, contentType: cropSource.mime })
+          .catch(() => undefined);
+      }
 
-      const newAvatarUrl = `${urlData.publicUrl}?t=${Date.now()}`;
-      setAvatarUrl(newAvatarUrl);
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(croppedPath);
+
+      setAvatarUrl(withCacheBuster(urlData.publicUrl));
+      setCropSource(null);
 
       toast({
         title: "Foto atualizada!",
