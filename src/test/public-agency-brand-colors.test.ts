@@ -99,8 +99,8 @@ describe("cores da identidade visual nos links públicos", () => {
   });
 
   it("mantém o degradê histórico no cabeçalho e dá contraste próprio ao pictograma", () => {
-    expect(publicQuoteSource).toContain('background: "var(--gradient-primary)"');
-    expect(publicQuoteSource).toContain('color: "var(--brand-on-primary, hsl(var(--primary-foreground)))"');
+    expect(publicQuoteSource).toContain('background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)"');
+    expect(publicQuoteSource).toContain('color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))"');
     expect(publicQuoteSource).toContain('color: "var(--brand-primary, hsl(var(--primary)))"');
   });
 

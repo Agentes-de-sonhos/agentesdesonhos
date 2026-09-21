@@ -79,13 +79,13 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
 
 /**
  * Cabeçalho do serviço no orçamento WEB: mantém o degradê histórico do
- * sistema, agora derivado da cor primária da agência. Texto e controles usam
- * o contraste calculado para a primária; o pictograma permanece na primária
- * sobre a pastilha clara para não desaparecer em marcas de baixo contraste.
+ * sistema, agora entre as cores primária e secundária da agência. Texto e
+ * controles usam a cor configurada para leitura sobre a secundária; o
+ * pictograma permanece na primária sobre a pastilha clara.
  */
 const SERVICE_HEADER_STYLE: React.CSSProperties = {
-  background: "var(--gradient-primary)",
-  color: "var(--brand-on-primary, hsl(var(--primary-foreground)))",
+  background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
+  color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
 };
 
 const SERVICE_ICON_STYLE: React.CSSProperties = {
