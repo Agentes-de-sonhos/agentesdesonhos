@@ -10,6 +10,8 @@ const operations = read("src/components/crm/operations/OperationsModule.tsx");
 const operationCard = read("src/components/crm/operations/OperationCard.tsx");
 const opportunityCard = read("src/components/crm/OpportunityCard.tsx");
 const scrollArea = read("src/components/crm/kanban/KanbanScrollArea.tsx");
+const moveToStageMenu = read("src/components/crm/kanban/MoveToStageMenu.tsx");
+const dropdownMenu = read("src/components/ui/dropdown-menu.tsx");
 const importContacts = read("src/components/crm/ImportContactsDialog.tsx");
 const createOperation = read("src/components/crm/operations/CreateOperationDialog.tsx");
 
@@ -36,6 +38,20 @@ describe("CRM mobile UX — alvos de toque e rolagem por etapa", () => {
     expect(scrollArea).toContain("snap-x snap-mandatory md:snap-none");
     expect(kanban).toContain("snap-center md:snap-align-none");
     expect(operations).toContain("snap-center md:snap-align-none");
+  });
+
+  it("quadros permitem gestos naturais nos dois eixos sem listeners de toque", () => {
+    expect(scrollArea).toContain("touch-pan-x touch-pan-y");
+    expect(scrollArea).not.toContain("onTouchMove");
+    expect(scrollArea).not.toContain("onPointerMove");
+  });
+
+  it("submenu Mover usa portal, colisão de viewport e rolagem vertical por toque", () => {
+    expect(dropdownMenu).toMatch(/DropdownMenuSubContent[\s\S]*ScopedDropdownPortal/);
+    expect(moveToStageMenu).toContain("collisionPadding={12}");
+    expect(moveToStageMenu).toContain("avoidCollisions");
+    expect(moveToStageMenu).toContain("100dvh");
+    expect(moveToStageMenu).toContain("overflow-y-auto overscroll-contain touch-pan-y");
   });
 
   it("menus dos cartões têm 44px no mobile", () => {
