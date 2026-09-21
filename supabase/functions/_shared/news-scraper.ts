@@ -42,6 +42,21 @@ function wpJsonPostsFeed(origin: string): string {
   return `${origin}/wp-json/wp/v2/posts?per_page=40&_fields=link,date_gmt,title,excerpt`;
 }
 
+/** Espelho de leitura em texto, usado quando o acesso direto é barrado pela CDN do portal. */
+function textMirror(url: string): string {
+  return `https://r.jina.ai/${url}`;
+}
+
+/**
+ * Variações de endpoint público do mesmo portal (com e sem "www") mais o espelho
+ * de leitura. A CDN de alguns portais bloqueia parte dessas rotas de forma
+ * intermitente, então tentamos todas para manter a coleta direta e atualizada.
+ */
+function wpJsonFeeds(...origins: string[]): string[] {
+  const direct = origins.map(wpJsonPostsFeed);
+  return [...direct, ...direct.map(textMirror)];
+}
+
 export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
   "PANROTAS": {
     key: "PANROTAS",
@@ -54,7 +69,10 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "Mercado & Eventos",
     slug: "mercado-eventos",
     feedUrl: "https://www.mercadoeeventos.com.br/feed/",
-    jsonFeedUrls: [wpJsonPostsFeed("https://www.mercadoeeventos.com.br")],
+    jsonFeedUrls: wpJsonFeeds(
+      "https://mercadoeeventos.com.br",
+      "https://www.mercadoeeventos.com.br",
+    ),
     fallbackFeedUrls: [
       bingNewsSiteFeed("mercadoeeventos.com.br"),
       googleNewsSiteFeed("mercadoeeventos.com.br"),
@@ -65,7 +83,10 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "Brasilturis",
     slug: "brasilturis",
     feedUrl: "https://brasilturis.com.br/feed/?withoutcomments=1",
-    jsonFeedUrls: [wpJsonPostsFeed("https://brasilturis.com.br")],
+    jsonFeedUrls: wpJsonFeeds(
+      "https://brasilturis.com.br",
+      "https://www.brasilturis.com.br",
+    ),
     fallbackFeedUrls: [bingNewsSiteFeed("brasilturis.com.br"), googleNewsSiteFeed("brasilturis.com.br")],
     maxItems: 60,
   },
@@ -306,9 +327,13 @@ function stripHtml(text: string): string {
 
 /** Converte a resposta da WordPress REST API do portal em itens brutos. */
 export function parseWpJsonItems(body: string, portal: PortalConfig): RawItem[] {
+  // O espelho de leitura devolve a resposta JSON precedida de um cabeçalho em texto.
+  const start = body.indexOf("[");
+  const end = body.lastIndexOf("]");
+  const json = start >= 0 && end > start ? body.slice(start, end + 1) : body;
   let posts: unknown;
   try {
-    posts = JSON.parse(body);
+    posts = JSON.parse(json);
   } catch {
     return [];
   }
@@ -386,8 +411,12 @@ export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
       const items = parseWpJsonItems(res.body, portal).filter(
         (n) => n.url_canonical && isProbablyArticleUrl(n.url_canonical),
       );
-      if (items.length > 0) collected.push(...items);
-      else errors.push(`Resposta sem itens utilizáveis em ${url}`);
+      if (items.length > 0) {
+        collected.push(...items);
+        // Uma fonte direta atualizada basta; as demais são apenas alternativas.
+        break;
+      }
+      errors.push(`Resposta sem itens utilizáveis em ${url}`);
     } else {
       errors.push(res.error);
     }
