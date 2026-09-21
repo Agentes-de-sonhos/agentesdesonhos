@@ -760,6 +760,7 @@ export default function Perfil() {
               : "Arraste e use o zoom para enquadrar o logotipo dentro do círculo, sem distorcer a imagem."
           }
           confirmLabel="Salvar imagem"
+          fitMode={cropSource.kind === "avatar" ? "cover" : "contain"}
           saving={cropSource.kind === "avatar" ? uploadingAvatar : uploadingLogo}
           onReplace={() =>
             cropSource.kind === "avatar"

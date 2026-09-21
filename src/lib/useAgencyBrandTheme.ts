@@ -25,6 +25,7 @@ export function useAgencyBrandTheme(input: AgencyBrandInput | null | undefined):
       input?.secondaryAuto,
       input?.tertiary,
       input?.tertiaryAuto,
+      input?.onSecondary,
     ],
   );
 

@@ -141,6 +141,36 @@ export interface AgencyBrandInput {
   onSecondary?: string | null;
 }
 
+/**
+ * Constrói a entrada da paleta a partir de um perfil de agência.
+ *
+ * Fonte ÚNICA usada pelo PDF, pelas páginas públicas e pelo app, evitando
+ * divergência de cores entre o orçamento em PDF e o orçamento web.
+ * Perfis antigos / valores nulos caem no fallback automático atual.
+ */
+export function agencyBrandInputFromProfile(
+  profile:
+    | {
+        agency_primary_color?: string | null;
+        agency_secondary_color?: string | null;
+        agency_secondary_auto?: boolean | null;
+        agency_tertiary_color?: string | null;
+        agency_tertiary_auto?: boolean | null;
+        agency_on_secondary_color?: string | null;
+      }
+    | null
+    | undefined,
+): AgencyBrandInput {
+  return {
+    primary: profile?.agency_primary_color ?? null,
+    secondary: profile?.agency_secondary_color ?? null,
+    secondaryAuto: profile?.agency_secondary_auto ?? null,
+    tertiary: profile?.agency_tertiary_color ?? null,
+    tertiaryAuto: profile?.agency_tertiary_auto ?? null,
+    onSecondary: profile?.agency_on_secondary_color ?? null,
+  };
+}
+
 /** Texto legível (preto/branco) sobre uma cor de fundo. */
 function readableOn(hex: string): string {
   const rgb = parseHex(hex) ?? parseHex(BRAND_FALLBACK_PRIMARY)!;
