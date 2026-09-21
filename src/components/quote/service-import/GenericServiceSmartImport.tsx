@@ -287,7 +287,9 @@ export function GenericServiceSmartImport({
               </Button>
             </div>
             <p className="w-full text-[11px] text-muted-foreground">
-              {includedIdx.length} de {total} itens serão adicionados como serviços separados.
+              {canAddMany
+                ? `${includedIdx.length} de ${total} itens serão adicionados como serviços separados.`
+                : `Encontramos ${total} serviços neste documento. Aplique este e repita a importação para os demais.`}
             </p>
           </div>
         )}
