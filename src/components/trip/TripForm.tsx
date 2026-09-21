@@ -10,6 +10,7 @@ import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { RangeCalendar } from "@/components/ui/range-calendar";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import { Label } from "@/components/ui/label";
 import {
@@ -184,8 +185,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="range"
+                  <RangeCalendar
                     selected={field.value as DateRange}
                     onSelect={(range) => {
                       if (!range?.from) {
@@ -211,9 +211,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
                         field.onChange({ from: range.from, to: undefined });
                       }
                     }}
-                    numberOfMonths={2}
                     initialFocus
-                    className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Plane, Search, ArrowRight, Loader2, Users, Calendar as CalendarIcon, PlaneTakeoff, PlaneLanding } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { RangeCalendar } from "@/components/ui/range-calendar";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -165,14 +166,11 @@ export function BloqueiosAereosStartCard() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
+                <RangeCalendar
                   selected={range}
                   onSelect={setRange}
-                  numberOfMonths={2}
                   initialFocus
                   locale={ptBR}
-                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
