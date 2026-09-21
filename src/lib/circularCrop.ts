@@ -30,9 +30,12 @@ export interface CropState {
   zoom: number;
 }
 
-export type ValidationResult =
-  | { ok: true }
-  | { ok: false; reason: "format" | "size"; title: string; message: string };
+export interface ValidationResult {
+  ok: boolean;
+  reason?: "format" | "size";
+  title?: string;
+  message?: string;
+}
 
 export function validateCircularImageFile(file: {
   name: string;
