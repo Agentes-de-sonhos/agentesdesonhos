@@ -86,6 +86,12 @@ export default function Perfil() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [cropSource, setCropSource] = useState<{
+    kind: "avatar" | "logo";
+    src: string;
+    mime: string;
+    file: File;
+  } | null>(null);
   const [formData, setFormData] = useState<ProfileData | null>(null);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
