@@ -133,6 +133,12 @@ export interface AgencyBrandInput {
   /** Tom muito claro. Quando ausente/automático, derivado da primária. */
   tertiary?: string | null;
   tertiaryAuto?: boolean | null;
+  /**
+   * Cor do texto/ícones exibidos SOBRE a cor secundária.
+   * Quando ausente (null/undefined) o contraste automático atual é mantido —
+   * fallback compatível com todas as agências já cadastradas.
+   */
+  onSecondary?: string | null;
 }
 
 /** Texto legível (preto/branco) sobre uma cor de fundo. */
@@ -140,6 +146,24 @@ function readableOn(hex: string): string {
   const rgb = parseHex(hex) ?? parseHex(BRAND_FALLBACK_PRIMARY)!;
   return luminance(rgb) > 0.42 ? "#1E293B" : "#FFFFFF";
 }
+
+/** Razão de contraste WCAG entre duas cores HEX (1 a 21). */
+export function brandContrastRatio(a: string, b: string): number {
+  const ca = parseHex(a);
+  const cb = parseHex(b);
+  if (!ca || !cb) return 1;
+  const la = luminance(ca);
+  const lb = luminance(cb);
+  const hi = Math.max(la, lb);
+  const lo = Math.min(la, lb);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/** Contraste automático do texto sobre a secundária (padrão do sistema). */
+export function defaultOnSecondaryColor(secondary: string | null | undefined): string {
+  return readableOn(normalizeBrandHex(secondary) ?? BRAND_FALLBACK_PRIMARY);
+}
+
 
 /**
  * Resolve a paleta efetiva da agência (contrato de 3 cores).
