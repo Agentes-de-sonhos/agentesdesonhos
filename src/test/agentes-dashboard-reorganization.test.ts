@@ -92,8 +92,9 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(feed).toContain('can("online_users.view") && (');
     expect(feed).toContain("data-dashboard-community-header-row");
     expect(feed).toContain("data-dashboard-community-actions");
-    expect(feed).toContain("lg:grid lg:grid-cols-[minmax(0,1fr)_auto]");
-    expect(feed).toContain("lg:col-start-2 lg:row-start-1 lg:justify-self-end");
+    expect(feed).toContain("lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto]");
+    expect(feed).toContain("lg:col-start-2 lg:row-start-1");
+    expect(feed).toContain("lg:col-start-3 lg:row-start-1 lg:justify-self-end");
     expect(feed).toContain("data-dashboard-online-users");
     expect(feed.match(/<OnlineAgentsStrip compact \/>/g)).toHaveLength(1);
   });
