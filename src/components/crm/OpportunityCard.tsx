@@ -58,6 +58,7 @@ import { MoveToStageMenu, type MoveStageTarget } from "@/components/crm/kanban/M
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
