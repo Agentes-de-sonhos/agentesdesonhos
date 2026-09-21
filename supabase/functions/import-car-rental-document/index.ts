@@ -224,7 +224,15 @@ Deno.serve(async (req) => {
     if (fileBase64) {
       const mime = fileMimeType || "application/pdf";
       const dataUrl = `data:${mime};base64,${fileBase64}`;
-      userContent.push({ type: "image_url", image_url: { url: dataUrl } });
+      if (mime === "application/pdf") {
+        // PDF precisa do bloco de documento; enviá-lo como imagem faz o provedor recusar (HTTP 400).
+        const fileName: string = typeof body?.fileName === "string" && body.fileName
+          ? body.fileName
+          : "documento.pdf";
+        userContent.push({ type: "file", file: { filename: fileName, file_data: dataUrl } });
+      } else {
+        userContent.push({ type: "image_url", image_url: { url: dataUrl } });
+      }
     }
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
