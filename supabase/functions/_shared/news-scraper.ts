@@ -20,6 +20,12 @@ export interface PortalConfig {
    * contornada: consumimos apenas agregadores públicos de sindicação.
    */
   fallbackFeedUrls?: string[];
+  /**
+   * Endpoints públicos de conteúdo do próprio portal em JSON (WordPress REST API).
+   * Servem como fonte direta e atualizada quando o feed RSS nativo está
+   * indisponível, evitando dependência de agregadores (que costumam atrasar).
+   */
+  jsonFeedUrls?: string[];
   maxItems: number;
 }
 
