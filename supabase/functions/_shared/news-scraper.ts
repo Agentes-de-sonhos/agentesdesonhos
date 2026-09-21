@@ -49,6 +49,7 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "Mercado & Eventos",
     slug: "mercado-eventos",
     feedUrl: "https://www.mercadoeeventos.com.br/feed/",
+    jsonFeedUrls: [wpJsonPostsFeed("https://www.mercadoeeventos.com.br")],
     fallbackFeedUrls: [
       bingNewsSiteFeed("mercadoeeventos.com.br"),
       googleNewsSiteFeed("mercadoeeventos.com.br"),
@@ -59,6 +60,7 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "Brasilturis",
     slug: "brasilturis",
     feedUrl: "https://brasilturis.com.br/feed/?withoutcomments=1",
+    jsonFeedUrls: [wpJsonPostsFeed("https://brasilturis.com.br")],
     fallbackFeedUrls: [bingNewsSiteFeed("brasilturis.com.br"), googleNewsSiteFeed("brasilturis.com.br")],
     maxItems: 60,
   },
