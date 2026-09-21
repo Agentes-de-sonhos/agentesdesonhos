@@ -366,6 +366,62 @@ function parseRssItems(xml: string, portal: PortalConfig, usedFallback: boolean)
   return parsed.filter((n) => n.titulo_original && n.url_canonical && isProbablyArticleUrl(n.url_canonical));
 }
 
+/**
+ * Coleta os itens do portal combinando as fontes diretas disponíveis (RSS nativo
+ * e API pública de conteúdo do próprio portal). Só recorre aos agregadores
+ * públicos quando nenhuma fonte direta responde. Itens repetidos são
+ * deduplicados pela URL canônica e ordenados da publicação mais recente.
+ */
+export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
+  const collected: RawItem[] = [];
+  const errors: string[] = [];
+
+  const native = await fetchFeedXmlFromUrl(portal.feedUrl);
+  if (native.ok) collected.push(...parseRssItems(native.body, portal, false));
+  else errors.push(native.error);
+
+  for (const url of portal.jsonFeedUrls ?? []) {
+    const res = await fetchFeedXmlFromUrl(url);
+    if (res.ok) {
+      const items = parseWpJsonItems(res.body, portal).filter(
+        (n) => n.url_canonical && isProbablyArticleUrl(n.url_canonical),
+      );
+      if (items.length > 0) collected.push(...items);
+      else errors.push(`Resposta sem itens utilizáveis em ${url}`);
+    } else {
+      errors.push(res.error);
+    }
+  }
+
+  if (collected.length === 0) {
+    for (const url of portal.fallbackFeedUrls ?? []) {
+      const alt = await fetchFeedXmlFromUrl(url);
+      if (alt.ok) {
+        const items = parseRssItems(alt.body, portal, true);
+        if (items.length > 0) {
+          collected.push(...items);
+          break;
+        }
+        errors.push(`Feed alternativo sem itens utilizáveis em ${url}`);
+      } else {
+        errors.push(alt.error);
+      }
+    }
+  }
+
+  if (collected.length === 0) throw new Error(errors.join(" | ") || `Nenhum item coletado para ${portal.key}`);
+
+  const byUrl = new Map<string, RawItem>();
+  for (const item of collected) {
+    if (!byUrl.has(item.url_canonical)) byUrl.set(item.url_canonical, item);
+  }
+
+  return [...byUrl.values()]
+    .sort((a, b) => (b.data_publicacao ?? "").localeCompare(a.data_publicacao ?? ""))
+    .slice(0, portal.maxItems);
+}
+
+
 // ── AI classification ───────────────────────────────────────
 export interface AiClassification {
   titulo_curto: string;
