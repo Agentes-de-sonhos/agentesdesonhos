@@ -3401,7 +3401,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
-  const applyAttractionImport = (p: any) => {
+  const applyAttractionImport = (rawImport: any) => {
+    // Traduz aliases da IA ("produto", "descricao", "ticketType"...) para as
+    // chaves canônicas antes do mapeamento, igual ao importador do orçamento.
+    const p = normalizeServiceItemFields("attraction", rawImport ?? {});
     const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
     const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
     setIf("name", p.nome_produto);
