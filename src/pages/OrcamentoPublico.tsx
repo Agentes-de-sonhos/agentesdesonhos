@@ -78,13 +78,18 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
 };
 
 /**
- * Cabeçalho do serviço no orçamento WEB: mesmo acabamento do PDF — fundo na
- * cor secundária da agência e texto/ícones na cor configurável sobre ela
- * (`--brand-on-secondary`, com fallback automático de contraste).
+ * Cabeçalho do serviço no orçamento WEB: mantém o degradê histórico do
+ * sistema, agora derivado da cor primária da agência. Texto e controles usam
+ * o contraste calculado para a primária; o pictograma permanece na primária
+ * sobre a pastilha clara para não desaparecer em marcas de baixo contraste.
  */
 const SERVICE_HEADER_STYLE: React.CSSProperties = {
-  background: "var(--brand-secondary, hsl(var(--primary)))",
-  color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
+  background: "var(--gradient-primary)",
+  color: "var(--brand-on-primary, hsl(var(--primary-foreground)))",
+};
+
+const SERVICE_ICON_STYLE: React.CSSProperties = {
+  color: "var(--brand-primary, hsl(var(--primary)))",
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -895,7 +900,10 @@ function CollapsibleServiceCard({
   const headerInner = (
     <>
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm">
+        <div
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm"
+          style={SERVICE_ICON_STYLE}
+        >
           {SERVICE_ICONS[type]}
         </div>
         <div className="flex flex-col items-start gap-0.5">
