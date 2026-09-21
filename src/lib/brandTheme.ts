@@ -215,7 +215,7 @@ export function resolveBrandPalette(input: AgencyBrandInput): BrandPalette {
     onPrimary: luminance(readable) > 0.42 ? "#1E293B" : "#FFFFFF",
     secondary,
     secondaryHover: toHex(mix(secondaryRgb, readable, 0.12)),
-    onSecondary: readableOn(secondary),
+    onSecondary: normalizeBrandHex(input.onSecondary) ?? readableOn(secondary),
     tertiary,
     onTertiary: readableOn(tertiary),
     selection: toHex(mix(WHITE, readable, 0.22)),
