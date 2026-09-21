@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import {
   Dialog,
@@ -13,7 +13,10 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Check, Crosshair, ImageUp, Loader2, Minus, Plus } from "lucide-react";
 import {
+  CROP_MASK_RATIO,
   CROP_OUTPUT_SIZE,
+  cropMaskSide,
+  initialZoomForMedia,
   MAX_ZOOM,
   MIN_ZOOM,
   clampZoom,
@@ -39,6 +42,12 @@ export interface CircularImageCropDialogProps {
   onConfirm: (blob: Blob, mime: string) => void | Promise<void>;
   /** Indica upload/salvamento em andamento. */
   saving?: boolean;
+  /**
+   * Enquadramento inicial (mesmo componente para os dois casos):
+   * - "contain" (padrão do logotipo): o logotipo inteiro cabe no círculo;
+   * - "cover" (foto do agente): o círculo já começa preenchido.
+   */
+  fitMode?: "contain" | "cover";
 }
 
 /**
@@ -56,32 +65,122 @@ export function CircularImageCropDialog({
   onCancel,
   onConfirm,
   saving = false,
+  fitMode = "contain",
 }: CircularImageCropDialogProps) {
   const [{ crop, zoom }, setCropState] = useState(defaultCropState);
   const [croppedArea, setCroppedArea] = useState<CropArea | null>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const confirmRef = useRef<HTMLButtonElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+  const [mediaSize, setMediaSize] = useState<{ width: number; height: number } | null>(null);
+
+  // Máscara REAL do recorte: ~88% da menor dimensão do palco medido
+  // (mesma área usada no preview e na imagem exportada).
+  const maskSide = cropMaskSide(stageSize);
+  // identidade estável: um objeto novo a cada render faz o Cropper recalcular
+  // em laço (o recálculo dispara onCropComplete e volta a renderizar).
+  const cropSize = useMemo(
+    () => (maskSide > 0 ? { width: maskSide, height: maskSide } : undefined),
+    [maskSide],
+  );
+  const fitZoom = mediaSize
+    ? initialZoomForMedia({
+        mediaWidth: mediaSize.width,
+        mediaHeight: mediaSize.height,
+        maskSide,
+        mode: fitMode,
+      })
+    : 1;
+
+  const observerRef = useRef<ResizeObserver | null>(null);
+
+  /**
+   * Mede o palco assim que ele existe (ref de callback: o diálogo monta em
+   * portal, então um efeito pode rodar antes do elemento estar no layout).
+   */
+  const attachStage = useCallback((el: HTMLDivElement | null) => {
+    stageRef.current = el;
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+    if (!el) return;
+    const measure = () => {
+      const width = el.clientWidth;
+      const height = el.clientHeight;
+      setStageSize((prev) => (prev.width === width && prev.height === height ? prev : { width, height }));
+    };
+    measure();
+    // segunda medição no próximo frame: durante a animação de abertura o
+    // elemento pode ainda estar com altura zero
+    requestAnimationFrame(measure);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(measure);
+      observer.observe(el);
+      observerRef.current = observer;
+    }
+  }, []);
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
 
   useEffect(() => {
     if (open) {
       setCropState(defaultCropState());
       setCroppedArea(null);
+      setMediaSize(null);
       setError(null);
     }
   }, [open, imageSrc]);
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
-    setCroppedArea(pixels);
+    setCroppedArea((prev) =>
+      prev &&
+      prev.x === pixels.x &&
+      prev.y === pixels.y &&
+      prev.width === pixels.width &&
+      prev.height === pixels.height
+        ? prev
+        : pixels,
+    );
   }, []);
 
   const setZoom = useCallback((next: number) => {
-    setCropState((prev) => ({ ...prev, zoom: clampZoom(next) }));
+    setCropState((prev) => {
+      const zoom = clampZoom(next);
+      return Math.abs(prev.zoom - zoom) < 0.0001 ? prev : { ...prev, zoom };
+    });
+  }, []);
+
+  const setCrop = useCallback((next: { x: number; y: number }) => {
+    setCropState((prev) =>
+      Math.abs(prev.crop.x - next.x) < 0.0001 && Math.abs(prev.crop.y - next.y) < 0.0001
+        ? prev
+        : { ...prev, crop: next },
+    );
   }, []);
 
   const handleRecenter = useCallback(() => {
-    setCropState(defaultCropState());
-  }, []);
+    setCropState(defaultCropState(fitZoom));
+  }, [fitZoom]);
+
+  /** Ao carregar a mídia, o zoom parte do enquadramento útil (nunca minúsculo). */
+  const handleMediaLoaded = useCallback(
+    (size: { width: number; height: number }) => {
+      setMediaSize({ width: size.width, height: size.height });
+      const next = initialZoomForMedia({
+        mediaWidth: size.width,
+        mediaHeight: size.height,
+        maskSide: cropMaskSide(
+          stageRef.current
+            ? { width: stageRef.current.clientWidth, height: stageRef.current.clientHeight }
+            : stageSize,
+        ),
+        mode: fitMode,
+      });
+      setCropState(defaultCropState(next));
+    },
+    [fitMode, stageSize],
+  );
 
   const handleConfirm = async () => {
     if (!croppedArea) return;
@@ -118,8 +217,11 @@ export function CircularImageCropDialog({
         </DialogHeader>
 
         <div
-          className="relative mx-auto h-[260px] w-full max-w-sm overflow-hidden rounded-lg bg-muted sm:h-[320px]"
+          ref={attachStage}
+          className="relative mx-auto h-[320px] w-full max-w-sm overflow-hidden rounded-lg bg-muted sm:h-[360px]"
           data-testid="circular-crop-stage"
+          data-mask-ratio={CROP_MASK_RATIO}
+          data-mask-side={maskSide || undefined}
         >
           <Cropper
             image={imageSrc}
@@ -132,7 +234,9 @@ export function CircularImageCropDialog({
             maxZoom={MAX_ZOOM}
             restrictPosition={false}
             objectFit="contain"
-            onCropChange={(next) => setCropState((prev) => ({ ...prev, crop: next }))}
+            {...(cropSize ? { cropSize } : {})}
+            onMediaLoaded={handleMediaLoaded}
+            onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}
           />

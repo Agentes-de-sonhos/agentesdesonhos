@@ -13,8 +13,45 @@ export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as
 export const ACCEPTED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"] as const;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const CROP_OUTPUT_SIZE = 512;
-export const MIN_ZOOM = 1;
+export const MIN_ZOOM = 0.3;
 export const MAX_ZOOM = 4;
+
+/**
+ * Proporção da máscara circular em relação à MENOR dimensão do palco.
+ * Referência visual aprovada: palco ~384x320 com círculo ~318 de diâmetro
+ * (≈88% da menor dimensão), com margem uniforme pequena.
+ */
+export const CROP_MASK_RATIO = 0.88;
+
+/** Lado (diâmetro) real da máscara circular para um palco medido. */
+export function cropMaskSide(stage: { width: number; height: number }): number {
+  const min = Math.min(stage.width || 0, stage.height || 0);
+  if (!Number.isFinite(min) || min <= 0) return 0;
+  return Math.round(min * CROP_MASK_RATIO);
+}
+
+/**
+ * Zoom inicial coerente com a máscara maior:
+ * - "contain" (logotipos): o logotipo inteiro cabe dentro do círculo;
+ * - "cover" (foto do agente): o círculo fica totalmente preenchido.
+ * Nunca começa com a imagem minúscula: o cálculo usa o tamanho renderizado
+ * da mídia (zoom 1) e o diâmetro efetivo da máscara.
+ */
+export function initialZoomForMedia(params: {
+  mediaWidth: number;
+  mediaHeight: number;
+  maskSide: number;
+  mode?: "contain" | "cover";
+}): number {
+  const { mediaWidth, mediaHeight, maskSide } = params;
+  const mode = params.mode ?? "contain";
+  if (!mediaWidth || !mediaHeight || !maskSide) return 1;
+  const reference = mode === "cover"
+    ? Math.min(mediaWidth, mediaHeight)
+    : Math.max(mediaWidth, mediaHeight);
+  if (!reference) return 1;
+  return clampZoom(maskSide / reference);
+}
 
 export type CircularImageKind = "avatar" | "logo";
 
@@ -73,8 +110,8 @@ export function clampZoom(zoom: number, min = MIN_ZOOM, max = MAX_ZOOM): number 
 }
 
 /** Estado neutro: imagem centralizada, sem zoom. Usado no "Centralizar". */
-export function defaultCropState(): CropState {
-  return { crop: { x: 0, y: 0 }, zoom: MIN_ZOOM };
+export function defaultCropState(zoom = 1): CropState {
+  return { crop: { x: 0, y: 0 }, zoom: clampZoom(zoom) };
 }
 
 /** Mantém transparência de PNG/WebP; qualquer outro formato sai como JPEG. */

@@ -56,6 +56,8 @@ import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { agencyBrandInputFromProfile, pickBrandProfile } from "@/lib/brandTheme";
+import { usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { resolvePublicLocale, formatPublicShortDate, formatPublicDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { publicAirportText } from "@/lib/airportDisplay";
@@ -2191,12 +2193,16 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     endDate,
   );
 
-  useAgencyBrandTheme({
-    primary: agentProfile?.agency_primary_color ?? null,
-    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
-    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
-    onSecondary: (agentProfile as any)?.agency_on_secondary_color ?? null,
+  // O payload público da carteira entrega o agente sem os campos de marca:
+  // as cores vêm do cadastro vivo quando o perfil recebido não as traz.
+  const walletBrand = usePublicAgencyBrand((tripData as any)?.user_id, {
+    enabled: !pickBrandProfile([agentProfile as any]),
   });
+  useAgencyBrandTheme(
+    agencyBrandInputFromProfile(
+      (pickBrandProfile([agentProfile as any, walletBrand as any]) ?? agentProfile) as any,
+    ),
+  );
 
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>

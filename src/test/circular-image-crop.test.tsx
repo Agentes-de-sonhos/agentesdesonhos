@@ -5,6 +5,7 @@ import {
   ACCEPTED_IMAGE_TYPES,
   MAX_IMAGE_BYTES,
   circularImageStoragePaths,
+  MIN_ZOOM,
   clampZoom,
   defaultCropState,
   extensionForMime,
@@ -64,10 +65,10 @@ describe("circularCrop utils", () => {
   });
 
   it("limita o zoom à faixa suportada", () => {
-    expect(clampZoom(0.2)).toBe(1);
+    expect(clampZoom(0.2)).toBe(MIN_ZOOM);
     expect(clampZoom(99)).toBe(4);
     expect(clampZoom(2.5)).toBe(2.5);
-    expect(clampZoom(Number.NaN)).toBe(1);
+    expect(clampZoom(Number.NaN)).toBe(MIN_ZOOM);
   });
 
   it("centraliza ao restaurar o enquadramento", () => {

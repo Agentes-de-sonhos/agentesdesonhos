@@ -686,6 +686,7 @@ export default function Onboarding() {
           title="Ajustar foto do agente"
           description="Arraste e use o zoom para escolher o que aparece dentro do círculo da sua foto."
           confirmLabel="Salvar imagem"
+          fitMode="cover"
           saving={uploadingAvatar}
           onReplace={() => fileInputRef.current?.click()}
           onCancel={() => setCropSource(null)}
