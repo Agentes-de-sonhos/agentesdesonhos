@@ -54,10 +54,17 @@ interface Props {
   mapToInitialData: (parsed: Record<string, any>) => { service_data: Record<string, any>; amount: number };
   onCancel: () => void;
   onConfirm: (initialData: { service_data: Record<string, any>; amount: number }, raw: Record<string, any>) => void;
+  /**
+   * Quando informado, permite adicionar TODOS os serviços confirmados de um
+   * documento com vários itens. Sem esta prop, o comportamento segue singular.
+   */
+  onConfirmMany?: (
+    items: Array<{ initialData: { service_data: Record<string, any>; amount: number }; raw: Record<string, any> }>,
+  ) => void | Promise<void>;
 }
 
 export function GenericServiceSmartImport({
-  serviceType, serviceLabel, fields, mapToInitialData, onCancel, onConfirm,
+  serviceType, serviceLabel, fields, mapToInitialData, onCancel, onConfirm, onConfirmMany,
 }: Props) {
   const { toast } = useToast();
   const { isAdmin } = useUserRole();
@@ -66,7 +73,9 @@ export function GenericServiceSmartImport({
   const [pastedText, setPastedText] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const [progressStep, setProgressStep] = useState(0);
-  const [parsed, setParsed] = useState<Record<string, any> | null>(null);
+  const [parsedList, setParsedList] = useState<Record<string, any>[] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [skipped, setSkipped] = useState<boolean[]>([]);
   const [debugInfo, setDebugInfo] = useState<any>(null);
   const [showDebug, setShowDebug] = useState(false);
   const [hardError, setHardError] = useState<string | null>(null);
