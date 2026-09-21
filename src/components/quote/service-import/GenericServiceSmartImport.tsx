@@ -172,32 +172,28 @@ export function GenericServiceSmartImport({
         success: body?.success,
       });
 
-      const candidate: Record<string, any> | null =
-        (body?.success && (body?.data || body)) ||
-        (body?.partial_data && Object.keys(body.partial_data || {}).length > 0 ? body.partial_data : null);
+      const items = extractParsedServices(body);
 
-      // Useful = has any non-empty value besides metadata
-      const hasUseful = !!candidate && Object.entries(candidate).some(([k, v]) => {
-        if (k === "confianca_extracao" || k === "campos_nao_identificados") return false;
-        if (v == null || v === "") return false;
-        if (Array.isArray(v)) return v.length > 0;
-        return true;
-      });
-
-      if (!hasUseful) {
+      if (items.length === 0) {
         const msg = body?.error_message || body?.error || `Não foi possível identificar dados do(a) ${serviceLabel}. Tente uma imagem mais nítida.`;
         setHardError(msg);
         toast({ title: "Erro na importação", description: msg, variant: "destructive" });
         return;
       }
 
-      setParsed(candidate!);
+      setParsedList(items);
+      setActiveIndex(0);
+      setSkipped(items.map(() => false));
 
-      const conf = (candidate as any)!.confianca_extracao?.geral ?? 0;
+      const conf = items[0]?.confianca_extracao?.geral ?? 0;
       const confPct = Math.round(conf * 100);
-      if (conf < 0.5) toast({ title: "Dados parciais identificados", description: `Confiança ${confPct}%. Revise os campos antes de aplicar.` });
-      else if (conf < 0.8) toast({ title: "Importação concluída com ressalvas", description: `Confiança ${confPct}%. Confira os campos.` });
-      else toast({ title: "Importação concluída", description: "Confira os dados antes de aplicar ao orçamento." });
+      const many = items.length > 1 ? `${items.length} itens encontrados. ` : "";
+      if (conf < 0.5) toast({ title: "Dados parciais identificados", description: `${many}Confiança ${confPct}%. Revise os campos antes de aplicar.` });
+      else if (conf < 0.8) toast({ title: "Importação concluída com ressalvas", description: `${many}Confiança ${confPct}%. Confira os campos.` });
+      else toast({
+        title: items.length > 1 ? `${items.length} itens encontrados` : "Importação concluída",
+        description: "Confira os dados antes de aplicar ao orçamento.",
+      });
     } catch (e: any) {
       const msg = e?.message || "Não foi possível identificar os dados da reserva com precisão.";
       setHardError(msg);
@@ -207,24 +203,94 @@ export function GenericServiceSmartImport({
     }
   };
 
-  if (parsed) {
+  if (parsedList && parsedList.length > 0) {
+    const total = parsedList.length;
+    const current = parsedList[Math.min(activeIndex, total - 1)];
+    const isSkipped = !!skipped[activeIndex];
+    const includedIdx = parsedList.map((_, i) => i).filter((i) => !skipped[i]);
+
+    const resetReview = () => {
+      setParsedList(null);
+      setActiveIndex(0);
+      setSkipped([]);
+      setUploadFile(null);
+      setDebugInfo(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    // Edições ficam na lista — navegar entre itens nunca perde alterações.
+    const updateCurrent = (d: Record<string, any>) =>
+      setParsedList((prev) => (prev ? prev.map((item, i) => (i === activeIndex ? d : item)) : prev));
+
+    const itemTitle = (item: Record<string, any>) =>
+      String(
+        item?.nome_atracao || item?.nome || item?.titulo || item?.empresa || item?.fornecedor ||
+        item?.operadora || item?.seguradora || item?.navio || item?.trajeto || item?.descricao_cliente || "",
+      ).trim();
+
+    const handleConfirm = () => {
+      const items = includedIdx.map((i) => ({ initialData: mapToInitialData(parsedList[i]), raw: parsedList[i] }));
+      if (items.length === 0) {
+        toast({ title: "Nenhum item selecionado", description: "Inclua pelo menos um serviço para continuar.", variant: "destructive" });
+        return;
+      }
+      if (items.length > 1 && onConfirmMany) {
+        void onConfirmMany(items);
+        return;
+      }
+      onConfirm(items[0].initialData, items[0].raw);
+    };
+
     return (
       <>
+        {total > 1 && (
+          <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border bg-muted/30 p-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold">Item {activeIndex + 1} de {total}</span>
+              {isSkipped && <Badge variant="destructive">Ignorado</Badge>}
+            </div>
+            <span className="max-w-[220px] truncate text-xs text-muted-foreground">
+              {itemTitle(current) || "Sem nome identificado"}
+            </span>
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <Button
+                type="button" variant="outline" size="sm"
+                disabled={activeIndex === 0}
+                onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
+              >
+                <ChevronLeft className="mr-1 h-3 w-3" /> Anterior
+              </Button>
+              <Button
+                type="button" variant="outline" size="sm"
+                disabled={activeIndex >= total - 1}
+                onClick={() => setActiveIndex((i) => Math.min(total - 1, i + 1))}
+              >
+                Próximo <ChevronRight className="ml-1 h-3 w-3" />
+              </Button>
+              <Button
+                type="button" variant={isSkipped ? "default" : "ghost"} size="sm"
+                onClick={() => setSkipped((prev) => prev.map((v, i) => (i === activeIndex ? !v : v)))}
+              >
+                {isSkipped
+                  ? (<><RotateCcw className="mr-1 h-3 w-3" /> Incluir</>)
+                  : (<><Ban className="mr-1 h-3 w-3" /> Ignorar</>)}
+              </Button>
+            </div>
+            <p className="w-full text-[11px] text-muted-foreground">
+              {includedIdx.length} de {total} itens serão adicionados como serviços separados.
+            </p>
+          </div>
+        )}
         <ReviewScreen
-          data={parsed}
-          onChange={setParsed}
+          key={activeIndex}
+          data={current}
+          onChange={updateCurrent}
           fields={fields}
           serviceLabel={serviceLabel}
-          onCancel={() => {
-            setParsed(null);
-            setUploadFile(null);
-            setDebugInfo(null);
-            if (fileInputRef.current) fileInputRef.current.value = "";
-          }}
-          onConfirm={() => {
-            const mapped = mapToInitialData(parsed);
-            onConfirm(mapped, parsed);
-          }}
+          onCancel={resetReview}
+          onConfirm={handleConfirm}
+          confirmLabel={includedIdx.length > 1 ? `Adicionar ${includedIdx.length} serviços` : undefined}
           isAdmin={isAdmin}
           onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}
         />
