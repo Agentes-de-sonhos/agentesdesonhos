@@ -9,6 +9,9 @@ import {
 import { getQuotePdfTokens } from "@/components/quote/QuotePDF";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { resolvePublicAgencyUserId } from "@/lib/usePublicAgencyBrand";
+import { readFileSync } from "node:fs";
+
+const publicQuoteSource = readFileSync("src/pages/OrcamentoPublico.tsx", "utf8");
 
 const customProfile = {
   agency_primary_color: "#0F172A",
@@ -93,6 +96,12 @@ describe("cores da identidade visual nos links públicos", () => {
     expect(style["--brand-secondary"]).toBe("#17A34A");
     expect(style["--brand-on-secondary"]).toBe("#FFFFFF");
     expect(style["--brand-tertiary"]).toBe("#E7F7EE");
+  });
+
+  it("mantém o degradê histórico no cabeçalho e dá contraste próprio ao pictograma", () => {
+    expect(publicQuoteSource).toContain('background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)"');
+    expect(publicQuoteSource).toContain('color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))"');
+    expect(publicQuoteSource).toContain('color: "var(--brand-primary, hsl(var(--primary)))"');
   });
 
   it("sem cor de texto configurada mantém o fallback automático de contraste", () => {
