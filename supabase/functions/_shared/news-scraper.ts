@@ -37,6 +37,11 @@ function googleNewsSiteFeed(domain: string): string {
   return `https://news.google.com/rss/search?q=site:${domain}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
 }
 
+/** Endpoint público de posts da WordPress REST API do próprio portal. */
+function wpJsonPostsFeed(origin: string): string {
+  return `${origin}/wp-json/wp/v2/posts?per_page=40&_fields=link,date_gmt,title,excerpt`;
+}
+
 export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
   "PANROTAS": {
     key: "PANROTAS",
