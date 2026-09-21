@@ -13,6 +13,13 @@ import {
   withCacheBuster,
 } from "@/lib/circularCrop";
 
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+(globalThis as any).ResizeObserver = (globalThis as any).ResizeObserver ?? ResizeObserverStub;
+
 vi.mock("react-easy-crop", () => ({
   __esModule: true,
   default: ({ onCropComplete, cropShape, aspect }: any) => (
