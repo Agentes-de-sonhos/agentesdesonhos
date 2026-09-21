@@ -327,9 +327,13 @@ function stripHtml(text: string): string {
 
 /** Converte a resposta da WordPress REST API do portal em itens brutos. */
 export function parseWpJsonItems(body: string, portal: PortalConfig): RawItem[] {
+  // O espelho de leitura devolve a resposta JSON precedida de um cabeçalho em texto.
+  const start = body.indexOf("[");
+  const end = body.lastIndexOf("]");
+  const json = start >= 0 && end > start ? body.slice(start, end + 1) : body;
   let posts: unknown;
   try {
-    posts = JSON.parse(body);
+    posts = JSON.parse(json);
   } catch {
     return [];
   }
