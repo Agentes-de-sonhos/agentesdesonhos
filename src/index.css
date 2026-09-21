@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Keep nested Kanban menus inside the mobile viewport regardless of the
+   horizontally scrolled card position calculated by Radix Popper. */
+@media (max-width: 767px) {
+  [data-radix-popper-content-wrapper]:has([data-mobile-stage-menu]) {
+    position: fixed !important;
+    inset: auto 0.75rem max(0.75rem, env(safe-area-inset-bottom)) 0.75rem !important;
+    width: auto !important;
+    min-width: 0 !important;
+    transform: none !important;
+    z-index: 300 !important;
+  }
+}
+
 /* Fix EXIF orientation for profile photos on mobile */
 img {
   image-orientation: from-image;

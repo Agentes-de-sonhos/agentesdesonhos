@@ -64,7 +64,7 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       data-testid="kanban-scroll-area"
       className={cn(
         // Única área de rolagem do funil: horizontal (colunas) e vertical (cards).
-        "overflow-x-auto overflow-y-auto overscroll-x-contain cursor-grab touch-pan-x scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent",
+        "overflow-x-auto overflow-y-auto overscroll-x-contain cursor-grab touch-pan-x touch-pan-y scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent",
         // Mobile: cada coluna "trava" no centro da tela; desktop mantém rolagem livre.
         "snap-x snap-mandatory md:snap-none",
         isMaximized
