@@ -265,7 +265,10 @@ Deno.serve(async (req) => {
     if (!aiResp.ok) {
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t.slice(0, 500));
-      return debugFail(currentStage, "ai_error", `Falha na chamada à IA (HTTP ${aiResp.status}).`, 502, { raw_ai_response: t.slice(0, 2000) });
+      const friendly = aiResp.status === 400
+        ? "A IA não conseguiu ler este arquivo. Tente enviar o voucher como imagem (PNG/JPG) ou cole o texto da reserva."
+        : `Falha na chamada à IA (HTTP ${aiResp.status}).`;
+      return debugFail(currentStage, "ai_error", friendly, 502, { raw_ai_response: t.slice(0, 2000) });
     }
 
     const aiJson = await aiResp.json();
