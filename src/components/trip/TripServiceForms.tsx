@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { AirfareSmartImport } from "@/components/quote/flight-wizard/AirfareSmartImport";
 import { normalizeParsedAirfareToLegacy } from "@/components/trip/FlightAutoImport";
+import { normalizeServiceItemFields } from "@/lib/serviceImportFieldAliases";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
