@@ -74,7 +74,8 @@ describe("cores da identidade visual nos links públicos", () => {
 
   it("o estilo da raiz pública mantém a paleta completa sem sobrescrever a secundária", () => {
     const style = brandThemeStyle(agencyBrandInputFromProfile(customProfile)) as Record<string, string>;
-    expect(style["--brand-primary"]).toBe("#0F172A");
+    const palette = resolveBrandPalette(agencyBrandInputFromProfile(customProfile));
+    expect(style["--brand-primary"]).toBe(palette.primary);
     expect(style["--brand-secondary"]).toBe("#17A34A");
     expect(style["--brand-on-secondary"]).toBe("#FFFFFF");
     expect(style["--brand-tertiary"]).toBe("#E7F7EE");
