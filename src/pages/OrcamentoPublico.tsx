@@ -28,7 +28,6 @@ import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
 import { includedIconComponent, includedIconLabel } from "@/lib/includedIcons";
-import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
 import CruiseItineraryTimeline from "@/components/quote/CruiseItineraryTimeline";
@@ -58,8 +57,8 @@ import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog"
 import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
-import { agencyBrandInputFromProfile, pickBrandProfile } from "@/lib/brandTheme";
-import { usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
+import { agencyBrandInputFromProfile, brandThemeStyle, pickBrandProfile } from "@/lib/brandTheme";
+import { resolvePublicAgencyUserId, usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { publicAirportText } from "@/lib/airportDisplay";
 
 function getServiceLabel(service: QuoteService): string {
@@ -1354,17 +1353,25 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // isso a paleta é resolvida a partir do primeiro perfil que realmente possui
   // cores configuradas, e o resolvedor compartilhado garante que o orçamento
   // web gere os mesmos tokens do PDF (incluindo o texto sobre a secundária).
-  const publicBrand = usePublicAgencyBrand(quote?.user_id, {
-    enabled: !pickBrandProfile([agentProfileOverride, fetchedAgentProfile, fetchedTokenAgentProfile]),
-  });
+  // Links legados por token omitem `quote.user_id`; a identidade já presente
+  // no payload público permite buscar a configuração viva sem ampliar dados.
+  const publicAgencyUserId = resolvePublicAgencyUserId(
+    quote as unknown as Record<string, unknown> | null,
+    agentProfile as unknown as Record<string, unknown> | null,
+  );
+
+  // O perfil embutido no link pode ser um snapshot anterior à última alteração
+  // de identidade visual. Sempre consultar a marca viva e dar prioridade a ela.
+  const publicBrand = usePublicAgencyBrand(publicAgencyUserId);
   const brandProfile =
     pickBrandProfile([
+      publicBrand,
       agentProfileOverride,
       fetchedAgentProfile,
       fetchedTokenAgentProfile,
-      publicBrand,
     ]) ?? agentProfile;
-  useAgencyBrandTheme(agencyBrandInputFromProfile(brandProfile as any));
+  const brandInput = agencyBrandInputFromProfile(brandProfile as any);
+  useAgencyBrandTheme(brandInput);
 
   if (isLoading) {
     return (
@@ -1485,7 +1492,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     >
     <div
       className="min-h-screen bg-[hsl(var(--background))]"
-      style={getWalletBrandStyle(agentProfile?.agency_primary_color, (agentProfile as any)?.agency_secondary_color)}
+      style={brandThemeStyle(brandInput)}
     >
       {/* ─── Slim Premium Header ─── */}
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
