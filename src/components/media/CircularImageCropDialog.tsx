@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import {
   Dialog,
@@ -79,6 +79,12 @@ export function CircularImageCropDialog({
   // Máscara REAL do recorte: ~88% da menor dimensão do palco medido
   // (mesma área usada no preview e na imagem exportada).
   const maskSide = cropMaskSide(stageSize);
+  // identidade estável: um objeto novo a cada render faz o Cropper recalcular
+  // em laço (o recálculo dispara onCropComplete e volta a renderizar).
+  const cropSize = useMemo(
+    () => (maskSide > 0 ? { width: maskSide, height: maskSide } : undefined),
+    [maskSide],
+  );
   const fitZoom = mediaSize
     ? initialZoomForMedia({
         mediaWidth: mediaSize.width,
@@ -127,7 +133,15 @@ export function CircularImageCropDialog({
   }, [open, imageSrc]);
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
-    setCroppedArea(pixels);
+    setCroppedArea((prev) =>
+      prev &&
+      prev.x === pixels.x &&
+      prev.y === pixels.y &&
+      prev.width === pixels.width &&
+      prev.height === pixels.height
+        ? prev
+        : pixels,
+    );
   }, []);
 
   const setZoom = useCallback((next: number) => {
@@ -209,7 +223,7 @@ export function CircularImageCropDialog({
             maxZoom={MAX_ZOOM}
             restrictPosition={false}
             objectFit="contain"
-            {...(maskSide ? { cropSize: { width: maskSide, height: maskSide } } : {})}
+            {...(cropSize ? { cropSize } : {})}
             onMediaLoaded={handleMediaLoaded}
             onCropChange={(next) => setCropState((prev) => ({ ...prev, crop: next }))}
             onZoomChange={setZoom}
