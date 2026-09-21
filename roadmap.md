@@ -20,3 +20,4 @@
 - [x] Calendários de intervalo: um mês no mobile com setas e swipe (Fase 1 compartilhada + Fase 2 formulários locais).
 - [x] Refinar UX/UI mobile da página inicial e dos quatro fluxos rápidos, preservando toda a lógica e sem publicar.
 - [x] Seletor editável de ícones na etapa "Incluso" do orçamento (editor, web público e PDF), sem migration e sem publicar.
+- [x] Remover o bloco de acesso por código da Área do Cliente compartilhada em SiteLab Base e todos os sites, sem publicar.

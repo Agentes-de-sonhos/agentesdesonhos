@@ -100,13 +100,11 @@ describe('tela de login', () => {
     expect(screen.getByTestId('client-area-internal-logo-placeholder')).toBeTruthy()
   })
 
-  it('mantém o acesso por código como opção secundária recolhida', async () => {
+  it('não exibe o acesso legado por código', async () => {
     renderPage()
-    const toggle = await screen.findByRole('button', { name: /Recebeu um link com código/i })
+    await waitFor(() => expect(screen.getByLabelText('E-mail')).toBeTruthy())
+    expect(screen.queryByRole('button', { name: /Recebeu um link com código/i })).toBeNull()
     expect(screen.queryByLabelText('Código de acesso')).toBeNull()
-    fireEvent.click(toggle)
-    expect(screen.getByLabelText('Código de acesso')).toBeTruthy()
-    expect(screen.getByText(/somente para acessar um conteúdo específico/i)).toBeTruthy()
   })
 
   it('associa o erro de login aos campos, sem chamar o servidor', async () => {
@@ -220,7 +218,6 @@ describe('proteção da rota autenticada', () => {
     'src/components/whitelabel/clientarea/ClientAreaLogin.tsx',
     'src/components/whitelabel/clientarea/ClientAreaSections.tsx',
     'src/components/whitelabel/clientarea/ClientAreaSupportCard.tsx',
-    'src/components/whitelabel/clientarea/ClientAreaCodeAccess.tsx',
   ].map((f) => [f, readFileSync(f, 'utf8')] as const)
 
   it('não usa HTML inseguro nem scripts externos', () => {
