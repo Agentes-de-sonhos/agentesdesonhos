@@ -18,3 +18,4 @@
 - [x] Compactar o cabeçalho mobile da página inicial, ampliar os quatro atalhos e remover o suporte flutuante global, sem publicar.
 - [x] Tornar os quatro formulários rápidos do dashboard fullscreen e seguros com teclado no mobile, preservando desktop e regras atuais.
 - [x] Calendários de intervalo: um mês no mobile com setas e swipe (Fase 1 compartilhada + Fase 2 formulários locais).
+- [ ] Refinar UX/UI mobile da página inicial e dos quatro fluxos rápidos, preservando toda a lógica e sem publicar.
