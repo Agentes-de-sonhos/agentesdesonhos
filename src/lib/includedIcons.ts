@@ -27,7 +27,7 @@ import {
   Ticket,
   Camera,
   MapPin,
-  Map,
+  Map as MapIcon,
   Mountain,
   Waves,
   Sun,
@@ -91,7 +91,7 @@ export const INCLUDED_ICONS: IncludedIconDef[] = [
   // Passeios e ingressos
   { id: "ticket", label: "Ingresso", category: "passeios", aliases: ["ingresso", "ticket", "parque", "entrada", "atracao", "passeio"], Icon: Ticket },
   { id: "camera", label: "Câmera / tour", category: "passeios", aliases: ["camera", "foto", "tour", "city tour", "passeio"], Icon: Camera },
-  { id: "map", label: "Mapa", category: "passeios", aliases: ["mapa", "roteiro", "itinerario"], Icon: Map },
+  { id: "map", label: "Mapa", category: "passeios", aliases: ["mapa", "roteiro", "itinerario"], Icon: MapIcon },
   { id: "pin", label: "Destino", category: "passeios", aliases: ["destino", "local", "ponto", "cidade"], Icon: MapPin },
   { id: "mountain", label: "Montanha", category: "passeios", aliases: ["montanha", "trilha", "natureza", "serra"], Icon: Mountain },
   { id: "beach", label: "Praia", category: "passeios", aliases: ["praia", "mar", "litoral", "ondas"], Icon: Waves },
