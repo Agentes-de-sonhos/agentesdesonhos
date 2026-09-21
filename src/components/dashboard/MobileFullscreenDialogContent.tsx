@@ -124,7 +124,7 @@ export function MobileFullscreenDialogContent({
         ref={bodyRef}
         data-mobile-dialog-body
         className={cn(
-          "min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 [scroll-padding-bottom:7rem] [scroll-padding-top:1rem] [&>form]:min-h-full [&>form]:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:overflow-y-auto md:p-0 md:[&>form]:min-h-0 md:[&>form]:pb-0",
+          "min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 [scroll-padding-bottom:7rem] [scroll-padding-top:1rem] [&>form]:min-h-full [&>form]:pb-[max(0.5rem,env(safe-area-inset-bottom))] [&>form>button[type=submit]:last-child]:sticky [&>form>button[type=submit]:last-child]:bottom-0 [&>form>button[type=submit]:last-child]:z-10 [&>form>button[type=submit]:last-child]:shadow-lg md:overflow-y-auto md:p-0 md:[&>form]:min-h-0 md:[&>form]:pb-0 md:[&>form>button[type=submit]:last-child]:static md:[&>form>button[type=submit]:last-child]:shadow-sm",
           bodyClassName,
         )}
       >

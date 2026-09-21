@@ -113,7 +113,7 @@ export function NotificationsDropdown() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[22rem] p-0 overflow-hidden"
+        className="w-[calc(100vw-1rem)] max-w-[22rem] overflow-hidden p-0"
         align="end"
         sideOffset={8}
       >
@@ -123,7 +123,7 @@ export function NotificationsDropdown() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs text-muted-foreground hover:text-foreground"
+              className="min-h-11 text-xs text-foreground hover:bg-accent md:min-h-8"
               onClick={() => {
                 markAllRead.mutate();
                 markCommunityRead.mutate(undefined);
