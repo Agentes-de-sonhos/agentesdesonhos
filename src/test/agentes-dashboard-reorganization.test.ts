@@ -157,6 +157,6 @@ describe("paginação contínua da Comunidade no dashboard", () => {
     for (const operation of [
       "createPost", "updatePost", "deletePost", "toggleLike", "fetchComments", "addComment", "deleteComment", "votePoll",
     ]) expect(hook).toContain(operation);
-    expect(hook.match(/invalidateQueries\(\{ queryKey: \[\"community-feed\"\] \}\)/g)?.length).toBeGreaterThanOrEqual(6);
+    expect(hook.match(/invalidateQueries\(\{ queryKey: \["community-feed"\] \}\)/g)?.length).toBeGreaterThanOrEqual(6);
   });
 });

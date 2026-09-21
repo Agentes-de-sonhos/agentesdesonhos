@@ -86,8 +86,12 @@ export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
       toast({ title: "Cliente cadastrado" });
       handleClose(false);
       onCreated?.({ id: client.id, name: client.name });
-    } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      toast({
+        title: "Erro",
+        description: err instanceof Error ? err.message : "Falha ao criar cliente",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
