@@ -677,7 +677,6 @@ export default function Onboarding() {
           </CardContent>
         </Card>
       </div>
-    </div>
 
       {cropSource && (
         <CircularImageCropDialog
