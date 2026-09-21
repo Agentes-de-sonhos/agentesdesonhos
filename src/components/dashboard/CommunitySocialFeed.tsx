@@ -134,7 +134,7 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
     <Card className="mx-0 w-full overflow-visible border-0 shadow-card md:rounded-none md:border-x-0 md:shadow-none lg:rounded-lg lg:border-x">
       <CardContent className="min-w-0 space-y-3 px-0 pb-5 pt-3 lg:px-6 lg:pt-5">
         <div
-          className="flex min-w-0 flex-col gap-3 px-3 sm:px-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-x-6 lg:gap-y-3 lg:px-0"
+          className="flex min-w-0 flex-col gap-3 px-3 sm:px-4 lg:grid lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:items-center lg:gap-x-6 lg:gap-y-3 lg:px-0"
           data-dashboard-community-header-row
         >
           <div className="min-w-0 lg:col-start-1 lg:row-start-1">
@@ -142,13 +142,13 @@ export function CommunitySocialFeed(_props: CommunitySocialFeedProps = {}) {
           </div>
           {can("online_users.view") && (
             <div
-              className="relative z-20 lg:col-start-2 lg:row-start-1 lg:justify-self-end"
+              className="relative z-20 shrink-0 lg:col-start-3 lg:row-start-1 lg:justify-self-end"
               data-dashboard-online-users
             >
               <OnlineAgentsStrip compact />
             </div>
           )}
-          <div className="min-w-0 lg:col-start-1 lg:row-start-2" data-dashboard-community-actions>
+          <div className="min-w-0 lg:col-start-2 lg:row-start-1" data-dashboard-community-actions>
             <CommunityComposerLauncher compact onSubmit={createPost} isCreating={isCreating} />
           </div>
         </div>
