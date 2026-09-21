@@ -315,7 +315,7 @@ Deno.serve(async (req) => {
 
     currentStage = "sent_to_ai";
     const userContent: any[] = [
-      { type: "text", text: `${SCHEMAS[serviceType].promptExtras} Se o ANO não estiver visível, preserve a data curta como aparece e adicione 'ano_pendente' em campos_nao_identificados. SEMPRE chame ${SCHEMAS[serviceType].fnName}.` },
+      { type: "text", text: `${SCHEMAS[serviceType].promptExtras} Se o documento tiver VÁRIOS serviços (ex.: ingressos de parques diferentes), devolva UM ITEM POR SERVIÇO no array "itens" — nunca um pacote único somado. Se o ANO não estiver visível, preserve a data curta como aparece e adicione 'ano_pendente' em campos_nao_identificados. SEMPRE chame ${SCHEMAS[serviceType].fnName}.` },
     ];
     if (text) userContent.push({ type: "text", text: `TEXTO EXTRAÍDO DO DOCUMENTO:\n\n${text}` });
     if (fileBase64) {
