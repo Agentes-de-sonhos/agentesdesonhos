@@ -87,11 +87,13 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(app).toContain('<Route path="/suporte" element={<Suporte />} />');
   });
 
-  it("combina compositor e presença na mesma linha no desktop", () => {
+  it("alinha a presença ao título Comunidade no desktop, sem mudar o mobile", () => {
     expect(feed).not.toContain("Ver toda a comunidade");
     expect(feed).toContain('can("online_users.view") && (');
+    expect(feed).toContain("data-dashboard-community-header-row");
     expect(feed).toContain("data-dashboard-community-actions");
-    expect(feed).toContain("lg:flex-row lg:items-center");
+    expect(feed).toContain("lg:grid lg:grid-cols-[minmax(0,1fr)_auto]");
+    expect(feed).toContain("lg:col-start-2 lg:row-start-1 lg:justify-self-end");
     expect(feed).toContain("data-dashboard-online-users");
     expect(feed.match(/<OnlineAgentsStrip compact \/>/g)).toHaveLength(1);
   });
