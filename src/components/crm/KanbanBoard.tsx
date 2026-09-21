@@ -83,7 +83,7 @@ function SortableColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn("w-[290px] flex-shrink-0", isMaximized && "h-full")}
+      className={cn("w-[290px] flex-shrink-0 snap-center md:snap-align-none", isMaximized && "h-full")}
     >
       {children({
         dragHandleProps: { ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>,
