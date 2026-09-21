@@ -6,7 +6,7 @@ import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation } from "@/lib/servicePayment";
 import { splitFlightLegs } from "@/lib/flightSegments";
-import { resolveBrandPalette, normalizeBrandHex } from "@/lib/brandTheme";
+import { agencyBrandInputFromProfile, resolveBrandPalette, normalizeBrandHex } from "@/lib/brandTheme";
 import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
@@ -193,11 +193,7 @@ function ensureReadable(fg: string, bg: string, min = 4.5): string {
 export function getQuotePdfTokens(profile: AgentProfile | null | undefined): PdfTokens {
   const onSecondaryOverride = normalizeBrandHex(profile?.agency_on_secondary_color ?? null);
   const palette = resolveBrandPalette({
-    primary: profile?.agency_primary_color ?? null,
-    secondary: profile?.agency_secondary_color ?? null,
-    secondaryAuto: profile?.agency_secondary_auto ?? null,
-    tertiary: profile?.agency_tertiary_color ?? null,
-    tertiaryAuto: profile?.agency_tertiary_auto ?? null,
+    ...agencyBrandInputFromProfile(profile),
     onSecondary: onSecondaryOverride,
   });
   const tertiary = palette.tertiary;
