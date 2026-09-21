@@ -301,7 +301,7 @@ export function GenericServiceSmartImport({
           serviceLabel={serviceLabel}
           onCancel={resetReview}
           onConfirm={handleConfirm}
-          confirmLabel={includedIdx.length > 1 ? `Adicionar ${includedIdx.length} serviços` : undefined}
+          confirmLabel={canAddMany && includedIdx.length > 1 ? `Adicionar ${includedIdx.length} serviços` : undefined}
           isAdmin={isAdmin}
           onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}
         />
