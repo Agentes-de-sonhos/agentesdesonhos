@@ -46,6 +46,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CircularImageCropDialog } from "@/components/media/CircularImageCropDialog";
+import {
+  circularImageStoragePaths,
+  readImageAsOrientedDataUrl,
+  validateCircularImageFile,
+  withCacheBuster,
+} from "@/lib/circularCrop";
 
 const brazilianStates = [
   "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
