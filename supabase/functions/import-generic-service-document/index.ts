@@ -101,7 +101,12 @@ const SCHEMAS: Record<ServiceKey, { fnName: string; description: string; propert
       ponto_encontro: { type: "string" },
       ...COMMON_META,
     },
-    promptExtras: "Documento de INGRESSO/PASSEIO/ATRAÇÃO TURÍSTICA. Identifique nome do produto, tipo, datas, quantidades e valores por adulto/criança.",
+    promptExtras: "Documento de INGRESSO/PASSEIO/ATRAÇÃO TURÍSTICA. Identifique nome do produto, tipo, datas, quantidades e valores por adulto/criança. " +
+      "Use SEMPRE as chaves 'nome_produto' e 'tipo_ingresso' (nunca 'produto', 'descricao', 'name' ou 'ticketType'). " +
+      "Quando a linha trouxer parque e modalidade juntos (ex.: 'Walt Disney World - ingresso base de 4 dias'), coloque o parque/atração em 'nome_produto' " +
+      "('Walt Disney World') e a modalidade/duração em 'tipo_ingresso' ('Ingresso base de 4 dias'). " +
+      "Se a separação não for inequívoca (ex.: 'Combo SeaWorld + Busch Gardens'), preserve a descrição completa em 'nome_produto'. " +
+      "NUNCA devolva 'nome_produto' vazio quando houver descrição legível na linha, e mantenha cada valor vinculado à sua própria linha.",
   },
   insurance: {
     fnName: "extract_insurance_document",
