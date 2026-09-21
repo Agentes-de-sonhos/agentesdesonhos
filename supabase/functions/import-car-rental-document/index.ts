@@ -8,12 +8,12 @@ const corsHeaders = {
 
 const SYSTEM_PROMPT = `Você é um extrator de RESERVAS / ORÇAMENTOS DE LOCAÇÃO DE VEÍCULOS (aluguel de carro, RAC, locadoras como Localiza, Hertz, Movida, Avis, Europcar, Budget, RentCars, etc.) para agências de viagens brasileiras.
 Sua ÚNICA tarefa: ler vouchers, confirmações de reserva, e-mails, prints, PDFs e textos de LOCAÇÃO DE VEÍCULOS (em IMAGEM, texto ou ambos)
-e devolver os dados estruturados usando a função "extract_car_rental_document".
+e devolver os dados estruturados em um único objeto JSON.
 
 REGRA #1 — POSTURA DE EXTRAÇÃO.
 - NUNCA desista. Mesmo com campos ilegíveis, EXTRAIA TUDO o que conseguir.
 - Deixe vazio/null o que não tiver certeza. Liste em "campos_nao_identificados" o nome dos campos que ficaram em branco.
-- SEMPRE chame a função extract_car_rental_document. NUNCA retorne texto explicando que o documento está ruim.
+- SEMPRE devolva um objeto JSON. NUNCA retorne texto explicando que o documento está ruim.
 
 REGRA #2 — DATAS / HORÁRIOS.
 - Sempre que o ANO estiver visível no documento, preencha datas como "YYYY-MM-DD".
@@ -67,7 +67,7 @@ FONTES DE ENTRADA:
 - Você pode receber a IMAGEM/PDF original e/ou texto extraído. Use AMBAS. A imagem é primária para logos e estrutura visual; o texto é confiável para números, datas e códigos.
 
 IMPORTANTE FINAL:
-- NÃO INVENTE ANO. NÃO INVENTE VALORES. SEMPRE chame extract_car_rental_document.`;
+- NÃO INVENTE ANO. NÃO INVENTE VALORES. DEVOLVA SOMENTE JSON VÁLIDO.`;
 
 const TOOL_SCHEMA = {
   type: "function",
@@ -216,7 +216,7 @@ Deno.serve(async (req) => {
         "valores (total, diária, moeda, câmbio), taxas e extras, políticas de combustível/cancelamento, " +
         "requisitos do motorista, observações, código/localizador da reserva, link, e fornecedor. " +
         "Se o ANO não estiver visível, preserve a data curta exatamente como aparece e adicione 'ano_pendente' em campos_nao_identificados. " +
-        "SEMPRE chame extract_car_rental_document — nunca retorne texto explicativo.",
+        "Devolva somente um objeto JSON válido — nunca retorne texto explicativo.",
     });
     if (text) {
       userContent.push({ type: "text", text: `TEXTO EXTRAÍDO DO DOCUMENTO:\n\n${text}` });
@@ -246,10 +246,17 @@ Deno.serve(async (req) => {
           model: "google/gemini-2.5-pro",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: content },
+            {
+              role: "user",
+              content: [
+                ...content,
+                {
+                  type: "text",
+                  text: "Retorne somente um objeto JSON válido com os campos solicitados, sem markdown e sem texto explicativo.",
+                },
+              ],
+            },
           ],
-          tools: [TOOL_SCHEMA],
-          tool_choice: { type: "function", function: { name: "extract_car_rental_document" } },
           temperature: 0,
           max_tokens: 6000,
         }),

@@ -9,6 +9,7 @@ import { Loader2, Upload, Sparkles, CheckCircle2, AlertTriangle, X, Bug, Chevron
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { extractPdfText } from "@/lib/pdfText";
+import { shouldSendFileBase64 } from "@/lib/fullPackageImportPayload";
 import { extractParsedServices } from "@/lib/serviceImportList";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -135,16 +136,23 @@ export function GenericServiceSmartImport({
         }
       }
 
-      const fileBase64 = uploadFile ? await fileToBase64(uploadFile) : undefined;
       let extractedText = hasText ? pastedText.trim() : "";
+      let pdfText = "";
       if (uploadFile && uploadFile.type === "application/pdf") {
         try {
-          const pdfText = await extractPdfText(uploadFile);
+          pdfText = await extractPdfText(uploadFile);
           extractedText = extractedText ? `${extractedText}\n\n${pdfText}` : pdfText;
         } catch (e) {
           console.warn("PDF text extraction failed:", e);
         }
       }
+
+      const sendBinary = shouldSendFileBase64({
+        hasFile: !!uploadFile,
+        mimeType: uploadFile?.type,
+        extractedText: pdfText,
+      });
+      const fileBase64 = uploadFile && sendBinary ? await fileToBase64(uploadFile) : undefined;
 
       const { data, error } = await supabase.functions.invoke("import-generic-service-document", {
         body: {
