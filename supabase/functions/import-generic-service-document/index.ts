@@ -378,26 +378,53 @@ Deno.serve(async (req) => {
       return debugFail(currentStage, "parse_error", "A IA retornou uma resposta sem estrutura reconhecível. Tente novamente com uma imagem mais nítida.", 422, { raw_ai_response: rawAiText });
     }
 
-    parsed.observacoes = Array.isArray(parsed.observacoes) ? parsed.observacoes : [];
-    parsed.campos_nao_identificados = Array.isArray(parsed.campos_nao_identificados) ? parsed.campos_nao_identificados : [];
-    parsed.confianca_extracao = parsed.confianca_extracao || {};
-    const confidence = Number(parsed.confianca_extracao?.geral) || 0;
+    // Compatibilidade: aceita { itens: [...] }, array puro ou objeto singular antigo.
+    const rawList: any[] = Array.isArray(parsed?.itens)
+      ? parsed.itens
+      : Array.isArray(parsed?.servicos)
+        ? parsed.servicos
+        : Array.isArray(parsed)
+          ? parsed
+          : [parsed];
 
-    // Check usefulness — generic: any non-empty primary field
-    const valueKeys = Object.keys(parsed).filter((k) => k !== "confianca_extracao" && k !== "campos_nao_identificados");
-    const hasAnyUseful = valueKeys.some((k) => {
-      const v = parsed[k];
-      if (v == null || v === "") return false;
-      if (Array.isArray(v)) return v.length > 0;
-      if (typeof v === "object") return Object.keys(v).length > 0;
-      return true;
-    });
+    const normalizeItem = (item: any) => {
+      const s = item && typeof item === "object" ? { ...item } : {};
+      s.observacoes = Array.isArray(s.observacoes) ? s.observacoes : [];
+      s.campos_nao_identificados = Array.isArray(s.campos_nao_identificados) ? s.campos_nao_identificados : [];
+      s.confianca_extracao = s.confianca_extracao || {};
+      return s;
+    };
 
-    if (!hasAnyUseful) {
-      return debugFail("low_confidence", "no_useful_data", "A IA não conseguiu identificar dados úteis. Tente uma imagem com melhor resolução ou preencha manualmente.", 200, { raw_ai_response: rawAiText, partial_data: parsed, confidence_score: confidence });
+    // Útil = qualquer campo principal preenchido (ignora metadados de confiança).
+    const hasUseful = (s: any) => Object.keys(s)
+      .filter((k) => k !== "confianca_extracao" && k !== "campos_nao_identificados" && k !== "observacoes")
+      .some((k) => {
+        const v = s[k];
+        if (v == null || v === "") return false;
+        if (Array.isArray(v)) return v.length > 0;
+        if (typeof v === "object") return Object.keys(v).length > 0;
+        return true;
+      });
+
+    const normalized = rawList.map(normalizeItem);
+    const items = normalized.filter(hasUseful);
+    const first = items[0] || normalized[0] || normalizeItem(null);
+    const confidence = Number(first.confianca_extracao?.geral) || 0;
+
+    if (items.length === 0) {
+      return debugFail("low_confidence", "no_useful_data", "A IA não conseguiu identificar dados úteis. Tente uma imagem com melhor resolução ou preencha manualmente.", 200, { raw_ai_response: rawAiText, partial_data: first, confidence_score: confidence });
     }
 
-    return json({ success: true, stage: "validation", confidence_score: confidence, data: parsed, ...parsed }, 200);
+    return json({
+      success: true,
+      stage: "validation",
+      confidence_score: confidence,
+      items_count: items.length,
+      items,
+      // Compatibilidade com consumidores singulares existentes.
+      data: first,
+      ...first,
+    }, 200);
   } catch (err) {
     console.error("import-generic-service-document fatal:", err);
     return debugFail(currentStage, "fatal", String((err as any)?.message || err), 500, { raw_ai_response: rawAiText });
