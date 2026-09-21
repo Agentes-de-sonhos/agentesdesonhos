@@ -58,6 +58,7 @@ import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInputFromProfile, pickBrandProfile } from "@/lib/brandTheme";
+import { usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { publicAirportText } from "@/lib/airportDisplay";
 
 function getServiceLabel(service: QuoteService): string {
@@ -1352,11 +1353,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // isso a paleta é resolvida a partir do primeiro perfil que realmente possui
   // cores configuradas, e o resolvedor compartilhado garante que o orçamento
   // web gere os mesmos tokens do PDF (incluindo o texto sobre a secundária).
-  const brandProfile = pickBrandProfile([
-    agentProfileOverride,
-    fetchedAgentProfile,
-    fetchedTokenAgentProfile,
-  ]) ?? agentProfile;
+  const publicBrand = usePublicAgencyBrand(quote?.user_id, {
+    enabled: !pickBrandProfile([agentProfileOverride, fetchedAgentProfile, fetchedTokenAgentProfile]),
+  });
+  const brandProfile =
+    pickBrandProfile([
+      agentProfileOverride,
+      fetchedAgentProfile,
+      fetchedTokenAgentProfile,
+      publicBrand,
+    ]) ?? agentProfile;
   useAgencyBrandTheme(agencyBrandInputFromProfile(brandProfile as any));
 
   if (isLoading) {
