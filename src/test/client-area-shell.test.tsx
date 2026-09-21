@@ -150,6 +150,8 @@ describe('área autenticada', () => {
   it('exibe saudação, agência e conteúdo verdadeiro sobre viagens', async () => {
     await loggedIn()
     expect(screen.getByText(/Bem-vindo à sua área exclusiva/i)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /Recebeu um link com código/i })).toBeNull()
+    expect(screen.queryByLabelText('Código de acesso')).toBeNull()
     // Sem viagens reais, a home é honesta: nada de destino ou data inventados.
     expect(await screen.findByRole('heading', { name: 'Suas viagens em um só lugar' })).toBeTruthy()
     expect(screen.queryByText(/pontos/i)).toBeNull()
