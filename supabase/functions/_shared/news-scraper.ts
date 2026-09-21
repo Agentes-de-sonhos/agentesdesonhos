@@ -411,8 +411,12 @@ export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
       const items = parseWpJsonItems(res.body, portal).filter(
         (n) => n.url_canonical && isProbablyArticleUrl(n.url_canonical),
       );
-      if (items.length > 0) collected.push(...items);
-      else errors.push(`Resposta sem itens utilizáveis em ${url}`);
+      if (items.length > 0) {
+        collected.push(...items);
+        // Uma fonte direta atualizada basta; as demais são apenas alternativas.
+        break;
+      }
+      errors.push(`Resposta sem itens utilizáveis em ${url}`);
     } else {
       errors.push(res.error);
     }
