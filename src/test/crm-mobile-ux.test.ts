@@ -52,6 +52,7 @@ describe("CRM mobile UX — alvos de toque e rolagem por etapa", () => {
     expect(moveToStageMenu).toContain("avoidCollisions");
     expect(moveToStageMenu).toContain("100dvh");
     expect(moveToStageMenu).toContain("overflow-y-auto overscroll-contain touch-pan-y");
+    expect(moveToStageMenu).toContain("max-md:!fixed max-md:!inset-x-3");
   });
 
   it("menus dos cartões têm 44px no mobile", () => {

@@ -51,7 +51,7 @@ export function MoveToStageMenu({ targets, currentStageId, onMoveToStage }: Move
         alignOffset={-4}
         collisionPadding={12}
         avoidCollisions
-        className="z-[100] w-56 max-h-[min(var(--radix-dropdown-menu-content-available-height),calc(100dvh-max(1rem,env(safe-area-inset-top))-max(1rem,env(safe-area-inset-bottom))))] overflow-y-auto overscroll-contain touch-pan-y"
+        className="z-[300] w-56 max-h-[min(var(--radix-dropdown-menu-content-available-height),calc(100dvh-max(1rem,env(safe-area-inset-top))-max(1rem,env(safe-area-inset-bottom))))] overflow-y-auto overscroll-contain touch-pan-y max-md:!fixed max-md:!inset-x-3 max-md:!bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-md:!top-auto max-md:!w-auto max-md:!translate-x-0 max-md:!translate-y-0"
       >
         <DropdownMenuLabel className="sticky top-0 z-10 bg-popover text-xs text-muted-foreground">
           Mover para
