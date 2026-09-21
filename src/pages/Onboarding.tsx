@@ -678,5 +678,21 @@ export default function Onboarding() {
         </Card>
       </div>
     </div>
+
+      {cropSource && (
+        <CircularImageCropDialog
+          open
+          imageSrc={cropSource.src}
+          sourceMime={cropSource.mime}
+          title="Ajustar foto do agente"
+          description="Arraste e use o zoom para escolher o que aparece dentro do círculo da sua foto."
+          confirmLabel="Salvar imagem"
+          saving={uploadingAvatar}
+          onReplace={() => fileInputRef.current?.click()}
+          onCancel={() => setCropSource(null)}
+          onConfirm={handleCroppedAvatar}
+        />
+      )}
+    </div>
   );
 }
