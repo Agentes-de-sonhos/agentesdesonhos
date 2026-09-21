@@ -450,7 +450,7 @@ export function OpportunityCard({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                <Button variant="ghost" size="icon" aria-label="Ações da oportunidade" className="h-11 w-11 flex-shrink-0 md:h-7 md:w-7">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

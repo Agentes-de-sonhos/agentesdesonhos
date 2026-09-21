@@ -349,20 +349,20 @@ export function KanbanBoard() {
       <div className="flex min-h-0 flex-1 flex-col gap-3">
 
         <KanbanToolbarSlot>
-          <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+          <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar"
               aria-label="Buscar oportunidades"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 pl-8 text-xs"
+              className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             {canCreateOpp && (
               <DialogTrigger asChild>
-                <Button size="sm" className="h-8 shrink-0 gap-1 px-2.5 text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
+                <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
                   <Plus className="h-3.5 w-3.5" /> Nova
                 </Button>
               </DialogTrigger>
