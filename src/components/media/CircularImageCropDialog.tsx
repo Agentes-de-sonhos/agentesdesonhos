@@ -88,21 +88,34 @@ export function CircularImageCropDialog({
       })
     : 1;
 
-  useEffect(() => {
-    if (!open) return;
-    const el = stageRef.current;
+  const observerRef = useRef<ResizeObserver | null>(null);
+
+  /**
+   * Mede o palco assim que ele existe (ref de callback: o diálogo monta em
+   * portal, então um efeito pode rodar antes do elemento estar no layout).
+   */
+  const attachStage = useCallback((el: HTMLDivElement | null) => {
+    stageRef.current = el;
+    observerRef.current?.disconnect();
+    observerRef.current = null;
     if (!el) return;
-    const measure = () =>
-      setStageSize({ width: el.clientWidth, height: el.clientHeight });
+    const measure = () => {
+      const width = el.clientWidth;
+      const height = el.clientHeight;
+      setStageSize((prev) => (prev.width === width && prev.height === height ? prev : { width, height }));
+    };
     measure();
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", measure);
-      return () => window.removeEventListener("resize", measure);
+    // segunda medição no próximo frame: durante a animação de abertura o
+    // elemento pode ainda estar com altura zero
+    requestAnimationFrame(measure);
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(measure);
+      observer.observe(el);
+      observerRef.current = observer;
     }
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [open]);
+  }, []);
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
 
   useEffect(() => {
     if (open) {
@@ -179,7 +192,7 @@ export function CircularImageCropDialog({
         </DialogHeader>
 
         <div
-          ref={stageRef}
+          ref={attachStage}
           className="relative mx-auto h-[320px] w-full max-w-sm overflow-hidden rounded-lg bg-muted sm:h-[360px]"
           data-testid="circular-crop-stage"
           data-mask-ratio={CROP_MASK_RATIO}
