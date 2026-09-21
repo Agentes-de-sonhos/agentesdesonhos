@@ -58,7 +58,7 @@ import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInputFromProfile, brandThemeStyle, pickBrandProfile } from "@/lib/brandTheme";
-import { usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
+import { resolvePublicAgencyUserId, usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { publicAirportText } from "@/lib/airportDisplay";
 
 function getServiceLabel(service: QuoteService): string {
@@ -1353,9 +1353,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   // isso a paleta é resolvida a partir do primeiro perfil que realmente possui
   // cores configuradas, e o resolvedor compartilhado garante que o orçamento
   // web gere os mesmos tokens do PDF (incluindo o texto sobre a secundária).
+  // Links legados por token omitem `quote.user_id`; a identidade já presente
+  // no payload público permite buscar a configuração viva sem ampliar dados.
+  const publicAgencyUserId = resolvePublicAgencyUserId(
+    quote as unknown as Record<string, unknown> | null,
+    agentProfile as unknown as Record<string, unknown> | null,
+  );
+
   // O perfil embutido no link pode ser um snapshot anterior à última alteração
   // de identidade visual. Sempre consultar a marca viva e dar prioridade a ela.
-  const publicBrand = usePublicAgencyBrand(quote?.user_id);
+  const publicBrand = usePublicAgencyBrand(publicAgencyUserId);
   const brandProfile =
     pickBrandProfile([
       publicBrand,

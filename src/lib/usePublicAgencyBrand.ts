@@ -10,6 +10,43 @@ export interface PublicAgencyBrand {
   agency_on_secondary_color: string | null;
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function validUserId(value: unknown): string | null {
+  return typeof value === "string" && UUID_PATTERN.test(value) ? value : null;
+}
+
+/**
+ * Resolve o identificador da agência somente a partir de dados já presentes
+ * no payload público. Links antigos não expõem `quote.user_id`, mas snapshots
+ * de assinatura e URLs públicas de logo/avatar já carregam esse identificador.
+ */
+export function resolvePublicAgencyUserId(
+  quote: Record<string, unknown> | null | undefined,
+  profile: Record<string, unknown> | null | undefined,
+): string | null {
+  const direct = validUserId(quote?.user_id) ?? validUserId(profile?.user_id);
+  if (direct) return direct;
+
+  const signature = quote?.signature_snapshot;
+  if (signature && typeof signature === "object") {
+    const signatureId = (signature as Record<string, unknown>).id;
+    if (typeof signatureId === "string") {
+      const fromSignature = validUserId(signatureId.replace(/^system:/, ""));
+      if (fromSignature) return fromSignature;
+    }
+  }
+
+  for (const value of [profile?.agency_logo_url, profile?.avatar_url]) {
+    if (typeof value !== "string") continue;
+    const match = value.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i);
+    const fromPublicAsset = validUserId(match?.[0]);
+    if (fromPublicAsset) return fromPublicAsset;
+  }
+
+  return null;
+}
+
 /**
  * Cores da identidade visual da agência para páginas PÚBLICAS.
  *

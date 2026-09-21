@@ -8,6 +8,7 @@ import {
 } from "@/lib/brandTheme";
 import { getQuotePdfTokens } from "@/components/quote/QuotePDF";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { resolvePublicAgencyUserId } from "@/lib/usePublicAgencyBrand";
 
 const customProfile = {
   agency_primary_color: "#0F172A",
@@ -28,6 +29,19 @@ const payloadProfile = {
 };
 
 describe("cores da identidade visual nos links públicos", () => {
+  it("resolve a agência em links legados pela assinatura pública", () => {
+    expect(resolvePublicAgencyUserId({
+      signature_snapshot: { id: "system:ae1e7b39-0254-4807-b6ea-3dc1e9d1fcc1" },
+    }, payloadProfile)).toBe("ae1e7b39-0254-4807-b6ea-3dc1e9d1fcc1");
+  });
+
+  it("resolve a agência em links antigos pela URL pública do logo", () => {
+    expect(resolvePublicAgencyUserId({}, {
+      ...payloadProfile,
+      agency_logo_url: "https://example.test/avatars/ae1e7b39-0254-4807-b6ea-3dc1e9d1fcc1/logo.png",
+    })).toBe("ae1e7b39-0254-4807-b6ea-3dc1e9d1fcc1");
+  });
+
   it("o perfil do payload público não traz marca e não é escolhido como fonte", () => {
     expect(pickBrandProfile([payloadProfile as Record<string, unknown>])).toBeNull();
   });
