@@ -94,7 +94,7 @@ describe("importação de ingressos — nome e tipo por linha", () => {
   });
 
   it("aliases de tipo de ingresso são reconhecidos sem quebrar o contrato", () => {
-    const item = normalizeServiceItemFields("attraction", {
+    const item: Record<string, unknown> = normalizeServiceItemFields("attraction", {
       park: "SeaWorld Orlando",
       ticketType: "1 dia",
       valor_total: 2810,
@@ -122,7 +122,7 @@ describe("importação de ingressos — nome e tipo por linha", () => {
   });
 
   it("outras categorias não ganham separação de nome/tipo", () => {
-    const transfer = normalizeServiceItemFields("transfer", {
+    const transfer: Record<string, unknown> = normalizeServiceItemFields("transfer", {
       operadora: "Wemoov - privativo",
       valor_total: 300,
     });
