@@ -57,6 +57,7 @@ import { BookingCartDialog } from "@/components/quote/booking/BookingCartDialog"
 import { BookingCartCta } from "@/components/quote/booking/BookingCartCta";
 import { InlineBookingAction } from "@/components/quote/booking/InlineBookingAction";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { agencyBrandInputFromProfile, pickBrandProfile } from "@/lib/brandTheme";
 import { publicAirportText } from "@/lib/airportDisplay";
 
 function getServiceLabel(service: QuoteService): string {
@@ -922,7 +923,8 @@ function CollapsibleServiceCard({
         <button
           type="button"
           onClick={onToggle}
-          className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
+          className={`w-full ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
+          style={SERVICE_HEADER_STYLE}
         >
           {headerInner}
         </button>
@@ -1334,12 +1336,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     };
   }, [quote?.services?.length, quote?.destination]);
 
-  useAgencyBrandTheme({
-    primary: agentProfile?.agency_primary_color ?? null,
-    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
-    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
-    onSecondary: (agentProfile as any)?.agency_on_secondary_color ?? null,
-  });
+  // O payload público do orçamento (token/código) NÃO carrega os campos de
+  // marca — apenas o cadastro vivo (`get_public_profile`) traz as cores. Por
+  // isso a paleta é resolvida a partir do primeiro perfil que realmente possui
+  // cores configuradas, e o resolvedor compartilhado garante que o orçamento
+  // web gere os mesmos tokens do PDF (incluindo o texto sobre a secundária).
+  const brandProfile = pickBrandProfile([
+    agentProfileOverride,
+    fetchedAgentProfile,
+    fetchedTokenAgentProfile,
+  ]) ?? agentProfile;
+  useAgencyBrandTheme(agencyBrandInputFromProfile(brandProfile as any));
 
   if (isLoading) {
     return (
