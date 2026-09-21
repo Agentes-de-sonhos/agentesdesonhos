@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface MobileFullscreenDialogContentProps {
+  open: boolean;
   title: string;
   description?: string;
   children: React.ReactNode;
@@ -20,6 +21,7 @@ interface MobileFullscreenDialogContentProps {
 
 /** Shared keyboard-safe shell for the four quick-create flows on the dashboard. */
 export function MobileFullscreenDialogContent({
+  open,
   title,
   description,
   children,
@@ -30,6 +32,7 @@ export function MobileFullscreenDialogContent({
   const bodyRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
+    if (!open) return;
     const content = contentRef.current;
     const body = bodyRef.current;
     if (!content || !body) return;
@@ -82,7 +85,7 @@ export function MobileFullscreenDialogContent({
       window.removeEventListener("orientationchange", syncViewportHeight);
       content.style.removeProperty("--quick-dialog-viewport-height");
     };
-  }, []);
+  }, [open]);
 
   return (
     <DialogContent

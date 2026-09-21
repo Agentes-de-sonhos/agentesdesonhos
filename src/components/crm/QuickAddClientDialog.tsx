@@ -118,6 +118,7 @@ export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
     <>
       <Dialog open={open} onOpenChange={handleClose}>
         <MobileFullscreenDialogContent
+          open={open}
           title="Cadastrar cliente"
           description="Cadastro rápido. Cria apenas o cliente, sem gerar oportunidade no funil."
           className="md:max-w-md"

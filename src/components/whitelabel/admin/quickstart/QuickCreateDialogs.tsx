@@ -43,7 +43,7 @@ function Shell({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <MobileFullscreenDialogContent title={title} description={description}>
+      <MobileFullscreenDialogContent open={open} title={title} description={description}>
         {children}
       </MobileFullscreenDialogContent>
     </Dialog>

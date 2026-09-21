@@ -6,6 +6,7 @@ const read = (p: string) => readFileSync(p, "utf8");
 const home = read("src/pages/whitelabel/admin/AgencyAdminHome.tsx");
 const quick = read("src/components/crm/QuickAddClientDialog.tsx");
 const dialogs = read("src/components/whitelabel/admin/quickstart/QuickCreateDialogs.tsx");
+const mobileShell = read("src/components/dashboard/MobileFullscreenDialogContent.tsx");
 const kanban = read("src/components/crm/KanbanBoard.tsx");
 const operations = read("src/components/crm/operations/OperationsModule.tsx");
 const area = read("src/components/whitelabel/admin/AgencyAdminArea.tsx");
@@ -43,6 +44,22 @@ describe("atalhos da página inicial do painel da agência", () => {
     expect(dialogs).toContain("createQuote");
     expect(dialogs).toContain("createItineraryWithAI");
     expect(dialogs).toContain("createTrip");
+  });
+
+  it("usa o mesmo formulário fullscreen seguro com teclado nos quatro atalhos", () => {
+    expect(dialogs).toContain("MobileFullscreenDialogContent");
+    expect(quick).toContain("MobileFullscreenDialogContent");
+    expect(mobileShell).toContain("data-mobile-fullscreen-dialog");
+    expect(mobileShell).toContain("100dvh");
+    expect(mobileShell).toContain("window.visualViewport");
+    expect(mobileShell).toContain("overflow-y-auto");
+    expect(mobileShell).toContain("overscroll-contain");
+    expect(mobileShell).toContain("safe-area-inset-top");
+    expect(mobileShell).toContain("safe-area-inset-bottom");
+    expect(mobileShell).toContain("scrollIntoView");
+    expect(mobileShell).toContain("md:left-[50%]");
+    expect(mobileShell).toContain("md:max-w-2xl");
+    expect(mobileShell).toContain("<DialogClose");
   });
 });
 
