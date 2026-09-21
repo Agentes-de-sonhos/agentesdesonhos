@@ -26,7 +26,8 @@ import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPubli
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
-import { resolveWhatsIncluded, iconKeyForIncludedItem } from "@/lib/whatsIncluded";
+import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
+import { includedIconComponent, includedIconLabel } from "@/lib/includedIcons";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
@@ -1453,21 +1454,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const svcTypes = new Set((quote.services || []).map(s => s.service_type));
   const hotelSvc = (quote.services || []).find(s => s.service_type === "hotel") as any;
   const flightSvc = (quote.services || []).find(s => s.service_type === "flight") as any;
-  const includedTexts = resolveWhatsIncluded(quote);
-  const iconFor: Record<string, React.ReactNode> = {
-    hotel: <Hotel className="h-4 w-4" />,
-    flight: <Plane className="h-4 w-4" />,
-    car: <Car className="h-4 w-4" />,
-    transfer: <ArrowRightLeft className="h-4 w-4" />,
-    attraction: <Ticket className="h-4 w-4" />,
-    insurance: <Shield className="h-4 w-4" />,
-    cruise: <Ship className="h-4 w-4" />,
-    sparkles: <Sparkles className="h-4 w-4" />,
-  };
-  const highlights = includedTexts.map((text) => ({
-    icon: iconFor[iconKeyForIncludedItem(text)] || iconFor.sparkles,
-    text,
-  }));
+  const includedItems = resolveWhatsIncludedItems(quote);
+  const highlights = includedItems.map((item) => {
+    const iconId = effectiveIncludedIconId(item);
+    const Icon = includedIconComponent(iconId);
+    return {
+      icon: <Icon className="h-4 w-4" aria-hidden="true" />,
+      iconLabel: includedIconLabel(iconId),
+      text: item.text,
+    };
+  });
 
   // Timeline nodes
   const timelineNodes: { icon: React.ReactNode; label: string }[] = [];

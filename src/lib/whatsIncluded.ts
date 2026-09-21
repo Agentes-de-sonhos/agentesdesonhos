@@ -3,6 +3,13 @@
  * Returns plain strings; rendering layers map keywords -> icons.
  * Stays in sync with OrcamentoPublico smart-highlights logic.
  */
+import {
+  FALLBACK_INCLUDED_ICON_ID,
+  iconIdFromLegacyKey,
+  sanitizeIncludedIconId,
+  type IncludedIconId,
+} from "@/lib/includedIcons";
+
 export function computeAutoWhatsIncluded(quote: any): string[] {
   const services: any[] = quote?.services || [];
   const types = new Set(services.map((s) => s.service_type));
@@ -35,14 +42,68 @@ export function computeAutoWhatsIncluded(quote: any): string[] {
 }
 
 /**
- * Returns the list to render — custom (if user edited) or auto-generated.
+ * Item da lista. `icon` é a escolha manual (id da allowlist); quando ausente,
+ * o ícone exibido vem da sugestão automática por palavra-chave.
  */
-export function resolveWhatsIncluded(quote: any): string[] {
-  const custom = (quote as any)?.whats_included;
-  if (Array.isArray(custom) && custom.length > 0) {
-    return custom.map((x) => String(x)).filter((x) => x.trim().length > 0);
+export interface WhatsIncludedItem {
+  text: string;
+  icon?: IncludedIconId;
+}
+
+/** Normaliza uma entrada persistida (string antiga ou objeto novo). */
+export function normalizeWhatsIncludedEntry(raw: unknown): WhatsIncludedItem | null {
+  if (typeof raw === "string") {
+    const text = raw.trim();
+    return text ? { text } : null;
   }
-  return computeAutoWhatsIncluded(quote);
+  if (raw && typeof raw === "object") {
+    const entry = raw as { text?: unknown; icon?: unknown };
+    const text = String(entry.text ?? "").trim();
+    if (!text) return null;
+    const icon = sanitizeIncludedIconId(entry.icon);
+    return icon ? { text, icon } : { text };
+  }
+  return null;
+}
+
+/** Itens personalizados persistidos, já normalizados (vazio se não houver). */
+export function customWhatsIncludedItems(quote: unknown): WhatsIncludedItem[] {
+  const custom = (quote as { whats_included?: unknown } | null)?.whats_included;
+  if (!Array.isArray(custom)) return [];
+  return custom.map(normalizeWhatsIncludedEntry).filter(Boolean) as WhatsIncludedItem[];
+}
+
+/** Lista final a renderizar: personalizada (se houver) ou automática. */
+export function resolveWhatsIncludedItems(quote: unknown): WhatsIncludedItem[] {
+  const custom = customWhatsIncludedItems(quote);
+  if (custom.length > 0) return custom;
+  return computeAutoWhatsIncluded(quote).map((text) => ({ text }));
+}
+
+/** Serializa para o banco: string simples quando não há ícone manual. */
+export function serializeWhatsIncludedItems(items: WhatsIncludedItem[]): Array<string | { text: string; icon: string }> {
+  return items
+    .map((item) => ({ text: String(item.text ?? "").trim(), icon: sanitizeIncludedIconId(item.icon) }))
+    .filter((item) => item.text.length > 0)
+    .map((item) => (item.icon ? { text: item.text, icon: item.icon } : item.text));
+}
+
+/** Ícone efetivo do item: escolha manual ou sugestão automática. */
+export function effectiveIncludedIconId(item: WhatsIncludedItem): IncludedIconId {
+  return sanitizeIncludedIconId(item.icon) ?? autoIncludedIconId(item.text);
+}
+
+/** Sugestão automática (id da allowlist) para um texto. */
+export function autoIncludedIconId(text: string): IncludedIconId {
+  return iconIdFromLegacyKey(iconKeyForIncludedItem(text)) || FALLBACK_INCLUDED_ICON_ID;
+}
+
+/**
+ * Returns the list to render — custom (if user edited) or auto-generated.
+ * Mantido para consumidores que só precisam dos textos.
+ */
+export function resolveWhatsIncluded(quote: unknown): string[] {
+  return resolveWhatsIncludedItems(quote).map((item) => item.text);
 }
 
 /**
@@ -60,7 +121,7 @@ export type WhatsIncludedIconKey =
   | "sparkles";
 
 export function iconKeyForIncludedItem(text: string): WhatsIncludedIconKey {
-  const t = text.toLowerCase();
+  const t = String(text ?? "").toLowerCase();
   if (/(hotel|hosped|pousada|resort|all inclusive)/.test(t)) return "hotel";
   if (/(voo|voos|aére|aere|passage|flight)/.test(t)) return "flight";
   if (/(carro|locaç|aluguel de carro|rent|veíc|veic)/.test(t)) return "car";

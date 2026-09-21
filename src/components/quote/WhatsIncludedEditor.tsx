@@ -1,37 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, ArrowUp, ArrowDown, RotateCcw, Sparkles, Loader2, Hotel, Plane, Car, ArrowRightLeft, Ticket, Shield, Ship } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, RotateCcw, Sparkles, Loader2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { computeAutoWhatsIncluded, iconKeyForIncludedItem, type WhatsIncludedIconKey } from "@/lib/whatsIncluded";
+import {
+  computeAutoWhatsIncluded,
+  customWhatsIncludedItems,
+  serializeWhatsIncludedItems,
+  autoIncludedIconId,
+  effectiveIncludedIconId,
+  type WhatsIncludedItem,
+} from "@/lib/whatsIncluded";
+import { includedIconComponent, includedIconLabel, type IncludedIconId } from "@/lib/includedIcons";
+import { IncludedIconPicker } from "@/components/quote/IncludedIconPicker";
 
 interface Props {
   quote: any;
   onUpdated?: () => void;
 }
 
-const ICONS: Record<WhatsIncludedIconKey, typeof Sparkles> = {
-  hotel: Hotel,
-  flight: Plane,
-  car: Car,
-  transfer: ArrowRightLeft,
-  attraction: Ticket,
-  insurance: Shield,
-  cruise: Ship,
-  sparkles: Sparkles,
-};
-
 export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
   const auto = useMemo(() => computeAutoWhatsIncluded(quote), [quote]);
-  const initial: string[] = Array.isArray(quote?.whats_included) && quote.whats_included.length > 0
-    ? quote.whats_included.map((x: any) => String(x))
-    : auto;
-  const isCustom = Array.isArray(quote?.whats_included) && quote.whats_included.length > 0;
+  const persisted = useMemo(() => customWhatsIncludedItems(quote), [quote]);
+  const isCustom = persisted.length > 0;
+  const initial: WhatsIncludedItem[] = isCustom ? persisted : auto.map((text) => ({ text }));
 
-  const [items, setItems] = useState<string[]>(initial);
+  const [items, setItems] = useState<WhatsIncludedItem[]>(initial);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [pickerIndex, setPickerIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!dirty) setItems(initial);
@@ -46,19 +44,16 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, dirty]);
 
-  const update = (next: string[]) => {
+  const update = (next: WhatsIncludedItem[]) => {
     setItems(next);
     setDirty(true);
   };
 
-  const save = async (override?: string[] | null) => {
+  const save = async (override?: WhatsIncludedItem[] | null) => {
     if (!quote?.id) return;
     setSaving(true);
     try {
-      const value =
-        override === null
-          ? null
-          : (override ?? items).map((x) => x.trim()).filter(Boolean);
+      const value = override === null ? null : serializeWhatsIncludedItems(override ?? items);
       const { error } = await supabase
         .from("quotes")
         .update({ whats_included: value as any })
@@ -74,14 +69,21 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
     }
   };
 
+  // "Gerar novamente": refaz os textos automáticos, preservando os ícones
+  // escolhidos manualmente para itens com o mesmo texto. Itens sem
+  // correspondência voltam à sugestão automática de ícone.
   const regenerate = () => {
-    const fresh = computeAutoWhatsIncluded(quote);
-    setItems(fresh);
-    setDirty(true);
+    const manualByText = new Map(items.filter((i) => i.icon).map((i) => [i.text.trim(), i.icon as IncludedIconId]));
+    update(computeAutoWhatsIncluded(quote).map((text) => {
+      const icon = manualByText.get(text.trim());
+      return icon ? { text, icon } : { text };
+    }));
   };
 
+  // "Restaurar automática": limpa a lista personalizada (inclusive ícones
+  // manuais) gravando NULL, voltando à lista automática completa.
   const restoreAuto = async () => {
-    setItems(computeAutoWhatsIncluded(quote));
+    setItems(computeAutoWhatsIncluded(quote).map((text) => ({ text })));
     await save(null);
   };
 
@@ -92,6 +94,8 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
     [next[i], next[j]] = [next[j], next[i]];
     update(next);
   };
+
+  const activeItem = pickerIndex !== null ? items[pickerIndex] : null;
 
   return (
     <div className="space-y-4">
@@ -114,18 +118,31 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
       </div>
 
       <ul className="space-y-2">
-        {items.map((text, i) => {
-          const Icon = ICONS[iconKeyForIncludedItem(text)] || Sparkles;
+        {items.map((item, i) => {
+          const Icon = includedIconComponent(effectiveIncludedIconId(item));
+          const label = `Alterar ícone de ${item.text || "item"}`;
           return (
             <li key={i} className="flex items-center gap-2 rounded-xl border bg-card p-2 shadow-sm">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
+              <button
+                type="button"
+                onClick={() => setPickerIndex(i)}
+                aria-label={label}
+                title={`${includedIconLabel(effectiveIncludedIconId(item))} — alterar ícone`}
+                className="group relative flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors hover:bg-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-9 sm:w-9"
+              >
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-1 -top-1 hidden h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 sm:flex"
+                >
+                  <Pencil className="h-2.5 w-2.5" />
+                </span>
+              </button>
               <Input
-                value={text}
+                value={item.text}
                 onChange={(e) => {
                   const next = [...items];
-                  next[i] = e.target.value;
+                  next[i] = { ...next[i], text: e.target.value };
                   update(next);
                 }}
                 placeholder="Descreva o item incluído"
@@ -147,8 +164,26 @@ export function WhatsIncludedEditor({ quote, onUpdated }: Props) {
         })}
       </ul>
 
+      {activeItem && (
+        <IncludedIconPicker
+          open={pickerIndex !== null}
+          onOpenChange={(open) => { if (!open) setPickerIndex(null); }}
+          itemText={activeItem.text}
+          currentIconId={activeItem.icon}
+          autoIconId={autoIncludedIconId(activeItem.text)}
+          onApply={(iconId) => {
+            if (pickerIndex === null) return;
+            const next = [...items];
+            const { icon: _prev, ...rest } = next[pickerIndex];
+            next[pickerIndex] = iconId ? { ...rest, icon: iconId } : rest;
+            update(next);
+            setPickerIndex(null);
+          }}
+        />
+      )}
+
       <div className="flex items-center justify-between gap-2 pt-2">
-        <Button type="button" variant="outline" size="sm" onClick={() => update([...items, ""])}>
+        <Button type="button" variant="outline" size="sm" onClick={() => update([...items, { text: "" }])}>
           <Plus className="h-3.5 w-3.5 mr-1.5" /> Adicionar item
         </Button>
         <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
