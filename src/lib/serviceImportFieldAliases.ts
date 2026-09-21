@@ -15,7 +15,7 @@
  *   e o tipo só é derivado com delimitador/padrão claro.
  */
 
-export type ServiceItemRecord = Record<string, any>;
+export type ServiceItemRecord = Record<string, unknown>;
 
 /** Aliases por chave canônica, por tipo de serviço. */
 const ALIASES: Record<string, Record<string, string[]>> = {
@@ -79,13 +79,13 @@ const ALIASES: Record<string, Record<string, string[]>> = {
   },
 };
 
-function cleanText(value: any): string {
+function cleanText(value: unknown): string {
   if (typeof value === "number") return String(value);
   if (typeof value !== "string") return "";
   return value.replace(/\s+/g, " ").trim();
 }
 
-function isEmpty(value: any): boolean {
+function isEmpty(value: unknown): boolean {
   if (value == null) return true;
   if (typeof value === "string") return value.trim() === "";
   if (Array.isArray(value)) return value.length === 0;
