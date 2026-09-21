@@ -19,6 +19,9 @@ class ResizeObserverStub {
   disconnect() {}
 }
 (globalThis as any).ResizeObserver = (globalThis as any).ResizeObserver ?? ResizeObserverStub;
+if (typeof window !== "undefined" && !(window as any).ResizeObserver) {
+  (window as any).ResizeObserver = ResizeObserverStub;
+}
 
 vi.mock("react-easy-crop", () => ({
   __esModule: true,
