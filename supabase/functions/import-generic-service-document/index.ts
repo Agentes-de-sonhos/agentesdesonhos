@@ -20,7 +20,7 @@ REGRA #0 — VÁRIOS SERVIÇOS NO MESMO DOCUMENTO.
 REGRA #1 — POSTURA DE EXTRAÇÃO.
 - NUNCA desista. Mesmo com campos ilegíveis, EXTRAIA TUDO o que conseguir.
 - Deixe vazio/null o que não tiver certeza. Liste em "campos_nao_identificados" o nome dos campos em branco.
-- SEMPRE chame a função fornecida. NUNCA retorne texto explicando que o documento está ruim.
+- SEMPRE devolva JSON válido no formato solicitado. NUNCA retorne texto explicando que o documento está ruim.
 REGRA #2 — DATAS / HORÁRIOS.
 - Se o ANO estiver visível, use "YYYY-MM-DD". Senão, preserve a data curta como aparece e adicione "ano_pendente" em campos_nao_identificados.
 - Horários em "HH:mm" (24h). NUNCA invente ano nem hora.
@@ -31,7 +31,7 @@ REGRA #3 — VALORES.
 - "valor_total_brl" = total convertido em R$ quando aparecer.
 CONFIANÇA: calcule "confianca_extracao.geral" (0 a 1) com sua certeza real.
 FONTES: pode receber IMAGEM/PDF e/ou texto extraído. Use AMBOS.
-IMPORTANTE: NÃO INVENTE dados. SEMPRE chame a função.
+IMPORTANTE: NÃO INVENTE dados. DEVOLVA SOMENTE JSON VÁLIDO.
 `;
 
 const CONFIDENCE_SCHEMA = {
@@ -236,7 +236,7 @@ const SCHEMAS: Record<ServiceKey, { fnName: string; description: string; propert
 
 function buildSystemPrompt(key: ServiceKey): string {
   return `Você é um extrator de RESERVAS / ORÇAMENTOS para agências de viagens brasileiras, especializado em ${key.toUpperCase()}.
-Sua ÚNICA tarefa: ler vouchers, confirmações, e-mails, prints, PDFs e textos e devolver os dados estruturados usando a função "${SCHEMAS[key].fnName}".
+Sua ÚNICA tarefa: ler vouchers, confirmações, e-mails, prints, PDFs e textos e devolver os dados estruturados em JSON.
 ${SHARED_RULES}
 CONTEXTO: ${SCHEMAS[key].promptExtras}`;
 }
@@ -315,16 +315,23 @@ Deno.serve(async (req) => {
 
     currentStage = "sent_to_ai";
     const userContent: any[] = [
-      { type: "text", text: `${SCHEMAS[serviceType].promptExtras} Se o documento tiver VÁRIOS serviços (ex.: ingressos de parques diferentes), devolva UM ITEM POR SERVIÇO no array "itens" — nunca um pacote único somado. Se o ANO não estiver visível, preserve a data curta como aparece e adicione 'ano_pendente' em campos_nao_identificados. SEMPRE chame ${SCHEMAS[serviceType].fnName}.` },
+      { type: "text", text: `${SCHEMAS[serviceType].promptExtras} Se o documento tiver VÁRIOS serviços (ex.: ingressos de parques diferentes), devolva UM ITEM POR SERVIÇO no array "itens" — nunca um pacote único somado. Se o ANO não estiver visível, preserve a data curta como aparece e adicione 'ano_pendente' em campos_nao_identificados.` },
     ];
     if (text) userContent.push({ type: "text", text: `TEXTO EXTRAÍDO DO DOCUMENTO:\n\n${text}` });
     if (fileBase64) {
       const mime = fileMimeType || "application/pdf";
-      userContent.push({ type: "image_url", image_url: { url: `data:${mime};base64,${fileBase64}` } });
+      const dataUrl = `data:${mime};base64,${fileBase64}`;
+      if (mime === "application/pdf") {
+        const fileName = typeof body?.fileName === "string" && body.fileName
+          ? body.fileName
+          : "documento.pdf";
+        userContent.push({ type: "file", file: { filename: fileName, file_data: dataUrl } });
+      } else {
+        userContent.push({ type: "image_url", image_url: { url: dataUrl } });
+      }
     }
 
-    const tool = buildTool(serviceType);
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const callAi = (content: any[]) => fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -334,14 +341,28 @@ Deno.serve(async (req) => {
         model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: buildSystemPrompt(serviceType) },
-          { role: "user", content: userContent },
+          {
+            role: "user",
+            content: [
+              ...content,
+              {
+                type: "text",
+                text: 'Retorne somente um objeto JSON válido no formato {"itens":[{...}]}, sem markdown e sem texto explicativo.',
+              },
+            ],
+          },
         ],
-        tools: [tool],
-        tool_choice: { type: "function", function: { name: tool.function.name } },
         temperature: 0,
         max_tokens: 6000,
       }),
     });
+
+    let aiResp = await callAi(userContent);
+    if (aiResp.status === 400 && fileBase64 && text) {
+      const errBody = await aiResp.text();
+      console.error("AI gateway 400 with binary, retrying text-only:", errBody.slice(0, 300));
+      aiResp = await callAi(userContent.filter((block) => block?.type === "text"));
+    }
 
     currentStage = "ai_response_received";
     if (aiResp.status === 429) return debugFail(currentStage, "rate_limited", "Muitas requisições. Aguarde alguns segundos e tente novamente.", 429);
@@ -349,7 +370,10 @@ Deno.serve(async (req) => {
     if (!aiResp.ok) {
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t.slice(0, 500));
-      return debugFail(currentStage, "ai_error", `Falha na chamada à IA (HTTP ${aiResp.status}).`, 502, { raw_ai_response: t.slice(0, 2000) });
+      const friendly = aiResp.status === 400
+        ? "A IA não conseguiu ler este arquivo. Tente enviar uma imagem mais nítida ou cole o texto da reserva."
+        : `Falha na chamada à IA (HTTP ${aiResp.status}).`;
+      return debugFail(currentStage, "ai_error", friendly, 502, { raw_ai_response: t.slice(0, 2000) });
     }
 
     const aiJson = await aiResp.json();
