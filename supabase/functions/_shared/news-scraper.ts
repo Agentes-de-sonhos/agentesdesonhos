@@ -300,10 +300,46 @@ export async function fetchFeedXml(portal: PortalConfig): Promise<string> {
   return (await fetchFeedXmlWithFallback(portal)).xml;
 }
 
-export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
-  const { xml, usedFallback } = await fetchFeedXmlWithFallback(portal);
-  if (!xml || xml.length < 100) throw new Error(`Empty feed body (${xml.length} bytes)`);
+function stripHtml(text: string): string {
+  return decodeHtmlEntities(text.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+}
 
+/** Converte a resposta da WordPress REST API do portal em itens brutos. */
+export function parseWpJsonItems(body: string, portal: PortalConfig): RawItem[] {
+  let posts: unknown;
+  try {
+    posts = JSON.parse(body);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(posts)) return [];
+  const items: RawItem[] = [];
+  for (const raw of posts.slice(0, portal.maxItems)) {
+    const post = raw as {
+      link?: string;
+      date_gmt?: string;
+      title?: { rendered?: string };
+      excerpt?: { rendered?: string };
+    };
+    const link = typeof post.link === "string" ? post.link : "";
+    const title = stripHtml(post.title?.rendered ?? "");
+    if (!link || !title) continue;
+    const desc = stripHtml(post.excerpt?.rendered ?? "");
+    const parsedDate = post.date_gmt ? new Date(`${post.date_gmt}Z`) : null;
+    const iso = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null;
+    items.push({
+      titulo_original: title,
+      conteudo: desc || title,
+      url: link,
+      url_canonical: canonicalizeUrl(link),
+      data_publicacao: iso,
+      content_hash: stableHash(portal.key, title, iso ? iso.slice(0, 10) : ""),
+    });
+  }
+  return items;
+}
+
+function parseRssItems(xml: string, portal: PortalConfig, usedFallback: boolean): RawItem[] {
   const items = extractItems(xml).slice(0, portal.maxItems);
   const parsed: RawItem[] = items.map((it) => {
     const rawTitle = extractTag(it, "title");
