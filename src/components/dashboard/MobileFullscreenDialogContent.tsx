@@ -39,6 +39,7 @@ export function MobileFullscreenDialogContent({
 
     const viewport = window.visualViewport;
     let frame = 0;
+    let focusTimer = 0;
 
     const keepFocusedControlVisible = () => {
       window.cancelAnimationFrame(frame);
@@ -68,20 +69,24 @@ export function MobileFullscreenDialogContent({
     const handleFocus = (event: FocusEvent) => {
       const target = event.target;
       if (!(target instanceof HTMLElement) || !target.matches("input, textarea, select, [role='combobox']")) return;
-      window.setTimeout(keepFocusedControlVisible, 180);
+      window.clearTimeout(focusTimer);
+      focusTimer = window.setTimeout(keepFocusedControlVisible, 180);
     };
 
     syncViewportHeight();
     body.addEventListener("focusin", handleFocus);
     viewport?.addEventListener("resize", syncViewportHeight);
     viewport?.addEventListener("scroll", syncViewportHeight);
+    window.addEventListener("resize", syncViewportHeight);
     window.addEventListener("orientationchange", syncViewportHeight);
 
     return () => {
       window.cancelAnimationFrame(frame);
+      window.clearTimeout(focusTimer);
       body.removeEventListener("focusin", handleFocus);
       viewport?.removeEventListener("resize", syncViewportHeight);
       viewport?.removeEventListener("scroll", syncViewportHeight);
+      window.removeEventListener("resize", syncViewportHeight);
       window.removeEventListener("orientationchange", syncViewportHeight);
       content.style.removeProperty("--quick-dialog-viewport-height");
     };

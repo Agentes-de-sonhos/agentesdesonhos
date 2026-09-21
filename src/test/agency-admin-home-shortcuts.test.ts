@@ -52,6 +52,7 @@ describe("atalhos da página inicial do painel da agência", () => {
     expect(mobileShell).toContain("data-mobile-fullscreen-dialog");
     expect(mobileShell).toContain("100dvh");
     expect(mobileShell).toContain("window.visualViewport");
+    expect(mobileShell).toContain('window.addEventListener("resize", syncViewportHeight)');
     expect(mobileShell).toContain("overflow-y-auto");
     expect(mobileShell).toContain("overscroll-contain");
     expect(mobileShell).toContain("safe-area-inset-top");
