@@ -72,6 +72,8 @@ interface ProfileData {
   agency_primary_color: string | null;
   agency_secondary_color: string | null;
   agency_secondary_auto: boolean | null;
+  /** Cor do texto sobre a secundária (null = contraste automático atual). */
+  agency_on_secondary_color: string | null;
   agency_tertiary_color: string | null;
   agency_tertiary_auto: boolean | null;
   /** Idioma dos materiais públicos enviados ao cliente final. */
@@ -136,6 +138,7 @@ export default function Perfil() {
           agency_primary_color: (data as any).agency_primary_color || null,
           agency_secondary_color: (data as any).agency_secondary_color || null,
           agency_secondary_auto: (data as any).agency_secondary_auto ?? true,
+          agency_on_secondary_color: (data as any).agency_on_secondary_color || null,
           agency_tertiary_color: (data as any).agency_tertiary_color || null,
           agency_tertiary_auto: (data as any).agency_tertiary_auto ?? true,
           public_content_locale: (data as any).public_content_locale || "pt-BR",
@@ -678,16 +681,18 @@ export default function Perfil() {
             initialColor={profile?.agency_primary_color ?? null}
             initialSecondaryColor={profile?.agency_secondary_color ?? null}
             initialSecondaryAuto={profile?.agency_secondary_auto ?? true}
+            initialOnSecondaryColor={profile?.agency_on_secondary_color ?? null}
             initialTertiaryColor={profile?.agency_tertiary_color ?? null}
             initialTertiaryAuto={profile?.agency_tertiary_auto ?? true}
             agencyLogoUrl={profile?.agency_logo_url ?? null}
-            onSaved={(color, secondary, auto, tertiary, tertiaryAuto) => {
+            onSaved={(color, secondary, auto, tertiary, tertiaryAuto, onSecondary) => {
               const patch = {
                 agency_primary_color: color,
                 agency_secondary_color: secondary ?? null,
                 agency_secondary_auto: auto ?? true,
                 agency_tertiary_color: tertiary ?? null,
                 agency_tertiary_auto: tertiaryAuto ?? true,
+                agency_on_secondary_color: onSecondary ?? null,
               };
               setProfile((prev) => (prev ? { ...prev, ...patch } as any : prev));
               setFormData((prev) => (prev ? { ...prev, ...patch } as any : prev));

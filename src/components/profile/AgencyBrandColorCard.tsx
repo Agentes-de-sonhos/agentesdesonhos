@@ -17,13 +17,15 @@ import { useToast } from "@/hooks/use-toast";
 import { normalizeHex, rgbToHex } from "@/lib/agencyColor";
 import { Switch } from "@/components/ui/switch";
 import { useQueryClient } from "@tanstack/react-query";
-import { deriveSecondaryColor } from "@/lib/brandTheme";
+import { deriveSecondaryColor, defaultOnSecondaryColor, brandContrastRatio } from "@/lib/brandTheme";
 
 interface Props {
   initialColor: string | null;
   /** Segundo acento real da marca (foco/borda ativa e ações secundárias). */
   initialSecondaryColor?: string | null;
   initialSecondaryAuto?: boolean | null;
+  /** Cor do texto exibido sobre a cor secundária (null = padrão do sistema). */
+  initialOnSecondaryColor?: string | null;
   /** Tom muito claro (fundos, superfícies, miolo de intervalos). */
   initialTertiaryColor?: string | null;
   /** Gerar o tom claro automaticamente a partir da cor principal. */
@@ -35,6 +37,7 @@ interface Props {
     auto?: boolean,
     tertiary?: string | null,
     tertiaryAuto?: boolean,
+    onSecondary?: string | null,
   ) => void;
 }
 
@@ -48,6 +51,7 @@ export function AgencyBrandColorCard({
   initialColor,
   initialSecondaryColor = null,
   initialSecondaryAuto = true,
+  initialOnSecondaryColor = null,
   initialTertiaryColor = null,
   initialTertiaryAuto = true,
   agencyLogoUrl,
@@ -69,6 +73,13 @@ export function AgencyBrandColorCard({
   );
   const [savedSecondary, setSavedSecondary] = useState<string | null>(
     legacySecondary ? null : normalizeHex(initialSecondaryColor),
+  );
+
+  // Cor do texto sobre a secundária. `null` mantém o contraste automático
+  // atual (fallback compatível com as agências já cadastradas).
+  const [onSecondary, setOnSecondary] = useState<string | null>(normalizeHex(initialOnSecondaryColor));
+  const [savedOnSecondary, setSavedOnSecondary] = useState<string | null>(
+    normalizeHex(initialOnSecondaryColor),
   );
 
   // Terciária: tom muito claro, com automação própria.
@@ -102,7 +113,9 @@ export function AgencyBrandColorCard({
     setSavedTertiary(normalizeHex(initialTertiaryColor));
     setTertAuto(initialTertiaryAuto !== false);
     setSavedTertAuto(initialTertiaryAuto !== false);
-  }, [initialSecondaryColor, initialSecondaryAuto, initialTertiaryColor, initialTertiaryAuto, initialColor]);
+    setOnSecondary(normalizeHex(initialOnSecondaryColor));
+    setSavedOnSecondary(normalizeHex(initialOnSecondaryColor));
+  }, [initialOnSecondaryColor, initialSecondaryColor, initialSecondaryAuto, initialTertiaryColor, initialTertiaryAuto, initialColor]);
 
   // No modo automático a terciária acompanha a principal (mistura com branco).
   useEffect(() => {
@@ -113,7 +126,11 @@ export function AgencyBrandColorCard({
   const effectiveTertiary = tertAuto
     ? deriveSecondaryColor(color)
     : normalizeHex(tertiary) || deriveSecondaryColor(color);
+  const autoOnSecondary = defaultOnSecondaryColor(effectiveSecondary);
+  const effectiveOnSecondary = normalizeHex(onSecondary) || autoOnSecondary;
+  const onSecondaryContrast = brandContrastRatio(effectiveOnSecondary, effectiveSecondary);
   const dirty =
+    (savedOnSecondary || "") !== (normalizeHex(onSecondary) || "") ||
     (savedColor || "") !== (normalizeHex(color) || "") ||
     (savedSecondary || "") !== effectiveSecondary ||
     savedTertAuto !== tertAuto ||
@@ -124,6 +141,14 @@ export function AgencyBrandColorCard({
     const hex = normalizeHex(color);
     if (!hex) {
       toast({ title: "Cor inválida", description: "Use um HEX no formato #RRGGBB.", variant: "destructive" });
+      return;
+    }
+    if (onSecondary !== null && !normalizeHex(onSecondary)) {
+      toast({
+        title: "Cor inválida",
+        description: "Use um HEX no formato #RRGGBB para o texto sobre a cor secundária.",
+        variant: "destructive",
+      });
       return;
     }
     if (!normalizeHex(secondary) || !normalizeHex(effectiveTertiary)) {
@@ -143,6 +168,7 @@ export function AgencyBrandColorCard({
           // A secundária passa a ser um acento real e explícito.
           agency_secondary_color: effectiveSecondary,
           agency_secondary_auto: false,
+          agency_on_secondary_color: normalizeHex(onSecondary),
           agency_tertiary_color: effectiveTertiary,
           agency_tertiary_auto: tertAuto,
         } as any)
@@ -150,9 +176,10 @@ export function AgencyBrandColorCard({
       if (error) throw error;
       setSavedColor(hex);
       setSavedSecondary(effectiveSecondary);
+      setSavedOnSecondary(normalizeHex(onSecondary));
       setSavedTertiary(effectiveTertiary);
       setSavedTertAuto(tertAuto);
-      onSaved?.(hex, effectiveSecondary, false, effectiveTertiary, tertAuto);
+      onSaved?.(hex, effectiveSecondary, false, effectiveTertiary, tertAuto, normalizeHex(onSecondary));
       // Reflete a mudança imediatamente em todas as telas e links públicos.
       queryClient.invalidateQueries({ queryKey: ["agency-admin-portal"] });
       queryClient.invalidateQueries({ queryKey: ["agency-domain"] });
@@ -293,6 +320,85 @@ export function AgencyBrandColorCard({
                 className="font-mono"
               />
             </div>
+          </div>
+
+          {/* Cor do texto sobre a cor secundária */}
+          <div className="space-y-3 rounded-lg border bg-background/60 p-3">
+            <div className="min-w-0">
+              <Label className="text-sm font-medium">Cor do texto sobre a cor secundária</Label>
+              <p className="text-xs text-muted-foreground">
+                Usada nos títulos e valores exibidos sobre fundos na cor secundária, como as
+                faixas dos serviços no orçamento em PDF e nas páginas públicas. Sem escolha,
+                o sistema define automaticamente (aparência atual).
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-[auto_1fr] sm:items-end">
+              <div className="space-y-2">
+                <Label className="text-xs">Seletor</Label>
+                <input
+                  type="color"
+                  value={effectiveOnSecondary}
+                  onChange={(e) => setOnSecondary(e.target.value.toUpperCase())}
+                  className="h-10 w-16 cursor-pointer rounded-md border border-input bg-background p-1"
+                  aria-label="Escolher cor do texto sobre a cor secundária"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs" htmlFor="on-secondary-hex">
+                  HEX do texto
+                </Label>
+                <Input
+                  id="on-secondary-hex"
+                  value={onSecondary ?? ""}
+                  placeholder={autoOnSecondary}
+                  onChange={(e) => setOnSecondary(e.target.value.toUpperCase() || null)}
+                  onBlur={() => {
+                    if (onSecondary === null || onSecondary === "") return;
+                    const n = normalizeHex(onSecondary);
+                    if (n) setOnSecondary(n);
+                  }}
+                  className="font-mono"
+                />
+              </div>
+            </div>
+
+            {/* Prévia em tempo real: texto sobre o fundo secundário */}
+            <div
+              data-testid="on-secondary-preview"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-md px-3 py-2"
+              style={{ backgroundColor: effectiveSecondary, color: effectiveOnSecondary }}
+            >
+              <span className="text-xs font-extrabold uppercase tracking-wider">Hospedagem</span>
+              <span className="text-sm font-extrabold">R$ 4.820,00</span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                Contraste {onSecondaryContrast.toFixed(2)}:1
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-10 min-h-11 md:h-8 md:min-h-0"
+                onClick={() => setOnSecondary(null)}
+                disabled={onSecondary === null}
+              >
+                Restaurar padrão do sistema
+              </Button>
+            </div>
+
+            {onSecondaryContrast < 4.5 && (
+              <p
+                role="status"
+                data-testid="on-secondary-contrast-warning"
+                className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800"
+              >
+                O contraste está abaixo do recomendado (4.5:1) e o texto pode ficar difícil de
+                ler. Você pode manter essa escolha se preferir.
+              </p>
+            )}
           </div>
         </div>
 

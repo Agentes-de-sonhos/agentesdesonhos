@@ -236,7 +236,12 @@ export function brandCssVars(
   secondary?: string | null,
   /** Paleta completa do tenant (inclui terciária); quando ausente, o
    * comportamento é exatamente o atual — apenas primária/secundária. */
-  palette?: { tertiary?: string | null; tertiaryAuto?: boolean | null } | null,
+  palette?: {
+    tertiary?: string | null;
+    tertiaryAuto?: boolean | null;
+    /** Cor do texto sobre a secundária (null = contraste automático). */
+    onSecondary?: string | null;
+  } | null,
 ): Record<string, string> {
   return brandThemeVars({
     primary: brand.accent,
@@ -244,6 +249,7 @@ export function brandCssVars(
     secondaryAuto: !secondary,
     tertiary: palette?.tertiary ?? null,
     tertiaryAuto: palette?.tertiaryAuto ?? true,
+    onSecondary: palette?.onSecondary ?? null,
   });
 }
 

@@ -1338,6 +1338,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     primary: agentProfile?.agency_primary_color ?? null,
     secondary: (agentProfile as any)?.agency_secondary_color ?? null,
     secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
+    onSecondary: (agentProfile as any)?.agency_on_secondary_color ?? null,
   });
 
   if (isLoading) {
