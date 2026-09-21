@@ -193,25 +193,25 @@ export function OperationsModule() {
     <div className="flex min-h-0 flex-1 flex-col gap-3">
 
       <KanbanToolbarSlot>
-        <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+        <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
           <Input
             placeholder="Buscar"
             aria-label="Buscar operações"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 pl-8 text-xs"
+            className="h-10 pl-8 text-sm md:h-8 md:text-xs"
           />
         </div>
         {canCreate && (
-          <Button size="sm" className="h-8 shrink-0 gap-1 px-2.5 text-xs" onClick={() => setCreateOpen(true)} title="Nova operação" aria-label="Nova operação">
+          <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" onClick={() => setCreateOpen(true)} title="Nova operação" aria-label="Nova operação">
             <Plus className="h-3.5 w-3.5" /> Nova
           </Button>
         )}
         <Button
           variant="outline"
           size="sm"
-          className="h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+          className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
           onClick={toggleMaximize}
         >
           {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
@@ -239,7 +239,7 @@ export function OperationsModule() {
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleColumnDrop(e, stage.key)}
                     className={cn(
-                      "flex w-[290px] min-h-full flex-shrink-0 flex-col rounded-xl border p-3",
+                      "flex w-[290px] min-h-full flex-shrink-0 snap-center md:snap-align-none flex-col rounded-xl border p-3",
                       tokens.bg,
                       tokens.border
                     )}
@@ -283,8 +283,9 @@ export function OperationsModule() {
                         );
                       })}
                       {ops.length === 0 && (
-                        <div className="text-center py-8 text-xs text-muted-foreground/70 border-2 border-dashed rounded-lg border-muted-foreground/15">
-                          Nenhuma operação
+                        <div className="space-y-1 rounded-lg border-2 border-dashed border-muted-foreground/15 px-3 py-8 text-center text-xs text-muted-foreground/70">
+                          <p className="font-medium text-muted-foreground">Nenhuma operação nesta etapa</p>
+                          <p>Arraste um cartão até aqui para movê-lo.</p>
                         </div>
                       )}
                     </div>

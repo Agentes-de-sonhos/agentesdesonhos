@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -463,12 +464,15 @@ export function ImportContactsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-3xl md:rounded-lg md:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Upload className="h-5 w-5" />
             Importar Contatos
           </DialogTitle>
+          <DialogDescription>
+            Importe contatos de uma planilha ou da agenda do seu dispositivo.
+          </DialogDescription>
         </DialogHeader>
 
         {step === "choose" && (

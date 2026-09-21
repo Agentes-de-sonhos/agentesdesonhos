@@ -58,6 +58,7 @@ import { MoveToStageMenu, type MoveStageTarget } from "@/components/crm/kanban/M
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -450,7 +451,7 @@ export function OpportunityCard({
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                <Button variant="ghost" size="icon" aria-label="Ações da oportunidade" className="h-11 w-11 flex-shrink-0 md:h-7 md:w-7">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -567,7 +568,7 @@ export function OpportunityCard({
               {notesCount > 0 && (
                 <div
                   className="flex items-center gap-1 text-[11px] text-muted-foreground"
-                  title={`${notesCount} anotação(ões)`}
+                  title={notesCount === 1 ? "1 anotação" : `${notesCount} anotações`}
                 >
                   <MessageSquare className="h-3 w-3" />
                   <span>{notesCount}</span>
@@ -586,11 +587,14 @@ export function OpportunityCard({
         }}
       >
         <DialogContent
-          className="sm:max-w-4xl max-h-[90vh] flex flex-col"
+          className="h-[100dvh] max-h-[100dvh] w-screen max-w-none flex flex-col rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-4xl sm:rounded-lg sm:p-6"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader>
             <DialogTitle>Editar Oportunidade</DialogTitle>
+            <DialogDescription>
+              Atualize as informações desta oportunidade.
+            </DialogDescription>
           </DialogHeader>
           <OpportunityForm
             opportunity={opportunity}
@@ -603,9 +607,12 @@ export function OpportunityCard({
 
       {/* Edit Client Dialog */}
       <Dialog open={showEditClient} onOpenChange={setShowEditClient}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-lg sm:rounded-lg sm:p-6">
           <DialogHeader>
             <DialogTitle>Editar Cliente</DialogTitle>
+            <DialogDescription>
+              Atualize os dados de contato do cliente vinculado.
+            </DialogDescription>
           </DialogHeader>
           <Form {...clientForm}>
             <form onSubmit={clientForm.handleSubmit(handleUpdateClient)} className="space-y-4">

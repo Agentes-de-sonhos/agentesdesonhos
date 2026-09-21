@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -83,7 +84,7 @@ function SortableColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn("w-[290px] flex-shrink-0", isMaximized && "h-full")}
+      className={cn("w-[290px] flex-shrink-0 snap-center md:snap-align-none", isMaximized && "h-full")}
     >
       {children({
         dragHandleProps: { ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>,
@@ -349,30 +350,33 @@ export function KanbanBoard() {
       <div className="flex min-h-0 flex-1 flex-col gap-3">
 
         <KanbanToolbarSlot>
-          <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+          <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar"
               aria-label="Buscar oportunidades"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 pl-8 text-xs"
+              className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             {canCreateOpp && (
               <DialogTrigger asChild>
-                <Button size="sm" className="h-8 shrink-0 gap-1 px-2.5 text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
+                <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
                   <Plus className="h-3.5 w-3.5" /> Nova
                 </Button>
               </DialogTrigger>
             )}
             <DialogContent
-              className="sm:max-w-4xl max-h-[90vh] flex flex-col"
+              className="h-[100dvh] max-h-[100dvh] w-screen max-w-none flex flex-col rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-4xl sm:rounded-lg sm:p-6"
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <DialogHeader>
                 <DialogTitle>Nova Oportunidade</DialogTitle>
+                <DialogDescription>
+                  Preencha os dados da oportunidade para adicioná-la ao funil.
+                </DialogDescription>
               </DialogHeader>
               <OpportunityForm
                 onSuccess={() => setIsDialogOpen(false)}
@@ -384,7 +388,7 @@ export function KanbanBoard() {
             <Button
               variant="outline"
               size="sm"
-              className="h-8 shrink-0 gap-1 px-2.5 text-xs"
+              className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
               title="Importar orçamento"
               aria-label="Importar orçamento"
               onClick={() => setImportOpen(true)}
@@ -395,7 +399,7 @@ export function KanbanBoard() {
           <Button
             variant="outline"
             size="sm"
-            className="h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+            className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
             onClick={toggleMaximize}
           >
             {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
@@ -413,9 +417,12 @@ export function KanbanBoard() {
           }}
         />
         <Dialog open={!!editingOpportunity} onOpenChange={(o) => !o && setEditingOpportunity(null)}>
-          <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col" onOpenAutoFocus={(e) => e.preventDefault()}>
+          <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none flex flex-col rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-4xl sm:rounded-lg sm:p-6" onOpenAutoFocus={(e) => e.preventDefault()}>
             <DialogHeader>
               <DialogTitle>Oportunidade vinculada</DialogTitle>
+              <DialogDescription>
+                Revise e ajuste os dados da oportunidade importada.
+              </DialogDescription>
             </DialogHeader>
             {editingOpportunity && (
               <OpportunityForm

@@ -29,6 +29,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -126,7 +127,8 @@ function IconAction({
           onClick={onClick}
           aria-label={label}
           className={cn(
-            "inline-flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
+            "inline-flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-md bg-transparent text-muted-foreground/80 transition-colors",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             "hover:bg-muted/70 hover:text-foreground focus-visible:bg-muted focus-visible:text-foreground",
             destructive && "hover:bg-rose-50 hover:text-rose-600"
           )}
@@ -385,20 +387,20 @@ export function ClientsModule() {
     <TooltipProvider delayDuration={200}>
       <div className="space-y-4">
         <KanbanToolbarSlot>
-          <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+          <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar"
               aria-label="Buscar clientes"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-8 pl-8 text-xs"
+              className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
           {canCreate && (
             <Button
               size="sm"
-              className="h-8 shrink-0 gap-1 px-2.5 text-xs"
+              className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
               onClick={() =>
                 contactView === "empresas"
                   ? setCompanyCreateRequested(true)
@@ -415,7 +417,7 @@ export function ClientsModule() {
           <Button
             variant="outline"
             size="sm"
-            className="h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+            className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
             onClick={toggleMaximize}
             title={isMaximized ? "Minimizar" : "Maximizar"}
           >
@@ -426,7 +428,7 @@ export function ClientsModule() {
             <Button
               variant="outline"
               size="sm"
-              className="ml-auto h-8 shrink-0 gap-1.5 px-2.5 text-xs"
+              className="ml-auto h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
               onClick={() => setIsImportOpen(true)}
               title="Importar contatos"
               aria-label="Importar contatos"
@@ -439,9 +441,14 @@ export function ClientsModule() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 
 
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-4 overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-lg md:rounded-lg md:p-6">
             <DialogHeader>
               <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
+              <DialogDescription>
+                {editingClient
+                  ? "Atualize os dados de contato deste cliente."
+                  : "Informe os dados de contato do novo cliente."}
+              </DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">

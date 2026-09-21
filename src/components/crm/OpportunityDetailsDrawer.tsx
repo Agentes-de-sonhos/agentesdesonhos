@@ -150,7 +150,7 @@ export function OpportunityDetailsDrawer({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        className="w-full sm:max-w-3xl lg:max-w-4xl overflow-y-auto p-0"
+        className="w-full max-w-none h-[100dvh] max-h-[100dvh] overflow-y-auto p-0 sm:max-w-3xl lg:max-w-4xl"
       >
         {/* HEADER */}
         <div className="sticky top-0 z-10 bg-card/95 backdrop-blur border-b border-border px-6 pt-6 pb-4">

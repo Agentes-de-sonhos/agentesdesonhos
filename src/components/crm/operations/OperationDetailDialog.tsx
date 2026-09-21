@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -150,11 +151,10 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={
-          focused && !focusedWide
-            ? "w-[calc(100vw-1.5rem)] max-w-[720px] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6"
-            : "w-[calc(100vw-1.5rem)] max-w-[1560px] lg:w-[93vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6"
-        }
+        className={cn(
+          "h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto overflow-x-hidden rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-1.5rem)] sm:rounded-lg sm:p-6",
+          focused && !focusedWide ? "sm:max-w-[720px]" : "sm:max-w-[1560px] lg:w-[93vw]"
+        )}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
       >
