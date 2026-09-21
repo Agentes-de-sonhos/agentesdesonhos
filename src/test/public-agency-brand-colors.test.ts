@@ -28,11 +28,14 @@ const payloadProfile = {
 
 describe("cores da identidade visual nos links públicos", () => {
   it("o perfil do payload público não traz marca e não é escolhido como fonte", () => {
-    expect(pickBrandProfile([payloadProfile as any])).toBeNull();
+    expect(pickBrandProfile([payloadProfile as Record<string, unknown>])).toBeNull();
   });
 
   it("escolhe o cadastro vivo quando o payload público não tem cores", () => {
-    const picked = pickBrandProfile([payloadProfile as any, customProfile as any]);
+    const picked = pickBrandProfile([
+      payloadProfile as Record<string, unknown>,
+      customProfile as Record<string, unknown>,
+    ]);
     expect(picked).toBe(customProfile);
   });
 
