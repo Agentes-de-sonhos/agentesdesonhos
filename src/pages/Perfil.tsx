@@ -137,51 +137,41 @@ export default function Perfil() {
     fetchProfile();
   }, [user]);
 
-  const handleImageUpload = async (
-    file: File,
+  const uploadCroppedImage = async (
+    blob: Blob,
+    outputMime: string,
     type: "avatar" | "logo",
     setUploading: (v: boolean) => void
   ) => {
     if (!user) return;
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-    const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
-    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
-      toast({
-        title: "Formato inválido",
-        description: "Use apenas JPG, PNG ou WebP",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Arquivo muito grande",
-        description: "O tamanho máximo é 5MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setUploading(true);
 
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}/${type}.${fileExt}`;
+      const { croppedPath, originalPath } = circularImageStoragePaths({
+        userId: user.id,
+        kind: type,
+        outputMime,
+        originalMime: cropSource?.mime || outputMime,
+      });
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(fileName, file, { upsert: true });
+        .upload(croppedPath, blob, { upsert: true, contentType: outputMime });
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(fileName);
+      // Guarda o arquivo original para reenquadramento futuro (não bloqueia o fluxo).
+      if (cropSource?.file) {
+        await supabase.storage
+          .from("avatars")
+          .upload(originalPath, cropSource.file, { upsert: true, contentType: cropSource.mime })
+          .catch(() => undefined);
+      }
 
-      const newUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(croppedPath);
+
+      const newUrl = withCacheBuster(urlData.publicUrl);
       const updateField = type === "avatar" ? "avatar_url" : "agency_logo_url";
 
       const { error: updateError } = await supabase
@@ -194,6 +184,8 @@ export default function Perfil() {
       setProfile((prev) => prev ? { ...prev, [updateField]: newUrl } : null);
       setFormData((prev) => prev ? { ...prev, [updateField]: newUrl } : null);
       void queryClient.invalidateQueries({ queryKey: ["agency-admin-profile"] });
+
+      setCropSource(null);
 
       toast({
         title: type === "avatar" ? "Foto atualizada!" : "Logo atualizada!",
@@ -210,14 +202,39 @@ export default function Perfil() {
     }
   };
 
+  const handleFileSelected = async (file: File, type: "avatar" | "logo") => {
+    const validation = validateCircularImageFile(file);
+    if (!validation.ok) {
+      toast({
+        title: validation.title,
+        description: validation.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const src = await readImageAsOrientedDataUrl(file);
+      setCropSource({ kind: type, src, mime: file.type, file });
+    } catch {
+      toast({
+        title: "Erro ao abrir imagem",
+        description: "Não foi possível ler este arquivo. Tente outro.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) handleImageUpload(file, "avatar", setUploadingAvatar);
+    if (file) void handleFileSelected(file, "avatar");
+    event.target.value = "";
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) handleImageUpload(file, "logo", setUploadingLogo);
+    if (file) void handleFileSelected(file, "logo");
+    event.target.value = "";
   };
 
   const handleSave = async () => {
