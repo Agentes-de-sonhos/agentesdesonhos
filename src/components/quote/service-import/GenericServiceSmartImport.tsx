@@ -565,7 +565,7 @@ function ReviewScreen({
           <X className="h-4 w-4 mr-1" /> Cancelar
         </Button>
         <Button type="button" onClick={onConfirm}>
-          <CheckCircle2 className="h-4 w-4 mr-1" /> Aplicar ao formulário
+          <CheckCircle2 className="h-4 w-4 mr-1" /> {confirmLabel || "Aplicar ao formulário"}
         </Button>
       </div>
     </div>
