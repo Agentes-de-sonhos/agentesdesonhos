@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -270,7 +271,7 @@ export function TripRemindersCard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2"
+                className="h-11 min-w-11 px-2 md:h-8 md:min-w-0"
                 aria-label="Página anterior"
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={safePage === 0}
@@ -284,7 +285,7 @@ export function TripRemindersCard() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2"
+                className="h-11 min-w-11 px-2 md:h-8 md:min-w-0"
                 aria-label="Próxima página"
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={safePage >= totalPages - 1}
@@ -301,6 +302,7 @@ export function TripRemindersCard() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Editar Follow-up</DialogTitle>
+            <DialogDescription>Atualize as anotações deste lembrete de viagem.</DialogDescription>
           </DialogHeader>
           <Textarea
             value={followUpText}

@@ -123,7 +123,7 @@ export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
           description="Cadastro rápido. Cria apenas o cliente, sem gerar oportunidade no funil."
           className="md:max-w-md"
         >
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="flex min-h-full flex-col gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="qac-name">Nome *</Label>
               <Input
@@ -155,7 +155,7 @@ export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
                 maxLength={255}
               />
             </div>
-            <DialogFooter className="gap-2">
+            <DialogFooter className="sticky bottom-0 z-10 mt-auto gap-2 border-t bg-background pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-4 sm:static sm:border-0 sm:bg-transparent sm:pb-0">
               <Button type="button" variant="outline" onClick={() => handleClose(false)}>
                 Cancelar
               </Button>

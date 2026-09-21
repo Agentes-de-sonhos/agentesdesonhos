@@ -184,7 +184,8 @@ export function UpcomingAgendaEventsCard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 px-2"
+                  className="h-11 min-w-11 px-2 md:h-8 md:min-w-0"
+                  aria-label="Página anterior"
                   onClick={() => setPage((p) => Math.max(0, p - 1))}
                   disabled={safePage === 0}
                 >
@@ -197,7 +198,8 @@ export function UpcomingAgendaEventsCard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 px-2"
+                  className="h-11 min-w-11 px-2 md:h-8 md:min-w-0"
+                  aria-label="Próxima página"
                   onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                   disabled={safePage >= totalPages - 1}
                 >

@@ -114,9 +114,8 @@ export function MobileFullscreenDialogContent({
             <DialogTitle>{title}</DialogTitle>
             {description ? <DialogDescription>{description}</DialogDescription> : null}
           </div>
-          <DialogClose className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:absolute md:right-4 md:top-4 md:h-8 md:w-8">
+          <DialogClose aria-label="Fechar" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:absolute md:right-4 md:top-4 md:h-9 md:w-9">
             <X className="h-5 w-5" />
-            <span className="sr-only">Fechar</span>
           </DialogClose>
         </div>
       </DialogHeader>
@@ -125,7 +124,7 @@ export function MobileFullscreenDialogContent({
         ref={bodyRef}
         data-mobile-dialog-body
         className={cn(
-          "min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-4 [scroll-padding-bottom:6rem] [scroll-padding-top:1rem] md:overflow-y-auto md:p-0",
+          "min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 [scroll-padding-bottom:7rem] [scroll-padding-top:1rem] [&>form]:min-h-full [&>form]:pb-[max(0.5rem,env(safe-area-inset-bottom))] md:overflow-y-auto md:p-0 md:[&>form]:min-h-0 md:[&>form]:pb-0",
           bodyClassName,
         )}
       >
