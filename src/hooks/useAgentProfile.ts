@@ -10,6 +10,11 @@ export interface AgentProfile {
   agency_secondary_color?: string | null;
   /** Quando true (default), o tom secundário é derivado da cor principal. */
   agency_secondary_auto?: boolean | null;
+  /**
+   * Cor do texto/ícones sobre a cor secundária (ex.: faixas de serviço do PDF).
+   * Ausente/nulo => contraste automático (aparência atual preservada).
+   */
+  agency_on_secondary_color?: string | null;
   agency_tertiary_color?: string | null;
   /** Quando true (default), o tom terciário é derivado da cor principal. */
   agency_tertiary_auto?: boolean | null;
