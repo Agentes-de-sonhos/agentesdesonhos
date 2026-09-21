@@ -235,24 +235,36 @@ Deno.serve(async (req) => {
       }
     }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userContent },
-        ],
-        tools: [TOOL_SCHEMA],
-        tool_choice: { type: "function", function: { name: "extract_car_rental_document" } },
-        temperature: 0,
-        max_tokens: 6000,
-      }),
-    });
+    const callAi = (content: any[]) =>
+      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-pro",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: content },
+          ],
+          tools: [TOOL_SCHEMA],
+          tool_choice: { type: "function", function: { name: "extract_car_rental_document" } },
+          temperature: 0,
+          max_tokens: 6000,
+        }),
+      });
+
+    let aiResp = await callAi(userContent);
+
+    // O provedor recusa alguns documentos (HTTP 400). Se já temos o texto extraído,
+    // tentamos mais uma vez apenas com o texto, sem o binário do arquivo.
+    if (aiResp.status === 400 && fileBase64 && text) {
+      const errBody = await aiResp.text();
+      console.error("AI gateway 400 with binary, retrying text-only:", errBody.slice(0, 300));
+      const textOnly = userContent.filter((b) => b?.type === "text");
+      aiResp = await callAi(textOnly);
+    }
 
     currentStage = "ai_response_received";
 
