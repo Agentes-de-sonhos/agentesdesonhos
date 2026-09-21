@@ -23,7 +23,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { RangeCalendar } from "@/components/ui/range-calendar";
 import { cn } from "@/lib/utils";
 import {
@@ -282,6 +281,7 @@ export function ItineraryForm({ onSubmit, isLoading, initialValues }: ItineraryF
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <RangeCalendar
+                    hint
                 selected={dateRange}
                 onSelect={(range) => {
                   setDateRange(range);

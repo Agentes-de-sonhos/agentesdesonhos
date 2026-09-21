@@ -394,6 +394,7 @@ export function QuoteClientForm({
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <RangeCalendar
+                    hint
                       selected={field.value?.from ? { from: field.value.from, to: field.value.to ?? undefined } as DateRange : undefined}
                       onSelect={(range: DateRange | undefined) => {
                         field.onChange({ from: range?.from, to: range?.to });

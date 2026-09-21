@@ -9,7 +9,6 @@ import { CalendarIcon, MapPin, Plus } from "lucide-react";
 import { useFormDraft } from "@/hooks/usePersistedState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
 import { RangeCalendar } from "@/components/ui/range-calendar";
 import { ClientSelector } from "@/components/shared/ClientSelector";
 import { Label } from "@/components/ui/label";
@@ -186,6 +185,7 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <RangeCalendar
+                    hint
                     selected={field.value as DateRange}
                     onSelect={(range) => {
                       if (!range?.from) {
