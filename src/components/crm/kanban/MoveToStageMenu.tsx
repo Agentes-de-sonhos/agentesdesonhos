@@ -47,11 +47,12 @@ export function MoveToStageMenu({ targets, currentStageId, onMoveToStage }: Move
         <ArrowRightLeft className="mr-2 h-4 w-4" /> Mover
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent
+        data-mobile-stage-menu
         sideOffset={6}
         alignOffset={-4}
         collisionPadding={12}
         avoidCollisions
-        className="z-[300] w-56 max-h-[min(var(--radix-dropdown-menu-content-available-height),calc(100dvh-max(1rem,env(safe-area-inset-top))-max(1rem,env(safe-area-inset-bottom))))] overflow-y-auto overscroll-contain touch-pan-y max-md:!fixed max-md:!inset-x-3 max-md:!bottom-[max(0.75rem,env(safe-area-inset-bottom))] max-md:!top-auto max-md:!w-auto max-md:!translate-x-0 max-md:!translate-y-0"
+        className="z-[300] w-56 max-h-[min(var(--radix-dropdown-menu-content-available-height),calc(100dvh-max(1rem,env(safe-area-inset-top))-max(1rem,env(safe-area-inset-bottom))))] overflow-y-auto overscroll-contain touch-pan-y max-md:!w-[calc(100vw-1.5rem)]"
       >
         <DropdownMenuLabel className="sticky top-0 z-10 bg-popover text-xs text-muted-foreground">
           Mover para

@@ -12,6 +12,7 @@ const opportunityCard = read("src/components/crm/OpportunityCard.tsx");
 const scrollArea = read("src/components/crm/kanban/KanbanScrollArea.tsx");
 const moveToStageMenu = read("src/components/crm/kanban/MoveToStageMenu.tsx");
 const dropdownMenu = read("src/components/ui/dropdown-menu.tsx");
+const globalStyles = read("src/index.css");
 const importContacts = read("src/components/crm/ImportContactsDialog.tsx");
 const createOperation = read("src/components/crm/operations/CreateOperationDialog.tsx");
 
@@ -52,7 +53,9 @@ describe("CRM mobile UX — alvos de toque e rolagem por etapa", () => {
     expect(moveToStageMenu).toContain("avoidCollisions");
     expect(moveToStageMenu).toContain("100dvh");
     expect(moveToStageMenu).toContain("overflow-y-auto overscroll-contain touch-pan-y");
-    expect(moveToStageMenu).toContain("max-md:!fixed max-md:!inset-x-3");
+    expect(moveToStageMenu).toContain("data-mobile-stage-menu");
+    expect(globalStyles).toContain('[data-radix-popper-content-wrapper]:has([data-mobile-stage-menu])');
+    expect(globalStyles).toContain("transform: none !important");
   });
 
   it("menus dos cartões têm 44px no mobile", () => {
