@@ -100,13 +100,11 @@ describe('tela de login', () => {
     expect(screen.getByTestId('client-area-internal-logo-placeholder')).toBeTruthy()
   })
 
-  it('mantém o acesso por código como opção secundária recolhida', async () => {
+  it('não exibe o acesso legado por código', async () => {
     renderPage()
-    const toggle = await screen.findByRole('button', { name: /Recebeu um link com código/i })
+    await waitFor(() => expect(screen.getByLabelText('E-mail')).toBeTruthy())
+    expect(screen.queryByRole('button', { name: /Recebeu um link com código/i })).toBeNull()
     expect(screen.queryByLabelText('Código de acesso')).toBeNull()
-    fireEvent.click(toggle)
-    expect(screen.getByLabelText('Código de acesso')).toBeTruthy()
-    expect(screen.getByText(/somente para acessar um conteúdo específico/i)).toBeTruthy()
   })
 
   it('associa o erro de login aos campos, sem chamar o servidor', async () => {
@@ -152,6 +150,8 @@ describe('área autenticada', () => {
   it('exibe saudação, agência e conteúdo verdadeiro sobre viagens', async () => {
     await loggedIn()
     expect(screen.getByText(/Bem-vindo à sua área exclusiva/i)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: /Recebeu um link com código/i })).toBeNull()
+    expect(screen.queryByLabelText('Código de acesso')).toBeNull()
     // Sem viagens reais, a home é honesta: nada de destino ou data inventados.
     expect(await screen.findByRole('heading', { name: 'Suas viagens em um só lugar' })).toBeTruthy()
     expect(screen.queryByText(/pontos/i)).toBeNull()
@@ -220,7 +220,6 @@ describe('proteção da rota autenticada', () => {
     'src/components/whitelabel/clientarea/ClientAreaLogin.tsx',
     'src/components/whitelabel/clientarea/ClientAreaSections.tsx',
     'src/components/whitelabel/clientarea/ClientAreaSupportCard.tsx',
-    'src/components/whitelabel/clientarea/ClientAreaCodeAccess.tsx',
   ].map((f) => [f, readFileSync(f, 'utf8')] as const)
 
   it('não usa HTML inseguro nem scripts externos', () => {

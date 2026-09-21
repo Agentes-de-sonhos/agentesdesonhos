@@ -16,7 +16,6 @@ import {
 import type { ClientAreaProfileData } from "@/hooks/useClientAreaDocuments";
 import { DocumentTripGroups } from "./ClientAreaDocumentList";
 import { ClientAreaSupportCard } from "./ClientAreaSupportCard";
-import { ClientAreaCodeAccess } from "./ClientAreaCodeAccess";
 
 function SectionCard({
   title, description, icon: Icon, children,
@@ -136,8 +135,6 @@ export function ClientAreaHome({
             </Button>
           ) : null}
         </div>
-
-        <ClientAreaCodeAccess className="mt-5" />
       </section>
 
       <ClientAreaSupportCard info={info} compact />

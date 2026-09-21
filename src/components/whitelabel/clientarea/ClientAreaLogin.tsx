@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { BrandText } from "@/components/ui/brand-text";
 import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
 import { agencyWhatsappLink } from "@/lib/clientAreaAccess";
-import { ClientAreaCodeAccess } from "./ClientAreaCodeAccess";
 
 /**
  * Flag focal: exibição do logotipo interno (acima do título "Área do Cliente")
@@ -100,7 +99,7 @@ export function ClientAreaLogin({
         </div>
 
         {/* Formulário */}
-        <div className="order-2 space-y-4">
+        <div className="order-2">
           <div className="rounded-3xl border border-border/60 bg-card p-6 shadow-sm md:p-8">
             <form onSubmit={onSubmit} className="space-y-5" noValidate>
               <div className="space-y-2">
@@ -173,7 +172,6 @@ export function ClientAreaLogin({
             )}
           </div>
 
-          <ClientAreaCodeAccess />
         </div>
       </div>
     </section>

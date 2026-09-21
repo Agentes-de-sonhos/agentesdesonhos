@@ -128,13 +128,12 @@ describe('esqueci minha senha', () => {
   })
 })
 
-describe('separação entre login e código de link', () => {
-  it('o bloco de código não sugere que o login exige um código', async () => {
+describe('login sem acesso por código', () => {
+  it('não exibe o bloco legado de código', async () => {
     renderPage()
-    const toggle = await screen.findByRole('button', { name: /Recebeu um link com código/i })
-    fireEvent.click(toggle)
-    expect(screen.getByLabelText('Código de acesso')).toBeTruthy()
-    expect(screen.queryByText(/use o código do link recebido logo abaixo/i)).toBeNull()
+    await waitFor(() => expect(screen.getByLabelText('E-mail')).toBeTruthy())
+    expect(screen.queryByRole('button', { name: /Recebeu um link com código/i })).toBeNull()
+    expect(screen.queryByLabelText('Código de acesso')).toBeNull()
   })
 })
 
