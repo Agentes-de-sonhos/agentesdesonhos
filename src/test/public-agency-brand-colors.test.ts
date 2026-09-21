@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   agencyBrandInputFromProfile,
+  brandThemeStyle,
   brandThemeVars,
   pickBrandProfile,
   resolveBrandPalette,
@@ -39,6 +40,19 @@ describe("cores da identidade visual nos links públicos", () => {
     expect(picked).toBe(customProfile);
   });
 
+  it("prioriza o cadastro vivo sobre um snapshot antigo embutido no link", () => {
+    const staleSnapshot = {
+      ...customProfile,
+      agency_secondary_color: "#0284C7",
+      agency_tertiary_color: "#E0F2FE",
+    };
+    const picked = pickBrandProfile([
+      customProfile as Record<string, unknown>,
+      staleSnapshot as Record<string, unknown>,
+    ]);
+    expect(picked).toBe(customProfile);
+  });
+
   it("a paleta personalizada chega ao orçamento web com os mesmos tokens do PDF", () => {
     const pdf = getQuotePdfTokens(customProfile as unknown as AgentProfile);
     const web = resolveBrandPalette(agencyBrandInputFromProfile(customProfile));
@@ -56,6 +70,14 @@ describe("cores da identidade visual nos links públicos", () => {
     expect(vars["--brand-secondary"]).toBe("#17A34A");
     expect(vars["--brand-on-secondary"]).toBe("#FFFFFF");
     expect(vars["--brand-tertiary"]).toBe("#E7F7EE");
+  });
+
+  it("o estilo da raiz pública mantém a paleta completa sem sobrescrever a secundária", () => {
+    const style = brandThemeStyle(agencyBrandInputFromProfile(customProfile)) as Record<string, string>;
+    expect(style["--brand-primary"]).toBe("#0F172A");
+    expect(style["--brand-secondary"]).toBe("#17A34A");
+    expect(style["--brand-on-secondary"]).toBe("#FFFFFF");
+    expect(style["--brand-tertiary"]).toBe("#E7F7EE");
   });
 
   it("sem cor de texto configurada mantém o fallback automático de contraste", () => {
