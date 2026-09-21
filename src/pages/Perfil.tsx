@@ -742,6 +742,36 @@ export default function Perfil() {
           </CardContent>
         </Card>
       </div>
+
+      {cropSource && (
+        <CircularImageCropDialog
+          open
+          imageSrc={cropSource.src}
+          sourceMime={cropSource.mime}
+          title={cropSource.kind === "avatar" ? "Ajustar foto do agente" : "Ajustar logo da agência"}
+          description={
+            cropSource.kind === "avatar"
+              ? "Arraste e use o zoom para escolher o que aparece dentro do círculo da sua foto."
+              : "Arraste e use o zoom para enquadrar o logotipo dentro do círculo, sem distorcer a imagem."
+          }
+          confirmLabel="Salvar imagem"
+          saving={cropSource.kind === "avatar" ? uploadingAvatar : uploadingLogo}
+          onReplace={() =>
+            cropSource.kind === "avatar"
+              ? avatarInputRef.current?.click()
+              : logoInputRef.current?.click()
+          }
+          onCancel={() => setCropSource(null)}
+          onConfirm={(blob, mime) =>
+            uploadCroppedImage(
+              blob,
+              mime,
+              cropSource.kind,
+              cropSource.kind === "avatar" ? setUploadingAvatar : setUploadingLogo
+            )
+          }
+        />
+      )}
     </DashboardLayout>
   );
 }
