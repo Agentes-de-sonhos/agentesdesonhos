@@ -19,6 +19,12 @@ if (typeof window !== "undefined" && !(window as any).ResizeObserver) {
   (window as any).ResizeObserver = ResizeObserverStub;
 }
 
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { from: () => ({ update: () => ({ eq: async () => ({ error: null }) }) }) },
+}));
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "agency-1" } }) }));
+vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: () => {} }) }));
+
 const AGENCY = {
   agency_primary_color: "#0B5CAB",
   agency_secondary_color: "#17A34A",
@@ -85,7 +91,7 @@ describe("cor do texto sobre a cor secundária — paleta", () => {
   it("isolamento por agência: cada configuração gera sua própria cor de texto", () => {
     const a = resolveBrandPalette({
       primary: "#0B5CAB",
-      secondary: "#17A34A",
+      secondary: "#FFD34A",
       secondaryAuto: false,
       tertiary: "#F1FBF5",
       tertiaryAuto: false,
@@ -93,7 +99,7 @@ describe("cor do texto sobre a cor secundária — paleta", () => {
     });
     const b = resolveBrandPalette({
       primary: "#0B5CAB",
-      secondary: "#17A34A",
+      secondary: "#FFD34A",
       secondaryAuto: false,
       tertiary: "#F1FBF5",
       tertiaryAuto: false,
@@ -144,10 +150,6 @@ describe("PDF e preview do orçamento", () => {
 });
 
 describe("configuração na Identidade Visual", () => {
-  vi.mock("@/integrations/supabase/client", () => ({
-    supabase: { from: () => ({ update: () => ({ eq: async () => ({ error: null }) }) }) },
-  }));
-
   async function renderCard(initialOnSecondaryColor: string | null) {
     const { AgencyBrandColorCard } = await import("@/components/profile/AgencyBrandColorCard");
     const { QueryClient, QueryClientProvider } = await import("@tanstack/react-query");
