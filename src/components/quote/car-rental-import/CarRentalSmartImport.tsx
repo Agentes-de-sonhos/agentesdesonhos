@@ -9,6 +9,7 @@ import { Loader2, Upload, Car, CheckCircle2, AlertTriangle, X, Trash2, Plus, Bug
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { extractPdfText } from "@/lib/pdfText";
+import { shouldSendFileBase64 } from "@/lib/fullPackageImportPayload";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { CarRentalData } from "@/types/quote";
@@ -338,16 +339,24 @@ export function CarRentalSmartImport({ quoteId, onCancel, onConfirm }: Props) {
         }
       }
 
-      const fileBase64 = uploadFile ? await fileToBase64(uploadFile) : undefined;
       let extractedText = hasText ? pastedText.trim() : "";
+      let pdfText = "";
       if (uploadFile && uploadFile.type === "application/pdf") {
         try {
-          const pdfText = await extractPdfText(uploadFile);
+          pdfText = await extractPdfText(uploadFile);
           extractedText = extractedText ? `${extractedText}\n\n${pdfText}` : pdfText;
         } catch (e) {
           console.warn("PDF text extraction failed:", e);
         }
       }
+
+      // PDF com texto suficiente: envia SOMENTE texto (evita 400 do provedor e reduz latência).
+      const sendBinary = shouldSendFileBase64({
+        hasFile: !!uploadFile,
+        mimeType: uploadFile?.type,
+        extractedText: pdfText,
+      });
+      const fileBase64 = uploadFile && sendBinary ? await fileToBase64(uploadFile) : undefined;
 
       const { data, error } = await supabase.functions.invoke("import-car-rental-document", {
         body: {

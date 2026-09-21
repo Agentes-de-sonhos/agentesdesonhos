@@ -224,27 +224,47 @@ Deno.serve(async (req) => {
     if (fileBase64) {
       const mime = fileMimeType || "application/pdf";
       const dataUrl = `data:${mime};base64,${fileBase64}`;
-      userContent.push({ type: "image_url", image_url: { url: dataUrl } });
+      if (mime === "application/pdf") {
+        // PDF precisa do bloco de documento; enviá-lo como imagem faz o provedor recusar (HTTP 400).
+        const fileName: string = typeof body?.fileName === "string" && body.fileName
+          ? body.fileName
+          : "documento.pdf";
+        userContent.push({ type: "file", file: { filename: fileName, file_data: dataUrl } });
+      } else {
+        userContent.push({ type: "image_url", image_url: { url: dataUrl } });
+      }
     }
 
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userContent },
-        ],
-        tools: [TOOL_SCHEMA],
-        tool_choice: { type: "function", function: { name: "extract_car_rental_document" } },
-        temperature: 0,
-        max_tokens: 6000,
-      }),
-    });
+    const callAi = (content: any[]) =>
+      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-pro",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: content },
+          ],
+          tools: [TOOL_SCHEMA],
+          tool_choice: { type: "function", function: { name: "extract_car_rental_document" } },
+          temperature: 0,
+          max_tokens: 6000,
+        }),
+      });
+
+    let aiResp = await callAi(userContent);
+
+    // O provedor recusa alguns documentos (HTTP 400). Se já temos o texto extraído,
+    // tentamos mais uma vez apenas com o texto, sem o binário do arquivo.
+    if (aiResp.status === 400 && fileBase64 && text) {
+      const errBody = await aiResp.text();
+      console.error("AI gateway 400 with binary, retrying text-only:", errBody.slice(0, 300));
+      const textOnly = userContent.filter((b) => b?.type === "text");
+      aiResp = await callAi(textOnly);
+    }
 
     currentStage = "ai_response_received";
 
@@ -257,7 +277,10 @@ Deno.serve(async (req) => {
     if (!aiResp.ok) {
       const t = await aiResp.text();
       console.error("AI gateway error:", aiResp.status, t.slice(0, 500));
-      return debugFail(currentStage, "ai_error", `Falha na chamada à IA (HTTP ${aiResp.status}).`, 502, { raw_ai_response: t.slice(0, 2000) });
+      const friendly = aiResp.status === 400
+        ? "A IA não conseguiu ler este arquivo. Tente enviar o voucher como imagem (PNG/JPG) ou cole o texto da reserva."
+        : `Falha na chamada à IA (HTTP ${aiResp.status}).`;
+      return debugFail(currentStage, "ai_error", friendly, 502, { raw_ai_response: t.slice(0, 2000) });
     }
 
     const aiJson = await aiResp.json();
