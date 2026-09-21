@@ -10,6 +10,13 @@ const corsHeaders = {
 type ServiceKey = "transfer" | "attraction" | "insurance" | "cruise" | "circuit" | "rail_transport" | "other";
 
 const SHARED_RULES = `
+REGRA #0 — VÁRIOS SERVIÇOS NO MESMO DOCUMENTO.
+- O documento pode conter 1, 2, 5 ou mais serviços do mesmo tipo (ex.: ingressos da Universal, da Disney e do SeaWorld; dois transfers; três seguros).
+- Devolva SEMPRE o array "itens" com UM ITEM POR SERVIÇO identificado, na ordem em que aparecem (ou cronológica, quando houver datas).
+- NUNCA junte dois serviços diferentes no mesmo item e NUNCA repita o mesmo serviço em itens diferentes.
+- NUNCA transforme vários serviços em um "pacote" com valor somado: cada serviço tem seu próprio valor.
+- Se houver apenas um serviço, devolva um array com um único item.
+- Cada item deve conter TODOS os campos que você conseguir ler daquele serviço específico.
 REGRA #1 — POSTURA DE EXTRAÇÃO.
 - NUNCA desista. Mesmo com campos ilegíveis, EXTRAIA TUDO o que conseguir.
 - Deixe vazio/null o que não tiver certeza. Liste em "campos_nao_identificados" o nome dos campos em branco.
@@ -240,11 +247,22 @@ function buildTool(key: ServiceKey) {
     type: "function",
     function: {
       name: s.fnName,
-      description: s.description,
+      description: `${s.description} Always return one item per service inside 'itens'.`,
       parameters: {
         type: "object",
-        properties: s.properties,
-        required: [],
+        properties: {
+          itens: {
+            type: "array",
+            description: "Uma entrada por serviço identificado no documento (mínimo 1).",
+            items: {
+              type: "object",
+              properties: s.properties,
+              required: [],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["itens"],
         additionalProperties: false,
       },
     },
