@@ -229,7 +229,7 @@ export function TripRemindersCard() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 px-2 text-xs shrink-0"
+                      className="h-11 px-2 text-xs shrink-0 md:h-7"
                       onClick={() => handleEditFollowUp(reminder.id, reminder.follow_up_note)}
                     >
                       <Edit2 className="h-3.5 w-3.5 mr-1 shrink-0" />
@@ -238,7 +238,7 @@ export function TripRemindersCard() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 px-2 text-xs shrink-0"
+                      className="h-11 px-2 text-xs shrink-0 md:h-7"
                       onClick={() => navigate(`/ferramentas-ia/trip-wallet/${reminder.trip_id}`)}
                     >
                       <ExternalLink className="h-3.5 w-3.5 mr-1 shrink-0" />
@@ -248,7 +248,7 @@ export function TripRemindersCard() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-xs shrink-0 text-primary hover:text-primary/80 hover:bg-primary/10"
+                      className="h-11 px-2 text-xs shrink-0 text-primary hover:text-primary/80 hover:bg-primary/10 md:h-7"
                       onClick={() => handleMarkCompleted(reminder.id)}
                       disabled={isUpdating}
                     >
