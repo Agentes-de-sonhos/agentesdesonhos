@@ -130,7 +130,7 @@ export function OperationCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 text-muted-foreground opacity-60 hover:opacity-100"
+                className="h-11 w-11 shrink-0 text-muted-foreground opacity-100 md:h-6 md:w-6 md:opacity-60 md:hover:opacity-100"
                 aria-label="Ações"
               >
                 <MoreVertical className="h-3.5 w-3.5" />
