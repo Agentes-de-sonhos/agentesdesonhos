@@ -20,6 +20,12 @@ export interface PortalConfig {
    * contornada: consumimos apenas agregadores públicos de sindicação.
    */
   fallbackFeedUrls?: string[];
+  /**
+   * Endpoints públicos de conteúdo do próprio portal em JSON (WordPress REST API).
+   * Servem como fonte direta e atualizada quando o feed RSS nativo está
+   * indisponível, evitando dependência de agregadores (que costumam atrasar).
+   */
+  jsonFeedUrls?: string[];
   maxItems: number;
 }
 
@@ -29,6 +35,11 @@ function bingNewsSiteFeed(domain: string): string {
 
 function googleNewsSiteFeed(domain: string): string {
   return `https://news.google.com/rss/search?q=site:${domain}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
+}
+
+/** Endpoint público de posts da WordPress REST API do próprio portal. */
+function wpJsonPostsFeed(origin: string): string {
+  return `${origin}/wp-json/wp/v2/posts?per_page=40&_fields=link,date_gmt,title,excerpt`;
 }
 
 export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
@@ -43,6 +54,7 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "Mercado & Eventos",
     slug: "mercado-eventos",
     feedUrl: "https://www.mercadoeeventos.com.br/feed/",
+    jsonFeedUrls: [wpJsonPostsFeed("https://www.mercadoeeventos.com.br")],
     fallbackFeedUrls: [
       bingNewsSiteFeed("mercadoeeventos.com.br"),
       googleNewsSiteFeed("mercadoeeventos.com.br"),
@@ -53,6 +65,7 @@ export const PORTAL_CONFIGS: Record<PortalKey, PortalConfig> = {
     key: "Brasilturis",
     slug: "brasilturis",
     feedUrl: "https://brasilturis.com.br/feed/?withoutcomments=1",
+    jsonFeedUrls: [wpJsonPostsFeed("https://brasilturis.com.br")],
     fallbackFeedUrls: [bingNewsSiteFeed("brasilturis.com.br"), googleNewsSiteFeed("brasilturis.com.br")],
     maxItems: 60,
   },
@@ -287,10 +300,46 @@ export async function fetchFeedXml(portal: PortalConfig): Promise<string> {
   return (await fetchFeedXmlWithFallback(portal)).xml;
 }
 
-export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
-  const { xml, usedFallback } = await fetchFeedXmlWithFallback(portal);
-  if (!xml || xml.length < 100) throw new Error(`Empty feed body (${xml.length} bytes)`);
+function stripHtml(text: string): string {
+  return decodeHtmlEntities(text.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+}
 
+/** Converte a resposta da WordPress REST API do portal em itens brutos. */
+export function parseWpJsonItems(body: string, portal: PortalConfig): RawItem[] {
+  let posts: unknown;
+  try {
+    posts = JSON.parse(body);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(posts)) return [];
+  const items: RawItem[] = [];
+  for (const raw of posts.slice(0, portal.maxItems)) {
+    const post = raw as {
+      link?: string;
+      date_gmt?: string;
+      title?: { rendered?: string };
+      excerpt?: { rendered?: string };
+    };
+    const link = typeof post.link === "string" ? post.link : "";
+    const title = stripHtml(post.title?.rendered ?? "");
+    if (!link || !title) continue;
+    const desc = stripHtml(post.excerpt?.rendered ?? "");
+    const parsedDate = post.date_gmt ? new Date(`${post.date_gmt}Z`) : null;
+    const iso = parsedDate && !Number.isNaN(parsedDate.getTime()) ? parsedDate.toISOString() : null;
+    items.push({
+      titulo_original: title,
+      conteudo: desc || title,
+      url: link,
+      url_canonical: canonicalizeUrl(link),
+      data_publicacao: iso,
+      content_hash: stableHash(portal.key, title, iso ? iso.slice(0, 10) : ""),
+    });
+  }
+  return items;
+}
+
+function parseRssItems(xml: string, portal: PortalConfig, usedFallback: boolean): RawItem[] {
   const items = extractItems(xml).slice(0, portal.maxItems);
   const parsed: RawItem[] = items.map((it) => {
     const rawTitle = extractTag(it, "title");
@@ -316,6 +365,62 @@ export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
   // Filtra: precisa ter título, url válida e ser matéria
   return parsed.filter((n) => n.titulo_original && n.url_canonical && isProbablyArticleUrl(n.url_canonical));
 }
+
+/**
+ * Coleta os itens do portal combinando as fontes diretas disponíveis (RSS nativo
+ * e API pública de conteúdo do próprio portal). Só recorre aos agregadores
+ * públicos quando nenhuma fonte direta responde. Itens repetidos são
+ * deduplicados pela URL canônica e ordenados da publicação mais recente.
+ */
+export async function fetchRSSItems(portal: PortalConfig): Promise<RawItem[]> {
+  const collected: RawItem[] = [];
+  const errors: string[] = [];
+
+  const native = await fetchFeedXmlFromUrl(portal.feedUrl);
+  if (native.ok) collected.push(...parseRssItems(native.body, portal, false));
+  else errors.push(native.error);
+
+  for (const url of portal.jsonFeedUrls ?? []) {
+    const res = await fetchFeedXmlFromUrl(url);
+    if (res.ok) {
+      const items = parseWpJsonItems(res.body, portal).filter(
+        (n) => n.url_canonical && isProbablyArticleUrl(n.url_canonical),
+      );
+      if (items.length > 0) collected.push(...items);
+      else errors.push(`Resposta sem itens utilizáveis em ${url}`);
+    } else {
+      errors.push(res.error);
+    }
+  }
+
+  if (collected.length === 0) {
+    for (const url of portal.fallbackFeedUrls ?? []) {
+      const alt = await fetchFeedXmlFromUrl(url);
+      if (alt.ok) {
+        const items = parseRssItems(alt.body, portal, true);
+        if (items.length > 0) {
+          collected.push(...items);
+          break;
+        }
+        errors.push(`Feed alternativo sem itens utilizáveis em ${url}`);
+      } else {
+        errors.push(alt.error);
+      }
+    }
+  }
+
+  if (collected.length === 0) throw new Error(errors.join(" | ") || `Nenhum item coletado para ${portal.key}`);
+
+  const byUrl = new Map<string, RawItem>();
+  for (const item of collected) {
+    if (!byUrl.has(item.url_canonical)) byUrl.set(item.url_canonical, item);
+  }
+
+  return [...byUrl.values()]
+    .sort((a, b) => (b.data_publicacao ?? "").localeCompare(a.data_publicacao ?? ""))
+    .slice(0, portal.maxItems);
+}
+
 
 // ── AI classification ───────────────────────────────────────
 export interface AiClassification {
