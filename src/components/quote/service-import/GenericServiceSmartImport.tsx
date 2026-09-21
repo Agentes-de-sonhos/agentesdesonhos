@@ -183,7 +183,7 @@ export function GenericServiceSmartImport({
         success: body?.success,
       });
 
-      const items = extractParsedServices(body);
+      const items = extractParsedServices(body, serviceType);
 
       if (items.length === 0) {
         const msg = body?.error_message || body?.error || `Não foi possível identificar dados do(a) ${serviceLabel}. Tente uma imagem mais nítida.`;
@@ -235,7 +235,8 @@ export function GenericServiceSmartImport({
 
     const itemTitle = (item: Record<string, any>) =>
       String(
-        item?.nome_atracao || item?.nome || item?.titulo || item?.empresa || item?.fornecedor ||
+        item?.nome_produto || item?.nome_atracao || item?.nome_circuito || item?.nome ||
+        item?.titulo || item?.plano || item?.descricao || item?.empresa || item?.fornecedor ||
         item?.operadora || item?.seguradora || item?.navio || item?.trajeto || item?.descricao_cliente || "",
       ).trim();
 

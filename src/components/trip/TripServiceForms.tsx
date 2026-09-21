@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { AirfareSmartImport } from "@/components/quote/flight-wizard/AirfareSmartImport";
 import { normalizeParsedAirfareToLegacy } from "@/components/trip/FlightAutoImport";
+import { normalizeServiceItemFields } from "@/lib/serviceImportFieldAliases";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -3401,7 +3402,10 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
-  const applyAttractionImport = (p: any) => {
+  const applyAttractionImport = (rawImport: any) => {
+    // Traduz aliases da IA ("produto", "descricao", "ticketType"...) para as
+    // chaves canônicas antes do mapeamento, igual ao importador do orçamento.
+    const p = normalizeServiceItemFields("attraction", rawImport ?? {});
     const setIf = (k: string, v: any) => { if (v !== undefined && v !== null && v !== "") form.setValue(k as any, v as any); };
     const parseLocalDate = (d?: string) => { if (!d) return undefined; const [y,m,day] = String(d).split('-').map(Number); return new Date(y, (m||1)-1, day||1); };
     setIf("name", p.nome_produto);

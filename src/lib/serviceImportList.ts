@@ -8,6 +8,8 @@
  * Generalização de `hotelImportList.ts`, que segue dedicado à hospedagem.
  */
 
+import { normalizeServiceItemFields } from "./serviceImportFieldAliases";
+
 export type ParsedServiceItem = Record<string, any>;
 
 const META_KEYS = new Set(["confianca_extracao", "campos_nao_identificados", "observacoes"]);
@@ -55,7 +57,11 @@ export function sortServiceItemsChronologically<T extends ParsedServiceItem>(lis
  * Aceita `items`, `itens`, `servicos`, array puro, `data` singular, o próprio
  * corpo e `partial_data` (retorno parcial/baixa confiança).
  */
-export function extractParsedServices<T extends ParsedServiceItem>(body: any): T[] {
+export function extractParsedServices<T extends ParsedServiceItem>(
+  body: any,
+  /** Traduz aliases da IA para as chaves do formulário (quando informado). */
+  serviceType?: string,
+): T[] {
   if (!body) return [];
 
   const candidates: any[] = [];
@@ -83,5 +89,6 @@ export function extractParsedServices<T extends ParsedServiceItem>(body: any): T
     else if (serviceItemHasUsefulData(partial)) useful = [partial];
   }
 
-  return sortServiceItemsChronologically(useful) as T[];
+  const normalized = useful.map((item) => normalizeServiceItemFields(serviceType, item));
+  return sortServiceItemsChronologically(normalized) as T[];
 }
