@@ -37,6 +37,13 @@ import { Separator } from "@/components/ui/separator";
 import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard";
 import { AgencyBrandColorCard } from "@/components/profile/AgencyBrandColorCard";
 import { PublicContentLocaleCard } from "@/components/profile/PublicContentLocaleCard";
+import { CircularImageCropDialog } from "@/components/media/CircularImageCropDialog";
+import {
+  circularImageStoragePaths,
+  readImageAsOrientedDataUrl,
+  validateCircularImageFile,
+  withCacheBuster,
+} from "@/lib/circularCrop";
 
 
 const brazilianStates = [
