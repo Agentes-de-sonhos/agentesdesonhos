@@ -399,7 +399,7 @@ export function GenericServiceSmartImport({
 
 /* ─────────── REVIEW SCREEN ─────────── */
 function ReviewScreen({
-  data, onChange, fields, serviceLabel, onCancel, onConfirm, isAdmin, onShowDebug,
+  data, onChange, fields, serviceLabel, onCancel, onConfirm, isAdmin, onShowDebug, confirmLabel,
 }: {
   data: Record<string, any>;
   onChange: (d: Record<string, any>) => void;
@@ -409,6 +409,7 @@ function ReviewScreen({
   onConfirm: () => void;
   isAdmin?: boolean;
   onShowDebug?: () => void;
+  confirmLabel?: string;
 }) {
   const conf = data.confianca_extracao?.geral ?? 0;
   const lowConf = conf > 0 && conf < 0.8;
