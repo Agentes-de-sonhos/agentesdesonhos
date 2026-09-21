@@ -171,6 +171,26 @@ export function agencyBrandInputFromProfile(
   };
 }
 
+/**
+ * Escolhe, entre perfis possíveis, o primeiro que realmente carrega campos de
+ * marca. Necessário porque alguns payloads públicos entregam apenas dados de
+ * apresentação (nome, logo) sem as cores da agência.
+ */
+export function pickBrandProfile<T extends Record<string, unknown> | null | undefined>(
+  candidates: T[],
+): T | null {
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const hasBrand =
+      normalizeBrandHex(candidate.agency_primary_color as string | null) ||
+      normalizeBrandHex(candidate.agency_secondary_color as string | null) ||
+      normalizeBrandHex(candidate.agency_tertiary_color as string | null) ||
+      normalizeBrandHex(candidate.agency_on_secondary_color as string | null);
+    if (hasBrand) return candidate;
+  }
+  return null;
+}
+
 /** Texto legível (preto/branco) sobre uma cor de fundo. */
 function readableOn(hex: string): string {
   const rgb = parseHex(hex) ?? parseHex(BRAND_FALLBACK_PRIMARY)!;

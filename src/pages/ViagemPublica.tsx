@@ -56,6 +56,7 @@ import { useDestinationCoverPhoto } from "@/hooks/useDestinationCoverPhoto";
 import { getWalletBrandStyle } from "@/lib/agencyColor";
 import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { agencyBrandInputFromProfile } from "@/lib/brandTheme";
 import { resolvePublicLocale, formatPublicShortDate, formatPublicDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { publicAirportText } from "@/lib/airportDisplay";
@@ -2191,12 +2192,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     endDate,
   );
 
-  useAgencyBrandTheme({
-    primary: agentProfile?.agency_primary_color ?? null,
-    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
-    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
-    onSecondary: (agentProfile as any)?.agency_on_secondary_color ?? null,
-  });
+  useAgencyBrandTheme(agencyBrandInputFromProfile(agentProfile as any));
 
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>

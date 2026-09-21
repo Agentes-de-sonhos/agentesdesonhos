@@ -76,19 +76,29 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
   cruise: <Ship className="h-5 w-5" />, rail_transport: <TramFront className="h-5 w-5" />, circuit: <Map className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
 };
 
+/**
+ * Cabeçalho do serviço no orçamento WEB: mesmo acabamento do PDF — fundo na
+ * cor secundária da agência e texto/ícones na cor configurável sobre ela
+ * (`--brand-on-secondary`, com fallback automático de contraste).
+ */
+const SERVICE_HEADER_STYLE: React.CSSProperties = {
+  background: "var(--brand-secondary, hsl(var(--primary)))",
+  color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
+};
+
 const SERVICE_COLORS: Record<ServiceType, string> = {
   // Unified agency-theme: every service inherits the agency primary color.
   // Differentiation comes from icon + content, not color.
-  flight: "from-primary/15 to-primary/5 text-primary",
-  hotel: "from-primary/15 to-primary/5 text-primary",
-  car_rental: "from-primary/15 to-primary/5 text-primary",
-  transfer: "from-primary/15 to-primary/5 text-primary",
-  attraction: "from-primary/15 to-primary/5 text-primary",
-  insurance: "from-primary/15 to-primary/5 text-primary",
-  cruise: "from-primary/15 to-primary/5 text-primary",
-  rail_transport: "from-primary/15 to-primary/5 text-primary",
-  circuit: "from-primary/15 to-primary/5 text-primary",
-  other: "from-primary/15 to-primary/5 text-primary",
+  flight: "",
+  hotel: "",
+  car_rental: "",
+  transfer: "",
+  attraction: "",
+  insurance: "",
+  cruise: "",
+  rail_transport: "",
+  circuit: "",
+  other: "",
 };
 
 let quoteCurrency: QuoteCurrency = 'BRL';
@@ -930,7 +940,8 @@ function CollapsibleServiceCard({
         </button>
       ) : (
         <div
-          className={`w-full bg-gradient-to-r ${colorClass} px-5 py-3 flex items-center justify-between`}
+          className={`w-full ${colorClass} px-5 py-3 flex items-center justify-between`}
+          style={SERVICE_HEADER_STYLE}
           data-service-card-header="static"
         >
           {headerInner}

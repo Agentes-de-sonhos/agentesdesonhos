@@ -21,6 +21,7 @@ import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
+import { agencyBrandInputFromProfile } from "@/lib/brandTheme";
 import {
   isPricingContentEmpty,
   sanitizePricingContent,
@@ -112,12 +113,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   });
 
   // Identidade visual global da agência (também nos portals: modais, selects).
-  useAgencyBrandTheme({
-    primary: agentProfile?.agency_primary_color ?? null,
-    secondary: (agentProfile as any)?.agency_secondary_color ?? null,
-    secondaryAuto: !(agentProfile as any)?.agency_secondary_color,
-    onSecondary: (agentProfile as any)?.agency_on_secondary_color ?? null,
-  });
+  useAgencyBrandTheme(agencyBrandInputFromProfile(agentProfile as any));
 
   // Weather + timezone (hook must be called unconditionally before any early return)
   const weatherDestination = itinerary?.destination;
