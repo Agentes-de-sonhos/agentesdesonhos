@@ -2,12 +2,9 @@ import { useState } from "react";
 import { z } from "zod";
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
+import { MobileFullscreenDialogContent } from "@/components/dashboard/MobileFullscreenDialogContent";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -120,13 +117,11 @@ export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
   return (
     <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Cadastrar cliente</DialogTitle>
-            <DialogDescription>
-              Cadastro rápido. Cria apenas o cliente, sem gerar oportunidade no funil.
-            </DialogDescription>
-          </DialogHeader>
+        <MobileFullscreenDialogContent
+          title="Cadastrar cliente"
+          description="Cadastro rápido. Cria apenas o cliente, sem gerar oportunidade no funil."
+          className="md:max-w-md"
+        >
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor="qac-name">Nome *</Label>
@@ -169,7 +164,7 @@ export function QuickAddClientDialog({ open, onOpenChange, onCreated }: Props) {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </MobileFullscreenDialogContent>
       </Dialog>
 
       <AlertDialog open={!!confirmDup} onOpenChange={(o) => !o && setConfirmDup(null)}>

@@ -9,11 +9,8 @@
 import { useState } from "react";
 import {
   Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
+import { MobileFullscreenDialogContent } from "@/components/dashboard/MobileFullscreenDialogContent";
 import { toast } from "sonner";
 import { QuoteClientForm } from "@/components/quote/QuoteClientForm";
 import { ItineraryForm } from "@/components/itinerary/ItineraryForm";
@@ -46,13 +43,9 @@ function Shell({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] w-[calc(100vw-1.5rem)] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+      <MobileFullscreenDialogContent title={title} description={description}>
         {children}
-      </DialogContent>
+      </MobileFullscreenDialogContent>
     </Dialog>
   );
 }
