@@ -54,9 +54,12 @@ export function MobileFullscreenDialogContent({
         const safeTop = headerBottom + 12;
         const safeBottom = viewportBottom - 20;
 
-        if (rect.top < safeTop || rect.bottom > safeBottom) {
-          active.scrollIntoView({ block: "center", behavior: "smooth" });
-        }
+        const offset = rect.top < safeTop
+          ? rect.top - safeTop
+          : rect.bottom > safeBottom
+            ? rect.bottom - safeBottom
+            : 0;
+        if (offset) body.scrollBy({ top: offset, behavior: "smooth" });
       });
     };
 

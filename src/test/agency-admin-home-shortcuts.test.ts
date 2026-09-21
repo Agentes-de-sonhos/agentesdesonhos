@@ -57,7 +57,7 @@ describe("atalhos da página inicial do painel da agência", () => {
     expect(mobileShell).toContain("overscroll-contain");
     expect(mobileShell).toContain("safe-area-inset-top");
     expect(mobileShell).toContain("safe-area-inset-bottom");
-    expect(mobileShell).toContain("scrollIntoView");
+    expect(mobileShell).toContain('body.scrollBy({ top: offset, behavior: "smooth" })');
     expect(mobileShell).toContain("md:left-[50%]");
     expect(mobileShell).toContain("md:max-w-2xl");
     expect(mobileShell).toContain("<DialogClose");
