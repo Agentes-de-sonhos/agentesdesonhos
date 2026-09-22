@@ -689,14 +689,14 @@ export default function ProcessoReserva() {
                 ))}
                 {canManage && (
                   <Button
-                    className="gap-2"
-                    disabled={!readiness.ready}
+                    className="min-h-11 w-full gap-2 sm:w-auto"
                     onClick={() => setConfirmSaleOpen(true)}
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     Confirmar venda e iniciar operação
                   </Button>
                 )}
+
               </div>
             )}
           </Card>
