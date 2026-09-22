@@ -28,6 +28,18 @@ export const V2_BLOCKING_SERVICE_STATUSES = [
 /** Situações que excluem o serviço da conversão quando ele é opcional. */
 export const V2_EXCLUDED_WHEN_OPTIONAL_STATUSES = ["unavailable", "cancelled"] as const;
 
+/**
+ * Situações terminais de um processo de reserva: ele deixa de ser "ativo".
+ * Espelha exatamente `public.travel_file_is_active(text)` no banco (migration
+ * 0020), usada pelo trigger do funil e pela RPC de confirmação.
+ */
+export const V2_TERMINAL_FILE_STATUSES = ["cancelled", "trip_completed"] as const;
+
+/** Processo ativo = situação fora das terminais (cancelado / viagem concluída). */
+export const isActiveTravelFileStatus = (status?: string | null): boolean =>
+  !(V2_TERMINAL_FILE_STATUSES as readonly string[]).includes(status || "");
+
+
 export const V2_ACCEPTANCE_CHANNELS = [
   { value: "whatsapp", label: "WhatsApp" },
   { value: "telefone", label: "Telefone" },
