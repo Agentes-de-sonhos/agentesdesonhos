@@ -542,6 +542,14 @@ export default function ProcessoReserva() {
                     size="sm"
                     className="gap-2"
                     onClick={() => {
+                      if (workflowLinks.isLoading) {
+                        toast.info("Ainda estamos carregando os vínculos deste processo. Um instante.");
+                        return;
+                      }
+                      if (workflowLinks.isError) {
+                        toast.error("Não conseguimos consultar a operação deste processo agora. Tente novamente em instantes.");
+                        return;
+                      }
                       const operationId = workflowLinks.operationId || file.operation_id;
                       if (!operationId) {
                         toast.error(
@@ -560,6 +568,14 @@ export default function ProcessoReserva() {
                     size="sm"
                     className="gap-2"
                     onClick={() => {
+                      if (workflowLinks.isLoading) {
+                        toast.info("Ainda estamos carregando os vínculos deste processo. Um instante.");
+                        return;
+                      }
+                      if (workflowLinks.isError) {
+                        toast.error("Não conseguimos consultar a venda deste processo agora. Tente novamente em instantes.");
+                        return;
+                      }
                       if (!workflowLinks.saleId) {
                         toast.error(
                           "Não foi possível localizar a venda deste processo no financeiro. Verifique suas permissões ou recarregue a página.",
