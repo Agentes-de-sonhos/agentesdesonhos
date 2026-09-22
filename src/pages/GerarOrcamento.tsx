@@ -938,14 +938,24 @@ export default function GerarOrcamento() {
 
     const token = quote.share_token || await publishQuote(quote.id);
 
-    // Always use the seuorcamento.tur.br domain. Prefer the new format
-    // (agency-slug + access-code) when available; otherwise fall back to the
-    // legacy /orcamento/:token route on the same domain.
-    const accessCode = (quote as any).public_access_code;
-    const agencyName = agentProfile?.agency_name;
-    const publicUrl = accessCode && agencyName
-      ? buildOrcamentoLink(agencyName, accessCode, customDomain)
-      : `${ORCAMENTO_DOMAIN}/orcamento/${token}`;
+    // Camada única de URLs públicas: slug canônico do site da agência (ou
+    // domínio próprio) + código público do orçamento. Sem endereço válido,
+    // nenhum link falso é gerado.
+    const resolved = resolveQuotePublicUrl({
+      agencySlug,
+      accessCode: (quote as any).public_access_code,
+      shareToken: token,
+      customDomain,
+    });
+    if (!resolved.ok) {
+      toast({
+        title: "Link público indisponível",
+        description: resolved.error,
+        variant: "destructive",
+      });
+      return;
+    }
+    const publicUrl = resolved.url;
 
     clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
