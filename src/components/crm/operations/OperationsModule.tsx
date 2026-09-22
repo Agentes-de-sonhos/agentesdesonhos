@@ -25,7 +25,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 export function OperationsModule() {
-  const { operations, isLoading, moveStage, reorderOperations } = useOperations();
+  const { operations, isLoading, isFetching, moveStage, reorderOperations } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
   const { can, canStage, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
