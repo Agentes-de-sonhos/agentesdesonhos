@@ -19,12 +19,18 @@ import {
   V2_ACCEPTANCE_CHANNELS,
   type TravelFileReadiness,
 } from "@/lib/travelFileConversion";
-import { money } from "@/lib/travelFiles";
 import {
   useConfirmTravelFileSale,
   type ConfirmSaleResult,
 } from "@/hooks/useUnifiedWorkflow";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+
+/** Formatação monetária local (mesma regra usada na página do processo). */
+const money = (value: number | null | undefined, currency: string) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: currency || "BRL",
+  }).format(value ?? 0);
 
 interface ConfirmSaleDialogProps {
   open: boolean;
