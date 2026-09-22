@@ -1341,7 +1341,7 @@ export default function GerarOrcamento() {
                 shareToken: quote.share_token,
                 customDomain,
               });
-              if (!resolvedShare.ok) return null;
+              if (resolvedShare.ok !== true) return null;
               const publicUrl = resolvedShare.url;
               const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (
