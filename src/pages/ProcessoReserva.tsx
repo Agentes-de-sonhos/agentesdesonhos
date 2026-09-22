@@ -14,8 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  CheckCircle2,
+  CircleDollarSign,
   ExternalLink,
   FileText,
   Loader2,
@@ -60,6 +63,14 @@ import {
   ManualServiceDialog,
   type ManualServicePayload,
 } from "@/components/reservas/ManualServiceDialog";
+import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import {
+  assessTravelFileReadiness,
+  describeServiceCommission,
+  isConvertedV2,
+} from "@/lib/travelFileConversion";
+import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
+import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
 
 const money = (value: number | null | undefined, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -147,6 +158,11 @@ export default function ProcessoReserva() {
   const [editDraftOpen, setEditDraftOpen] = useState(false);
   const [manualServiceOpen, setManualServiceOpen] = useState(false);
   const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
+  // Fluxo unificado V2 (entitlement de agência, desligado por padrão).
+  const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
+  const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
+  const [supplierExceptions, setSupplierExceptions] = useState<Record<string, string>>({});
   const { can } = usePermissions();
   // Interface segue as permissões; a autoridade final é o servidor.
   // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
