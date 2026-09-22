@@ -60,10 +60,13 @@ export function ConfirmSaleDialog({
   file,
   readiness,
   supplierExceptions,
+  onConfirmed,
+  processHref,
 }: ConfirmSaleDialogProps) {
   const navigate = useNavigate();
   const nav = useAdminNav();
   const confirmSale = useConfirmTravelFileSale(file.id);
+
   const [channel, setChannel] = useState("");
   const [note, setNote] = useState("");
   const [result, setResult] = useState<ConfirmSaleResult | null>(null);
@@ -102,10 +105,7 @@ export function ConfirmSaleDialog({
       });
       // Defesa extra: nenhuma resposta com erro estruturado vira sucesso.
       if (isConfirmSaleFailure(data)) {
-        toast.error(
-          data.message ||
-            "Não foi possível confirmar a venda. Revise os vínculos deste processo.",
-        );
+        toast.error(humanizeWorkflowError(data.message || data.error));
         return;
       }
       setResult(data);
@@ -114,19 +114,23 @@ export function ConfirmSaleDialog({
           ? "Esta confirmação já havia sido registrada — nada foi duplicado."
           : "Venda confirmada e operação iniciada.",
       );
+      onConfirmed?.(data);
     } catch (error: any) {
-      const message = String(error?.message || "Não foi possível confirmar a venda.");
-      toast.error(message.replace(/^[A-Z_]+:\s*/, ""));
+      // Código interno fica só na telemetria; a pessoa vê texto claro.
+      console.error("confirm_travel_file_sale falhou:", extractWorkflowCode(error));
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[88svh] w-[calc(100vw-1.5rem)] max-w-lg flex-col overflow-hidden p-0 sm:w-full">
+        <DialogHeader className="px-5 pt-5">
           <DialogTitle>Confirmar venda e iniciar operação</DialogTitle>
         </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5 [padding-bottom:calc(1.25rem+env(safe-area-inset-bottom))]">
+
 
         {result ? (
           <div className="space-y-4">
