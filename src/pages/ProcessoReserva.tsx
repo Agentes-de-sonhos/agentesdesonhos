@@ -844,6 +844,51 @@ export default function ProcessoReserva() {
                   )}
                 </div>
 
+                {unifiedV2 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        (service.financial_rule_status ?? "pending") === "pending"
+                          ? "outline"
+                          : "secondary"
+                      }
+                      className={
+                        (service.financial_rule_status ?? "pending") === "pending"
+                          ? "border-amber-500/50 text-amber-700 dark:text-amber-300"
+                          : undefined
+                      }
+                    >
+                      {describeServiceCommission(service)}
+                    </Badge>
+                    {canFinancialManage && !isConvertedV2(file) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs"
+                        onClick={() => setRuleEditing(service)}
+                        aria-label={`Regra financeira de ${service.product_name}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Regra financeira
+                      </Button>
+                    )}
+                    {readiness?.missingSupplierIds.includes(service.id) && (
+                      <Input
+                        value={supplierExceptions[service.id] ?? ""}
+                        onChange={(e) =>
+                          setSupplierExceptions((prev) => ({
+                            ...prev,
+                            [service.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="Sem fornecedor: justifique a exceção"
+                        className="h-8 min-w-[220px] flex-1 bg-background text-xs"
+                        aria-label={`Justificativa de exceção de fornecedor para ${service.product_name}`}
+                      />
+                    )}
+                  </div>
+                )}
+
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <div className="min-w-0">
                     <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -988,6 +1033,26 @@ export default function ProcessoReserva() {
             )}
           </ol>
         </Card>
+
+        {unifiedV2 && readiness && (
+          <ConfirmSaleDialog
+            open={confirmSaleOpen}
+            onOpenChange={setConfirmSaleOpen}
+            file={file}
+            readiness={readiness}
+            supplierExceptions={supplierExceptions}
+          />
+        )}
+        {unifiedV2 && ruleEditing && (
+          <ServiceFinancialRuleDialog
+            open={!!ruleEditing}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) setRuleEditing(null);
+            }}
+            fileId={file.id}
+            service={ruleEditing}
+          />
+        )}
 
         {isManual && canManage && (
           <>
