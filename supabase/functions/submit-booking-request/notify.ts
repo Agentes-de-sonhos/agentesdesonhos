@@ -3,6 +3,8 @@
 // A solicitação NUNCA depende deste envio: qualquer falha aqui apenas marca a
 // linha da fila `quote_booking_request_deliveries` como `failed`. WhatsApp não é
 // enviado nem marcado como enviado — não há integração configurada.
+import { planWhatsappNotify, whatsappConfigFromEnv } from "../_shared/whatsapp-request-notify.ts";
+
 const APP_BASE_URL = "https://app.agentesdesonhos.com.br";
 const APP_CRM_URL = `${APP_BASE_URL}/crm`;
 
@@ -230,6 +232,16 @@ export async function deliverBookingNotifications(
         });
         out.failed++;
       }
+    }
+
+    // WhatsApp: PREPARADO E INERTE. Sem template aprovado nada é enviado; só o
+    // motivo é registrado no log (sem PII). A solicitação nunca depende disto.
+    const first = rows[0];
+    const plan = planWhatsappNotify(first?.agency_whatsapp ?? null, whatsappConfigFromEnv((k) => Deno.env.get(k)));
+    if (plan.status !== "sent") {
+      console.log(`[submit-booking-request] whatsapp-${plan.status}: ${plan.reason}`);
+    } else {
+      console.log("[submit-booking-request] whatsapp-ready: envio ainda não habilitado nesta rodada.");
     }
   } catch (e) {
     console.error("[submit-booking-request] notify-exception");
