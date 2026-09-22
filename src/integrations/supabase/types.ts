@@ -16446,6 +16446,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      compute_operation_customer_payment_status: {
+        Args: { p_operation_id: string }
+        Returns: string
+      }
       compute_operation_payment_status: {
         Args: { _operation_id: string }
         Returns: string
