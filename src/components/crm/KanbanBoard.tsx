@@ -331,6 +331,14 @@ export function KanbanBoard() {
             duration: 8000,
           },
         );
+      } else if (message.includes("MULTIPLE_ACTIVE_TRAVEL_FILES")) {
+        toast.error(
+          "Esta oportunidade tem mais de um processo de reserva ativo. Revise na Central e mantenha apenas um ativo antes de fechar.",
+          {
+            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
+            duration: 8000,
+          },
+        );
       } else if (message.includes("WORKFLOW_LINK_CONFLICT")) {
         toast.error(
           "Esta oportunidade está ligada a outro processo de reserva. Revise os vínculos na Central antes de fechar.",
