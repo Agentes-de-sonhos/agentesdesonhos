@@ -247,13 +247,21 @@ export function KanbanBoard() {
     // simplesmente arrastada para "Fechada" — a venda é confirmada de forma
     // transacional na Central de Reservas (o servidor também bloqueia).
     if (celebrate && unifiedV2) {
-      const { data: linkedFile } = await (supabase as any)
+      const { data: linkedFile, error: linkedError } = await (supabase as any)
         .from("travel_files")
         .select("id")
         .eq("opportunity_id", opportunity.id)
         .not("status", "in", "(cancelled,trip_completed)")
         .limit(1)
         .maybeSingle();
+      if (linkedError) {
+        // Falha de rede/permissão nunca pode virar fechamento pelo caminho
+        // antigo: o card fica onde está e o motivo aparece para a pessoa.
+        toast.error(
+          "Não conseguimos verificar se esta oportunidade tem um processo de reserva. Tente novamente em instantes.",
+        );
+        return;
+      }
       if (linkedFile?.id) {
         toast.info(
           "Esta oportunidade tem um processo na Central de Reservas. Confirme a venda por lá.",
@@ -269,20 +277,37 @@ export function KanbanBoard() {
       }
     }
 
-    await reorderOpportunities({
-      movedId: draggedId,
-      fromStageId,
-      toStageId: toStage.id,
-      toStageLegacyKey: toStage.legacy_key,
-      fromStageLegacyKey: fromStage?.legacy_key || opportunity.stage,
-      fromStageLabel: fromStage?.name,
-      toStageLabel: toStage.name,
-      orderedTargetIds: targetList,
-      orderedSourceIds: sourceList,
-    });
+    try {
+      await reorderOpportunities({
+        movedId: draggedId,
+        fromStageId,
+        toStageId: toStage.id,
+        toStageLegacyKey: toStage.legacy_key,
+        fromStageLegacyKey: fromStage?.legacy_key || opportunity.stage,
+        fromStageLabel: fromStage?.name,
+        toStageLabel: toStage.name,
+        orderedTargetIds: targetList,
+        orderedSourceIds: sourceList,
+      });
+    } catch (error: any) {
+      const message = String(error?.message || "");
+      if (message.includes("USE_CONFIRM_SALE")) {
+        toast.info(
+          "Esta venda é confirmada na Central de Reservas, para criar operação e financeiro sem duplicar nada.",
+          {
+            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
+            duration: 8000,
+          },
+        );
+      } else if (error?.name !== "PermissionDeniedError") {
+        toast.error("Não foi possível mover este cartão. Nada foi alterado.");
+      }
+      return;
+    }
 
     // Só após a persistência confirmada (uma vez por movimentação bem-sucedida).
     if (celebrate) fireCelebrationConfetti();
+
   };
 
   // Reuso direto da lógica do drag and drop (mesma reordenação, permissões e cache).
