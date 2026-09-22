@@ -267,9 +267,9 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    // Exclusão/edição invalidam a cópia aberta por link direto.
-    if (directSale?.id === deleteId) setDirectSale(null);
+    // A cópia direta só sai de cena depois da exclusão concluir com sucesso.
     await deleteSale(deleteId);
+    setDirectSale((prev) => directRecordAfterDelete(prev, deleteId));
     setDeleteId(null);
   };
   const handleDeleteProduct = async () => { if (deleteProductId) { await deleteSaleProduct(deleteProductId); setDeleteProductId(null); } };
