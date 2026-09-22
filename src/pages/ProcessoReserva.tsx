@@ -286,7 +286,7 @@ export default function ProcessoReserva() {
       await setResponsibles.mutateAsync({ commercial, operations });
       toast.success(successMessage);
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível salvar a alteração.");
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
@@ -294,7 +294,7 @@ export default function ProcessoReserva() {
     try {
       await saveService.mutateAsync({ id: serviceId, status });
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível atualizar o serviço.");
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
@@ -320,7 +320,7 @@ export default function ProcessoReserva() {
         },
       });
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível atualizar o serviço.");
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
