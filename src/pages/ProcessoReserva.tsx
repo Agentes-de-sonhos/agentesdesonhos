@@ -63,7 +63,11 @@ import {
   ManualServiceDialog,
   type ManualServicePayload,
 } from "@/components/reservas/ManualServiceDialog";
-import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import {
+  useUnifiedWorkflowV2,
+  useTravelFileWorkflowLinks,
+} from "@/hooks/useUnifiedWorkflow";
+
 import {
   assessTravelFileReadiness,
   describeServiceCommission,
