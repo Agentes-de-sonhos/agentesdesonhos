@@ -947,7 +947,7 @@ export default function GerarOrcamento() {
       shareToken: token,
       customDomain,
     });
-    if (!resolved.ok) {
+    if (resolved.ok !== true) {
       toast({
         title: "Link público indisponível",
         description: resolved.error,
@@ -956,6 +956,7 @@ export default function GerarOrcamento() {
       return;
     }
     const publicUrl = resolved.url;
+
 
     clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
