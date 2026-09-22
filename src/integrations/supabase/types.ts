@@ -17439,6 +17439,7 @@ export type Database = {
       }
       travel_file_create_manual: { Args: { _payload: Json }; Returns: Json }
       travel_file_detail: { Args: { _file_id: string }; Returns: Json }
+      travel_file_is_active: { Args: { _status: string }; Returns: boolean }
       travel_file_note_add: {
         Args: { _author_name?: string; _body: string; _file_id: string }
         Returns: string
