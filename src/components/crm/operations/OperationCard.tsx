@@ -241,10 +241,27 @@ export function OperationCard({
       </div>
 
       <div className="flex flex-wrap gap-1 mt-2">
-        {operation.payment_status !== "pago" && (
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1">
-            <Wallet className="h-2.5 w-2.5" /> Pgto. {operation.payment_status}
-          </Badge>
+        {/* Fluxo unificado V2 (travel_file_id): recebimento do cliente e
+            pagamento a fornecedores são duas ideias separadas. */}
+        {operation.travel_file_id ? (
+          <>
+            {operation.customer_payment_status && operation.customer_payment_status !== "pago" && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1">
+                <Wallet className="h-2.5 w-2.5" /> Cliente: {operation.customer_payment_status}
+              </Badge>
+            )}
+            {operation.supplier_payment_status && operation.supplier_payment_status !== "pago" && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1">
+                <Wallet className="h-2.5 w-2.5" /> Fornecedores: {operation.supplier_payment_status}
+              </Badge>
+            )}
+          </>
+        ) : (
+          operation.payment_status !== "pago" && (
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 gap-1">
+              <Wallet className="h-2.5 w-2.5" /> Pgto. {operation.payment_status}
+            </Badge>
+          )
         )}
         {travelClose && (
           <Badge className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 border-orange-300 hover:bg-orange-100">

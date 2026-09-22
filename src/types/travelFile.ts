@@ -81,6 +81,11 @@ export interface TravelFile {
   contact_snapshot: TravelFileContactSnapshot;
   trip_name: string | null;
   /**
+   * Versão do fluxo: 1 = legado; 2 = fluxo unificado (venda convertida pela
+   * RPC confirm_travel_file_sale). Compatível com registros antigos.
+   */
+  workflow_version?: number;
+  /**
    * Totais por moeda derivados dos serviços — só existem em reservas de
    * origem manual e apenas com as permissões financeiras correspondentes.
    * Não substituem nem sobrescrevem os valores congelados das solicitações web.
@@ -127,6 +132,18 @@ export interface TravelFileService {
   status: TravelFileServiceStatus;
   snapshot: Record<string, unknown>;
   created_at: string;
+  /** Regra financeira confirmada (fluxo unificado V2). */
+  operator_id?: string | null;
+  commission_type?: string | null;
+  commission_percent?: number | null;
+  commission_fixed?: number | null;
+  non_commissionable_fees?: number | null;
+  payment_rule?: string | null;
+  payment_days?: number | null;
+  requires_invoice?: boolean | null;
+  financial_rule_status?: "pending" | "confirmed" | "not_applicable" | null;
+  financial_rule_snapshot?: Record<string, unknown> | null;
+  financial_rule_snapshot_at?: string | null;
 }
 
 /** Nota interna do processo: nunca é exibida ao cliente. */

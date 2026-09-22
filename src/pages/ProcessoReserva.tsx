@@ -14,8 +14,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
+  CheckCircle2,
+  CircleDollarSign,
   ExternalLink,
   FileText,
   Loader2,
@@ -60,6 +63,14 @@ import {
   ManualServiceDialog,
   type ManualServicePayload,
 } from "@/components/reservas/ManualServiceDialog";
+import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import {
+  assessTravelFileReadiness,
+  describeServiceCommission,
+  isConvertedV2,
+} from "@/lib/travelFileConversion";
+import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
+import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
 
 const money = (value: number | null | undefined, currency: string) =>
   new Intl.NumberFormat("pt-BR", {
@@ -147,6 +158,11 @@ export default function ProcessoReserva() {
   const [editDraftOpen, setEditDraftOpen] = useState(false);
   const [manualServiceOpen, setManualServiceOpen] = useState(false);
   const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
+  // Fluxo unificado V2 (entitlement de agência, desligado por padrão).
+  const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
+  const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
+  const [supplierExceptions, setSupplierExceptions] = useState<Record<string, string>>({});
   const { can } = usePermissions();
   // Interface segue as permissões; a autoridade final é o servidor.
   // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
@@ -191,6 +207,15 @@ export default function ProcessoReserva() {
     return groupServiceFinancialsByCurrency(services, file?.currency);
   }, [services, file?.origin, file?.currency]);
   const suggested = useMemo(() => suggestFileStatusFromServices(services), [services]);
+  // Prontidão do fluxo unificado: espelha a RPC apenas para orientar a tela.
+  const readiness = useMemo(
+    () =>
+      file && unifiedV2
+        ? assessTravelFileReadiness(file, services, supplierExceptions)
+        : null,
+    [file, services, supplierExceptions, unifiedV2],
+  );
+
 
 
   const updateFileStatus = async (status: TravelFileStatus, reason?: string) => {
@@ -376,11 +401,18 @@ export default function ProcessoReserva() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(FILE_STATUS_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
+                  {Object.entries(FILE_STATUS_LABELS)
+                    // Fluxo unificado: venda só é confirmada pelo botão transacional,
+                    // nunca pela troca manual de etapa.
+                    .filter(
+                      ([value]) =>
+                        !unifiedV2 || !["sale_confirmed", "in_operation"].includes(value),
+                    )
+                    .map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
@@ -479,6 +511,85 @@ export default function ProcessoReserva() {
             )}
           </div>
         </Card>
+
+        {/* Fluxo unificado V2: prontidão da venda (somente com entitlement ativo) */}
+        {unifiedV2 && file.status !== "cancelled" && file.status !== "trip_completed" && readiness && (
+          <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">
+              Confirmação da venda (fluxo unificado)
+            </h2>
+
+            {isConvertedV2(file) ? (
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm">
+                <p className="flex items-center gap-2 font-semibold text-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  Venda confirmada e operação iniciada.
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  O recebimento do cliente e os pagamentos a fornecedores são acompanhados
+                  separadamente na operação e no financeiro.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate(nav.crm("operacoes"))}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Abrir operação
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate(nav.financeiro)}
+                  >
+                    <CircleDollarSign className="h-4 w-4" />
+                    Abrir financeiro
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {readiness.blockers.length === 0 ? (
+                  <p className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    Processo pronto: {readiness.eligible.length} serviço(s), total{" "}
+                    {money(readiness.total, readiness.currency || file.currency)}.
+                  </p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {readiness.blockers.map((blocker) => (
+                      <li
+                        key={blocker}
+                        className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-foreground"
+                      >
+                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+                        <span>{blocker}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {readiness.warnings.map((warning) => (
+                  <p key={warning} className="text-xs text-muted-foreground">
+                    {warning}
+                  </p>
+                ))}
+                {canManage && (
+                  <Button
+                    className="gap-2"
+                    disabled={!readiness.ready}
+                    onClick={() => setConfirmSaleOpen(true)}
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Confirmar venda e iniciar operação
+                  </Button>
+                )}
+              </div>
+            )}
+          </Card>
+        )}
 
         {/* Visão geral */}
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
@@ -733,6 +844,51 @@ export default function ProcessoReserva() {
                   )}
                 </div>
 
+                {unifiedV2 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        (service.financial_rule_status ?? "pending") === "pending"
+                          ? "outline"
+                          : "secondary"
+                      }
+                      className={
+                        (service.financial_rule_status ?? "pending") === "pending"
+                          ? "border-amber-500/50 text-amber-700 dark:text-amber-300"
+                          : undefined
+                      }
+                    >
+                      {describeServiceCommission(service)}
+                    </Badge>
+                    {canFinancialManage && !isConvertedV2(file) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs"
+                        onClick={() => setRuleEditing(service)}
+                        aria-label={`Regra financeira de ${service.product_name}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Regra financeira
+                      </Button>
+                    )}
+                    {readiness?.missingSupplierIds.includes(service.id) && (
+                      <Input
+                        value={supplierExceptions[service.id] ?? ""}
+                        onChange={(e) =>
+                          setSupplierExceptions((prev) => ({
+                            ...prev,
+                            [service.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="Sem fornecedor: justifique a exceção"
+                        className="h-8 min-w-[220px] flex-1 bg-background text-xs"
+                        aria-label={`Justificativa de exceção de fornecedor para ${service.product_name}`}
+                      />
+                    )}
+                  </div>
+                )}
+
                 <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
                   <div className="min-w-0">
                     <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -877,6 +1033,26 @@ export default function ProcessoReserva() {
             )}
           </ol>
         </Card>
+
+        {unifiedV2 && readiness && (
+          <ConfirmSaleDialog
+            open={confirmSaleOpen}
+            onOpenChange={setConfirmSaleOpen}
+            file={file}
+            readiness={readiness}
+            supplierExceptions={supplierExceptions}
+          />
+        )}
+        {unifiedV2 && ruleEditing && (
+          <ServiceFinancialRuleDialog
+            open={!!ruleEditing}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) setRuleEditing(null);
+            }}
+            fileId={file.id}
+            service={ruleEditing}
+          />
+        )}
 
         {isManual && canManage && (
           <>

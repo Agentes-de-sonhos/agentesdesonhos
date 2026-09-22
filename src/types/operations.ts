@@ -28,6 +28,17 @@ export interface Operation {
   stage: OperationStage;
   priority: OperationPriority;
   payment_status: OperationPaymentStatus;
+  /**
+   * Fluxo unificado V2: status separados por natureza.
+   * customer_payment_status = recebimento do cliente (faturas/pagamentos);
+   * supplier_payment_status = pagamento a fornecedores (serviços is_paid).
+   * `payment_status` continua existindo apenas como espelho de compatibilidade.
+   */
+  travel_file_id?: string | null;
+  conversion_key?: string | null;
+  flow_origin?: string | null;
+  customer_payment_status?: OperationPaymentStatus | null;
+  supplier_payment_status?: OperationPaymentStatus | null;
   assigned_user_id: string | null;
   notes: string | null;
   position: number;
