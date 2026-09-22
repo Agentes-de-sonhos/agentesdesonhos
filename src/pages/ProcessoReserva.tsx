@@ -163,9 +163,17 @@ export default function ProcessoReserva() {
   const [manualServiceOpen, setManualServiceOpen] = useState(false);
   const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
   // Fluxo unificado V2 (entitlement de agência, desligado por padrão).
-  const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  // Fail-closed: carregando ou com erro NUNCA equivale a "desligado".
+  const unified = useUnifiedWorkflowV2();
+  const unifiedV2 = unified.enabled;
+  const unifiedResolved = unified.resolved;
+  const unifiedChecking = !unified.resolved && !unified.isError;
+  const unifiedFailed = unified.isError && !unified.resolved;
+  // Caminho legado só é liberado quando a consulta terminou com "desligado".
+  const legacyFlowAllowed = unifiedResolved && !unifiedV2;
   // Vínculos canônicos persistidos (operação/venda) do processo já convertido.
   const workflowLinks = useTravelFileWorkflowLinks(id, unifiedV2);
+
 
   const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
   const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
