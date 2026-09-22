@@ -947,7 +947,7 @@ export default function GerarOrcamento() {
       shareToken: token,
       customDomain,
     });
-    if (!resolved.ok) {
+    if (resolved.ok !== true) {
       toast({
         title: "Link público indisponível",
         description: resolved.error,
@@ -956,6 +956,7 @@ export default function GerarOrcamento() {
       return;
     }
     const publicUrl = resolved.url;
+
 
     clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
@@ -1340,7 +1341,7 @@ export default function GerarOrcamento() {
                 shareToken: quote.share_token,
                 customDomain,
               });
-              if (!resolvedShare.ok) return null;
+              if (resolvedShare.ok !== true) return null;
               const publicUrl = resolvedShare.url;
               const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (

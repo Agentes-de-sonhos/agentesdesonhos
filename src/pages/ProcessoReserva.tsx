@@ -67,6 +67,8 @@ import {
   useUnifiedWorkflowV2,
   useTravelFileWorkflowLinks,
 } from "@/hooks/useUnifiedWorkflow";
+import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMessages";
+
 
 import {
   assessTravelFileReadiness,
@@ -250,10 +252,10 @@ export default function ProcessoReserva() {
       );
       return;
     }
+    // Intenção de concluir a venda no fluxo unificado: abre a MESMA confirmação
+    // oficial (avanço sequencial e troca de etapa não gravam nada direto).
     if (["sale_confirmed", "in_operation"].includes(status) && unifiedV2) {
-      toast.info(
-        'A venda é confirmada no botão "Confirmar venda e iniciar operação", para criar operação e financeiro sem duplicar nada.',
-      );
+      setConfirmSaleOpen(true);
       return;
     }
     if (status === "cancelled" && !(reason || "").trim()) {
@@ -265,9 +267,11 @@ export default function ProcessoReserva() {
       await setStatus.mutateAsync({ status, reason: reason ?? null });
       toast.success(`Processo atualizado: ${FILE_STATUS_LABELS[status]}`);
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível salvar a alteração.");
+      console.error("travel_file status:", extractWorkflowCode(error));
+      toast.error(humanizeWorkflowError(error));
     }
   };
+
 
   const updateResponsibles = async (
     commercial: string | null,
@@ -282,7 +286,7 @@ export default function ProcessoReserva() {
       await setResponsibles.mutateAsync({ commercial, operations });
       toast.success(successMessage);
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível salvar a alteração.");
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
@@ -290,7 +294,7 @@ export default function ProcessoReserva() {
     try {
       await saveService.mutateAsync({ id: serviceId, status });
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível atualizar o serviço.");
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
@@ -316,7 +320,7 @@ export default function ProcessoReserva() {
         },
       });
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível atualizar o serviço.");
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
@@ -435,14 +439,18 @@ export default function ProcessoReserva() {
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(FILE_STATUS_LABELS)
-                    // Fluxo unificado: venda só é confirmada pelo botão transacional,
-                    // nunca pela troca manual de etapa. Enquanto a verificação do
-                    // fluxo não terminar, essas etapas também ficam fora da lista.
+                    // Fluxo unificado: escolher "Venda confirmada"/"Em operação"
+                    // NÃO grava a etapa — abre a confirmação oficial, que cria
+                    // operação e financeiro sem duplicar. Enquanto a verificação
+                    // do fluxo não terminar, essas etapas ficam fora da lista.
                     .filter(
                       ([value]) =>
                         legacyFlowAllowed ||
+                        unifiedV2 ||
                         !["sale_confirmed", "in_operation"].includes(value),
                     )
+
+
 
                     .map(([value, label]) => (
                       <SelectItem key={value} value={value}>
@@ -681,14 +689,14 @@ export default function ProcessoReserva() {
                 ))}
                 {canManage && (
                   <Button
-                    className="gap-2"
-                    disabled={!readiness.ready}
+                    className="min-h-11 w-full gap-2 sm:w-auto"
                     onClick={() => setConfirmSaleOpen(true)}
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     Confirmar venda e iniciar operação
                   </Button>
                 )}
+
               </div>
             )}
           </Card>

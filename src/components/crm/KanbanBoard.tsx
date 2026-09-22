@@ -59,7 +59,10 @@ import { isClosedOpportunityStage } from "@/lib/crmCardShortcuts";
 import { fireCelebrationConfetti } from "@/lib/celebrationConfetti";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import { ConfirmSaleLauncher } from "@/components/reservas/ConfirmSaleLauncher";
+import { extractWorkflowCode, humanizeWorkflowError, resolveActiveTravelFiles } from "@/lib/confirmSaleMessages";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+
 
 function SortableColumn({
   stage,
@@ -121,6 +124,12 @@ export function KanbanBoard() {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
+  /** Confirmação oficial de venda aberta pelo funil (fluxo unificado V2). */
+  const [confirmSaleTarget, setConfirmSaleTarget] = useState<{
+    fileId: string;
+    opportunityId: string;
+  } | null>(null);
+
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -218,7 +227,26 @@ export function KanbanBoard() {
     e.dataTransfer.dropEffect = "move";
   };
 
+  /**
+   * Localiza o processo de reserva ativo da oportunidade e abre a confirmação
+   * oficial. Devolve false quando não há processo único (o chamador explica).
+   */
+  const openConfirmSaleForOpportunity = async (opportunityId: string) => {
+    const { data, error } = await (supabase as any)
+      .from("travel_files")
+      .select("id")
+      .eq("opportunity_id", opportunityId)
+      .not("status", "in", "(cancelled,trip_completed)")
+      .limit(2);
+    if (error) return false;
+    const resolution = resolveActiveTravelFiles((data ?? []) as Array<{ id: string }>);
+    if (resolution.kind !== "single") return false;
+    setConfirmSaleTarget({ fileId: resolution.fileId!, opportunityId });
+    return true;
+  };
+
   const performMove = async (
+
     movedId: string,
     toStage: PipelineStage,
     targetCardId: string | null,
@@ -300,34 +328,33 @@ export function KanbanBoard() {
         );
         return;
       }
-      const activeFiles = (linkedFiles ?? []) as Array<{ id: string }>;
-      if (activeFiles.length > 1) {
+      const resolution = resolveActiveTravelFiles(
+        (linkedFiles ?? []) as Array<{ id: string }>,
+      );
+      if (resolution.kind === "multiple") {
         toast.error(
           "Esta oportunidade tem mais de um processo de reserva ativo. Revise os processos na Central de Reservas e mantenha apenas um ativo.",
           {
             action: {
               label: "Abrir processo",
-              onClick: () => navigate(nav.reservas(activeFiles[0].id)),
+              onClick: () => navigate(nav.reservas(resolution.fileId!)),
             },
             duration: 8000,
           },
         );
         return;
       }
-      if (activeFiles.length === 1) {
-        toast.info(
-          "Esta oportunidade tem um processo na Central de Reservas. Confirme a venda por lá.",
-          {
-            action: {
-              label: "Abrir processo",
-              onClick: () => navigate(nav.reservas(activeFiles[0].id)),
-            },
-            duration: 8000,
-          },
-        );
+      if (resolution.kind === "single") {
+        // Nunca fecha em silêncio pelo arrasto: abre a MESMA confirmação
+        // oficial da Central. O card só muda de coluna após o sucesso da RPC.
+        setConfirmSaleTarget({
+          fileId: resolution.fileId!,
+          opportunityId: opportunity.id,
+        });
         return;
       }
     }
+
 
 
     try {
@@ -344,31 +371,24 @@ export function KanbanBoard() {
       });
     } catch (error: any) {
       const message = String(error?.message || "");
-      if (message.includes("USE_CONFIRM_SALE")) {
-        toast.info(
-          "Esta venda é confirmada na Central de Reservas, para criar operação e financeiro sem duplicar nada.",
-          {
+      const code = extractWorkflowCode(error);
+      if (code === "USE_CONFIRM_SALE") {
+        // Guard do servidor: a intenção é fechar a venda — abrimos a mesma
+        // confirmação oficial em vez de deixar a pessoa num ciclo sem saída.
+        const opened = await openConfirmSaleForOpportunity(opportunity.id);
+        if (!opened) {
+          toast.info(humanizeWorkflowError(error), {
             action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
             duration: 8000,
-          },
-        );
-      } else if (message.includes("MULTIPLE_ACTIVE_TRAVEL_FILES")) {
-        toast.error(
-          "Esta oportunidade tem mais de um processo de reserva ativo. Revise na Central e mantenha apenas um ativo antes de fechar.",
-          {
-            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
-            duration: 8000,
-          },
-        );
-      } else if (message.includes("WORKFLOW_LINK_CONFLICT")) {
-        toast.error(
-          "Esta oportunidade está ligada a outro processo de reserva. Revise os vínculos na Central antes de fechar.",
-          {
-            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
-            duration: 8000,
-          },
-        );
+          });
+        }
+      } else if (code === "MULTIPLE_ACTIVE_TRAVEL_FILES" || code === "WORKFLOW_LINK_CONFLICT") {
+        toast.error(humanizeWorkflowError(error), {
+          action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
+          duration: 8000,
+        });
       } else if (error?.name !== "PermissionDeniedError") {
+        console.error("Falha ao mover oportunidade:", code || message);
         toast.error("Não foi possível mover este cartão. A lista foi recarregada com o que está no servidor.");
       }
       return;
@@ -398,12 +418,11 @@ export function KanbanBoard() {
   const handleMoveToStage = async (opportunity: Opportunity, toStageId: string) => {
     const toStage = stages.find((s) => s.id === toStageId);
     if (!toStage) return;
-    try {
-      await performMove(opportunity.id, toStage, null, false);
-    } catch {
-      toast.error("Não foi possível mover o card. Tente novamente.");
-    }
+    // performMove já explica qualquer falha: nenhum segundo aviso para o
+    // mesmo erro.
+    await performMove(opportunity.id, toStage, null, false);
   };
+
 
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
     e.preventDefault();
@@ -702,6 +721,23 @@ export function KanbanBoard() {
         />
 
         <QuickAddClientDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
+
+        {/* Mesma confirmação oficial da Central de Reservas: arrastar para
+            "Fechado" nunca grava a etapa direto. Cancelar mantém o card onde
+            está; o sucesso da RPC é que fecha a oportunidade. */}
+        <ConfirmSaleLauncher
+          fileId={confirmSaleTarget?.fileId ?? null}
+          open={!!confirmSaleTarget}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setConfirmSaleTarget(null);
+          }}
+          processHref={confirmSaleTarget ? nav.reservas(confirmSaleTarget.fileId) : undefined}
+          onConfirmed={() => {
+            setConfirmSaleTarget(null);
+            fireCelebrationConfetti();
+          }}
+        />
+
       </div>
     </TooltipProvider>
   );

@@ -25,7 +25,9 @@ import {
   type ConfirmSaleResult,
 } from "@/hooks/useUnifiedWorkflow";
 
+import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMessages";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+
 
 /** Formatação monetária local (mesma regra usada na página do processo). */
 const money = (value: number | null | undefined, currency: string) =>
@@ -41,7 +43,12 @@ interface ConfirmSaleDialogProps {
   readiness: TravelFileReadiness;
   /** Justificativas de exceção de fornecedor por id de serviço. */
   supplierExceptions: Record<string, string>;
+  /** Chamado após confirmação bem-sucedida (inclusive replay idempotente). */
+  onConfirmed?: (result: ConfirmSaleResult) => void;
+  /** Link para abrir o processo e corrigir o que falta (funil/Central). */
+  processHref?: string;
 }
+
 
 /**
  * Aceite do cliente + confirmação transacional da venda (fluxo unificado V2).
@@ -55,10 +62,13 @@ export function ConfirmSaleDialog({
   file,
   readiness,
   supplierExceptions,
+  onConfirmed,
+  processHref,
 }: ConfirmSaleDialogProps) {
   const navigate = useNavigate();
   const nav = useAdminNav();
   const confirmSale = useConfirmTravelFileSale(file.id);
+
   const [channel, setChannel] = useState("");
   const [note, setNote] = useState("");
   const [result, setResult] = useState<ConfirmSaleResult | null>(null);
@@ -97,10 +107,7 @@ export function ConfirmSaleDialog({
       });
       // Defesa extra: nenhuma resposta com erro estruturado vira sucesso.
       if (isConfirmSaleFailure(data)) {
-        toast.error(
-          data.message ||
-            "Não foi possível confirmar a venda. Revise os vínculos deste processo.",
-        );
+        toast.error(humanizeWorkflowError(data.message || data.error));
         return;
       }
       setResult(data);
@@ -109,19 +116,23 @@ export function ConfirmSaleDialog({
           ? "Esta confirmação já havia sido registrada — nada foi duplicado."
           : "Venda confirmada e operação iniciada.",
       );
+      onConfirmed?.(data);
     } catch (error: any) {
-      const message = String(error?.message || "Não foi possível confirmar a venda.");
-      toast.error(message.replace(/^[A-Z_]+:\s*/, ""));
+      // Código interno fica só na telemetria; a pessoa vê texto claro.
+      console.error("confirm_travel_file_sale falhou:", extractWorkflowCode(error));
+      toast.error(humanizeWorkflowError(error));
     }
   };
 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[88svh] w-[calc(100vw-1.5rem)] max-w-lg flex-col overflow-hidden p-0 sm:w-full">
+        <DialogHeader className="px-5 pt-5">
           <DialogTitle>Confirmar venda e iniciar operação</DialogTitle>
         </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5 [padding-bottom:calc(1.25rem+env(safe-area-inset-bottom))]">
+
 
         {result ? (
           <div className="space-y-4">
@@ -183,11 +194,38 @@ export function ConfirmSaleDialog({
               </p>
             </div>
 
+            {readiness.blockers.length > 0 && (
+              <div className="space-y-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+                <p className="text-sm font-medium text-foreground">
+                  Falta isto para confirmar a venda:
+                </p>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+                  {readiness.blockers.map((blocker) => (
+                    <li key={blocker}>{blocker}</li>
+                  ))}
+                </ul>
+                {processHref && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="min-h-11 gap-2"
+                    onClick={() => {
+                      onOpenChange(false);
+                      navigate(processHref);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Abrir o processo para ajustar
+                  </Button>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="acceptance-channel">Canal do aceite *</Label>
                 <Select value={channel} onValueChange={setChannel}>
-                  <SelectTrigger id="acceptance-channel" className="mt-1">
+                  <SelectTrigger id="acceptance-channel" className="mt-1 min-h-11">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,7 +239,7 @@ export function ConfirmSaleDialog({
               </div>
               <div>
                 <Label htmlFor="acceptance-date">Data e hora do aceite</Label>
-                <Input id="acceptance-date" value={nowLabel} readOnly className="mt-1 bg-muted/30" />
+                <Input id="acceptance-date" value={nowLabel} readOnly className="mt-1 h-11 bg-muted/30" />
               </div>
             </div>
 
@@ -223,9 +261,10 @@ export function ConfirmSaleDialog({
               </p>
             ))}
 
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 variant="outline"
+                className="min-h-11"
                 onClick={() => onOpenChange(false)}
                 disabled={confirmSale.isPending}
               >
@@ -234,7 +273,7 @@ export function ConfirmSaleDialog({
               <Button
                 onClick={submit}
                 disabled={!channel || confirmSale.isPending || !readiness.ready}
-                className="gap-2"
+                className="min-h-11 gap-2"
               >
                 {confirmSale.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Confirmar venda
@@ -242,7 +281,9 @@ export function ConfirmSaleDialog({
             </div>
           </div>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
+
