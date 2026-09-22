@@ -239,10 +239,27 @@ export default function ProcessoReserva() {
       toast.error("Você não possui permissão para alterar o processo.");
       return;
     }
+    // Avanço para venda confirmada / em operação depende de saber qual fluxo
+    // vale para esta agência. Sem resposta definitiva, a ação fica bloqueada.
+    if (["sale_confirmed", "in_operation"].includes(status) && !unifiedResolved) {
+      toast.error(
+        unifiedFailed
+          ? "Não conseguimos verificar como esta venda deve ser confirmada. Recarregue a página e tente novamente."
+          : "Ainda estamos verificando como esta venda deve ser confirmada. Aguarde um instante e tente novamente.",
+      );
+      return;
+    }
+    if (["sale_confirmed", "in_operation"].includes(status) && unifiedV2) {
+      toast.info(
+        'A venda é confirmada no botão "Confirmar venda e iniciar operação", para criar operação e financeiro sem duplicar nada.',
+      );
+      return;
+    }
     if (status === "cancelled" && !(reason || "").trim()) {
       toast.error("Informe o motivo do cancelamento.");
       return;
     }
+
     try {
       await setStatus.mutateAsync({ status, reason: reason ?? null });
       toast.success(`Processo atualizado: ${FILE_STATUS_LABELS[status]}`);
