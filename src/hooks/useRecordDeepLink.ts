@@ -47,6 +47,21 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
   const cbRef = useRef({ fetchById, onOpen, onClear, messages });
   cbRef.current = { fetchById, onOpen, onClear, messages };
 
+  /* Guarda SÍNCRONA do parâmetro mais recente: atualizada já no render, então
+     uma resposta que chega entre o render do novo parâmetro e o efeito seguinte
+     também é descartada. */
+  const latestParamRef = useRef<string | null>(param);
+  latestParamRef.current = param;
+
+  // Desmontagem: nenhum efeito colateral depois que a tela sai.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     // Troca/limpeza do parâmetro reinicia a máquina de estado.
     if (stateRef.current.param !== param) {
