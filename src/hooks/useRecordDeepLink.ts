@@ -105,6 +105,9 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
     void (async () => {
       const { data, error } = await doFetch(myParam);
       const current = stateRef.current;
+      /* Antes de qualquer efeito (aviso, abrir, limpar ou mudar a máquina):
+         a tela precisa estar montada e o parâmetro precisa ser o mais recente. */
+      if (!mountedRef.current || latestParamRef.current !== myParam) return;
       // Resposta obsoleta (parâmetro trocado, nova tentativa, ou já resolvido).
       if (current.param !== myParam || current.attempt !== myAttempt || current.phase !== "fetching") {
         return;
