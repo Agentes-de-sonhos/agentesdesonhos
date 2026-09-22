@@ -1,16 +1,30 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+type Phase = "idle" | "fetching" | "failed" | "done";
+
+/** Estado da resolução, sempre escopado ao parâmetro atual. */
+interface LinkState {
+  param: string | null;
+  attempt: number;
+  phase: Phase;
+}
+
 /**
  * Abre um registro exato vindo de um link direto (ex.: `?sale=<id>` ou
- * `?operation=<id>`), sem corrida de cache:
+ * `?operation=<id>`) com uma máquina de estado escopada pelo parâmetro:
  *
- * - espera a lista terminar de carregar/atualizar antes de decidir;
+ * - espera a lista terminar de carregar/atualizar antes da PRIMEIRA decisão;
  * - se o id não estiver na lista (cache velho, outro mês, fora do limite),
  *   busca direto no servidor respeitando as permissões da conta;
- * - cada par "id#tentativa" é consultado UMA única vez;
- * - falha transitória PRESERVA o parâmetro na URL e oferece uma nova tentativa
- *   real e limitada; o parâmetro só é removido com resposta definitiva
+ * - mudança de identidade da lista ou oscilação de "carregando" durante a
+ *   consulta NÃO cancela nem suprime a tentativa em andamento;
+ * - resposta tardia de um parâmetro antigo é descartada e nunca abre nada;
+ * - se o registro chegar pela lista durante a consulta, abre UMA única vez;
+ * - trocar, limpar ou reabrir o parâmetro reinicia as tentativas (um novo id
+ *   sempre começa na tentativa 1);
+ * - falha transitória PRESERVA o parâmetro e oferece nova tentativa explícita e
+ *   limitada (sem loop); o parâmetro só é removido com resposta definitiva
  *   (aberto com sucesso, ou inexistente/inacessível).
  */
 export function useRecordDeepLink<T extends { id: string }>(opts: {
@@ -24,64 +38,94 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
   messages: { transient: string; exhausted: string; missing: string };
   maxAttempts?: number;
 }) {
-  const {
-    param,
-    listReady,
-    list,
-    fetchById,
-    onOpen,
-    onClear,
-    messages,
-    maxAttempts = 3,
-  } = opts;
+  const { param, listReady, list, fetchById, onOpen, onClear, messages, maxAttempts = 3 } = opts;
 
-  const [attempt, setAttempt] = useState(0);
-  const attemptedRef = useRef<string>("");
+  const stateRef = useRef<LinkState>({ param: null, attempt: 0, phase: "idle" });
+  const [retryTick, setRetryTick] = useState(0);
 
   // Refs para callbacks: o efeito não deve reexecutar por identidade de função.
   const cbRef = useRef({ fetchById, onOpen, onClear, messages });
   cbRef.current = { fetchById, onOpen, onClear, messages };
 
   useEffect(() => {
-    if (!param || !listReady) return;
-    const attemptKey = `${param}#${attempt}`;
-    if (attemptedRef.current === attemptKey) return;
-    attemptedRef.current = attemptKey;
+    // Troca/limpeza do parâmetro reinicia a máquina de estado.
+    if (stateRef.current.param !== param) {
+      stateRef.current = { param, attempt: 0, phase: "idle" };
+    }
+    if (!param) return;
 
+    const state = stateRef.current;
     const { fetchById: doFetch, onOpen: open, onClear: clear, messages: msg } = cbRef.current;
+
+    if (state.phase === "done" || state.phase === "failed") return;
+
+    // Durante a consulta, se o registro aparecer na lista, abrimos uma única vez
+    // (a resposta em voo passa a ser ignorada por mudança de fase).
+    if (state.phase === "fetching") {
+      const arrived = list.find((r) => r.id === param);
+      if (arrived) {
+        state.phase = "done";
+        open(arrived, true);
+        clear();
+      }
+      return;
+    }
+
+    // Fase "idle": só decide quando a lista está estável.
+    if (!listReady) return;
 
     const inList = list.find((r) => r.id === param);
     if (inList) {
+      state.phase = "done";
       open(inList, true);
       clear();
       return;
     }
 
-    let active = true;
-    (async () => {
-      const { data, error } = await doFetch(param);
-      if (!active) return;
+    const myParam = param;
+    const myAttempt = state.attempt + 1;
+    state.attempt = myAttempt;
+    state.phase = "fetching";
+
+    void (async () => {
+      const { data, error } = await doFetch(myParam);
+      const current = stateRef.current;
+      // Resposta obsoleta (parâmetro trocado, nova tentativa, ou já resolvido).
+      if (current.param !== myParam || current.attempt !== myAttempt || current.phase !== "fetching") {
+        return;
+      }
       if (error) {
-        const canRetry = attempt + 1 < maxAttempts;
+        current.phase = "failed";
+        const canRetry = myAttempt < maxAttempts;
         toast.error(
           canRetry ? msg.transient : msg.exhausted,
           canRetry
-            ? { action: { label: "Tentar novamente", onClick: () => setAttempt((n) => n + 1) } }
+            ? {
+                action: {
+                  label: "Tentar novamente",
+                  onClick: () => {
+                    const st = stateRef.current;
+                    if (st.param !== myParam || st.attempt !== myAttempt || st.phase !== "failed") return;
+                    st.phase = "idle";
+                    setRetryTick((n) => n + 1);
+                  },
+                },
+              }
             : undefined,
         );
         return;
       }
       if (!data) {
+        current.phase = "done";
         toast.error(msg.missing);
         clear();
         return;
       }
+      current.phase = "done";
       open(data, false);
       clear();
     })();
-    return () => {
-      active = false;
-    };
+    // Sem cleanup de cancelamento: a obsolescência é decidida pelo estado.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [param, attempt, listReady, list, maxAttempts]);
+  }, [param, listReady, list, retryTick, maxAttempts]);
 }

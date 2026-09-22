@@ -39,6 +39,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
 import { useRecordDeepLink } from "@/hooks/useRecordDeepLink";
+import { mergeDirectRecord, shouldDropDirectRecord } from "@/lib/deepLinkRecords";
 import { useSellers } from "@/hooks/useSellers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,16 +50,21 @@ import { toast } from "sonner";
 
 export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
   const { sales: allSales, saleProducts, isLoading: salesLoading, isFetching: salesFetching, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
-  // Venda aberta por link direto "?sale=<id>": entra na coleção renderizada
-  // mesmo fora do mês exibido ou do limite da lista, e nunca duplicada.
+  // Venda aberta por link direto "?sale=<id>": fica visível mesmo fora do limite
+  // da lista, sem duplicar e SOMENTE no mês a que pertence (ou sem filtro).
   const [directSale, setDirectSale] = useState<Sale | null>(null);
   const sales = useMemo(() => {
     const base = (!viewMonth || !viewYear)
       ? allSales
       : allSales.filter(s => isInMonth(s.sale_date, viewMonth, viewYear));
-    if (directSale && !base.some(s => s.id === directSale.id)) return [directSale, ...base];
-    return base;
+    return mergeDirectRecord(base, directSale, (s) =>
+      !viewMonth || !viewYear || isInMonth(s.sale_date, viewMonth, viewYear));
   }, [allSales, viewMonth, viewYear, directSale]);
+  // A cópia direta é descartada quando a lista passa a trazer a venda (autoridade
+  // do cache) — evita manter um registro obsoleto depois de editar ou excluir.
+  useEffect(() => {
+    if (shouldDropDirectRecord(directSale, allSales)) setDirectSale(null);
+  }, [directSale, allSales]);
   const { closedOpportunities } = useClosedOpportunities();
   const { sellers } = useSellers();
   const { user } = useAuth();
@@ -192,6 +198,7 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
     sellerCommission: number,
   ) => {
     if (editingSaleId) {
+      if (directSale?.id === editingSaleId) setDirectSale(null);
       await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
       if (sellerId) {
         await syncSellerExpense(editingSaleId, formData, sellerId, sellerCommission);
@@ -256,7 +263,13 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
     setIsProductDialogOpen(true);
   };
 
-  const handleDelete = async () => { if (deleteId) { await deleteSale(deleteId); setDeleteId(null); } };
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    // Exclusão/edição invalidam a cópia aberta por link direto.
+    if (directSale?.id === deleteId) setDirectSale(null);
+    await deleteSale(deleteId);
+    setDeleteId(null);
+  };
   const handleDeleteProduct = async () => { if (deleteProductId) { await deleteSaleProduct(deleteProductId); setDeleteProductId(null); } };
 
   const importedOpportunityIds = sales.map(s => s.opportunity_id).filter(Boolean);
