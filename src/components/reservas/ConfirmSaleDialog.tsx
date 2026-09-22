@@ -25,7 +25,9 @@ import {
   type ConfirmSaleResult,
 } from "@/hooks/useUnifiedWorkflow";
 
+import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMessages";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+
 
 /** Formatação monetária local (mesma regra usada na página do processo). */
 const money = (value: number | null | undefined, currency: string) =>
