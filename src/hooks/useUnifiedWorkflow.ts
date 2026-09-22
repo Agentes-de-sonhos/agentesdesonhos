@@ -72,7 +72,15 @@ export function useUnifiedWorkflowV2() {
       return !!data;
     },
   });
-  return { enabled: query.data === true, isLoading: query.isLoading };
+  // `resolved` só é true quando a consulta terminou com resposta: carregando ou
+  // erro NUNCA podem ser interpretados como "entitlement desligado".
+  return {
+    enabled: query.data === true,
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    isError: query.isError,
+    resolved: typeof query.data === "boolean",
+  };
 }
 
 /**

@@ -4,6 +4,7 @@ import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import { useOperations } from "@/hooks/useOperations";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -25,7 +26,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 export function OperationsModule() {
-  const { operations, isLoading, moveStage, reorderOperations } = useOperations();
+  const { operations, isLoading, isFetching, moveStage, reorderOperations } = useOperations();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
   const { can, canStage, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
@@ -54,22 +55,61 @@ export function OperationsModule() {
   }, [searchParams, setSearchParams]);
 
   /* Comando de URL "?operation=<id>" (link após confirmar a venda no processo
-     de reserva): abre a ficha exata da operação criada/reutilizada. */
+     de reserva): abre a ficha exata da operação criada/reutilizada. A lista em
+     cache pode estar velha, então quando o registro não aparece nela buscamos o
+     ID direto no servidor (respeitando as políticas de acesso da conta). O
+     parâmetro só sai da URL depois de uma resposta definitiva. */
   const operationParam = searchParams.get("operation");
+  const resolvingOperationRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!operationParam || isLoading) return;
+    if (!operationParam || isLoading || isFetching) return;
+    if (resolvingOperationRef.current === operationParam) return;
+    resolvingOperationRef.current = operationParam;
+
+    const clearParam = () => {
+      const next = new URLSearchParams(searchParams);
+      next.delete("operation");
+      setSearchParams(next, { replace: true });
+    };
+
+    const open = (op: Operation) => {
+      setSelectedTab("overview");
+      setSelected(op);
+    };
+
     const target = operations.find((o) => o.id === operationParam);
-    const next = new URLSearchParams(searchParams);
-    next.delete("operation");
-    setSearchParams(next, { replace: true });
-    if (!target) {
-      toast.error("Não encontramos esta operação na sua lista. Ela pode ter sido removida ou pertencer a outra conta.");
+    if (target) {
+      open(target);
+      clearParam();
       return;
     }
-    setSelectedTab("overview");
-    setSelected(target);
+
+    let active = true;
+    (async () => {
+      const { data, error } = await (supabase as any)
+        .from("operations")
+        .select("*, client:clients(id,name,phone,email)")
+        .eq("id", operationParam)
+        .maybeSingle();
+      if (!active) return;
+      if (error) {
+        toast.error("Não conseguimos abrir esta operação agora. Tente novamente em instantes.");
+        resolvingOperationRef.current = null;
+        return;
+      }
+      if (!data) {
+        toast.error("Não encontramos esta operação na sua conta. Ela pode ter sido removida ou pertencer a outra conta.");
+        clearParam();
+        return;
+      }
+      open(data as unknown as Operation);
+      clearParam();
+    })();
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [operationParam, isLoading, operations]);
+  }, [operationParam, isLoading, isFetching, operations]);
 
 
 

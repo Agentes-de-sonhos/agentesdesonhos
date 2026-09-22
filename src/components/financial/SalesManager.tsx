@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -47,7 +47,7 @@ import { isInMonth } from "@/utils/monthFilter";
 import { toast } from "sonner";
 
 export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
-  const { sales: allSales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+  const { sales: allSales, saleProducts, isLoading: salesLoading, isFetching: salesFetching, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   const sales = useMemo(() => {
     if (!viewMonth || !viewYear) return allSales;
     return allSales.filter(s => isInMonth(s.sale_date, viewMonth, viewYear));
@@ -87,24 +87,59 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
   }, [actionParam, setSearchParams]);
 
   // Link direto "?sale=<id>" (vindo da confirmação de venda no processo de
-  // reserva): abre a venda exata, avisando quando ela não está acessível.
+  // reserva): abre a venda exata. A lista carregada é limitada e pode estar
+  // velha, então quando o ID não está nela buscamos direto no servidor.
   const saleParam = searchParams.get("sale");
+  const resolvingSaleRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!saleParam) return;
-    if (allSales.length === 0) return;
+    if (!saleParam || salesLoading || salesFetching) return;
+    if (resolvingSaleRef.current === saleParam) return;
+    resolvingSaleRef.current = saleParam;
+
+    const clearParam = () => setSearchParams({ tab: "vendas" }, { replace: true });
+
+    const open = (sale: Sale) => {
+      setExpandedSales((prev) => new Set(prev).add(sale.id));
+      if (sale.sale_date) {
+        const d = parseLocalDate(sale.sale_date);
+        if (d) onMonthChange?.(d.getMonth() + 1, d.getFullYear());
+      }
+    };
+
     const target = allSales.find((s) => s.id === saleParam);
-    setSearchParams({ tab: "vendas" }, { replace: true });
-    if (!target) {
-      toast.error("Não encontramos esta venda na sua lista. Ela pode ter sido removida ou pertencer a outra conta.");
+    if (target) {
+      open(target);
+      clearParam();
       return;
     }
-    setExpandedSales((prev) => new Set(prev).add(target.id));
-    if (target.sale_date) {
-      const d = parseLocalDate(target.sale_date);
-      if (d) onMonthChange?.(d.getMonth() + 1, d.getFullYear());
-    }
+
+    let active = true;
+    (async () => {
+      const { data, error } = await (supabase as any)
+        .from("sales")
+        .select("*")
+        .eq("id", saleParam)
+        .maybeSingle();
+      if (!active) return;
+      if (error) {
+        toast.error("Não conseguimos abrir esta venda agora. Tente novamente em instantes.");
+        resolvingSaleRef.current = null;
+        return;
+      }
+      if (!data) {
+        toast.error("Não encontramos esta venda na sua conta. Ela pode ter sido removida ou pertencer a outra conta.");
+        clearParam();
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+      open(data as unknown as Sale);
+      clearParam();
+    })();
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saleParam, allSales]);
+  }, [saleParam, salesLoading, salesFetching, allSales]);
 
 
 
