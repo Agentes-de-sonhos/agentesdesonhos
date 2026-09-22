@@ -7,6 +7,9 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOperations } from "@/hooks/useOperations";
 import { useRecordDeepLink } from "@/hooks/useRecordDeepLink";
+import { upsertRecord } from "@/lib/deepLinkRecords";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
@@ -28,6 +31,8 @@ import {
 } from "@/components/ui/alert-dialog";
 export function OperationsModule() {
   const { operations, isLoading, isFetching, moveStage, reorderOperations } = useOperations();
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
   const { can, canStage, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
@@ -73,7 +78,13 @@ export function OperationsModule() {
         .maybeSingle();
       return { data: (data as Operation | null) ?? null, error };
     },
-    onOpen: (op) => {
+    onOpen: (op, fromList) => {
+      // Operação buscada direto entra no cache exato da lista (upsert por id),
+      // então continua disponível e consistente depois de fechar o detalhe.
+      if (!fromList) {
+        queryClient.setQueryData<Operation[]>(["operations", user?.id], (prev) =>
+          upsertRecord(prev ?? [], op));
+      }
       setSelectedTab("overview");
       setSelected(op);
     },

@@ -29,7 +29,16 @@ function setup(over: Partial<Parameters<typeof useRecordDeepLink<Rec>>[0]> = {})
     ...over,
   };
   const hook = renderHook((p: any) => useRecordDeepLink<Rec>(p), { initialProps: props });
-  return { hook, onOpen, onClear, fetchById: props.fetchById as any };
+  const rerender = (next: Partial<typeof props>) =>
+    act(() => { hook.rerender({ ...props, ...next } as any); });
+  return { hook, rerender, props, onOpen, onClear, fetchById: props.fetchById as any };
+}
+
+/** Promise controlada: resolvemos no momento exato do teste. */
+function deferred<V>() {
+  let resolve!: (v: V) => void;
+  const promise = new Promise<V>((r) => { resolve = r; });
+  return { promise, resolve };
 }
 
 describe("useRecordDeepLink — atalho por link direto", () => {
@@ -97,5 +106,97 @@ describe("useRecordDeepLink — atalho por link direto", () => {
     const { fetchById, onClear } = setup({ param: null });
     expect(fetchById).not.toHaveBeenCalled();
     expect(onClear).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Corridas: identidade da lista, oscilação de "carregando", parâmetro trocado,
+ * reabertura do mesmo id e reinício das tentativas. Todos com promise
+ * controlada + rerender (comportamentais).
+ */
+describe("useRecordDeepLink — corridas", () => {
+  beforeEach(() => toastError.mockReset());
+  afterEach(cleanup);
+
+  it("lista mudando durante a consulta não cancela nem suprime a tentativa", async () => {
+    const d = deferred<{ data: Rec | null; error: unknown }>();
+    const fetchById = vi.fn(() => d.promise);
+    const { rerender, onOpen, onClear } = setup({ fetchById });
+    expect(fetchById).toHaveBeenCalledTimes(1);
+
+    // Nova identidade de lista (refetch do cache) chega durante a consulta.
+    rerender({ list: [{ id: "outro" }] });
+    rerender({ list: [{ id: "outro" }, { id: "mais-um" }] });
+    expect(fetchById).toHaveBeenCalledTimes(1);
+
+    await act(async () => { d.resolve({ data: { id: "x-1" }, error: null }); });
+    await waitFor(() => expect(onOpen).toHaveBeenCalledWith({ id: "x-1" }, false));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(onClear).toHaveBeenCalledTimes(1);
+  });
+
+  it("listReady true→false→true durante a consulta não dispara segunda consulta", async () => {
+    const d = deferred<{ data: Rec | null; error: unknown }>();
+    const fetchById = vi.fn(() => d.promise);
+    const { rerender, onOpen } = setup({ fetchById });
+    rerender({ listReady: false });
+    rerender({ listReady: true });
+    expect(fetchById).toHaveBeenCalledTimes(1);
+    await act(async () => { d.resolve({ data: { id: "x-1" }, error: null }); });
+    await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(1));
+  });
+
+  it("registro chegando pela lista durante a consulta abre UMA vez", async () => {
+    const d = deferred<{ data: Rec | null; error: unknown }>();
+    const fetchById = vi.fn(() => d.promise);
+    const { rerender, onOpen, onClear } = setup({ fetchById });
+    rerender({ list: [{ id: "x-1" }] });
+    expect(onOpen).toHaveBeenCalledWith({ id: "x-1" }, true);
+    await act(async () => { d.resolve({ data: { id: "x-1" }, error: null }); });
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(onClear).toHaveBeenCalledTimes(1);
+  });
+
+  it("resposta tardia do parâmetro A não abre nada depois de trocar para B", async () => {
+    const dA = deferred<{ data: Rec | null; error: unknown }>();
+    const dB = deferred<{ data: Rec | null; error: unknown }>();
+    const fetchById = vi.fn((id: string) => (id === "x-1" ? dA.promise : dB.promise));
+    const { rerender, onOpen } = setup({ fetchById });
+    rerender({ param: "x-2" });
+    expect(fetchById).toHaveBeenNthCalledWith(2, "x-2");
+
+    await act(async () => { dA.resolve({ data: { id: "x-1" }, error: null }); });
+    expect(onOpen).not.toHaveBeenCalled();
+
+    await act(async () => { dB.resolve({ data: { id: "x-2" }, error: null }); });
+    await waitFor(() => expect(onOpen).toHaveBeenCalledWith({ id: "x-2" }, false));
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  });
+
+  it("limpar e reabrir o MESMO id na mesma montagem volta a funcionar", async () => {
+    const fetchById = vi.fn(async () => ({ data: { id: "x-1" } as Rec, error: null }));
+    const { rerender, onOpen } = setup({ fetchById });
+    await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(1));
+    // A URL é limpa (param null) e o mesmo link é aberto de novo.
+    rerender({ param: null });
+    await act(async () => { rerender({ param: "x-1" }); });
+    await waitFor(() => expect(fetchById).toHaveBeenCalledTimes(2));
+    expect(onOpen).toHaveBeenCalledTimes(2);
+  });
+
+  it("novo id começa na tentativa 1: erro do id anterior não consome tentativas", async () => {
+    const fetchById = vi
+      .fn()
+      .mockResolvedValueOnce({ data: null, error: { message: "boom" } })
+      .mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+    const { rerender } = setup({ fetchById, maxAttempts: 2 });
+    await waitFor(() => expect(toastError).toHaveBeenCalledTimes(1));
+    expect(toastError.mock.calls[0][0]).toBe("transitório");
+
+    await act(async () => { rerender({ param: "x-2" }); });
+    await waitFor(() => expect(toastError).toHaveBeenCalledTimes(2));
+    // Ainda é a primeira tentativa do novo id: retry segue disponível.
+    expect(toastError.mock.calls[1][0]).toBe("transitório");
+    expect(toastError.mock.calls[1][1]?.action?.label).toBe("Tentar novamente");
   });
 });
