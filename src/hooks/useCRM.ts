@@ -544,9 +544,27 @@ export function useOpportunities() {
       if (!ensureStagePermission('opportunities', toStageId, 'move')) denyAction();
       if (stageChanged && fromStageId && !ensureStagePermission('opportunities', fromStageId, 'move')) denyAction();
 
-      // Update positions for all cards in target column (and ensure moved card is in target stage)
+      // Mudança de etapa: o card movido é atualizado PRIMEIRO e sozinho. Se o
+      // servidor recusar (ex.: guard do fluxo unificado), nenhuma posição de
+      // outro card é enviada. Não há RPC transacional para isto hoje, então a
+      // ordem das escritas é a garantia possível — sem inventar atomicidade.
+      if (stageChanged) {
+        const movedPatch: Record<string, any> = {
+          position: Math.max(0, orderedTargetIds.indexOf(movedId)),
+          stage_id: toStageId,
+        };
+        if (toStageLegacyKey) movedPatch.stage = toStageLegacyKey;
+        const movedRes: any = await supabase
+          .from("opportunities")
+          .update(movedPatch)
+          .eq("id", movedId);
+        if (movedRes?.error) throw movedRes.error;
+      }
+
+      // Só depois da etapa confirmada: posições dos demais cards.
       const tasks: Promise<any>[] = [];
       orderedTargetIds.forEach((id, idx) => {
+        if (stageChanged && id === movedId) return;
         const patch: Record<string, any> = { position: idx };
         if (id === movedId && stageChanged) {
           patch.stage_id = toStageId;
@@ -586,7 +604,12 @@ export function useOpportunities() {
       }
     },
     onError: (error: any) => {
+      // O cache volta a refletir o servidor em qualquer falha.
+      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       if (error?.name === 'PermissionDeniedError') return;
+      const message = String(error?.message || "");
+      // Erros de fluxo têm aviso amigável único na camada de interface.
+      if (message.includes("USE_CONFIRM_SALE") || message.includes("WORKFLOW_LINK_CONFLICT")) return;
       toast({ title: "Erro ao reordenar", description: error.message, variant: "destructive" });
     },
   });
