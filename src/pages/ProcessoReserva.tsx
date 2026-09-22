@@ -164,6 +164,9 @@ export default function ProcessoReserva() {
   const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
   // Fluxo unificado V2 (entitlement de agência, desligado por padrão).
   const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  // Vínculos canônicos persistidos (operação/venda) do processo já convertido.
+  const workflowLinks = useTravelFileWorkflowLinks(id, unifiedV2);
+
   const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
   const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
   const [supplierExceptions, setSupplierExceptions] = useState<Record<string, string>>({});
