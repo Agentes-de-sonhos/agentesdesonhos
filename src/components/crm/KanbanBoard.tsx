@@ -721,6 +721,23 @@ export function KanbanBoard() {
         />
 
         <QuickAddClientDialog open={quickAddOpen} onOpenChange={setQuickAddOpen} />
+
+        {/* Mesma confirmação oficial da Central de Reservas: arrastar para
+            "Fechado" nunca grava a etapa direto. Cancelar mantém o card onde
+            está; o sucesso da RPC é que fecha a oportunidade. */}
+        <ConfirmSaleLauncher
+          fileId={confirmSaleTarget?.fileId ?? null}
+          open={!!confirmSaleTarget}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setConfirmSaleTarget(null);
+          }}
+          processHref={confirmSaleTarget ? nav.reservas(confirmSaleTarget.fileId) : undefined}
+          onConfirmed={() => {
+            setConfirmSaleTarget(null);
+            fireCelebrationConfetti();
+          }}
+        />
+
       </div>
     </TooltipProvider>
   );
