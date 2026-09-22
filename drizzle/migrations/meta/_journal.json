@@ -169,6 +169,13 @@
       "when": 1790111024663,
       "tag": "0023_agency_request_notifications",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790112083122,
+      "tag": "0024_booking_request_alerts_and_deeplinks",
+      "breakpoints": true
     }
   ]
 }
