@@ -5,12 +5,16 @@ import { assessTravelFileReadiness } from "@/lib/travelFileConversion";
 
 /**
  * Testes comportamentais do diálogo de confirmação da venda (fluxo unificado
- * V2): chamada real do hook, proteção contra duplo clique e navegação para a
- * operação e a venda criadas.
+ * V2): chamada real do hook, bloqueio de duplo clique com estado de carregando,
+ * tratamento de falha estruturada (LEGACY_AMBIGUOUS_LINK) e navegação para a
+ * operação e a venda retornadas.
  */
 
 const rpcMock = vi.fn();
 const navigateMock = vi.fn();
+const toastSuccess = vi.fn();
+const toastError = vi.fn();
+
 // jsdom não implementa a API usada pelo menu suspenso do design system.
 beforeEach(() => {
   (Element.prototype as any).scrollIntoView = vi.fn();
@@ -19,9 +23,12 @@ beforeEach(() => {
   (Element.prototype as any).setPointerCapture = vi.fn();
 });
 
-
 vi.mock("react-router-dom", () => ({
   useNavigate: () => navigateMock,
+}));
+
+vi.mock("sonner", () => ({
+  toast: { success: (...a: any[]) => toastSuccess(...a), error: (...a: any[]) => toastError(...a) },
 }));
 
 vi.mock("@/lib/agencyAdminNav", () => ({
@@ -32,12 +39,34 @@ vi.mock("@/lib/agencyAdminNav", () => ({
   }),
 }));
 
-vi.mock("@/hooks/useUnifiedWorkflow", () => ({
-  useConfirmTravelFileSale: () => ({
-    mutateAsync: rpcMock,
-    isPending: false,
-  }),
-}));
+// Hook simulado com estado real de carregando, como o react-query faz.
+vi.mock("@/hooks/useUnifiedWorkflow", async () => {
+  const React = await import("react");
+  const isConfirmSaleFailure = (data: any) => !!data && typeof data.error === "string";
+  return {
+    isConfirmSaleFailure,
+    useConfirmTravelFileSale: () => {
+      const [isPending, setPending] = React.useState(false);
+      return {
+        isPending,
+        mutateAsync: async (input: any) => {
+          setPending(true);
+          try {
+            const data = await rpcMock(input);
+            if (isConfirmSaleFailure(data)) {
+              const err: any = new Error(data.message || "falha");
+              err.code = data.error;
+              throw err;
+            }
+            return data;
+          } finally {
+            setPending(false);
+          }
+        },
+      };
+    },
+  };
+});
 
 const file: any = {
   id: "file-1",
@@ -80,22 +109,31 @@ function open() {
   );
 }
 
+async function chooseChannel() {
+  fireEvent.click(screen.getByLabelText(/canal do aceite/i));
+  fireEvent.click(await screen.findByText("WhatsApp"));
+}
+
+const successPayload = {
+  file_id: "file-1",
+  opportunity_id: "opp-1",
+  operation_id: "op-9",
+  sale_id: "sale-9",
+  created: ["operation", "sale"],
+  reused: [],
+  replayed: false,
+  warnings: [],
+  total: 1200,
+  currency: "BRL",
+};
+
 describe("ConfirmSaleDialog — comportamento", () => {
   beforeEach(() => {
     rpcMock.mockReset();
     navigateMock.mockReset();
-    rpcMock.mockResolvedValue({
-      file_id: "file-1",
-      opportunity_id: "opp-1",
-      operation_id: "op-9",
-      sale_id: "sale-9",
-      created: ["operation", "sale"],
-      reused: [],
-      replayed: false,
-      warnings: [],
-      total: 1200,
-      currency: "BRL",
-    });
+    toastSuccess.mockReset();
+    toastError.mockReset();
+    rpcMock.mockResolvedValue(successPayload);
   });
   afterEach(cleanup);
 
@@ -105,26 +143,68 @@ describe("ConfirmSaleDialog — comportamento", () => {
     await waitFor(() => expect(rpcMock).not.toHaveBeenCalled());
   });
 
-  it("dois cliques enviam a MESMA chave de idempotência", async () => {
+  it("dois cliques rápidos geram UMA única chamada, com a mesma chave", async () => {
+    let resolveRpc: (value: unknown) => void = () => {};
+    rpcMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveRpc = resolve;
+        }),
+    );
     open();
-    fireEvent.click(screen.getByLabelText(/canal do aceite/i));
-    fireEvent.click(await screen.findByText("WhatsApp"));
+    await chooseChannel();
 
     const button = screen.getByRole("button", { name: /confirmar venda/i });
     fireEvent.click(button);
-    await waitFor(() => expect(rpcMock).toHaveBeenCalled());
+    await waitFor(() => expect(rpcMock).toHaveBeenCalledTimes(1));
+    // Durante o envio o botão fica desabilitado (estado de carregando real).
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(rpcMock).toHaveBeenCalledTimes(1);
+
+    resolveRpc(successPayload);
+    await waitFor(() => expect(toastSuccess).toHaveBeenCalled());
     const firstKey = rpcMock.mock.calls[0][0].idempotencyKey;
     expect(firstKey).toBeTruthy();
     expect(rpcMock.mock.calls[0][0].expectedUpdatedAt).toBe(file.updated_at);
-    for (const call of rpcMock.mock.calls) {
-      expect(call[0].idempotencyKey).toBe(firstKey);
-    }
+  });
+
+  it("falha estruturada (LEGACY_AMBIGUOUS_LINK) nunca aparece como sucesso", async () => {
+    rpcMock.mockResolvedValue({
+      error: "LEGACY_AMBIGUOUS_LINK",
+      message: "Esta oportunidade tem mais de uma venda antiga elegível.",
+      entity: "sales",
+      replayed: false,
+    });
+    open();
+    await chooseChannel();
+    fireEvent.click(screen.getByRole("button", { name: /confirmar venda/i }));
+
+    await waitFor(() => expect(toastError).toHaveBeenCalled());
+    expect(toastSuccess).not.toHaveBeenCalled();
+    expect(screen.queryByText(/venda registrada com sucesso/i)).toBeNull();
+    expect(screen.queryByRole("button", { name: /abrir financeiro/i })).toBeNull();
+    // O botão continua utilizável para nova tentativa após corrigir o vínculo.
+    expect(screen.getByRole("button", { name: /confirmar venda/i })).not.toBeDisabled();
+  });
+
+  it("erro do servidor (WORKFLOW_LINK_CONFLICT) mostra mensagem e não confirma", async () => {
+    rpcMock.mockRejectedValue(
+      new Error("WORKFLOW_LINK_CONFLICT: Esta oportunidade já está vinculada a outro processo."),
+    );
+    open();
+    await chooseChannel();
+    fireEvent.click(screen.getByRole("button", { name: /confirmar venda/i }));
+
+    await waitFor(() => expect(toastError).toHaveBeenCalled());
+    expect(String(toastError.mock.calls[0][0])).toMatch(/vinculada a outro processo/i);
+    expect(toastSuccess).not.toHaveBeenCalled();
   });
 
   it("depois de confirmar, os links levam à operação e à venda retornadas", async () => {
     open();
-    fireEvent.click(screen.getByLabelText(/canal do aceite/i));
-    fireEvent.click(await screen.findByText("WhatsApp"));
+    await chooseChannel();
     fireEvent.click(screen.getByRole("button", { name: /confirmar venda/i }));
 
     const openOperation = await screen.findByRole("button", { name: /abrir operação/i });
