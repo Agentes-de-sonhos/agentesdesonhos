@@ -198,7 +198,7 @@ describe("ConfirmSaleDialog — comportamento", () => {
     fireEvent.click(screen.getByRole("button", { name: /confirmar venda/i }));
 
     await waitFor(() => expect(toastError).toHaveBeenCalled());
-    expect(String(toastError.mock.calls[0][0])).toMatch(/vinculada a outro processo/i);
+    expect(String(toastError.mock.calls[0][0])).toMatch(/ligado a outra operação ou venda/i);
     expect(toastSuccess).not.toHaveBeenCalled();
   });
 
