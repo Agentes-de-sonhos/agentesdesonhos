@@ -16335,6 +16335,10 @@ export type Database = {
       can_use_public_community: { Args: never; Returns: boolean }
       can_use_reservations_center: { Args: never; Returns: boolean }
       can_view_community_post: { Args: { _post_id: string }; Returns: boolean }
+      canonical_sale_product_type: {
+        Args: { _service_type: string }
+        Returns: string
+      }
       cast_monthly_vote: {
         Args: { _nominee_user_id: string }
         Returns: {
