@@ -198,8 +198,10 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
     sellerCommission: number,
   ) => {
     if (editingSaleId) {
-      if (directSale?.id === editingSaleId) setDirectSale(null);
-      await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
+      /* A cópia aberta por link direto só é trocada DEPOIS do sucesso: se a
+         gravação falhar, a venda continua visível como estava. */
+      const updated = await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
+      setDirectSale((prev) => directRecordAfterUpdate(prev, editingSaleId, updated as Partial<Sale> | null));
       if (sellerId) {
         await syncSellerExpense(editingSaleId, formData, sellerId, sellerCommission);
       } else {
