@@ -300,34 +300,33 @@ export function KanbanBoard() {
         );
         return;
       }
-      const activeFiles = (linkedFiles ?? []) as Array<{ id: string }>;
-      if (activeFiles.length > 1) {
+      const resolution = resolveActiveTravelFiles(
+        (linkedFiles ?? []) as Array<{ id: string }>,
+      );
+      if (resolution.kind === "multiple") {
         toast.error(
           "Esta oportunidade tem mais de um processo de reserva ativo. Revise os processos na Central de Reservas e mantenha apenas um ativo.",
           {
             action: {
               label: "Abrir processo",
-              onClick: () => navigate(nav.reservas(activeFiles[0].id)),
+              onClick: () => navigate(nav.reservas(resolution.fileId!)),
             },
             duration: 8000,
           },
         );
         return;
       }
-      if (activeFiles.length === 1) {
-        toast.info(
-          "Esta oportunidade tem um processo na Central de Reservas. Confirme a venda por lá.",
-          {
-            action: {
-              label: "Abrir processo",
-              onClick: () => navigate(nav.reservas(activeFiles[0].id)),
-            },
-            duration: 8000,
-          },
-        );
+      if (resolution.kind === "single") {
+        // Nunca fecha em silêncio pelo arrasto: abre a MESMA confirmação
+        // oficial da Central. O card só muda de coluna após o sucesso da RPC.
+        setConfirmSaleTarget({
+          fileId: resolution.fileId!,
+          opportunityId: opportunity.id,
+        });
         return;
       }
     }
+
 
 
     try {
