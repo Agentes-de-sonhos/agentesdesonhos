@@ -235,11 +235,9 @@ describe("useRecordDeepLink — desmontagem e janela de troca de parâmetro", ()
     const fetchById = vi.fn((id: string) => (id === "x-1" ? dA.promise : never));
     const { hook, props, onOpen, onClear } = setup({ fetchById });
 
-    // Renderiza B e resolve A na MESMA janela, antes de qualquer outro efeito.
-    await act(async () => {
-      hook.rerender({ ...props, param: "x-2" } as any);
-      dA.resolve({ data: { id: "x-1" }, error: null });
-    });
+    // B já renderizado (guarda síncrona atualizada no render); A responde depois.
+    act(() => { hook.rerender({ ...props, param: "x-2" } as any); });
+    await act(async () => { dA.resolve({ data: { id: "x-1" }, error: null }); });
 
     expect(onOpen).not.toHaveBeenCalled();
     expect(onClear).not.toHaveBeenCalled();
