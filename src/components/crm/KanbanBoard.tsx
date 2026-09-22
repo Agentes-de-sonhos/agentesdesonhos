@@ -125,7 +125,13 @@ export function KanbanBoard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const nav = useAdminNav();
-  const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  const {
+    enabled: unifiedV2,
+    isLoading: unifiedV2Loading,
+    isFetching: unifiedV2Fetching,
+    isError: unifiedV2Error,
+    resolved: unifiedV2Resolved,
+  } = useUnifiedWorkflowV2();
 
   /* Comando de URL "?new=1" (atalhos do menu/painel): abre o formulário real de
      nova oportunidade, respeitando a permissão de criação. */
