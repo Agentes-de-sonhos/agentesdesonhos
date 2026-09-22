@@ -548,7 +548,30 @@ export default function ProcessoReserva() {
         </Card>
 
         {/* Fluxo unificado V2: prontidão da venda (somente com entitlement ativo) */}
-        {unifiedV2 && file.status !== "cancelled" && file.status !== "trip_completed" && readiness && (
+        {/* Verificação do fluxo em andamento ou com falha: nada de caminho legado. */}
+        {!unifiedResolved && (
+          <Card className="min-w-0 rounded-2xl border-border/60 p-4 text-sm sm:p-5">
+            <h2 className="mb-1 text-sm font-semibold text-foreground">Verificando fluxo de venda</h2>
+            {unifiedFailed ? (
+              <div className="space-y-3">
+                <p className="text-muted-foreground">
+                  Não conseguimos verificar como a venda deste processo deve ser confirmada. As
+                  etapas de venda confirmada e operação ficam bloqueadas até a verificação
+                  terminar.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                  Tentar novamente
+                </Button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">
+                Um instante: estamos confirmando qual fluxo de venda vale para esta agência.
+              </p>
+            )}
+          </Card>
+        )}
+
+        {unifiedV2 && isActiveTravelFileStatus(file.status) && readiness && (
           <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
             <h2 className="mb-3 text-sm font-semibold text-foreground">
               Confirmação da venda (fluxo unificado)
