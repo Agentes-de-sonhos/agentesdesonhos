@@ -66,17 +66,26 @@ describe("hooks do fluxo unificado V2", () => {
     await waitFor(() => expect(result.current.enabled).toBe(true));
   });
 
-  it("enquanto carrega, o fluxo permanece desligado", async () => {
+  it("enquanto carrega, o fluxo permanece desligado e NÃO resolvido", async () => {
     rpcMock.mockImplementation(() => new Promise(() => {}));
     const { result } = renderHook(() => useUnifiedWorkflowV2(), { wrapper });
     expect(result.current.isLoading).toBe(true);
     expect(result.current.enabled).toBe(false);
+    expect(result.current.resolved).toBe(false);
   });
 
-  it("erro na consulta do entitlement não liga o fluxo", async () => {
+  it("erro na consulta do entitlement não liga o fluxo nem marca resolvido", async () => {
     rpcMock.mockResolvedValue({ data: null, error: { message: "boom" } });
     const { result } = renderHook(() => useUnifiedWorkflowV2(), { wrapper });
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.enabled).toBe(false);
+    expect(result.current.resolved).toBe(false);
+  });
+
+  it("resposta definitiva false marca resolvido (caminho legado liberado)", async () => {
+    rpcMock.mockResolvedValue({ data: false, error: null });
+    const { result } = renderHook(() => useUnifiedWorkflowV2(), { wrapper });
+    await waitFor(() => expect(result.current.resolved).toBe(true));
     expect(result.current.enabled).toBe(false);
   });
 
