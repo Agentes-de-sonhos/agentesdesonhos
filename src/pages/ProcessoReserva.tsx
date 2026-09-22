@@ -534,7 +534,16 @@ export default function ProcessoReserva() {
                     variant="outline"
                     size="sm"
                     className="gap-2"
-                    onClick={() => navigate(nav.crm("operacoes"))}
+                    onClick={() => {
+                      const operationId = workflowLinks.operationId || file.operation_id;
+                      if (!operationId) {
+                        toast.error(
+                          "Não foi possível localizar a operação deste processo. Verifique suas permissões ou recarregue a página.",
+                        );
+                        return;
+                      }
+                      navigate(`${nav.crm("operacoes")}?operation=${operationId}`);
+                    }}
                   >
                     <ExternalLink className="h-4 w-4" />
                     Abrir operação
@@ -543,12 +552,21 @@ export default function ProcessoReserva() {
                     variant="outline"
                     size="sm"
                     className="gap-2"
-                    onClick={() => navigate(nav.financeiro)}
+                    onClick={() => {
+                      if (!workflowLinks.saleId) {
+                        toast.error(
+                          "Não foi possível localizar a venda deste processo no financeiro. Verifique suas permissões ou recarregue a página.",
+                        );
+                        return;
+                      }
+                      navigate(`${nav.financeiro}?tab=vendas&sale=${workflowLinks.saleId}`);
+                    }}
                   >
                     <CircleDollarSign className="h-4 w-4" />
                     Abrir financeiro
                   </Button>
                 </div>
+
               </div>
             ) : (
               <div className="space-y-3">
