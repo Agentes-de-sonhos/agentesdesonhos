@@ -135,7 +135,7 @@ export function ConfirmSaleDialog({
                   className="gap-2"
                   onClick={() => {
                     onOpenChange(false);
-                    navigate(`${nav.crm("operacoes")}&operation=${result.operation_id}`);
+                    navigate(`${nav.crm("operacoes")}?operation=${result.operation_id}`);
                   }}
                 >
                   <ExternalLink className="h-4 w-4" />
