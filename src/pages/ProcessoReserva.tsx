@@ -435,11 +435,14 @@ export default function ProcessoReserva() {
                 <SelectContent>
                   {Object.entries(FILE_STATUS_LABELS)
                     // Fluxo unificado: venda só é confirmada pelo botão transacional,
-                    // nunca pela troca manual de etapa.
+                    // nunca pela troca manual de etapa. Enquanto a verificação do
+                    // fluxo não terminar, essas etapas também ficam fora da lista.
                     .filter(
                       ([value]) =>
-                        !unifiedV2 || !["sale_confirmed", "in_operation"].includes(value),
+                        legacyFlowAllowed ||
+                        !["sale_confirmed", "in_operation"].includes(value),
                     )
+
                     .map(([value, label]) => (
                       <SelectItem key={value} value={value}>
                         {label}
