@@ -41,7 +41,12 @@ interface ConfirmSaleDialogProps {
   readiness: TravelFileReadiness;
   /** Justificativas de exceção de fornecedor por id de serviço. */
   supplierExceptions: Record<string, string>;
+  /** Chamado após confirmação bem-sucedida (inclusive replay idempotente). */
+  onConfirmed?: (result: ConfirmSaleResult) => void;
+  /** Link para abrir o processo e corrigir o que falta (funil/Central). */
+  processHref?: string;
 }
+
 
 /**
  * Aceite do cliente + confirmação transacional da venda (fluxo unificado V2).
