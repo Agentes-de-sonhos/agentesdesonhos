@@ -167,3 +167,35 @@ export function useServiceFinancialRule(fileId?: string) {
     },
   });
 }
+
+/**
+ * Vínculos canônicos persistidos de um processo já convertido: operação por
+ * `operations.travel_file_id` e venda por `sales.travel_file_id`. Usado pelos
+ * atalhos "Abrir operação" / "Abrir financeiro" após recarregar a página.
+ */
+export function useTravelFileWorkflowLinks(fileId?: string, enabled = true) {
+  const query = useQuery({
+    queryKey: ["travel-file-workflow-links", fileId],
+    enabled: !!fileId && enabled,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const [op, sale] = await Promise.all([
+        sb.from("operations").select("id").eq("travel_file_id", fileId).maybeSingle(),
+        sb.from("sales").select("id").eq("travel_file_id", fileId).maybeSingle(),
+      ]);
+      if (op.error) throw op.error;
+      if (sale.error) throw sale.error;
+      return {
+        operationId: (op.data?.id as string | undefined) ?? null,
+        saleId: (sale.data?.id as string | undefined) ?? null,
+      };
+    },
+  });
+  return {
+    operationId: query.data?.operationId ?? null,
+    saleId: query.data?.saleId ?? null,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
+}
