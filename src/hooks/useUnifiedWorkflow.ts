@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const sb = supabase as any;
 
-/** Resultado da RPC confirm_travel_file_sale. */
+/** Resultado de sucesso da RPC confirm_travel_file_sale. */
 export interface ConfirmSaleResult {
   file_id: string;
   opportunity_id: string | null;
@@ -17,6 +17,40 @@ export interface ConfirmSaleResult {
   total: number;
   currency: string;
 }
+
+/**
+ * Falha estruturada: a RPC devolve JSON (em vez de exceção) quando precisa
+ * PERSISTIR a ocorrência antes de desistir — ex.: LEGACY_AMBIGUOUS_LINK.
+ */
+export interface ConfirmSaleFailure {
+  error: string;
+  message?: string | null;
+  entity?: string | null;
+  file_id?: string | null;
+  opportunity_id?: string | null;
+}
+
+export type ConfirmSaleResponse = ConfirmSaleResult | ConfirmSaleFailure;
+
+export function isConfirmSaleFailure(
+  data: ConfirmSaleResponse | null | undefined,
+): data is ConfirmSaleFailure {
+  return !!data && typeof (data as ConfirmSaleFailure).error === "string";
+}
+
+/** Erro de domínio lançado pelo hook quando a RPC devolve falha estruturada. */
+export class ConfirmSaleDomainError extends Error {
+  code: string;
+  constructor(failure: ConfirmSaleFailure) {
+    super(
+      failure.message ||
+        "Não foi possível confirmar a venda. Revise os vínculos deste processo.",
+    );
+    this.name = "ConfirmSaleDomainError";
+    this.code = failure.error;
+  }
+}
+
 
 /**
  * Feature flag do fluxo unificado (Fase 1A): entitlement de agência
@@ -70,7 +104,13 @@ export function useConfirmTravelFileSale(fileId?: string) {
         p_expected_updated_at: input.expectedUpdatedAt ?? null,
       });
       if (error) throw error;
-      return data as ConfirmSaleResult;
+      const response = data as ConfirmSaleResponse;
+      // Falha estruturada nunca pode chegar à interface como sucesso.
+      if (isConfirmSaleFailure(response)) {
+        throw new ConfirmSaleDomainError(response);
+      }
+      return response;
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["travel-file"] });
@@ -126,4 +166,36 @@ export function useServiceFinancialRule(fileId?: string) {
       queryClient.invalidateQueries({ queryKey: ["travel-file"] });
     },
   });
+}
+
+/**
+ * Vínculos canônicos persistidos de um processo já convertido: operação por
+ * `operations.travel_file_id` e venda por `sales.travel_file_id`. Usado pelos
+ * atalhos "Abrir operação" / "Abrir financeiro" após recarregar a página.
+ */
+export function useTravelFileWorkflowLinks(fileId?: string, enabled = true) {
+  const query = useQuery({
+    queryKey: ["travel-file-workflow-links", fileId],
+    enabled: !!fileId && enabled,
+    staleTime: 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const [op, sale] = await Promise.all([
+        sb.from("operations").select("id").eq("travel_file_id", fileId).maybeSingle(),
+        sb.from("sales").select("id").eq("travel_file_id", fileId).maybeSingle(),
+      ]);
+      if (op.error) throw op.error;
+      if (sale.error) throw sale.error;
+      return {
+        operationId: (op.data?.id as string | undefined) ?? null,
+        saleId: (sale.data?.id as string | undefined) ?? null,
+      };
+    },
+  });
+  return {
+    operationId: query.data?.operationId ?? null,
+    saleId: query.data?.saleId ?? null,
+    isLoading: query.isLoading,
+    isError: query.isError,
+  };
 }

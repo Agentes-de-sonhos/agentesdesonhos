@@ -63,7 +63,11 @@ import {
   ManualServiceDialog,
   type ManualServicePayload,
 } from "@/components/reservas/ManualServiceDialog";
-import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import {
+  useUnifiedWorkflowV2,
+  useTravelFileWorkflowLinks,
+} from "@/hooks/useUnifiedWorkflow";
+
 import {
   assessTravelFileReadiness,
   describeServiceCommission,
@@ -160,6 +164,9 @@ export default function ProcessoReserva() {
   const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
   // Fluxo unificado V2 (entitlement de agência, desligado por padrão).
   const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  // Vínculos canônicos persistidos (operação/venda) do processo já convertido.
+  const workflowLinks = useTravelFileWorkflowLinks(id, unifiedV2);
+
   const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
   const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
   const [supplierExceptions, setSupplierExceptions] = useState<Record<string, string>>({});
@@ -534,7 +541,16 @@ export default function ProcessoReserva() {
                     variant="outline"
                     size="sm"
                     className="gap-2"
-                    onClick={() => navigate(nav.crm("operacoes"))}
+                    onClick={() => {
+                      const operationId = workflowLinks.operationId || file.operation_id;
+                      if (!operationId) {
+                        toast.error(
+                          "Não foi possível localizar a operação deste processo. Verifique suas permissões ou recarregue a página.",
+                        );
+                        return;
+                      }
+                      navigate(`${nav.crm("operacoes")}?operation=${operationId}`);
+                    }}
                   >
                     <ExternalLink className="h-4 w-4" />
                     Abrir operação
@@ -543,12 +559,21 @@ export default function ProcessoReserva() {
                     variant="outline"
                     size="sm"
                     className="gap-2"
-                    onClick={() => navigate(nav.financeiro)}
+                    onClick={() => {
+                      if (!workflowLinks.saleId) {
+                        toast.error(
+                          "Não foi possível localizar a venda deste processo no financeiro. Verifique suas permissões ou recarregue a página.",
+                        );
+                        return;
+                      }
+                      navigate(`${nav.financeiro}?tab=vendas&sale=${workflowLinks.saleId}`);
+                    }}
                   >
                     <CircleDollarSign className="h-4 w-4" />
                     Abrir financeiro
                   </Button>
                 </div>
+
               </div>
             ) : (
               <div className="space-y-3">
