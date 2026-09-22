@@ -93,6 +93,14 @@ export function ConfirmSaleDialog({
         },
         expectedUpdatedAt: file.updated_at,
       });
+      // Defesa extra: nenhuma resposta com erro estruturado vira sucesso.
+      if (isConfirmSaleFailure(data)) {
+        toast.error(
+          data.message ||
+            "Não foi possível confirmar a venda. Revise os vínculos deste processo.",
+        );
+        return;
+      }
       setResult(data);
       toast.success(
         data.replayed
@@ -104,6 +112,7 @@ export function ConfirmSaleDialog({
       toast.error(message.replace(/^[A-Z_]+:\s*/, ""));
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
