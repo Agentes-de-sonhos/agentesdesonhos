@@ -40,6 +40,7 @@ export type ProductType =
   | 'transfer' 
   | 'atracao' 
   | 'locacao' 
+  | 'pacote'
   | 'outro';
 
 export const PRODUCT_TYPES: Record<ProductType, string> = {
@@ -50,8 +51,10 @@ export const PRODUCT_TYPES: Record<ProductType, string> = {
   transfer: 'Transfer',
   atracao: 'Atrações/Ingressos',
   locacao: 'Locação de Veículo',
+  pacote: 'Pacote',
   outro: 'Outro',
 };
+
 
 export interface CustomerPayment {
   id: string;

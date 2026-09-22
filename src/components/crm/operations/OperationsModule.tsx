@@ -53,6 +53,26 @@ export function OperationsModule() {
     setCreateOpen(true);
   }, [searchParams, setSearchParams]);
 
+  /* Comando de URL "?operation=<id>" (link após confirmar a venda no processo
+     de reserva): abre a ficha exata da operação criada/reutilizada. */
+  const operationParam = searchParams.get("operation");
+  useEffect(() => {
+    if (!operationParam || isLoading) return;
+    const target = operations.find((o) => o.id === operationParam);
+    const next = new URLSearchParams(searchParams);
+    next.delete("operation");
+    setSearchParams(next, { replace: true });
+    if (!target) {
+      toast.error("Não encontramos esta operação na sua lista. Ela pode ter sido removida ou pertencer a outra conta.");
+      return;
+    }
+    setSelectedTab("overview");
+    setSelected(target);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [operationParam, isLoading, operations]);
+
+
+
   const filtered = useMemo(
     () =>
       operations.filter((o) => {

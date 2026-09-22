@@ -135,7 +135,7 @@ export function ConfirmSaleDialog({
                   className="gap-2"
                   onClick={() => {
                     onOpenChange(false);
-                    navigate(nav.crm("operacoes"));
+                    navigate(`${nav.crm("operacoes")}?operation=${result.operation_id}`);
                   }}
                 >
                   <ExternalLink className="h-4 w-4" />
@@ -148,13 +148,14 @@ export function ConfirmSaleDialog({
                   className="gap-2"
                   onClick={() => {
                     onOpenChange(false);
-                    navigate(nav.financeiro);
+                    navigate(`${nav.financeiro}?tab=vendas&sale=${result.sale_id}`);
                   }}
                 >
                   <Wallet className="h-4 w-4" />
                   Abrir financeiro
                 </Button>
               )}
+
               <Button onClick={() => onOpenChange(false)}>Concluir</Button>
             </div>
           </div>

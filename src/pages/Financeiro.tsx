@@ -216,7 +216,7 @@ export default function Financeiro() {
               {activeTab === "entradas" && <EntradasManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "despesas" && <SmartExpenseManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "faturas" && <InvoicesManager viewMonth={viewMonth} viewYear={viewYear} />}
-              {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} />}
+              {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} onMonthChange={(m, y) => { setViewMonth(m); setViewYear(y); }} />}
               {activeTab === "comissoes" && <CommissionsCenter viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "recibos" && <ReceiptsCenter viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "notas-fiscais" && <FiscalNotesTab />}
