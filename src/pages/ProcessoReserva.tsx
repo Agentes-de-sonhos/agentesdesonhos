@@ -72,6 +72,7 @@ import {
   assessTravelFileReadiness,
   describeServiceCommission,
   isConvertedV2,
+  isActiveTravelFileStatus,
 } from "@/lib/travelFileConversion";
 import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
 import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
@@ -163,9 +164,17 @@ export default function ProcessoReserva() {
   const [manualServiceOpen, setManualServiceOpen] = useState(false);
   const [manualServiceEditing, setManualServiceEditing] = useState<TravelFileService | null>(null);
   // Fluxo unificado V2 (entitlement de agência, desligado por padrão).
-  const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
+  // Fail-closed: carregando ou com erro NUNCA equivale a "desligado".
+  const unified = useUnifiedWorkflowV2();
+  const unifiedV2 = unified.enabled;
+  const unifiedResolved = unified.resolved;
+  const unifiedChecking = !unified.resolved && !unified.isError;
+  const unifiedFailed = unified.isError && !unified.resolved;
+  // Caminho legado só é liberado quando a consulta terminou com "desligado".
+  const legacyFlowAllowed = unifiedResolved && !unifiedV2;
   // Vínculos canônicos persistidos (operação/venda) do processo já convertido.
   const workflowLinks = useTravelFileWorkflowLinks(id, unifiedV2);
+
 
   const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
   const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
@@ -231,10 +240,27 @@ export default function ProcessoReserva() {
       toast.error("Você não possui permissão para alterar o processo.");
       return;
     }
+    // Avanço para venda confirmada / em operação depende de saber qual fluxo
+    // vale para esta agência. Sem resposta definitiva, a ação fica bloqueada.
+    if (["sale_confirmed", "in_operation"].includes(status) && !unifiedResolved) {
+      toast.error(
+        unifiedFailed
+          ? "Não conseguimos verificar como esta venda deve ser confirmada. Recarregue a página e tente novamente."
+          : "Ainda estamos verificando como esta venda deve ser confirmada. Aguarde um instante e tente novamente.",
+      );
+      return;
+    }
+    if (["sale_confirmed", "in_operation"].includes(status) && unifiedV2) {
+      toast.info(
+        'A venda é confirmada no botão "Confirmar venda e iniciar operação", para criar operação e financeiro sem duplicar nada.',
+      );
+      return;
+    }
     if (status === "cancelled" && !(reason || "").trim()) {
       toast.error("Informe o motivo do cancelamento.");
       return;
     }
+
     try {
       await setStatus.mutateAsync({ status, reason: reason ?? null });
       toast.success(`Processo atualizado: ${FILE_STATUS_LABELS[status]}`);
@@ -410,11 +436,14 @@ export default function ProcessoReserva() {
                 <SelectContent>
                   {Object.entries(FILE_STATUS_LABELS)
                     // Fluxo unificado: venda só é confirmada pelo botão transacional,
-                    // nunca pela troca manual de etapa.
+                    // nunca pela troca manual de etapa. Enquanto a verificação do
+                    // fluxo não terminar, essas etapas também ficam fora da lista.
                     .filter(
                       ([value]) =>
-                        !unifiedV2 || !["sale_confirmed", "in_operation"].includes(value),
+                        legacyFlowAllowed ||
+                        !["sale_confirmed", "in_operation"].includes(value),
                     )
+
                     .map(([value, label]) => (
                       <SelectItem key={value} value={value}>
                         {label}
@@ -520,7 +549,30 @@ export default function ProcessoReserva() {
         </Card>
 
         {/* Fluxo unificado V2: prontidão da venda (somente com entitlement ativo) */}
-        {unifiedV2 && file.status !== "cancelled" && file.status !== "trip_completed" && readiness && (
+        {/* Verificação do fluxo em andamento ou com falha: nada de caminho legado. */}
+        {!unifiedResolved && (
+          <Card className="min-w-0 rounded-2xl border-border/60 p-4 text-sm sm:p-5">
+            <h2 className="mb-1 text-sm font-semibold text-foreground">Verificando fluxo de venda</h2>
+            {unifiedFailed ? (
+              <div className="space-y-3">
+                <p className="text-muted-foreground">
+                  Não conseguimos verificar como a venda deste processo deve ser confirmada. As
+                  etapas de venda confirmada e operação ficam bloqueadas até a verificação
+                  terminar.
+                </p>
+                <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+                  Tentar novamente
+                </Button>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">
+                Um instante: estamos confirmando qual fluxo de venda vale para esta agência.
+              </p>
+            )}
+          </Card>
+        )}
+
+        {unifiedV2 && isActiveTravelFileStatus(file.status) && readiness && (
           <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
             <h2 className="mb-3 text-sm font-semibold text-foreground">
               Confirmação da venda (fluxo unificado)

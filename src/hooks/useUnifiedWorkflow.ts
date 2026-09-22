@@ -120,7 +120,17 @@ export function useConfirmTravelFileSale(fileId?: string) {
       return response;
 
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
+      // Vínculos persistidos precisam valer IMEDIATAMENTE após a conversão:
+      // sem isto o cache de ["travel-file-workflow-links"] poderia devolver
+      // saleId/operationId nulos (staleTime) e travar os atalhos do processo.
+      if (fileId) {
+        queryClient.setQueryData(["travel-file-workflow-links", fileId], {
+          operationId: result.operation_id ?? null,
+          saleId: result.sale_id ?? null,
+        });
+        queryClient.invalidateQueries({ queryKey: ["travel-file-workflow-links", fileId] });
+      }
       queryClient.invalidateQueries({ queryKey: ["travel-file"] });
       queryClient.invalidateQueries({ queryKey: ["travel-files-page"] });
       queryClient.invalidateQueries({ queryKey: ["travel-files-summary"] });
@@ -128,6 +138,7 @@ export function useConfirmTravelFileSale(fileId?: string) {
       queryClient.invalidateQueries({ queryKey: ["operations"] });
       queryClient.invalidateQueries({ queryKey: ["sales"] });
     },
+
   });
 }
 
