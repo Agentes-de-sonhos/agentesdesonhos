@@ -263,13 +263,14 @@ export function KanbanBoard() {
     }
 
     if (celebrate && unifiedV2) {
-      const { data: linkedFile, error: linkedError } = await (supabase as any)
+      // Mesmo predicado terminal do servidor (travel_file_is_active):
+      // cancelado e viagem concluída NÃO contam como processo ativo.
+      const { data: linkedFiles, error: linkedError } = await (supabase as any)
         .from("travel_files")
         .select("id")
         .eq("opportunity_id", opportunity.id)
-        .neq("status", "cancelled")
-        .limit(1)
-        .maybeSingle();
+        .not("status", "in", "(cancelled,trip_completed)")
+        .limit(2);
       if (linkedError) {
         // Falha de rede/permissão nunca pode virar fechamento pelo caminho
         // antigo: o card fica onde está e o motivo aparece para a pessoa.
@@ -278,13 +279,27 @@ export function KanbanBoard() {
         );
         return;
       }
-      if (linkedFile?.id) {
+      const activeFiles = (linkedFiles ?? []) as Array<{ id: string }>;
+      if (activeFiles.length > 1) {
+        toast.error(
+          "Esta oportunidade tem mais de um processo de reserva ativo. Revise os processos na Central de Reservas e mantenha apenas um ativo.",
+          {
+            action: {
+              label: "Abrir processo",
+              onClick: () => navigate(nav.reservas(activeFiles[0].id)),
+            },
+            duration: 8000,
+          },
+        );
+        return;
+      }
+      if (activeFiles.length === 1) {
         toast.info(
           "Esta oportunidade tem um processo na Central de Reservas. Confirme a venda por lá.",
           {
             action: {
               label: "Abrir processo",
-              onClick: () => navigate(nav.reservas(linkedFile.id)),
+              onClick: () => navigate(nav.reservas(activeFiles[0].id)),
             },
             duration: 8000,
           },
@@ -292,6 +307,7 @@ export function KanbanBoard() {
         return;
       }
     }
+
 
     try {
       await reorderOpportunities({
