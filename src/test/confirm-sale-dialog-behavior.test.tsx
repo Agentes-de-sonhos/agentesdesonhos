@@ -11,6 +11,14 @@ import { assessTravelFileReadiness } from "@/lib/travelFileConversion";
 
 const rpcMock = vi.fn();
 const navigateMock = vi.fn();
+// jsdom não implementa a API usada pelo menu suspenso do design system.
+beforeEach(() => {
+  (Element.prototype as any).scrollIntoView = vi.fn();
+  (Element.prototype as any).hasPointerCapture = vi.fn();
+  (Element.prototype as any).releasePointerCapture = vi.fn();
+  (Element.prototype as any).setPointerCapture = vi.fn();
+});
+
 
 vi.mock("react-router-dom", () => ({
   useNavigate: () => navigateMock,
