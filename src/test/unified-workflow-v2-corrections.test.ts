@@ -56,6 +56,9 @@ describe("Fase 1A — correções (migration 0017)", () => {
   it("funil: falha de consulta ou USE_CONFIRM_SALE não fecha pelo caminho antigo", () => {
     expect(kanban).toContain("error: linkedError");
     expect(kanban).toContain("USE_CONFIRM_SALE");
-    expect(kanban).toContain("Nada foi alterado.");
+    // Mensagem factual: não afirmamos que "nada foi alterado", apenas que a lista
+    // foi recarregada com o estado do servidor.
+    expect(kanban).toContain("recarregada com o que está no servidor");
+    expect(kanban).not.toContain("Nada foi alterado.");
   });
 });
