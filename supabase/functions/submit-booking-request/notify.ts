@@ -3,7 +3,18 @@
 // A solicitação NUNCA depende deste envio: qualquer falha aqui apenas marca a
 // linha da fila `quote_booking_request_deliveries` como `failed`. WhatsApp não é
 // enviado nem marcado como enviado — não há integração configurada.
-const APP_CRM_URL = "https://app.agentesdesonhos.com.br/crm";
+const APP_BASE_URL = "https://app.agentesdesonhos.com.br";
+const APP_CRM_URL = `${APP_BASE_URL}/crm`;
+
+/** Deep link da ficha do pedido na Central de Reservas (fallback: funil). */
+export function bookingRequestDeepLink(row: {
+  travel_file_id?: string | null;
+  opportunity_id?: string | null;
+}): string {
+  if (row.travel_file_id) return `${APP_BASE_URL}/reservas/${row.travel_file_id}`;
+  if (row.opportunity_id) return `${APP_CRM_URL}?opportunity=${row.opportunity_id}`;
+  return APP_CRM_URL;
+}
 
 const esc = (v: unknown) =>
   String(v ?? "")
@@ -40,11 +51,16 @@ export interface DeliveryRow {
   agency_user_id: string;
   opportunity_id: string | null;
   service_names: string | null;
+  travel_file_id?: string | null;
+  travel_file_number?: string | null;
+  agency_whatsapp?: string | null;
 }
 
 export function renderAgencyEmail(row: DeliveryRow) {
   const trip = row.trip_title || row.destination || "Orçamento";
   const contact = [row.client_whatsapp, row.client_email].filter(Boolean).join(" · ");
+  const link = bookingRequestDeepLink(row);
+  const fileLabel = row.travel_file_number ? `Ficha: ${row.travel_file_number}` : "";
   return {
     subject: `Nova solicitação de reserva ${row.protocol} — ${trip}`,
     text: [
@@ -53,11 +69,12 @@ export function renderAgencyEmail(row: DeliveryRow) {
       `Contato: ${contact || "não informado"}`,
       `Orçamento/destino: ${trip}`,
       `Serviços: ${row.service_names || "-"}`,
+      fileLabel,
       `Valor apresentado: ${money(row.currency, row.total_estimated)}`,
       row.client_notes ? `Observações: ${row.client_notes}` : "",
       "",
       "Este pedido não é uma reserva confirmada: reconfirme serviços, disponibilidade e valores.",
-      `Abrir no CRM: ${APP_CRM_URL}`,
+      `Abrir a solicitação: ${link}`,
     ].filter(Boolean).join("\n"),
     html: `
       <div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:560px">
@@ -75,8 +92,9 @@ export function renderAgencyEmail(row: DeliveryRow) {
           Este pedido <strong>não é uma reserva confirmada</strong>. Reconfirme serviços,
           disponibilidade e valores antes de retornar ao viajante.
         </p>
-        <a href="${APP_CRM_URL}" style="display:inline-block;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:14px">
-          Abrir no CRM
+        ${row.travel_file_number ? `<p style="margin:0 0 12px"><strong>Ficha:</strong> ${esc(row.travel_file_number)}</p>` : ""}
+        <a href="${link}" style="display:inline-block;background:#111827;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-size:14px">
+          Abrir a solicitação
         </a>
       </div>`,
   };
@@ -122,7 +140,7 @@ export async function deliverBookingNotifications(
 ): Promise<{ sent: number; failed: number; skipped: number }> {
   const out = { sent: 0, failed: 0, skipped: 0 };
   try {
-    const { data, error } = await supabase.rpc("pending_booking_request_deliveries", {
+    const { data, error } = await supabase.rpc("pending_booking_request_deliveries_v2", {
       p_request_id: requestId,
     });
     if (error) {
