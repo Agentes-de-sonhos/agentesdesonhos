@@ -21,8 +21,10 @@ import {
 } from "@/lib/travelFileConversion";
 import {
   useConfirmTravelFileSale,
+  isConfirmSaleFailure,
   type ConfirmSaleResult,
 } from "@/hooks/useUnifiedWorkflow";
+
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
 /** Formatação monetária local (mesma regra usada na página do processo). */
