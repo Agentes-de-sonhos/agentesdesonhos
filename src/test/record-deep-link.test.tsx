@@ -200,3 +200,49 @@ describe("useRecordDeepLink — corridas", () => {
     expect(toastError.mock.calls[1][1]?.action?.label).toBe("Tentar novamente");
   });
 });
+
+/**
+ * Guarda síncrona de parâmetro + desmontagem (comportamentais).
+ */
+describe("useRecordDeepLink — desmontagem e janela de troca de parâmetro", () => {
+  beforeEach(() => toastError.mockReset());
+  afterEach(cleanup);
+
+  it("desmontar antes da resposta não abre, não limpa e não avisa", async () => {
+    const d = deferred<{ data: Rec | null; error: unknown }>();
+    const fetchById = vi.fn(() => d.promise);
+    const { hook, onOpen, onClear } = setup({ fetchById });
+    expect(fetchById).toHaveBeenCalledTimes(1);
+    hook.unmount();
+    await act(async () => { d.resolve({ data: { id: "x-1" }, error: null }); });
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(onClear).not.toHaveBeenCalled();
+    expect(toastError).not.toHaveBeenCalled();
+  });
+
+  it("desmontar antes de uma resposta de erro não mostra aviso", async () => {
+    const d = deferred<{ data: Rec | null; error: unknown }>();
+    const fetchById = vi.fn(() => d.promise);
+    const { hook } = setup({ fetchById });
+    hook.unmount();
+    await act(async () => { d.resolve({ data: null, error: { message: "boom" } }); });
+    expect(toastError).not.toHaveBeenCalled();
+  });
+
+  it("resposta de A não atua depois de renderizar B (guarda síncrona do render)", async () => {
+    const dA = deferred<{ data: Rec | null; error: unknown }>();
+    const never = new Promise<{ data: Rec | null; error: unknown }>(() => {});
+    const fetchById = vi.fn((id: string) => (id === "x-1" ? dA.promise : never));
+    const { hook, props, onOpen, onClear } = setup({ fetchById });
+
+    // Renderiza B e resolve A na MESMA janela, antes de qualquer outro efeito.
+    await act(async () => {
+      hook.rerender({ ...props, param: "x-2" } as any);
+      dA.resolve({ data: { id: "x-1" }, error: null });
+    });
+
+    expect(onOpen).not.toHaveBeenCalled();
+    expect(onClear).not.toHaveBeenCalled();
+    expect(toastError).not.toHaveBeenCalled();
+  });
+});
