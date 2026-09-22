@@ -343,31 +343,24 @@ export function KanbanBoard() {
       });
     } catch (error: any) {
       const message = String(error?.message || "");
-      if (message.includes("USE_CONFIRM_SALE")) {
-        toast.info(
-          "Esta venda é confirmada na Central de Reservas, para criar operação e financeiro sem duplicar nada.",
-          {
+      const code = extractWorkflowCode(error);
+      if (code === "USE_CONFIRM_SALE") {
+        // Guard do servidor: a intenção é fechar a venda — abrimos a mesma
+        // confirmação oficial em vez de deixar a pessoa num ciclo sem saída.
+        const opened = await openConfirmSaleForOpportunity(opportunity.id);
+        if (!opened) {
+          toast.info(humanizeWorkflowError(error), {
             action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
             duration: 8000,
-          },
-        );
-      } else if (message.includes("MULTIPLE_ACTIVE_TRAVEL_FILES")) {
-        toast.error(
-          "Esta oportunidade tem mais de um processo de reserva ativo. Revise na Central e mantenha apenas um ativo antes de fechar.",
-          {
-            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
-            duration: 8000,
-          },
-        );
-      } else if (message.includes("WORKFLOW_LINK_CONFLICT")) {
-        toast.error(
-          "Esta oportunidade está ligada a outro processo de reserva. Revise os vínculos na Central antes de fechar.",
-          {
-            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
-            duration: 8000,
-          },
-        );
+          });
+        }
+      } else if (code === "MULTIPLE_ACTIVE_TRAVEL_FILES" || code === "WORKFLOW_LINK_CONFLICT") {
+        toast.error(humanizeWorkflowError(error), {
+          action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
+          duration: 8000,
+        });
       } else if (error?.name !== "PermissionDeniedError") {
+        console.error("Falha ao mover oportunidade:", code || message);
         toast.error("Não foi possível mover este cartão. A lista foi recarregada com o que está no servidor.");
       }
       return;
@@ -397,12 +390,11 @@ export function KanbanBoard() {
   const handleMoveToStage = async (opportunity: Opportunity, toStageId: string) => {
     const toStage = stages.find((s) => s.id === toStageId);
     if (!toStage) return;
-    try {
-      await performMove(opportunity.id, toStage, null, false);
-    } catch {
-      toast.error("Não foi possível mover o card. Tente novamente.");
-    }
+    // performMove já explica qualquer falha: nenhum segundo aviso para o
+    // mesmo erro.
+    await performMove(opportunity.id, toStage, null, false);
   };
+
 
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
     e.preventDefault();
