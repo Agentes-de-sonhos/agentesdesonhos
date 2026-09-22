@@ -73,7 +73,7 @@ Passos:
 
 - `handle_opportunity_closed` (cria venda): passa a ser idempotente — não insere se já existir venda com a mesma `opportunity_id`, e não insere quando a oportunidade tem travel_file (a venda vem da RPC, com os valores reais em vez da estimativa). Mantém o `clients.status='cliente_ativo'`.
 - `auto_create_operation_on_close`: mantém o caminho legado (oportunidade sem file), mas passa a ignorar oportunidades que já tenham file, para a operação nascer só pela RPC com os serviços certos.
-- `sync_operation_payment_status`: passa a escrever em `operations.customer_payment_status`… **não** — passa a escrever apenas em `payment_status` a partir dos serviços do fornecedor; a situação do cliente fica isolada (ver G).
+- `sync_operation_payment_status`: continua derivando apenas `operations.payment_status` dos serviços (fornecedor). A situação de recebimento do cliente passa a ficar em coluna própria (ver G).
 - Nenhum trigger é removido nesta fase.
 
 ## E. Central de Reservas e funil
