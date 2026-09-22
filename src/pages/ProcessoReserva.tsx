@@ -594,12 +594,17 @@ export default function ProcessoReserva() {
                     size="sm"
                     className="gap-2"
                     onClick={() => {
-                      if (workflowLinks.isLoading) {
+                      if (workflowLinks.isLoading || workflowLinks.isFetching) {
                         toast.info("Ainda estamos carregando os vínculos deste processo. Um instante.");
                         return;
                       }
                       if (workflowLinks.isError) {
-                        toast.error("Não conseguimos consultar a operação deste processo agora. Tente novamente em instantes.");
+                        toast.error("Não conseguimos consultar a operação deste processo agora.", {
+                          action: {
+                            label: "Tentar novamente",
+                            onClick: () => { void workflowLinks.refetch(); },
+                          },
+                        });
                         return;
                       }
                       const operationId = workflowLinks.operationId || file.operation_id;
@@ -620,12 +625,17 @@ export default function ProcessoReserva() {
                     size="sm"
                     className="gap-2"
                     onClick={() => {
-                      if (workflowLinks.isLoading) {
+                      if (workflowLinks.isLoading || workflowLinks.isFetching) {
                         toast.info("Ainda estamos carregando os vínculos deste processo. Um instante.");
                         return;
                       }
                       if (workflowLinks.isError) {
-                        toast.error("Não conseguimos consultar a venda deste processo agora. Tente novamente em instantes.");
+                        toast.error("Não conseguimos consultar a venda deste processo agora.", {
+                          action: {
+                            label: "Tentar novamente",
+                            onClick: () => { void workflowLinks.refetch(); },
+                          },
+                        });
                         return;
                       }
                       if (!workflowLinks.saleId) {

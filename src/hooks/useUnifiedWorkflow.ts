@@ -215,6 +215,9 @@ export function useTravelFileWorkflowLinks(fileId?: string, enabled = true) {
     operationId: query.data?.operationId ?? null,
     saleId: query.data?.saleId ?? null,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     isError: query.isError,
+    /** Nova tentativa real da consulta (sem recarregar a página). */
+    refetch: query.refetch,
   };
 }
