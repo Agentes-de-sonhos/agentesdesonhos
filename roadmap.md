@@ -22,3 +22,9 @@
 - [x] Seletor editável de ícones na etapa "Incluso" do orçamento (editor, web público e PDF), sem migration e sem publicar.
 - [x] Remover o bloco de acesso por código da Área do Cliente compartilhada em SiteLab Base e todos os sites, sem publicar.
 - [x] Fase 1A — fluxo unificado de conversão file → operação + venda atrás do entitlement unified_workflow_v2 (OFF por padrão, nenhuma agência ativada), sem publicar/deployar. Pontos pendentes para fase futura: vínculo de carteira/roteiro e diagnóstico de duplicidades legadas.
+- [ ] Fase 1A — rodada corretiva 2 (migration 0018, sem ativar entitlement e sem publicar):
+  - [ ] Lock da oportunidade antes das checagens (concorrência entre dois files da mesma oportunidade).
+  - [ ] Retorno estruturado de erro da RPC tratado como falha no hook e no diálogo.
+  - [ ] Recebimento do cliente no V2 calculado só pela linhagem do file/operação.
+  - [ ] Atalhos persistidos de operação e venda no processo já convertido.
+  - [ ] Testes comportamentais reais (entitlement, duplo clique, erro estruturado, funil) + suíte, tipos, build.
