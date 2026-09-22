@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useOperations } from "@/hooks/useOperations";
+import { useRecordDeepLink } from "@/hooks/useRecordDeepLink";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
@@ -60,56 +61,33 @@ export function OperationsModule() {
      ID direto no servidor (respeitando as políticas de acesso da conta). O
      parâmetro só sai da URL depois de uma resposta definitiva. */
   const operationParam = searchParams.get("operation");
-  const resolvingOperationRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!operationParam || isLoading || isFetching) return;
-    if (resolvingOperationRef.current === operationParam) return;
-    resolvingOperationRef.current = operationParam;
-
-    const clearParam = () => {
-      const next = new URLSearchParams(searchParams);
-      next.delete("operation");
-      setSearchParams(next, { replace: true });
-    };
-
-    const open = (op: Operation) => {
-      setSelectedTab("overview");
-      setSelected(op);
-    };
-
-    const target = operations.find((o) => o.id === operationParam);
-    if (target) {
-      open(target);
-      clearParam();
-      return;
-    }
-
-    let active = true;
-    (async () => {
+  useRecordDeepLink<Operation>({
+    param: operationParam,
+    listReady: !isLoading && !isFetching,
+    list: operations,
+    fetchById: async (id) => {
       const { data, error } = await (supabase as any)
         .from("operations")
         .select("*, client:clients(id,name,phone,email)")
-        .eq("id", operationParam)
+        .eq("id", id)
         .maybeSingle();
-      if (!active) return;
-      if (error) {
-        toast.error("Não conseguimos abrir esta operação agora. Tente novamente em instantes.");
-        resolvingOperationRef.current = null;
-        return;
-      }
-      if (!data) {
-        toast.error("Não encontramos esta operação na sua conta. Ela pode ter sido removida ou pertencer a outra conta.");
-        clearParam();
-        return;
-      }
-      open(data as unknown as Operation);
-      clearParam();
-    })();
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [operationParam, isLoading, isFetching, operations]);
+      return { data: (data as Operation | null) ?? null, error };
+    },
+    onOpen: (op) => {
+      setSelectedTab("overview");
+      setSelected(op);
+    },
+    onClear: () => {
+      const next = new URLSearchParams(searchParams);
+      next.delete("operation");
+      setSearchParams(next, { replace: true });
+    },
+    messages: {
+      transient: "Não conseguimos abrir esta operação agora.",
+      exhausted: "Não conseguimos abrir esta operação depois de várias tentativas. Tente novamente mais tarde.",
+      missing: "Não encontramos esta operação na sua conta. Ela pode ter sido removida ou pertencer a outra conta.",
+    },
+  });
 
 
 

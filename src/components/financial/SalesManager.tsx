@@ -38,6 +38,7 @@ import {
   Collapsible, CollapsibleContent, CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
+import { useRecordDeepLink } from "@/hooks/useRecordDeepLink";
 import { useSellers } from "@/hooks/useSellers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -48,10 +49,16 @@ import { toast } from "sonner";
 
 export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
   const { sales: allSales, saleProducts, isLoading: salesLoading, isFetching: salesFetching, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+  // Venda aberta por link direto "?sale=<id>": entra na coleção renderizada
+  // mesmo fora do mês exibido ou do limite da lista, e nunca duplicada.
+  const [directSale, setDirectSale] = useState<Sale | null>(null);
   const sales = useMemo(() => {
-    if (!viewMonth || !viewYear) return allSales;
-    return allSales.filter(s => isInMonth(s.sale_date, viewMonth, viewYear));
-  }, [allSales, viewMonth, viewYear]);
+    const base = (!viewMonth || !viewYear)
+      ? allSales
+      : allSales.filter(s => isInMonth(s.sale_date, viewMonth, viewYear));
+    if (directSale && !base.some(s => s.id === directSale.id)) return [directSale, ...base];
+    return base;
+  }, [allSales, viewMonth, viewYear, directSale]);
   const { closedOpportunities } = useClosedOpportunities();
   const { sellers } = useSellers();
   const { user } = useAuth();
@@ -90,56 +97,38 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
   // reserva): abre a venda exata. A lista carregada é limitada e pode estar
   // velha, então quando o ID não está nela buscamos direto no servidor.
   const saleParam = searchParams.get("sale");
-  const resolvingSaleRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!saleParam || salesLoading || salesFetching) return;
-    if (resolvingSaleRef.current === saleParam) return;
-    resolvingSaleRef.current = saleParam;
-
-    const clearParam = () => setSearchParams({ tab: "vendas" }, { replace: true });
-
-    const open = (sale: Sale) => {
+  useRecordDeepLink<Sale>({
+    param: saleParam,
+    listReady: !salesLoading && !salesFetching,
+    list: allSales,
+    fetchById: async (id) => {
+      const { data, error } = await (supabase as any)
+        .from("sales")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      return { data: (data as Sale | null) ?? null, error };
+    },
+    onOpen: (sale, fromList) => {
+      // A venda buscada direto entra na coleção renderizada (sem duplicar),
+      // mesmo fora do mês exibido ou do limite da lista.
+      if (!fromList) {
+        setDirectSale(sale);
+        queryClient.invalidateQueries({ queryKey: ["sales"] });
+      }
       setExpandedSales((prev) => new Set(prev).add(sale.id));
       if (sale.sale_date) {
         const d = parseLocalDate(sale.sale_date);
         if (d) onMonthChange?.(d.getMonth() + 1, d.getFullYear());
       }
-    };
-
-    const target = allSales.find((s) => s.id === saleParam);
-    if (target) {
-      open(target);
-      clearParam();
-      return;
-    }
-
-    let active = true;
-    (async () => {
-      const { data, error } = await (supabase as any)
-        .from("sales")
-        .select("*")
-        .eq("id", saleParam)
-        .maybeSingle();
-      if (!active) return;
-      if (error) {
-        toast.error("Não conseguimos abrir esta venda agora. Tente novamente em instantes.");
-        resolvingSaleRef.current = null;
-        return;
-      }
-      if (!data) {
-        toast.error("Não encontramos esta venda na sua conta. Ela pode ter sido removida ou pertencer a outra conta.");
-        clearParam();
-        return;
-      }
-      queryClient.invalidateQueries({ queryKey: ["sales"] });
-      open(data as unknown as Sale);
-      clearParam();
-    })();
-    return () => {
-      active = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saleParam, salesLoading, salesFetching, allSales]);
+    },
+    onClear: () => setSearchParams({ tab: "vendas" }, { replace: true }),
+    messages: {
+      transient: "Não conseguimos abrir esta venda agora.",
+      exhausted: "Não conseguimos abrir esta venda depois de várias tentativas. Tente novamente mais tarde.",
+      missing: "Não encontramos esta venda na sua conta. Ela pode ter sido removida ou pertencer a outra conta.",
+    },
+  });
 
 
 
