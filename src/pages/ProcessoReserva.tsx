@@ -512,6 +512,85 @@ export default function ProcessoReserva() {
           </div>
         </Card>
 
+        {/* Fluxo unificado V2: prontidão da venda (somente com entitlement ativo) */}
+        {unifiedV2 && file.status !== "cancelled" && file.status !== "trip_completed" && readiness && (
+          <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">
+              Confirmação da venda (fluxo unificado)
+            </h2>
+
+            {isConvertedV2(file) ? (
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-sm">
+                <p className="flex items-center gap-2 font-semibold text-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  Venda confirmada e operação iniciada.
+                </p>
+                <p className="mt-1 text-muted-foreground">
+                  O recebimento do cliente e os pagamentos a fornecedores são acompanhados
+                  separadamente na operação e no financeiro.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate(nav.crm("operacoes"))}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Abrir operação
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => navigate(nav.financeiro)}
+                  >
+                    <CircleDollarSign className="h-4 w-4" />
+                    Abrir financeiro
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {readiness.blockers.length === 0 ? (
+                  <p className="flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-3 text-sm text-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    Processo pronto: {readiness.eligible.length} serviço(s), total{" "}
+                    {money(readiness.total, readiness.currency || file.currency)}.
+                  </p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {readiness.blockers.map((blocker) => (
+                      <li
+                        key={blocker}
+                        className="flex items-start gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-foreground"
+                      >
+                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+                        <span>{blocker}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {readiness.warnings.map((warning) => (
+                  <p key={warning} className="text-xs text-muted-foreground">
+                    {warning}
+                  </p>
+                ))}
+                {canManage && (
+                  <Button
+                    className="gap-2"
+                    disabled={!readiness.ready}
+                    onClick={() => setConfirmSaleOpen(true)}
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Confirmar venda e iniciar operação
+                  </Button>
+                )}
+              </div>
+            )}
+          </Card>
+        )}
+
         {/* Visão geral */}
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
