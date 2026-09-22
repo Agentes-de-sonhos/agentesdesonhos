@@ -23,7 +23,7 @@ describe("Fluxo unificado V2 — fiação da interface", () => {
 
   it("diálogo de confirmação usa chave de idempotência estável por abertura", () => {
     const dialog = read("src/components/reservas/ConfirmSaleDialog.tsx");
-    expect(dialog).toContain("confirm_travel_file_sale");
+    expect(dialog).toContain("useConfirmTravelFileSale");
     expect(dialog).toContain("idempotencyKey");
     expect(dialog).toContain("crypto.randomUUID");
     expect(dialog).toContain("expectedUpdatedAt");
@@ -31,10 +31,10 @@ describe("Fluxo unificado V2 — fiação da interface", () => {
     expect(dialog).toContain("Canal do aceite");
   });
 
-  it("regra financeira do serviço grava snapshot via RPC dedicada", () => {
+  it("regra financeira do serviço usa hooks dedicados e termos padrão da agência", () => {
     const dialog = read("src/components/reservas/ServiceFinancialRuleDialog.tsx");
-    expect(dialog).toContain("travel_file_service_set_financial_rule");
-    expect(dialog).toContain("travel_file_supplier_terms");
+    expect(dialog).toContain("useServiceFinancialRule");
+    expect(dialog).toContain("useSupplierTerms");
     expect(dialog).toContain("Usar termos padrão da agência");
   });
 
@@ -52,9 +52,12 @@ describe("Fluxo unificado V2 — fiação da interface", () => {
     expect(card).toContain("supplier_payment_status");
   });
 
-  it("hook consulta o entitlement unified_workflow_v2 (default OFF)", () => {
+  it("hook consulta o entitlement unified_workflow_v2 (default OFF) e chama as RPCs", () => {
     const hook = read("src/hooks/useUnifiedWorkflow.ts");
     expect(hook).toContain("current_agency_has_entitlement");
     expect(hook).toContain("unified_workflow_v2");
+    expect(hook).toContain("confirm_travel_file_sale");
+    expect(hook).toContain("travel_file_service_set_financial_rule");
+    expect(hook).toContain("travel_file_supplier_terms");
   });
 });
