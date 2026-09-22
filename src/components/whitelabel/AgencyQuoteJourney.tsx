@@ -35,6 +35,8 @@ import {
   type Occurrence, type ServiceGroup,
 } from "@/lib/agencyJourneyOccurrences";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
+import { focusNextField, useKeyboardInset, useRevealFocusedField } from "@/hooks/useKeyboardInsets";
+import { agencySiteHref } from "@/lib/agencyContextLink";
 
 export const SERVICE_ICONS: Record<string, typeof Plane> = {
   aereo: Plane,
@@ -255,6 +257,11 @@ export interface AgencyQuoteJourneyProps {
   onEditQuickValues?: () => void;
   privacyUrl?: string;
   termsUrl?: string;
+  /**
+   * Chamado ao fechar a confirmação de envio, DEPOIS da limpeza total.
+   * Padrão: volta para a página inicial do site da agência.
+   */
+  onCompleted?: () => void;
 }
 
 interface DraftShape {
@@ -284,6 +291,7 @@ export function AgencyQuoteJourney({
   quickRoute,
   privacyUrl = "/politicasdeprivacidade",
   termsUrl = "/termosdeuso",
+  onCompleted,
 }: AgencyQuoteJourneyProps) {
   const editorial = isEditorialTheme(hostname);
   const { state, error, submit, reset } = useAgencySiteRequest(hostname);
@@ -304,6 +312,11 @@ export function AgencyQuoteJourney({
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [honeypot, setHoneypot] = useState("");
   const bodyRef = useRef<HTMLDivElement | null>(null);
+  const submittingRef = useRef(false);
+  const completedRef = useRef(false);
+
+  const keyboardInset = useKeyboardInset(open);
+  useRevealFocusedField(bodyRef, open);
 
   const buildFreshGroups = useCallback((): { groups: ServiceGroup[]; context: TripContext } => {
     const service = serviceByKey(primaryService);
@@ -315,9 +328,36 @@ export function AgencyQuoteJourney({
     }
     return {
       context: baseContext,
-      groups: [{ key: service.key, items: [{ id: newOccurrenceId(service.key), values: merged, legs }] }],
+      groups: [
+        {
+          key: service.key,
+          items: [{ id: newOccurrenceId(service.key), values: merged, legs, baseline: { ...merged } }],
+        },
+      ],
     };
   }, [primaryService, quickValues, quickRoute]);
+
+  /** Zera TODO o estado da jornada: nenhuma solicitação herda a anterior. */
+  const resetJourney = useCallback(() => {
+    // Depois de concluir, o rascunho não volta a ser gravado: nada da
+    // solicitação anterior pode ressurgir para o próximo cliente.
+    completedRef.current = true;
+    try {
+      sessionStorage.removeItem(draftKey);
+    } catch { /* ignore */ }
+    const fresh = buildFreshGroups();
+    setContext(fresh.context);
+    setGroups(fresh.groups);
+    setSelection([]);
+    setStepIndex(1);
+    setStage("primary");
+    setErrors({});
+    setContact(EMPTY_CONTACT);
+    setContactErrors({});
+    setHoneypot("");
+    submittingRef.current = false;
+    reset();
+  }, [buildFreshGroups, draftKey, reset]);
 
   /** Ao abrir: retoma o rascunho da sessão ou monta a etapa inicial. */
   useEffect(() => {
@@ -346,16 +386,22 @@ export function AgencyQuoteJourney({
       setSelection([]);
       setStepIndex(1);
       setStage("primary");
+      // Sem rascunho compatível NADA é reaproveitado: contato e observações
+      // da solicitação anterior também são descartados.
+      setContact(EMPTY_CONTACT);
+      setHoneypot("");
     }
     setErrors({});
     setContactErrors({});
+    submittingRef.current = false;
+    completedRef.current = false;
     if (state !== "idle") reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, primaryService, signature]);
 
   /** Rascunho de sessão: fechar e reabrir não perde nada. */
   useEffect(() => {
-    if (!open || !groups.length || state === "success") return;
+    if (!open || !groups.length || state === "success" || completedRef.current) return;
     try {
       const draft: DraftShape = { sig: signature, stage, context, groups, selection, stepIndex, contact };
       sessionStorage.setItem(draftKey, JSON.stringify(draft));
@@ -481,7 +527,7 @@ export function AgencyQuoteJourney({
   const goToStage = (next: Stage) => {
     setStage(next);
     setErrors({});
-    window.requestAnimationFrame(() => bodyRef.current?.scrollTo({ top: 0 }));
+    window.requestAnimationFrame(() => bodyRef.current?.scrollTo?.({ top: 0 }));
   };
 
   const handlePrimaryContinue = () => {
@@ -551,27 +597,47 @@ export function AgencyQuoteJourney({
     });
 
   const handleSubmit = async () => {
+    // Trava síncrona: dois toques rápidos geram UM único envio.
+    if (submittingRef.current || state === "submitting") return;
     const found = validateContactStep(contact);
     setContactErrors(found);
     if (Object.keys(found).length) return;
     const entries = entriesForPayload();
     if (!entries.length) return;
+    submittingRef.current = true;
     const parts = buildJourneyPayload(entries, context);
-    await submit({
-      ...parts,
-      lead_name: contact.lead_name,
-      lead_phone: contact.lead_phone,
-      lead_email: contact.lead_email,
-      preferred_channel: contact.lead_phone.trim() ? "WhatsApp" : "E-mail",
-      best_time: "Qualquer horário",
-      notes: contact.notes,
-      consent: contact.consent,
-      consent_version: "v1",
-      honeypot,
-    });
+    try {
+      await submit({
+        ...parts,
+        lead_name: contact.lead_name,
+        lead_phone: contact.lead_phone,
+        lead_email: contact.lead_email,
+        preferred_channel: contact.lead_phone.trim() ? "WhatsApp" : "E-mail",
+        best_time: "Qualquer horário",
+        notes: contact.notes,
+        consent: contact.consent,
+        consent_version: "v1",
+        honeypot,
+      });
+    } finally {
+      submittingRef.current = false;
+    }
     try {
       sessionStorage.removeItem(draftKey);
     } catch { /* ignore */ }
+  };
+
+  /** Fechar a confirmação: limpa tudo, fecha a janela e volta para a home. */
+  const handleSuccessClose = () => {
+    resetJourney();
+    onOpenChange(false);
+    if (onCompleted) {
+      onCompleted();
+      return;
+    }
+    try {
+      window.location.assign(agencySiteHref("/"));
+    } catch { /* ambiente sem navegação */ }
   };
 
   const heading = PRIMARY_HEADINGS[groupService.key] ?? {
@@ -597,7 +663,7 @@ export function AgencyQuoteJourney({
 
   const renderOccurrence = (item: Occurrence, index: number, total: number) => {
     const role = isPrimaryStep && index === 0 ? "primary" : "additional";
-    const plan = occurrencePlan(groupService, item.values, role);
+    const plan = occurrencePlan(groupService, item.values, role, item.baseline);
     const occErrors = errors[item.id] ?? {};
 
     return (
@@ -865,8 +931,21 @@ export function AgencyQuoteJourney({
       : "É só um contato para o consultor retornar. Não é uma compra.";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Fechar a confirmação por X/overlay segue o mesmo caminho do botão.
+        if (!next && state === "success") {
+          handleSuccessClose();
+          return;
+        }
+        onOpenChange(next);
+      }}
+    >
       <DialogContent
+        // Com o teclado aberto a janela encolhe: o rodapé com o CTA fica
+        // sempre visível acima do teclado e o corpo continua rolável.
+        style={keyboardInset > 0 ? { maxHeight: `calc(100vh - ${keyboardInset}px)` } : undefined}
         className={`flex max-h-[92vh] w-[calc(100vw-1rem)] max-w-xl flex-col gap-0 overflow-hidden rounded-3xl border-0 bg-card p-0 shadow-2xl sm:w-[calc(100vw-3rem)] ${editorial ? portalThemeClass(hostname) : ""}`}
       >
         <div className="flex items-start gap-3 px-5 pb-3 pt-6 md:px-8">
@@ -886,7 +965,20 @@ export function AgencyQuoteJourney({
           </div>
         </div>
 
-        <div ref={bodyRef} className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-6 pt-2 md:px-8">
+        <div
+          ref={bodyRef}
+          data-testid="wlq-body"
+          // "Próximo"/Enter avança para o campo seguinte e o revela,
+          // em vez de fechar o teclado ou enviar o formulário.
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            const target = event.target as HTMLElement | null;
+            if (!target || target.tagName === "TEXTAREA") return;
+            if (target.tagName !== "INPUT") return;
+            if (focusNextField(bodyRef.current, target)) event.preventDefault();
+          }}
+          className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-6 pt-2 md:px-8"
+        >
           {state === "success" ? (
             <div className="mx-auto max-w-md py-6 text-center" role="status">
               <span className="wl-icon-badge mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-primary/10 text-primary">
@@ -898,7 +990,7 @@ export function AgencyQuoteJourney({
                 {totalServices === 1 ? "1 serviço" : `${totalServices} serviços`}. Um consultor da {agencyName} vai
                 retornar para alinhar todos os detalhes.
               </p>
-              <Button className="mt-6" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button className="mt-6" variant="outline" data-testid="wlq-success-close" onClick={handleSuccessClose}>
                 Fechar
               </Button>
             </div>

@@ -32,6 +32,13 @@ export interface Occurrence {
   id: string;
   values: ServiceValues;
   legs: RouteLeg[];
+  /**
+   * Retrato dos valores no nascimento da ocorrência. Define de forma ESTÁVEL
+   * quais campos obrigatórios ainda precisam ser perguntados, para que digitar
+   * não faça o campo desaparecer. Opcional por compatibilidade com rascunhos
+   * antigos em sessionStorage.
+   */
+  baseline?: ServiceValues;
 }
 
 export interface ServiceGroup {
@@ -62,8 +69,9 @@ export function occurrencePlan(
   service: RequestService,
   values: ServiceValues,
   role: OccurrenceRole,
+  baseline?: ServiceValues,
 ): OccurrencePlan {
-  const all = stepFields(service, { role, values }).filter((f) => fieldIsVisible(f, values));
+  const all = stepFields(service, { role, values, baseline }).filter((f) => fieldIsVisible(f, values));
   const multiRoute = service.key === "aereo" && isMultiRoute(service, values);
   const periodNames = periodFieldNames(service);
   const mode = !multiRoute && service.period ? periodMode(service, values) : null;
@@ -105,7 +113,7 @@ export function validateOccurrence(
   options: { role: OccurrenceRole; childAges: string[]; childCount: number },
 ): Record<string, string> {
   const { values, legs } = occurrence;
-  const plan = occurrencePlan(service, values, options.role);
+  const plan = occurrencePlan(service, values, options.role, occurrence.baseline);
   const found = validateServiceStep(service, values);
   const renderable = new Set(plan.fields.map((f) => f.name));
   const errors: Record<string, string> = {};
@@ -159,15 +167,17 @@ export function extraOccurrence(service: RequestService, context: TripContext): 
     const inherited = travelers[field.name];
     if (inherited !== undefined) values[field.name] = inherited;
   }
-  return { id: newOccurrenceId(service.key), values, legs: [] };
+  return { id: newOccurrenceId(service.key), values, legs: [], baseline: { ...values } };
 }
 
 
 /** Primeira ocorrência de um serviço adicional: herda todo o contexto da viagem. */
 export function inheritedOccurrence(service: RequestService, context: TripContext): Occurrence {
+  const values = applyContextToService(service, initialServiceValues(service), context);
   return {
     id: newOccurrenceId(service.key),
-    values: applyContextToService(service, initialServiceValues(service), context),
+    values,
     legs: [],
+    baseline: { ...values },
   };
 }
