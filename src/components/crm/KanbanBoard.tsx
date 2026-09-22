@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Plus, Search, Maximize2, Minimize2, Download } from "lucide-react";
@@ -57,6 +57,9 @@ import {
 import { cn } from "@/lib/utils";
 import { isClosedOpportunityStage } from "@/lib/crmCardShortcuts";
 import { fireCelebrationConfetti } from "@/lib/celebrationConfetti";
+import { supabase } from "@/integrations/supabase/client";
+import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import { useAdminNav } from "@/lib/agencyAdminNav";
 
 function SortableColumn({
   stage,
@@ -120,6 +123,9 @@ export function KanbanBoard() {
   const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const nav = useAdminNav();
+  const { enabled: unifiedV2 } = useUnifiedWorkflowV2();
 
   /* Comando de URL "?new=1" (atalhos do menu/painel): abre o formulário real de
      nova oportunidade, respeitando a permissão de criação. */
@@ -236,6 +242,32 @@ export function KanbanBoard() {
       stageChanged &&
       isClosedOpportunityStage(toStage) &&
       !isClosedOpportunityStage(fromStage);
+
+    // Fluxo unificado V2: oportunidade ligada a um processo de reserva não é
+    // simplesmente arrastada para "Fechada" — a venda é confirmada de forma
+    // transacional na Central de Reservas (o servidor também bloqueia).
+    if (celebrate && unifiedV2) {
+      const { data: linkedFile } = await (supabase as any)
+        .from("travel_files")
+        .select("id")
+        .eq("opportunity_id", opportunity.id)
+        .not("status", "in", "(cancelled,trip_completed)")
+        .limit(1)
+        .maybeSingle();
+      if (linkedFile?.id) {
+        toast.info(
+          "Esta oportunidade tem um processo na Central de Reservas. Confirme a venda por lá.",
+          {
+            action: {
+              label: "Abrir processo",
+              onClick: () => navigate(nav.reservas(linkedFile.id)),
+            },
+            duration: 8000,
+          },
+        );
+        return;
+      }
+    }
 
     await reorderOpportunities({
       movedId: draggedId,
