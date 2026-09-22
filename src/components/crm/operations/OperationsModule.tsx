@@ -4,6 +4,7 @@ import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 import { useOperations } from "@/hooks/useOperations";
 import { useOperationStages } from "@/hooks/useOperationStages";
 import { usePermissions } from "@/hooks/usePermissions";
