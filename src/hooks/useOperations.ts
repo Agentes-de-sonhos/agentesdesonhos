@@ -33,7 +33,7 @@ export function useOperations() {
   const { user } = useAuth();
   const qc = useQueryClient();
 
-  const { data: operations = [], isLoading } = useQuery({
+  const { data: operations = [], isLoading, isFetching } = useQuery({
     queryKey: ["operations", user?.id],
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 2,
@@ -198,6 +198,7 @@ export function useOperations() {
   return {
     operations,
     isLoading,
+    isFetching,
     createOperation: createOperation.mutateAsync,
     updateOperation: updateOperation.mutateAsync,
     moveStage: moveStage.mutateAsync,

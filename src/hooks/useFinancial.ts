@@ -32,7 +32,7 @@ export function useFinancial() {
   const financialEnabled = !!user && can('financial.access');
 
   // Fetch sales with products
-  const { data: sales = [], isLoading: salesLoading } = useQuery({
+  const { data: sales = [], isLoading: salesLoading, isFetching: salesFetching } = useQuery({
     queryKey: ["sales", user?.id],
     queryFn: async () => {
       if (!user) return [];
@@ -619,6 +619,7 @@ export function useFinancial() {
     incomeEntries,
     expenseEntries,
     summary,
+    isFetching: salesFetching,
     isLoading: salesLoading || productsLoading || customerPaymentsLoading || supplierPaymentsLoading || incomeLoading || expenseLoading,
     createSale: createSaleMutation.mutateAsync,
     updateSale: updateSaleMutation.mutateAsync,
