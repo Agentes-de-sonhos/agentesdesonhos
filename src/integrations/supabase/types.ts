@@ -2039,6 +2039,39 @@ export type Database = {
           },
         ]
       }
+      booking_request_issues: {
+        Row: {
+          agency_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          payload: Json | null
+          request_id: string | null
+          resolved_at: string | null
+          source: string
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          request_id?: string | null
+          resolved_at?: string | null
+          source?: string
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          request_id?: string | null
+          resolved_at?: string | null
+          source?: string
+        }
+        Relationships: []
+      }
       booking_services: {
         Row: {
           booking_id: string
@@ -9331,6 +9364,7 @@ export type Database = {
           service_data: Json
           service_type: string
           source_quote_service_id: string | null
+          source_travel_file_service_id: string | null
           start_date: string | null
           supplier: string | null
           updated_at: string
@@ -9354,6 +9388,7 @@ export type Database = {
           service_data?: Json
           service_type?: string
           source_quote_service_id?: string | null
+          source_travel_file_service_id?: string | null
           start_date?: string | null
           supplier?: string | null
           updated_at?: string
@@ -9377,6 +9412,7 @@ export type Database = {
           service_data?: Json
           service_type?: string
           source_quote_service_id?: string | null
+          source_travel_file_service_id?: string | null
           start_date?: string | null
           supplier?: string | null
           updated_at?: string
@@ -9388,6 +9424,13 @@ export type Database = {
             columns: ["operation_id"]
             isOneToOne: false
             referencedRelation: "operations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operation_services_source_tfs_fkey"
+            columns: ["source_travel_file_service_id"]
+            isOneToOne: false
+            referencedRelation: "travel_file_services"
             referencedColumns: ["id"]
           },
         ]
@@ -9518,9 +9561,12 @@ export type Database = {
           assigned_team_member_id: string | null
           assigned_user_id: string | null
           client_id: string
+          conversion_key: string | null
           created_at: string
           created_by_team_member_id: string | null
+          customer_payment_status: string
           destination: string | null
+          flow_origin: string | null
           id: string
           itinerary_id: string | null
           notes: string | null
@@ -9534,8 +9580,10 @@ export type Database = {
           sale_amount: number
           stage: string
           stage_entered_at: string
+          supplier_payment_status: string
           title: string
           travel_end_date: string | null
+          travel_file_id: string | null
           travel_start_date: string | null
           trip_id: string | null
           updated_at: string
@@ -9545,9 +9593,12 @@ export type Database = {
           assigned_team_member_id?: string | null
           assigned_user_id?: string | null
           client_id: string
+          conversion_key?: string | null
           created_at?: string
           created_by_team_member_id?: string | null
+          customer_payment_status?: string
           destination?: string | null
+          flow_origin?: string | null
           id?: string
           itinerary_id?: string | null
           notes?: string | null
@@ -9561,8 +9612,10 @@ export type Database = {
           sale_amount?: number
           stage?: string
           stage_entered_at?: string
+          supplier_payment_status?: string
           title?: string
           travel_end_date?: string | null
+          travel_file_id?: string | null
           travel_start_date?: string | null
           trip_id?: string | null
           updated_at?: string
@@ -9572,9 +9625,12 @@ export type Database = {
           assigned_team_member_id?: string | null
           assigned_user_id?: string | null
           client_id?: string
+          conversion_key?: string | null
           created_at?: string
           created_by_team_member_id?: string | null
+          customer_payment_status?: string
           destination?: string | null
+          flow_origin?: string | null
           id?: string
           itinerary_id?: string | null
           notes?: string | null
@@ -9588,8 +9644,10 @@ export type Database = {
           sale_amount?: number
           stage?: string
           stage_entered_at?: string
+          supplier_payment_status?: string
           title?: string
           travel_end_date?: string | null
+          travel_file_id?: string | null
           travel_start_date?: string | null
           trip_id?: string | null
           updated_at?: string
@@ -9608,6 +9666,13 @@ export type Database = {
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operations_travel_file_id_fkey"
+            columns: ["travel_file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
             referencedColumns: ["id"]
           },
         ]
@@ -12385,8 +12450,10 @@ export type Database = {
           sale_id: string
           sale_price: number
           source_kind: string | null
+          source_operation_service_id: string | null
           source_provenance: Json
           source_service_id: string | null
+          source_travel_file_service_id: string | null
           supplier_name: string | null
           updated_at: string
           user_id: string
@@ -12416,8 +12483,10 @@ export type Database = {
           sale_id: string
           sale_price?: number
           source_kind?: string | null
+          source_operation_service_id?: string | null
           source_provenance?: Json
           source_service_id?: string | null
+          source_travel_file_service_id?: string | null
           supplier_name?: string | null
           updated_at?: string
           user_id: string
@@ -12447,8 +12516,10 @@ export type Database = {
           sale_id?: string
           sale_price?: number
           source_kind?: string | null
+          source_operation_service_id?: string | null
           source_provenance?: Json
           source_service_id?: string | null
+          source_travel_file_service_id?: string | null
           supplier_name?: string | null
           updated_at?: string
           user_id?: string
@@ -12468,6 +12539,20 @@ export type Database = {
             referencedRelation: "sales"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sale_products_source_os_fkey"
+            columns: ["source_operation_service_id"]
+            isOneToOne: false
+            referencedRelation: "operation_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_products_source_tfs_fkey"
+            columns: ["source_travel_file_service_id"]
+            isOneToOne: false
+            referencedRelation: "travel_file_services"
+            referencedColumns: ["id"]
+          },
         ]
       }
       sales: {
@@ -12475,9 +12560,11 @@ export type Database = {
           client_id: string | null
           client_name: string
           commission: number | null
+          conversion_key: string | null
           created_at: string
           destination: string
           end_date: string | null
+          flow_origin: string | null
           id: string
           import_fingerprint: string | null
           import_provenance: Json
@@ -12494,6 +12581,7 @@ export type Database = {
           source_quote_id: string | null
           source_trip_id: string | null
           start_date: string | null
+          travel_file_id: string | null
           trip_status: string | null
           trip_type: string | null
           updated_at: string
@@ -12503,9 +12591,11 @@ export type Database = {
           client_id?: string | null
           client_name: string
           commission?: number | null
+          conversion_key?: string | null
           created_at?: string
           destination: string
           end_date?: string | null
+          flow_origin?: string | null
           id?: string
           import_fingerprint?: string | null
           import_provenance?: Json
@@ -12522,6 +12612,7 @@ export type Database = {
           source_quote_id?: string | null
           source_trip_id?: string | null
           start_date?: string | null
+          travel_file_id?: string | null
           trip_status?: string | null
           trip_type?: string | null
           updated_at?: string
@@ -12531,9 +12622,11 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           commission?: number | null
+          conversion_key?: string | null
           created_at?: string
           destination?: string
           end_date?: string | null
+          flow_origin?: string | null
           id?: string
           import_fingerprint?: string | null
           import_provenance?: Json
@@ -12550,6 +12643,7 @@ export type Database = {
           source_quote_id?: string | null
           source_trip_id?: string | null
           start_date?: string | null
+          travel_file_id?: string | null
           trip_status?: string | null
           trip_type?: string | null
           updated_at?: string
@@ -12575,6 +12669,13 @@ export type Database = {
             columns: ["seller_id"]
             isOneToOne: false
             referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_travel_file_id_fkey"
+            columns: ["travel_file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
             referencedColumns: ["id"]
           },
         ]
@@ -14634,6 +14735,9 @@ export type Database = {
           agency_id: string
           city: string | null
           commission_amount: number | null
+          commission_fixed: number | null
+          commission_percent: number | null
+          commission_type: string | null
           cost_amount: number | null
           country: string | null
           created_at: string
@@ -14641,15 +14745,23 @@ export type Database = {
           destination: string | null
           end_date: string | null
           file_id: string
+          financial_rule_snapshot: Json | null
+          financial_rule_snapshot_at: string | null
+          financial_rule_status: string
           id: string
           is_required: boolean
+          non_commissionable_fees: number | null
+          operator_id: string | null
           passengers_count: number | null
           passengers_snapshot: Json
+          payment_days: number | null
+          payment_rule: string | null
           product_name: string
           quantity: number
           reconfirmed_amount: number | null
           request_item_id: string | null
           requested_amount: number
+          requires_invoice: boolean | null
           responsible_team_member_id: string | null
           service_type: string
           snapshot: Json
@@ -14665,6 +14777,9 @@ export type Database = {
           agency_id: string
           city?: string | null
           commission_amount?: number | null
+          commission_fixed?: number | null
+          commission_percent?: number | null
+          commission_type?: string | null
           cost_amount?: number | null
           country?: string | null
           created_at?: string
@@ -14672,15 +14787,23 @@ export type Database = {
           destination?: string | null
           end_date?: string | null
           file_id: string
+          financial_rule_snapshot?: Json | null
+          financial_rule_snapshot_at?: string | null
+          financial_rule_status?: string
           id?: string
           is_required?: boolean
+          non_commissionable_fees?: number | null
+          operator_id?: string | null
           passengers_count?: number | null
           passengers_snapshot?: Json
+          payment_days?: number | null
+          payment_rule?: string | null
           product_name: string
           quantity?: number
           reconfirmed_amount?: number | null
           request_item_id?: string | null
           requested_amount?: number
+          requires_invoice?: boolean | null
           responsible_team_member_id?: string | null
           service_type: string
           snapshot?: Json
@@ -14696,6 +14819,9 @@ export type Database = {
           agency_id?: string
           city?: string | null
           commission_amount?: number | null
+          commission_fixed?: number | null
+          commission_percent?: number | null
+          commission_type?: string | null
           cost_amount?: number | null
           country?: string | null
           created_at?: string
@@ -14703,15 +14829,23 @@ export type Database = {
           destination?: string | null
           end_date?: string | null
           file_id?: string
+          financial_rule_snapshot?: Json | null
+          financial_rule_snapshot_at?: string | null
+          financial_rule_status?: string
           id?: string
           is_required?: boolean
+          non_commissionable_fees?: number | null
+          operator_id?: string | null
           passengers_count?: number | null
           passengers_snapshot?: Json
+          payment_days?: number | null
+          payment_rule?: string | null
           product_name?: string
           quantity?: number
           reconfirmed_amount?: number | null
           request_item_id?: string | null
           requested_amount?: number
+          requires_invoice?: boolean | null
           responsible_team_member_id?: string | null
           service_type?: string
           snapshot?: Json
@@ -14729,6 +14863,13 @@ export type Database = {
             columns: ["file_id"]
             isOneToOne: false
             referencedRelation: "travel_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "travel_file_services_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
             referencedColumns: ["id"]
           },
         ]
@@ -14815,6 +14956,7 @@ export type Database = {
           status: string
           trip_name: string | null
           updated_at: string
+          workflow_version: number
         }
         Insert: {
           adults_count?: number
@@ -14865,6 +15007,7 @@ export type Database = {
           status?: string
           trip_name?: string | null
           updated_at?: string
+          workflow_version?: number
         }
         Update: {
           adults_count?: number
@@ -14915,6 +15058,7 @@ export type Database = {
           status?: string
           trip_name?: string | null
           updated_at?: string
+          workflow_version?: number
         }
         Relationships: []
       }
@@ -15771,6 +15915,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      workflow_commands: {
+        Row: {
+          agency_id: string
+          command: string
+          created_at: string
+          file_id: string
+          id: string
+          idempotency_key: string
+          payload_hash: string
+          result: Json | null
+          status: string
+        }
+        Insert: {
+          agency_id: string
+          command: string
+          created_at?: string
+          file_id: string
+          id?: string
+          idempotency_key: string
+          payload_hash: string
+          result?: Json | null
+          status?: string
+        }
+        Update: {
+          agency_id?: string
+          command?: string
+          created_at?: string
+          file_id?: string
+          id?: string
+          idempotency_key?: string
+          payload_hash?: string
+          result?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_commands_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "travel_files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
