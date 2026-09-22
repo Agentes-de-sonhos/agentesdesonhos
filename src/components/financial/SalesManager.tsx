@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
 import { useRecordDeepLink } from "@/hooks/useRecordDeepLink";
-import { mergeDirectRecord, shouldDropDirectRecord } from "@/lib/deepLinkRecords";
+import { mergeDirectRecord, shouldDropDirectRecord, directRecordAfterUpdate, directRecordAfterDelete } from "@/lib/deepLinkRecords";
 import { useSellers } from "@/hooks/useSellers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
