@@ -252,12 +252,22 @@ export function KanbanBoard() {
     // Fluxo unificado V2: oportunidade ligada a um processo de reserva não é
     // simplesmente arrastada para "Fechada" — a venda é confirmada de forma
     // transacional na Central de Reservas (o servidor também bloqueia).
+    if (celebrate) {
+      // Carregando ou com falha na verificação: nunca assumir "desligado".
+      if (!unifiedV2Resolved || unifiedV2Loading || unifiedV2Fetching || unifiedV2Error) {
+        toast.error(
+          "Ainda estamos verificando como esta venda deve ser fechada. Aguarde um instante e tente novamente.",
+        );
+        return;
+      }
+    }
+
     if (celebrate && unifiedV2) {
       const { data: linkedFile, error: linkedError } = await (supabase as any)
         .from("travel_files")
         .select("id")
         .eq("opportunity_id", opportunity.id)
-        .not("status", "in", "(cancelled,trip_completed)")
+        .neq("status", "cancelled")
         .limit(1)
         .maybeSingle();
       if (linkedError) {
@@ -305,8 +315,16 @@ export function KanbanBoard() {
             duration: 8000,
           },
         );
+      } else if (message.includes("WORKFLOW_LINK_CONFLICT")) {
+        toast.error(
+          "Esta oportunidade está ligada a outro processo de reserva. Revise os vínculos na Central antes de fechar.",
+          {
+            action: { label: "Abrir Central", onClick: () => navigate(nav.reservas()) },
+            duration: 8000,
+          },
+        );
       } else if (error?.name !== "PermissionDeniedError") {
-        toast.error("Não foi possível mover este cartão. Nada foi alterado.");
+        toast.error("Não foi possível mover este cartão. A lista foi recarregada com o que está no servidor.");
       }
       return;
     }
