@@ -123,6 +123,7 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
                   label: "Tentar novamente",
                   onClick: () => {
                     const st = stateRef.current;
+                    if (!mountedRef.current || latestParamRef.current !== myParam) return;
                     if (st.param !== myParam || st.attempt !== myAttempt || st.phase !== "failed") return;
                     st.phase = "idle";
                     setRetryTick((n) => n + 1);
