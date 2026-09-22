@@ -250,10 +250,10 @@ export default function ProcessoReserva() {
       );
       return;
     }
+    // Intenção de concluir a venda no fluxo unificado: abre a MESMA confirmação
+    // oficial (avanço sequencial e troca de etapa não gravam nada direto).
     if (["sale_confirmed", "in_operation"].includes(status) && unifiedV2) {
-      toast.info(
-        'A venda é confirmada no botão "Confirmar venda e iniciar operação", para criar operação e financeiro sem duplicar nada.',
-      );
+      setConfirmSaleOpen(true);
       return;
     }
     if (status === "cancelled" && !(reason || "").trim()) {
@@ -265,9 +265,11 @@ export default function ProcessoReserva() {
       await setStatus.mutateAsync({ status, reason: reason ?? null });
       toast.success(`Processo atualizado: ${FILE_STATUS_LABELS[status]}`);
     } catch (error: any) {
-      toast.error(error?.message || "Não foi possível salvar a alteração.");
+      console.error("travel_file status:", extractWorkflowCode(error));
+      toast.error(humanizeWorkflowError(error));
     }
   };
+
 
   const updateResponsibles = async (
     commercial: string | null,
