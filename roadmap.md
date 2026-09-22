@@ -21,4 +21,4 @@
 - [x] Refinar UX/UI mobile da página inicial e dos quatro fluxos rápidos, preservando toda a lógica e sem publicar.
 - [x] Seletor editável de ícones na etapa "Incluso" do orçamento (editor, web público e PDF), sem migration e sem publicar.
 - [x] Remover o bloco de acesso por código da Área do Cliente compartilhada em SiteLab Base e todos os sites, sem publicar.
-- [ ] Fase 1A — fluxo unificado de conversão file → operação + venda atrás do entitlement unified_workflow_v2 (OFF por padrão), sem publicar/deployar.
+- [x] Fase 1A — fluxo unificado de conversão file → operação + venda atrás do entitlement unified_workflow_v2 (OFF por padrão, nenhuma agência ativada), sem publicar/deployar. Pontos pendentes para fase futura: vínculo de carteira/roteiro e diagnóstico de duplicidades legadas.
