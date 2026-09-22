@@ -72,6 +72,7 @@ import {
   assessTravelFileReadiness,
   describeServiceCommission,
   isConvertedV2,
+  isActiveTravelFileStatus,
 } from "@/lib/travelFileConversion";
 import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
 import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
