@@ -85,6 +85,28 @@ export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; view
     }
   }, [actionParam, setSearchParams]);
 
+  // Link direto "?sale=<id>" (vindo da confirmação de venda no processo de
+  // reserva): abre a venda exata, avisando quando ela não está acessível.
+  const saleParam = searchParams.get("sale");
+  useEffect(() => {
+    if (!saleParam) return;
+    if (allSales.length === 0) return;
+    const target = allSales.find((s) => s.id === saleParam);
+    setSearchParams({ tab: "vendas" }, { replace: true });
+    if (!target) {
+      toast.error("Não encontramos esta venda na sua lista. Ela pode ter sido removida ou pertencer a outra conta.");
+      return;
+    }
+    setExpandedSales((prev) => new Set(prev).add(target.id));
+    if (target.sale_date) {
+      const d = parseLocalDate(target.sale_date);
+      if (d) onMonthChange?.(d.getMonth() + 1, d.getFullYear());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saleParam, allSales]);
+
+
+
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
