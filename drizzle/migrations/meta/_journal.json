@@ -134,6 +134,13 @@
       "when": 1790045415187,
       "tag": "0018_unified_workflow_v2_opportunity_lock",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1790046102069,
+      "tag": "0019_unified_workflow_v2_funnel_guard",
+      "breakpoints": true
     }
   ]
 }
