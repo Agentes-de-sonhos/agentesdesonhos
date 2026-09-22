@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const sb = supabase as any;
 
-/** Resultado da RPC confirm_travel_file_sale. */
+/** Resultado de sucesso da RPC confirm_travel_file_sale. */
 export interface ConfirmSaleResult {
   file_id: string;
   opportunity_id: string | null;
@@ -17,6 +17,40 @@ export interface ConfirmSaleResult {
   total: number;
   currency: string;
 }
+
+/**
+ * Falha estruturada: a RPC devolve JSON (em vez de exceção) quando precisa
+ * PERSISTIR a ocorrência antes de desistir — ex.: LEGACY_AMBIGUOUS_LINK.
+ */
+export interface ConfirmSaleFailure {
+  error: string;
+  message?: string | null;
+  entity?: string | null;
+  file_id?: string | null;
+  opportunity_id?: string | null;
+}
+
+export type ConfirmSaleResponse = ConfirmSaleResult | ConfirmSaleFailure;
+
+export function isConfirmSaleFailure(
+  data: ConfirmSaleResponse | null | undefined,
+): data is ConfirmSaleFailure {
+  return !!data && typeof (data as ConfirmSaleFailure).error === "string";
+}
+
+/** Erro de domínio lançado pelo hook quando a RPC devolve falha estruturada. */
+export class ConfirmSaleDomainError extends Error {
+  code: string;
+  constructor(failure: ConfirmSaleFailure) {
+    super(
+      failure.message ||
+        "Não foi possível confirmar a venda. Revise os vínculos deste processo.",
+    );
+    this.name = "ConfirmSaleDomainError";
+    this.code = failure.error;
+  }
+}
+
 
 /**
  * Feature flag do fluxo unificado (Fase 1A): entitlement de agência
