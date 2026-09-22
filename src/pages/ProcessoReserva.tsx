@@ -207,6 +207,15 @@ export default function ProcessoReserva() {
     return groupServiceFinancialsByCurrency(services, file?.currency);
   }, [services, file?.origin, file?.currency]);
   const suggested = useMemo(() => suggestFileStatusFromServices(services), [services]);
+  // Prontidão do fluxo unificado: espelha a RPC apenas para orientar a tela.
+  const readiness = useMemo(
+    () =>
+      file && unifiedV2
+        ? assessTravelFileReadiness(file, services, supplierExceptions)
+        : null,
+    [file, services, supplierExceptions, unifiedV2],
+  );
+
 
 
   const updateFileStatus = async (status: TravelFileStatus, reason?: string) => {
@@ -392,11 +401,18 @@ export default function ProcessoReserva() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(FILE_STATUS_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
+                  {Object.entries(FILE_STATUS_LABELS)
+                    // Fluxo unificado: venda só é confirmada pelo botão transacional,
+                    // nunca pela troca manual de etapa.
+                    .filter(
+                      ([value]) =>
+                        !unifiedV2 || !["sale_confirmed", "in_operation"].includes(value),
+                    )
+                    .map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
