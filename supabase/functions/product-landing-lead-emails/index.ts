@@ -4,6 +4,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { renderLeadEmail } from "./template.ts";
 import { drainConversationalQueue } from "./conversational.ts";
+import { drainAgencyRequestQueue } from "./agencyRequests.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -109,7 +110,10 @@ Deno.serve(async (req) => {
   // Same cron pass also drains the conversational lead-form queue.
   const conversational = await drainConversationalQueue(supabase, resendKey, FROM, limit);
 
-  return new Response(JSON.stringify({ claimed: rows.length, sent, failed, conversational }), {
+  // ... e também a fila das solicitações do site white label.
+  const agencyRequests = await drainAgencyRequestQueue(supabase, resendKey, FROM, limit);
+
+  return new Response(JSON.stringify({ claimed: rows.length, sent, failed, conversational, agencyRequests }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });

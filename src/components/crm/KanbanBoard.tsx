@@ -146,6 +146,27 @@ export function KanbanBoard() {
     setIsDialogOpen(true);
   }, [searchParams, setSearchParams]);
 
+  /* Deep link "?opportunity=<id>" (aviso de nova solicitação e e-mail da
+     agência): abre a oportunidade quando ela pertence à carteira carregada —
+     a autorização continua sendo a da própria lista, protegida por RLS. */
+  const deepLinkDoneRef = useRef<string | null>(null);
+  useEffect(() => {
+    const wanted = searchParams.get("opportunity");
+    if (!wanted || deepLinkDoneRef.current === wanted) return;
+    if (isLoading) return;
+    const found = opportunities.find((o) => o.id === wanted);
+    deepLinkDoneRef.current = wanted;
+    const next = new URLSearchParams(searchParams);
+    next.delete("opportunity");
+    setSearchParams(next, { replace: true });
+    if (!found) {
+      toast.error("Oportunidade não encontrada ou sem permissão de acesso.");
+      return;
+    }
+    setEditingOpportunity(found);
+  }, [searchParams, setSearchParams, opportunities, isLoading]);
+
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })

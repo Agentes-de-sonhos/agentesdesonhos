@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Eye, X, Phone, MapPin, Clock, PartyPopper } from "lucide-react";
 import { useLeadRealtime, useMarkLeadAttended, type LeadItem } from "@/hooks/useLeadAlerts";
+import { NewSiteRequestAlert } from "@/components/leads/NewSiteRequestAlert";
 
 function sourceBadge(source: LeadItem["source"]) {
   if (source === "conversational") {
@@ -77,6 +78,8 @@ export function NewLeadAlertProvider({ children }: { children: React.ReactNode }
   return (
     <>
       {children}
+      {/* Aviso das solicitações recebidas pelo site da agência (tempo real). */}
+      <NewSiteRequestAlert />
       <Dialog open={!!current} onOpenChange={(open) => !open && close()}>
         <DialogContent className="sm:max-w-md">
           {current && (

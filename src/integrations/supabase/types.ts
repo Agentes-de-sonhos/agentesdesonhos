@@ -830,6 +830,59 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_request_notifications: {
+        Row: {
+          agency_user_id: string
+          attempts: number
+          channel: string
+          claimed_at: string | null
+          created_at: string
+          id: string
+          last_error: string | null
+          provider_message_id: string | null
+          recipient: string | null
+          request_id: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          agency_user_id: string
+          attempts?: number
+          channel: string
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          provider_message_id?: string | null
+          recipient?: string | null
+          request_id: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          agency_user_id?: string
+          attempts?: number
+          channel?: string
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          provider_message_id?: string | null
+          recipient?: string | null
+          request_id?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_request_notifications_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "agency_site_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_showcases: {
         Row: {
           auto_categories: string[] | null
@@ -16359,6 +16412,27 @@ export type Database = {
       check_ai_usage: { Args: { _user_id: string }; Returns: boolean }
       check_public_slug_available: { Args: { p_slug: string }; Returns: Json }
       check_trip_shared: { Args: { p_trip_id: string }; Returns: boolean }
+      claim_agency_request_notifications: {
+        Args: { p_limit?: number }
+        Returns: {
+          agency_name: string
+          channel: string
+          created_at: string
+          destination: string
+          details: Json
+          lead_email: string
+          lead_name: string
+          lead_phone: string
+          notes: string
+          notification_id: string
+          opportunity_id: string
+          protocol: string
+          recipient: string
+          request_id: string
+          service_label: string
+          summary: string
+        }[]
+      }
       claim_lead_form_deliveries: {
         Args: { p_limit?: number }
         Returns: {
@@ -16421,6 +16495,15 @@ export type Database = {
       clone_itinerary_for_trip: {
         Args: { p_source_itinerary_id: string; p_trip_id: string }
         Returns: string
+      }
+      complete_agency_request_notification: {
+        Args: {
+          p_error?: string
+          p_notification_id: string
+          p_provider_message_id?: string
+          p_status: string
+        }
+        Returns: undefined
       }
       complete_booking_request_delivery: {
         Args: {
@@ -17425,6 +17508,7 @@ export type Database = {
         Args: { _keys: string[] }
         Returns: string[]
       }
+      to_e164_br: { Args: { _phone: string }; Returns: string }
       track_lead_form_view: {
         Args: { p_session_hash: string; p_token: string }
         Returns: undefined

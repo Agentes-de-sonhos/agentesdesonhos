@@ -65,20 +65,26 @@ function withStepRequired(serviceKey: string, field: RequestField): RequestField
  * Em ambos os casos entram, antes dos essenciais, os campos obrigatórios que
  * realmente chegaram vazios (ex.: CTA externo sem primeira dobra, ou a atração
  * de um serviço de ingressos incluído depois).
+ *
+ * IMPORTANTE: quais campos obrigatórios "chegaram vazios" é decidido pelo
+ * `baseline` — o retrato dos valores no momento em que a ocorrência nasceu.
+ * Se usássemos os valores atuais, o campo sairia da lista na primeira letra
+ * digitada e desapareceria da tela (era o bug do "Nome do ingresso").
  */
 export function stepFields(
   service: RequestService,
-  options: { role: "primary" | "additional"; values: ServiceValues },
+  options: { role: "primary" | "additional"; values: ServiceValues; baseline?: ServiceValues },
 ): RequestField[] {
   const { role, values } = options;
+  const baseline = options.baseline ?? values;
   const byName = new Map(service.fields.map((field) => [field.name, field]));
   const out: RequestField[] = [];
   const seen = new Set<string>();
 
   const missing = formFields(
     service,
-    role === "primary" ? { isPrimary: true, values } : { isComplement: true, values },
-  ).filter((field) => field.required && !isTravelerField(field.name) && !fieldHasValue(field, values));
+    role === "primary" ? { isPrimary: true, values: baseline } : { isComplement: true, values: baseline },
+  ).filter((field) => field.required && !isTravelerField(field.name) && !fieldHasValue(field, baseline));
 
   for (const field of missing) {
     if (seen.has(field.name)) continue;
