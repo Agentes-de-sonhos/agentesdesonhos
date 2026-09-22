@@ -127,6 +127,13 @@
       "when": 1790044471487,
       "tag": "0017_unified_workflow_v2_corrections",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790045415187,
+      "tag": "0018_unified_workflow_v2_opportunity_lock",
+      "breakpoints": true
     }
   ]
 }
