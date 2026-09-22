@@ -59,7 +59,10 @@ import { isClosedOpportunityStage } from "@/lib/crmCardShortcuts";
 import { fireCelebrationConfetti } from "@/lib/celebrationConfetti";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnifiedWorkflowV2 } from "@/hooks/useUnifiedWorkflow";
+import { ConfirmSaleLauncher } from "@/components/reservas/ConfirmSaleLauncher";
+import { extractWorkflowCode, humanizeWorkflowError, resolveActiveTravelFiles } from "@/lib/confirmSaleMessages";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+
 
 function SortableColumn({
   stage,
@@ -121,6 +124,12 @@ export function KanbanBoard() {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
+  /** Confirmação oficial de venda aberta pelo funil (fluxo unificado V2). */
+  const [confirmSaleTarget, setConfirmSaleTarget] = useState<{
+    fileId: string;
+    opportunityId: string;
+  } | null>(null);
+
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -218,7 +227,26 @@ export function KanbanBoard() {
     e.dataTransfer.dropEffect = "move";
   };
 
+  /**
+   * Localiza o processo de reserva ativo da oportunidade e abre a confirmação
+   * oficial. Devolve false quando não há processo único (o chamador explica).
+   */
+  const openConfirmSaleForOpportunity = async (opportunityId: string) => {
+    const { data, error } = await (supabase as any)
+      .from("travel_files")
+      .select("id")
+      .eq("opportunity_id", opportunityId)
+      .not("status", "in", "(cancelled,trip_completed)")
+      .limit(2);
+    if (error) return false;
+    const resolution = resolveActiveTravelFiles((data ?? []) as Array<{ id: string }>);
+    if (resolution.kind !== "single") return false;
+    setConfirmSaleTarget({ fileId: resolution.fileId!, opportunityId });
+    return true;
+  };
+
   const performMove = async (
+
     movedId: string,
     toStage: PipelineStage,
     targetCardId: string | null,
