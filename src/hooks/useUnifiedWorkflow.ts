@@ -104,7 +104,13 @@ export function useConfirmTravelFileSale(fileId?: string) {
         p_expected_updated_at: input.expectedUpdatedAt ?? null,
       });
       if (error) throw error;
-      return data as ConfirmSaleResult;
+      const response = data as ConfirmSaleResponse;
+      // Falha estruturada nunca pode chegar à interface como sucesso.
+      if (isConfirmSaleFailure(response)) {
+        throw new ConfirmSaleDomainError(response);
+      }
+      return response;
+
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["travel-file"] });
