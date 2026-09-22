@@ -47,3 +47,31 @@ export function shouldDropDirectRecord<T extends { id: string }>(
   if (changedIds.some((id) => id === direct.id)) return true;
   return list.some((r) => r.id === direct.id);
 }
+
+/**
+ * Ciclo de vida do registro direto depois de uma EDIÇÃO concluída com sucesso:
+ * mantém o registro visível com os dados atualizados retornados pelo servidor,
+ * até o cache da lista virar autoridade. Outro registro não é afetado.
+ */
+export function directRecordAfterUpdate<T extends { id: string }>(
+  direct: T | null | undefined,
+  updatedId: string,
+  updated: Partial<T> | null | undefined,
+): T | null {
+  if (!direct) return null;
+  if (direct.id !== updatedId) return direct;
+  if (!updated) return direct;
+  return { ...direct, ...updated } as T;
+}
+
+/**
+ * Ciclo de vida depois de uma EXCLUSÃO concluída com sucesso: o registro direto
+ * excluído sai de cena; qualquer outro permanece.
+ */
+export function directRecordAfterDelete<T extends { id: string }>(
+  direct: T | null | undefined,
+  deletedId: string,
+): T | null {
+  if (!direct) return null;
+  return direct.id === deletedId ? null : direct;
+}

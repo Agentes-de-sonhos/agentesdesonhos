@@ -47,6 +47,21 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
   const cbRef = useRef({ fetchById, onOpen, onClear, messages });
   cbRef.current = { fetchById, onOpen, onClear, messages };
 
+  /* Guarda SÍNCRONA do parâmetro mais recente: atualizada já no render, então
+     uma resposta que chega entre o render do novo parâmetro e o efeito seguinte
+     também é descartada. */
+  const latestParamRef = useRef<string | null>(param);
+  latestParamRef.current = param;
+
+  // Desmontagem: nenhum efeito colateral depois que a tela sai.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     // Troca/limpeza do parâmetro reinicia a máquina de estado.
     if (stateRef.current.param !== param) {
@@ -90,6 +105,9 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
     void (async () => {
       const { data, error } = await doFetch(myParam);
       const current = stateRef.current;
+      /* Antes de qualquer efeito (aviso, abrir, limpar ou mudar a máquina):
+         a tela precisa estar montada e o parâmetro precisa ser o mais recente. */
+      if (!mountedRef.current || latestParamRef.current !== myParam) return;
       // Resposta obsoleta (parâmetro trocado, nova tentativa, ou já resolvido).
       if (current.param !== myParam || current.attempt !== myAttempt || current.phase !== "fetching") {
         return;
@@ -105,6 +123,7 @@ export function useRecordDeepLink<T extends { id: string }>(opts: {
                   label: "Tentar novamente",
                   onClick: () => {
                     const st = stateRef.current;
+                    if (!mountedRef.current || latestParamRef.current !== myParam) return;
                     if (st.param !== myParam || st.attempt !== myAttempt || st.phase !== "failed") return;
                     st.phase = "idle";
                     setRetryTick((n) => n + 1);

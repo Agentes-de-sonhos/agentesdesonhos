@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useFinancial, useClosedOpportunities } from "@/hooks/useFinancial";
 import { useRecordDeepLink } from "@/hooks/useRecordDeepLink";
-import { mergeDirectRecord, shouldDropDirectRecord } from "@/lib/deepLinkRecords";
+import { mergeDirectRecord, shouldDropDirectRecord, directRecordAfterUpdate, directRecordAfterDelete } from "@/lib/deepLinkRecords";
 import { useSellers } from "@/hooks/useSellers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -198,8 +198,10 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
     sellerCommission: number,
   ) => {
     if (editingSaleId) {
-      if (directSale?.id === editingSaleId) setDirectSale(null);
-      await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
+      /* A cópia aberta por link direto só é trocada DEPOIS do sucesso: se a
+         gravação falhar, a venda continua visível como estava. */
+      const updated = await updateSale({ id: editingSaleId, ...formData, seller_id: sellerId || null, seller_commission_percent: sellerId ? sellerCommission : null } as any);
+      setDirectSale((prev) => directRecordAfterUpdate(prev, editingSaleId, updated as Partial<Sale> | null));
       if (sellerId) {
         await syncSellerExpense(editingSaleId, formData, sellerId, sellerCommission);
       } else {
@@ -265,9 +267,9 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
 
   const handleDelete = async () => {
     if (!deleteId) return;
-    // Exclusão/edição invalidam a cópia aberta por link direto.
-    if (directSale?.id === deleteId) setDirectSale(null);
+    // A cópia direta só sai de cena depois da exclusão concluir com sucesso.
     await deleteSale(deleteId);
+    setDirectSale((prev) => directRecordAfterDelete(prev, deleteId));
     setDeleteId(null);
   };
   const handleDeleteProduct = async () => { if (deleteProductId) { await deleteSaleProduct(deleteProductId); setDeleteProductId(null); } };
