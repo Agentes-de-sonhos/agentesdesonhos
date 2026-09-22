@@ -51,3 +51,26 @@ status `skipped` com motivo registrado.
 
 A fila tem `UNIQUE (request_id, channel)`: reprocessar, repetir o envio do
 formulário ou repetir a passada do worker não gera segundo aviso.
+
+## Solicitações de serviços do orçamento público (Rodada 2)
+
+Mesmo estado: **preparado e inerte**. O pedido de reserva cria uma linha no
+canal `whatsapp` (destinatário `agency`) com status `skipped` quando não há
+telefone válido, e o envio permanece bloqueado sem template aprovado.
+
+- Nome sugerido: `nova_solicitacao_orcamento_ads`
+- Categoria: **Utility** · Idioma: `pt_BR`
+- Corpo:
+
+  ```text
+  Olá, {{1}}. O cliente {{2}} confirmou a solicitação de serviços do orçamento {{3}}. Acesse o sistema para reconfirmar valores e disponibilidade: {{4}}
+  ```
+
+- Variáveis: `{{1}}` agente/agência · `{{2}}` cliente · `{{3}}` protocolo do
+  pedido · `{{4}}` deep link da ficha
+  (`https://app.agentesdesonhos.com.br/reservas/<travel_file_id>`).
+- Destinatário: telefone do perfil da agência normalizado em E.164 pela função
+  `public.to_e164_br` (devolvido por `pending_booking_request_deliveries_v2`).
+- Configuração ainda necessária: `WHATSAPP_REQUEST_TEMPLATE_SID` (Content SID
+  `HX...` do template aprovado), `WHATSAPP_FROM` (número remetente aprovado) e a
+  conexão Twilio do workspace. Sem esses valores nada é enviado e nada falha.

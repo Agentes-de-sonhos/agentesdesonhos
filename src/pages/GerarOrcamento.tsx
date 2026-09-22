@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
-import { buildOrcamentoLink, ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
-import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
+import { resolveQuotePublicUrl } from "@/lib/publicAgencyUrls";
+import { useAgencyPublicSite } from "@/hooks/useAgencyPublicSite";
 import { QuoteShareBar } from "@/components/quote/QuoteShareBar";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
@@ -442,7 +442,7 @@ export default function GerarOrcamento() {
     persisted?.editingService || null
   );
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
-  const { customDomain } = useAgencyCustomDomain();
+  const { agencySlug, customDomain } = useAgencyPublicSite();
   const [showAIImport, setShowAIImport] = useState(false);
   const [showFullPackage, setShowFullPackage] = useState(false);
   const [showExportWallet, setShowExportWallet] = useState(false);
@@ -938,14 +938,24 @@ export default function GerarOrcamento() {
 
     const token = quote.share_token || await publishQuote(quote.id);
 
-    // Always use the seuorcamento.tur.br domain. Prefer the new format
-    // (agency-slug + access-code) when available; otherwise fall back to the
-    // legacy /orcamento/:token route on the same domain.
-    const accessCode = (quote as any).public_access_code;
-    const agencyName = agentProfile?.agency_name;
-    const publicUrl = accessCode && agencyName
-      ? buildOrcamentoLink(agencyName, accessCode, customDomain)
-      : `${ORCAMENTO_DOMAIN}/orcamento/${token}`;
+    // Camada única de URLs públicas: slug canônico do site da agência (ou
+    // domínio próprio) + código público do orçamento. Sem endereço válido,
+    // nenhum link falso é gerado.
+    const resolved = resolveQuotePublicUrl({
+      agencySlug,
+      accessCode: (quote as any).public_access_code,
+      shareToken: token,
+      customDomain,
+    });
+    if (!resolved.ok) {
+      toast({
+        title: "Link público indisponível",
+        description: resolved.error,
+        variant: "destructive",
+      });
+      return;
+    }
+    const publicUrl = resolved.url;
 
     clearLocalDraft();
     await navigator.clipboard.writeText(publicUrl);
@@ -1324,11 +1334,14 @@ export default function GerarOrcamento() {
           </div>
           {quote.share_token && (
             (() => {
-              const accessCode = (quote as any).public_access_code;
-              const agencyName = agentProfile?.agency_name;
-              const publicUrl = accessCode && agencyName
-                ? buildOrcamentoLink(agencyName, accessCode, customDomain)
-                : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
+              const resolvedShare = resolveQuotePublicUrl({
+                agencySlug,
+                accessCode: (quote as any).public_access_code,
+                shareToken: quote.share_token,
+                customDomain,
+              });
+              if (!resolvedShare.ok) return null;
+              const publicUrl = resolvedShare.url;
               const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (
                 <QuoteShareBar

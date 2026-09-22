@@ -16357,6 +16357,14 @@ export type Database = {
         Args: { _a: string; _b: string }
         Returns: boolean
       }
+      booking_request_file_link: {
+        Args: { p_request_id: string }
+        Returns: {
+          opportunity_id: string
+          travel_file_id: string
+          travel_file_number: string
+        }[]
+      }
       booking_request_file_number: {
         Args: { p_request_id: string }
         Returns: string
@@ -17163,6 +17171,34 @@ export type Database = {
           service_names: string
           status: string
           total_estimated: number
+          trip_title: string
+          version: number
+        }[]
+      }
+      pending_booking_request_deliveries_v2: {
+        Args: { p_request_id: string }
+        Returns: {
+          agency_name: string
+          agency_user_id: string
+          agency_whatsapp: string
+          channel: string
+          client_email: string
+          client_name: string
+          client_notes: string
+          client_whatsapp: string
+          currency: string
+          delivery_id: string
+          destination: string
+          opportunity_id: string
+          protocol: string
+          quote_id: string
+          recipient_email: string
+          recipient_kind: string
+          service_names: string
+          status: string
+          total_estimated: number
+          travel_file_id: string
+          travel_file_number: string
           trip_title: string
           version: number
         }[]
