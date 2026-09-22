@@ -31,11 +31,11 @@ describe("URLs públicas da agência", () => {
     expect(
       buildPublicToolUrl({
         kind: "orcamento",
-        agencySlug: "sitelab-base",
+        agencySlug: "casa-nova-tur",
         accessCode: "C1",
         customDomain: "sitelab.local",
       }),
-    ).toBe("https://vitrine.tur.br/sitelab-base/orcamento/C1");
+    ).toBe("https://vitrine.tur.br/casa-nova-tur/orcamento/C1");
   });
 
   it("não gera link quando falta slug e código público", () => {
