@@ -192,11 +192,38 @@ export function ConfirmSaleDialog({
               </p>
             </div>
 
+            {readiness.blockers.length > 0 && (
+              <div className="space-y-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3">
+                <p className="text-sm font-medium text-foreground">
+                  Falta isto para confirmar a venda:
+                </p>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-foreground">
+                  {readiness.blockers.map((blocker) => (
+                    <li key={blocker}>{blocker}</li>
+                  ))}
+                </ul>
+                {processHref && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="min-h-11 gap-2"
+                    onClick={() => {
+                      onOpenChange(false);
+                      navigate(processHref);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Abrir o processo para ajustar
+                  </Button>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="acceptance-channel">Canal do aceite *</Label>
                 <Select value={channel} onValueChange={setChannel}>
-                  <SelectTrigger id="acceptance-channel" className="mt-1">
+                  <SelectTrigger id="acceptance-channel" className="mt-1 min-h-11">
                     <SelectValue placeholder="Selecione" />
                   </SelectTrigger>
                   <SelectContent>
@@ -210,7 +237,7 @@ export function ConfirmSaleDialog({
               </div>
               <div>
                 <Label htmlFor="acceptance-date">Data e hora do aceite</Label>
-                <Input id="acceptance-date" value={nowLabel} readOnly className="mt-1 bg-muted/30" />
+                <Input id="acceptance-date" value={nowLabel} readOnly className="mt-1 h-11 bg-muted/30" />
               </div>
             </div>
 
@@ -232,9 +259,10 @@ export function ConfirmSaleDialog({
               </p>
             ))}
 
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 variant="outline"
+                className="min-h-11"
                 onClick={() => onOpenChange(false)}
                 disabled={confirmSale.isPending}
               >
@@ -243,7 +271,7 @@ export function ConfirmSaleDialog({
               <Button
                 onClick={submit}
                 disabled={!channel || confirmSale.isPending || !readiness.ready}
-                className="gap-2"
+                className="min-h-11 gap-2"
               >
                 {confirmSale.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Confirmar venda
@@ -251,7 +279,9 @@ export function ConfirmSaleDialog({
             </div>
           </div>
         )}
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
+
