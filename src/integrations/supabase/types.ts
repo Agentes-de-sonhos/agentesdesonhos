@@ -17461,6 +17461,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      travel_file_service_set_financial_rule: {
+        Args: { _payload: Json; _service_id: string }
+        Returns: undefined
+      }
       travel_file_set_responsibles: {
         Args: { _commercial?: string; _file_id: string; _operations?: string }
         Returns: undefined
@@ -17468,6 +17472,10 @@ export type Database = {
       travel_file_set_status: {
         Args: { _file_id: string; _reason?: string; _status: string }
         Returns: undefined
+      }
+      travel_file_supplier_terms: {
+        Args: { _operator_id: string }
+        Returns: Json
       }
       travel_file_update_manual: {
         Args: { _file_id: string; _payload: Json }
