@@ -16482,6 +16482,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      confirm_travel_file_sale: {
+        Args: {
+          p_acceptance?: Json
+          p_expected_updated_at?: string
+          p_file_id: string
+          p_idempotency_key: string
+        }
+        Returns: Json
+      }
       consume_google_oauth_state: {
         Args: { p_id: string; p_nonce_hash: string }
         Returns: string
