@@ -47,7 +47,7 @@ import { isInMonth } from "@/utils/monthFilter";
 import { toast } from "sonner";
 
 export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
-  const { sales: allSales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
+  const { sales: allSales, saleProducts, isLoading: salesLoading, isFetching: salesFetching, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   const sales = useMemo(() => {
     if (!viewMonth || !viewYear) return allSales;
     return allSales.filter(s => isInMonth(s.sale_date, viewMonth, viewYear));
