@@ -44,8 +44,9 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/types/financial";
 import { PRODUCT_TYPES } from "@/types/financial";
 import { isInMonth } from "@/utils/monthFilter";
+import { toast } from "sonner";
 
-export function SalesManager({ viewMonth, viewYear }: { viewMonth?: number; viewYear?: number } = {}) {
+export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
   const { sales: allSales, saleProducts, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   const sales = useMemo(() => {
     if (!viewMonth || !viewYear) return allSales;
