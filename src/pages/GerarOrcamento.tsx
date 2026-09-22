@@ -1334,11 +1334,14 @@ export default function GerarOrcamento() {
           </div>
           {quote.share_token && (
             (() => {
-              const accessCode = (quote as any).public_access_code;
-              const agencyName = agentProfile?.agency_name;
-              const publicUrl = accessCode && agencyName
-                ? buildOrcamentoLink(agencyName, accessCode, customDomain)
-                : `${ORCAMENTO_DOMAIN}/orcamento/${quote.share_token}`;
+              const resolvedShare = resolveQuotePublicUrl({
+                agencySlug,
+                accessCode: (quote as any).public_access_code,
+                shareToken: quote.share_token,
+                customDomain,
+              });
+              if (!resolvedShare.ok) return null;
+              const publicUrl = resolvedShare.url;
               const serviceTypes = (quote.services || []).map((s: any) => s.service_type).filter(Boolean);
               return (
                 <QuoteShareBar
