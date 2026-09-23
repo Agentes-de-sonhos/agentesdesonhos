@@ -85,6 +85,8 @@ import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings"
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles } from "lucide-react";
+import { QuoteTitleField } from "@/components/quote/QuoteTitleField";
+import { INITIAL_SETUP_HIGHLIGHT_CLASS, isInitialSetupItemPending, pendingInitialSetup } from "@/lib/quoteInitialSetup";
 import { ExportQuoteToWalletDialog } from "@/components/quote/ExportQuoteToWalletDialog";
 import { QuoteEntryExtrasManager } from "@/components/quote/QuoteEntryExtrasManager";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -1560,7 +1562,11 @@ export default function GerarOrcamento() {
         onBeforeNavigate={async () => {
           await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
         }}
-        renderInitial={() => (
+        renderInitial={() => {
+          const initialSetupPending = pendingInitialSetup(quote as any);
+          const coverPending =
+            isInitialSetupItemPending(quote as any, "cover") || isInitialSetupItemPending(quote as any, "intro");
+          return (
           <div className="space-y-5">
             <section
               aria-labelledby="quote-initial-data-title"
@@ -1612,7 +1618,8 @@ export default function GerarOrcamento() {
               </div>
             </section>
           </div>
-        )}
+          );
+        }}
         renderIncluded={() => (
           <WhatsIncludedEditor
             quote={quote}
