@@ -174,15 +174,22 @@ export function assessTravelFileReadiness(
     );
   }
 
+  /**
+   * A partir da revisão de produto de 2026: custo, comissão, margem, nota
+   * fiscal e prazo de pagamento pertencem à Gestão Financeira e NÃO bloqueiam
+   * a confirmação da venda. A RPC também deixou de bloquear (migration 0026).
+   * Os serviços com regra pendente continuam listados para acompanhamento.
+   */
   const pendingRule = eligible.filter(
     (s) => (s.financial_rule_status ?? "pending") === "pending",
   );
   if (pendingRule.length > 0) {
-    blockers.push(
-      `${pendingRule.length} serviço(s) sem regra financeira confirmada (fornecedor/comissão).`,
+    warnings.push(
+      `${pendingRule.length} serviço(s) entrarão com informações financeiras pendentes de configuração no Financeiro.`,
     );
   }
 
+  // Fornecedor é exigido na etapa de reserva/emissão do serviço, não na venda.
   const missingSupplierIds = eligible
     .filter(
       (s) =>
@@ -191,11 +198,7 @@ export function assessTravelFileReadiness(
         !(supplierExceptions[s.id] || "").trim(),
     )
     .map((s) => s.id);
-  if (missingSupplierIds.length > 0) {
-    blockers.push(
-      `${missingSupplierIds.length} serviço(s) sem fornecedor identificado (informe o fornecedor ou justifique a exceção).`,
-    );
-  }
+
 
   const total = eligible.reduce((sum, s) => sum + effectiveServiceAmount(s), 0);
   const currency = currencies[0] ?? "";
