@@ -888,10 +888,19 @@ export default function ProcessoReserva() {
                           .join(" | ")}
                   </span>
                 ) : (
-                  <span className="text-xs text-muted-foreground">
-                    Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-                    {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
+                  <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                    Solicitado {money(reconfirmation.requested || totals.requested, file.currency)} ·
+                    Reconfirmado {money(reconfirmation.reconfirmed, file.currency)} · Venda{" "}
+                    {money(totals.sold, file.currency)}
+                    {reconfirmationMode && (
+                      <>
+                        {" · "}
+                        {reconfirmation.eligibleCount} pronto(s) para venda ·{" "}
+                        {reconfirmation.pendingCount} pendente(s)
+                      </>
+                    )}
                   </span>
+
                 ))}
               {isManual && canManage && (
                 <Button
