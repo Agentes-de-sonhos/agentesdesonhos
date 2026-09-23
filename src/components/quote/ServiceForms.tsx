@@ -273,7 +273,18 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
-              <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => updateLeg(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportSearchInput
+                  aria-label="Aeroporto de origem"
+                  value={leg.airport_origin || ""}
+                  onChange={(v) => updateLeg(idx, "airport_origin", v)}
+                  onSelect={(airport) => updateLegFields(idx, {
+                    airport_origin: airport.iata,
+                    origin_airport_name: airport.name,
+                    origin_city: airport.city,
+                  })}
+                />
+              </div>
               {airportHint(leg.airport_origin, leg.origin_city) && (
                 <p className="text-[11px] text-muted-foreground mt-1 truncate" title={airportHint(leg.airport_origin, leg.origin_city)}>
                   {airportHint(leg.airport_origin, leg.origin_city)}
@@ -288,7 +299,18 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
-              <Input placeholder="CDG" value={leg.airport_destination || ""} onChange={e => updateLeg(idx, "airport_destination", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportSearchInput
+                  aria-label="Aeroporto de destino"
+                  value={leg.airport_destination || ""}
+                  onChange={(v) => updateLeg(idx, "airport_destination", v)}
+                  onSelect={(airport) => updateLegFields(idx, {
+                    airport_destination: airport.iata,
+                    destination_airport_name: airport.name,
+                    destination_city: airport.city,
+                  })}
+                />
+              </div>
               {airportHint(leg.airport_destination, leg.destination_city) && (
                 <p className="text-[11px] text-muted-foreground mt-1 truncate" title={airportHint(leg.airport_destination, leg.destination_city)}>
                   {airportHint(leg.airport_destination, leg.destination_city)}
