@@ -177,14 +177,17 @@ describe("HotelPhotoGallery (autosave)", () => {
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />);
     await findSuggestions();
-    const second = await screen.findByLabelText("Selecionar foto 2");
-    // Clique duplo na mesma sugestão: a segunda vez não pode duplicar a foto.
-    fireEvent.click(second);
-    fireEvent.click(second);
+    fireEvent.click(await screen.findByLabelText("Selecionar foto 2"));
     fireEvent.click(await screen.findByLabelText("Selecionar foto 1"));
-    const last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as string[];
+    let last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as string[];
+    // Ordem escolhida preservada e sem duplicidade.
     expect(last).toEqual([makeGplaceRef("P1", 1), makeGplaceRef("P1", 0)]);
     expect(dedupeImageRefs(last)).toHaveLength(2);
+
+    // Clicar de novo na mesma sugestão alterna (remove) — nunca duplica.
+    fireEvent.click(await screen.findByLabelText("Selecionar foto 2"));
+    last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as string[];
+    expect(last).toEqual([makeGplaceRef("P1", 0)]);
   });
 
   it("importa URL manual e já conta no limite, sem botão de confirmar", async () => {
