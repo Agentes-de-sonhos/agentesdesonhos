@@ -128,7 +128,9 @@ describe("venda não depende de custo, comissão nem regra financeira", () => {
     expect(readiness.ready).toBe(true);
     expect(readiness.blockers).toEqual([]);
     expect(readiness.warnings).toEqual([]);
-    expect(readiness.pendingServices).toEqual([]);
+    // A lista operacional pode sinalizar fornecedor ausente para acompanhamento,
+    // mas não bloqueia a venda e não se mistura com regra financeira.
+    expect(readiness.pendingServices.map((item) => item.id)).toEqual([eligible.id]);
     expect(readiness.total).toBe(14200);
   });
 
