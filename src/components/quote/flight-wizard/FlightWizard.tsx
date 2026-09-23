@@ -97,6 +97,19 @@ function fmt(d?: string) {
     return format(new Date(y, m - 1, day), "dd/MM/yyyy", { locale: ptBR });
   } catch { return d; }
 }
+/**
+ * Mantém o 1º trecho alinhado à data principal escolhida no calendário.
+ * Só atualiza quando o trecho está vazio, era igual à data anterior ou tem o
+ * mesmo dia/mês com outro ano (sintoma do bug 27/02/2027 → 27/02/2026).
+ * Datas de trecho digitadas manualmente e diferentes são preservadas.
+ */
+export function syncFirstLegDate(legs: FlightLegDraft[] | undefined, prev: string | undefined, next: string): FlightLegDraft[] | undefined {
+  if (!legs?.length || !next) return legs;
+  const cur = legs[0].leg_date || "";
+  const sameDayOtherYear = cur.length === 10 && cur.slice(5) === next.slice(5) && cur !== next;
+  if (cur && cur !== prev && !sameDayOtherYear) return legs;
+  return legs.map((l, i) => (i === 0 ? { ...l, leg_date: next } : l));
+}
 function parseLocal(d?: string): Date | undefined {
   if (!d) return undefined;
   const [y, m, day] = d.split("-").map(Number);
@@ -488,7 +501,16 @@ export function FlightWizard({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar mode="single"
                       selected={parseLocal(data.departure_date)}
-                      onSelect={(d) => upd({ departure_date: d ? format(d, "yyyy-MM-dd") : "" })}
+                      onSelect={(d) => {
+                        const next = d ? format(d, "yyyy-MM-dd") : "";
+                        const patch: Partial<WizardFlightDraft> = {
+                          departure_date: next,
+                          outbound_legs: syncFirstLegDate(data.outbound_legs, data.departure_date, next),
+                        };
+                        // Volta nunca anterior à ida: limpa para o agente escolher de novo.
+                        if (next && data.return_date && data.return_date < next) patch.return_date = "";
+                        upd(patch);
+                      }}
                       initialFocus className="pointer-events-auto"
                       locale={ptBR} />
                   </PopoverContent>
@@ -507,7 +529,11 @@ export function FlightWizard({
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar mode="single"
                         selected={parseLocal(data.return_date)}
-                        onSelect={(d) => upd({ return_date: d ? format(d, "yyyy-MM-dd") : "" })}
+                        onSelect={(d) => {
+                          const next = d ? format(d, "yyyy-MM-dd") : "";
+                          upd({ return_date: next, return_legs: syncFirstLegDate(data.return_legs, data.return_date, next) });
+                        }}
+                        disabled={(d) => { const dep = parseLocal(data.departure_date); return !!dep && d < dep; }}
                         initialFocus className="pointer-events-auto"
                         locale={ptBR}
                         defaultMonth={parseLocal(data.return_date) || parseLocal(data.departure_date)} />

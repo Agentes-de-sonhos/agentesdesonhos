@@ -195,9 +195,8 @@ export function parsedAirfareToFlightData(
   // Infer year hint from resumo.data_ida (YYYY-MM-DD) or current year
   const isoIda = /^(\d{4})-\d{2}-\d{2}$/.exec(p.resumo?.data_ida || "");
   // Datas sem ano no documento (ex.: "27/02") usam o ano da viagem, nunca o ano corrente.
-  const tripYear = opts.tripStartDate instanceof Date
-    ? opts.tripStartDate.getFullYear()
-    : (/^(\d{4})-\d{2}-\d{2}/.exec(opts.tripStartDate || "")?.[1] ? Number(/^(\d{4})/.exec(opts.tripStartDate as string)![1]) : null);
+  const tripIso = /^(\d{4})-\d{2}-\d{2}/.exec(typeof opts.tripStartDate === "string" ? opts.tripStartDate : "");
+  const tripYear = opts.tripStartDate instanceof Date ? opts.tripStartDate.getFullYear() : tripIso ? Number(tripIso[1]) : null;
   let yearHint = isoIda ? Number(isoIda[1]) : (tripYear ?? new Date().getFullYear());
 
   // Walk voos chronologically; bump year when month goes backwards (Dec → Jan)
