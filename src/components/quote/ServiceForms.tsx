@@ -19,6 +19,7 @@ import {
 import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggestions";
 import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
+import { AirportSearchInput } from "@/components/quote/AirportSearchInput";
 import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
 import {
   autoSyncDefaultComposition,
