@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { syncFirstLegDate } from "@/lib/flightLegDateSync";
 import { parsedAirfareToFlightData } from "@/components/quote/flight-wizard/AirfareSmartImport";
-import { formatPublicShortDate } from "@/lib/publicLocale";
+import { formatPublicShortDate } from "@/i18n/publicMaterials/locale";
 
 describe("datas da passagem aérea", () => {
   it("corrige trecho 27/02/2026 quando o calendário escolhe 27/02/2027", () => {
