@@ -17557,6 +17557,10 @@ export type Database = {
         Args: { p_session_hash: string; p_slug: string }
         Returns: undefined
       }
+      travel_file_backfill_services: {
+        Args: { p_file_id: string }
+        Returns: Json
+      }
       travel_file_create_manual: { Args: { _payload: Json }; Returns: Json }
       travel_file_detail: { Args: { _file_id: string }; Returns: Json }
       travel_file_is_active: { Args: { _status: string }; Returns: boolean }
