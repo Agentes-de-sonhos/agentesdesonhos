@@ -693,9 +693,17 @@ export default function ProcessoReserva() {
                 className="min-w-0 rounded-xl border border-border/50 p-3 sm:p-4"
               >
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                    {service.product_name}
+                  <p
+                    data-testid={`service-title-${service.id}`}
+                    className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]"
+                  >
+                    {travelFileServiceTitle(service)}
                   </p>
+                  {serviceOptionLabel(service) && (
+                    <Badge variant="secondary" className="font-normal">
+                      {serviceOptionLabel(service)}
+                    </Badge>
+                  )}
                   {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
                   {isManual && canManage && (
                     <Button
@@ -721,11 +729,25 @@ export default function ProcessoReserva() {
                     </span>
                   )}
                   <span>Qtd. {service.quantity}</span>
-                  {service.supplier_name && <span>Fornecedor: {service.supplier_name}</span>}
-                  {canRevenue && (
-                    <span>Solicitado {money(service.requested_amount, service.currency)}</span>
+                  {displayServiceSupplier(service) ? (
+                    <span>Fornecedor: {displayServiceSupplier(service)}</span>
+                  ) : (
+                    unifiedV2 &&
+                    canFinancialManage &&
+                    !isConvertedV2(file) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 gap-1.5 px-2 text-xs"
+                        onClick={() => setRuleEditing(service)}
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        Adicionar fornecedor
+                      </Button>
+                    )
                   )}
                 </div>
+
 
                 {reconfirmationMode && (pendingByService[service.id]?.length ?? 0) > 0 && (
                   <div
