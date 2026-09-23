@@ -12,6 +12,7 @@ vi.mock("@/integrations/supabase/client", () => {
   return { supabase: { from: () => q, functions: { invoke: vi.fn() }, auth: { getSession: vi.fn(async () => ({ data: { session: null } })) } } };
 });
 
+vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "u1" }, session: null, loading: false }) }));
 vi.mock("@/lib/pdfText", () => ({ extractPdfText: vi.fn(async () => "") }));
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useWizardInvalidHandler, WALLET_REQUIRED_MESSAGE } from "@/components/trip/useWizardInvalidHandler";

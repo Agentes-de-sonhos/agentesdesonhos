@@ -49,7 +49,7 @@ export function useWizardInvalidHandler(opts: {
   const optsRef = useRef(opts);
   optsRef.current = opts;
 
-  const onInvalid = useCallback((errors: FieldErrors) => {
+  const run = useCallback((errors: FieldErrors) => {
     const { totalSteps, currentStep, setStep, wizardMode } = optsRef.current;
     const root = formRef.current;
     const labels: string[] = [];
@@ -84,6 +84,12 @@ export function useWizardInvalidHandler(opts: {
       el.focus?.({ preventScroll: true } as FocusOptions);
     }
   }, []);
+
+  // Executa depois que o react-hook-form publica os erros no estado, para que
+  // as mensagens/aria-invalid já estejam no DOM de cada etapa.
+  const onInvalid = useCallback((errors: FieldErrors) => {
+    setTimeout(() => run(errors), 0);
+  }, [run]);
 
   return { formRef, onInvalid };
 }
