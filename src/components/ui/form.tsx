@@ -5,6 +5,8 @@ import { Controller, ControllerProps, FieldPath, FieldValues, FormProvider, useF
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
+import { useIsRequiredField } from "@/components/quote/RequiredFieldsScope";
+import { REQUIRED_FIELD_SUFFIX } from "@/lib/serviceFormRequired";
 
 const Form = FormProvider;
 
