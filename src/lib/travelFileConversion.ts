@@ -263,26 +263,65 @@ export function describeServicePendingReasons(
   if (effectiveServiceAmount(service) <= 0) {
     missing.push("Informe o valor reconfirmado do serviço.");
   }
-  if ((service.financial_rule_status ?? "pending") === "pending") {
-    missing.push("Confirme a regra financeira (comissão, taxas, nota fiscal e prazo de pagamento).");
-  }
+  // Fornecedor só é exigido quando o serviço já está reservado ou emitido.
+  // Custo, comissão, nota fiscal e prazos são configurados no Financeiro e
+  // nunca impedem a venda.
   if (
-    !service.operator_id &&
-    !(service.supplier_name || "").trim() &&
-    !(supplierExceptions[service.id] || "").trim()
+    (SERVICE_STATUSES_REQUIRING_SUPPLIER as readonly string[]).includes(status) &&
+    !serviceHasSupplier(service, supplierExceptions)
   ) {
-    missing.push("Selecione o fornecedor ou justifique a exceção.");
+    missing.push(SUPPLIER_REQUIRED_MESSAGE);
   }
   return missing;
 }
 
-/** Resumo do bloco "Serviços para reconfirmar". */
+/** Situações que só se sustentam com fornecedor identificado. */
+export const SERVICE_STATUSES_REQUIRING_SUPPLIER = ["booked", "paid", "issued", "delivered"] as const;
+
+export const SUPPLIER_REQUIRED_MESSAGE =
+  "Informe o fornecedor antes de reservar/emitir este serviço.";
+
+/** Fornecedor identificado (operadora, nome livre ou exceção justificada). */
+export function serviceHasSupplier(
+  service: Pick<TravelFileService, "id" | "operator_id" | "supplier_name">,
+  supplierExceptions: Record<string, string> = {},
+): boolean {
+  return (
+    !!service.operator_id ||
+    !!(service.supplier_name || "").trim() ||
+    !!(supplierExceptions[service.id] || "").trim()
+  );
+}
+
+/**
+ * Transição de situação operacional permitida? Devolve a mensagem humana do
+ * impedimento (ou null quando a mudança pode seguir).
+ */
+export function describeStatusTransitionBlock(
+  service: TravelFileService,
+  target: string,
+  supplierExceptions: Record<string, string> = {},
+): string | null {
+  if ((SERVICE_STATUSES_REQUIRING_SUPPLIER as readonly string[]).includes(target)) {
+    if (!serviceHasSupplier(service, supplierExceptions)) return SUPPLIER_REQUIRED_MESSAGE;
+  }
+  if (target === "amount_changed") {
+    if ((service.reconfirmed_amount ?? 0) <= 0) {
+      return "Informe o valor reconfirmado antes de marcar que o valor mudou.";
+    }
+  }
+  return null;
+}
+
+/** Resumo operacional do bloco "Serviços para reconfirmar". */
 export function summarizeReconfirmation(
   services: TravelFileService[],
   supplierExceptions: Record<string, string> = {},
 ): {
   requested: number;
   reconfirmed: number;
+  sold: number;
+  variation: number;
   eligibleCount: number;
   pendingCount: number;
 } {
@@ -290,13 +329,22 @@ export function summarizeReconfirmation(
   const pending = services.filter(
     (s) => describeServicePendingReasons(s, supplierExceptions).length > 0,
   );
+  const requested = services.reduce((sum, s) => sum + (s.requested_amount ?? 0), 0);
+  const reconfirmed = services.reduce(
+    (sum, s) => sum + (s.reconfirmed_amount ?? s.requested_amount ?? 0),
+    0,
+  );
+  const sold = services.reduce(
+    (sum, s) => sum + (s.sold_amount ?? s.reconfirmed_amount ?? s.requested_amount ?? 0),
+    0,
+  );
   return {
-    requested: services.reduce((sum, s) => sum + (s.requested_amount ?? 0), 0),
-    reconfirmed: services.reduce(
-      (sum, s) => sum + (s.sold_amount ?? s.reconfirmed_amount ?? 0),
-      0,
-    ),
+    requested,
+    reconfirmed,
+    sold,
+    variation: reconfirmed - requested,
     eligibleCount: eligible.length,
     pendingCount: pending.length,
   };
 }
+
