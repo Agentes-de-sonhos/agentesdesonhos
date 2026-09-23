@@ -1306,7 +1306,6 @@ function PublicQuoteDocuments({
         allowDownload
         onClose={closeViewer}
         onDownload={viewerDoc ? () => downloadDoc(viewerDoc) : undefined}
-        closeLabel={t("closeLabel")}
         downloadLabel={t("downloadLabel")}
       />
     </section>
