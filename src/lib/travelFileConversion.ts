@@ -330,19 +330,23 @@ export function summarizeReconfirmation(
     (s) => describeServicePendingReasons(s, supplierExceptions).length > 0,
   );
   const requested = services.reduce((sum, s) => sum + (s.requested_amount ?? 0), 0);
-  const reconfirmed = services.reduce(
-    (sum, s) => sum + (s.reconfirmed_amount ?? s.requested_amount ?? 0),
-    0,
-  );
-  const sold = services.reduce(
-    (sum, s) => sum + (s.sold_amount ?? s.reconfirmed_amount ?? s.requested_amount ?? 0),
+  // Somamos apenas o que foi efetivamente reconfirmado/vendido: nada é
+  // presumido a partir do valor solicitado.
+  const reconfirmed = services.reduce((sum, s) => sum + (s.reconfirmed_amount ?? 0), 0);
+  const sold = services.reduce((sum, s) => sum + (s.sold_amount ?? 0), 0);
+  const variation = services.reduce(
+    (sum, s) =>
+      s.reconfirmed_amount == null
+        ? sum
+        : sum + (s.reconfirmed_amount - (s.requested_amount ?? 0)),
     0,
   );
   return {
     requested,
     reconfirmed,
     sold,
-    variation: reconfirmed - requested,
+    variation,
+
     eligibleCount: eligible.length,
     pendingCount: pending.length,
   };
