@@ -725,7 +725,7 @@ export default function ProcessoReserva() {
                 ) : (
                   <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
                     Solicitado {money(reconfirmation.requested || totals.requested, file.currency)} ·
-                    Reconfirmado {money(reconfirmation.reconfirmed, file.currency)} · Venda{" "}
+                    Reconfirmado {money(reconfirmation.reconfirmed, file.currency)} · Vendido{" "}
                     {money(totals.sold, file.currency)}
                     {reconfirmationMode && (
                       <>
@@ -793,12 +793,12 @@ export default function ProcessoReserva() {
                   >
                     {travelFileServiceTitle(service)}
                   </p>
-                  {serviceOptionLabel(service) && (
+                  {!reconfirmationMode && serviceOptionLabel(service) && (
                     <Badge variant="secondary" className="font-normal">
                       {serviceOptionLabel(service)}
                     </Badge>
                   )}
-                  {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
+                  {!reconfirmationMode && service.is_required && <Badge variant="outline">Obrigatório</Badge>}
                   {isManual && canManage && (
                     <Button
                       variant="ghost"
