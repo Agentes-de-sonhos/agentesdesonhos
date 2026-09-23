@@ -13,10 +13,12 @@ const signatureCard = readFileSync("src/components/quote/QuoteSignatureCard.tsx"
 const signatureSelector = readFileSync("src/components/signatures/SignatureSelector.tsx", "utf8");
 
 describe("Editor de orçamento reorganizado", () => {
-  it("tem somente quatro passos explicativos na ordem aprovada", () => {
+  it("tem somente três passos explicativos na ordem aprovada", () => {
     const stepBlock = page.match(/const QUOTE_STEPS[\s\S]*?\n\];/)?.[0] ?? "";
-    expect(stepBlock.match(/step:/g)).toHaveLength(4);
-    expect(stepBlock).toMatch(/Adicionar serviços[\s\S]*Organizar serviços[\s\S]*Configurar orçamento[\s\S]*Publicar/);
+    expect(stepBlock.match(/step:/g)).toHaveLength(3);
+    expect(stepBlock).toMatch(/Adicionar serviços[\s\S]*Organizar serviços[\s\S]*Configurar orçamento/);
+    // O orçamento web nasce publicado: não existe mais a etapa "Publicar".
+    expect(stepBlock).not.toContain('short: "Publicar"');
     expect(stepBlock).not.toContain("Revisar orçamento");
     expect(stepBlock).not.toContain("Escolher assinatura");
     expect(guide).not.toContain("Ver mais");
@@ -106,9 +108,8 @@ describe("Editor de orçamento reorganizado", () => {
   });
 
   it("preserva handlers de geração e layout responsivo das ações", () => {
-    expect(page).toContain("onClick={handlePublish}");
     expect(page).toContain("onClick={handleGeneratePDF}");
-    expect(page).toContain("disabled={isPublishing}");
+    expect(page).not.toContain("onClick={handlePublish}");
     expect(page).toContain("actions={!quote.share_token ? (");
     expect(guide).toContain("flex-col gap-2 md:flex-row");
     expect(guide).toContain("flex shrink-0 items-center justify-end");

@@ -18,9 +18,11 @@ import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
 import { BookingServiceDetails } from "@/components/quote/booking/BookingServiceDetails";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
 import {
+  BOOKING_ACCEPT_REQUIRED_MESSAGE,
   BOOKING_REQUEST_DISCLAIMER,
   validateBookingContact,
 } from "@/lib/quoteBookingSelection";
+import { cn } from "@/lib/utils";
 import { buildSelectionSummary, sectionMetaChips } from "@/lib/quoteBookingShowcase";
 import type { QuoteService } from "@/types/quote";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
@@ -39,6 +41,7 @@ export function BookingCartDialog() {
   const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [accepted, setAccepted] = useState(false);
+  const [acceptHint, setAcceptHint] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const summary = useMemo(
@@ -334,43 +337,66 @@ export function BookingCartDialog() {
                     </span>
                   </div>
                 )}
-                {!isEmpty && (
-                  <label
-                    data-booking-disclaimer-accept
-                    className="flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed text-muted-foreground"
-                  >
-                    <Checkbox
-                      className="mt-0.5"
-                      checked={accepted}
-                      onCheckedChange={(v) => setAccepted(v === true)}
-                      aria-label={t("acceptBookingDisclaimer")}
-                    />
-                    <span>{BOOKING_REQUEST_DISCLAIMER}</span>
-                  </label>
-                )}
                 {(error || cart.validationError) && (
                   <p className="text-xs font-medium text-destructive" role="alert">
                     {error || cart.validationError}
                   </p>
                 )}
                 {!isEmpty && (
-                  <div className="flex sm:justify-end">
-                    <Button
-                      type="button"
-                      size="lg"
-                      className="min-h-[48px] w-full gap-2 sm:w-auto"
-                      onClick={handleSubmit}
-                      disabled={cart.submitting}
-                    >
-                      {cart.submitting ? (
-                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                      ) : (
-                        <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                  /* Aceite + envio formam um único bloco, alinhado à esquerda. */
+                  <div className="flex flex-col items-start gap-3">
+                    <label
+                      data-booking-disclaimer-accept
+                      className={cn(
+                        "flex cursor-pointer items-start gap-2.5 rounded-lg p-2 text-[11px] leading-relaxed text-muted-foreground transition-colors",
+                        acceptHint && "bg-destructive/5 ring-1 ring-destructive",
                       )}
-                      {cart.submitting ? t("sending") : t("sendBookingRequest")}
-                    </Button>
+                    >
+                      <Checkbox
+                        className="mt-0.5"
+                        checked={accepted}
+                        onCheckedChange={(v) => {
+                          setAccepted(v === true);
+                          if (v === true) setAcceptHint(false);
+                        }}
+                        aria-label={t("acceptBookingDisclaimer")}
+                        aria-describedby={acceptHint ? "booking-accept-hint" : undefined}
+                      />
+                      <span>{BOOKING_REQUEST_DISCLAIMER}</span>
+                    </label>
+                    {acceptHint && (
+                      <p
+                        id="booking-accept-hint"
+                        role="alert"
+                        className="text-xs font-medium text-destructive"
+                      >
+                        {BOOKING_ACCEPT_REQUIRED_MESSAGE}
+                      </p>
+                    )}
+                    <div
+                      className="w-full sm:w-auto"
+                      onClick={() => {
+                        if (!accepted && !cart.submitting) setAcceptHint(true);
+                      }}
+                    >
+                      <Button
+                        type="button"
+                        size="lg"
+                        className="min-h-[48px] w-full gap-2 sm:w-auto"
+                        onClick={handleSubmit}
+                        disabled={cart.submitting || !accepted}
+                      >
+                        {cart.submitting ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                        )}
+                        {cart.submitting ? t("sending") : t("sendBookingRequest")}
+                      </Button>
+                    </div>
                   </div>
                 )}
+
 
 
               </>

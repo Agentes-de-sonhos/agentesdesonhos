@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, ChevronDown, CloudOff, Cloud, Globe } from "lucide-react";
+import { AlertTriangle, ChevronDown, CloudOff, Cloud } from "lucide-react";
 import { useQuoteAutosave, getLocalDraft, clearLocalDraft, type SaveStatus } from "@/hooks/useQuoteAutosave";
 import { resolveQuotePublicUrl } from "@/lib/publicAgencyUrls";
 import { useAgencyPublicSite } from "@/hooks/useAgencyPublicSite";
@@ -59,9 +59,9 @@ import { QuoteStepsGuide, type QuoteStepMeta } from "@/components/quote/QuoteSte
 const QUOTE_STEPS: QuoteStepMeta[] = [
   { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e demais itens da viagem.", accentClass: "bg-sky-500" },
   { step: 2, short: "Organizar serviços", hint: "Revise, edite, ordene e agrupe os serviços por destino ou seção.", accentClass: "bg-emerald-500" },
-  { step: 3, short: "Configurar orçamento", hint: "Confira os dados principais, personalize capa e apresentação, valores, condições, documentos e assinatura.", accentClass: "bg-violet-500" },
-  { step: 4, short: "Publicar", hint: "Gere a versão web para compartilhamento ou o arquivo PDF do orçamento.", accentClass: "bg-amber-500" },
+  { step: 3, short: "Configurar orçamento", hint: "Confira os dados principais, personalize capa e apresentação, valores, condições, documentos e assinatura. O link do orçamento web já está pronto no topo da página.", accentClass: "bg-violet-500" },
 ];
+
 import { useQuotes, useQuote } from "@/hooks/useQuotes";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -411,7 +411,7 @@ export default function GerarOrcamento() {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { quotes, isLoading: quotesLoading, createQuote, isCreating, publishQuote, isPublishing, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
+  const { quotes, isLoading: quotesLoading, createQuote, isCreating, ensureQuotePublicLink, deleteQuote, duplicateQuote, isDuplicating } = useQuotes();
   const {
     quote, addService, updateService, deleteService, reorderServices, isAddingService,
     createSection, renameSection, deleteSection, reorderSections, saveServiceLayout, isSavingSections,
@@ -835,6 +835,60 @@ export default function GerarOrcamento() {
   };
 
   /**
+   * Criação direta a partir de uma oportunidade: sem tela intermediária.
+   * Reutiliza orçamento já vinculado à oportunidade e protege contra duplo
+   * clique / retry / corrida (guarda síncrona por oportunidade).
+   */
+  const autoQuoteRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (id) return;
+    const prefill = opportunityPrefill;
+    const opportunityId = prefill?.opportunity_id;
+    if (!opportunityId || !prefill?.client_id || !prefill?.client_name) return;
+    if (autoQuoteRef.current === opportunityId) return;
+    autoQuoteRef.current = opportunityId;
+    let active = true;
+    (async () => {
+      try {
+        const { data: existing } = await supabase
+          .from("quotes")
+          .select("id")
+          .eq("opportunity_id", opportunityId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (!active) return;
+        if (existing?.id) {
+          navigate(nav.quote(existing.id), { replace: true });
+          return;
+        }
+        const created = await createQuote({
+          client_id: prefill.client_id,
+          client_name: prefill.client_name,
+          destination: prefill.destination || "",
+          start_date: prefill.start_date || null,
+          end_date: prefill.end_date || null,
+          adults_count: prefill.adults_count ?? 1,
+          children_count: prefill.children_count ?? 0,
+          opportunity_id: opportunityId,
+        } as QuoteFormData);
+        if (!active) return;
+        incrementUsage();
+        setDraftBanner(null);
+        navigate(nav.quote(created.id), { replace: true });
+      } catch {
+        // Falha de criação automática cai no formulário manual desta tela.
+        autoQuoteRef.current = null;
+      }
+    })();
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, opportunityPrefill?.opportunity_id, opportunityPrefill?.client_id]);
+
+
+  /**
    * Ingressos PERSONALIZADOS cuja composição tarifária ficou dessincronizada
    * da composição global (o agente mudou passageiros depois de personalizar).
    * Composições padrão nunca entram aqui: elas são sincronizadas automaticamente.
@@ -931,40 +985,18 @@ export default function GerarOrcamento() {
     await generateQuotePDF(quote, agentProfile, resolvePublicLocale(agentProfile));
   };
 
-  const handlePublish = async () => {
-    if (!quote) return;
-    if (blockForFareReview()) return;
-    if (blockForFareSync()) return;
-
-    const token = quote.share_token || await publishQuote(quote.id);
-
-    // Camada única de URLs públicas: slug canônico do site da agência (ou
-    // domínio próprio) + código público do orçamento. Sem endereço válido,
-    // nenhum link falso é gerado.
-    const resolved = resolveQuotePublicUrl({
-      agencySlug,
-      accessCode: (quote as any).public_access_code,
-      shareToken: token,
-      customDomain,
+  // Orçamentos antigos (criados antes do link automático) recebem o link
+  // público silenciosamente ao abrir o editor. Uma única vez por registro.
+  const ensuredLinkRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!quote?.id || (quote as any).share_token) return;
+    if (ensuredLinkRef.current === quote.id) return;
+    ensuredLinkRef.current = quote.id;
+    ensureQuotePublicLink(quote.id).catch(() => {
+      ensuredLinkRef.current = null;
     });
-    if (resolved.ok !== true) {
-      toast({
-        title: "Link público indisponível",
-        description: resolved.error,
-        variant: "destructive",
-      });
-      return;
-    }
-    const publicUrl = resolved.url;
+  }, [quote?.id, (quote as any)?.share_token, ensureQuotePublicLink]);
 
-
-    clearLocalDraft();
-    await navigator.clipboard.writeText(publicUrl);
-    toast({
-      title: quote.share_token ? "Link copiado" : "Orçamento publicado",
-      description: quote.share_token ? "O link foi copiado para a área de transferência." : "O link do orçamento foi copiado para a área de transferência.",
-    });
-  };
 
   const handleEditService = (service: QuoteService) => {
     setSelectedServiceType(service.service_type);
@@ -1376,15 +1408,6 @@ export default function GerarOrcamento() {
                 <TooltipProvider delayDuration={150}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button size="sm" onClick={handlePublish} disabled={isPublishing}>
-                        <Globe className="mr-1 h-3.5 w-3.5 xl:mr-2 xl:h-4 xl:w-4" />
-                        <span className="whitespace-nowrap text-[11px] xl:text-sm">Gerar orçamento web</span>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Cria um link para você enviar ao cliente.</TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
                       <Button size="sm" onClick={handleGeneratePDF}>
                         <FileText className="mr-1 h-3.5 w-3.5 xl:mr-2 xl:h-4 xl:w-4" />
                         <span className="whitespace-nowrap text-[11px] xl:text-sm">Gerar orçamento PDF</span>
@@ -1395,6 +1418,7 @@ export default function GerarOrcamento() {
                 </TooltipProvider>
               ) : undefined}
             />
+
 
             {/* 1. Adicionar serviços */}
             <QuoteStepCard

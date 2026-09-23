@@ -15,7 +15,15 @@ import {
   type QuotePricingMode,
 } from "@/lib/quotePricing";
 
+/** Token público opaco (128 bits) usado nos links do orçamento web. */
+export function generateShareToken(): string {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return Array.from(array).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export function useQuotes() {
+
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -52,7 +60,10 @@ export function useQuotes() {
           destination: formData.destination,
           start_date: formData.start_date,
           end_date: formData.end_date,
-          status: "draft",
+          // O orçamento web nasce acessível: link público seguro gerado junto
+          // com o registro, sem etapa manual de "Publicar".
+          status: "published",
+          share_token: generateShareToken(),
           currency: formData.currency || "BRL",
           currency_mode: formData.currency_mode || "fixed",
           exchange_rate: formData.exchange_rate ?? null,
@@ -64,6 +75,7 @@ export function useQuotes() {
       if (error) throw error;
       return data as Quote;
     },
+
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
       toast({ title: "Orçamento criado", description: "O orçamento foi criado com sucesso." });
@@ -127,7 +139,10 @@ export function useQuotes() {
           start_date: source.start_date,
           end_date: source.end_date,
           total_amount: source.total_amount,
-          status: "draft",
+          // A cópia também nasce com link público próprio (token novo).
+          status: "published",
+          share_token: generateShareToken(),
+
           show_detailed_prices: (source as any).show_detailed_prices,
           payment_terms: (source as any).payment_terms,
           valid_until: (source as any).valid_until,
@@ -244,6 +259,30 @@ export function useQuotes() {
     },
   });
 
+  /**
+   * Garante link público para orçamentos antigos (criados antes do link
+   * automático). Silencioso: nenhum toast, idempotente por registro.
+   */
+  const ensurePublicLinkMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const shareToken = generateShareToken();
+      const { data, error } = await supabase
+        .from("quotes")
+        .update({ status: "published", share_token: shareToken } as any)
+        .eq("id", id)
+        .is("share_token", null)
+        .select("share_token")
+        .maybeSingle();
+      if (error) throw error;
+      return (data as any)?.share_token ?? null;
+    },
+    onSuccess: (token, id) => {
+      if (!token) return;
+      queryClient.invalidateQueries({ queryKey: ["quotes"] });
+      queryClient.invalidateQueries({ queryKey: ["quote", id] });
+    },
+  });
+
   return {
     quotes,
     isLoading,
@@ -252,10 +291,12 @@ export function useQuotes() {
     deleteQuote: deleteQuoteMutation.mutateAsync,
     duplicateQuote: duplicateQuoteMutation.mutateAsync,
     publishQuote: publishQuoteMutation.mutateAsync,
+    ensureQuotePublicLink: ensurePublicLinkMutation.mutateAsync,
     isCreating: createQuoteMutation.isPending,
     isPublishing: publishQuoteMutation.isPending,
     isDuplicating: duplicateQuoteMutation.isPending,
   };
+
 }
 
 export function useQuote(id: string | undefined) {
