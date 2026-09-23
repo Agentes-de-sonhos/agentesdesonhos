@@ -228,7 +228,7 @@ describe("ProcessoReserva — Avançar genérico x CTA canônico no fluxo unific
     expect(
       screen.queryByRole("button", { name: /Avançar para Venda confirmada/i }),
     ).not.toBeInTheDocument();
-ecreenshot    expect(screen.queryByRole("button", { name: /Avançar para Em operação/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Avançar para Em operação/i })).not.toBeInTheDocument();
   });
 
   it("etapa anterior: botão genérico Avançar continua presente", async () => {
