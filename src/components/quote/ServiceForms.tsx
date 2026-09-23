@@ -1316,8 +1316,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
     resolver: zodResolver(carRentalSchema),
     defaultValues: {
       rental_company: init?.rental_company || "",
-      pickup_location: init?.pickup_location || "",
-      dropoff_location: init?.dropoff_location || "",
+      pickup_location: init?.pickup_location || prefill?.pickup_location || "",
+      dropoff_location: init?.dropoff_location || prefill?.dropoff_location || "",
       pickup_date: init?.pickup_date ? parseLocalDate(init.pickup_date) : tripStartDate || new Date(),
       pickup_time: init?.pickup_time || "10:00",
       dropoff_date: init?.dropoff_date ? parseLocalDate(init.dropoff_date) : tripEndDate || new Date(),
@@ -3551,7 +3551,21 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       photoContext={destinationContext}
     />
   );
+  // Sugestões editáveis derivadas do orçamento (destino, datas, passageiros).
+  const prefill = useMemo(
+    () =>
+      buildServicePrefill(serviceType as any, {
+        destination: destinationContext ?? null,
+        startDate: tripStartDate ?? null,
+        endDate: tripEndDate ?? null,
+        adults: adultsCount ?? null,
+        children: childrenCount ?? null,
+      }),
+    [serviceType, destinationContext, tripStartDate, tripEndDate, adultsCount, childrenCount],
+  );
+
   const formProps = {
+    prefill,
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
     // Documentos com vários serviços do mesmo tipo (3 ingressos, 2 transfers...)
