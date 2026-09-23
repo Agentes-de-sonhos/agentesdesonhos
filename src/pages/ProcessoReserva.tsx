@@ -399,22 +399,44 @@ export default function ProcessoReserva() {
       : currencyGroups.map((group) => money(group[key], group.currency)).join(" · ");
 
   /**
-   * Cartões financeiros por moeda. A margem só é exibida quando há permissão de
-   * receita E de margem: com a receita removida ela seria calculada contra zero.
+   * Cartões do topo dos serviços.
+   * Na reconfirmação (solicitação do site, antes da venda) o contexto é
+   * OPERACIONAL: solicitado, reconfirmado, vendido e variação. Custo, comissão
+   * e margem pertencem à Gestão Financeira e não aparecem aqui.
+   * A margem nunca é exibida sem custo informado: ela seria a própria receita.
    */
-  const financialCards = (
-    isManual && currencyGroups.length > 0
-      ? currencyGroups
-      : [{ currency: file.currency, ...totals }]
-  ).map((group) => ({
-    currency: group.currency,
-    items: [
-      ...(canMargin ? [{ label: "Custo", value: group.cost }] : []),
-      ...(canCommission ? [{ label: "Comissão", value: group.commission }] : []),
-      ...(canMargin && canRevenue ? [{ label: "Margem", value: group.margin }] : []),
-      ...(canRevenue ? [{ label: "Variação vs. solicitado", value: group.variation }] : []),
-    ],
-  })).filter((card) => card.items.length > 0);
+  const financialCards = reconfirmationMode
+    ? canRevenue
+      ? [
+          {
+            currency: file.currency,
+            items: [
+              { label: "Total solicitado", value: reconfirmation.requested },
+              { label: "Total reconfirmado", value: reconfirmation.reconfirmed },
+              { label: "Total vendido", value: reconfirmation.sold },
+              { label: "Variação vs. solicitado", value: reconfirmation.variation },
+            ],
+          },
+        ]
+      : []
+    : (
+        isManual && currencyGroups.length > 0
+          ? currencyGroups
+          : [{ currency: file.currency, ...totals }]
+      )
+        .map((group) => ({
+          currency: group.currency,
+          items: [
+            ...(canMargin ? [{ label: "Custo", value: group.cost }] : []),
+            ...(canCommission ? [{ label: "Comissão", value: group.commission }] : []),
+            ...(canMargin && canRevenue && group.costKnown
+              ? [{ label: "Margem", value: group.margin }]
+              : []),
+            ...(canRevenue ? [{ label: "Variação vs. solicitado", value: group.variation }] : []),
+          ],
+        }))
+        .filter((card) => card.items.length > 0);
+
 
 
   return (
