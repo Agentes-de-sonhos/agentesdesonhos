@@ -1363,6 +1363,53 @@ export default function ProcessoReserva() {
           />
         )}
 
+        {statusJustification && (
+          <Dialog
+            open
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) setStatusJustification(null);
+            }}
+          >
+            <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:w-full">
+              <DialogHeader>
+                <DialogTitle>
+                  {SERVICE_STATUS_LABELS[statusJustification.status]}:{" "}
+                  {travelFileServiceTitle(statusJustification.service)}
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Explique o que mudou. A justificativa fica registrada nas notas internas do
+                processo e nunca aparece para o cliente.
+              </p>
+              <Textarea
+                value={statusJustification.reason}
+                onChange={(e) =>
+                  setStatusJustification((prev) =>
+                    prev ? { ...prev, reason: e.target.value } : prev,
+                  )
+                }
+                placeholder="Ex.: fornecedor informou aumento de tarifa."
+                className="min-h-24"
+                aria-label="Justificativa da mudança"
+              />
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => setStatusJustification(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button className="min-h-11" onClick={confirmStatusJustification}>
+                  Salvar mudança
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+
+
         {isManual && canManage && (
           <>
             <EditarRascunhoDialog
