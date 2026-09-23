@@ -73,9 +73,12 @@ import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMes
 import {
   assessTravelFileReadiness,
   describeServiceCommission,
+  describeServicePendingReasons,
+  summarizeReconfirmation,
   isConvertedV2,
   isActiveTravelFileStatus,
 } from "@/lib/travelFileConversion";
+
 import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
 import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
 
