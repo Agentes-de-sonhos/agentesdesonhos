@@ -20,6 +20,8 @@ import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggesti
 import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { AirportSearchInput } from "@/components/quote/AirportSearchInput";
+import { RequiredFieldsScope, ServiceFormActions } from "@/components/quote/RequiredFieldsScope";
+import { focusFirstInvalidField } from "@/lib/serviceFormRequired";
 import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
 import {
   autoSyncDefaultComposition,
@@ -566,7 +568,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={flightSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         {isEditing && flightAnalysis.status === "incomplete" && (
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
             <span className="font-medium">Passagem incompleta</span> — {formatMissingFlightFields(flightAnalysis.missing)}
@@ -816,11 +819,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             </div>
           )}
         </div>
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1055,7 +1059,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={hotelSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         {/* 1. Hotel name (principal) */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
@@ -1269,11 +1274,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1359,7 +1365,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={carRentalSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="rental_company" render={({ field }) => (
           <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl>
             <PlacesAutocomplete
@@ -1446,11 +1453,12 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Grupo econômico" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1521,7 +1529,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={transferSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="transfer_mode" render={({ field }) => (
           <FormItem><FormLabel>Tipo de Transfer</FormLabel>
             <div className="grid grid-cols-3 gap-2">
@@ -1641,14 +1650,15 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
 
         {renderPaymentSlot(paymentSlot, isRoundTrip ? price * 2 : price)}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Transfer privativo" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
             {initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
             {initialData ? "Salvar" : isRoundTrip ? "Salvar 2 trechos" : "Salvar"}
           </Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1743,7 +1753,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={attractionSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="product_name" render={({ field }) => (
             <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl>
@@ -1856,11 +1867,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
           </p>
         )}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Ingresso com fila rápida" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading || !!compositionError || paxOutOfSync || compositionPending}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1897,7 +1909,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={insuranceSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="provider" render={({ field }) => (
           <FormItem><FormLabel>Seguradora</FormLabel><FormControl><Input placeholder="Assist Card, Travel Ace..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -1956,11 +1969,12 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Cobertura ampliada" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2102,7 +2116,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={cruiseSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="ship_name" render={({ field }) => (
           <FormItem><FormLabel>Nome do Navio</FormLabel><FormControl><Input placeholder="MSC Seaview, Costa Diadema..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -2343,11 +2358,12 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         )} />
 
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Cabine com varanda" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2462,7 +2478,8 @@ function RailTransportForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <RequiredFieldsScope schema={railSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-6">
         <section className="space-y-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <TramFront className="h-4 w-4 text-primary" /> Trajeto
@@ -2624,11 +2641,12 @@ function RailTransportForm({
         )}
 
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Primeira classe" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2699,7 +2717,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={otherSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="company_name" render={({ field }) => (
           <FormItem><FormLabel>{OTHER_SERVICE_NAME_LABEL}</FormLabel><FormControl>
             <PlacesAutocomplete
@@ -2751,11 +2770,12 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
           </FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Opção recomendada" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2801,7 +2821,8 @@ function CircuitForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialDa
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={circuitSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="circuit_name" render={({ field }) => (
           <FormItem><FormLabel>Nome do Circuito</FormLabel><FormControl>
             <Input placeholder="Ex: Circuito Itália Clássica" {...field} />
@@ -2839,11 +2860,12 @@ function CircuitForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialDa
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Circuito clássico" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
