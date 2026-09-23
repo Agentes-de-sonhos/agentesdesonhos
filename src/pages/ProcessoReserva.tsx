@@ -385,6 +385,12 @@ export default function ProcessoReserva() {
   const next = nextFileStatus(file.status);
   // Reservas cadastradas à mão podem ter dados e serviços editados aqui.
   const isManual = file.origin === "manual";
+  /**
+   * Solicitação recebida do site, no fluxo unificado e ainda não convertida:
+   * a etapa da agência é reconfirmar cada serviço antes da venda.
+   */
+  const reconfirmationMode = !isManual && !!unifiedV2 && !isConvertedV2(file);
+
 
   /** Um valor por moeda, lado a lado — sem somar nem converter moedas. */
   const groupedMoney = (key: "requested" | "reconfirmed" | "sold") =>
