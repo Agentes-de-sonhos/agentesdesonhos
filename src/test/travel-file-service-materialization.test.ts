@@ -24,9 +24,13 @@ const sql = readFileSync(
 );
 
 const ensureFileSql = readFileSync(
-  resolve(process.cwd(), "drizzle/migrations/0014_unified_workflow_v2_functions.sql"),
+  resolve(
+    process.cwd(),
+    "supabase/migrations/20260819133022_9a3b2535-8ddd-4ba4-8c33-b4e40b51a97f.sql",
+  ),
   "utf8",
 );
+
 
 describe("migration 0025 — materialização dos serviços (teste estático de SQL)", () => {
   it("cria trigger por comando nos itens da solicitação", () => {
