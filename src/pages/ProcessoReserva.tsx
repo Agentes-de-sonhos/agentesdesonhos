@@ -72,7 +72,6 @@ import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMes
 
 import {
   assessTravelFileReadiness,
-  describeServiceCommission,
   describeServicePendingReasons,
   describeStatusTransitionBlock,
   summarizeReconfirmation,
@@ -84,11 +83,6 @@ import {
   serviceOptionLabel,
   travelFileServiceTitle,
 } from "@/lib/travelFileServiceIdentity";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -480,19 +474,17 @@ export default function ProcessoReserva() {
    * A margem nunca é exibida sem custo informado: ela seria a própria receita.
    */
   const financialCards = reconfirmationMode
-    ? canRevenue
-      ? [
-          {
-            currency: file.currency,
-            items: [
-              { label: "Total solicitado", value: reconfirmation.requested },
-              { label: "Total reconfirmado", value: reconfirmation.reconfirmed },
-              { label: "Total vendido", value: reconfirmation.sold },
-              { label: "Variação vs. solicitado", value: reconfirmation.variation },
-            ],
-          },
-        ]
-      : []
+    ? [
+        {
+          currency: file.currency,
+          items: [
+            { label: "Solicitado", value: reconfirmation.requested },
+            { label: "Reconfirmado", value: reconfirmation.reconfirmed },
+            { label: "Vendido", value: reconfirmation.sold },
+            { label: "Variação vs. solicitado", value: reconfirmation.variation },
+          ],
+        },
+      ]
     : (
         isManual && currencyGroups.length > 0
           ? currencyGroups
@@ -829,7 +821,7 @@ export default function ProcessoReserva() {
                     <span>Fornecedor: {displayServiceSupplier(service)}</span>
                   ) : (
                     unifiedV2 &&
-                    canFinancialManage &&
+                    canManage &&
                     !isConvertedV2(file) && (
                       <Button
                         variant="ghost"
@@ -918,80 +910,6 @@ export default function ProcessoReserva() {
                   )}
                 </div>
 
-                {/* Informações financeiras: opcionais nesta etapa. Custo, comissão,
-                    nota fiscal e prazos vivem na Gestão Financeira e nunca
-                    impedem a confirmação da venda. */}
-                {(canMargin || canCommission || (unifiedV2 && canFinancialManage)) && (
-                  <Collapsible className="mt-3">
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-9 gap-2 px-2 text-xs text-muted-foreground"
-                      >
-                        <CircleDollarSign className="h-3.5 w-3.5" />
-                        Adicionar informações financeiras agora (opcional)
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="mt-2 rounded-xl border border-border/50 bg-muted/20 p-3">
-                        <p className="text-[11px] text-muted-foreground">
-                          Opcional nesta etapa: se ficar em branco, o financeiro deste serviço
-                          entra como pendente de configuração após a venda.
-                        </p>
-                        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {canMargin && (
-                            <AmountField
-                              label="Custo"
-                              value={service.cost_amount}
-                              currency={service.currency}
-                              readOnly={!canFinancialManage}
-                              onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
-                            />
-                          )}
-                          {canCommission && (
-                            <AmountField
-                              label="Comissão"
-                              value={service.commission_amount}
-                              currency={service.currency}
-                              readOnly={!canCommissionManage}
-                              onCommit={(v) =>
-                                patchServiceAmounts(service, { commission_amount: v })
-                              }
-                            />
-                          )}
-                        </div>
-                        {unifiedV2 && (
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <Badge variant="secondary">{describeServiceCommission(service)}</Badge>
-                            {canFinancialManage && !isConvertedV2(file) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-9 gap-1.5 text-xs"
-                                onClick={() => setRuleEditing(service)}
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                                Fornecedor e regra financeira
-                              </Button>
-                            )}
-                            {isConvertedV2(file) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 gap-1.5 text-xs"
-                                onClick={() => navigate(`${nav.financeiro}?tab=vendas`)}
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                                Configurar depois no Financeiro
-                              </Button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
 
               </div>
             ))}
