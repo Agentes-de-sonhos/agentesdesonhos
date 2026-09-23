@@ -22,6 +22,7 @@ import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { AirportSearchInput } from "@/components/quote/AirportSearchInput";
 import { RequiredFieldsScope, ServiceFormActions } from "@/components/quote/RequiredFieldsScope";
 import { focusFirstInvalidField } from "@/lib/serviceFormRequired";
+import { buildServicePrefill, type ServicePrefill } from "@/lib/serviceFormPrefill";
 import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
 import {
   autoSyncDefaultComposition,
@@ -126,6 +127,8 @@ interface ServiceFormProps {
   photoSlot?: React.ReactNode;
   /** Destino/contexto do orçamento — usado para priorizar buscas de lugares. */
   destinationContext?: string | null;
+  /** Sugestões editáveis derivadas do orçamento/oportunidade (destino, datas, passageiros). */
+  prefill?: ServicePrefill;
   /** Called when the service mode chooser becomes active/inactive so the parent modal can adapt its layout */
   onChooserActiveChange?: (active: boolean) => void;
 
@@ -419,7 +422,7 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
   );
 }
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, prefill }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
@@ -439,7 +442,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     resolver: zodResolver(flightSchema),
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
-      origin_city: init?.origin_city || "", destination_city: init?.destination_city || "",
+      origin_city: init?.origin_city || "", destination_city: init?.destination_city || prefill?.destination_city || "",
       airline: init?.airline || "",
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       fees_amount: (init as any)?.fees_amount ?? 0,
@@ -867,7 +870,7 @@ const hotelSchema = z.object({
   path: ["check_out"],
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange, prefill }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   // Legacy migration: if there are no `rooms`, seed one from the old single-room fields.
@@ -902,7 +905,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     resolver: zodResolver(hotelSchema),
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
-      hotel_name: init?.hotel_name || "", city: init?.city || "",
+      hotel_name: init?.hotel_name || "", city: init?.city || prefill?.city || "",
       meal_plan: init?.meal_plan || "",
       rooms: initialRooms,
       notes: init?.notes || "",
@@ -1303,7 +1306,7 @@ const carRentalSchema = z.object({
   path: ["dropoff_date"],
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange, prefill }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const [pickupOpen, setPickupOpen] = useState(false);
   const [dropoffOpen, setDropoffOpen] = useState(false);
@@ -1476,7 +1479,7 @@ const transferSchema = z.object({
   description: z.string().optional(),
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, prefill }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof transferSchema>>({
@@ -1485,7 +1488,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
       company_name: init?.company_name || "",
       transfer_mode: init?.transfer_type || "round_trip",
       service_category: init?.service_category || undefined,
-      location: init?.location || "",
+      location: init?.location || prefill?.location || "",
       price: init?.price || initialData?.amount || 0,
       arrival_date: init?.arrival_date ? parseLocalDate(init.arrival_date) : (init?.date ? parseLocalDate(init.date) : tripStartDate),
       departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripEndDate,
