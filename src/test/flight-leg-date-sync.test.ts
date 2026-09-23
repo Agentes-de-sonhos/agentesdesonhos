@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+vi.mock("@/lib/pdfText", () => ({ extractPdfText: async () => "" }));
 import { syncFirstLegDate } from "@/lib/flightLegDateSync";
 import { parsedAirfareToFlightData } from "@/components/quote/flight-wizard/AirfareSmartImport";
 import { formatPublicShortDate } from "@/i18n/publicMaterials/locale";
