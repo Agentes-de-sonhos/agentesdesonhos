@@ -3509,16 +3509,8 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const isHotel = serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    // Hospedagem: nada é salvo enquanto a galeria tiver alterações pendentes —
-    // as fotos jamais mudam silenciosamente.
-    if (isHotel && galleryPending) {
-      toast({
-        title: "Confirme a galeria de fotos",
-        description: "Clique em “Salvar galeria” (ou remova as fotos do hotel anterior) antes de salvar a hospedagem.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Hospedagem: a galeria tem autosave — cada seleção/remoção já está aplicada,
+    // então nunca há pendência bloqueando o salvamento do serviço.
     return onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
