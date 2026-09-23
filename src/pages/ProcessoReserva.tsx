@@ -727,51 +727,6 @@ export default function ProcessoReserva() {
                   )}
                 </div>
 
-                {unifiedV2 && (
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={
-                        (service.financial_rule_status ?? "pending") === "pending"
-                          ? "outline"
-                          : "secondary"
-                      }
-                      className={
-                        (service.financial_rule_status ?? "pending") === "pending"
-                          ? "border-amber-500/50 text-amber-700 dark:text-amber-300"
-                          : undefined
-                      }
-                    >
-                      {describeServiceCommission(service)}
-                    </Badge>
-                    {canFinancialManage && !isConvertedV2(file) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 gap-1.5 text-xs"
-                        onClick={() => setRuleEditing(service)}
-                        aria-label={`Regra financeira de ${service.product_name}`}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Regra financeira
-                      </Button>
-                    )}
-                    {readiness?.missingSupplierIds.includes(service.id) && (
-                      <Input
-                        value={supplierExceptions[service.id] ?? ""}
-                        onChange={(e) =>
-                          setSupplierExceptions((prev) => ({
-                            ...prev,
-                            [service.id]: e.target.value,
-                          }))
-                        }
-                        placeholder="Sem fornecedor: justifique a exceção"
-                        className="h-8 min-w-[220px] flex-1 bg-background text-xs"
-                        aria-label={`Justificativa de exceção de fornecedor para ${service.product_name}`}
-                      />
-                    )}
-                  </div>
-                )}
-
                 {reconfirmationMode && (pendingByService[service.id]?.length ?? 0) > 0 && (
                   <div
                     data-testid={`service-pending-${service.id}`}
@@ -794,9 +749,7 @@ export default function ProcessoReserva() {
                   </div>
                 )}
 
-
-
-                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="min-w-0">
                     <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       Status do serviço
@@ -805,7 +758,7 @@ export default function ProcessoReserva() {
                       value={service.status}
                       disabled={!canManage}
                       onValueChange={(v) =>
-                        patchServiceStatus(service.id, v as TravelFileServiceStatus)
+                        changeServiceStatus(service, v as TravelFileServiceStatus)
                       }
                     >
                       <SelectTrigger className="mt-1 h-9">
@@ -823,6 +776,13 @@ export default function ProcessoReserva() {
                   {canRevenue && (
                     <>
                       <AmountField
+                        label="Solicitado"
+                        value={service.requested_amount}
+                        currency={service.currency}
+                        readOnly
+                        onCommit={() => {}}
+                      />
+                      <AmountField
                         label="Reconfirmado"
                         value={service.reconfirmed_amount}
                         currency={service.currency}
@@ -838,25 +798,83 @@ export default function ProcessoReserva() {
                       />
                     </>
                   )}
-                  {canMargin && (
-                    <AmountField
-                      label="Custo"
-                      value={service.cost_amount}
-                      currency={service.currency}
-                      readOnly={!canFinancialManage}
-                      onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
-                    />
-                  )}
-                  {canCommission && (
-                    <AmountField
-                      label="Comissão"
-                      value={service.commission_amount}
-                      currency={service.currency}
-                      readOnly={!canCommissionManage}
-                      onCommit={(v) => patchServiceAmounts(service, { commission_amount: v })}
-                    />
-                  )}
                 </div>
+
+                {/* Informações financeiras: opcionais nesta etapa. Custo, comissão,
+                    nota fiscal e prazos vivem na Gestão Financeira e nunca
+                    impedem a confirmação da venda. */}
+                {(canMargin || canCommission || (unifiedV2 && canFinancialManage)) && (
+                  <Collapsible className="mt-3">
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 gap-2 px-2 text-xs text-muted-foreground"
+                      >
+                        <CircleDollarSign className="h-3.5 w-3.5" />
+                        Adicionar informações financeiras agora (opcional)
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="mt-2 rounded-xl border border-border/50 bg-muted/20 p-3">
+                        <p className="text-[11px] text-muted-foreground">
+                          Opcional nesta etapa: se ficar em branco, o financeiro deste serviço
+                          entra como pendente de configuração após a venda.
+                        </p>
+                        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {canMargin && (
+                            <AmountField
+                              label="Custo"
+                              value={service.cost_amount}
+                              currency={service.currency}
+                              readOnly={!canFinancialManage}
+                              onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
+                            />
+                          )}
+                          {canCommission && (
+                            <AmountField
+                              label="Comissão"
+                              value={service.commission_amount}
+                              currency={service.currency}
+                              readOnly={!canCommissionManage}
+                              onCommit={(v) =>
+                                patchServiceAmounts(service, { commission_amount: v })
+                              }
+                            />
+                          )}
+                        </div>
+                        {unifiedV2 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary">{describeServiceCommission(service)}</Badge>
+                            {canFinancialManage && !isConvertedV2(file) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-9 gap-1.5 text-xs"
+                                onClick={() => setRuleEditing(service)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                                Fornecedor e regra financeira
+                              </Button>
+                            )}
+                            {isConvertedV2(file) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 gap-1.5 text-xs"
+                                onClick={() => navigate(`${nav.financeiro}?tab=vendas`)}
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                Configurar depois no Financeiro
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
               </div>
             ))}
             {services.length === 0 && (
