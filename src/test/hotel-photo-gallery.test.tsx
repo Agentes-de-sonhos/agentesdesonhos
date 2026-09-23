@@ -177,9 +177,11 @@ describe("HotelPhotoGallery (autosave)", () => {
     const onChange = vi.fn();
     render(<Harness onChange={onChange} />);
     await findSuggestions();
-    fireEvent.click(await screen.findByLabelText("Selecionar foto 2"));
+    const second = await screen.findByLabelText("Selecionar foto 2");
+    // Clique duplo na mesma sugestão: a segunda vez não pode duplicar a foto.
+    fireEvent.click(second);
+    fireEvent.click(second);
     fireEvent.click(await screen.findByLabelText("Selecionar foto 1"));
-    fireEvent.click(await screen.findByLabelText("Selecionar foto 2"));
     const last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as string[];
     expect(last).toEqual([makeGplaceRef("P1", 1), makeGplaceRef("P1", 0)]);
     expect(dedupeImageRefs(last)).toHaveLength(2);
