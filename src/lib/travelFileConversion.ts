@@ -233,3 +233,66 @@ export function describeServiceCommission(service: TravelFileService): string {
   if (type === "none") return "Sem comissão";
   return "Comissão não informada";
 }
+
+/**
+ * O que ainda falta neste serviço para ele entrar na venda, em linguagem
+ * humana. Nunca expõe códigos técnicos e nunca inventa dado nenhum.
+ */
+export function describeServicePendingReasons(
+  service: TravelFileService,
+  supplierExceptions: Record<string, string> = {},
+): string[] {
+  const missing: string[] = [];
+  const status = service.status;
+
+  if ((V2_BLOCKING_SERVICE_STATUSES as readonly string[]).includes(status)) {
+    missing.push("Confirme a disponibilidade com o fornecedor e ajuste a situação do serviço.");
+  }
+  if ((V2_EXCLUDED_WHEN_OPTIONAL_STATUSES as readonly string[]).includes(status)) {
+    missing.push(
+      service.is_required
+        ? "Serviço obrigatório indisponível: reconfirme ou cancele o processo."
+        : "Serviço indisponível/cancelado: ficará fora da venda.",
+    );
+    return missing;
+  }
+  if (effectiveServiceAmount(service) <= 0) {
+    missing.push("Informe o valor reconfirmado do serviço.");
+  }
+  if ((service.financial_rule_status ?? "pending") === "pending") {
+    missing.push("Confirme a regra financeira (comissão, taxas, nota fiscal e prazo de pagamento).");
+  }
+  if (
+    !service.operator_id &&
+    !(service.supplier_name || "").trim() &&
+    !(supplierExceptions[service.id] || "").trim()
+  ) {
+    missing.push("Selecione o fornecedor ou justifique a exceção.");
+  }
+  return missing;
+}
+
+/** Resumo do bloco "Serviços para reconfirmar". */
+export function summarizeReconfirmation(
+  services: TravelFileService[],
+  supplierExceptions: Record<string, string> = {},
+): {
+  requested: number;
+  reconfirmed: number;
+  eligibleCount: number;
+  pendingCount: number;
+} {
+  const eligible = services.filter(isServiceEligible);
+  const pending = services.filter(
+    (s) => describeServicePendingReasons(s, supplierExceptions).length > 0,
+  );
+  return {
+    requested: services.reduce((sum, s) => sum + (s.requested_amount ?? 0), 0),
+    reconfirmed: services.reduce(
+      (sum, s) => sum + (s.sold_amount ?? s.reconfirmed_amount ?? 0),
+      0,
+    ),
+    eligibleCount: eligible.length,
+    pendingCount: pending.length,
+  };
+}
