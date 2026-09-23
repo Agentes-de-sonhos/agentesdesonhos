@@ -71,17 +71,21 @@ describe("migration 0025 — materialização dos serviços (teste estático de 
   });
 
   it("a chave idempotente por item da solicitação continua valendo", () => {
+    expect(ensureFileSql).toContain(
+      "CONSTRAINT travel_file_services_item_unique UNIQUE (request_item_id)",
+    );
     expect(ensureFileSql).toContain("ON CONFLICT (request_item_id) DO NOTHING");
     // status inicial canônico: nada é marcado como disponível automaticamente
-    expect(ensureFileSql).not.toMatch(/travel_file_services[\s\S]{0,4000}'available'/);
+    expect(ensureFileSql).toContain("status text NOT NULL DEFAULT 'requested'");
   });
 
   it("apenas os itens da solicitação entram (escolha do cliente é a fonte)", () => {
-    expect(ensureFileSql).toContain(
-      "FROM public.quote_booking_request_items i\n  WHERE i.request_id = v_req.id",
+    expect(ensureFileSql).toMatch(
+      /FROM public\.quote_booking_request_items i\s+WHERE i\.request_id = v_req\.id/,
     );
   });
 });
+
 
 const service = (patch: Partial<TravelFileService> = {}): TravelFileService =>
   ({
