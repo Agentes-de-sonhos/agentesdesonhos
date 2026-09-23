@@ -188,9 +188,8 @@ export function ConfirmSaleDialog({
                 {readiness.eligible.length} serviço(s) · Total {money(readiness.total, readiness.currency || file.currency)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                A oportunidade será marcada como ganha, a operação e a venda financeira
-                serão criadas com os serviços escolhidos, e o recebimento do cliente
-                nascerá como pendente.
+                A oportunidade será marcada como ganha, a operação e a venda serão criadas
+                com os serviços escolhidos, e o recebimento do cliente nascerá como pendente.
               </p>
             </div>
 

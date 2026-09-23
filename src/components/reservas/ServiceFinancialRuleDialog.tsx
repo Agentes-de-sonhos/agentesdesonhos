@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import type { TravelFileService } from "@/types/travelFile";
 import { useServiceFinancialRule } from "@/hooks/useUnifiedWorkflow";
 

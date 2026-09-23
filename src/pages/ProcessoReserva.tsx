@@ -220,7 +220,6 @@ export default function ProcessoReserva() {
   const canRevenue = can("financial.view_revenue");
   const canMargin = can("financial.view_margin");
   const canCommission = can("financial.commissions.view");
-  const canCommissionManage = can("financial.commissions.manage");
   const canFinancialManage = can("reservations.financial.manage");
 
   const file = data?.file;
@@ -254,6 +253,13 @@ export default function ProcessoReserva() {
         ? assessTravelFileReadiness(file, services, supplierExceptions)
         : null,
     [file, services, supplierExceptions, unifiedV2],
+  );
+  const visibleReadinessWarnings = useMemo(
+    () =>
+      (readiness?.warnings ?? []).filter(
+        (warning) => !/financeir|informações financeiras/i.test(warning),
+      ),
+    [readiness?.warnings],
   );
   /** Resumo do bloco de reconfirmação (fluxo unificado). */
   const reconfirmation = useMemo(
@@ -1023,7 +1029,7 @@ export default function ProcessoReserva() {
                     ))}
                   </ul>
                 )}
-                {readiness.warnings.map((warning) => (
+                {visibleReadinessWarnings.map((warning) => (
                   <p key={warning} className="text-xs text-muted-foreground">
                     {warning}
                   </p>
