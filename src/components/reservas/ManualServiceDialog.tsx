@@ -69,7 +69,7 @@ export function ManualServiceDialog({
   currency = "BRL",
   onSave,
 }: ManualServiceDialogProps) {
-  const [serviceType, setServiceType] = useState("outros");
+  const [serviceType, setServiceType] = useState("other");
   const [productName, setProductName] = useState("");
   const [supplierName, setSupplierName] = useState("");
   const [destination, setDestination] = useState("");
@@ -84,7 +84,7 @@ export function ManualServiceDialog({
   useEffect(() => {
     if (!open) return;
     setFieldError(null);
-    setServiceType(service?.service_type || "outros");
+    setServiceType(canonicalOperationServiceType(service?.service_type));
     setProductName(service?.product_name || "");
     setSupplierName(service?.supplier_name || "");
     setDestination(service?.destination || "");

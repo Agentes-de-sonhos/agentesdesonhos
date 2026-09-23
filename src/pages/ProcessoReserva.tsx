@@ -743,7 +743,7 @@ export default function ProcessoReserva() {
                   </span>
 
                 ))}
-              {isManual && canManage && (
+              {canManage && (
                 <Button
                   variant="outline"
                   size="sm"
