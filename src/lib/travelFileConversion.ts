@@ -102,10 +102,11 @@ export interface TravelFileReadiness {
  * - cliente e oportunidade vinculados;
  * - nenhum serviço em reconfirmação; nenhum obrigatório indisponível;
  * - ao menos um elegível com preço final;
- * - moeda única;
- * - regra financeira confirmada (ou não aplicável) em todos os elegíveis;
- * - fornecedor identificado ou exceção justificada.
+ * - moeda única.
+ * Custo, comissão, margem, regra financeira, nota fiscal e prazos NÃO são
+ * exigidos antes da venda: ficam pendentes na Gestão Financeira.
  */
+
 export function assessTravelFileReadiness(
   file: Pick<
     TravelFile,
