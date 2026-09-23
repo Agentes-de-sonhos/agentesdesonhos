@@ -185,7 +185,7 @@ describe("HotelPhotoGallery (autosave)", () => {
     expect(dedupeImageRefs(last)).toHaveLength(2);
 
     // Clicar de novo na mesma sugestão alterna (remove) — nunca duplica.
-    fireEvent.click(await screen.findByLabelText("Selecionar foto 2"));
+    fireEvent.click(await screen.findByLabelText("Remover foto 2 da galeria"));
     last = onChange.mock.calls[onChange.mock.calls.length - 1][0] as string[];
     expect(last).toEqual([makeGplaceRef("P1", 0)]);
   });
