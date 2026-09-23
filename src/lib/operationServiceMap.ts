@@ -9,6 +9,7 @@ export const OPERATION_SERVICE_LABELS: Record<string, string> = {
   insurance: "Seguro viagem",
   cruise: "Cruzeiro",
   train: "Trem",
+  package: "Pacote",
   other: "Outros",
 };
 

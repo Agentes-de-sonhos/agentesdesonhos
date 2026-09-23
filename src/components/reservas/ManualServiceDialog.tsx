@@ -22,18 +22,18 @@ import { Loader2 } from "lucide-react";
 import { parsePastedCurrency } from "@/lib/currencyMask";
 import type { TravelFileService } from "@/types/travelFile";
 import { TripPeriodField } from "@/components/shared/TripPeriodField";
+import {
+  OPERATION_SERVICE_LABELS,
+  canonicalOperationServiceType,
+} from "@/lib/operationServiceMap";
 
-const SERVICE_TYPES: { value: string; label: string }[] = [
-  { value: "aereo", label: "Passagem aérea" },
-  { value: "hotel", label: "Hospedagem" },
-  { value: "transfer", label: "Transfer" },
-  { value: "passeio", label: "Passeio" },
-  { value: "seguro", label: "Seguro" },
-  { value: "cruzeiro", label: "Cruzeiro" },
-  { value: "ingresso", label: "Ingresso" },
-  { value: "pacote", label: "Pacote" },
-  { value: "outros", label: "Outro" },
-];
+/**
+ * Um único vocabulário de tipos de serviço em toda a plataforma (reserva,
+ * operação e financeiro), para que o tipo escolhido seja gravado como escolhido.
+ */
+const SERVICE_TYPES: { value: string; label: string }[] = Object.entries(
+  OPERATION_SERVICE_LABELS,
+).map(([value, label]) => ({ value, label }));
 
 export interface ManualServicePayload {
   serviceId?: string | null;
