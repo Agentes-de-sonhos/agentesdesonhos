@@ -1185,14 +1185,51 @@ function PublicQuoteDocuments({
     },
   });
 
-  const openDoc = async (doc: PublicDocument, download: boolean) => {
+  // Visualização dentro do próprio orçamento: o endereço de armazenamento não
+  // entra na navegação e o bucket continua privado (endereço assinado curto).
+  const [viewerDoc, setViewerDoc] = useState<PublicDocument | null>(null);
+  const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+  const [viewerLoading, setViewerLoading] = useState(false);
+
+  const signDoc = async (doc: PublicDocument, download: boolean) => {
     const { data, error } = await supabase.storage
       .from("quote-documents")
-      .createSignedUrl(doc.file_path, 60 * 10, {
+      .createSignedUrl(doc.file_path, SIGNED_URL_TTL_SECONDS, {
         download: download ? doc.file_name : undefined,
       });
-    if (error || !data?.signedUrl) return;
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+    if (error || !data?.signedUrl) return null;
+    return data.signedUrl;
+  };
+
+  const downloadDoc = async (doc: PublicDocument) => {
+    const url = await signDoc(doc, true);
+    if (!url) return;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = doc.file_name;
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
+  const openDoc = async (doc: PublicDocument) => {
+    if (!canPreviewInline(doc.file_type, doc.file_name)) {
+      await downloadDoc(doc);
+      return;
+    }
+    setViewerDoc(doc);
+    setViewerUrl(null);
+    setViewerLoading(true);
+    const url = await signDoc(doc, false);
+    setViewerUrl(url);
+    setViewerLoading(false);
+  };
+
+  const closeViewer = () => {
+    setViewerDoc(null);
+    setViewerUrl(null);
+    setViewerLoading(false);
   };
 
   if (isLoading || documents.length === 0) return null;
@@ -1238,7 +1275,7 @@ function PublicQuoteDocuments({
                     variant="ghost"
                     size="sm"
                     className="h-9 px-2.5 text-xs"
-                    onClick={() => openDoc(doc, false)}
+                    onClick={() => openDoc(doc)}
                     title={t("viewTitle")}
                   >
                     <Eye className="h-4 w-4 sm:mr-1.5" />
@@ -1248,7 +1285,7 @@ function PublicQuoteDocuments({
                     variant="ghost"
                     size="sm"
                     className="h-9 px-2.5 text-xs"
-                    onClick={() => openDoc(doc, true)}
+                    onClick={() => downloadDoc(doc)}
                     title={t("downloadTitle")}
                   >
                     <Download className="h-4 w-4 sm:mr-1.5" />
@@ -1260,6 +1297,16 @@ function PublicQuoteDocuments({
           })}
         </ul>
       </div>
+      <PublicDocumentViewer
+        doc={viewerDoc}
+        signedUrl={viewerUrl}
+        loading={viewerLoading}
+        allowDownload
+        onClose={closeViewer}
+        onDownload={viewerDoc ? () => downloadDoc(viewerDoc) : undefined}
+        closeLabel={t("closeLabel")}
+        downloadLabel={t("downloadLabel")}
+      />
     </section>
   );
 }
