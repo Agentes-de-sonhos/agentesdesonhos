@@ -264,10 +264,12 @@ export function OpportunityCard({
         .from("quotes")
         .select("id")
         .eq("opportunity_id", opportunity.id)
+        .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle();
+      // Já existe orçamento desta oportunidade: abre o existente, sem duplicar.
       if (data?.id) {
-        setLinkedDialog({ kind: "quote", existingId: data.id });
+        navigate(nav.quote(data.id));
         return;
       }
       await proceedCreateQuote();
@@ -275,6 +277,7 @@ export function OpportunityCard({
       setIsCheckingLink(false);
     }
   };
+
 
   const handleCreateTripWallet = async () => {
     if (isCheckingLink) return;

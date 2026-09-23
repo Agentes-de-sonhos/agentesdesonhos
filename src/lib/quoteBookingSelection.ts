@@ -160,6 +160,10 @@ export function bookingSelectionTotal(
 }
 
 /** Validação do contato: nome + (WhatsApp OU e-mail). */
+/** Orientação exibida quando o cliente tenta enviar sem marcar o aceite. */
+export const BOOKING_ACCEPT_REQUIRED_MESSAGE =
+  "É necessário aceitar o aviso de que o pedido não confirma a reserva.";
+
 export function validateBookingContact(input: {
   name: string;
   whatsapp: string;
@@ -170,7 +174,7 @@ export function validateBookingContact(input: {
 }): string | null {
   if (input.hasLinkedClient) {
     if (!input.disclaimerAccepted) {
-      return "É necessário aceitar o aviso de que o pedido não confirma a reserva.";
+      return BOOKING_ACCEPT_REQUIRED_MESSAGE;
     }
     return null;
   }
@@ -182,7 +186,7 @@ export function validateBookingContact(input: {
   if (input.email.trim() && !emailOk) return "Informe um e-mail válido.";
   if (!hasWhats && !emailOk) return "Informe WhatsApp ou e-mail para a agência entrar em contato.";
   if (!input.disclaimerAccepted) {
-    return "É necessário aceitar o aviso de que o pedido não confirma a reserva.";
+    return BOOKING_ACCEPT_REQUIRED_MESSAGE;
   }
   return null;
 }

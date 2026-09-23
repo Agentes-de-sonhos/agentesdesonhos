@@ -31,7 +31,7 @@ describe("aceite único no rodapé fixo do modal de solicitação", () => {
 
   it("checkbox acessível é a única fonte de estado de accepted", () => {
     expect(panel).toContain("const [accepted, setAccepted] = useState(false)");
-    expect(panel).toContain("onCheckedChange={(v) => setAccepted(v === true)}");
+    expect(panel).toContain("setAccepted(v === true);");
     expect(panel).toContain('aria-label={t("acceptBookingDisclaimer")}');
     expect(panel).toContain("disclaimerAccepted: accepted");
     // não marca automaticamente

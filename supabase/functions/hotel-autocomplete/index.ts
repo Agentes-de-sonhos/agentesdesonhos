@@ -69,20 +69,32 @@ serve(async (req) => {
       );
     }
 
-    // Filter and format predictions - prioritize lodging
-    const predictions = (data.predictions || [])
-      .filter((p: any) => {
-        const types = p.types || [];
-        // Prioritize lodging but allow other establishments
-        return types.includes("lodging") || types.includes("establishment");
-      })
+    // Somente meios de hospedagem: aeroportos, restaurantes, cafeterias e
+    // demais negócios ficam fora. O param `types` legado não aceita "lodging",
+    // então o filtro é aplicado sobre os tipos devolvidos.
+    const BLOCKED_TYPES = [
+      "airport", "restaurant", "cafe", "bar", "food", "meal_takeaway", "meal_delivery",
+      "travel_agency", "car_rental", "bus_station", "train_station", "transit_station",
+      "tourist_attraction", "museum", "store", "shopping_mall", "supermarket",
+      "hospital", "school", "gym", "night_club", "bank", "atm", "gas_station",
+    ];
+    const raw = data.predictions || [];
+    const isLodging = (p: any) => {
+      const types: string[] = p.types || [];
+      return types.includes("lodging") || types.includes("campground") || types.includes("rv_park");
+    };
+    const lodging = raw.filter(isLodging);
+    const fallback = raw.filter(
+      (p: any) => !isLodging(p) && !(p.types || []).some((t: string) => BLOCKED_TYPES.includes(t)),
+    );
+    const predictions = (lodging.length > 0 ? lodging : fallback)
       .slice(0, 5)
       .map((p: any) => ({
         place_id: p.place_id,
         name: p.structured_formatting?.main_text || p.description,
         secondary: p.structured_formatting?.secondary_text || "",
         description: p.description,
-        is_hotel: (p.types || []).includes("lodging"),
+        is_hotel: isLodging(p),
       }));
 
     // Sort: hotels first
