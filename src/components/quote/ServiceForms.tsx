@@ -74,6 +74,7 @@ import {
   type CruiseCabinOption,
 } from "@/lib/cruiseCabins";
 import { FlightWizard, FlightModeChooser, type WizardFlightDraft } from "./flight-wizard/FlightWizard";
+import { syncFirstLegDate } from "@/lib/flightLegDateSync";
 import { AirfareSmartImport } from "./flight-wizard/AirfareSmartImport";
 import { HotelSmartImport } from "./hotel-import/HotelSmartImport";
 import { CarRentalSmartImport } from "./car-rental-import/CarRentalSmartImport";
@@ -613,7 +614,14 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                   {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button></FormControl></PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
+                  <Calendar mode="single" selected={field.value} onSelect={(d) => {
+                    const prev = field.value ? format(field.value, "yyyy-MM-dd") : "";
+                    const next = d ? format(d, "yyyy-MM-dd") : "";
+                    field.onChange(d);
+                    if (next) setOutboundLegs((legs) => syncFirstLegDate(legs, prev, next) ?? legs);
+                    const ret = form.getValues("return_date");
+                    if (d && ret && ret < d) form.setValue("return_date", null as any);
+                  }} disabled={disableDate} defaultMonth={field.value || defaultMonth(tripStartDate)} initialFocus className="pointer-events-auto" />
                 </PopoverContent>
               </Popover><FormMessage /></FormItem>
           )} />
@@ -625,7 +633,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                     {field.value ? format(field.value, "dd/MM/yyyy", { locale: ptBR }) : "Selecione"}<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button></FormControl></PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value ?? undefined} onSelect={field.onChange} disabled={disableDate} defaultMonth={defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
+                    <Calendar mode="single" selected={field.value ?? undefined} onSelect={(d) => {
+                      const prev = field.value ? format(field.value, "yyyy-MM-dd") : "";
+                      const next = d ? format(d, "yyyy-MM-dd") : "";
+                      field.onChange(d);
+                      if (next) setReturnLegs((legs) => syncFirstLegDate(legs, prev, next) ?? legs);
+                    }} disabled={(d) => !!disableDate?.(d) || (!!form.getValues("departure_date") && d < form.getValues("departure_date")!)} defaultMonth={field.value || form.getValues("departure_date") || defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover><FormMessage /></FormItem>
             )} />
@@ -3334,6 +3347,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
               <AirfareSmartImport
+                tripStartDate={props.tripStartDate}
                 onCancel={() => setMode("chooser")}
                 onConfirm={(mapped) => {
                   setInjectedInitial({

@@ -90,6 +90,8 @@ const emptyLeg = (): FlightLegDraft => ({
   departure_time: "", arrival_time: "", flight_number: "",
 });
 
+import { syncFirstLegDate } from "@/lib/flightLegDateSync";
+
 function fmt(d?: string) {
   if (!d) return "—";
   try {
@@ -488,7 +490,16 @@ export function FlightWizard({
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar mode="single"
                       selected={parseLocal(data.departure_date)}
-                      onSelect={(d) => upd({ departure_date: d ? format(d, "yyyy-MM-dd") : "" })}
+                      onSelect={(d) => {
+                        const next = d ? format(d, "yyyy-MM-dd") : "";
+                        const patch: Partial<WizardFlightDraft> = {
+                          departure_date: next,
+                          outbound_legs: syncFirstLegDate(data.outbound_legs, data.departure_date, next),
+                        };
+                        // Volta nunca anterior à ida: limpa para o agente escolher de novo.
+                        if (next && data.return_date && data.return_date < next) patch.return_date = "";
+                        upd(patch);
+                      }}
                       initialFocus className="pointer-events-auto"
                       locale={ptBR} />
                   </PopoverContent>
@@ -507,7 +518,11 @@ export function FlightWizard({
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar mode="single"
                         selected={parseLocal(data.return_date)}
-                        onSelect={(d) => upd({ return_date: d ? format(d, "yyyy-MM-dd") : "" })}
+                        onSelect={(d) => {
+                          const next = d ? format(d, "yyyy-MM-dd") : "";
+                          upd({ return_date: next, return_legs: syncFirstLegDate(data.return_legs, data.return_date, next) });
+                        }}
+                        disabled={(d) => { const dep = parseLocal(data.departure_date); return !!dep && d < dep; }}
                         initialFocus className="pointer-events-auto"
                         locale={ptBR}
                         defaultMonth={parseLocal(data.return_date) || parseLocal(data.departure_date)} />
