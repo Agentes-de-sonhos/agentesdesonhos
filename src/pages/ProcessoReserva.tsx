@@ -183,7 +183,14 @@ export default function ProcessoReserva() {
 
   const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
   const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
-  const [supplierExceptions, setSupplierExceptions] = useState<Record<string, string>>({});
+  const [supplierExceptions] = useState<Record<string, string>>({});
+  /** Mudança de situação que exige justificativa antes de gravar. */
+  const [statusJustification, setStatusJustification] = useState<{
+    service: TravelFileService;
+    status: TravelFileServiceStatus;
+    reason: string;
+  } | null>(null);
+
   const { can } = usePermissions();
   // Interface segue as permissões; a autoridade final é o servidor.
   // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
