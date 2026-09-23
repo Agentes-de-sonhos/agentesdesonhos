@@ -498,7 +498,7 @@ export function useTrip(id: string | undefined) {
       toast({ title: "Serviço adicionado", description: "O serviço foi adicionado à carteira." });
     },
     onError: (error) => {
-      toast({ title: "Erro ao adicionar serviço", description: error.message, variant: "destructive" });
+      toast({ title: "Não foi possível adicionar o serviço", description: `Erro no servidor: ${error.message || "tente novamente"}. Os dados preenchidos foram mantidos.`, variant: "destructive" });
     },
   });
 
@@ -541,7 +541,7 @@ export function useTrip(id: string | undefined) {
       toast({ title: "Serviço atualizado", description: "O serviço foi atualizado com sucesso." });
     },
     onError: (error) => {
-      toast({ title: "Erro ao atualizar serviço", description: error.message, variant: "destructive" });
+      toast({ title: "Não foi possível salvar o serviço", description: `Erro no servidor: ${error.message || "tente novamente"}. Os dados preenchidos foram mantidos.`, variant: "destructive" });
     },
   });
 

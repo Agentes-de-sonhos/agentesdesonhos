@@ -49,6 +49,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCallback, useRef } from "react";
 import { resolveAirlineDisplay } from "@/lib/airlines";
 import { getAirportsMap } from "@/lib/airports";
+import { useWizardInvalidHandler } from "@/components/trip/useWizardInvalidHandler";
 
 /**
  * StepSection: stable, module-level component to avoid remounting
@@ -473,7 +474,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const isLastStep = stepIndex === totalSteps - 1;
   const goBack = () => setStepIndex((s) => Math.max(0, s - 1));
   const goNext = () => setStepIndex((s) => Math.min(totalSteps - 1, s + 1));
-  const saveNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalSteps, currentStep: stepIndex, setStep: setStepIndex, wizardMode });
+  const saveNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
 
@@ -481,7 +483,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "flight-wizard")}
       >
         {!hideInlineImport && !wizardMode && !isEditing && <FlightAutoImport onImport={handleFlightImport} />}
@@ -1180,7 +1183,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const isLastHotelStep = hotelStepIndex === totalHotelSteps - 1;
   const goHotelBack = () => setHotelStepIndex((s) => Math.max(0, s - 1));
   const goHotelNext = () => setHotelStepIndex((s) => Math.min(totalHotelSteps - 1, s + 1));
-  const saveHotelNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalHotelSteps, currentStep: hotelStepIndex, setStep: setHotelStepIndex, wizardMode });
+  const saveHotelNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyHotelImport = (mapped: Partial<any>, raw?: ParsedHotel) => {
@@ -1213,7 +1217,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "245 158 11" } as React.CSSProperties) : undefined}
       >
@@ -2051,7 +2056,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   const isLastCarStep = carStepIndex === totalCarSteps - 1;
   const goCarBack = () => setCarStepIndex((s) => Math.max(0, s - 1));
   const goCarNext = () => setCarStepIndex((s) => Math.min(totalCarSteps - 1, s + 1));
-  const saveCarNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalCarSteps, currentStep: carStepIndex, setStep: setCarStepIndex, wizardMode });
+  const saveCarNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyCarImport = (p: any) => {
@@ -2089,7 +2095,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "16 185 129" } as React.CSSProperties) : undefined}
       >
@@ -2506,8 +2513,8 @@ const transferSchema = z.object({
   city: z.string().optional(),
   date: z.date().optional().nullable(),
   time: z.string().optional(),
-  origin_location: z.string().optional(),
-  destination_location: z.string().optional(),
+  origin_location: z.string().trim().min(1, "Informe a origem do transfer"),
+  destination_location: z.string().trim().min(1, "Informe o destino do transfer"),
   company_name: z.string().optional(),
   reservation_code: z.string().optional(),
   // Arrival
@@ -2688,7 +2695,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
   const isLastTransferStep = transferStepIndex === totalTransferSteps - 1;
   const goTransferBack = () => setTransferStepIndex((s) => Math.max(0, s - 1));
   const goTransferNext = () => setTransferStepIndex((s) => Math.min(totalTransferSteps - 1, s + 1));
-  const saveTransferNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalTransferSteps, currentStep: transferStepIndex, setStep: setTransferStepIndex, wizardMode });
+  const saveTransferNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyTransferImport = (p: any) => {
@@ -2716,7 +2724,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "99 102 241" } as React.CSSProperties) : undefined}
       >
@@ -3399,7 +3408,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
   const isLastAttractionStep = attractionStepIndex === totalAttractionSteps - 1;
   const goAttractionBack = () => setAttractionStepIndex((s) => Math.max(0, s - 1));
   const goAttractionNext = () => setAttractionStepIndex((s) => Math.min(totalAttractionSteps - 1, s + 1));
-  const saveAttractionNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalAttractionSteps, currentStep: attractionStepIndex, setStep: setAttractionStepIndex, wizardMode });
+  const saveAttractionNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyAttractionImport = (rawImport: any) => {
@@ -3430,7 +3440,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "236 72 153" } as React.CSSProperties) : undefined}
       >
@@ -4104,7 +4115,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
   const isLastInsuranceStep = insuranceStepIndex === totalInsuranceSteps - 1;
   const goInsuranceBack = () => setInsuranceStepIndex((s) => Math.max(0, s - 1));
   const goInsuranceNext = () => setInsuranceStepIndex((s) => Math.min(totalInsuranceSteps - 1, s + 1));
-  const saveInsuranceNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalInsuranceSteps, currentStep: insuranceStepIndex, setStep: setInsuranceStepIndex, wizardMode });
+  const saveInsuranceNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyInsuranceImport = (p: any) => {
@@ -4130,7 +4142,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "244 63 94" } as React.CSSProperties) : undefined}
       >
@@ -4753,7 +4766,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
   const isLastCruiseStep = cruiseStepIndex === totalCruiseSteps - 1;
   const goCruiseBack = () => setCruiseStepIndex((s) => Math.max(0, s - 1));
   const goCruiseNext = () => setCruiseStepIndex((s) => Math.min(totalCruiseSteps - 1, s + 1));
-  const saveCruiseNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalCruiseSteps, currentStep: cruiseStepIndex, setStep: setCruiseStepIndex, wizardMode });
+  const saveCruiseNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyCruiseImport = (p: any) => {
@@ -4782,7 +4796,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "14 165 233" } as React.CSSProperties) : undefined}
       >
@@ -5464,7 +5479,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const isLastOtherStep = clampedOtherIndex === totalOtherSteps - 1;
   const goOtherBack = () => setOtherStepIndex((s) => Math.max(0, s - 1));
   const goOtherNext = () => setOtherStepIndex((s) => Math.min(totalOtherSteps - 1, s + 1));
-  const saveOtherNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalOtherSteps, currentStep: otherStepIndex, setStep: setOtherStepIndex, wizardMode });
+  const saveOtherNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyOtherImport = (p: any) => {
@@ -5485,7 +5501,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-6", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "100 116 139" } as React.CSSProperties) : undefined}
       >
@@ -6175,7 +6192,8 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
   const isLastTrainStep = trainStepIndex === totalTrainSteps - 1;
   const goTrainBack = () => setTrainStepIndex((s) => Math.max(0, s - 1));
   const goTrainNext = () => setTrainStepIndex((s) => Math.min(totalTrainSteps - 1, s + 1));
-  const saveTrainNow = () => form.handleSubmit(handleSubmit)();
+  const { formRef, onInvalid } = useWizardInvalidHandler({ totalSteps: totalTrainSteps, currentStep: trainStepIndex, setStep: setTrainStepIndex, wizardMode });
+  const saveTrainNow = () => form.handleSubmit(handleSubmit, onInvalid)();
 
   const [aiImportOpen, setAiImportOpen] = useState(false);
   const applyTrainImport = (p: any) => {
@@ -6201,7 +6219,8 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
     <>
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(handleSubmit)}
+        ref={formRef}
+        onSubmit={form.handleSubmit(handleSubmit, onInvalid)}
         className={cn("space-y-4", wizardMode && "service-wizard")}
         style={wizardMode ? ({ ["--wizard-accent" as any]: "20 184 166" } as React.CSSProperties) : undefined}
       >
