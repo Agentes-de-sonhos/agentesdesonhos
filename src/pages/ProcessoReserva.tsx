@@ -236,6 +236,20 @@ export default function ProcessoReserva() {
         : null,
     [file, services, supplierExceptions, unifiedV2],
   );
+  /** Resumo do bloco de reconfirmação (fluxo unificado). */
+  const reconfirmation = useMemo(
+    () => summarizeReconfirmation(services, supplierExceptions),
+    [services, supplierExceptions],
+  );
+  /** Pendências por serviço, em linguagem humana. */
+  const pendingByService = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const service of services) {
+      map[service.id] = describeServicePendingReasons(service, supplierExceptions);
+    }
+    return map;
+  }, [services, supplierExceptions]);
+
 
 
 
