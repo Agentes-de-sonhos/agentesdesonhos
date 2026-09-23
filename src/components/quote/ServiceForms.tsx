@@ -3503,7 +3503,6 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [photoQuery, setPhotoQuery] = useState<string | null>(null);
-  const [galleryPending, setGalleryPending] = useState(false);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const isHotel = serviceType === 'hotel';
@@ -3523,7 +3522,6 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       hotelMode={isHotel}
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : serviceType === 'other' ? 'other_service' : 'other'}
       hasSavedService={!!initialData}
-      onGalleryPendingChange={isHotel ? setGalleryPending : undefined}
       photoQuery={serviceType === 'attraction' ? photoQuery : undefined}
       photoContext={destinationContext}
     />
