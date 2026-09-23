@@ -38,6 +38,12 @@ describe("funil: arrastar para Fechado abre a confirmação oficial", () => {
     expect(kanban).toMatch(/code === "USE_CONFIRM_SALE"[\s\S]*openConfirmSaleForOpportunity/);
   });
 
+  it("o funil usa a prontidão compartilhada sem blocker financeiro", () => {
+    expect(launcher).toContain("assessTravelFileReadiness");
+    expect(launcher).toContain("ConfirmSaleDialog");
+    expect(dialog).not.toMatch(/sem regra financeira confirmada|fornecedor\/comissão|Regra financeira pendente/i);
+  });
+
   it("um único aviso por erro: o menu de mover não repete o toast", () => {
     const handler = kanban.slice(
       kanban.indexOf("const handleMoveToStage"),

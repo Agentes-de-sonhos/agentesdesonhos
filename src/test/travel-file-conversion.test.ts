@@ -137,13 +137,13 @@ describe("travelFileConversion — regras puras do fluxo unificado V2", () => {
     expect(r.blockers.join(" ")).toContain("BRL, USD");
   });
 
-  it("regra financeira pendente NÃO bloqueia a venda: vira aviso e pendência", () => {
+  it("financeiro pendente NÃO bloqueia a venda nem aparece na pré-venda", () => {
     const pending = baseService({ financial_rule_status: "pending" });
     const r = assessTravelFileReadiness(baseFile(), [pending]);
     expect(r.ready).toBe(true);
-    expect(r.blockers.join(" ")).not.toContain("regra financeira");
-    expect(r.warnings.join(" ")).toContain("Financeiro");
-    expect(r.pendingServices.map((s) => s.id)).toContain(pending.id);
+    expect(r.blockers.join(" ")).not.toMatch(/regra financeira|custo|comissão|margem/i);
+    expect(r.warnings.join(" ")).not.toMatch(/regra financeira|custo|comissão|margem/i);
+    expect(r.pendingServices.map((s) => s.id)).not.toContain(pending.id);
   });
 
   it("fornecedor ausente NÃO bloqueia a venda (é exigido ao reservar/emitir)", () => {
@@ -182,7 +182,7 @@ describe("travelFileConversion — regras puras do fluxo unificado V2", () => {
 
   it("nunca inventa comissão: ausente vira descrição neutra", () => {
     expect(describeServiceCommission(baseService({ financial_rule_status: "pending" }))).toContain(
-      "pendente",
+      "Configuração financeira pendente",
     );
     expect(
       describeServiceCommission(baseService({ financial_rule_status: "not_applicable" })),

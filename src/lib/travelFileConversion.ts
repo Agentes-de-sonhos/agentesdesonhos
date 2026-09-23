@@ -82,7 +82,7 @@ export interface TravelFileReadiness {
   warnings: string[];
   /** Serviços que entrarão na operação/venda. */
   eligible: TravelFileService[];
-  /** Serviços com pendência de fornecedor/regra financeira, por id. */
+  /** Serviços com pendência operacional de fornecedor, por id. */
   pendingServices: TravelFileService[];
   /** Opcionais indisponíveis/cancelados que ficarão de fora. */
   excludedCount: number;
@@ -179,17 +179,8 @@ export function assessTravelFileReadiness(
    * A partir da revisão de produto de 2026: custo, comissão, margem, nota
    * fiscal e prazo de pagamento pertencem à Gestão Financeira e NÃO bloqueiam
    * a confirmação da venda. A RPC também deixou de bloquear (migration 0026).
-   * Os serviços com regra pendente continuam listados para acompanhamento.
+   * A tela de pré-venda não mostra avisos financeiros.
    */
-  const pendingRule = eligible.filter(
-    (s) => (s.financial_rule_status ?? "pending") === "pending",
-  );
-  if (pendingRule.length > 0) {
-    warnings.push(
-      `${pendingRule.length} serviço(s) entrarão com informações financeiras pendentes de configuração no Financeiro.`,
-    );
-  }
-
   // Fornecedor é exigido na etapa de reserva/emissão do serviço, não na venda.
   const missingSupplierIds = eligible
     .filter(
@@ -210,7 +201,7 @@ export function assessTravelFileReadiness(
     blockers,
     warnings,
     eligible,
-    pendingServices: [...pendingRule, ...eligible.filter((s) => missingSupplierIds.includes(s.id))],
+    pendingServices: eligible.filter((s) => missingSupplierIds.includes(s.id)),
     excludedCount,
     total,
     currency,
@@ -223,7 +214,7 @@ export function assessTravelFileReadiness(
 export function describeServiceCommission(service: TravelFileService): string {
   const status = service.financial_rule_status ?? "pending";
   if (status === "not_applicable") return "Sem comissão (não se aplica)";
-  if (status === "pending") return "Regra financeira pendente";
+  if (status === "pending") return "Configuração financeira pendente";
   const type = (service.commission_type || "").toLowerCase();
   if (type === "percentage" || type === "percent") {
     return service.commission_percent != null
@@ -351,4 +342,3 @@ export function summarizeReconfirmation(
     pendingCount: pending.length,
   };
 }
-
