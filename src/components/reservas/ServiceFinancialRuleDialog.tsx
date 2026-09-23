@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import type { TravelFileService } from "@/types/travelFile";
 import { useServiceFinancialRule } from "@/hooks/useUnifiedWorkflow";
 
@@ -44,6 +46,20 @@ export function ServiceFinancialRuleDialog({
     setSupplierName(service.supplier_name ?? "");
   }, [open, service]);
 
+  const operatorsQuery = useQuery({
+    queryKey: ["tour-operators-options"],
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    queryFn: async () => {
+      const { data, error } = await (supabase.from("tour_operators") as any)
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return (data || []) as { id: string; name: string }[];
+    },
+  });
+
   const save = async () => {
     if (saveRule.isPending) return;
     const realOperatorId = operatorId === NONE_OPERATOR ? null : operatorId;
@@ -53,6 +69,15 @@ export function ServiceFinancialRuleDialog({
         payload: {
           operator_id: realOperatorId,
           supplier_name: supplierName.trim() || null,
+          commission_type: service.commission_type ?? "none",
+          commission_percent: service.commission_percent ?? null,
+          commission_fixed: service.commission_fixed ?? null,
+          non_commissionable_fees: service.non_commissionable_fees ?? 0,
+          payment_rule: service.payment_rule ?? null,
+          payment_days: service.payment_days ?? null,
+          requires_invoice: service.requires_invoice ?? false,
+          status: service.financial_rule_status ?? "pending",
+          source: "manual",
         },
       });
       toast.success("Fornecedor do serviço atualizado.");
@@ -83,6 +108,11 @@ export function ServiceFinancialRuleDialog({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={NONE_OPERATOR}>Não vinculado a operadora cadastrada</SelectItem>
+                {(operatorsQuery.data ?? []).map((op) => (
+                  <SelectItem key={op.id} value={op.id}>
+                    {op.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
