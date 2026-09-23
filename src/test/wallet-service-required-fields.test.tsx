@@ -17,6 +17,7 @@ vi.mock("@/lib/pdfText", () => ({ extractPdfText: vi.fn(async () => "") }));
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { useWizardInvalidHandler, WALLET_REQUIRED_MESSAGE } from "@/components/trip/useWizardInvalidHandler";
 import { TripServiceForm } from "@/components/trip/TripServiceForms";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 beforeEach(() => {
   toastMock.mockReset();
@@ -81,7 +82,7 @@ describe("Carteira Digital — validação compartilhada de serviços manuais", 
 
   it("Transfer sem Origem e Destino: não salva, mostra pendências e preserva dados", async () => {
     const onSubmit = vi.fn();
-    render(<TripServiceForm serviceType="transfer" onSubmit={onSubmit} onCancel={() => {}} />);
+    render(<QueryClientProvider client={new QueryClient()}><TripServiceForm serviceType="transfer" onSubmit={onSubmit} onCancel={() => {}} /></QueryClientProvider>);
     const company = document.querySelector('input[name="company_name"]') as HTMLInputElement | null;
     if (company) fireEvent.change(company, { target: { value: "Transfers SA" } });
     // Avança até a última etapa.
