@@ -866,8 +866,13 @@ export default function ProcessoReserva() {
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-sm font-semibold text-foreground">
-              {isManual ? "Serviços da reserva" : "Serviços solicitados"}
+              {isManual
+                ? "Serviços da reserva"
+                : reconfirmationMode
+                  ? "Serviços para reconfirmar"
+                  : "Serviços solicitados"}
             </h2>
+
             <div className="flex flex-wrap items-center gap-2">
               {canRevenue &&
                 (isManual ? (
