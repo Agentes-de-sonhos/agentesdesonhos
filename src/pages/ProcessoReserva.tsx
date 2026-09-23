@@ -73,9 +73,12 @@ import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMes
 import {
   assessTravelFileReadiness,
   describeServiceCommission,
+  describeServicePendingReasons,
+  summarizeReconfirmation,
   isConvertedV2,
   isActiveTravelFileStatus,
 } from "@/lib/travelFileConversion";
+
 import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
 import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
 
@@ -233,6 +236,20 @@ export default function ProcessoReserva() {
         : null,
     [file, services, supplierExceptions, unifiedV2],
   );
+  /** Resumo do bloco de reconfirmação (fluxo unificado). */
+  const reconfirmation = useMemo(
+    () => summarizeReconfirmation(services, supplierExceptions),
+    [services, supplierExceptions],
+  );
+  /** Pendências por serviço, em linguagem humana. */
+  const pendingByService = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const service of services) {
+      map[service.id] = describeServicePendingReasons(service, supplierExceptions);
+    }
+    return map;
+  }, [services, supplierExceptions]);
+
 
 
 
@@ -368,6 +385,12 @@ export default function ProcessoReserva() {
   const next = nextFileStatus(file.status);
   // Reservas cadastradas à mão podem ter dados e serviços editados aqui.
   const isManual = file.origin === "manual";
+  /**
+   * Solicitação recebida do site, no fluxo unificado e ainda não convertida:
+   * a etapa da agência é reconfirmar cada serviço antes da venda.
+   */
+  const reconfirmationMode = !isManual && !!unifiedV2 && !isConvertedV2(file);
+
 
   /** Um valor por moeda, lado a lado — sem somar nem converter moedas. */
   const groupedMoney = (key: "requested" | "reconfirmed" | "sold") =>
@@ -579,6 +602,270 @@ export default function ProcessoReserva() {
             )}
           </Card>
         )}
+
+        {/* Serviços */}
+        <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-sm font-semibold text-foreground">
+              {isManual
+                ? "Serviços da reserva"
+                : reconfirmationMode
+                  ? "Serviços para reconfirmar"
+                  : "Serviços solicitados"}
+            </h2>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {canRevenue &&
+                (isManual ? (
+                  // Um resumo por moeda: nada é somado entre moedas diferentes.
+                  <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                    {currencyGroups.length === 0
+                      ? "Sem serviços lançados"
+                      : currencyGroups
+                          .map(
+                            (group) =>
+                              `${group.currency}: solicitado ${money(group.requested, group.currency)} · reconfirmado ${money(group.reconfirmed, group.currency)} · venda ${money(group.sold, group.currency)}`,
+                          )
+                          .join(" | ")}
+                  </span>
+                ) : (
+                  <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
+                    Solicitado {money(reconfirmation.requested || totals.requested, file.currency)} ·
+                    Reconfirmado {money(reconfirmation.reconfirmed, file.currency)} · Venda{" "}
+                    {money(totals.sold, file.currency)}
+                    {reconfirmationMode && (
+                      <>
+                        {" · "}
+                        {reconfirmation.eligibleCount} pronto(s) para venda ·{" "}
+                        {reconfirmation.pendingCount} pendente(s)
+                      </>
+                    )}
+                  </span>
+
+                ))}
+              {isManual && canManage && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => {
+                    setManualServiceEditing(null);
+                    setManualServiceOpen(true);
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  Acrescentar serviço
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {financialCards.map((card) => (
+            <div key={card.currency} className="mb-3 min-w-0">
+              {financialCards.length > 1 && (
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Totais em {card.currency}
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {card.items.map((item) => (
+                  <div
+                    key={`${card.currency}-${item.label}`}
+                    className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3"
+                  >
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {item.label}
+                    </p>
+                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
+                      {money(item.value, card.currency)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+
+          <div className="space-y-2">
+            {services.map((service) => (
+              <div
+                key={service.id}
+                className="min-w-0 rounded-xl border border-border/50 p-3 sm:p-4"
+              >
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
+                    {service.product_name}
+                  </p>
+                  {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
+                  {isManual && canManage && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto gap-2"
+                      onClick={() => {
+                        setManualServiceEditing(service);
+                        setManualServiceOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </Button>
+                  )}
+                </div>
+                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  {service.city && <span>{service.city}</span>}
+                  {(service.start_date || service.end_date) && (
+                    <span>
+                      {dateLabel(service.start_date)}
+                      {service.end_date ? ` — ${dateLabel(service.end_date)}` : ""}
+                    </span>
+                  )}
+                  <span>Qtd. {service.quantity}</span>
+                  {service.supplier_name && <span>Fornecedor: {service.supplier_name}</span>}
+                  {canRevenue && (
+                    <span>Solicitado {money(service.requested_amount, service.currency)}</span>
+                  )}
+                </div>
+
+                {unifiedV2 && (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        (service.financial_rule_status ?? "pending") === "pending"
+                          ? "outline"
+                          : "secondary"
+                      }
+                      className={
+                        (service.financial_rule_status ?? "pending") === "pending"
+                          ? "border-amber-500/50 text-amber-700 dark:text-amber-300"
+                          : undefined
+                      }
+                    >
+                      {describeServiceCommission(service)}
+                    </Badge>
+                    {canFinancialManage && !isConvertedV2(file) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 gap-1.5 text-xs"
+                        onClick={() => setRuleEditing(service)}
+                        aria-label={`Regra financeira de ${service.product_name}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Regra financeira
+                      </Button>
+                    )}
+                    {readiness?.missingSupplierIds.includes(service.id) && (
+                      <Input
+                        value={supplierExceptions[service.id] ?? ""}
+                        onChange={(e) =>
+                          setSupplierExceptions((prev) => ({
+                            ...prev,
+                            [service.id]: e.target.value,
+                          }))
+                        }
+                        placeholder="Sem fornecedor: justifique a exceção"
+                        className="h-8 min-w-[220px] flex-1 bg-background text-xs"
+                        aria-label={`Justificativa de exceção de fornecedor para ${service.product_name}`}
+                      />
+                    )}
+                  </div>
+                )}
+
+                {reconfirmationMode && (pendingByService[service.id]?.length ?? 0) > 0 && (
+                  <div
+                    data-testid={`service-pending-${service.id}`}
+                    className="mt-2 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3"
+                  >
+                    <p className="text-xs font-semibold text-foreground">
+                      Falta para este serviço entrar na venda:
+                    </p>
+                    <ul className="mt-1 space-y-1">
+                      {pendingByService[service.id].map((reason) => (
+                        <li
+                          key={reason}
+                          className="flex items-start gap-2 text-xs text-muted-foreground"
+                        >
+                          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-600" />
+                          <span className="[overflow-wrap:anywhere]">{reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+
+
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  <div className="min-w-0">
+                    <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Status do serviço
+                    </label>
+                    <Select
+                      value={service.status}
+                      disabled={!canManage}
+                      onValueChange={(v) =>
+                        patchServiceStatus(service.id, v as TravelFileServiceStatus)
+                      }
+                    >
+                      <SelectTrigger className="mt-1 h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(SERVICE_STATUS_LABELS).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {canRevenue && (
+                    <>
+                      <AmountField
+                        label="Reconfirmado"
+                        value={service.reconfirmed_amount}
+                        currency={service.currency}
+                        readOnly={!canManage}
+                        onCommit={(v) => patchServiceAmounts(service, { reconfirmed_amount: v })}
+                      />
+                      <AmountField
+                        label="Vendido"
+                        value={service.sold_amount}
+                        currency={service.currency}
+                        readOnly={!canFinancialManage}
+                        onCommit={(v) => patchServiceAmounts(service, { sold_amount: v })}
+                      />
+                    </>
+                  )}
+                  {canMargin && (
+                    <AmountField
+                      label="Custo"
+                      value={service.cost_amount}
+                      currency={service.currency}
+                      readOnly={!canFinancialManage}
+                      onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
+                    />
+                  )}
+                  {canCommission && (
+                    <AmountField
+                      label="Comissão"
+                      value={service.commission_amount}
+                      currency={service.currency}
+                      readOnly={!canCommissionManage}
+                      onCommit={(v) => patchServiceAmounts(service, { commission_amount: v })}
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+            {services.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                Nenhum serviço registrado neste processo.
+              </p>
+            )}
+          </div>
+        </Card>
 
         {unifiedV2 && isActiveTravelFileStatus(file.status) && readiness && (
           <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
@@ -845,231 +1132,6 @@ export default function ProcessoReserva() {
           </div>
         </Card>
 
-        {/* Serviços */}
-        <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
-          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-sm font-semibold text-foreground">
-              {isManual ? "Serviços da reserva" : "Serviços solicitados"}
-            </h2>
-            <div className="flex flex-wrap items-center gap-2">
-              {canRevenue &&
-                (isManual ? (
-                  // Um resumo por moeda: nada é somado entre moedas diferentes.
-                  <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
-                    {currencyGroups.length === 0
-                      ? "Sem serviços lançados"
-                      : currencyGroups
-                          .map(
-                            (group) =>
-                              `${group.currency}: solicitado ${money(group.requested, group.currency)} · reconfirmado ${money(group.reconfirmed, group.currency)} · venda ${money(group.sold, group.currency)}`,
-                          )
-                          .join(" | ")}
-                  </span>
-                ) : (
-                  <span className="text-xs text-muted-foreground">
-                    Solicitado {money(totals.requested, file.currency)} · Reconfirmado{" "}
-                    {money(totals.reconfirmed, file.currency)} · Venda {money(totals.sold, file.currency)}
-                  </span>
-                ))}
-              {isManual && canManage && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => {
-                    setManualServiceEditing(null);
-                    setManualServiceOpen(true);
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
-                  Acrescentar serviço
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {financialCards.map((card) => (
-            <div key={card.currency} className="mb-3 min-w-0">
-              {financialCards.length > 1 && (
-                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  Totais em {card.currency}
-                </p>
-              )}
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {card.items.map((item) => (
-                  <div
-                    key={`${card.currency}-${item.label}`}
-                    className="min-w-0 rounded-xl border border-border/50 bg-muted/20 p-3"
-                  >
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      {item.label}
-                    </p>
-                    <p className="mt-0.5 text-sm font-semibold tabular-nums text-foreground">
-                      {money(item.value, card.currency)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-
-
-          <div className="space-y-2">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="min-w-0 rounded-xl border border-border/50 p-3 sm:p-4"
-              >
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                    {service.product_name}
-                  </p>
-                  {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
-                  {isManual && canManage && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-auto gap-2"
-                      onClick={() => {
-                        setManualServiceEditing(service);
-                        setManualServiceOpen(true);
-                      }}
-                    >
-                      <Pencil className="h-4 w-4" />
-                      Editar
-                    </Button>
-                  )}
-                </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {service.city && <span>{service.city}</span>}
-                  {(service.start_date || service.end_date) && (
-                    <span>
-                      {dateLabel(service.start_date)}
-                      {service.end_date ? ` — ${dateLabel(service.end_date)}` : ""}
-                    </span>
-                  )}
-                  <span>Qtd. {service.quantity}</span>
-                  {service.supplier_name && <span>Fornecedor: {service.supplier_name}</span>}
-                  {canRevenue && (
-                    <span>Solicitado {money(service.requested_amount, service.currency)}</span>
-                  )}
-                </div>
-
-                {unifiedV2 && (
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={
-                        (service.financial_rule_status ?? "pending") === "pending"
-                          ? "outline"
-                          : "secondary"
-                      }
-                      className={
-                        (service.financial_rule_status ?? "pending") === "pending"
-                          ? "border-amber-500/50 text-amber-700 dark:text-amber-300"
-                          : undefined
-                      }
-                    >
-                      {describeServiceCommission(service)}
-                    </Badge>
-                    {canFinancialManage && !isConvertedV2(file) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 gap-1.5 text-xs"
-                        onClick={() => setRuleEditing(service)}
-                        aria-label={`Regra financeira de ${service.product_name}`}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Regra financeira
-                      </Button>
-                    )}
-                    {readiness?.missingSupplierIds.includes(service.id) && (
-                      <Input
-                        value={supplierExceptions[service.id] ?? ""}
-                        onChange={(e) =>
-                          setSupplierExceptions((prev) => ({
-                            ...prev,
-                            [service.id]: e.target.value,
-                          }))
-                        }
-                        placeholder="Sem fornecedor: justifique a exceção"
-                        className="h-8 min-w-[220px] flex-1 bg-background text-xs"
-                        aria-label={`Justificativa de exceção de fornecedor para ${service.product_name}`}
-                      />
-                    )}
-                  </div>
-                )}
-
-                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                  <div className="min-w-0">
-                    <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                      Status do serviço
-                    </label>
-                    <Select
-                      value={service.status}
-                      disabled={!canManage}
-                      onValueChange={(v) =>
-                        patchServiceStatus(service.id, v as TravelFileServiceStatus)
-                      }
-                    >
-                      <SelectTrigger className="mt-1 h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(SERVICE_STATUS_LABELS).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {canRevenue && (
-                    <>
-                      <AmountField
-                        label="Reconfirmado"
-                        value={service.reconfirmed_amount}
-                        currency={service.currency}
-                        readOnly={!canManage}
-                        onCommit={(v) => patchServiceAmounts(service, { reconfirmed_amount: v })}
-                      />
-                      <AmountField
-                        label="Vendido"
-                        value={service.sold_amount}
-                        currency={service.currency}
-                        readOnly={!canFinancialManage}
-                        onCommit={(v) => patchServiceAmounts(service, { sold_amount: v })}
-                      />
-                    </>
-                  )}
-                  {canMargin && (
-                    <AmountField
-                      label="Custo"
-                      value={service.cost_amount}
-                      currency={service.currency}
-                      readOnly={!canFinancialManage}
-                      onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
-                    />
-                  )}
-                  {canCommission && (
-                    <AmountField
-                      label="Comissão"
-                      value={service.commission_amount}
-                      currency={service.currency}
-                      readOnly={!canCommissionManage}
-                      onCommit={(v) => patchServiceAmounts(service, { commission_amount: v })}
-                    />
-                  )}
-                </div>
-              </div>
-            ))}
-            {services.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Nenhum serviço registrado neste processo.
-              </p>
-            )}
-          </div>
-        </Card>
 
         {/* Notas internas */}
         <Card className="min-w-0 rounded-2xl border-border/60 p-4 sm:p-5">
