@@ -2513,8 +2513,8 @@ const transferSchema = z.object({
   city: z.string().optional(),
   date: z.date().optional().nullable(),
   time: z.string().optional(),
-  origin_location: z.string().optional(),
-  destination_location: z.string().optional(),
+  origin_location: z.string().trim().min(1, "Informe a origem do transfer"),
+  destination_location: z.string().trim().min(1, "Informe o destino do transfer"),
   company_name: z.string().optional(),
   reservation_code: z.string().optional(),
   // Arrival

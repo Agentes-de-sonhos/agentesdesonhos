@@ -5,15 +5,32 @@ import { toast } from "@/hooks/use-toast";
 
 export const WALLET_REQUIRED_MESSAGE = "Preencha os campos obrigatórios para adicionar o serviço.";
 
-function labelFor(el: HTMLElement, root: HTMLElement): string | null {
-  const id = el.id;
-  const label = id ? (root.querySelector(`label[for="${CSS.escape(id)}"]`) as HTMLElement | null) : null;
-  const text = (label?.textContent || "").replace(/\*/g, "").replace(/Campo obrigatório/gi, "").trim();
-  return text || null;
-}
+type Invalid = { label: string | null; focus: HTMLElement | null };
 
-function invalidIn(root: HTMLElement): HTMLElement[] {
-  return Array.from(root.querySelectorAll<HTMLElement>('[aria-invalid="true"]'));
+/** Localiza campos inválidos pela mensagem de erro exibida (FormMessage) ou aria-invalid. */
+function invalidIn(root: HTMLElement): Invalid[] {
+  const out: Invalid[] = [];
+  const seen = new Set<string>();
+  root.querySelectorAll<HTMLElement>('[id$="-form-item-message"]').forEach((msg) => {
+    const baseId = msg.id.replace(/-message$/, "");
+    if (seen.has(baseId)) return;
+    seen.add(baseId);
+    const label = root.querySelector(`label[for="${CSS.escape(baseId)}"]`) as HTMLElement | null;
+    const item = msg.parentElement;
+    const control =
+      (root.querySelector(`#${CSS.escape(baseId)}`) as HTMLElement | null) ?? null;
+    const focus =
+      (control && control.matches("input,textarea,select,button") ? control : null) ??
+      (control?.querySelector("input,textarea,select,button") as HTMLElement | null) ??
+      (item?.querySelector("input,textarea,select,button") as HTMLElement | null) ??
+      control;
+    const text = (label?.textContent || "").replace(/\*/g, "").replace(/Campo obrigatório/gi, "").trim();
+    out.push({ label: text || null, focus });
+  });
+  if (!out.length) {
+    root.querySelectorAll<HTMLElement>('[aria-invalid="true"]').forEach((el) => out.push({ label: null, focus: el }));
+  }
+  return out;
 }
 
 /**
@@ -44,11 +61,11 @@ export function useWizardInvalidHandler(opts: {
         flushSync(() => setStep(i));
         const found = invalidIn(root);
         if (found.length && firstStep < 0) firstStep = i;
-        found.forEach((el) => add(labelFor(el, root)));
+        found.forEach((f) => add(f.label));
       }
       flushSync(() => setStep(firstStep >= 0 ? firstStep : currentStep));
     } else if (root) {
-      invalidIn(root).forEach((el) => add(labelFor(el, root)));
+      invalidIn(root).forEach((f) => add(f.label));
     }
 
     toast({
@@ -57,7 +74,7 @@ export function useWizardInvalidHandler(opts: {
       variant: "destructive",
     });
 
-    const target = root ? invalidIn(root)[0] : null;
+    const target = root ? invalidIn(root)[0]?.focus ?? null : null;
     const fallbackName = Object.keys(errors || {})[0];
     const el =
       target ??
