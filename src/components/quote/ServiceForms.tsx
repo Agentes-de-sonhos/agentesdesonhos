@@ -638,7 +638,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                       const next = d ? format(d, "yyyy-MM-dd") : "";
                       field.onChange(d);
                       if (next) setReturnLegs((legs) => syncFirstLegDate(legs, prev, next) ?? legs);
-                    }} disabled={(d) => disableDate(d) || (!!form.getValues("departure_date") && d < form.getValues("departure_date")!)} defaultMonth={field.value || form.getValues("departure_date") || defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
+                    }} disabled={(d) => !!disableDate?.(d) || (!!form.getValues("departure_date") && d < form.getValues("departure_date")!)} defaultMonth={field.value || form.getValues("departure_date") || defaultMonth(tripEndDate || tripStartDate)} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover><FormMessage /></FormItem>
             )} />
