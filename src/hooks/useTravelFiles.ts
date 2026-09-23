@@ -606,7 +606,7 @@ export function useTravelFileMutations(fileId?: string) {
       requestedAmount?: number | null;
       currency?: string | null;
     }) => {
-      const { error } = await sb.rpc("travel_file_service_manual_save", {
+      const { data, error } = await sb.rpc("travel_file_service_manual_save", {
         _payload: {
           service_id: input.serviceId || null,
           file_id: fileId,
@@ -631,6 +631,16 @@ export function useTravelFileMutations(fileId?: string) {
         },
       });
       if (error) throw error;
+      // O serviço é sempre parte da viagem e sempre cobrado: quando o processo
+      // já está em operação e/ou vendido, o mesmo serviço aparece em Operações
+      // e no Financeiro (pendente de configuração). Idempotente por vínculo.
+      const serviceId = (data as unknown as string) || input.serviceId || null;
+      if (serviceId) {
+        const { error: linkError } = await sb.rpc("travel_service_materialize", {
+          _file_service_id: serviceId,
+        } as never);
+        if (linkError) throw linkError;
+      }
     },
     onSuccess: invalidate,
   });
