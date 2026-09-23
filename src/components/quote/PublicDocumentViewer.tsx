@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, X } from "lucide-react";
 import { resolveDocumentPreviewKind } from "@/lib/publicDocumentViewer";
@@ -56,6 +56,7 @@ export function PublicDocumentViewer({
               {downloadLabel}
             </Button>
           ) : null}
+          <DialogDescription className="sr-only">Anexo do orçamento aberto dentro da própria página.</DialogDescription>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-9" aria-label={closeLabel}>
             <X className="mr-1.5 h-4 w-4" />
             {closeLabel}
