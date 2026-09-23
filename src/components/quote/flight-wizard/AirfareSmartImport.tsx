@@ -185,13 +185,20 @@ function voo2leg(v: ParsedAirfareFlight, yearHint: number): FlightLegDetail {
 }
 
 /** Map ParsedAirfare → FlightData (for prefilling the existing quote flight form) */
-export function parsedAirfareToFlightData(p: ParsedAirfare): Partial<FlightData> & { __extras?: any } {
+export function parsedAirfareToFlightData(
+  p: ParsedAirfare,
+  opts: { tripStartDate?: string | Date | null } = {},
+): Partial<FlightData> & { __extras?: any } {
   const voos = p.voos || [];
   if (voos.length === 0) return {};
 
   // Infer year hint from resumo.data_ida (YYYY-MM-DD) or current year
   const isoIda = /^(\d{4})-\d{2}-\d{2}$/.exec(p.resumo?.data_ida || "");
-  let yearHint = isoIda ? Number(isoIda[1]) : new Date().getFullYear();
+  // Datas sem ano no documento (ex.: "27/02") usam o ano da viagem, nunca o ano corrente.
+  const tripYear = opts.tripStartDate instanceof Date
+    ? opts.tripStartDate.getFullYear()
+    : (/^(\d{4})-\d{2}-\d{2}/.exec(opts.tripStartDate || "")?.[1] ? Number(/^(\d{4})/.exec(opts.tripStartDate as string)![1]) : null);
+  let yearHint = isoIda ? Number(isoIda[1]) : (tripYear ?? new Date().getFullYear());
 
   // Walk voos chronologically; bump year when month goes backwards (Dec → Jan)
   let lastMonth = 0;
@@ -326,9 +333,11 @@ interface Props {
   quoteId?: string;
   onCancel: () => void;
   onConfirm: (data: Partial<FlightData>, raw: ParsedAirfare) => void;
+  /** Início da viagem: fornece o ano quando o documento traz só dia/mês. */
+  tripStartDate?: Date;
 }
 
-export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
+export function AirfareSmartImport({ quoteId, onCancel, onConfirm, tripStartDate }: Props) {
   const { toast } = useToast();
   const { isAdmin } = useUserRole();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -533,7 +542,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm }: Props) {
             if (fileInputRef.current) fileInputRef.current.value = "";
           }}
           onConfirm={() => {
-            const mapped = parsedAirfareToFlightData(parsed);
+            const mapped = parsedAirfareToFlightData(parsed, { tripStartDate });
             onConfirm(mapped, parsed);
           }}
           isAdmin={isAdmin}

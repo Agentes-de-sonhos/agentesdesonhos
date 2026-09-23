@@ -3334,6 +3334,7 @@ function FlightEntry(props: Omit<ServiceFormProps, "serviceType">) {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
               <AirfareSmartImport
+                tripStartDate={props.tripStartDate}
                 onCancel={() => setMode("chooser")}
                 onConfirm={(mapped) => {
                   setInjectedInitial({
