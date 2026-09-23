@@ -74,10 +74,28 @@ import {
   assessTravelFileReadiness,
   describeServiceCommission,
   describeServicePendingReasons,
+  describeStatusTransitionBlock,
   summarizeReconfirmation,
   isConvertedV2,
   isActiveTravelFileStatus,
 } from "@/lib/travelFileConversion";
+import {
+  displayServiceSupplier,
+  serviceOptionLabel,
+  travelFileServiceTitle,
+} from "@/lib/travelFileServiceIdentity";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 
 import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
 import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
