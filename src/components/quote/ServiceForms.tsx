@@ -243,6 +243,10 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
   };
+  /** Grava vários campos do trecho de uma vez (seleção estruturada de aeroporto). */
+  const updateLegFields = (idx: number, fields: Record<string, any>) => {
+    onChange(legs.map((l, i) => i === idx ? { ...l, ...fields } : l));
+  };
   const addLeg = () => {
     const leg = emptyLeg();
     if (defaultSegmentType) (leg as any).segment_type = defaultSegmentType;
