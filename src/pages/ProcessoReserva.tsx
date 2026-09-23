@@ -636,7 +636,13 @@ export default function ProcessoReserva() {
           </div>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {next && canManage && (
+            {/* Fluxo unificado V2: venda confirmada / em operação ficam
+                exclusivamente no CTA canônico "Confirmar venda e iniciar
+                operação" (bloco Confirmação da venda). O botão genérico Avançar
+                continua apenas para as etapas anteriores. */}
+            {next && canManage && !(
+              unifiedV2 && ["sale_confirmed", "in_operation"].includes(next)
+            ) && (
               <Button size="sm" className="gap-2" onClick={() => updateFileStatus(next)}>
                 Avançar para {FILE_STATUS_LABELS[next]}
                 <ArrowRight className="h-4 w-4" />
