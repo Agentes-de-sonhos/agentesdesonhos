@@ -1571,7 +1571,7 @@ export default function GerarOrcamento() {
                 Dados principais
               </h4>
               <div className="mt-3">
-                <QuoteSummary quote={quote} />
+                <QuoteSummary quote={quote} hideTitle />
               </div>
             </section>
             <section aria-labelledby="quote-cover-title" className="space-y-3 border-t border-border pt-4">
@@ -1581,6 +1581,25 @@ export default function GerarOrcamento() {
                 </h4>
                 <div className="mt-1.5 h-1 w-full rounded-full bg-sky-500" />
               </div>
+              {initialSetupPending.length > 0 && (
+                <ul data-testid="quote-initial-setup-hints" className="space-y-1 rounded-lg border border-sky-200 bg-sky-50/60 px-3 py-2 text-xs text-sky-900">
+                  {initialSetupPending.map((item) => (
+                    <li key={item.key} className="flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-sky-500" />
+                      {item.hint}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <QuoteTitleField
+                quote={quote}
+                onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              />
+              <div
+                data-testid="quote-cover-block"
+                data-pending={coverPending ? "true" : "false"}
+                className={coverPending ? INITIAL_SETUP_HIGHLIGHT_CLASS + " p-2" : undefined}
+              >
               <DestinationIntroEditor
                 embedded
                 quoteId={quote.id}
@@ -1590,6 +1609,7 @@ export default function GerarOrcamento() {
                 introImages={(quote as any).destination_intro_images || []}
                 onUpdate={() => {}}
               />
+              </div>
             </section>
           </div>
         )}
