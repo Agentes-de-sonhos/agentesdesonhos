@@ -144,11 +144,11 @@ export function ConfirmSaleDialog({
                   ? "Novos registros criados."
                   : "Registros existentes reutilizados (nada duplicado)."}
               </p>
-              {result.warnings.map((warning) => (
-                <p key={warning} className="mt-1 text-xs text-amber-600 dark:text-amber-300">
-                  {warning}
+              {result.warnings.length > 0 && (
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
+                  Informações financeiras pendentes — configure na Gestão Financeira.
                 </p>
-              ))}
+              )}
             </div>
             <div className="flex flex-wrap gap-2">
               {result.operation_id && (
@@ -188,9 +188,8 @@ export function ConfirmSaleDialog({
                 {readiness.eligible.length} serviço(s) · Total {money(readiness.total, readiness.currency || file.currency)}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                A oportunidade será marcada como ganha, a operação e a venda financeira
-                serão criadas com os serviços escolhidos, e o recebimento do cliente
-                nascerá como pendente.
+                A oportunidade será marcada como ganha, a operação e a venda serão criadas
+                com os serviços escolhidos, e o recebimento do cliente nascerá como pendente.
               </p>
             </div>
 
@@ -254,12 +253,6 @@ export function ConfirmSaleDialog({
                 placeholder="Ex.: cliente confirmou por mensagem às 14h32; print anexado ao processo."
               />
             </div>
-
-            {readiness.warnings.map((warning) => (
-              <p key={warning} className="text-xs text-amber-600 dark:text-amber-300">
-                {warning}
-              </p>
-            ))}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button

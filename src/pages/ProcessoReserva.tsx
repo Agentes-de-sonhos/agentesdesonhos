@@ -72,7 +72,6 @@ import { extractWorkflowCode, humanizeWorkflowError } from "@/lib/confirmSaleMes
 
 import {
   assessTravelFileReadiness,
-  describeServiceCommission,
   describeServicePendingReasons,
   describeStatusTransitionBlock,
   summarizeReconfirmation,
@@ -84,11 +83,6 @@ import {
   serviceOptionLabel,
   travelFileServiceTitle,
 } from "@/lib/travelFileServiceIdentity";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Dialog,
   DialogContent,
@@ -226,7 +220,6 @@ export default function ProcessoReserva() {
   const canRevenue = can("financial.view_revenue");
   const canMargin = can("financial.view_margin");
   const canCommission = can("financial.commissions.view");
-  const canCommissionManage = can("financial.commissions.manage");
   const canFinancialManage = can("reservations.financial.manage");
 
   const file = data?.file;
@@ -260,6 +253,13 @@ export default function ProcessoReserva() {
         ? assessTravelFileReadiness(file, services, supplierExceptions)
         : null,
     [file, services, supplierExceptions, unifiedV2],
+  );
+  const visibleReadinessWarnings = useMemo(
+    () =>
+      (readiness?.warnings ?? []).filter(
+        (warning) => !/financeir|informações financeiras/i.test(warning),
+      ),
+    [readiness?.warnings],
   );
   /** Resumo do bloco de reconfirmação (fluxo unificado). */
   const reconfirmation = useMemo(
@@ -480,19 +480,17 @@ export default function ProcessoReserva() {
    * A margem nunca é exibida sem custo informado: ela seria a própria receita.
    */
   const financialCards = reconfirmationMode
-    ? canRevenue
-      ? [
-          {
-            currency: file.currency,
-            items: [
-              { label: "Total solicitado", value: reconfirmation.requested },
-              { label: "Total reconfirmado", value: reconfirmation.reconfirmed },
-              { label: "Total vendido", value: reconfirmation.sold },
-              { label: "Variação vs. solicitado", value: reconfirmation.variation },
-            ],
-          },
-        ]
-      : []
+    ? [
+        {
+          currency: file.currency,
+          items: [
+            { label: "Solicitado", value: reconfirmation.requested },
+            { label: "Reconfirmado", value: reconfirmation.reconfirmed },
+            { label: "Vendido", value: reconfirmation.sold },
+            { label: "Variação vs. solicitado", value: reconfirmation.variation },
+          ],
+        },
+      ]
     : (
         isManual && currencyGroups.length > 0
           ? currencyGroups
@@ -727,7 +725,7 @@ export default function ProcessoReserva() {
                 ) : (
                   <span className="text-xs text-muted-foreground [overflow-wrap:anywhere]">
                     Solicitado {money(reconfirmation.requested || totals.requested, file.currency)} ·
-                    Reconfirmado {money(reconfirmation.reconfirmed, file.currency)} · Venda{" "}
+                    Reconfirmado {money(reconfirmation.reconfirmed, file.currency)} · Vendido{" "}
                     {money(totals.sold, file.currency)}
                     {reconfirmationMode && (
                       <>
@@ -795,12 +793,12 @@ export default function ProcessoReserva() {
                   >
                     {travelFileServiceTitle(service)}
                   </p>
-                  {serviceOptionLabel(service) && (
+                  {!reconfirmationMode && serviceOptionLabel(service) && (
                     <Badge variant="secondary" className="font-normal">
                       {serviceOptionLabel(service)}
                     </Badge>
                   )}
-                  {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
+                  {!reconfirmationMode && service.is_required && <Badge variant="outline">Obrigatório</Badge>}
                   {isManual && canManage && (
                     <Button
                       variant="ghost"
@@ -918,80 +916,6 @@ export default function ProcessoReserva() {
                   )}
                 </div>
 
-                {/* Informações financeiras: opcionais nesta etapa. Custo, comissão,
-                    nota fiscal e prazos vivem na Gestão Financeira e nunca
-                    impedem a confirmação da venda. */}
-                {(canMargin || canCommission || (unifiedV2 && canFinancialManage)) && (
-                  <Collapsible className="mt-3">
-                    <CollapsibleTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-9 gap-2 px-2 text-xs text-muted-foreground"
-                      >
-                        <CircleDollarSign className="h-3.5 w-3.5" />
-                        Adicionar informações financeiras agora (opcional)
-                      </Button>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="mt-2 rounded-xl border border-border/50 bg-muted/20 p-3">
-                        <p className="text-[11px] text-muted-foreground">
-                          Opcional nesta etapa: se ficar em branco, o financeiro deste serviço
-                          entra como pendente de configuração após a venda.
-                        </p>
-                        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {canMargin && (
-                            <AmountField
-                              label="Custo"
-                              value={service.cost_amount}
-                              currency={service.currency}
-                              readOnly={!canFinancialManage}
-                              onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
-                            />
-                          )}
-                          {canCommission && (
-                            <AmountField
-                              label="Comissão"
-                              value={service.commission_amount}
-                              currency={service.currency}
-                              readOnly={!canCommissionManage}
-                              onCommit={(v) =>
-                                patchServiceAmounts(service, { commission_amount: v })
-                              }
-                            />
-                          )}
-                        </div>
-                        {unifiedV2 && (
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <Badge variant="secondary">{describeServiceCommission(service)}</Badge>
-                            {canFinancialManage && !isConvertedV2(file) && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-9 gap-1.5 text-xs"
-                                onClick={() => setRuleEditing(service)}
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                                Fornecedor e regra financeira
-                              </Button>
-                            )}
-                            {isConvertedV2(file) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-9 gap-1.5 text-xs"
-                                onClick={() => navigate(`${nav.financeiro}?tab=vendas`)}
-                              >
-                                <ExternalLink className="h-3.5 w-3.5" />
-                                Configurar depois no Financeiro
-                              </Button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
-                )}
 
               </div>
             ))}
@@ -1105,7 +1029,7 @@ export default function ProcessoReserva() {
                     ))}
                   </ul>
                 )}
-                {readiness.warnings.map((warning) => (
+                {visibleReadinessWarnings.map((warning) => (
                   <p key={warning} className="text-xs text-muted-foreground">
                     {warning}
                   </p>
