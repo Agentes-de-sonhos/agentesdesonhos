@@ -90,25 +90,14 @@ const emptyLeg = (): FlightLegDraft => ({
   departure_time: "", arrival_time: "", flight_number: "",
 });
 
+import { syncFirstLegDate } from "@/lib/flightLegDateSync";
+
 function fmt(d?: string) {
   if (!d) return "—";
   try {
     const [y, m, day] = d.split("-").map(Number);
     return format(new Date(y, m - 1, day), "dd/MM/yyyy", { locale: ptBR });
   } catch { return d; }
-}
-/**
- * Mantém o 1º trecho alinhado à data principal escolhida no calendário.
- * Só atualiza quando o trecho está vazio, era igual à data anterior ou tem o
- * mesmo dia/mês com outro ano (sintoma do bug 27/02/2027 → 27/02/2026).
- * Datas de trecho digitadas manualmente e diferentes são preservadas.
- */
-export function syncFirstLegDate(legs: FlightLegDraft[] | undefined, prev: string | undefined, next: string): FlightLegDraft[] | undefined {
-  if (!legs?.length || !next) return legs;
-  const cur = legs[0].leg_date || "";
-  const sameDayOtherYear = cur.length === 10 && cur.slice(5) === next.slice(5) && cur !== next;
-  if (cur && cur !== prev && !sameDayOtherYear) return legs;
-  return legs.map((l, i) => (i === 0 ? { ...l, leg_date: next } : l));
 }
 function parseLocal(d?: string): Date | undefined {
   if (!d) return undefined;
