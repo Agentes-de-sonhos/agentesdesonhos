@@ -196,7 +196,7 @@ describe("Editor de orçamento reorganizado", () => {
   });
 
   it("mantém os subtítulos internos simples e os dois cartões de capa equilibrados", () => {
-    const initial = page.match(/renderInitial=\{\(\) => \([\s\S]*?\n        \)\}/)?.[0] ?? "";
+    const initial = page.match(/renderInitial=\{\(\) => \{[\s\S]*?\n        \}\}/)?.[0] ?? "";
     const dataHeading = initial.match(/<h4 id="quote-initial-data-title"[\s\S]*?<\/h4>/)?.[0] ?? "";
     expect(dataHeading).toContain("Dados principais");
     expect(dataHeading).not.toContain("<Users");

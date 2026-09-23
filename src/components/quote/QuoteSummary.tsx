@@ -18,9 +18,11 @@ function parseLocalDate(dateStr: string) {
 
 interface QuoteSummaryProps {
   quote: Quote;
+  /** O título passou para o bloco Configuração da capa; aqui fica oculto. */
+  hideTitle?: boolean;
 }
 
-export function QuoteSummary({ quote }: QuoteSummaryProps) {
+export function QuoteSummary({ quote, hideTitle }: QuoteSummaryProps) {
   const [editing, setEditing] = useState(false);
   const [editingDest, setEditingDest] = useState(false);
   const [destDraft, setDestDraft] = useState(quote.destination);
@@ -181,6 +183,7 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
           )}
 
           {/* Título da viagem (opcional) */}
+          {!hideTitle && (
           <div data-testid="quote-main-title" className="flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm md:border-b-0">
             <Plane className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Título:</span>
@@ -215,7 +218,8 @@ export function QuoteSummary({ quote }: QuoteSummaryProps) {
               </>
             )}
           </div>
-          
+          )}
+
           {/* Passageiros editáveis */}
           {editingPax ? (
             <div data-testid="quote-main-passengers" className="flex min-h-14 min-w-0 items-center justify-start gap-2 border-b border-border/60 px-3 py-3 text-left text-sm md:border-b-0 md:border-l">

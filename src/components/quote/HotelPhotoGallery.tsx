@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Check, ImageIcon, Link2, Loader2, Pencil, Plus, X } from "lucide-react";
+import { Check, ImageIcon, Link2, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,7 +19,6 @@ import {
   dedupeImageRefs,
   dropStaleGoogleRefs,
   galleryCounterLabel,
-  hasStaleGoogleRefs,
   imageRefOrigin,
   isSameImageRefList,
   isValidHttpImageUrl,
@@ -27,32 +26,31 @@ import {
 } from "@/lib/quoteHotelGallery";
 import type { AddImageResult } from "@/lib/quoteHotelGallery";
 
-export const HOTEL_GALLERY_PENDING_MESSAGE =
-  "A galeria de fotos está em edição. Clique em “Salvar galeria” para confirmar as fotos desta hospedagem.";
-export const HOTEL_GALLERY_STALE_MESSAGE =
-  "As fotos salvas pertencem ao hotel anterior. Revise a galeria e clique em “Salvar galeria”.";
+export const HOTEL_GALLERY_SAVING_LABEL = "Salvando…";
+export const HOTEL_GALLERY_SAVED_LABEL = "Salvo";
+export const HOTEL_GALLERY_RETRY_MESSAGE =
+  "Não foi possível salvar a última alteração da galeria. Tente novamente.";
 
 interface HotelPhotoGalleryProps {
-  /** Fotos confirmadas (fonte da verdade do formulário). */
+  /** Fotos da galeria (fonte da verdade do formulário). */
   imageUrls: string[];
-  /** Chamado APENAS ao confirmar a galeria ("Salvar galeria"). */
+  /** Chamado imediatamente a cada seleção/remoção — autosave, sem botão Salvar. */
   onImageUrlsChange: (urls: string[]) => void;
   placeId?: string | null;
-  /** `true` quando o serviço já existe (edição) — evita abrir edição sozinho. */
+  /** `true` quando o serviço já existe (edição). */
   hasSavedService?: boolean;
-  /**
-   * Informa ao formulário que a galeria tem alterações não confirmadas ou está
-   * inconsistente com o hotel atual — o submit deve ser bloqueado até Salvar.
-   */
+  /** Mantido por compatibilidade: a galeria nunca fica pendente (autosave). */
   onPendingChange?: (pending: boolean) => void;
 }
 
 /**
- * Galeria de fotos exclusiva do serviço HOSPEDAGEM nos orçamentos.
+ * Galeria de fotos da HOSPEDAGEM nos orçamentos, com autosave.
  *
- * Trabalha com dois estados: `imageUrls` (salvas) e `draft` (rascunho do modo
- * de edição). Nenhuma seleção/remoção do rascunho toca em `onImageUrlsChange`
- * — apenas "Salvar galeria" confirma, e "Cancelar" descarta.
+ * Cada seleção ou remoção é aplicada na hora, em fila serializada (a referência
+ * `currentRef` é a única origem do próximo estado), de modo que cliques rápidos
+ * nunca produzem duplicidade nem respostas fora de ordem. A ordem escolhida
+ * pelo usuário é preservada. Em falha, o estado visível é mantido e o retry
+ * fica explícito — nunca exibimos "Salvo" sobre uma alteração que não entrou.
  */
 export function HotelPhotoGallery({
   imageUrls,
@@ -64,39 +62,41 @@ export function HotelPhotoGallery({
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
   const seenPlace = useRef<string | null | undefined>(undefined);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryRef = useRef<(() => void) | null>(null);
 
-  const [mode, setMode] = useState<"view" | "edit">("view");
-  const [draft, setDraft] = useState<string[]>([]);
-  const draftRef = useRef<string[]>([]);
   const [feedback, setFeedback] = useState<{ tone: "error" | "info"; text: string } | null>(null);
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [urlOpen, setUrlOpen] = useState(false);
   const [urlValue, setUrlValue] = useState("");
   const [urlLoading, setUrlLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const saved = useMemo(() => dedupeImageRefs(imageUrls || []), [imageUrls]);
-  const active = mode === "edit" ? draft : saved;
+  const active = useMemo(() => dedupeImageRefs(imageUrls || []), [imageUrls]);
+  const currentRef = useRef<string[]>(active);
+  currentRef.current = active;
   const atLimit = active.length >= MAX_HOTEL_GALLERY_IMAGES;
 
-  const applyDraft = useCallback((next: string[]) => {
-    draftRef.current = next;
-    setDraft(next);
+  useEffect(() => () => { if (savedTimer.current) clearTimeout(savedTimer.current); }, []);
+  // Autosave: a galeria nunca bloqueia o salvamento do serviço.
+  useEffect(() => { onPendingChange?.(false); }, [onPendingChange]);
+
+  const markSaved = useCallback(() => {
+    setStatus("saving");
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => setStatus("saved"), 220);
   }, []);
 
-  const openEdit = useCallback(
-    (base?: string[]) => {
-      applyDraft(dedupeImageRefs(base ?? imageUrls ?? []));
-      setFeedback(null);
-      setUrlOpen(false);
-      setUrlValue("");
-      setMode("edit");
-    },
-    [imageUrls, applyDraft],
-  );
+  /** Aplica um novo estado imediatamente (autosave). */
+  const commit = useCallback((next: string[]) => {
+    if (isSameImageRefList(next, currentRef.current)) return;
+    currentRef.current = next;
+    retryRef.current = null;
+    onImageUrlsChange(next);
+    markSaved();
+  }, [onImageUrlsChange, markSaved]);
 
-  // Primeiro hotel selecionado → abre edição e busca sugestões.
-  // Troca de hotel → limpa as referências Google antigas SOMENTE no rascunho.
-  // As fotos confirmadas nunca são alteradas fora de "Salvar galeria".
+  // Troca de hotel: as referências do hotel anterior saem automaticamente.
   useEffect(() => {
     if (!placeId) {
       seenPlace.current = placeId ?? null;
@@ -105,47 +105,29 @@ export function HotelPhotoGallery({
     const previous = seenPlace.current;
     seenPlace.current = placeId;
     if (previous && previous !== placeId) {
-      openEdit(dropStaleGoogleRefs(imageUrls || [], placeId));
-      return;
+      commit(dropStaleGoogleRefs(currentRef.current, placeId));
     }
-    if (!previous && !hasSavedService) openEdit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [placeId]);
 
-  /**
-   * Adição determinística: calcula o resultado a partir do rascunho atual
-   * (ref sincronizada) — nunca depende do retorno do updater do setState.
-   */
+  /** Adição determinística a partir do estado atual (nunca do updater). */
   const tryAdd = useCallback((ref: string): AddImageResult => {
-    const res = addImageRef(draftRef.current, ref);
-    applyDraft(res.urls);
+    const res = addImageRef(currentRef.current, ref);
+    if (res.ok) commit(res.urls);
     setFeedback(res.ok ? null : { tone: "error", text: res.error || HOTEL_GALLERY_LIMIT_MESSAGE });
     return res;
-  }, [applyDraft]);
+  }, [commit]);
 
   const handleRemove = useCallback((ref: string) => {
-    applyDraft(removeImageRef(draftRef.current, ref));
+    commit(removeImageRef(currentRef.current, ref));
     setFeedback(null);
-  }, [applyDraft]);
+  }, [commit]);
 
   const handleGoogleSelected = useCallback((urls: string[]) => {
     urls.forEach((u) => tryAdd(u));
   }, [tryAdd]);
 
-  const handleAddUrl = useCallback(async () => {
-    const candidate = urlValue.trim();
-    if (!isValidHttpImageUrl(candidate)) {
-      setFeedback({ tone: "error", text: "Informe um link http ou https válido de imagem." });
-      return;
-    }
-    if (containsImageRef(draftRef.current, candidate)) {
-      setFeedback({ tone: "error", text: "Esta foto já está na galeria." });
-      return;
-    }
-    if (draftRef.current.length >= MAX_HOTEL_GALLERY_IMAGES) {
-      setFeedback({ tone: "error", text: HOTEL_GALLERY_LIMIT_MESSAGE });
-      return;
-    }
+  const importUrl = useCallback(async (candidate: string) => {
     setUrlLoading(true);
     setFeedback(null);
     try {
@@ -155,39 +137,47 @@ export function HotelPhotoGallery({
       const importedUrl: string | undefined = data?.url;
       if (error || !importedUrl) {
         // Importação falhou: NÃO gravamos hotlink externo como importado.
+        retryRef.current = () => { void importUrl(candidate); };
+        setStatus("error");
         setFeedback({
           tone: "error",
           text: data?.error || "Não foi possível carregar a imagem deste link. Tente novamente.",
         });
         return;
       }
-      // A importação é idempotente: a mesma URL de origem devolve sempre o
-      // mesmo arquivo. Comparamos antes de adicionar para não duplicar.
+      // A importação é idempotente: a mesma URL de origem devolve o mesmo arquivo.
       const res = tryAdd(importedUrl);
       if (res.ok) {
         setUrlValue("");
         setUrlOpen(false);
       }
     } catch {
+      retryRef.current = () => { void importUrl(candidate); };
+      setStatus("error");
       setFeedback({ tone: "error", text: "Não foi possível carregar a imagem deste link. Tente novamente." });
     } finally {
       setUrlLoading(false);
     }
-  }, [urlValue, tryAdd]);
+  }, [tryAdd]);
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (fileRef.current) fileRef.current.value = "";
-    if (!file) return;
-    const invalid = validateImageFile(file);
-    if (invalid) {
-      setFeedback({ tone: "error", text: invalid });
+  const handleAddUrl = useCallback(async () => {
+    const candidate = urlValue.trim();
+    if (!isValidHttpImageUrl(candidate)) {
+      setFeedback({ tone: "error", text: "Informe um link http ou https válido de imagem." });
       return;
     }
-    if (draftRef.current.length >= MAX_HOTEL_GALLERY_IMAGES) {
+    if (containsImageRef(currentRef.current, candidate)) {
+      setFeedback({ tone: "error", text: "Esta foto já está na galeria." });
+      return;
+    }
+    if (currentRef.current.length >= MAX_HOTEL_GALLERY_IMAGES) {
       setFeedback({ tone: "error", text: HOTEL_GALLERY_LIMIT_MESSAGE });
       return;
     }
+    await importUrl(candidate);
+  }, [urlValue, importUrl]);
+
+  const uploadFile = useCallback(async (file: File) => {
     if (!user?.id) {
       setFeedback({ tone: "error", text: "Sessão expirada. Faça login novamente." });
       return;
@@ -202,6 +192,8 @@ export function HotelPhotoGallery({
         .from("quote-images")
         .upload(fullPath, result.full, { upsert: true, contentType: "image/webp" });
       if (error) {
+        retryRef.current = () => { void uploadFile(file); };
+        setStatus("error");
         setFeedback({ tone: "error", text: "Erro ao enviar a foto. Tente novamente." });
         return;
       }
@@ -212,38 +204,31 @@ export function HotelPhotoGallery({
       const res = tryAdd(urlData.publicUrl);
       if (res.ok) setFeedback(null);
     } catch {
+      retryRef.current = () => { void uploadFile(file); };
+      setStatus("error");
       setFeedback({ tone: "error", text: "Erro ao processar a imagem." });
     } finally {
       setUploading(false);
     }
+  }, [tryAdd, user?.id]);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = "";
+    if (!file) return;
+    const invalid = validateImageFile(file);
+    if (invalid) {
+      setFeedback({ tone: "error", text: invalid });
+      return;
+    }
+    if (currentRef.current.length >= MAX_HOTEL_GALLERY_IMAGES) {
+      setFeedback({ tone: "error", text: HOTEL_GALLERY_LIMIT_MESSAGE });
+      return;
+    }
+    await uploadFile(file);
   };
 
-  const handleSave = () => {
-    onImageUrlsChange(dedupeImageRefs(draftRef.current));
-    setFeedback(null);
-    setUrlOpen(false);
-    setUrlValue("");
-    setMode("view");
-  };
-
-  const handleCancel = () => {
-    applyDraft([]);
-    setFeedback(null);
-    setUrlOpen(false);
-    setUrlValue("");
-    setMode("view");
-  };
-
-  // Pendência = rascunho diferente das salvas, ou fotos salvas de outro hotel.
-  const staleSaved = hasStaleGoogleRefs(saved, placeId);
-  const dirtyDraft = mode === "edit" && !isSameImageRefList(draft, saved);
-  const pending = staleSaved || dirtyDraft;
-  useEffect(() => {
-    onPendingChange?.(pending);
-  }, [pending, onPendingChange]);
-  useEffect(() => () => onPendingChange?.(false), [onPendingChange]);
-
-  const showSection = !!placeId || saved.length > 0;
+  const showSection = !!placeId || active.length > 0;
   if (!showSection) {
     return (
       <div className="space-y-1" data-testid="hotel-gallery-empty">
@@ -264,41 +249,17 @@ export function HotelPhotoGallery({
             {galleryCounterLabel(active.length)}
           </p>
         </div>
-        {mode === "view" ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-8 gap-1.5 text-xs"
-            aria-label="Editar galeria de fotos"
-            onClick={() => openEdit()}
+        {status !== "idle" && (
+          <p
+            className={status === "error" ? "text-xs text-destructive" : "text-xs text-muted-foreground"}
+            data-testid="hotel-gallery-autosave-status"
+            role="status"
+            aria-live="polite"
           >
-            <Pencil className="h-3.5 w-3.5" />
-            Editar galeria
-          </Button>
-        ) : (
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 text-xs"
-              aria-label="Cancelar edição da galeria"
-              onClick={handleCancel}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              aria-label="Salvar galeria de fotos"
-              onClick={handleSave}
-            >
-              <Check className="h-3.5 w-3.5" />
-              Salvar galeria
-            </Button>
-          </div>
+            {status === "saving" && HOTEL_GALLERY_SAVING_LABEL}
+            {status === "saved" && HOTEL_GALLERY_SAVED_LABEL}
+            {status === "error" && HOTEL_GALLERY_RETRY_MESSAGE}
+          </p>
         )}
       </div>
 
@@ -318,129 +279,125 @@ export function HotelPhotoGallery({
               <span className="absolute bottom-1 left-1 rounded bg-background/85 px-1 py-0.5 text-[10px] text-muted-foreground">
                 {ORIGIN_LABEL[imageRefOrigin(ref)]}
               </span>
-              {mode === "edit" && (
-                <>
-                  <span className="absolute top-1 left-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
-                    <Check className="h-2.5 w-2.5 text-primary-foreground" />
-                  </span>
-                  <button
-                    type="button"
-                    aria-label="Remover foto da galeria"
-                    onClick={() => handleRemove(ref)}
-                    className="absolute top-1 right-1 h-5 w-5 shadow-sm rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-90 hover:opacity-100"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </>
-              )}
+              <span className="absolute top-1 left-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                <Check className="h-2.5 w-2.5 text-primary-foreground" />
+              </span>
+              <button
+                type="button"
+                aria-label="Remover foto da galeria"
+                onClick={() => handleRemove(ref)}
+                className="absolute top-1 right-1 h-5 w-5 shadow-sm rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-90 hover:opacity-100"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
           ))}
         </div>
       )}
 
-      {mode === "view" && active.length === 0 && (
-        <p className="text-xs text-muted-foreground">
-          Nenhuma foto selecionada. Use “Editar galeria” para escolher as fotos.
-        </p>
-      )}
-
-      {mode === "edit" && (
-        <div className="space-y-3">
-          {placeId && (
-            <GoogleHotelPhotos
-              placeId={placeId}
-              onPhotosSelected={handleGoogleSelected}
-              onPhotoRemoved={handleRemove}
-              existingUrls={draft}
-              hideCounter
-              disabled={atLimit}
-              headingLabel={HOTEL_GALLERY_SUGGESTIONS_TITLE}
-              buttonLabel="Buscar fotos do Google"
-              loadingLabel="Buscando sugestões do Google…"
-            />
-          )}
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              aria-label="Adicionar foto por URL"
-              onClick={() => setUrlOpen((v) => !v)}
-              disabled={atLimit}
-            >
-              <Link2 className="h-3.5 w-3.5" />
-              Adicionar foto por URL
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8 gap-1.5 text-xs"
-              aria-label="Enviar foto do computador"
-              onClick={() => fileRef.current?.click()}
-              disabled={atLimit || uploading}
-            >
-              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
-              {uploading ? "Enviando…" : "Enviar foto"}
-            </Button>
-          </div>
-
-          {urlOpen && (
-            <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3" data-testid="hotel-gallery-url-form">
-              <Input
-                value={urlValue}
-                onChange={(e) => setUrlValue(e.target.value)}
-                placeholder={HOTEL_GALLERY_URL_PLACEHOLDER}
-                aria-label="Link direto da imagem"
-                disabled={urlLoading}
-              />
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  className="h-8 gap-1.5 text-xs"
-                  onClick={handleAddUrl}
-                  disabled={urlLoading || atLimit}
-                  aria-label="Adicionar foto"
-                >
-                  {urlLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-                  {urlLoading ? "Importando…" : "Adicionar foto"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 text-xs"
-                  onClick={() => { setUrlOpen(false); setUrlValue(""); }}
-                  disabled={urlLoading}
-                  aria-label="Fechar adição por URL"
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={handleFile}
+      <div className="space-y-3">
+        {placeId && (
+          <GoogleHotelPhotos
+            placeId={placeId}
+            onPhotosSelected={handleGoogleSelected}
+            onPhotoRemoved={handleRemove}
+            existingUrls={active}
+            hideCounter
+            disabled={atLimit}
+            headingLabel={HOTEL_GALLERY_SUGGESTIONS_TITLE}
+            buttonLabel="Buscar fotos do Google"
+            loadingLabel="Buscando sugestões do Google…"
           />
-        </div>
-      )}
+        )}
 
-      {mode === "edit" && atLimit && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            aria-label="Adicionar foto por URL"
+            onClick={() => setUrlOpen((v) => !v)}
+            disabled={atLimit}
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            Adicionar foto por URL
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            aria-label="Enviar foto do computador"
+            onClick={() => fileRef.current?.click()}
+            disabled={atLimit || uploading}
+          >
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
+            {uploading ? "Enviando…" : "Enviar foto"}
+          </Button>
+          {status === "error" && retryRef.current && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs"
+              aria-label="Tentar salvar a galeria novamente"
+              data-testid="hotel-gallery-retry"
+              onClick={() => { const retry = retryRef.current; retryRef.current = null; setStatus("idle"); retry?.(); }}
+            >
+              Tentar novamente
+            </Button>
+          )}
+        </div>
+
+        {urlOpen && (
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3" data-testid="hotel-gallery-url-form">
+            <Input
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
+              placeholder={HOTEL_GALLERY_URL_PLACEHOLDER}
+              aria-label="Link direto da imagem"
+              disabled={urlLoading}
+            />
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                className="h-8 gap-1.5 text-xs"
+                onClick={handleAddUrl}
+                disabled={urlLoading || atLimit}
+                aria-label="Adicionar foto"
+              >
+                {urlLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                {urlLoading ? "Importando…" : "Adicionar foto"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => { setUrlOpen(false); setUrlValue(""); }}
+                disabled={urlLoading}
+                aria-label="Fechar adição por URL"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFile}
+        />
+      </div>
+
+      {atLimit && (
         <p className="text-xs text-destructive" data-testid="hotel-gallery-limit">
           {HOTEL_GALLERY_LIMIT_MESSAGE}
-        </p>
-      )}
-      {staleSaved && (
-        <p className="text-xs text-destructive" data-testid="hotel-gallery-stale">
-          {HOTEL_GALLERY_STALE_MESSAGE}
         </p>
       )}
       {feedback && (

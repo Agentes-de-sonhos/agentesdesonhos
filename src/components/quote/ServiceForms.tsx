@@ -19,6 +19,10 @@ import {
 import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggestions";
 import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
+import { AirportSearchInput } from "@/components/quote/AirportSearchInput";
+import { RequiredFieldsScope, ServiceFormActions } from "@/components/quote/RequiredFieldsScope";
+import { focusFirstInvalidField } from "@/lib/serviceFormRequired";
+import { buildServicePrefill, type ServicePrefill } from "@/lib/serviceFormPrefill";
 import { AttractionFareCompositionEditor } from "@/components/quote/AttractionFareCompositionEditor";
 import {
   autoSyncDefaultComposition,
@@ -123,6 +127,8 @@ interface ServiceFormProps {
   photoSlot?: React.ReactNode;
   /** Destino/contexto do orçamento — usado para priorizar buscas de lugares. */
   destinationContext?: string | null;
+  /** Sugestões editáveis derivadas do orçamento/oportunidade (destino, datas, passageiros). */
+  prefill?: ServicePrefill;
   /** Called when the service mode chooser becomes active/inactive so the parent modal can adapt its layout */
   onChooserActiveChange?: (active: boolean) => void;
 
@@ -243,6 +249,10 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
     const updated = legs.map((l, i) => i === idx ? { ...l, [field]: value } : l);
     onChange(updated);
   };
+  /** Grava vários campos do trecho de uma vez (seleção estruturada de aeroporto). */
+  const updateLegFields = (idx: number, fields: Record<string, any>) => {
+    onChange(legs.map((l, i) => i === idx ? { ...l, ...fields } : l));
+  };
   const addLeg = () => {
     const leg = emptyLeg();
     if (defaultSegmentType) (leg as any).segment_type = defaultSegmentType;
@@ -273,7 +283,18 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de origem</label>
-              <Input placeholder="GRU" value={leg.airport_origin || ""} onChange={e => updateLeg(idx, "airport_origin", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportSearchInput
+                  aria-label="Aeroporto de origem"
+                  value={leg.airport_origin || ""}
+                  onChange={(v) => updateLeg(idx, "airport_origin", v)}
+                  onSelect={(airport) => updateLegFields(idx, {
+                    airport_origin: airport.iata,
+                    origin_airport_name: airport.name,
+                    origin_city: airport.city,
+                  })}
+                />
+              </div>
               {airportHint(leg.airport_origin, leg.origin_city) && (
                 <p className="text-[11px] text-muted-foreground mt-1 truncate" title={airportHint(leg.airport_origin, leg.origin_city)}>
                   {airportHint(leg.airport_origin, leg.origin_city)}
@@ -288,7 +309,18 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
             </div>
             <div>
               <label className="text-xs text-muted-foreground">Aeroporto de destino</label>
-              <Input placeholder="CDG" value={leg.airport_destination || ""} onChange={e => updateLeg(idx, "airport_destination", e.target.value)} className="h-8 text-sm mt-1" />
+              <div className="mt-1">
+                <AirportSearchInput
+                  aria-label="Aeroporto de destino"
+                  value={leg.airport_destination || ""}
+                  onChange={(v) => updateLeg(idx, "airport_destination", v)}
+                  onSelect={(airport) => updateLegFields(idx, {
+                    airport_destination: airport.iata,
+                    destination_airport_name: airport.name,
+                    destination_city: airport.city,
+                  })}
+                />
+              </div>
               {airportHint(leg.airport_destination, leg.destination_city) && (
                 <p className="text-[11px] text-muted-foreground mt-1 truncate" title={airportHint(leg.airport_destination, leg.destination_city)}>
                   {airportHint(leg.airport_destination, leg.destination_city)}
@@ -390,7 +422,7 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
   );
 }
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, prefill }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const normalizedLegs = normalizeLegs(init);
@@ -410,7 +442,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     resolver: zodResolver(flightSchema),
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
-      origin_city: init?.origin_city || "", destination_city: init?.destination_city || "",
+      origin_city: init?.origin_city || "", destination_city: init?.destination_city || prefill?.destination_city || "",
       airline: init?.airline || "",
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       fees_amount: (init as any)?.fees_amount ?? 0,
@@ -539,7 +571,8 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={flightSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         {isEditing && flightAnalysis.status === "incomplete" && (
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-300">
             <span className="font-medium">Passagem incompleta</span> — {formatMissingFlightFields(flightAnalysis.missing)}
@@ -789,11 +822,12 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             </div>
           )}
         </div>
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -836,7 +870,7 @@ const hotelSchema = z.object({
   path: ["check_out"],
 });
 
-function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange, prefill }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   // Legacy migration: if there are no `rooms`, seed one from the old single-room fields.
@@ -871,7 +905,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     resolver: zodResolver(hotelSchema),
     defaultValues: {
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
-      hotel_name: init?.hotel_name || "", city: init?.city || "",
+      hotel_name: init?.hotel_name || "", city: init?.city || prefill?.city || "",
       meal_plan: init?.meal_plan || "",
       rooms: initialRooms,
       notes: init?.notes || "",
@@ -1028,7 +1062,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={hotelSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         {/* 1. Hotel name (principal) */}
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="hotel_name" render={({ field }) => (
@@ -1242,11 +1277,12 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1270,7 +1306,7 @@ const carRentalSchema = z.object({
   path: ["dropoff_date"],
 });
 
-function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, photoSlot, onPlaceIdChange, prefill }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const [pickupOpen, setPickupOpen] = useState(false);
   const [dropoffOpen, setDropoffOpen] = useState(false);
@@ -1280,8 +1316,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
     resolver: zodResolver(carRentalSchema),
     defaultValues: {
       rental_company: init?.rental_company || "",
-      pickup_location: init?.pickup_location || "",
-      dropoff_location: init?.dropoff_location || "",
+      pickup_location: init?.pickup_location || prefill?.pickup_location || "",
+      dropoff_location: init?.dropoff_location || prefill?.dropoff_location || "",
       pickup_date: init?.pickup_date ? parseLocalDate(init.pickup_date) : tripStartDate || new Date(),
       pickup_time: init?.pickup_time || "10:00",
       dropoff_date: init?.dropoff_date ? parseLocalDate(init.dropoff_date) : tripEndDate || new Date(),
@@ -1332,7 +1368,8 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={carRentalSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="rental_company" render={({ field }) => (
           <FormItem><FormLabel>Nome da Locadora</FormLabel><FormControl>
             <PlacesAutocomplete
@@ -1419,11 +1456,12 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Grupo econômico" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1441,7 +1479,7 @@ const transferSchema = z.object({
   description: z.string().optional(),
 });
 
-function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot }: Omit<ServiceFormProps, "serviceType">) {
+function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, paymentSlot, prefill }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
   const form = useForm<z.infer<typeof transferSchema>>({
@@ -1450,7 +1488,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
       company_name: init?.company_name || "",
       transfer_mode: init?.transfer_type || "round_trip",
       service_category: init?.service_category || undefined,
-      location: init?.location || "",
+      location: init?.location || prefill?.location || "",
       price: init?.price || initialData?.amount || 0,
       arrival_date: init?.arrival_date ? parseLocalDate(init.arrival_date) : (init?.date ? parseLocalDate(init.date) : tripStartDate),
       departure_date: init?.departure_date ? parseLocalDate(init.departure_date) : tripEndDate,
@@ -1494,7 +1532,8 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={transferSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="transfer_mode" render={({ field }) => (
           <FormItem><FormLabel>Tipo de Transfer</FormLabel>
             <div className="grid grid-cols-3 gap-2">
@@ -1614,14 +1653,15 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
 
         {renderPaymentSlot(paymentSlot, isRoundTrip ? price * 2 : price)}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Transfer privativo" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
             {initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
             {initialData ? "Salvar" : isRoundTrip ? "Salvar 2 trechos" : "Salvar"}
           </Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1716,7 +1756,8 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={attractionSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="product_name" render={({ field }) => (
             <FormItem><FormLabel>Nome do Produto</FormLabel><FormControl>
@@ -1829,11 +1870,12 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
           </p>
         )}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Ingresso com fila rápida" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading || !!compositionError || paxOutOfSync || compositionPending}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -1870,7 +1912,8 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={insuranceSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="provider" render={({ field }) => (
           <FormItem><FormLabel>Seguradora</FormLabel><FormControl><Input placeholder="Assist Card, Travel Ace..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -1929,11 +1972,12 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           <FormItem><FormLabel>Observações</FormLabel><FormControl><TextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Cobertura ampliada" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2075,7 +2119,8 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={cruiseSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="ship_name" render={({ field }) => (
           <FormItem><FormLabel>Nome do Navio</FormLabel><FormControl><Input placeholder="MSC Seaview, Costa Diadema..." {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -2316,11 +2361,12 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         )} />
 
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Cabine com varanda" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2435,7 +2481,8 @@ function RailTransportForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <RequiredFieldsScope schema={railSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-6">
         <section className="space-y-3">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
             <TramFront className="h-4 w-4 text-primary" /> Trajeto
@@ -2597,11 +2644,12 @@ function RailTransportForm({
         )}
 
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Primeira classe" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2672,7 +2720,8 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={otherSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="company_name" render={({ field }) => (
           <FormItem><FormLabel>{OTHER_SERVICE_NAME_LABEL}</FormLabel><FormControl>
             <PlacesAutocomplete
@@ -2724,11 +2773,12 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
           </FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Opção recomendada" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -2774,7 +2824,8 @@ function CircuitForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialDa
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <RequiredFieldsScope schema={circuitSchema}>
+      <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
         <FormField control={form.control} name="circuit_name" render={({ field }) => (
           <FormItem><FormLabel>Nome do Circuito</FormLabel><FormControl>
             <Input placeholder="Ex: Circuito Itália Clássica" {...field} />
@@ -2812,11 +2863,12 @@ function CircuitForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialDa
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Circuito clássico" />
-        <div className="flex gap-2 justify-end">
+        <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
-        </div>
+        </ServiceFormActions>
       </form>
+    </RequiredFieldsScope>
     </Form>
   );
 }
@@ -3476,22 +3528,13 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const [isImgUploading, setIsImgUploading] = useState(false);
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [photoQuery, setPhotoQuery] = useState<string | null>(null);
-  const [galleryPending, setGalleryPending] = useState(false);
   const hasMultipleOptions = serviceType === 'flight' || serviceType === 'hotel';
 
   const isHotel = serviceType === 'hotel';
 
   const wrappedSubmit = (data: any, amount: number, optionLabel?: string, description?: string) => {
-    // Hospedagem: nada é salvo enquanto a galeria tiver alterações pendentes —
-    // as fotos jamais mudam silenciosamente.
-    if (isHotel && galleryPending) {
-      toast({
-        title: "Confirme a galeria de fotos",
-        description: "Clique em “Salvar galeria” (ou remova as fotos do hotel anterior) antes de salvar a hospedagem.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Hospedagem: a galeria tem autosave — cada seleção/remoção já está aplicada,
+    // então nunca há pendência bloqueando o salvamento do serviço.
     return onSubmit(data, amount, optionLabel, description, serviceImageUrls.length > 0 ? serviceImageUrls[0] : undefined, serviceImageUrls);
   };
 
@@ -3504,12 +3547,25 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       hotelMode={isHotel}
       placeKind={serviceType === 'hotel' ? 'hotel' : serviceType === 'attraction' ? 'attraction' : serviceType === 'other' ? 'other_service' : 'other'}
       hasSavedService={!!initialData}
-      onGalleryPendingChange={isHotel ? setGalleryPending : undefined}
       photoQuery={serviceType === 'attraction' ? photoQuery : undefined}
       photoContext={destinationContext}
     />
   );
+  // Sugestões editáveis derivadas do orçamento (destino, datas, passageiros).
+  const prefill = useMemo(
+    () =>
+      buildServicePrefill(serviceType as any, {
+        destination: destinationContext ?? null,
+        startDate: tripStartDate ?? null,
+        endDate: tripEndDate ?? null,
+        adults: adultsCount ?? null,
+        children: childrenCount ?? null,
+      }),
+    [serviceType, destinationContext, tripStartDate, tripEndDate, adultsCount, childrenCount],
+  );
+
   const formProps = {
+    prefill,
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
     tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
     // Documentos com vários serviços do mesmo tipo (3 ingressos, 2 transfers...)
