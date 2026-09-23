@@ -74,10 +74,28 @@ import {
   assessTravelFileReadiness,
   describeServiceCommission,
   describeServicePendingReasons,
+  describeStatusTransitionBlock,
   summarizeReconfirmation,
   isConvertedV2,
   isActiveTravelFileStatus,
 } from "@/lib/travelFileConversion";
+import {
+  displayServiceSupplier,
+  serviceOptionLabel,
+  travelFileServiceTitle,
+} from "@/lib/travelFileServiceIdentity";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
 
 import { ConfirmSaleDialog } from "@/components/reservas/ConfirmSaleDialog";
 import { ServiceFinancialRuleDialog } from "@/components/reservas/ServiceFinancialRuleDialog";
@@ -183,7 +201,14 @@ export default function ProcessoReserva() {
 
   const [confirmSaleOpen, setConfirmSaleOpen] = useState(false);
   const [ruleEditing, setRuleEditing] = useState<TravelFileService | null>(null);
-  const [supplierExceptions, setSupplierExceptions] = useState<Record<string, string>>({});
+  const [supplierExceptions] = useState<Record<string, string>>({});
+  /** Mudança de situação que exige justificativa antes de gravar. */
+  const [statusJustification, setStatusJustification] = useState<{
+    service: TravelFileService;
+    status: TravelFileServiceStatus;
+    reason: string;
+  } | null>(null);
+
   const { can } = usePermissions();
   // Interface segue as permissões; a autoridade final é o servidor.
   // Ver valores NUNCA autoriza alterar valores: a edição de valor vendido e
@@ -315,6 +340,55 @@ export default function ProcessoReserva() {
     }
   };
 
+  /**
+   * Mudança de situação operacional do serviço.
+   * Transições incoerentes são explicadas em português e não são gravadas:
+   * reservar/emitir exige fornecedor; "Valor alterado" exige valor
+   * reconfirmado; "Indisponível" e "Valor alterado" exigem justificativa
+   * (gravada como nota interna do processo).
+   */
+  const changeServiceStatus = async (
+    service: TravelFileService,
+    status: TravelFileServiceStatus,
+  ) => {
+    if (status === service.status) return;
+    const block = describeStatusTransitionBlock(service, status, supplierExceptions);
+    if (block) {
+      toast.error(block);
+      return;
+    }
+    if (["unavailable", "amount_changed"].includes(status)) {
+      setStatusJustification({ service, status, reason: "" });
+      return;
+    }
+    await patchServiceStatus(service.id, status);
+  };
+
+  /** Confirma a mudança que exige justificativa, registrando a nota interna. */
+  const confirmStatusJustification = async () => {
+    if (!statusJustification) return;
+    const reason = statusJustification.reason.trim();
+    if (!reason) {
+      toast.error("Escreva a justificativa desta mudança.");
+      return;
+    }
+    const { service, status } = statusJustification;
+    try {
+      await saveService.mutateAsync({ id: service.id, status });
+      await addNote
+        .mutateAsync({
+          body: `${travelFileServiceTitle(service)} — ${SERVICE_STATUS_LABELS[status]}: ${reason}`,
+          authorName: (user?.user_metadata as any)?.full_name || user?.email || null,
+        })
+        .catch(() => {});
+      setStatusJustification(null);
+      toast.success("Situação do serviço atualizada.");
+    } catch (error: any) {
+      toast.error(humanizeWorkflowError(error));
+    }
+  };
+
+
   /** Valores operacionais gravados juntos: o servidor valida cada permissão. */
   const patchServiceAmounts = async (
     service: TravelFileService,
@@ -399,22 +473,44 @@ export default function ProcessoReserva() {
       : currencyGroups.map((group) => money(group[key], group.currency)).join(" · ");
 
   /**
-   * Cartões financeiros por moeda. A margem só é exibida quando há permissão de
-   * receita E de margem: com a receita removida ela seria calculada contra zero.
+   * Cartões do topo dos serviços.
+   * Na reconfirmação (solicitação do site, antes da venda) o contexto é
+   * OPERACIONAL: solicitado, reconfirmado, vendido e variação. Custo, comissão
+   * e margem pertencem à Gestão Financeira e não aparecem aqui.
+   * A margem nunca é exibida sem custo informado: ela seria a própria receita.
    */
-  const financialCards = (
-    isManual && currencyGroups.length > 0
-      ? currencyGroups
-      : [{ currency: file.currency, ...totals }]
-  ).map((group) => ({
-    currency: group.currency,
-    items: [
-      ...(canMargin ? [{ label: "Custo", value: group.cost }] : []),
-      ...(canCommission ? [{ label: "Comissão", value: group.commission }] : []),
-      ...(canMargin && canRevenue ? [{ label: "Margem", value: group.margin }] : []),
-      ...(canRevenue ? [{ label: "Variação vs. solicitado", value: group.variation }] : []),
-    ],
-  })).filter((card) => card.items.length > 0);
+  const financialCards = reconfirmationMode
+    ? canRevenue
+      ? [
+          {
+            currency: file.currency,
+            items: [
+              { label: "Total solicitado", value: reconfirmation.requested },
+              { label: "Total reconfirmado", value: reconfirmation.reconfirmed },
+              { label: "Total vendido", value: reconfirmation.sold },
+              { label: "Variação vs. solicitado", value: reconfirmation.variation },
+            ],
+          },
+        ]
+      : []
+    : (
+        isManual && currencyGroups.length > 0
+          ? currencyGroups
+          : [{ currency: file.currency, ...totals }]
+      )
+        .map((group) => ({
+          currency: group.currency,
+          items: [
+            ...(canMargin ? [{ label: "Custo", value: group.cost }] : []),
+            ...(canCommission ? [{ label: "Comissão", value: group.commission }] : []),
+            ...(canMargin && canRevenue && group.costKnown
+              ? [{ label: "Margem", value: group.margin }]
+              : []),
+            ...(canRevenue ? [{ label: "Variação vs. solicitado", value: group.variation }] : []),
+          ],
+        }))
+        .filter((card) => card.items.length > 0);
+
 
 
   return (
@@ -693,9 +789,17 @@ export default function ProcessoReserva() {
                 className="min-w-0 rounded-xl border border-border/50 p-3 sm:p-4"
               >
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <p className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]">
-                    {service.product_name}
+                  <p
+                    data-testid={`service-title-${service.id}`}
+                    className="min-w-0 text-sm font-medium text-foreground [overflow-wrap:anywhere]"
+                  >
+                    {travelFileServiceTitle(service)}
                   </p>
+                  {serviceOptionLabel(service) && (
+                    <Badge variant="secondary" className="font-normal">
+                      {serviceOptionLabel(service)}
+                    </Badge>
+                  )}
                   {service.is_required && <Badge variant="outline">Obrigatório</Badge>}
                   {isManual && canManage && (
                     <Button
@@ -721,56 +825,25 @@ export default function ProcessoReserva() {
                     </span>
                   )}
                   <span>Qtd. {service.quantity}</span>
-                  {service.supplier_name && <span>Fornecedor: {service.supplier_name}</span>}
-                  {canRevenue && (
-                    <span>Solicitado {money(service.requested_amount, service.currency)}</span>
-                  )}
-                </div>
-
-                {unifiedV2 && (
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Badge
-                      variant={
-                        (service.financial_rule_status ?? "pending") === "pending"
-                          ? "outline"
-                          : "secondary"
-                      }
-                      className={
-                        (service.financial_rule_status ?? "pending") === "pending"
-                          ? "border-amber-500/50 text-amber-700 dark:text-amber-300"
-                          : undefined
-                      }
-                    >
-                      {describeServiceCommission(service)}
-                    </Badge>
-                    {canFinancialManage && !isConvertedV2(file) && (
+                  {displayServiceSupplier(service) ? (
+                    <span>Fornecedor: {displayServiceSupplier(service)}</span>
+                  ) : (
+                    unifiedV2 &&
+                    canFinancialManage &&
+                    !isConvertedV2(file) && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 px-2 text-xs"
                         onClick={() => setRuleEditing(service)}
-                        aria-label={`Regra financeira de ${service.product_name}`}
                       >
-                        <Pencil className="h-3.5 w-3.5" />
-                        Regra financeira
+                        <Plus className="h-3.5 w-3.5" />
+                        Adicionar fornecedor
                       </Button>
-                    )}
-                    {readiness?.missingSupplierIds.includes(service.id) && (
-                      <Input
-                        value={supplierExceptions[service.id] ?? ""}
-                        onChange={(e) =>
-                          setSupplierExceptions((prev) => ({
-                            ...prev,
-                            [service.id]: e.target.value,
-                          }))
-                        }
-                        placeholder="Sem fornecedor: justifique a exceção"
-                        className="h-8 min-w-[220px] flex-1 bg-background text-xs"
-                        aria-label={`Justificativa de exceção de fornecedor para ${service.product_name}`}
-                      />
-                    )}
-                  </div>
-                )}
+                    )
+                  )}
+                </div>
+
 
                 {reconfirmationMode && (pendingByService[service.id]?.length ?? 0) > 0 && (
                   <div
@@ -794,9 +867,7 @@ export default function ProcessoReserva() {
                   </div>
                 )}
 
-
-
-                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="min-w-0">
                     <label className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                       Status do serviço
@@ -805,7 +876,7 @@ export default function ProcessoReserva() {
                       value={service.status}
                       disabled={!canManage}
                       onValueChange={(v) =>
-                        patchServiceStatus(service.id, v as TravelFileServiceStatus)
+                        changeServiceStatus(service, v as TravelFileServiceStatus)
                       }
                     >
                       <SelectTrigger className="mt-1 h-9">
@@ -823,6 +894,13 @@ export default function ProcessoReserva() {
                   {canRevenue && (
                     <>
                       <AmountField
+                        label="Solicitado"
+                        value={service.requested_amount}
+                        currency={service.currency}
+                        readOnly
+                        onCommit={() => {}}
+                      />
+                      <AmountField
                         label="Reconfirmado"
                         value={service.reconfirmed_amount}
                         currency={service.currency}
@@ -838,25 +916,83 @@ export default function ProcessoReserva() {
                       />
                     </>
                   )}
-                  {canMargin && (
-                    <AmountField
-                      label="Custo"
-                      value={service.cost_amount}
-                      currency={service.currency}
-                      readOnly={!canFinancialManage}
-                      onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
-                    />
-                  )}
-                  {canCommission && (
-                    <AmountField
-                      label="Comissão"
-                      value={service.commission_amount}
-                      currency={service.currency}
-                      readOnly={!canCommissionManage}
-                      onCommit={(v) => patchServiceAmounts(service, { commission_amount: v })}
-                    />
-                  )}
                 </div>
+
+                {/* Informações financeiras: opcionais nesta etapa. Custo, comissão,
+                    nota fiscal e prazos vivem na Gestão Financeira e nunca
+                    impedem a confirmação da venda. */}
+                {(canMargin || canCommission || (unifiedV2 && canFinancialManage)) && (
+                  <Collapsible className="mt-3">
+                    <CollapsibleTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 gap-2 px-2 text-xs text-muted-foreground"
+                      >
+                        <CircleDollarSign className="h-3.5 w-3.5" />
+                        Adicionar informações financeiras agora (opcional)
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="mt-2 rounded-xl border border-border/50 bg-muted/20 p-3">
+                        <p className="text-[11px] text-muted-foreground">
+                          Opcional nesta etapa: se ficar em branco, o financeiro deste serviço
+                          entra como pendente de configuração após a venda.
+                        </p>
+                        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {canMargin && (
+                            <AmountField
+                              label="Custo"
+                              value={service.cost_amount}
+                              currency={service.currency}
+                              readOnly={!canFinancialManage}
+                              onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
+                            />
+                          )}
+                          {canCommission && (
+                            <AmountField
+                              label="Comissão"
+                              value={service.commission_amount}
+                              currency={service.currency}
+                              readOnly={!canCommissionManage}
+                              onCommit={(v) =>
+                                patchServiceAmounts(service, { commission_amount: v })
+                              }
+                            />
+                          )}
+                        </div>
+                        {unifiedV2 && (
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <Badge variant="secondary">{describeServiceCommission(service)}</Badge>
+                            {canFinancialManage && !isConvertedV2(file) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-9 gap-1.5 text-xs"
+                                onClick={() => setRuleEditing(service)}
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                                Fornecedor e regra financeira
+                              </Button>
+                            )}
+                            {isConvertedV2(file) && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 gap-1.5 text-xs"
+                                onClick={() => navigate(`${nav.financeiro}?tab=vendas`)}
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" />
+                                Configurar depois no Financeiro
+                              </Button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                )}
+
               </div>
             ))}
             {services.length === 0 && (
@@ -1226,6 +1362,53 @@ export default function ProcessoReserva() {
             service={ruleEditing}
           />
         )}
+
+        {statusJustification && (
+          <Dialog
+            open
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) setStatusJustification(null);
+            }}
+          >
+            <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md sm:w-full">
+              <DialogHeader>
+                <DialogTitle>
+                  {SERVICE_STATUS_LABELS[statusJustification.status]}:{" "}
+                  {travelFileServiceTitle(statusJustification.service)}
+                </DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">
+                Explique o que mudou. A justificativa fica registrada nas notas internas do
+                processo e nunca aparece para o cliente.
+              </p>
+              <Textarea
+                value={statusJustification.reason}
+                onChange={(e) =>
+                  setStatusJustification((prev) =>
+                    prev ? { ...prev, reason: e.target.value } : prev,
+                  )
+                }
+                placeholder="Ex.: fornecedor informou aumento de tarifa."
+                className="min-h-24"
+                aria-label="Justificativa da mudança"
+              />
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  onClick={() => setStatusJustification(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button className="min-h-11" onClick={confirmStatusJustification}>
+                  Salvar mudança
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+
+
 
         {isManual && canManage && (
           <>

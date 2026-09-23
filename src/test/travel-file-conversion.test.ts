@@ -137,25 +137,23 @@ describe("travelFileConversion — regras puras do fluxo unificado V2", () => {
     expect(r.blockers.join(" ")).toContain("BRL, USD");
   });
 
-  it("regra financeira pendente bloqueia e aparece como pendência", () => {
+  it("regra financeira pendente NÃO bloqueia a venda: vira aviso e pendência", () => {
     const pending = baseService({ financial_rule_status: "pending" });
     const r = assessTravelFileReadiness(baseFile(), [pending]);
-    expect(r.ready).toBe(false);
-    expect(r.blockers.join(" ")).toContain("regra financeira");
+    expect(r.ready).toBe(true);
+    expect(r.blockers.join(" ")).not.toContain("regra financeira");
+    expect(r.warnings.join(" ")).toContain("Financeiro");
     expect(r.pendingServices.map((s) => s.id)).toContain(pending.id);
   });
 
-  it("fornecedor ausente bloqueia, exceto com justificativa explícita", () => {
+  it("fornecedor ausente NÃO bloqueia a venda (é exigido ao reservar/emitir)", () => {
     const noSupplier = baseService({ id: "svc-1", supplier_name: null, operator_id: null });
     const blocked = assessTravelFileReadiness(baseFile(), [noSupplier]);
-    expect(blocked.ready).toBe(false);
+    expect(blocked.ready).toBe(true);
     expect(blocked.missingSupplierIds).toEqual(["svc-1"]);
-
-    const withException = assessTravelFileReadiness(baseFile(), [noSupplier], {
-      "svc-1": "Fornecedor indicado pelo cliente, sem cadastro.",
-    });
-    expect(withException.ready).toBe(true);
+    expect(blocked.blockers.join(" ")).not.toMatch(/fornecedor/i);
   });
+
 
   it("total usa o valor efetivo dos elegíveis e moeda única", () => {
     const r = assessTravelFileReadiness(baseFile(), [

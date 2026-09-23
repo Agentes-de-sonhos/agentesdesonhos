@@ -17572,9 +17572,25 @@ export type Database = {
         Args: { _note_id: string }
         Returns: undefined
       }
+      travel_file_service_display_name: {
+        Args: {
+          p_service_name: string
+          p_service_type: string
+          p_snapshot: Json
+        }
+        Returns: string
+      }
       travel_file_service_manual_save: {
         Args: { _payload: Json }
         Returns: string
+      }
+      travel_file_service_operator_id: {
+        Args: { p_snapshot: Json }
+        Returns: string
+      }
+      travel_file_service_refresh_identity: {
+        Args: { p_file_id: string }
+        Returns: Json
       }
       travel_file_service_save: {
         Args: {
@@ -17593,6 +17609,14 @@ export type Database = {
       travel_file_service_set_financial_rule: {
         Args: { _payload: Json; _service_id: string }
         Returns: undefined
+      }
+      travel_file_service_supplier_name: {
+        Args: { p_service_type: string; p_snapshot: Json }
+        Returns: string
+      }
+      travel_file_service_type_label: {
+        Args: { p_service_type: string }
+        Returns: string
       }
       travel_file_set_responsibles: {
         Args: { _commercial?: string; _file_id: string; _operations?: string }

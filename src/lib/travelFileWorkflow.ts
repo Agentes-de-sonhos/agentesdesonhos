@@ -75,8 +75,13 @@ export interface TravelFileFinancials {
   sold: number;
   cost: number;
   commission: number;
-  /** Margem = venda − custo (quando houver custo informado). */
+  /** Margem = venda − custo. Só faz sentido quando existe custo informado. */
   margin: number;
+  /**
+   * Algum serviço tem custo informado? Sem isso a margem é DESCONHECIDA e não
+   * pode ser apresentada (senão ela viraria a própria receita).
+   */
+  costKnown: boolean;
   /** Diferença entre reconfirmado e solicitado: alerta de reajuste. */
   variation: number;
 }
@@ -93,6 +98,7 @@ export function summarizeServiceFinancials(services: TravelFileService[]): Trave
   let sold = 0;
   let cost = 0;
   let commission = 0;
+  let costKnown = false;
 
   for (const service of services) {
     if (service.status === "cancelled") continue;
@@ -101,6 +107,7 @@ export function summarizeServiceFinancials(services: TravelFileService[]): Trave
     requested += req;
     reconfirmed += rec;
     sold += service.sold_amount == null ? rec : num(service.sold_amount);
+    if (service.cost_amount != null) costKnown = true;
     cost += num(service.cost_amount);
     commission += num(service.commission_amount);
   }
@@ -112,9 +119,11 @@ export function summarizeServiceFinancials(services: TravelFileService[]): Trave
     cost,
     commission,
     margin: sold - cost,
+    costKnown,
     variation: reconfirmed - requested,
   };
 }
+
 
 /** Consolidação financeira de um grupo de moeda (nunca mistura moedas). */
 export interface TravelFileCurrencyFinancials extends TravelFileFinancials {

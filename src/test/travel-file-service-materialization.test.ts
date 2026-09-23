@@ -144,15 +144,15 @@ describe("serviços para reconfirmar — resumo e pendências", () => {
     expect(isServiceEligible(s)).toBe(true);
   });
 
-  it("exceção de fornecedor justificada resolve a pendência de fornecedor", () => {
+  it("serviço disponível sem fornecedor não tem pendência (fornecedor é do reservar/emitir)", () => {
     const s = service({
       status: "available",
       reconfirmed_amount: 100,
-      financial_rule_status: "confirmed",
+      financial_rule_status: "pending",
     });
-    expect(describeServicePendingReasons(s).join(" ")).toMatch(/fornecedor/i);
-    expect(describeServicePendingReasons(s, { s1: "Compra direta" })).toEqual([]);
+    expect(describeServicePendingReasons(s)).toEqual([]);
   });
+
 
   it("opcional indisponível avisa que fica fora, sem bloquear", () => {
     const s = service({ status: "unavailable", is_required: false });
