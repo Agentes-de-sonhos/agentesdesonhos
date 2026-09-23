@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { shouldAutoSuggestIntro } from "@/lib/quoteInitialSetup";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
@@ -192,10 +193,20 @@ export function DestinationIntroEditor({
   const handleToggle = async (checked: boolean) => {
     setEnabled(checked);
     await saveToDb({ show_destination_intro: checked });
-    if (checked && !text && images.length === 0) {
+    if (checked && !text && images.length === 0 && shouldAutoSuggestIntro(quoteId, false)) {
       handleGenerate();
     }
   };
+
+  // Uma sugestão automática por orçamento: rerenders não repetem a chamada de IA.
+  // O botão Regenerar continua disponível para tentar de novo.
+  useEffect(() => {
+    if (!enabled || !destination) return;
+    if (text || images.length > 0) return;
+    if (!shouldAutoSuggestIntro(quoteId, false)) return;
+    void handleGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, destination, quoteId]);
 
   const handleTextChange = (newText: string) => {
     setText(newText);
