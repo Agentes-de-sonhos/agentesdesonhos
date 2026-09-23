@@ -315,6 +315,55 @@ export default function ProcessoReserva() {
     }
   };
 
+  /**
+   * Mudança de situação operacional do serviço.
+   * Transições incoerentes são explicadas em português e não são gravadas:
+   * reservar/emitir exige fornecedor; "Valor alterado" exige valor
+   * reconfirmado; "Indisponível" e "Valor alterado" exigem justificativa
+   * (gravada como nota interna do processo).
+   */
+  const changeServiceStatus = async (
+    service: TravelFileService,
+    status: TravelFileServiceStatus,
+  ) => {
+    if (status === service.status) return;
+    const block = describeStatusTransitionBlock(service, status, supplierExceptions);
+    if (block) {
+      toast.error(block);
+      return;
+    }
+    if (["unavailable", "amount_changed"].includes(status)) {
+      setStatusJustification({ service, status, reason: "" });
+      return;
+    }
+    await patchServiceStatus(service.id, status);
+  };
+
+  /** Confirma a mudança que exige justificativa, registrando a nota interna. */
+  const confirmStatusJustification = async () => {
+    if (!statusJustification) return;
+    const reason = statusJustification.reason.trim();
+    if (!reason) {
+      toast.error("Escreva a justificativa desta mudança.");
+      return;
+    }
+    const { service, status } = statusJustification;
+    try {
+      await saveService.mutateAsync({ id: service.id, status });
+      await addNote
+        .mutateAsync({
+          body: `${travelFileServiceTitle(service)} — ${SERVICE_STATUS_LABELS[status]}: ${reason}`,
+          authorName: (user?.user_metadata as any)?.full_name || user?.email || null,
+        })
+        .catch(() => {});
+      setStatusJustification(null);
+      toast.success("Situação do serviço atualizada.");
+    } catch (error: any) {
+      toast.error(humanizeWorkflowError(error));
+    }
+  };
+
+
   /** Valores operacionais gravados juntos: o servidor valida cada permissão. */
   const patchServiceAmounts = async (
     service: TravelFileService,
