@@ -23,6 +23,8 @@ import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDis
 import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type QuoteCurrency } from "@/lib/quoteCurrency";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
+import { PublicDocumentViewer } from "@/components/quote/PublicDocumentViewer";
+import { canPreviewInline, SIGNED_URL_TTL_SECONDS } from "@/lib/publicDocumentViewer";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
