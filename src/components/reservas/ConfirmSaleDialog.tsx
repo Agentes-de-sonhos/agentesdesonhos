@@ -144,11 +144,9 @@ export function ConfirmSaleDialog({
                   ? "Novos registros criados."
                   : "Registros existentes reutilizados (nada duplicado)."}
               </p>
-              {result.warnings.length > 0 && (
-                <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
-                  Informações financeiras pendentes — configure na Gestão Financeira.
-                </p>
-              )}
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-300">
+                Informações financeiras pendentes — configure na Gestão Financeira.
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               {result.operation_id && (
@@ -279,4 +277,3 @@ export function ConfirmSaleDialog({
     </Dialog>
   );
 }
-

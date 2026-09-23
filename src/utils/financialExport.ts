@@ -215,7 +215,7 @@ export function prepareCommissionsExport(commissions: any[], period: { start: Da
     { key: "status", header: "Status", width: 16 },
   ];
   const PRODUCT_MAP: Record<string, string> = { aereo: "Aéreo", hotel: "Hotel", seguro: "Seguro", cruzeiro: "Cruzeiro", transfer: "Transfer", atracao: "Atrações", locacao: "Locação", outro: "Outro" };
-  const STATUS_MAP: Record<string, string> = { previsao_criada: "Previsão", aguardando_emissao_nota: "Aguard. Emissão NF", aguardando_envio_nota: "Aguard. Envio NF", aguardando_pagamento: "Aguard. Pagamento", recebido: "Recebido", atrasado: "Atrasado", cancelado: "Cancelado" };
+  const STATUS_MAP: Record<string, string> = { pending_configuration: "Pendente de configuração", previsao_criada: "Previsão", aguardando_emissao_nota: "Aguard. Emissão NF", aguardando_envio_nota: "Aguard. Envio NF", aguardando_pagamento: "Aguard. Pagamento", recebido: "Recebido", atrasado: "Atrasado", cancelado: "Cancelado" };
   const rows = filtered.map(c => ({
     client: c.client_name || "—",
     product: PRODUCT_MAP[c.product_type] || c.product_type,

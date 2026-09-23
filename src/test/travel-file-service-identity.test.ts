@@ -127,6 +127,8 @@ describe("venda não depende de custo, comissão nem regra financeira", () => {
     const readiness = assessTravelFileReadiness(file(), [eligible]);
     expect(readiness.ready).toBe(true);
     expect(readiness.blockers).toEqual([]);
+    expect(readiness.warnings).toEqual([]);
+    expect(readiness.pendingServices).toEqual([]);
     expect(readiness.total).toBe(14200);
   });
 
@@ -208,5 +210,28 @@ describe("migration 0026 (teste estático de SQL)", () => {
   it("não cria venda nem operação em nenhum caminho", () => {
     expect(sql).not.toContain("INSERT INTO public.sales");
     expect(sql).not.toContain("INSERT INTO public.operations");
+  });
+});
+
+describe("migration 0027 (teste estático de SQL)", () => {
+  const sql = readFileSync(
+    resolve(
+      process.cwd(),
+      "drizzle/migrations/0027_0027_remove_presale_financial_rule_source.sql",
+    ),
+    "utf8",
+  );
+
+  it("inclui o status financeiro pós-venda sem reintroduzir blocker pré-venda", () => {
+    expect(sql).toContain("pending_configuration");
+    expect(sql).toContain("commission_status");
+    expect(sql).not.toContain("serviço sem regra financeira confirmada");
+  });
+
+  it("produtos com financeiro pendente nascem sem custo, comissão, NF ou prazo inventados", () => {
+    expect(sql).toContain("THEN 0 ELSE coalesce(_service.cost_amount, 0) END");
+    expect(sql).toContain("THEN 0 ELSE coalesce(_service.non_commissionable_fees, 0) END");
+    expect(sql).toContain("THEN false ELSE coalesce(_service.requires_invoice, false) END");
+    expect(sql).toContain("THEN 'manual' ELSE _service.payment_rule END");
   });
 });

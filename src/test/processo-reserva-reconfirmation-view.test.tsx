@@ -217,9 +217,7 @@ describe("ProcessoReserva — reconfirmação V2 sem financeiro pré-venda", () 
   it("não renderiza custo, comissão, margem ou regra financeira no estado do processo 0000005", async () => {
     const readiness = assessTravelFileReadiness(FILE, SERVICES, {});
     expect(readiness.ready).toBe(true);
-    expect(readiness.warnings).toEqual([
-      expect.stringMatching(/informações financeiras pendentes/i),
-    ]);
+    expect(readiness.warnings).toEqual([]);
 
     renderPage();
 

@@ -48,6 +48,7 @@ const INVOICE_STATUSES: Record<string, string> = {
 };
 
 const COMMISSION_STATUSES: Record<string, string> = {
+  pending_configuration: "Pendente de configuração",
   previsao_criada: "Previsão criada",
   aguardando_emissao_nota: "Aguardando emissão de NF",
   aguardando_envio_nota: "Aguardando envio de NF",

@@ -109,6 +109,21 @@ function open() {
   );
 }
 
+function openWith(overrides: { file?: any; services?: any[] } = {}) {
+  const nextFile = { ...file, ...overrides.file };
+  const nextServices = overrides.services ?? services;
+  const readiness = assessTravelFileReadiness(nextFile, nextServices, {});
+  return render(
+    <ConfirmSaleDialog
+      open
+      onOpenChange={() => {}}
+      file={nextFile}
+      readiness={readiness}
+      supplierExceptions={{}}
+    />,
+  );
+}
+
 async function chooseChannel() {
   fireEvent.click(screen.getByLabelText(/canal do aceite/i));
   fireEvent.click(await screen.findByText("WhatsApp"));
@@ -213,5 +228,40 @@ describe("ConfirmSaleDialog — comportamento", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /abrir financeiro/i }));
     expect(navigateMock).toHaveBeenCalledWith("/financeiro?tab=vendas&sale=sale-9");
+  });
+
+  it("financeiro pendente com serviços operacionais válidos não bloqueia nem mostra regra financeira", async () => {
+    const pendingServices = [
+      {
+        ...services[0],
+        id: "svc-1",
+        status: "booked",
+        requested_amount: 14000,
+        reconfirmed_amount: 14000,
+        sold_amount: 14000,
+        supplier_name: "Sakura Consolidadora",
+        financial_rule_status: "pending",
+      },
+      {
+        ...services[0],
+        id: "svc-2",
+        status: "booked",
+        requested_amount: 15000,
+        reconfirmed_amount: 15000,
+        sold_amount: 15000,
+        product_name: "Hôtel Belgrand",
+        supplier_name: "HOTELDO",
+        financial_rule_status: "pending",
+      },
+    ];
+
+    openWith({ services: pendingServices });
+    expect(screen.queryByText(/regra financeira/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/fornecedor\/comissão/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/sem regra financeira confirmada/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/2 serviço\(s\) · Total R\$ 29\.000,00/i)).toBeInTheDocument();
+
+    await chooseChannel();
+    expect(screen.getByRole("button", { name: /confirmar venda/i })).not.toBeDisabled();
   });
 });

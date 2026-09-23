@@ -25,6 +25,7 @@ import { isInMonth } from "@/utils/monthFilter";
 const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
 const COMMISSION_STATUSES: Record<string, { label: string; color: string; icon: string }> = {
+  pending_configuration: { label: "Pendente de configuração", color: "bg-muted text-muted-foreground", icon: "📋" },
   previsao_criada: { label: "Previsão Criada", color: "bg-muted text-muted-foreground", icon: "📋" },
   aguardando_emissao_nota: { label: "Aguardando Emissão NF", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400", icon: "📄" },
   aguardando_envio_nota: { label: "Aguardando Envio NF", color: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400", icon: "📤" },
