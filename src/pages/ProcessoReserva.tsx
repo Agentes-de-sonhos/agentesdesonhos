@@ -827,7 +827,7 @@ export default function ProcessoReserva() {
                     <span>Fornecedor: {displayServiceSupplier(service)}</span>
                   ) : (
                     unifiedV2 &&
-                    canManage &&
+                    canFinancialManage &&
                     !isConvertedV2(file) && (
                       <Button
                         variant="ghost"
