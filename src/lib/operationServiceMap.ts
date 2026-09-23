@@ -9,11 +9,59 @@ export const OPERATION_SERVICE_LABELS: Record<string, string> = {
   insurance: "Seguro viagem",
   cruise: "Cruzeiro",
   train: "Trem",
+  package: "Pacote",
   other: "Outros",
 };
 
 export function serviceTypeLabel(type?: string | null) {
   return OPERATION_SERVICE_LABELS[type || "other"] || "Outros";
+}
+
+/**
+ * Converte sinônimos em português/legado para a chave canônica usada em
+ * `operation_services.service_type` e `travel_file_services.service_type`.
+ * Sem isso, "Locação de Carro" acabava salvo como "Hospedagem".
+ */
+export function canonicalOperationServiceType(type?: string | null): string {
+  const value = (type ?? "").trim().toLowerCase();
+  if (OPERATION_SERVICE_LABELS[value]) return value;
+  switch (value) {
+    case "aereo":
+    case "aéreo":
+    case "air":
+    case "airfare":
+    case "passagem":
+      return "flight";
+    case "hospedagem":
+    case "lodging":
+    case "accommodation":
+      return "hotel";
+    case "transporte":
+    case "transport":
+      return "transfer";
+    case "passeio":
+    case "ingresso":
+    case "ingressos":
+    case "atracao":
+    case "atração":
+    case "ticket":
+    case "tour":
+      return "attraction";
+    case "seguro":
+      return "insurance";
+    case "cruzeiro":
+      return "cruise";
+    case "trem":
+      return "train";
+    case "locacao":
+    case "locação":
+    case "locacao_veiculo":
+    case "rental_car":
+    case "car":
+      return "car_rental";
+    default:
+      return "other";
+  }
 }
 
 const firstString = (...vals: any[]) =>

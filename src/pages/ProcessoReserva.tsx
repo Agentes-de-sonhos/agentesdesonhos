@@ -743,7 +743,7 @@ export default function ProcessoReserva() {
                   </span>
 
                 ))}
-              {isManual && canManage && (
+              {canManage && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -1341,40 +1341,42 @@ export default function ProcessoReserva() {
 
 
         {isManual && canManage && (
-          <>
-            <EditarRascunhoDialog
-              open={editDraftOpen}
-              onOpenChange={setEditDraftOpen}
-              file={file}
-              currentClient={data?.client ? { id: data.client.id, name: data.client.name } : null}
-              currentCompany={data?.company ? { id: data.company.id, name: data.company.name } : null}
-              currentContact={data?.contact ? { id: data.contact.id, name: data.contact.name } : null}
-              canEditContractor={file.status === "draft"}
-              onSave={async (input) => {
-                await saveManualData.mutateAsync(input);
-                toast.success("Dados da reserva atualizados.");
-              }}
-            />
+          <EditarRascunhoDialog
+            open={editDraftOpen}
+            onOpenChange={setEditDraftOpen}
+            file={file}
+            currentClient={data?.client ? { id: data.client.id, name: data.client.name } : null}
+            currentCompany={data?.company ? { id: data.company.id, name: data.company.name } : null}
+            currentContact={data?.contact ? { id: data.contact.id, name: data.contact.name } : null}
+            canEditContractor={file.status === "draft"}
+            onSave={async (input) => {
+              await saveManualData.mutateAsync(input);
+              toast.success("Dados da reserva atualizados.");
+            }}
+          />
+        )}
 
-            <ManualServiceDialog
-              open={manualServiceOpen}
-              onOpenChange={(next) => {
-                setManualServiceOpen(next);
-                if (!next) setManualServiceEditing(null);
-              }}
-              service={manualServiceEditing}
-              canEditAmount={canFinancialManage}
-              // A moeda do serviço em edição prevalece; a da reserva é só fallback.
-              currency={manualServiceEditing?.currency || file.currency}
-              onSave={async (payload: ManualServicePayload) => {
-                await saveManualService.mutateAsync({
-                  ...payload,
-                  currency: manualServiceEditing?.currency || file.currency,
-                });
-                toast.success("Serviço salvo.");
-              }}
-            />
-          </>
+        {/* Acrescentar serviço vale para qualquer processo, inclusive os que
+            vieram de um orçamento: o serviço novo é sempre parte da viagem. */}
+        {canManage && (
+          <ManualServiceDialog
+            open={manualServiceOpen}
+            onOpenChange={(next) => {
+              setManualServiceOpen(next);
+              if (!next) setManualServiceEditing(null);
+            }}
+            service={manualServiceEditing}
+            canEditAmount={canFinancialManage}
+            // A moeda do serviço em edição prevalece; a da reserva é só fallback.
+            currency={manualServiceEditing?.currency || file.currency}
+            onSave={async (payload: ManualServicePayload) => {
+              await saveManualService.mutateAsync({
+                ...payload,
+                currency: manualServiceEditing?.currency || file.currency,
+              });
+              toast.success("Serviço salvo.");
+            }}
+          />
         )}
       </div>
     </DashboardLayout>

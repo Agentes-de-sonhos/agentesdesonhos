@@ -147,24 +147,41 @@ export function useOperationServices({ operationId, quoteId, opportunityId, enab
   const addService = useMutation({
     mutationFn: async (input: Partial<OperationService>) => {
       if (!operationId || !user?.id) throw new Error("Sem operação");
-      const { error } = await supabase.from("operation_services" as any).insert({
-        operation_id: operationId,
-        user_id: user.id,
-        service_type: input.service_type || "other",
-        name: input.name || "Serviço",
-        supplier: input.supplier ?? null,
-        destination: input.destination ?? null,
-        start_date: input.start_date || null,
-        end_date: input.end_date || null,
-        amount: input.amount ?? 0,
-        notes: input.notes ?? null,
-        service_data: input.service_data ?? {},
-        position: services.length,
-      } as any);
+      const { data, error } = await supabase
+        .from("operation_services" as any)
+        .insert({
+          operation_id: operationId,
+          user_id: user.id,
+          service_type: input.service_type || "other",
+          name: input.name || "Serviço",
+          supplier: input.supplier ?? null,
+          destination: input.destination ?? null,
+          start_date: input.start_date || null,
+          end_date: input.end_date || null,
+          amount: input.amount ?? 0,
+          notes: input.notes ?? null,
+          service_data: input.service_data ?? {},
+          position: services.length,
+        } as any)
+        .select("id")
+        .single();
       if (error) throw error;
+      // O serviço acrescentado aqui é sempre parte da viagem e sempre cobrado:
+      // ele passa a existir também na reserva e no Financeiro (pendente de
+      // configuração). A materialização é idempotente por vínculo.
+      const createdId = (data as any)?.id as string | undefined;
+      if (createdId) {
+        const { error: linkError } = await supabase.rpc("travel_service_materialize", {
+          _operation_service_id: createdId,
+        } as never);
+        if (linkError) throw linkError;
+      }
     },
     onSuccess: () => {
       invalidate();
+      qc.invalidateQueries({ queryKey: ["travel-file"] });
+      qc.invalidateQueries({ queryKey: ["travel-files"] });
+      qc.invalidateQueries({ queryKey: ["sales"] });
       toast.success("Serviço adicionado");
     },
     onError: (e: any) => toast.error(e?.message || "Erro ao adicionar serviço"),

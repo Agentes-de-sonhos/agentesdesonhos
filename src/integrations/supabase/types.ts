@@ -17648,6 +17648,10 @@ export type Database = {
         }
         Returns: Json
       }
+      travel_service_materialize: {
+        Args: { _file_service_id?: string; _operation_service_id?: string }
+        Returns: Json
+      }
       trigger_google_calendar_cron: { Args: never; Returns: number }
       trigger_google_calendar_purge: { Args: never; Returns: number }
       unaccent: { Args: { "": string }; Returns: string }
