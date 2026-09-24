@@ -49,6 +49,14 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
     }
   });
 
+  it("usa o ícone próprio da Paraíso sem substituir o logotipo visível", () => {
+    for (const hostname of ["paraisoviagens.com", "www.paraisoviagens.com"]) {
+      const info = { hostname, logo_url: null } as Parameters<typeof resolveAgencyFaviconUrl>[0];
+      expect(resolveAgencyFaviconUrl(info)).toContain("favicon-paraiso-viagens.png");
+      expect(resolveAgencyLogoOverride(hostname)).toContain("logo-paraiso-viagens.png");
+    }
+  });
+
   it("não altera os demais tenants", () => {
     expect(resolveSiteTheme(LIMITES)).toBe("travelEditorial");
     expect(resolveSiteTheme("paraisoviagens.com")).toBe("luxuryEditorial");

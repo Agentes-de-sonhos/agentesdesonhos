@@ -10,6 +10,7 @@ import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
 import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
+import paraisoFavicon from "@/assets/whitelabel/favicon-paraiso-viagens.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
 import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";
 
@@ -29,6 +30,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuFavicon.url,
   "www.destinoscomaju.com.br": destinosComAJuFavicon.url,
+  "paraisoviagens.com": paraisoFavicon.url,
+  "www.paraisoviagens.com": paraisoFavicon.url,
 };
 
 /**
