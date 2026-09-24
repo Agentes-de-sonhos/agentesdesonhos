@@ -2,6 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { agencyHostFromLocation } from "@/lib/agencyDomains";
 
 const VERSION_URL = "/version.json";
+
+/**
+ * Kill switch: when false, the "new version available" prompt is disabled
+ * for every user (no polling, no modal, no toast). Flip back to true to
+ * re-enable the update flow.
+ */
+export const APP_UPDATE_PROMPT_ENABLED = false;
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const DISMISS_KEY = "appUpdateDismissed";
 const DISMISS_DURATION_MS = 60 * 60 * 1000; // 60 minutes
