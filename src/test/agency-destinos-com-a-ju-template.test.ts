@@ -68,7 +68,7 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
   it("usa o pin vermelho oficial como favicon da 100 Limites", () => {
     for (const hostname of ["100limites.tur.br", "www.100limites.tur.br"]) {
       const info = { hostname, logo_url: null } as Parameters<typeof resolveAgencyFaviconUrl>[0];
-      expect(resolveAgencyFaviconUrl(info)).toContain("favicon-100-limites.png");
+      expect(resolveAgencyFaviconUrl(info)).toContain("favicon-100-limites-2.png");
     }
     expect(resolveAgencyLogoOverride("100limites.tur.br")).toBeNull();
   });
