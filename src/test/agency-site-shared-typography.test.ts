@@ -54,7 +54,8 @@ describe("tipografia compartilhada dos sites white label", () => {
 
   it("remove o texto inválido e preserva a newsletter declarativa da Destinos com a Ju", () => {
     const profile = resolveSiteProfile("destinoscomaju.com.br");
-    expect(homeSource).not.toContain('title ?? "Receba novidades e oportunidades"');
+    expect(homeSource).not.toMatch(/>\s*title \?\? "Receba novidades e oportunidades"\s*</);
+    expect(homeSource).toContain('{copy.title ?? "Receba novidades e oportunidades"}');
     expect(profile.copy?.newsletter).toEqual({
       kicker: "INSPIRAÇÕES PARA VIAJAR",
       title: "Receba novidades e oportunidades",
