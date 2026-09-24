@@ -10,7 +10,7 @@ import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import type { ImportableQuote } from "@/lib/crmQuoteImport";
 
 export const IMPORTABLE_QUOTE_COLUMNS =
-  "id, trip_title, destination, client_name, client_id, start_date, end_date, adults_count, children_count, total_amount, opportunity_id, created_at";
+  "id, trip_title, destination, client_name, client_id, start_date, end_date, adults_count, children_count, total_amount, opportunity_id, created_at, status, public_access_code";
 
 export function useImportableQuotes(enabled = true) {
   const { user } = useAuth();
