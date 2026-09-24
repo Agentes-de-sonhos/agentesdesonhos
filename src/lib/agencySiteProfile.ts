@@ -15,6 +15,7 @@ import {
   type AgencyDmcConfig,
   type AgencyHeroSlide,
   type AgencyHighlight,
+  type AgencyImageSlot,
   type AgencyModule,
   type AgencySectionKey,
   type AgencySectionOverride,
@@ -304,6 +305,16 @@ const LUXURY_CURATED: AgencySiteProfile = {
  */
 const EDITORIAL_ROSE: AgencySiteProfile = {
   key: "editorialRose",
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Experiências", to: "/#campanhas" },
+    { label: "Cruzeiros", to: "/#autoridade" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Avaliações", to: "/#avaliacoes" },
+    { label: "Dúvidas", to: "/#faq" },
+    { label: "Área do Cliente", to: "/area-do-cliente" },
+  ],
   sections: {
     dmc: { enabled: false }, testimonials: { enabled: false }, team: { enabled: false },
     credentials: { enabled: false }, highlights: { enabled: false },
