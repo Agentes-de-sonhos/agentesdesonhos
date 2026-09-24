@@ -48,6 +48,16 @@ function ReviewCard({ review }: { review: GoogleReview }) {
       {review.text && (
         <p className="mt-3 line-clamp-[8] flex-1 whitespace-pre-line text-[15px] leading-relaxed text-foreground">{review.text}</p>
       )}
+      {review.googleMapsUri && (
+        <a
+          href={review.googleMapsUri}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex items-center gap-1 self-start text-xs font-medium text-muted-foreground hover:text-[var(--brand-primary)] hover:underline"
+        >
+          Ver avaliação no Google Maps <ExternalLink className="h-3 w-3" aria-hidden="true" />
+        </a>
+      )}
     </article>
   );
 }
@@ -111,14 +121,32 @@ export function AgencyGoogleReviewsSection({ hostname, container }: { hostname: 
 
         {data ? (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {data.reviews.map((r, i) => <ReviewCard key={`${r.time ?? i}-${i}`} review={r} />)}
+            {data.reviews.map((r, i) => <ReviewCard key={`${r.publishTime ?? i}-${i}`} review={r} />)}
           </div>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-52 rounded-2xl" />)}
           </div>
         )}
-        <p className="mt-6 text-xs text-muted-foreground">Avaliações fornecidas pelo Google, exibidas na ordem retornada.</p>
+        <div className="mt-6 flex flex-col gap-1 text-muted-foreground">
+          <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
+            Google Maps
+          </p>
+          {data && data.attributions.length > 0 && (
+            <p className="font-sans text-[12px]">
+              Dados também fornecidos por:{" "}
+              {data.attributions.map((a, i) => (
+                <span key={`${a.provider}-${i}`}>
+                  {i > 0 && ", "}
+                  {a.providerUri ? (
+                    <a href={a.providerUri} target="_blank" rel="noopener noreferrer" className="hover:underline">{a.provider}</a>
+                  ) : a.provider}
+                </span>
+              ))}
+            </p>
+          )}
+          <p className="font-sans text-[12px]">Avaliações exibidas na ordem de relevância definida pelo Google Maps.</p>
+        </div>
       </div>
     </section>
   );

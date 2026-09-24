@@ -47,7 +47,15 @@ export interface GoogleReview {
   rating: number | null;
   text: string | null;
   relativeTime: string | null;
-  time: number | null;
+  publishTime: string | null;
+  /** Link direto para a avaliação no Google Maps. */
+  googleMapsUri: string | null;
+  flagContentUri: string | null;
+}
+
+export interface GoogleAttribution {
+  provider: string;
+  providerUri: string | null;
 }
 
 export interface GooglePlaceReviews {
@@ -55,6 +63,7 @@ export interface GooglePlaceReviews {
   rating: number | null;
   total: number | null;
   url: string | null;
+  attributions: GoogleAttribution[];
   reviews: GoogleReview[];
 }
 
@@ -66,30 +75,40 @@ const httpsUrl = (v: unknown): string | null => {
   const s = str(v);
   return s && /^https:\/\//i.test(s) ? s : null;
 };
+const obj = (v: unknown): Record<string, unknown> =>
+  v && typeof v === "object" ? (v as Record<string, unknown>) : {};
 
-/** Normaliza o payload da função preservando a ordem do Google (máx. 5). */
+/** Normaliza o payload (Places API New) preservando a ordem de relevância do Google (máx. 5). */
 export function mapGooglePlaceReviews(payload: unknown): GooglePlaceReviews | null {
   if (!payload || typeof payload !== "object") return null;
   const p = payload as Record<string, unknown>;
   if (p.enabled === false) return null;
   const raw = Array.isArray(p.reviews) ? p.reviews : [];
   const reviews: GoogleReview[] = raw.slice(0, GOOGLE_REVIEWS_MAX).map((r) => {
-    const x = (r ?? {}) as Record<string, unknown>;
+    const x = obj(r);
+    const a = obj(x.authorAttribution);
+    const text = typeof x.text === "string" ? x.text : obj(x.text).text;
     return {
-      authorName: str(x.author_name) ?? "Usuário do Google",
-      authorUrl: httpsUrl(x.author_url),
-      photoUrl: httpsUrl(x.profile_photo_url),
+      authorName: str(a.displayName) ?? "Usuário do Google",
+      authorUrl: httpsUrl(a.uri),
+      photoUrl: httpsUrl(a.photoUri),
       rating: num(x.rating),
-      text: str(x.text),
-      relativeTime: str(x.relative_time_description),
-      time: num(x.time),
+      text: str(text),
+      relativeTime: str(x.relativePublishTimeDescription),
+      publishTime: str(x.publishTime),
+      googleMapsUri: httpsUrl(x.googleMapsUri),
+      flagContentUri: httpsUrl(x.flagContentUri),
     };
   });
+  const attributions: GoogleAttribution[] = (Array.isArray(p.attributions) ? p.attributions : [])
+    .map((v) => ({ provider: str(obj(v).provider) ?? "", providerUri: httpsUrl(obj(v).providerUri) }))
+    .filter((v) => v.provider);
   return {
-    name: str(p.name) ?? "",
+    name: str(p.displayName) ?? "",
     rating: num(p.rating),
-    total: num(p.user_ratings_total),
-    url: httpsUrl(p.url),
+    total: num(p.userRatingCount),
+    url: httpsUrl(p.googleMapsUri),
+    attributions,
     reviews,
   };
 }
