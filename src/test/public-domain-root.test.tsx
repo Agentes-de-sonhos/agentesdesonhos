@@ -49,7 +49,7 @@ describe("raízes dos domínios públicos", () => {
   it.each(ROOTS)("mostra somente a identificação de %s", (hostname, label) => {
     renderGate(hostname, "/");
     expect(screen.getByRole("heading", { name: label })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "Agentes de Sonhos" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: label })).toHaveAttribute("src", expect.stringContaining("/__l5e/assets-v1/"));
     expect(screen.queryByTestId("public-link")).toBeNull();
   });
 
