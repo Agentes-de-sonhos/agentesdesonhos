@@ -346,7 +346,7 @@ export function AgencyQuickQuote({
             className={cn(
               "w-full min-w-0 whitespace-nowrap px-4",
               editorial
-                ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[15px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
+                ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[13px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
                 : "mt-1.5 h-11 rounded-xl md:mt-0",
             )}
             onClick={startJourney}
