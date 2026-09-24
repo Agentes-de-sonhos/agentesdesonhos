@@ -12,7 +12,7 @@ import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import paraisoFavicon from "@/assets/whitelabel/favicon-paraiso-viagens.png.asset.json";
 import essyaFavicon from "@/assets/whitelabel/favicon-essya-tur.png.asset.json";
-import limitesFavicon from "@/assets/whitelabel/favicon-100-limites.png.asset.json";
+import limitesFavicon from "@/assets/whitelabel/favicon-100-limites-2.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
 import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";
 
