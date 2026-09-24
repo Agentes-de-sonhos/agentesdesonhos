@@ -7,6 +7,7 @@
  * domínios.
  */
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+import { isEditorialTheme, isLuxuryTheme } from "@/lib/agencySiteTheme";
 import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
 import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
@@ -63,10 +64,22 @@ export interface AgencyHeaderBrandPreset {
   logoClassName: string;
 }
 
-const DEFAULT_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
+const NON_EDITORIAL_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
   logoOnly: false,
   headerClassName: "h-16",
   logoClassName: "h-10 w-auto max-w-[160px] object-contain",
+};
+
+const EDITORIAL_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
+  logoOnly: false,
+  headerClassName: "h-20",
+  logoClassName: "h-12 w-auto max-w-[200px] object-contain",
+};
+
+const LUXURY_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
+  logoOnly: false,
+  headerClassName: "h-[88px]",
+  logoClassName: "h-14 w-auto max-w-[240px] object-contain md:h-16 md:max-w-[280px]",
 };
 
 /**
@@ -122,7 +135,11 @@ export function normalizeBrandHost(hostname?: string | null): string {
 }
 
 export function resolveAgencyHeaderBrandPreset(hostname?: string | null): AgencyHeaderBrandPreset {
-  return HEADER_BRAND_BY_HOSTNAME[normalizeBrandHost(hostname)] ?? DEFAULT_HEADER_BRAND_PRESET;
+  const preset = HEADER_BRAND_BY_HOSTNAME[normalizeBrandHost(hostname)];
+  if (preset) return preset;
+  if (isLuxuryTheme(hostname)) return LUXURY_HEADER_BRAND_PRESET;
+  if (isEditorialTheme(hostname)) return EDITORIAL_HEADER_BRAND_PRESET;
+  return NON_EDITORIAL_HEADER_BRAND_PRESET;
 }
 
 /** Logotipo oficial do hostname (asset do projeto), quando existir. */

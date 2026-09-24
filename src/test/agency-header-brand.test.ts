@@ -24,8 +24,24 @@ describe("cabeçalho somente com logotipo por tenant", () => {
     expect(resolveAgencyHeaderBrandPreset("essyatur.com.br").logoClassName).toContain("md:h-24");
   });
 
-  it("não altera um hostname de controle", () => {
+  it("preserva o fallback editorial comum da Faé", () => {
     expect(resolveAgencyHeaderBrandPreset("faeviagens.com.br")).toEqual({
+      logoOnly: false,
+      headerClassName: "h-20",
+      logoClassName: "h-12 w-auto max-w-[200px] object-contain",
+    });
+  });
+
+  it("preserva o fallback editorial comum da Casa Nova", () => {
+    expect(resolveAgencyHeaderBrandPreset("casanovatur.demo.local")).toEqual({
+      logoOnly: false,
+      headerClassName: "h-20",
+      logoClassName: "h-12 w-auto max-w-[200px] object-contain",
+    });
+  });
+
+  it("preserva o fallback original de um hostname não editorial", () => {
+    expect(resolveAgencyHeaderBrandPreset("agencia-controle.example")).toEqual({
       logoOnly: false,
       headerClassName: "h-16",
       logoClassName: "h-10 w-auto max-w-[160px] object-contain",
