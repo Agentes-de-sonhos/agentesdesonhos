@@ -13,11 +13,13 @@ import {
 } from "@/lib/agencySlugRouting";
 import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
+import { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
 
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
 const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
+const PublicDomainRoot = lazy(() => import("@/components/routing/PublicDomainRoot"));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -51,6 +53,7 @@ function SharedHostIndex() {
  */
 export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
   const browserHost = typeof window === "undefined" ? "" : window.location.hostname;
+  const browserPath = typeof window === "undefined" ? "/" : window.location.pathname;
   const redirectHost = canonicalRedirectHost(browserHost);
   if (redirectHost && typeof window !== "undefined") {
     const { pathname, search, hash } = window.location;
@@ -84,14 +87,22 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     queryFn: () => fetchAgencyBySlug(slug as string),
   });
 
+  const publicRootLabel = publicDomainRootLabel(browserHost, browserPath);
+  if (publicRootLabel) {
+    return (
+      <Suspense fallback={<Spinner />}>
+        <PublicDomainRoot label={publicRootLabel} />
+      </Suspense>
+    );
+  }
+
   /**
    * Variante estática de "site em construção" (Essya Tur): não depende de
    * cadastro da agência no banco, então renderiza direto para o hostname —
    * apenas na home ("/"), preservando o princípio do status por domínio.
    */
   if (host && resolveConstructionVariant(host) === "essyaTur") {
-    const path = typeof window === "undefined" ? "/" : window.location.pathname;
-    if (path === "/" || path === "") {
+    if (browserPath === "/" || browserPath === "") {
       return (
         <Suspense fallback={<Spinner />}>
           <EssyaTurComingSoon />

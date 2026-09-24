@@ -35,6 +35,7 @@ img {
 
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
+    --public-root-background: 0 0% 100%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
@@ -131,6 +132,7 @@ img {
 
     --card: 222 47% 9%;
     --card-foreground: 210 40% 98%;
+    --public-root-background: 0 0% 100%;
 
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
