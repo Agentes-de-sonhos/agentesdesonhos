@@ -3,7 +3,7 @@ import { resolveSiteTheme, siteThemeRootClass, isEditorialTheme } from "@/lib/ag
 import { resolveProfileKey, resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { isUnderConstruction } from "@/lib/agencySiteStatus";
 import { resolveDmc, resolveSections } from "@/lib/agencySiteConfig";
-import { resolveAgencyLogoOverride } from "@/lib/agencySiteBrand";
+import { resolveAgencyFaviconUrl, resolveAgencyLogoOverride } from "@/lib/agencySiteBrand";
 
 const JU_HOSTS = ["destinoscomaju.com.br", "www.destinoscomaju.com.br"];
 const LIMITES = "100limites.tur.br";
@@ -39,6 +39,14 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
     expect(resolveAgencyLogoOverride(LIMITES)).toBeNull();
     // Paraíso tem o próprio logotipo oficial — nunca o da Ju.
     expect(resolveAgencyLogoOverride("paraisoviagens.com")).not.toContain("logo-destinos-com-a-ju");
+  });
+
+  it("usa o ícone próprio no favicon sem substituir o logotipo do site", () => {
+    for (const hostname of JU_HOSTS) {
+      const info = { hostname, logo_url: null } as Parameters<typeof resolveAgencyFaviconUrl>[0];
+      expect(resolveAgencyFaviconUrl(info)).toContain("favicon-destinos-com-a-ju.png");
+      expect(resolveAgencyLogoOverride(hostname)).toContain("logo-destinos-com-a-ju-2026.png");
+    }
   });
 
   it("não altera os demais tenants", () => {

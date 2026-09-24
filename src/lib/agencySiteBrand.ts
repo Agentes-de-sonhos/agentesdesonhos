@@ -8,6 +8,7 @@
  */
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
+import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
 import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";
@@ -23,6 +24,11 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "www.faeviagens.com.br": faeLogo.url,
   /** Casa Nova Tur — placeholder transparente enviado pela agência (host técnico). */
   "casanovatur.demo.local": casaNovaLogo.url,
+};
+
+const FAVICON_BY_HOSTNAME: Record<string, string> = {
+  "destinoscomaju.com.br": destinosComAJuFavicon.url,
+  "www.destinoscomaju.com.br": destinosComAJuFavicon.url,
 };
 
 /**
@@ -55,4 +61,9 @@ export function logoIncludesWordmark(hostname?: string | null): boolean {
 /** Logotipo efetivo do site: override oficial → cadastro da agência → nulo. */
 export function resolveAgencyLogoUrl(info: AgencyDomainInfo): string | null {
   return resolveAgencyLogoOverride(info.hostname) ?? info.logo_url ?? null;
+}
+
+/** Favicon efetivo: ícone específico do hostname → logotipo efetivo do site. */
+export function resolveAgencyFaviconUrl(info: AgencyDomainInfo): string | null {
+  return FAVICON_BY_HOSTNAME[normalizeBrandHost(info.hostname)] ?? resolveAgencyLogoUrl(info);
 }
