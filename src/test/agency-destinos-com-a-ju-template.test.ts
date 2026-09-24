@@ -65,6 +65,14 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
     expect(resolveAgencyLogoOverride("www.essyatur.com.br")).toBeNull();
   });
 
+  it("usa o pin vermelho oficial como favicon da 100 Limites", () => {
+    for (const hostname of ["100limites.tur.br", "www.100limites.tur.br"]) {
+      const info = { hostname, logo_url: null } as Parameters<typeof resolveAgencyFaviconUrl>[0];
+      expect(resolveAgencyFaviconUrl(info)).toContain("favicon-100-limites.png");
+    }
+    expect(resolveAgencyLogoOverride("100limites.tur.br")).toBeNull();
+  });
+
   it("não altera os demais tenants", () => {
     expect(resolveSiteTheme(LIMITES)).toBe("travelEditorial");
     expect(resolveSiteTheme("paraisoviagens.com")).toBe("luxuryEditorial");
