@@ -78,6 +78,22 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     queryFn: () => fetchAgencyBySlug(slug as string),
   });
 
+  /**
+   * Variante estática de "site em construção" (Essya Tur): não depende de
+   * cadastro da agência no banco, então renderiza direto para o hostname —
+   * apenas na home ("/"), preservando o princípio do status por domínio.
+   */
+  if (host && resolveConstructionVariant(host) === "essyaTur") {
+    const path = typeof window === "undefined" ? "/" : window.location.pathname;
+    if (path === "/" || path === "") {
+      return (
+        <Suspense fallback={<Spinner />}>
+          <EssyaTurComingSoon />
+        </Suspense>
+      );
+    }
+  }
+
   if (shared) {
     /**
      * Host compartilhado. No host CANÔNICO (`vitrine.tur.br`) a ausência de
