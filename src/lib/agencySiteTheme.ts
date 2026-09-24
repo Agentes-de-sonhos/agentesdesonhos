@@ -36,6 +36,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "www.faeviagens.com.br": "faeEditorial",
   "sitelab.local": "siteBaseEditorial",
   "casanovatur.demo.local": "casaNovaEditorial",
+  "essyatur.com.br": "essyaEditorial",
   "www.essyatur.com.br": "essyaEditorial",
 };
 
