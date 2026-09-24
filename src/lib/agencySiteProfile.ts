@@ -880,7 +880,6 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "sitelab.local": "siteLabBase",
   /** Host técnico de prévia da Casa Nova Tur (o domínio real não é vinculado). */
   "casanovatur.demo.local": "casaNovaCurated",
-  "essyatur.com.br": "essyaCurated",
   "www.essyatur.com.br": "essyaCurated",
 };
 

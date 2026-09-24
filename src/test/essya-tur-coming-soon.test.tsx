@@ -30,22 +30,12 @@ describe("Essyatur — white label em www.essyatur.com.br", () => {
     expect(siteNavLinks("exemplo.com.br").map((l) => l.label)).not.toContain("Sobre a Essyatur");
   });
 
-  it("contatos do briefing e redirecionamento do www para a URL principal", () => {
+  it("contatos do briefing e redirecionamento do domínio sem www", () => {
     expect(resolveSiteContacts(HOST).email).toBe("contato@essyatur.com.br");
     expect(withSiteContacts({ hostname: HOST, phone: "(11) 96219-3690" }).phone).toBe("(11) 96494-2210");
     expect(withSiteContacts({ hostname: "outra.com.br", phone: "1" }).phone).toBe("1");
-    expect(canonicalRedirectHost(HOST)).toBe("essyatur.com.br");
-    expect(canonicalRedirectHost("essyatur.com.br")).toBeNull();
-  });
-
-  it("URL principal essyatur.com.br (sem www) resolve o mesmo perfil, tema e menu", () => {
-    expect(resolveSiteProfile("essyatur.com.br").key).toBe("essyaCurated");
-    expect(isEditorialTheme("essyatur.com.br")).toBe(true);
-    expect(siteThemeRootClass("essyatur.com.br")).toContain("wl-essya");
-    expect(siteNavLinks("essyatur.com.br").map((l) => l.label)).toEqual(
-      siteNavLinks(HOST).map((l) => l.label),
-    );
-    expect(resolveSiteContacts("essyatur.com.br").phone).toBe("(11) 96494-2210");
+    expect(canonicalRedirectHost("essyatur.com.br")).toBe(HOST);
+    expect(canonicalRedirectHost(HOST)).toBeNull();
   });
 
   it("não inventa depoimentos, equipe ou credenciais", () => {

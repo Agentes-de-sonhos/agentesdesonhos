@@ -12,4 +12,4 @@
 - [White-label Surface Links](mem://tech/whitelabel-surface-context-links) — Site, Área do Cliente e Gestão como superfícies do mesmo tenant; preservação de __agency_host em hosts técnicos
 - [Vitrine shared host](mem://features/whitelabel/vitrine-shared-host) — vitrine.tur.br/{agency_slug} canônico para Sites ADS, fallback para Vitrine de Ofertas
 - [Solicitações do site → CRM](mem://features/whitelabel/site-request-notifications) — Reset total do formulário público, fila de notificações idempotente, WhatsApp preparado e aviso realtime com link da oportunidade
-- [Essya Tur white-label site](mem://features/whitelabel/essya-tur-coming-soon) — URL principal essyatur.com.br (raiz), www redireciona; perfil essyaCurated no ar
+- [Essya Tur Coming Soon](mem://features/whitelabel/essya-tur-coming-soon) — essyatur.com.br em construção, variante estática sem perfil, logo asset

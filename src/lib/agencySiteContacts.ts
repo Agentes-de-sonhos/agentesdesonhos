@@ -23,12 +23,6 @@ const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
     instagram: "https://www.instagram.com/casanova_viagens_rs",
     instagramLabel: "@casanova_viagens_rs",
   },
-  "essyatur.com.br": {
-    email: "contato@essyatur.com.br",
-    instagram: "https://www.instagram.com/essyatur",
-    instagramLabel: "@essyatur",
-    phone: "(11) 96494-2210",
-  },
   "www.essyatur.com.br": {
     email: "contato@essyatur.com.br",
     instagram: "https://www.instagram.com/essyatur",
@@ -53,8 +47,7 @@ export function withSiteContacts<T extends { hostname: string; phone: string | n
 
 /** Hosts alternativos que redirecionam para o hostname canônico do tenant. */
 const CANONICAL_REDIRECTS: Record<string, string> = {
-  /** URL principal: https://essyatur.com.br — www redireciona para a raiz. */
-  "www.essyatur.com.br": "essyatur.com.br",
+  "essyatur.com.br": "www.essyatur.com.br",
 };
 
 export function canonicalRedirectHost(hostname?: string | null): string | null {
