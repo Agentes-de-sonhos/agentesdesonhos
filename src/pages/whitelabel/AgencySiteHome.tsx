@@ -22,6 +22,8 @@ import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
+import { AgencyGoogleReviewsSection } from "@/components/whitelabel/AgencyGoogleReviewsSection";
+import { isGoogleReviewsEnabled } from "@/lib/agencyGoogleReviews";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
@@ -173,6 +175,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const hostname = info.hostname;
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
+  const googleReviews = isGoogleReviewsEnabled(hostname);
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
@@ -1317,6 +1320,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         ) : (
           node
         );
+        // Avaliações do Google (ativação por hostname) imediatamente antes da FAQ.
+        if (section.key === "faq" && googleReviews && index !== 0) {
+          return (
+            <div key={`${section.key}-with-reviews`}>
+              <AgencyGoogleReviewsSection hostname={hostname} container={container} />
+              {tagged}
+            </div>
+          );
+        }
         if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
