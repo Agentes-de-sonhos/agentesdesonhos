@@ -21,7 +21,6 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
-import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -531,7 +530,6 @@ export function AgencySiteLayout({
   // Calendar renderizados em portal herdem os tokens da agência.
   useAgencySiteThemeOnBody(info.hostname);
   useAgencyBrowserTitle(info.hostname);
-  useAgencyFavicon(resolveAgencyLogoUrl(info));
   return (
     <div className={`min-h-screen bg-background ${siteThemeRootClass(info.hostname)}`}>
       <AgencyBrandBar info={info} />

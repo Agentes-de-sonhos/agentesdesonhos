@@ -14,8 +14,10 @@ import {
 import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
 import PublicDomainRoot, { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
+import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 
 import { useNoindex } from "@/hooks/useNoindex";
+import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
 const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
@@ -76,6 +78,10 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     retry: 1,
     queryFn: () => fetchAgencyDomain(host as string),
   });
+
+  // Aplica a marca antes da escolha da rota. Assim a home temporária e as
+  // páginas públicas isoladas recebem o mesmo favicon do site completo.
+  useAgencyFavicon(data ? resolveAgencyLogoUrl(data) : null);
 
   const slug = slugLocation?.slug ?? null;
   const { data: bySlug, isLoading: slugLoading } = useQuery({
