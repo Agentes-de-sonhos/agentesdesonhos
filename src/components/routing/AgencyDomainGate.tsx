@@ -11,10 +11,12 @@ import {
   isSharedAgencySiteHost,
   parseAgencySlugLocation,
 } from "@/lib/agencySlugRouting";
+import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
+const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
