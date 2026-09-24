@@ -14,7 +14,7 @@ import {
 import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
 import PublicDomainRoot, { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
-import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
+import { resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
 
 import { useNoindex } from "@/hooks/useNoindex";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -81,7 +81,7 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
 
   // Aplica a marca antes da escolha da rota. Assim a home temporária e as
   // páginas públicas isoladas recebem o mesmo favicon do site completo.
-  useAgencyFavicon(data ? resolveAgencyLogoUrl(data) : null);
+  useAgencyFavicon(data ? resolveAgencyFaviconUrl(data) : null);
 
   const slug = slugLocation?.slug ?? null;
   const { data: bySlug, isLoading: slugLoading } = useQuery({
