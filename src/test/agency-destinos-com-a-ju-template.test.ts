@@ -76,7 +76,7 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
   it("não altera os demais tenants", () => {
     expect(resolveSiteTheme(LIMITES)).toBe("travelEditorial");
     expect(resolveSiteTheme("paraisoviagens.com")).toBe("luxuryEditorial");
-    expect(isUnderConstruction(LIMITES)).toBe(true);
-    expect(isUnderConstruction("paraisoviagens.com")).toBe(true);
+    expect(isUnderConstruction(LIMITES)).toBe(false);
+    expect(isUnderConstruction("paraisoviagens.com")).toBe(false);
   });
 });
