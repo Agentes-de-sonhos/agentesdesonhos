@@ -26,12 +26,6 @@ export interface AgencySiteStatusConfig {
 }
 
 const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
-  "100limites.tur.br": { status: "under_construction" },
-  "www.100limites.tur.br": { status: "under_construction" },
-  "paraisoviagens.com": { status: "under_construction" },
-  "www.paraisoviagens.com": { status: "under_construction" },
-  "destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
-  "www.destinoscomaju.com.br": { status: "under_construction", variant: "destinosComAJu" },
   "faeviagens.com.br": { status: "under_construction" },
   "www.faeviagens.com.br": { status: "under_construction" },
 };
