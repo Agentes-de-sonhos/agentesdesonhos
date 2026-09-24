@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import logoAsset from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
+import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 
 /**
  * Página temporária EXCLUSIVA do domínio essyatur.com.br.
@@ -12,7 +13,7 @@ import logoAsset from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 export default function EssyaTurComingSoon() {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Essya Tur — Site em construção";
+    document.title = resolveAgencyBrowserTitle(window.location.hostname) ?? "Essya Tur — Site em construção";
 
     const description = document.querySelector('meta[name="description"]');
     const previousDescription = description?.getAttribute("content") ?? null;
