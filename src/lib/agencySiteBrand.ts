@@ -55,8 +55,74 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "www.essyatur.com.br",
 ]);
 
+export interface AgencyHeaderBrandPreset {
+  logoOnly: boolean;
+  /** Stable header height across mobile and desktop. */
+  headerClassName: string;
+  /** Tenant-specific logo box; the source artwork remains unchanged. */
+  logoClassName: string;
+}
+
+const DEFAULT_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
+  logoOnly: false,
+  headerClassName: "h-16",
+  logoClassName: "h-10 w-auto max-w-[160px] object-contain",
+};
+
+/**
+ * Header-only brand presentation. Kept declarative and host-scoped so artwork
+ * with different proportions can be sized independently without affecting any
+ * other tenant or the footer/public documents.
+ */
+const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
+  "destinoscomaju.com.br": {
+    logoOnly: true,
+    headerClassName: "h-[88px] md:h-[112px]",
+    logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[150px]",
+  },
+  "www.destinoscomaju.com.br": {
+    logoOnly: true,
+    headerClassName: "h-[88px] md:h-[112px]",
+    logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[150px]",
+  },
+  "paraisoviagens.com": {
+    logoOnly: true,
+    headerClassName: "h-20 md:h-[88px]",
+    logoClassName: "h-14 w-auto max-w-[240px] object-contain md:h-16 md:max-w-[280px]",
+  },
+  "www.paraisoviagens.com": {
+    logoOnly: true,
+    headerClassName: "h-20 md:h-[88px]",
+    logoClassName: "h-14 w-auto max-w-[240px] object-contain md:h-16 md:max-w-[280px]",
+  },
+  "100limites.tur.br": {
+    logoOnly: true,
+    headerClassName: "h-20 md:h-24",
+    logoClassName: "h-14 w-auto max-w-[150px] object-contain md:h-[72px] md:max-w-[180px]",
+  },
+  "www.100limites.tur.br": {
+    logoOnly: true,
+    headerClassName: "h-20 md:h-24",
+    logoClassName: "h-14 w-auto max-w-[150px] object-contain md:h-[72px] md:max-w-[180px]",
+  },
+  "essyatur.com.br": {
+    logoOnly: true,
+    headerClassName: "h-[88px] md:h-[112px]",
+    logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[160px]",
+  },
+  "www.essyatur.com.br": {
+    logoOnly: true,
+    headerClassName: "h-[88px] md:h-[112px]",
+    logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[160px]",
+  },
+};
+
 export function normalizeBrandHost(hostname?: string | null): string {
   return (hostname || "").trim().toLowerCase().replace(/:\d+$/, "");
+}
+
+export function resolveAgencyHeaderBrandPreset(hostname?: string | null): AgencyHeaderBrandPreset {
+  return HEADER_BRAND_BY_HOSTNAME[normalizeBrandHost(hostname)] ?? DEFAULT_HEADER_BRAND_PRESET;
 }
 
 /** Logotipo oficial do hostname (asset do projeto), quando existir. */

@@ -15,7 +15,11 @@ import {
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
-import { logoIncludesWordmark, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
+import {
+  logoIncludesWordmark,
+  resolveAgencyHeaderBrandPreset,
+  resolveAgencyLogoUrl,
+} from "@/lib/agencySiteBrand";
 import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
@@ -48,9 +52,9 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
-  const luxury = isLuxuryTheme(info.hostname);
   const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
+  const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const navAll = siteNavLinks(info.hostname);
 
   if (editorial) {
@@ -58,20 +62,14 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
     return (
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur">
         <div
-          className={`${siteContainer(true)} flex items-center justify-between gap-6 ${
-            luxury ? "h-[88px]" : "h-20"
-          }`}
+          className={`${siteContainer(true)} flex items-center justify-between gap-6 ${headerBrand.headerClassName}`}
         >
           <Link to={agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={`Logo ${name}`}
-                className={
-                  luxury
-                    ? "h-14 w-auto max-w-[240px] object-contain md:h-16 md:max-w-[280px]"
-                    : "h-12 w-auto max-w-[200px] object-contain"
-                }
+                className={headerBrand.logoClassName}
               />
             ) : (
               <span className="grid h-12 w-12 place-items-center rounded-lg bg-foreground text-lg font-bold text-background">
@@ -79,7 +77,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
               </span>
             )}
             {/* Logotipos que já contêm o nome da marca não repetem o wordmark. */}
-            {!(logoUrl && logoIncludesWordmark(info.hostname)) && (
+            {!headerBrand.logoOnly && !(logoUrl && logoIncludesWordmark(info.hostname)) && (
               <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
                 <BrandText>{name}</BrandText>
               </span>
@@ -163,18 +161,20 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+      <div className={`mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 ${headerBrand.headerClassName}`}>
         <Link to={agencyContextHref("/")} className="flex items-center gap-3 min-w-0">
           {logoUrl ? (
-            <img src={logoUrl} alt={`Logo ${name}`} className="h-10 w-auto max-w-[160px] object-contain" />
+            <img src={logoUrl} alt={`Logo ${name}`} className={headerBrand.logoClassName} />
           ) : (
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground font-semibold">
               {name.slice(0, 1).toUpperCase()}
             </span>
           )}
-          <span className="truncate text-base font-semibold text-foreground">
-            <BrandText>{name}</BrandText>
-          </span>
+          {!headerBrand.logoOnly && (
+            <span className="truncate text-base font-semibold text-foreground">
+              <BrandText>{name}</BrandText>
+            </span>
+          )}
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
