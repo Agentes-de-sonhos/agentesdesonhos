@@ -132,6 +132,8 @@ export function useAppVersion(): { updateAvailable: boolean; remoteVersion: stri
   const stopRef = useRef(false);
 
   useEffect(() => {
+    // Globally disabled: never poll and never prompt while the kill switch is off.
+    if (!APP_UPDATE_PROMPT_ENABLED) return;
     // Skip in development — there is no meaningful version to compare against.
     if (currentVersion === "dev") return;
     if (isPublicUpdateContext()) {
