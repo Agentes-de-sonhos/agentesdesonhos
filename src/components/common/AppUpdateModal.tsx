@@ -19,6 +19,7 @@ import {
   hasUnsavedChanges,
   dismissAppUpdate,
   isPublicUpdateContext,
+  APP_UPDATE_PROMPT_ENABLED,
 } from "@/hooks/useAppVersion";
 
 /**
@@ -29,7 +30,7 @@ import {
 export function AppUpdateModal() {
   // Structural guard: agency / Site Lab surfaces must never mount the
   // Agentes de Sonhos update prompt, even if a version is detected.
-  const suppressed = isPublicUpdateContext();
+  const suppressed = !APP_UPDATE_PROMPT_ENABLED || isPublicUpdateContext();
   const { updateAvailable, remoteVersion } = useAppVersion();
   const [open, setOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
