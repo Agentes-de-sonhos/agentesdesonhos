@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import logoAsset from "@/assets/whitelabel/logo-destinos-com-a-ju.png.asset.json";
+import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 
 /**
  * Página temporária EXCLUSIVA do domínio destinoscomaju.com.br.
@@ -11,7 +12,7 @@ import logoAsset from "@/assets/whitelabel/logo-destinos-com-a-ju.png.asset.json
 export default function DestinosComAJuComingSoon() {
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = "Destinos com a Ju — Em breve";
+    document.title = resolveAgencyBrowserTitle(window.location.hostname) ?? "Destinos com a Ju — Em breve";
 
     const description = document.querySelector('meta[name="description"]');
     const previousDescription = description?.getAttribute("content") ?? null;
