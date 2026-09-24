@@ -13,13 +13,12 @@ import {
 } from "@/lib/agencySlugRouting";
 import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
-import { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
+import PublicDomainRoot, { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
 
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
 const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
-const PublicDomainRoot = lazy(() => import("@/components/routing/PublicDomainRoot"));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -89,11 +88,7 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
 
   const publicRootLabel = publicDomainRootLabel(browserHost, browserPath);
   if (publicRootLabel) {
-    return (
-      <Suspense fallback={<Spinner />}>
-        <PublicDomainRoot label={publicRootLabel} />
-      </Suspense>
-    );
+    return <PublicDomainRoot label={publicRootLabel} />;
   }
 
   /**
@@ -125,7 +120,7 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     if (!bySlug) return noAgency;
     return (
       <Suspense fallback={<Spinner />}>
-        <AgencyDomainRoutes info={withSiteContacts(bySlug)} basePath={slugLocation!.basePath} />
+        <AgencyDomainRoutes info={withSiteContacts(bySlug)} basePath={slugLocation?.basePath} />
       </Suspense>
     );
   }
