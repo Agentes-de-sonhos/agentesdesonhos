@@ -22,7 +22,8 @@ export type AgencySectionKey =
   | "team"
   | "testimonials"
   | "faq"
-  | "newsletter" | "map" | "avaliacoes";
+  | "newsletter"
+  | "avaliacoes";
 
 export interface AgencySectionConfig {
   key: AgencySectionKey;
@@ -50,8 +51,7 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "team", label: "Equipe e consultores", enabled: false, order: 8 },
   { key: "testimonials", label: "Depoimentos", enabled: false, order: 9 },
   { key: "faq", label: "Perguntas frequentes", enabled: true, order: 10 },
-  { key: "avaliacoes", label: "Avaliações do Google", enabled: true, order: 10.5 },
-  { key: "map", label: "Mapa e localização", enabled: false, order: 12 },
+  { key: "avaliacoes", label: "Avaliações do Google", enabled: false, order: 10.5 },
   { key: "newsletter", label: "Newsletter", enabled: true, order: 11 },
 ];
 

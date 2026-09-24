@@ -56,6 +56,27 @@ export interface AgencySectionCopy {
   cta?: string;
 }
 
+export interface AgencyAuthorityContent {
+  kicker: string;
+  title: string;
+  paragraphs: string[];
+  cta: string;
+  service: string;
+  image?: AgencyImageSlot;
+}
+
+export interface AgencyFooterContent {
+  description?: string;
+  whatsapp?: string;
+  phone?: string;
+  email?: string;
+  instagram?: string;
+  instagramLabel?: string;
+  address?: string;
+  legalName?: string;
+  cnpj?: string;
+}
+
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
@@ -85,25 +106,21 @@ export interface AgencySiteProfile {
   differentials?: AgencyDifferential[];
   faq?: { q: string; a: string }[];
   signature?: AgencySignatureContent;
+  authority?: AgencyAuthorityContent;
+  seo?: { title: string; description: string };
+  reviewsCopy?: { kicker: string; title: string; subtitle: string };
+  footer?: AgencyFooterContent;
   credentials?: AgencyCredentialsContent;
   /** Títulos/subtítulos por seção (fallback: textos padrão da engine). */
   copy?: Partial<Record<AgencySectionKey, AgencySectionCopy>>;
-  /** Conteúdo institucional da seção "about" quando o perfil define a redação. */
-  /** Configuração do mapa de localização (seção "map"). */
-  map?: {
-    latitude: number;
-    longitude: number;
-    address: string;
-    name?: string;
-    placeId?: string;
-    title?: string;
-    subtitle?: string;
-  };
   /** Overrides de texto para a Central de Solicitações. */
   requestCenter?: {
     title?: string;
-    subtitle?: string;
+    support?: string;
+    notice?: string;
+    submitLabel?: string;
   };
+  /** Conteúdo institucional da seção "about" quando o perfil define a redação. */
   about?: {
     kicker?: string;
     title?: string;

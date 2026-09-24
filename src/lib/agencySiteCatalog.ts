@@ -60,6 +60,7 @@ export const SITE_CATALOG: AgencyCatalogEntry[] = [
   { key: "credentials", name: "Credenciais e conexões", classification: "opcional", when: "Somente com associações, selos ou redes reais e verificáveis.", anchor: "#credenciais" },
   { key: "team", name: "Equipe e consultores", classification: "opcional", when: "Quando existe equipe real a apresentar, com nomes e funções.", anchor: "#equipe" },
   { key: "testimonials", name: "Depoimentos", classification: "opcional", when: "Somente com depoimentos reais autorizados pelos clientes.", anchor: "#depoimentos" },
+  { key: "avaliacoes", name: "Avaliações do Google", classification: "opcional", when: "Somente para perfis com integração e avaliações reais habilitadas.", anchor: "#avaliacoes" },
   { key: "faq", name: "Perguntas frequentes", classification: "recomendada", when: "Reduz dúvidas antes da solicitação e melhora a leitura por buscadores.", anchor: "#faq" },
   { key: "newsletter", name: "Newsletter e inspirações", classification: "opcional", when: "Captação leve para quem ainda não tem viagem definida.", anchor: "#novidades" },
   { key: "cta-footer", name: "CTA final e rodapé", classification: "recomendada", when: "Fechamento com contato, canais e links institucionais.", anchor: "#rodape", fixed: true },

@@ -108,8 +108,7 @@ export function AgencyGoogleReviewsSection({
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
             <h2 id="avaliacoes-title" className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-            {subtitle && <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground md:text-base">{subtitle}</p>}
-              {copy?.title ?? "{title ?? "O que dizem nossos viajantes"}"}
+              {copy?.title ?? "O que dizem nossos viajantes"}
             </h2>
             {copy?.subtitle && <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground md:text-base">{copy.subtitle}</p>}
             {data && data.rating != null && (

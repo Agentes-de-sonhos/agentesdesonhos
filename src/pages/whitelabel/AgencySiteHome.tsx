@@ -37,7 +37,7 @@ import {
 } from "@/components/whitelabel/SiteLabCatalogChrome";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
-import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
+import { SEO } from "@/components/seo/SEO";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
 import heroFae from "@/assets/whitelabel/hero-fae.jpg";
@@ -82,6 +82,7 @@ const HERO_IMAGES: Record<string, string> = {
   praia: heroPraia,
   luxo: heroLuxo,
   fae: heroFae,
+  europa: destinoEuropa,
 };
 
 /** Kept exported: other white-label surfaces import this service list. */
@@ -298,32 +299,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const renderSection = (key: AgencySectionKey) => {
     switch (key) {
-      case "map":
-        {
-          const m = profile.map;
-          if (!m) return null;
-          return (
-            <section key={key} id="mapa" className="bg-background">
-              <div className={`${container} py-14 md:py-24`}>
-                <SectionHeading
-                  title={m.title ?? "Onde estamos"}
-                  subtitle={m.subtitle}
-                  editorial={editorial}
-                />
-                <div className="mt-8 overflow-hidden rounded-2xl border border-border/60 shadow-sm">
-                  <PlaceMapCard
-                    latitude={m.latitude}
-                    longitude={m.longitude}
-                    address={m.address}
-                    name={m.name || name}
-                    placeId={m.placeId}
-                  />
-                </div>
-              </div>
-            </section>
-          );
-        }
-
       case "dmc":
         if (!dmc) return null;
         return (
@@ -411,6 +386,33 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
                   {s.text}
                 </p>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      case "authority": {
+        const authority = profile.authority;
+        if (!authority) return null;
+        return (
+          <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
+            <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
+              <img
+                src={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
+                alt="Cruzeiro em alto-mar"
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.kicker}</p>
+                <h2 className="mt-4 text-3xl font-extrabold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
+                <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-background/80 md:text-base">
+                  {authority.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                </div>
+                <Button size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openRequest(authority.service)}>
+                  {authority.cta} <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </div>
           </section>
@@ -1041,8 +1043,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               key={key}
               hostname={hostname}
               container={container}
-              title={copy.title}
-              subtitle={copy.subtitle}
+              copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
             />
           );
         }
@@ -1193,6 +1194,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   return (
     <>
+      {profile.seo && <SEO title={profile.seo.title} description={profile.seo.description} canonical="/" />}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
         id="topo"
@@ -1239,7 +1241,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-              {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+              {profile.key === "editorialRose" ? "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO" : location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
             </p>
           ) : (
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
@@ -1330,6 +1332,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 onServiceChange={setService}
                 open={requestOpen}
                 onOpenChange={setRequestOpen}
+                copy={profile.requestCenter}
               />
             </div>
           </div>
@@ -1343,6 +1346,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             onServiceChange={setService}
             open={requestOpen}
             onOpenChange={setRequestOpen}
+            copy={profile.requestCenter}
           />
         </div>
       )}
@@ -1362,8 +1366,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         ) : (
           node
         );
-          );
-        }
         if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
