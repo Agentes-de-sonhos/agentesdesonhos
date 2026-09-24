@@ -53,8 +53,8 @@ export default function DestinosComAJuComingSoon() {
           <img
             src={logoAsset.url}
             alt="Destinos com a Ju"
-            width={480}
-            height={252}
+            width={842}
+            height={624}
             className="mx-auto h-24 w-auto max-w-[280px] object-contain sm:h-32 sm:max-w-[360px]"
           />
 
