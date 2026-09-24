@@ -12,6 +12,7 @@ import {
   parseAgencySlugLocation,
 } from "@/lib/agencySlugRouting";
 import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
+import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
 
 import { useNoindex } from "@/hooks/useNoindex";
 
@@ -50,6 +51,11 @@ function SharedHostIndex() {
  */
 export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
   const browserHost = typeof window === "undefined" ? "" : window.location.hostname;
+  const redirectHost = canonicalRedirectHost(browserHost);
+  if (redirectHost && typeof window !== "undefined") {
+    const { pathname, search, hash } = window.location;
+    window.location.replace(`https://${redirectHost}${pathname}${search}${hash}`);
+  }
   const shared = isSharedAgencySiteHost(browserHost);
   const slugLocation =
     typeof window === "undefined"
@@ -108,7 +114,7 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     if (!bySlug) return noAgency;
     return (
       <Suspense fallback={<Spinner />}>
-        <AgencyDomainRoutes info={bySlug} basePath={slugLocation!.basePath} />
+        <AgencyDomainRoutes info={withSiteContacts(bySlug)} basePath={slugLocation!.basePath} />
       </Suspense>
     );
   }
@@ -119,7 +125,7 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
   if (host && data) {
     return (
       <Suspense fallback={<Spinner />}>
-        <AgencyDomainRoutes info={data} />
+        <AgencyDomainRoutes info={withSiteContacts(data)} />
       </Suspense>
     );
   }

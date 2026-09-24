@@ -668,6 +668,34 @@ img {
   --wl-sand: 146 40% 96%;
 }
 
+/* ===== Acabamento "essyaEditorial" (Essyatur) =================================
+   Azul #164F76 nas ações/faixas, amarelo #FDC700 só em destaques/CTAs,
+   branco e neutros como base. Nenhum outro tenant muda. */
+.wl-editorial.wl-essya {
+  --background: 0 0% 100%;
+  --foreground: 205 45% 14%;
+  --card: 0 0% 100%;
+  --card-foreground: 205 45% 14%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 205 45% 14%;
+  --primary: 204 69% 27%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 205 40% 95%;
+  --secondary-foreground: 205 45% 14%;
+  --muted: 210 25% 96%;
+  --muted-foreground: 205 12% 38%;
+  --accent: 47 100% 50%;
+  --accent-foreground: 205 45% 14%;
+  --border: 205 20% 88%;
+  --input: 205 20% 84%;
+  --ring: 204 69% 27%;
+  --radius: 0.75rem;
+  --wl-red: 204 69% 27%;
+  --wl-navy: 204 69% 22%;
+  --wl-ink: 205 60% 14%;
+  --wl-sand: 205 40% 96%;
+}
+
 .wl-editorial.wl-fae h1,
 .wl-editorial.wl-fae h2,
 .wl-editorial.wl-fae h3 {
