@@ -78,6 +78,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { OpportunityForm } from "./OpportunityForm";
+import { LinkQuoteToOpportunityDialog } from "./LinkQuoteToOpportunityDialog";
 import { OpportunityHistoryDialog } from "./OpportunityHistoryDialog";
 import { OpportunityDetailsDrawer } from "./OpportunityDetailsDrawer";
 import { QuickLabelPicker } from "./QuickLabelPicker";
@@ -188,6 +189,7 @@ export function OpportunityCard({
     existingId: string;
   }>(null);
   const [isCheckingLink, setIsCheckingLink] = useState(false);
+  const [showQuoteChoice, setShowQuoteChoice] = useState(false);
 
   const notesCount = notesCounts[opportunity.id] || 0;
   const appliedLabels = byOpportunity[opportunity.id] || [];
@@ -481,8 +483,8 @@ export function OpportunityCard({
                   <History className="mr-2 h-4 w-4" /> Histórico
                 </DropdownMenuItem>
                 {showGenerateQuote && (
-                  <DropdownMenuItem onClick={handleCreateQuote} disabled={isCheckingLink}>
-                    <FileText className="mr-2 h-4 w-4" /> Gerar orçamento
+                  <DropdownMenuItem onClick={() => setShowQuoteChoice(true)} disabled={isCheckingLink}>
+                    <FileText className="mr-2 h-4 w-4" /> Gerar / vincular orçamento
                   </DropdownMenuItem>
                 )}
                 {showGenerateWallet && (
@@ -581,6 +583,13 @@ export function OpportunityCard({
           </div>
         </CardContent>
       </Card>
+
+      <LinkQuoteToOpportunityDialog
+        open={showQuoteChoice}
+        onOpenChange={setShowQuoteChoice}
+        opportunityId={opportunity.id}
+        onGenerateNew={handleCreateQuote}
+      />
 
       <Dialog
         open={isEditing}
