@@ -78,6 +78,11 @@ export interface AgencyFooterContent {
   cnpj?: string;
 }
 
+export interface AgencyHeroPresentation {
+  kicker?: string;
+  cta?: { label: string; service: string };
+}
+
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
@@ -99,6 +104,10 @@ export interface AgencySiteProfile {
   /** Pontos do atendimento humano exibidos na seção "concierge". */
   conciergePoints?: { key: string; title: string; text: string }[];
   hero?: AgencyHeroSlide[];
+  /** Apresentação opcional do hero; ausente preserva os fallbacks da engine. */
+  heroPresentation?: AgencyHeroPresentation;
+  /** Rótulo opcional do WhatsApp no concierge (fallback compartilhado intacto). */
+  conciergeWhatsappLabel?: string;
   /** Slot de imagem de fallback do hero (resolvido na apresentação). */
   heroImage?: string;
   destinations?: AgencyDestination[];
@@ -310,10 +319,9 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     { label: "Destinos", to: "/#destinos" },
     { label: "Experiências", to: "/#campanhas" },
     { label: "Cruzeiros", to: "/#autoridade" },
+    { label: "Ofertas", to: "/ofertas" },
     { label: "Sobre", to: "/#sobre" },
     { label: "Avaliações", to: "/#avaliacoes" },
-    { label: "Dúvidas", to: "/#faq" },
-    { label: "Área do Cliente", to: "/area-do-cliente" },
   ],
   sections: {
     dmc: { enabled: false }, testimonials: { enabled: false }, team: { enabled: false },
@@ -329,6 +337,10 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     canonical: "https://www.destinoscomaju.com.br/",
   },
   heroImage: "europa",
+  heroPresentation: {
+    kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
+    cta: { label: "Começar a planejar", service: "pacotes" },
+  },
   hero: [
     { title: "Sua viagem importa. Cada detalhe também.", subtitle: "Consultoria completa e atendimento próximo para você viajar com tranquilidade, segurança e experiências que realmente combinam com você.", order: 1, enabled: true },
     { title: "Orlando, Europa, cruzeiros e resorts planejados por quem conhece", subtitle: "Destinos, hospedagens e experiências selecionados de acordo com o perfil, o momento e as prioridades de cada viajante.", order: 2, enabled: true },
@@ -387,6 +399,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     { key: "proposta", title: "Receba uma proposta personalizada", text: "Você recebe opções claras, organizadas e explicadas para escolher com segurança." },
     { key: "acompanhamento", title: "Viaje com acompanhamento", text: "Depois da confirmação, documentos, roteiro e informações ficam organizados na Área do Cliente, com suporte durante toda a jornada." },
   ],
+  conciergeWhatsappLabel: "Falar com a Juliana",
   reviewsCopy: {
     kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju",
     subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes.",

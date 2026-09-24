@@ -866,7 +866,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
                       >
                         <a href={waHref} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle className="mr-2 h-4 w-4" /> Falar no WhatsApp
+                          <MessageCircle className="mr-2 h-4 w-4" /> {profile.conciergeWhatsappLabel ?? "Falar no WhatsApp"}
                         </a>
                       </Button>
                     )}
@@ -1248,7 +1248,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-              {profile.key === "editorialRose" ? "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO" : location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+               {profile.heroPresentation?.kicker ?? (location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens")}
             </p>
           ) : (
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
@@ -1274,13 +1274,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           >
             {current.subtitle}
           </p>
-          {profile.key === "editorialRose" && (
+          {profile.heroPresentation?.cta && (
             <Button
               size="lg"
               className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => openRequest("pacotes")}
+              onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
             >
-              Começar a planejar <ArrowRight className="ml-2 h-4 w-4" />
+              {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           )}
 

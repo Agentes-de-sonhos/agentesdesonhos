@@ -30,4 +30,5 @@
   - [x] Atalhos persistidos de operação e venda no processo já convertido.
   - [x] Testes comportamentais reais (entitlement, duplo clique, erro estruturado) + suíte, tipos, build.
   - Não executado: teste concorrente real de banco (exigiria dados persistentes); funil segue coberto por teste estrutural.
-- [ ] Evolução editorial exclusiva da Destinos com a Ju: conteúdo aprovado, testes focados, typecheck, build e conferência visual, sem publicar.
+- [x] Evolução editorial exclusiva da Destinos com a Ju: conteúdo aprovado, testes focados, typecheck, build e conferência visual, sem publicar.
+- [x] Correção final declarativa da Destinos com a Ju: hero, menu, WhatsApp e resolução por hostname; teste focado e typecheck, sem publicar.
