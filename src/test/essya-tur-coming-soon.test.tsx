@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { isUnderConstruction, resolveSiteStatus } from "@/lib/agencySiteStatus";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { isEditorialTheme, siteThemeRootClass } from "@/lib/agencySiteTheme";
@@ -39,8 +40,8 @@ describe("Essyatur — white label em www.essyatur.com.br", () => {
 
   it("não inventa depoimentos, equipe ou credenciais", () => {
     const p = resolveSiteProfile(HOST);
-    expect(p.sections?.testimonials?.enabled).toBe(false);
-    expect(p.sections?.credentials?.enabled).toBe(false);
+    expect(sectionOverrideEnabled(p.sections?.testimonials)).toBe(false);
+    expect(sectionOverrideEnabled(p.sections?.credentials)).toBe(false);
     expect(p.testimonials).toBeUndefined();
   });
 });
