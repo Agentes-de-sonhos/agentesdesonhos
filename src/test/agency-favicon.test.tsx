@@ -16,7 +16,7 @@ function setupHeadLinks() {
 }
 
 function headHrefs() {
-  return Array.from(document.head.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')).map(
+  return Array.from(document.head.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]')).map(
     (l) => l.getAttribute("href"),
   );
 }
@@ -30,13 +30,12 @@ describe("useAgencyFavicon", () => {
     document.head.innerHTML = "";
   });
 
-  it("aponta todos os ícones para o logotipo da agência enquanto montado", () => {
+  it("substitui os ícones concorrentes por um único favicon da agência", () => {
     renderHook(() => useAgencyFavicon("https://cdn.exemplo.com/logo-essyatur.png"));
     expect(headHrefs()).toEqual([
-      "https://cdn.exemplo.com/logo-essyatur.png",
-      "https://cdn.exemplo.com/logo-essyatur.png",
-      "https://cdn.exemplo.com/logo-essyatur.png",
+      "https://cdn.exemplo.com/logo-essyatur.png?favicon=agency-v2",
     ]);
+    expect(document.querySelector("#agency-favicon")).not.toBeNull();
   });
 
   it("restaura os ícones originais ao desmontar", () => {
@@ -57,10 +56,17 @@ describe("useAgencyFavicon", () => {
       ({ url }: { url: string | null }) => useAgencyFavicon(url),
       { initialProps: { url: "https://cdn.exemplo.com/a.png" as string | null } },
     );
-    expect(headHrefs()[0]).toBe("https://cdn.exemplo.com/a.png");
+    expect(headHrefs()).toEqual(["https://cdn.exemplo.com/a.png?favicon=agency-v2"]);
     rerender({ url: "https://cdn.exemplo.com/b.png" });
-    expect(headHrefs()[0]).toBe("https://cdn.exemplo.com/b.png");
+    expect(headHrefs()).toEqual(["https://cdn.exemplo.com/b.png?favicon=agency-v2"]);
     unmount();
     expect(headHrefs()).toEqual(ORIGINAL_HREFS);
+  });
+
+  it("preserva parâmetros existentes ao criar uma URL nova para o cache", () => {
+    renderHook(() => useAgencyFavicon("https://cdn.exemplo.com/logo.png?t=123"));
+    expect(headHrefs()).toEqual([
+      "https://cdn.exemplo.com/logo.png?t=123&favicon=agency-v2",
+    ]);
   });
 });

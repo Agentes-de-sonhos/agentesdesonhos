@@ -1,26 +1,46 @@
 import { useEffect } from "react";
 
+const AGENCY_FAVICON_ID = "agency-favicon";
+
+function cacheScopedLogoUrl(logoUrl: string): string {
+  try {
+    const url = new URL(logoUrl, window.location.origin);
+    url.searchParams.set("favicon", "agency-v2");
+    return url.href;
+  } catch {
+    return logoUrl;
+  }
+}
+
 /**
- * Troca o favicon do <head> pelo logotipo da agência enquanto o site
- * white-label estiver montado, restaurando os ícones originais ao sair.
+ * Troca os favicons concorrentes por um único ícone da agência enquanto o
+ * domínio white-label estiver montado, restaurando os originais ao sair.
  * Sem logotipo resolvido, nada é alterado (favicon padrão da plataforma).
  */
 export function useAgencyFavicon(logoUrl?: string | null) {
   useEffect(() => {
     if (!logoUrl) return;
-    const links = Array.from(
-      document.head.querySelectorAll<HTMLLinkElement>('link[rel="icon"]'),
-    );
-    if (!links.length) return;
-    const previous = links.map((link) => link.getAttribute("href"));
-    links.forEach((link) => {
-      link.setAttribute("href", logoUrl);
-    });
+
+    const previousLinks = Array.from(
+      document.head.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]'),
+    ).map((link) => ({ link, nextSibling: link.nextSibling }));
+
+    previousLinks.forEach(({ link }) => link.remove());
+
+    const agencyIcon = document.createElement("link");
+    agencyIcon.id = AGENCY_FAVICON_ID;
+    agencyIcon.rel = "icon";
+    agencyIcon.href = cacheScopedLogoUrl(logoUrl);
+    document.head.appendChild(agencyIcon);
+
     return () => {
-      links.forEach((link, index) => {
-        const href = previous[index];
-        if (href === null) link.removeAttribute("href");
-        else link.setAttribute("href", href);
+      agencyIcon.remove();
+      previousLinks.forEach(({ link, nextSibling }) => {
+        if (nextSibling?.parentNode === document.head) {
+          document.head.insertBefore(link, nextSibling);
+        } else {
+          document.head.appendChild(link);
+        }
       });
     };
   }, [logoUrl]);
