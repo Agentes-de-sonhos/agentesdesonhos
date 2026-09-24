@@ -304,34 +304,105 @@ const LUXURY_CURATED: AgencySiteProfile = {
  */
 const EDITORIAL_ROSE: AgencySiteProfile = {
   key: "editorialRose",
-  sections: { ...CURATED_SECTIONS, map: { enabled: true, order: 11 } },
-  heroImage: "praia",
+  sections: {
+    dmc: { enabled: false }, testimonials: { enabled: false }, team: { enabled: false },
+    credentials: { enabled: false }, highlights: { enabled: false },
+    signature: { enabled: true, order: 1 }, destinations: { order: 2 }, modules: { order: 3 },
+    authority: { enabled: true, order: 4 }, about: { order: 5 }, differentials: { order: 6 },
+    concierge: { order: 7 }, avaliacoes: { enabled: true, order: 8 }, faq: { order: 9 },
+    newsletter: { order: 10 }, offers: { order: 11 },
+  },
+  seo: {
+    title: "Destinos com a Ju | Viagens Personalizadas, Orlando, Europa e Cruzeiros",
+    description: "Consultoria completa para viagens personalizadas, Orlando, Europa, cruzeiros, Caribe e resorts, com suporte antes, durante e depois.",
+  },
+  heroImage: "europa",
   hero: [
-    { title: "Viagens que transformam, destinos que inspiram", subtitle: "Planejamento próximo e curadoria atenta para cada roteiro com a {agency}.", order: 1, enabled: true },
-    { title: "Europa, Parques e Cruzeiros com quem entende", subtitle: "Do primeiro voo ao retorno, cuidamos de cada detalhe da sua jornada.", order: 2, enabled: true }
+    { title: "Sua viagem importa. Cada detalhe também.", subtitle: "Consultoria completa e atendimento próximo para você viajar com tranquilidade, segurança e experiências que realmente combinam com você.", order: 1, enabled: true },
+    { title: "Orlando, Europa, cruzeiros e resorts planejados por quem conhece", subtitle: "Destinos, hospedagens e experiências selecionados de acordo com o perfil, o momento e as prioridades de cada viajante.", order: 2, enabled: true },
+    { title: "Do primeiro planejamento ao retorno, você viaja com suporte de verdade", subtitle: "Um atendimento conduzido de perto, com orientação, organização e acompanhamento antes, durante e depois da viagem.", order: 3, enabled: true },
   ],
+  requestCenter: {
+    title: "Por onde você quer começar?",
+    support: "Conte o que está planejando. A Juliana analisará pessoalmente a sua solicitação e entrará em contato para entender todos os detalhes.",
+    notice: "Sua solicitação não é processada automaticamente. Cada pedido é analisado com atenção para que as opções realmente façam sentido para a sua viagem.",
+    submitLabel: "Enviar solicitação",
+  },
   signature: {
-    kicker: "DESTINOS COM A JU",
-    title: "Sua viagem merece um olhar especializado.",
-    text: "Mais do que um roteiro, criamos experiências que conectam você aos melhores destinos do mundo, com o conforto e a segurança de um planejamento sob medida."
+    kicker: "O JEITO DESTINOS COM A JU DE PLANEJAR",
+    title: "Uma viagem bem planejada começa por uma boa conversa.",
+    text: "Antes de sugerir destinos, hotéis ou experiências, queremos entender quem vai viajar, o que espera viver e quais detalhes são realmente importantes. É assim que cada viagem ganha personalidade, tranquilidade e significado.",
   },
   destinations: [
-    { key: "europa", image: "europa", label: "Europa", title: "Europa e Culturas", text: "Cidades históricas e vilas charmosas planejadas no seu ritmo.", service: "pacotes", enabled: true, order: 1 },
-    { key: "parques", image: "parques", label: "Família", title: "Parques e Orlando", text: "Logística completa para aproveitar o melhor dos parques com tranquilidade.", service: "ingressos", enabled: true, order: 2 },
-    { key: "cruzeiros", image: "cruzeiro", label: "Navegação", title: "Cruzeiros Selecionados", text: "Os melhores itinerários e navios para a sua próxima aventura no mar.", service: "cruzeiros", enabled: true, order: 3 },
-    { key: "resorts", image: "resort", label: "Conforto", title: "Resorts e All Inclusive", text: "Estadias premium no Brasil e no mundo para relaxar com tudo pronto.", service: "hospedagem", enabled: true, order: 4 }
+    { key: "europa-no-seu-ritmo", image: "europa", label: "Cultura e experiências", title: "Europa no seu ritmo", text: "Cidades históricas, gastronomia, paisagens e experiências combinadas em um roteiro personalizado, com deslocamentos e hospedagens cuidadosamente planejados.", service: "pacotes", enabled: true, order: 1 },
+    { key: "orlando-completo", image: "parques", label: "Parques e entretenimento", title: "Orlando com planejamento completo", text: "Parques, ingressos, hospedagem, alimentação e deslocamentos organizados para aproveitar melhor cada dia da viagem.", service: "ingressos", enabled: true, order: 2 },
+    { key: "cruzeiro-certo", image: "cruzeiro", label: "Experiência em alto-mar", title: "O cruzeiro certo para cada viajante", text: "Companhia, navio, itinerário e categoria de cabine escolhidos com orientação de quem conhece diferentes experiências de cruzeiro.", service: "cruzeiros", enabled: true, order: 3 },
+    { key: "caribe-mexico", image: "litoral", label: "Praias e experiências", title: "Caribe e México", text: "Mar, cultura, gastronomia e resorts selecionados para casais, famílias e grupos de amigos que procuram conforto e experiências especiais.", service: "pacotes", enabled: true, order: 4 },
+    { key: "nordeste-conforto", image: "resort", label: "Resorts e all inclusive", title: "Nordeste com conforto e tranquilidade", text: "Resorts e experiências para famílias, casais e grupos que querem descansar com estrutura, segurança e facilidade.", service: "hospedagem", enabled: true, order: 5 },
   ],
-  map: {
-    latitude: -23.5505,
-    longitude: -46.6333,
-    address: "São Paulo, SP",
-    name: "Destinos com a Ju",
-    title: "Onde estamos",
-    subtitle: "Atendimento presencial com hora marcada ou consultoria digital completa."
+  modules: [
+    { key: "internacionais-personalizadas", title: "Viagens internacionais personalizadas", text: "Roteiros, hospedagens e experiências combinados de acordo com o ritmo, os interesses e as prioridades dos viajantes.", service: "pacotes", image: "europa", enabled: true, order: 1 },
+    { key: "orlando-disney-universal", title: "Orlando, Disney e Universal", text: "Planejamento de parques, ingressos, hotéis, refeições e deslocamentos para aproveitar a viagem com mais organização e menos preocupação.", service: "ingressos", image: "parques", enabled: true, order: 2 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação para escolher companhia, navio, cabine e itinerário entre opções como Disney Cruise Line, MSC, Norwegian e Royal Caribbean.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 3 },
+    { key: "resorts-all-inclusive", title: "Resorts e all inclusive", text: "Seleção de resorts no Brasil, Caribe e México, considerando estrutura, localização, perfil dos hóspedes e experiência desejada.", service: "hospedagem", image: "resort", enabled: true, order: 4 },
+    { key: "europa-multidestinos", title: "Europa e multidestinos", text: "Combinações de cidades e países com logística organizada, hospedagens selecionadas e tempo adequado em cada destino.", service: "pacotes", image: "europa", enabled: true, order: 5 },
+    { key: "viagens-em-familia", title: "Viagens em família", text: "Planejamento pensado para diferentes idades, equilibrando diversão, conforto, segurança e o ritmo de toda a família.", service: "pacotes", image: "parques", enabled: true, order: 6 },
+  ],
+  authority: {
+    kicker: "EXPERIÊNCIA QUE FAZ DIFERENÇA",
+    title: "Cruzeiros orientados por quem realmente conhece essa forma de viajar",
+    paragraphs: [
+      "Juliana é especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em cruzeiros, além de conhecer companhias como MSC, Norwegian e Royal Caribbean.",
+      "Esse repertório ajuda a comparar navios, itinerários, cabines, experiências a bordo e perfis de viagem com muito mais segurança. O objetivo não é apenas encontrar um cruzeiro, mas escolher aquele que realmente combina com você.",
+    ],
+    cta: "Quero planejar meu cruzeiro", service: "cruzeiros", image: "cruzeiro",
+  },
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Uma história construída por paixão, experiência e proximidade",
+    text: "A Destinos com a Ju nasceu em 2013, quando Juliana Neves Sanches transformou sua paixão por viagens em uma agência dedicada a criar experiências personalizadas.\n\nAo longo dos anos, Juliana construiu um repertório especialmente forte em Disney, Universal, viagens internacionais e cruzeiros. É especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em alto-mar, incluindo viagens com MSC, Norwegian e Royal Caribbean.\n\nHoje, a Destinos com a Ju atende diferentes perfis de viajantes, sempre com a mesma essência: ouvir com atenção, planejar cada detalhe e acompanhar o cliente do primeiro contato ao retorno.",
+    image: "europa", badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
+  },
+  differentials: [
+    { title: "Atendimento conduzido de perto", text: "A Juliana participa do planejamento e acompanha pessoalmente cada cliente durante as principais etapas da viagem.", icon: "consultivo" },
+    { title: "Planejamento realmente personalizado", text: "As escolhas consideram quem vai viajar, o perfil dos passageiros, o orçamento, os interesses e o ritmo desejado.", icon: "conferido" },
+    { title: "Experiência nos destinos e produtos vendidos", text: "O conhecimento construído em viagens, parques, resorts e cruzeiros permite apresentar opções com mais clareza e segurança.", icon: "fornecedores" },
+    { title: "Suporte antes, durante e depois", text: "O atendimento continua após a confirmação das reservas, com orientação antes do embarque, acompanhamento durante a viagem e apoio no retorno.", icon: "acompanhamento" },
+  ],
+  conciergePoints: [
+    { key: "ideia", title: "Conte a sua ideia", text: "Envie a solicitação com o destino, período, passageiros e o que você já imagina para a viagem." },
+    { key: "detalhes", title: "Conversamos sobre os detalhes", text: "A Juliana entra em contato para entender o perfil dos viajantes, as prioridades e as expectativas." },
+    { key: "proposta", title: "Receba uma proposta personalizada", text: "Você recebe opções claras, organizadas e explicadas para escolher com segurança." },
+    { key: "acompanhamento", title: "Viaje com acompanhamento", text: "Depois da confirmação, documentos, roteiro e informações ficam organizados na Área do Cliente, com suporte durante toda a jornada." },
+  ],
+  reviewsCopy: {
+    kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju",
+    subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes.",
+  },
+  faq: [
+    { q: "O atendimento da Destinos com a Ju é personalizado?", a: "Sim. Cada solicitação é analisada individualmente. Antes de montar a proposta, buscamos entender o perfil dos viajantes, as prioridades, o orçamento e o tipo de experiência desejada." },
+    { q: "Posso solicitar apenas um serviço?", a: "Sim. Você pode solicitar passagem aérea, hospedagem, aluguel de carro, transfer, ingressos, seguro ou cruzeiro separadamente. Também podemos organizar a viagem completa." },
+    { q: "A agência é especializada em cruzeiros?", a: "Sim. Juliana é especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em cruzeiros, além de conhecer companhias como MSC, Norwegian e Royal Caribbean." },
+    { q: "Vocês organizam viagens para Orlando?", a: "Sim. Planejamos passagens, hospedagem, ingressos, parques, alimentação, deslocamentos e outros detalhes importantes para aproveitar melhor cada dia em Orlando." },
+    { q: "Como funciona o suporte durante a viagem?", a: "A Destinos com a Ju acompanha o cliente antes do embarque e permanece disponível durante a viagem para orientar e ajudar na condução de eventuais imprevistos." },
+    { q: "Onde encontro meus documentos depois da compra?", a: "Orçamento, roteiro, documentos, vouchers e informações ficam organizados na Área do Cliente, acessível pelos links enviados pela agência." },
+    { q: "Solicitar uma proposta tem algum custo?", a: "Não. A solicitação inicial é gratuita e sem compromisso. Depois de entender a viagem, apresentamos as possibilidades e orientamos os próximos passos." },
+  ],
+  footer: {
+    description: "Consultoria completa para viagens personalizadas, com planejamento e acompanhamento antes, durante e depois.",
+    whatsapp: "(11) 95741-4840", phone: "(11) 2959-6402", email: "contato@destinoscomaju.com.br",
+    instagram: "https://instagram.com/destinoscomaju", instagramLabel: "@destinoscomaju",
+    address: "Rua Pontins, 54 — Santana — São Paulo/SP", legalName: "FECAFER Agência de Viagens e Turismo Ltda.", cnpj: "23.593.301/0001-71",
   },
   copy: {
-    avaliacoes: { title: "O que dizem sobre a Ju", subtitle: "Relatos de quem já planejou e viveu experiências inesquecíveis conosco." }
-  }
+    destinations: { title: "Inspirações para a sua próxima viagem", subtitle: "Destinos e experiências que fazem parte do repertório da Destinos com a Ju. Escolha uma inspiração e conte como você imagina a sua viagem." },
+    modules: { title: "Viagens que planejamos com atenção a cada detalhe", subtitle: "A Destinos com a Ju combina consultoria, experiência e acompanhamento para criar viagens que respeitam o perfil de cada cliente." },
+    differentials: { title: "O que você encontra na Destinos com a Ju", subtitle: "Mais do que reservas, você recebe orientação, acompanhamento e a tranquilidade de ter alguém cuidando da sua viagem." },
+    concierge: { kicker: "SUA VIAGEM REALMENTE IMPORTA", title: "Aqui você não é apenas mais um cliente", subtitle: "Um consultor dedicado acompanha a sua viagem do início ao fim. Você recebe orientação para tomar decisões, entende cada escolha e sabe com quem contar caso aconteça algum imprevisto.", cta: "Solicitar atendimento personalizado" },
+    avaliacoes: { kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju", subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes." },
+    faq: { title: "Dúvidas frequentes" },
+    newsletter: { kicker: "INSPIRAÇÕES PARA VIAJAR", title: "Receba ideias para a sua próxima viagem", subtitle: "Deixe o seu contato para receber inspirações de destinos, cruzeiros, resorts e experiências selecionadas pela Destinos com a Ju.", cta: "Quero receber inspirações" },
+  },
 };
 
 /**
