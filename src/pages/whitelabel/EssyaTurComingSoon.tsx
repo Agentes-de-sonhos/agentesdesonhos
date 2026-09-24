@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import logoAsset from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
+import faviconAsset from "@/assets/whitelabel/favicon-essya-tur.png.asset.json";
 import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
+import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 /**
  * Página temporária EXCLUSIVA do domínio essyatur.com.br.
@@ -11,6 +13,10 @@ import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
  * ar, basta trocar a variante em `agencySiteStatus`.
  */
 export default function EssyaTurComingSoon() {
+  // A variante estática pode renderizar sem o cadastro resolvido no gate;
+  // garante o favicon oficial da bússola direto pelo asset do projeto.
+  useAgencyFavicon(faviconAsset.url);
+
   useEffect(() => {
     const previousTitle = document.title;
     document.title = resolveAgencyBrowserTitle(window.location.hostname) ?? "Essya Tur — Site em construção";

@@ -57,6 +57,14 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
     }
   });
 
+  it("usa a bússola oficial como favicon da Essya Tur sem trocar o logotipo do site", () => {
+    for (const hostname of ["essyatur.com.br", "www.essyatur.com.br"]) {
+      const info = { hostname, logo_url: null } as Parameters<typeof resolveAgencyFaviconUrl>[0];
+      expect(resolveAgencyFaviconUrl(info)).toContain("favicon-essya-tur.png");
+    }
+    expect(resolveAgencyLogoOverride("www.essyatur.com.br")).toBeNull();
+  });
+
   it("não altera os demais tenants", () => {
     expect(resolveSiteTheme(LIMITES)).toBe("travelEditorial");
     expect(resolveSiteTheme("paraisoviagens.com")).toBe("luxuryEditorial");
