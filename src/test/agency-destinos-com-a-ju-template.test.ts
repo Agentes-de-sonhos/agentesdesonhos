@@ -4,6 +4,7 @@ import { resolveProfileKey, resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { isUnderConstruction } from "@/lib/agencySiteStatus";
 import { resolveDmc, resolveSections } from "@/lib/agencySiteConfig";
 import { resolveAgencyFaviconUrl, resolveAgencyLogoOverride } from "@/lib/agencySiteBrand";
+import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
 
 const JU_HOSTS = ["destinoscomaju.com.br", "www.destinoscomaju.com.br"];
 const LIMITES = "100limites.tur.br";
@@ -43,7 +44,30 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       expect(profile.faq).toHaveLength(7);
       expect(profile.footer?.cnpj).toBe("23.593.301/0001-71");
       expect(profile.seo?.canonical).toBe("https://www.destinoscomaju.com.br/");
+      expect(profile.heroPresentation).toEqual({
+        kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
+        cta: { label: "Começar a planejar", service: "pacotes" },
+      });
+      expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
     }
+  });
+
+  it("mantém o menu enxuto, Ofertas acessível e Área do Cliente como ação separada", () => {
+    expect(siteNavLinks(JU_HOSTS[0])).toEqual([
+      { label: "Início", to: "/" },
+      { label: "Destinos", to: "/#destinos" },
+      { label: "Experiências", to: "/#campanhas" },
+      { label: "Cruzeiros", to: "/#autoridade" },
+      { label: "Ofertas", to: "/ofertas" },
+      { label: "Sobre", to: "/#sobre" },
+      { label: "Avaliações", to: "/#avaliacoes" },
+    ]);
+  });
+
+  it("resolve o perfil pelo hostname canônico recebido no contexto, sem depender do slug", () => {
+    const info = { hostname: JU_HOSTS[0] };
+    expect(resolveSiteProfile(info.hostname)).toBe(resolveSiteProfile("www.destinoscomaju.com.br"));
+    expect(resolveProfileKey("destinos-com-a-ju")).toBe("classic");
   });
 
   it("não herda referências editoriais de outros tenants", () => {
