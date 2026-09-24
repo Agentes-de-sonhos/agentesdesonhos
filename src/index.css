@@ -508,40 +508,36 @@ img {
 }
 
 /* ===== Acabamento "roseEditorial" (Destinos com a Ju) =========================
-   Camada FINA sobre `.wl-editorial`: mesmo layout e comportamento, identidade
-   derivada do logotipo (magenta/rosé, rosa-claro nas superfícies suaves e
-   bordô/ameixa nos textos de contraste). Nenhum outro tenant é afetado. */
+   Camada FINA sobre `.wl-editorial`: azul-marinho na base, rosé nos detalhes e
+   vinho nas ações. O escopo da classe garante que nenhum outro tenant mude. */
 .wl-editorial.wl-rose {
-  --background: 340 40% 98%;
-  --foreground: 330 34% 16%;
+  --background: 0 0% 100%;
+  --foreground: 216 46% 18%;
 
   --card: 0 0% 100%;
-  --card-foreground: 330 34% 16%;
+  --card-foreground: 216 46% 18%;
   --popover: 0 0% 100%;
-  --popover-foreground: 330 34% 16%;
+  --popover-foreground: 216 46% 18%;
 
-  /* Magenta do logotipo; branco sobre este tom fica acima de 4.5:1. */
-  --primary: 334 62% 38%;
-  --primary-foreground: 340 40% 98%;
+  --primary: 335 58% 34%;
+  --primary-foreground: 0 0% 100%;
 
   --secondary: 340 44% 95%;
-  --secondary-foreground: 330 34% 16%;
-  --muted: 340 40% 96%;
-  --muted-foreground: 330 14% 38%;
+  --secondary-foreground: 216 46% 18%;
+  --muted: 216 24% 96%;
+  --muted-foreground: 216 14% 40%;
   --accent: 340 46% 94%;
-  --accent-foreground: 330 34% 16%;
+  --accent-foreground: 216 46% 18%;
 
-  --border: 336 30% 90%;
-  --input: 336 30% 86%;
-  --ring: 334 62% 38%;
+  --border: 216 18% 88%;
+  --input: 216 18% 84%;
+  --ring: 335 58% 34%;
   --radius: 0.75rem;
 
-  /* Rosa de marca nos detalhes/kickers/ícones e bordô nas faixas escuras. */
-  --wl-red: 334 66% 44%;
-  --wl-navy: 330 40% 18%;
-  --wl-ink: 330 44% 15%;
-  /* Rosa-claro quente nas seções alternadas. */
-  --wl-sand: 340 46% 95%;
+  --wl-red: 337 61% 48%;
+  --wl-navy: 216 52% 20%;
+  --wl-ink: 216 52% 16%;
+  --wl-sand: 340 42% 96%;
 }
 
 /* ===== Acabamento "siteBaseEditorial" (SiteLab Base) =========================

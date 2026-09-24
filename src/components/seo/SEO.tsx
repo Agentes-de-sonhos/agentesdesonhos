@@ -10,6 +10,8 @@ import {
 interface SEOProps {
   /** Page title. If omitted, uses the default site title. */
   title?: string;
+  /** Keeps a supplied title verbatim instead of appending the platform name. */
+  exactTitle?: boolean;
   /** Meta description. Falls back to a generic site description. */
   description?: string;
   /** Canonical path (starting with /) or full URL. Defaults to current pathname. */
@@ -32,6 +34,7 @@ interface SEOProps {
  */
 export function SEO({
   title,
+  exactTitle = false,
   description,
   canonical,
   noindex = false,
@@ -41,7 +44,9 @@ export function SEO({
 }: SEOProps) {
   const location = useLocation();
   const pathname = location?.pathname ?? "/";
-  const finalTitle = title
+  const finalTitle = title && exactTitle
+    ? title
+    : title
     ? title.includes(SITE_NAME)
       ? title
       : `${title} | ${SITE_NAME}`

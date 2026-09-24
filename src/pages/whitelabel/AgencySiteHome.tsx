@@ -37,6 +37,7 @@ import {
 } from "@/components/whitelabel/SiteLabCatalogChrome";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
+import { SEO } from "@/components/seo/SEO";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
 import heroFae from "@/assets/whitelabel/hero-fae.jpg";
@@ -81,6 +82,7 @@ const HERO_IMAGES: Record<string, string> = {
   praia: heroPraia,
   luxo: heroLuxo,
   fae: heroFae,
+  europa: destinoEuropa,
 };
 
 /** Kept exported: other white-label surfaces import this service list. */
@@ -384,6 +386,33 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
                   {s.text}
                 </p>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      case "authority": {
+        const authority = profile.authority;
+        if (!authority) return null;
+        return (
+          <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
+            <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
+              <img
+                src={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
+                alt="Cruzeiro em alto-mar"
+                loading="lazy"
+                className="aspect-[4/3] w-full rounded-xl object-cover"
+              />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.kicker}</p>
+                <h2 className="mt-4 text-3xl font-extrabold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
+                <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-background/80 md:text-base">
+                  {authority.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                </div>
+                <Button size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openRequest(authority.service)}>
+                  {authority.cta} <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
               </div>
             </div>
           </section>
@@ -1005,6 +1034,20 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
       }
 
+      case "avaliacoes":
+        if (!googleReviews) return null;
+        {
+          const copy = copyFor("avaliacoes");
+          return (
+            <AgencyGoogleReviewsSection
+              key={key}
+              hostname={hostname}
+              container={container}
+              copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
+            />
+          );
+        }
+
       case "faq":
         {
         const copy = copyFor("faq");
@@ -1092,7 +1135,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
-                        {copy.title ?? "Receba novidades e oportunidades"}
+                        title ?? "Receba novidades e oportunidades"
                       </h2>
                       <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/80 md:text-base">
                         {copy.subtitle ??
@@ -1124,7 +1167,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 </span>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">
-                    {copy.title ?? "Receba novidades e oportunidades"}
+                    title ?? "Receba novidades e oportunidades"
                   </h2>
                   <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
                     {copy.subtitle ??
@@ -1151,6 +1194,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   return (
     <>
+      {profile.seo && (
+        <SEO
+          title={profile.seo.title}
+          exactTitle
+          description={profile.seo.description}
+          canonical={profile.seo.canonical ?? "/"}
+        />
+      )}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
         id="topo"
@@ -1197,7 +1248,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-              {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
+              {profile.key === "editorialRose" ? "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO" : location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
             </p>
           ) : (
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
@@ -1223,6 +1274,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           >
             {current.subtitle}
           </p>
+          {profile.key === "editorialRose" && (
+            <Button
+              size="lg"
+              className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => openRequest("pacotes")}
+            >
+              Começar a planejar <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
 
           {slides.length > 1 && (
             <div className={`flex items-center gap-3 ${editorial ? "mt-6" : "mt-8"}`}>
@@ -1288,6 +1348,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 onServiceChange={setService}
                 open={requestOpen}
                 onOpenChange={setRequestOpen}
+                copy={profile.requestCenter}
               />
             </div>
           </div>
@@ -1301,6 +1362,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             onServiceChange={setService}
             open={requestOpen}
             onOpenChange={setRequestOpen}
+            copy={profile.requestCenter}
           />
         </div>
       )}
@@ -1320,15 +1382,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         ) : (
           node
         );
-        // Avaliações do Google (ativação por hostname) imediatamente antes da FAQ.
-        if (section.key === "faq" && googleReviews && index !== 0) {
-          return (
-            <div key={`${section.key}-with-reviews`}>
-              <AgencyGoogleReviewsSection hostname={hostname} container={container} />
-              {tagged}
-            </div>
-          );
-        }
         if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).

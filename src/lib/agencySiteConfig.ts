@@ -11,6 +11,7 @@ export type AgencySectionKey =
   | "highlights"
   | "dmc"
   | "signature"
+  | "authority"
   | "destinations"
   | "modules"
   | "offers"
@@ -21,7 +22,8 @@ export type AgencySectionKey =
   | "team"
   | "testimonials"
   | "faq"
-  | "newsletter";
+  | "newsletter"
+  | "avaliacoes";
 
 export interface AgencySectionConfig {
   key: AgencySectionKey;
@@ -36,6 +38,7 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "dmc", label: "Seção B2B / DMC", enabled: false, order: 0 },
   // Assinatura editorial de posicionamento (curta) — genérica, off por padrão.
   { key: "signature", label: "Assinatura editorial", enabled: false, order: 0.5 },
+  { key: "authority", label: "Autoridade editorial", enabled: false, order: 4.5 },
   { key: "offers", label: "Ofertas em destaque", enabled: true, order: 1 },
   { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
   { key: "highlights", label: "Destaques", enabled: true, order: 3 },
@@ -48,6 +51,7 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "team", label: "Equipe e consultores", enabled: false, order: 8 },
   { key: "testimonials", label: "Depoimentos", enabled: false, order: 9 },
   { key: "faq", label: "Perguntas frequentes", enabled: true, order: 10 },
+  { key: "avaliacoes", label: "Avaliações do Google", enabled: false, order: 10.5 },
   { key: "newsletter", label: "Newsletter", enabled: true, order: 11 },
 ];
 

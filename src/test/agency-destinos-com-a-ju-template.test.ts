@@ -8,7 +8,7 @@ import { resolveAgencyFaviconUrl, resolveAgencyLogoOverride } from "@/lib/agency
 const JU_HOSTS = ["destinoscomaju.com.br", "www.destinoscomaju.com.br"];
 const LIMITES = "100limites.tur.br";
 
-describe("Destinos com a Ju — template estrutural da 100 Limites com identidade rosé", () => {
+describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
   it("está no ar com o site completo, mantendo o template configurado", () => {
     for (const host of JU_HOSTS) expect(isUnderConstruction(host)).toBe(false);
   });
@@ -23,11 +23,35 @@ describe("Destinos com a Ju — template estrutural da 100 Limites com identidad
     expect(siteThemeRootClass(LIMITES)).toBe("wl-editorial");
   });
 
-  it("replica a mesma estrutura/ordem de seções da 100 Limites", () => {
-    const ju = resolveSections(resolveSiteProfile(JU_HOSTS[0]).sections).map((s) => s.key);
+  it("usa a ordem editorial própria sem alterar o perfil da 100 Limites", () => {
+    const profile = resolveSiteProfile(JU_HOSTS[0]);
+    const ju = resolveSections(profile.sections).map((s) => s.key);
     const limites = resolveSections(resolveSiteProfile(LIMITES).sections).map((s) => s.key);
-    expect(ju).toEqual(limites);
+    expect(ju).toEqual(["signature", "destinations", "modules", "authority", "about", "differentials", "concierge", "avaliacoes", "faq", "newsletter", "offers"]);
+    expect(limites).not.toContain("authority");
     expect(resolveProfileKey(JU_HOSTS[0])).toBe("editorialRose");
+  });
+
+  it("entrega conteúdo aprovado, cinco destinos e seis especialidades", () => {
+    for (const host of JU_HOSTS) {
+      const profile = resolveSiteProfile(host);
+      expect(profile.hero?.[0].title).toBe("Sua viagem importa. Cada detalhe também.");
+      expect(profile.destinations).toHaveLength(5);
+      expect(profile.modules).toHaveLength(6);
+      expect(profile.authority?.title).toContain("Cruzeiros");
+      expect(profile.about?.text).toContain("Juliana Neves Sanches");
+      expect(profile.faq).toHaveLength(7);
+      expect(profile.footer?.cnpj).toBe("23.593.301/0001-71");
+      expect(profile.seo?.canonical).toBe("https://www.destinoscomaju.com.br/");
+    }
+  });
+
+  it("não herda referências editoriais de outros tenants", () => {
+    const serialized = JSON.stringify(resolveSiteProfile(JU_HOSTS[0]));
+    expect(serialized).not.toContain("Comandatuba");
+    expect(serialized).not.toContain("Lua de mel");
+    expect(serialized).not.toContain("Paraíso");
+    expect(serialized).not.toContain("100 Limites");
   });
 
   it("não herda conteúdo exclusivo (DMC) da 100 Limites", () => {

@@ -40,6 +40,12 @@ export interface AgencyQuickQuoteProps {
   /** Opens the full Central de Solicitações immediately (external CTA). */
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  copy?: {
+    title?: string;
+    support?: string;
+    notice?: string;
+    submitLabel?: string;
+  };
 }
 
 /**
@@ -56,6 +62,7 @@ export function AgencyQuickQuote({
   onServiceChange,
   open,
   onOpenChange,
+  copy,
 }: AgencyQuickQuoteProps) {
   const service = useMemo(() => serviceByKey(activeKey), [activeKey]);
   const editorial = isEditorialTheme(hostname);
@@ -237,6 +244,12 @@ export function AgencyQuickQuote({
             : "rounded-[18px] border border-border/60 bg-card/95 p-4 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-card/90 md:p-6"
         }
       >
+        {(copy?.title || copy?.support) && (
+          <div className="mb-5 border-b border-border/70 pb-5">
+            {copy.title && <h2 className="text-xl font-bold text-foreground md:text-2xl">{copy.title}</h2>}
+            {copy.support && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">{copy.support}</p>}
+          </div>
+        )}
         <div className={editorial ? "relative flex items-start gap-1" : undefined}>
           {editorial && railOverflow && (
             <button
@@ -333,12 +346,12 @@ export function AgencyQuickQuote({
             className={cn(
               "w-full min-w-0 whitespace-nowrap px-4",
               editorial
-                ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[15px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
+                ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[13px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
                 : "mt-1.5 h-11 rounded-xl md:mt-0",
             )}
             onClick={startJourney}
           >
-            Solicitar <ArrowRight className="ml-2 h-4 w-4 shrink-0" />
+            {copy?.submitLabel ?? "Solicitar"} <ArrowRight className="ml-2 h-4 w-4 shrink-0" />
           </Button>
         </div>
 
@@ -353,8 +366,8 @@ export function AgencyQuickQuote({
           />
         )}
 
-        <p className={editorial ? "mt-4 text-[13px] text-muted-foreground" : "mt-3 text-xs text-muted-foreground"}>
-          Não é uma busca automática: cada pedido é analisado por um consultor da equipe.
+        <p className={editorial ? "mt-4 text-[13px] leading-relaxed text-muted-foreground" : "mt-3 text-xs text-muted-foreground"}>
+          {copy?.notice ?? "Não é uma busca automática: cada pedido é analisado por um consultor da equipe."}
         </p>
       </div>
 
