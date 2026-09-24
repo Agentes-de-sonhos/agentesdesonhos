@@ -1134,7 +1134,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                       <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
-                        {copy.title ?? "Receba novidades e oportunidades"}
+                        title ?? "Receba novidades e oportunidades"
                       </h2>
                       <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/80 md:text-base">
                         {copy.subtitle ??
@@ -1166,7 +1166,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 </span>
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">
-                    {copy.title ?? "Receba novidades e oportunidades"}
+                    title ?? "Receba novidades e oportunidades"
                   </h2>
                   <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
                     {copy.subtitle ??
