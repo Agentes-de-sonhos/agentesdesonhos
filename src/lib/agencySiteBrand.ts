@@ -35,6 +35,7 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "faeviagens.com.br",
   "www.faeviagens.com.br",
   "casanovatur.demo.local",
+  "essyatur.com.br",
   "www.essyatur.com.br",
 ]);
 

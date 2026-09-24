@@ -1,10 +1,12 @@
 ---
-name: Essya Tur construction page
-description: essyatur.com.br serves static "under construction" variant essyaTur (no agency profile yet); Lab Base site deferred until briefing
+name: Essya Tur white-label site
+description: essyatur.com.br (raiz) é a URL principal do site Essyatur; www redireciona; perfil essyaCurated / tema essyaEditorial
 type: feature
 ---
-- Domain essyatur.com.br / www.essyatur.com.br: `under_construction`, variant `"essyaTur"` in STATUS_BY_HOST (agencySiteStatus.ts).
-- Agency has NO profile on the platform (agency_public_domains empty for the hostname) → static page `EssyaTurComingSoon.tsx`, rendered by AgencyDomainGate before any DB fetch, only on "/".
-- Logo: user-uploaded webp stored as asset pointer `src/assets/whitelabel/logo-essya-tur.png.asset.json`.
-- Plan: user will provide the agency briefing later, then request the SiteLab Base build (like other white-label agencies).
-- seatour.com.br was the user's typo in the first message; the real domain is essyatur.com.br.
+- URL principal do tenant: **https://essyatur.com.br** (raiz). `canonicalRedirectHost("www.essyatur.com.br")` → "essyatur.com.br" (agencySiteContacts.ts).
+- `agency_public_domains`: hostnames essyatur.com.br (is_primary=true) e www.essyatur.com.br (is_primary=false), user_id 4d5a7157-59b6-4329-8768-7f8895e8ce92, slug essyatur, admin_portal_enabled=true.
+- No Lovable Domains, essyatur.com.br é o primary conectado; www não está mais listado como domínio web do projeto.
+- Site Lab Base no ar (não mais "em construção"): perfil `essyaCurated`, tema `essyaEditorial` (raiz `wl-essya`), ambos resolvidos para os DOIS hostnames (raiz e www) em agencySiteProfile.ts / agencySiteTheme.ts / agencySiteContacts.ts / agencySiteBrand.ts.
+- Contatos: WhatsApp (11) 96494-2210, contato@essyatur.com.br, @essyatur. Telefone do perfil (11) 96219-3690 inalterado.
+- Teste focado: src/test/essya-tur-coming-soon.test.tsx (5 testes).
+- DNS: zona essyatur.com.br usa nameservers da Locaweb (ns1–ns3.locaweb.com.br); o check de status reportou nameservers instáveis — se o site não abrir, revisar DNS na Locaweb.
