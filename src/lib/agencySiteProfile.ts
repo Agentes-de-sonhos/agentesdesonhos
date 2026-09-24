@@ -29,6 +29,8 @@ export type AgencySiteProfileKey =
   | "faeCurated"
   /** Casa Nova Tur — viagens planejadas com acompanhamento (Novo Hamburgo/RS). */
   | "casaNovaCurated"
+  /** Essyatur — atendimento próximo, famílias/parques, luxo (São Paulo/SP). */
+  | "essyaCurated"
   /** Laboratório visual neutro (SiteLab Base): estrutura editorial, conteúdo demo. */
   | "siteLabBase";
 
@@ -56,6 +58,8 @@ export interface AgencySectionCopy {
 
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
+  /** Menu próprio do perfil (substitui o menu padrão quando definido). */
+  nav?: { label: string; to: string }[];
   /**
    * Perfil DEMONSTRATIVO (laboratório): libera conteúdo de exemplo em seções
    * normalmente condicionadas a dados reais e ativa a chrome do catálogo.
@@ -740,6 +744,128 @@ const SITE_LAB_BASE: AgencySiteProfile = {
   },
 };
 
+/**
+ * Essyatur — conteúdo do briefing oficial. Sem prêmios, números, depoimentos
+ * ou certificações: somente o que a agência informou.
+ */
+const ESSYA_CURATED: AgencySiteProfile = {
+  key: "essyaCurated",
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Sobre a Essyatur", to: "/#sobre" },
+    { label: "Experiências", to: "/#destinos" },
+    { label: "Serviços", to: "/#campanhas" },
+    { label: "Inspirações", to: "/#destaques" },
+    { label: "Dúvidas Frequentes", to: "/#faq" },
+    { label: "Contato", to: "/#atendimento" },
+    { label: "Área do Cliente", to: "/area-do-cliente" },
+  ],
+  sections: {
+    dmc: { enabled: false },
+    testimonials: { enabled: false },
+    team: { enabled: false },
+    credentials: { enabled: false },
+    offers: { enabled: false },
+    newsletter: { enabled: false },
+    signature: { enabled: true, order: 1 },
+    about: { order: 2 },
+    differentials: { order: 3 },
+    destinations: { order: 4 },
+    modules: { order: 5 },
+    highlights: { order: 6 },
+    concierge: { order: 7 },
+    faq: { order: 8 },
+  },
+  heroImage: "praia",
+  hero: [
+    {
+      title: "Viaje com segurança e um roteiro feito para você",
+      subtitle:
+        "Atendimento próximo e personalizado, com suporte antes, durante e depois da viagem.",
+      order: 1,
+      enabled: true,
+    },
+    {
+      title: "Orlando, cruzeiros e experiências para toda a família",
+      subtitle:
+        "Planejamento cuidadoso para famílias com crianças, famílias multigeracionais e casais.",
+      order: 2,
+      enabled: true,
+    },
+    {
+      title: "Viagens sob medida, do primeiro contato ao retorno",
+      subtitle:
+        "Você fala direto com quem planeja a sua viagem, pelo WhatsApp.",
+      order: 3,
+      enabled: true,
+    },
+  ],
+  signature: {
+    kicker: "ESSYATUR",
+    title: "Atendimento próximo para viagens realmente personalizadas.",
+    text:
+      "Cada viagem começa por uma conversa: quem viaja, o que desejam viver e o equilíbrio certo entre qualidade e investimento. A partir daí, a Essyatur desenha o roteiro e acompanha cada etapa.",
+  },
+  about: {
+    kicker: "SOBRE A ESSYATUR",
+    title: "Cristiane Serro Azul e um atendimento feito por especialistas.",
+    text:
+      "À frente da Essyatur, Cristiane Serro Azul, sócia administradora, atende pessoalmente os clientes, com os sócios, desde 2020. A vivência frequente nos destinos vendidos e as capacitações especializadas orientam cada indicação. Em qualquer imprevisto, o responsável acompanha o caso até a solução.",
+    image: "resort",
+    badge: { value: "Desde 2020", label: "Atendimento direto pela proprietária e sócios." },
+  },
+  differentials: [
+    { title: "Atendimento por especialista", text: "Você fala direto com quem planeja a sua viagem, sem intermediários.", icon: "consultivo" },
+    { title: "Roteiros realmente personalizados", text: "Cada roteiro nasce do perfil de quem viaja, nunca de um pacote pronto.", icon: "fornecedores" },
+    { title: "Curadoria criteriosa", text: "Hotéis, serviços e experiências escolhidos com critério e vivência nos destinos.", icon: "conferido" },
+    { title: "Suporte durante toda a viagem", text: "Antes, durante e depois: imprevistos acompanhados até a solução.", icon: "acompanhamento" },
+  ],
+  destinations: [
+    { key: "familias-criancas", image: "parques", label: "Famílias", title: "Famílias com crianças", text: "Parques, hotéis e ritmo de viagem pensados para os pequenos.", service: "pacotes", enabled: true, order: 1 },
+    { key: "multigeracionais", image: "resort", label: "Famílias", title: "Famílias multigeracionais", text: "Roteiros confortáveis que funcionam para avós, pais e netos juntos.", service: "pacotes", enabled: true, order: 2 },
+    { key: "casais", image: "luademel", label: "Casais", title: "Casais", text: "Viagens a dois, com experiências escolhidas para o momento do casal.", service: "pacotes", enabled: true, order: 3 },
+    { key: "luxo-exclusivas", image: "villa", label: "Luxo", title: "Luxo e experiências exclusivas", text: "Hotéis e experiências selecionados para uma viagem memorável.", service: "hospedagem", enabled: true, order: 4 },
+  ],
+  modules: [
+    { key: "orlando", title: "Orlando", text: "Parques, ingressos, hotéis e deslocamentos organizados para a família.", service: "ingressos", image: "parques", enabled: true, order: 1 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Navios, itinerários e cabines comparados com clareza.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 2 },
+    { key: "europa", title: "Europa", text: "Cidades, campo e experiências combinadas no seu ritmo.", service: "pacotes", image: "europa", enabled: true, order: 3 },
+    { key: "america-do-sul", title: "América do Sul", text: "Roteiros próximos, com natureza, cultura e gastronomia.", service: "pacotes", image: "douro", enabled: true, order: 4 },
+    { key: "caribe-mexico", title: "Caribe e México", text: "Praias e resorts escolhidos para cada perfil de viajante.", service: "hospedagem", image: "litoral", enabled: true, order: 5 },
+    { key: "brasil-eua-canada", title: "Brasil, Estados Unidos e Canadá", text: "Destinos nacionais e na América do Norte planejados sob medida.", service: "pacotes", image: "brasil", enabled: true, order: 6 },
+  ],
+  highlights: [
+    { title: "Orlando e famílias", text: "Planejamento completo de parques e hospedagem para aproveitar cada dia com as crianças.", service: "ingressos", cta: "Planejar Orlando" },
+    { title: "Cruzeiros", text: "Escolha do navio, do roteiro e da cabine com orientação de especialista.", service: "cruzeiros", cta: "Falar sobre cruzeiros" },
+    { title: "Sob medida e experiências exclusivas", text: "Roteiros personalizados com hotéis e experiências de alto padrão.", service: "pacotes", cta: "Solicitar proposta" },
+  ],
+  conciergePoints: [
+    { key: "conversa", title: "1. Conversa inicial", text: "Pelo WhatsApp ou pelo formulário, entendemos quem viaja e o que desejam." },
+    { key: "proposta", title: "2. Proposta personalizada", text: "Apresentamos opções equilibrando qualidade e investimento." },
+    { key: "suporte", title: "3. Suporte antes, durante e depois", text: "Acompanhamos a viagem inteira e cuidamos de qualquer imprevisto até a solução." },
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "O atendimento é feito diretamente pela proprietária e sócios, pelo WhatsApp. Entendemos o seu perfil, apresentamos uma proposta personalizada e acompanhamos toda a viagem." },
+    { q: "Vocês planejam viagens para famílias com crianças?", a: "Sim. Famílias com crianças e famílias multigeracionais estão entre as especialidades da Essyatur, incluindo Orlando e parques." },
+    { q: "E se acontecer um imprevisto durante a viagem?", a: "O responsável pela sua viagem acompanha o caso até a solução. O suporte vale antes, durante e depois da viagem." },
+    { q: "Quais destinos vocês atendem?", a: "Orlando, cruzeiros, Europa, América do Sul, Caribe e México, além de Brasil, Estados Unidos e Canadá." },
+    { q: "Como começo a planejar?", a: "Envie uma solicitação pelo formulário do site ou fale pelo WhatsApp contando a ideia inicial da viagem." },
+  ],
+  copy: {
+    destinations: { title: "Experiências por perfil", subtitle: "Viagens pensadas para quem viaja com você." },
+    modules: { title: "Destinos e serviços", subtitle: "Os destinos e produtos em que a Essyatur é especialista." },
+    highlights: { title: "Inspirações", subtitle: "Orlando, cruzeiros e viagens sob medida." },
+    differentials: { title: "Por que viajar com a Essyatur", subtitle: "Segurança e suporte em cada etapa." },
+    concierge: {
+      kicker: "COMO FUNCIONA",
+      title: "Suporte antes, durante e depois da viagem",
+      subtitle: "Um atendimento próximo, do primeiro contato ao retorno.",
+      cta: "Solicitar minha viagem",
+    },
+    faq: { title: "Dúvidas frequentes" },
+  },
+};
+
 const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
 
   "100limites.tur.br": "editorialDmc",
@@ -754,6 +880,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "sitelab.local": "siteLabBase",
   /** Host técnico de prévia da Casa Nova Tur (o domínio real não é vinculado). */
   "casanovatur.demo.local": "casaNovaCurated",
+  "www.essyatur.com.br": "essyaCurated",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -763,6 +890,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   editorialRose: EDITORIAL_ROSE,
   faeCurated: FAE_CURATED,
   casaNovaCurated: CASA_NOVA_CURATED,
+  essyaCurated: ESSYA_CURATED,
   siteLabBase: SITE_LAB_BASE,
 };
 

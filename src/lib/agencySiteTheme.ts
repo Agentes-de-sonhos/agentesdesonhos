@@ -21,7 +21,9 @@ export type AgencySiteThemeKey =
   /** Mesmo layout editorial, acabamento base NEUTRO (SiteLab Base). */
   | "siteBaseEditorial"
   /** Mesmo layout editorial, identidade verde floresta + mint (Casa Nova Tur). */
-  | "casaNovaEditorial";
+  | "casaNovaEditorial"
+  /** Mesmo layout editorial, identidade azul #164F76 + amarelo #FDC700 (Essyatur). */
+  | "essyaEditorial";
 
 const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "100limites.tur.br": "travelEditorial",
@@ -34,6 +36,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "www.faeviagens.com.br": "faeEditorial",
   "sitelab.local": "siteBaseEditorial",
   "casanovatur.demo.local": "casaNovaEditorial",
+  "www.essyatur.com.br": "essyaEditorial",
 };
 
 function normalizeHost(hostname?: string | null): string {
@@ -56,7 +59,8 @@ export function isEditorialTheme(hostname?: string | null): boolean {
     theme === "roseEditorial" ||
     theme === "faeEditorial" ||
     theme === "siteBaseEditorial" ||
-    theme === "casaNovaEditorial"
+    theme === "casaNovaEditorial" ||
+    theme === "essyaEditorial"
   );
 }
 
@@ -72,6 +76,7 @@ export const ROSE_ROOT_CLASS = "wl-rose";
 export const FAE_ROOT_CLASS = "wl-fae";
 export const SITE_BASE_ROOT_CLASS = "wl-site-base";
 export const CASA_NOVA_ROOT_CLASS = "wl-casanova";
+export const ESSYA_ROOT_CLASS = "wl-essya";
 
 /** Classe(s) raiz do tema resolvido — única fonte de verdade para o layout. */
 export function siteThemeRootClass(hostname?: string | null): string {
@@ -81,6 +86,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
   if (theme === "faeEditorial") return `${EDITORIAL_ROOT_CLASS} ${FAE_ROOT_CLASS}`;
   if (theme === "siteBaseEditorial") return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}`;
   if (theme === "casaNovaEditorial") return `${EDITORIAL_ROOT_CLASS} ${CASA_NOVA_ROOT_CLASS}`;
+  if (theme === "essyaEditorial") return `${EDITORIAL_ROOT_CLASS} ${ESSYA_ROOT_CLASS}`;
   if (theme === "travelEditorial") return EDITORIAL_ROOT_CLASS;
   return "";
 }

@@ -35,6 +35,7 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "faeviagens.com.br",
   "www.faeviagens.com.br",
   "casanovatur.demo.local",
+  "www.essyatur.com.br",
 ]);
 
 export function normalizeBrandHost(hostname?: string | null): string {
