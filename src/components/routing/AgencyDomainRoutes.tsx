@@ -160,6 +160,8 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               element={
                 resolveConstructionVariant(info.hostname) === "destinosComAJu" ? (
                   <DestinosComAJuComingSoon />
+                ) : resolveConstructionVariant(info.hostname) === "essyaTur" ? (
+                  <EssyaTurComingSoon />
                 ) : (
                   <AgencyUnderConstruction info={info} />
                 )
