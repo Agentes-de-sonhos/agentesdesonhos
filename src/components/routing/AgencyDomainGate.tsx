@@ -11,10 +11,12 @@ import {
   isSharedAgencySiteHost,
   parseAgencySlugLocation,
 } from "@/lib/agencySlugRouting";
+import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 
 import { useNoindex } from "@/hooks/useNoindex";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
+const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -75,6 +77,22 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     retry: 1,
     queryFn: () => fetchAgencyBySlug(slug as string),
   });
+
+  /**
+   * Variante estática de "site em construção" (Essya Tur): não depende de
+   * cadastro da agência no banco, então renderiza direto para o hostname —
+   * apenas na home ("/"), preservando o princípio do status por domínio.
+   */
+  if (host && resolveConstructionVariant(host) === "essyaTur") {
+    const path = typeof window === "undefined" ? "/" : window.location.pathname;
+    if (path === "/" || path === "") {
+      return (
+        <Suspense fallback={<Spinner />}>
+          <EssyaTurComingSoon />
+        </Suspense>
+      );
+    }
+  }
 
   if (shared) {
     /**

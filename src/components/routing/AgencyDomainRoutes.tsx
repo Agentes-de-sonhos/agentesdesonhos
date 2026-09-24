@@ -12,6 +12,7 @@ import { useNoindex } from "@/hooks/useNoindex";
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
 const DestinosComAJuComingSoon = lazy(() => import("@/pages/whitelabel/DestinosComAJuComingSoon"));
+const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
 const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGate"));
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
 const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
@@ -159,6 +160,8 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               element={
                 resolveConstructionVariant(info.hostname) === "destinosComAJu" ? (
                   <DestinosComAJuComingSoon />
+                ) : resolveConstructionVariant(info.hostname) === "essyaTur" ? (
+                  <EssyaTurComingSoon />
                 ) : (
                   <AgencyUnderConstruction info={info} />
                 )
