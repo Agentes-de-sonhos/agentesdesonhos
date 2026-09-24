@@ -10,10 +10,13 @@ import {
 import { formatCnpj } from "@/lib/agencyDomains";
 
 const CONSTRUCTION_HOSTS = [
-  "100limites.tur.br",
-  "www.100limites.tur.br",
-  "paraisoviagens.com",
-  "www.paraisoviagens.com",
+  "faeviagens.com.br",
+  "www.faeviagens.com.br",
+];
+const LIVE_HOSTS = [
+  "100limites.tur.br", "www.100limites.tur.br",
+  "paraisoviagens.com", "www.paraisoviagens.com",
+  "destinoscomaju.com.br", "www.destinoscomaju.com.br",
 ];
 
 describe("agency site status", () => {
@@ -23,7 +26,7 @@ describe("agency site status", () => {
     expect(normalizeStatusHost(null)).toBe("");
   });
 
-  it("marca os quatro hostnames como under_construction", () => {
+  it("marca os hosts configurados como under_construction", () => {
     for (const host of CONSTRUCTION_HOSTS) {
       expect(resolveSiteStatus(host), host).toBe("under_construction");
       expect(isUnderConstruction(host.toUpperCase()), host).toBe(true);
@@ -31,14 +34,15 @@ describe("agency site status", () => {
   });
 
   it("mantém qualquer host não configurado como live", () => {
-    for (const host of ["outraagencia.com.br", "www.outraagencia.com.br", "", null]) {
+    for (const host of [...LIVE_HOSTS, "outraagencia.com.br", "www.outraagencia.com.br", "", null]) {
       expect(resolveSiteStatus(host as string | null)).toBe("live");
       expect(isUnderConstruction(host as string | null)).toBe(false);
     }
   });
 
   it("decide a superfície da rota / por hostname", () => {
-    expect(resolveHomeSurface("paraisoviagens.com")).toBe("under_construction");
+    expect(resolveHomeSurface("faeviagens.com.br")).toBe("under_construction");
+    expect(resolveHomeSurface("paraisoviagens.com")).toBe("site_home");
     expect(resolveHomeSurface("outraagencia.com.br")).toBe("site_home");
   });
 
@@ -78,17 +82,9 @@ describe("formatCnpj", () => {
 });
 
 describe("variante da página temporária", () => {
-  it("Destinos com a Ju volta ao modo em construção com variante exclusiva", () => {
-    expect(isUnderConstruction("destinoscomaju.com.br")).toBe(true);
-    expect(isUnderConstruction(" WWW.DestinosComAJu.com.br ")).toBe(true);
-    expect(resolveConstructionVariant("destinoscomaju.com.br")).toBe("destinosComAJu");
-    expect(resolveConstructionVariant("www.destinoscomaju.com.br")).toBe("destinosComAJu");
-  });
-
-  it("mantém a variante default nos demais domínios", () => {
-    for (const host of [...CONSTRUCTION_HOSTS, "outraagencia.com.br", "", null]) {
+  it("usa a variante default após os três sites entrarem no ar", () => {
+    for (const host of [...CONSTRUCTION_HOSTS, ...LIVE_HOSTS, "", null]) {
       expect(resolveConstructionVariant(host as string | null), String(host)).toBe("default");
     }
   });
 });
-
