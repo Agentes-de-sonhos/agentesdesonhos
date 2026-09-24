@@ -107,7 +107,7 @@ export interface AgencySiteProfile {
   faq?: { q: string; a: string }[];
   signature?: AgencySignatureContent;
   authority?: AgencyAuthorityContent;
-  seo?: { title: string; description: string };
+  seo?: { title: string; description: string; canonical?: string };
   reviewsCopy?: { kicker: string; title: string; subtitle: string };
   footer?: AgencyFooterContent;
   credentials?: AgencyCredentialsContent;
@@ -315,6 +315,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   seo: {
     title: "Destinos com a Ju | Viagens Personalizadas, Orlando, Europa e Cruzeiros",
     description: "Consultoria completa para viagens personalizadas, Orlando, Europa, cruzeiros, Caribe e resorts, com suporte antes, durante e depois.",
+    canonical: "https://www.destinoscomaju.com.br/",
   },
   heroImage: "europa",
   hero: [

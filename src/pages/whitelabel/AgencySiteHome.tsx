@@ -1194,7 +1194,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   return (
     <>
-      {profile.seo && <SEO title={profile.seo.title} description={profile.seo.description} canonical="/" />}
+      {profile.seo && (
+        <SEO
+          title={profile.seo.title}
+          exactTitle
+          description={profile.seo.description}
+          canonical={profile.seo.canonical ?? "/"}
+        />
+      )}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
       <section
         id="topo"
@@ -1267,6 +1274,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           >
             {current.subtitle}
           </p>
+          {profile.key === "editorialRose" && (
+            <Button
+              size="lg"
+              className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
+              onClick={() => openRequest("pacotes")}
+            >
+              Começar a planejar <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
 
           {slides.length > 1 && (
             <div className={`flex items-center gap-3 ${editorial ? "mt-6" : "mt-8"}`}>

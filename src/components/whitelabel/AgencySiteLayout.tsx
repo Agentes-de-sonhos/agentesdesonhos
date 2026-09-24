@@ -228,6 +228,9 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const logoUrl = resolveAgencyLogoUrl(info);
   /* Canais extras declarativos (e-mail público / Instagram) — vazio por padrão. */
   const contacts = resolveSiteContacts(info.hostname);
+  const profile = resolveSiteProfile(info.hostname);
+  const footer = profile.footer;
+  const footerWhatsapp = footer?.whatsapp?.replace(/\D/g, "") || wa;
   const navAll = siteNavLinks(info.hostname);
 
   if (luxury) {
@@ -360,11 +363,11 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
               </p>
             )}
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
-              Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
+              {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
             </p>
-            {location && (
+            {(footer?.address || location) && (
               <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)_/_0.75)]">
-                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {location}
+                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {footer?.address ?? location}
               </p>
             )}
           </div>
@@ -388,44 +391,44 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-ink)_/_0.7)]">Atendimento</p>
             <ul className="mt-5 space-y-3">
-              {wa ? (
+              {footerWhatsapp ? (
                 <li>
                   <a
-                    href={`https://wa.me/${wa}`}
+                    href={`https://wa.me/${footerWhatsapp.startsWith("55") ? footerWhatsapp : `55${footerWhatsapp}`}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
-                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> Falar no WhatsApp
+                    <MessageCircle className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {footer?.whatsapp ? `WhatsApp ${footer.whatsapp}` : "Falar no WhatsApp"}
                   </a>
                 </li>
               ) : null}
-              {info.phone ? (
+              {(footer?.phone || info.phone) ? (
                 <li className="flex items-center gap-2 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">
-                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {info.phone}
+                  <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {footer?.phone ?? info.phone}
                 </li>
               ) : null}
-              {contacts.email ? (
+              {(footer?.email || contacts.email) ? (
                 <li>
                   <a
-                    href={`mailto:${contacts.email}`}
+                    href={`mailto:${footer?.email ?? contacts.email}`}
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     <Mail className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" />
-                    <span className="break-all">{contacts.email}</span>
+                    <span className="break-all">{footer?.email ?? contacts.email}</span>
                   </a>
                 </li>
               ) : null}
-              {contacts.instagram ? (
+              {(footer?.instagram || contacts.instagram) ? (
                 <li>
                   <a
-                    href={contacts.instagram}
+                    href={footer?.instagram ?? contacts.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     <Instagram className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" />
-                    {contacts.instagramLabel ?? "Instagram"}
+                    {footer?.instagramLabel ?? contacts.instagramLabel ?? "Instagram"}
                   </a>
                 </li>
               ) : null}
@@ -443,6 +446,8 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-ink)_/_0.7)]">Legal</p>
             <ul className="mt-5 space-y-3">
+              {footer?.legalName && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">{footer.legalName}</li>}
+              {footer?.cnpj && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">CNPJ {footer.cnpj}</li>}
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
