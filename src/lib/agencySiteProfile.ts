@@ -89,6 +89,21 @@ export interface AgencySiteProfile {
   /** Títulos/subtítulos por seção (fallback: textos padrão da engine). */
   copy?: Partial<Record<AgencySectionKey, AgencySectionCopy>>;
   /** Conteúdo institucional da seção "about" quando o perfil define a redação. */
+  /** Configuração do mapa de localização (seção "map"). */
+  map?: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    name?: string;
+    placeId?: string;
+    title?: string;
+    subtitle?: string;
+  };
+  /** Overrides de texto para a Central de Solicitações. */
+  requestCenter?: {
+    title?: string;
+    subtitle?: string;
+  };
   about?: {
     kicker?: string;
     title?: string;
