@@ -29,6 +29,9 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
+  /** Pin vermelho com globo e avião da 100 Limites (aba do navegador). */
+  "100limites.tur.br": limitesFavicon.url,
+  "www.100limites.tur.br": limitesFavicon.url,
   "destinoscomaju.com.br": destinosComAJuFavicon.url,
   "www.destinoscomaju.com.br": destinosComAJuFavicon.url,
   "paraisoviagens.com": paraisoFavicon.url,
