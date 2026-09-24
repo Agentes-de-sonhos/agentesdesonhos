@@ -12,13 +12,15 @@ export function useAgencyFavicon(logoUrl?: string | null) {
       document.head.querySelectorAll<HTMLLinkElement>('link[rel="icon"]'),
     );
     if (!links.length) return;
-    const previous = links.map((link) => link.href);
+    const previous = links.map((link) => link.getAttribute("href"));
     links.forEach((link) => {
-      link.href = logoUrl;
+      link.setAttribute("href", logoUrl);
     });
     return () => {
       links.forEach((link, index) => {
-        link.href = previous[index];
+        const href = previous[index];
+        if (href === null) link.removeAttribute("href");
+        else link.setAttribute("href", href);
       });
     };
   }, [logoUrl]);

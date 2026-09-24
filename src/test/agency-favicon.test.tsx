@@ -9,7 +9,7 @@ function setupHeadLinks() {
   return ORIGINAL_HREFS.map((href) => {
     const link = document.createElement("link");
     link.rel = "icon";
-    link.href = href;
+    link.setAttribute("href", href);
     document.head.appendChild(link);
     return link;
   });
