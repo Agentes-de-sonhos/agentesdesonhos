@@ -9,6 +9,7 @@ import {
   formatCnpj,
 } from "@/lib/agencyDomains";
 import { configuredCnpj } from "@/lib/agencySiteStatus";
+import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 
 /** Só aceita cores simples e seguras vindas do cadastro (hex). */
 function safeAccent(color?: string | null): string | null {
@@ -30,7 +31,7 @@ export default function AgencyUnderConstruction({ info }: { info: AgencyDomainIn
 
   useEffect(() => {
     const previousTitle = document.title;
-    document.title = `${name} — Novo site em construção`;
+    document.title = resolveAgencyBrowserTitle(info.hostname) ?? `${name} — Novo site em construção`;
 
     const description = document.querySelector('meta[name="description"]');
     const previousDescription = description?.getAttribute("content") ?? null;
@@ -51,7 +52,7 @@ export default function AgencyUnderConstruction({ info }: { info: AgencyDomainIn
       }
       robots.remove();
     };
-  }, [name]);
+  }, [info.hostname, name]);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[hsl(40_30%_98%)]">

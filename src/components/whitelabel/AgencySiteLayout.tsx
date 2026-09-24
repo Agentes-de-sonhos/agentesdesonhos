@@ -20,6 +20,7 @@ import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
+import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -528,6 +529,7 @@ export function AgencySiteLayout({
   // Propaga o tema do tenant para o `body`, para que Dialog/Popover/Select/
   // Calendar renderizados em portal herdem os tokens da agência.
   useAgencySiteThemeOnBody(info.hostname);
+  useAgencyBrowserTitle(info.hostname);
   return (
     <div className={`min-h-screen bg-background ${siteThemeRootClass(info.hostname)}`}>
       <AgencyBrandBar info={info} />
