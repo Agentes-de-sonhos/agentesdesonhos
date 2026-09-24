@@ -16,7 +16,7 @@ export type AgencySiteStatus = "live" | "under_construction";
  * acabamentos exclusivos de um domínio, fáceis de remover quando o site
  * completo entrar no ar.
  */
-export type AgencyConstructionVariant = "default" | "destinosComAJu";
+export type AgencyConstructionVariant = "default" | "destinosComAJu" | "essyaTur";
 
 export interface AgencySiteStatusConfig {
   status: AgencySiteStatus;
