@@ -58,6 +58,16 @@ import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
+import {
+  AGENCY_CARD_DESCRIPTION_CLASS,
+  AGENCY_CARD_TITLE_CLASS,
+  AGENCY_HERO_COPY_CLASS,
+  AGENCY_HERO_SUBTITLE_CLASS,
+  AGENCY_HERO_TITLE_CLASS,
+  AGENCY_SECTION_HEADING_CLASS,
+  AGENCY_SECTION_SUBTITLE_CLASS,
+  AGENCY_SECTION_TITLE_CLASS,
+} from "@/lib/agencySiteTypography";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
@@ -131,17 +141,17 @@ function SectionHeading({
 }) {
   if (editorial) {
     return (
-      <div className="mb-10 max-w-2xl">
-        <h2 className="text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">{title}</h2>
-        {subtitle && <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground md:text-base">{subtitle}</p>}
+      <div className={AGENCY_SECTION_HEADING_CLASS}>
+        <h2 className={AGENCY_SECTION_TITLE_CLASS}>{title}</h2>
+        {subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{subtitle}</p>}
       </div>
     );
   }
   return (
-    <div className="mb-8 max-w-2xl">
-      <h2 className="text-2xl font-semibold text-foreground md:text-3xl">{title}</h2>
+    <div className={AGENCY_SECTION_HEADING_CLASS}>
+      <h2 className="w-full break-words text-pretty text-2xl font-semibold leading-tight text-foreground md:text-3xl">{title}</h2>
       <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
-      {subtitle && <p className="mt-4 text-muted-foreground">{subtitle}</p>}
+      {subtitle && <p className="mt-4 w-full max-w-5xl break-words text-pretty text-muted-foreground">{subtitle}</p>}
     </div>
   );
 }
@@ -336,8 +346,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       className="group wl-curation-card relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
                       <Icon className="h-8 w-8 text-primary wl-accent-icon" aria-hidden="true" strokeWidth={1.6} />
-                      <h3 className="mt-6 text-xl font-bold text-foreground">{h.title}</h3>
-                      <p className="mt-3 flex-1 text-[15px] leading-relaxed text-muted-foreground">{h.text}</p>
+                      <h3 className={`mt-6 text-xl text-foreground ${AGENCY_CARD_TITLE_CLASS}`}>{h.title}</h3>
+                      <p className={`mt-3 flex-1 text-[15px] text-muted-foreground ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{h.text}</p>
                       <button
                         type="button"
                         onClick={() => openRequest(h.service)}
@@ -600,14 +610,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                           {d.label}
                         </span>
                         <h3
-                          className={`mt-2 font-bold leading-tight text-background ${
+                          className={`mt-2 text-background ${AGENCY_CARD_TITLE_CLASS} ${
                             i === 0 ? "text-2xl md:text-3xl" : "text-xl"
                           }`}
                         >
                           {d.title}
                         </h3>
                         {i === 0 && (
-                          <p className="mt-2 max-w-md text-sm text-background/80">{d.text}</p>
+                          <p className={`mt-2 w-full max-w-2xl text-sm text-background/80 ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
                         <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
                           Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
@@ -1106,7 +1116,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         }
         return (
           <section key={key} id="faq" className="border-y border-border/60 bg-muted/30">
-            <div className="mx-auto max-w-4xl px-4 py-14 md:py-16">
+             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading title={copy.title ?? "Perguntas frequentes"} />
               <Accordion type="single" collapsible className="w-full">
                 {faq.map((item, index) => (
@@ -1134,10 +1144,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                       <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                         <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
-                      <h2 className="mt-4 text-3xl font-extrabold leading-tight text-white md:text-[2.6rem]">
-                        title ?? "Receba novidades e oportunidades"
+                       <h2 className="mt-4 w-full break-words text-pretty text-3xl font-extrabold leading-[1.12] text-white md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]">
+                         {copy.title ?? "Receba novidades e oportunidades"}
                       </h2>
-                      <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-white/80 md:text-base">
+                       <p className="mt-6 w-full max-w-4xl break-words text-pretty text-[15px] leading-relaxed text-white/80 md:text-base">
                         {copy.subtitle ??
                           "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                       </p>
@@ -1166,10 +1176,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <Mail className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground">
-                    title ?? "Receba novidades e oportunidades"
+                   <h2 className="w-full break-words text-pretty text-xl font-semibold leading-tight text-foreground">
+                     {copy.title ?? "Receba novidades e oportunidades"}
                   </h2>
-                  <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">
+                   <p className="mt-1.5 w-full max-w-4xl break-words text-pretty text-sm text-muted-foreground">
                     {copy.subtitle ??
                       "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                   </p>
@@ -1244,7 +1254,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               : "pb-10 pt-20 md:pt-32"
           }`}
         >
-          <div className={editorial ? "md:max-w-[60%]" : undefined}>
+          <div className={editorial ? AGENCY_HERO_COPY_CLASS : undefined}>
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
@@ -1258,18 +1268,18 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           )}
           <h1
             className={
-              editorial
-                ? "max-w-[24ch] text-[2rem] font-extrabold leading-[1.05] tracking-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.45)] md:text-[2.75rem]"
-                : "max-w-3xl text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
+               editorial
+                 ? AGENCY_HERO_TITLE_CLASS
+                 : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
             {current.title}
           </h1>
           <p
             className={
-              editorial
-                ? "mt-4 max-w-xl text-[15px] leading-relaxed text-white/90 md:text-base"
-                : "mt-4 max-w-2xl text-base text-primary-foreground/85 md:text-lg"
+               editorial
+                 ? AGENCY_HERO_SUBTITLE_CLASS
+                 : "mt-4 w-full max-w-5xl break-words text-pretty text-base text-primary-foreground/85 md:text-lg"
             }
           >
             {current.subtitle}

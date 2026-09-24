@@ -32,3 +32,4 @@
   - Não executado: teste concorrente real de banco (exigiria dados persistentes); funil segue coberto por teste estrutural.
 - [x] Evolução editorial exclusiva da Destinos com a Ju: conteúdo aprovado, testes focados, typecheck, build e conferência visual, sem publicar.
 - [x] Correção final declarativa da Destinos com a Ju: hero, menu, WhatsApp e resolução por hostname; teste focado e typecheck, sem publicar.
+- [ ] Padronizar tipografia e largura dos sites white label, corrigir newsletter e validar desktop/mobile, sem publicar.

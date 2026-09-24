@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { AGENCY_CARD_DESCRIPTION_CLASS, AGENCY_CARD_TITLE_CLASS } from "@/lib/agencySiteTypography";
 
 export interface AgencyCampaignItem {
   key: string;
@@ -80,7 +81,7 @@ export function AgencyCampaignRail({
             key={item.key}
             type="button"
             onClick={() => onSelect(item.service)}
-            className="group relative w-[78vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[46vw] md:w-[calc((100%-2.5rem)/3)] xl:w-[calc((100%-3.75rem)/4)]"
+            className="group relative w-[82vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[46vw] md:w-[calc((100%-2.5rem)/3)]"
           >
             <div className="relative aspect-[4/5] w-full overflow-hidden">
               <img
@@ -93,8 +94,8 @@ export function AgencyCampaignRail({
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_8%/0.88)] via-[hsl(220_12%_8%/0.3)] to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-6">
-                <h3 className="text-xl font-bold leading-tight text-background">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-background/80">{item.text}</p>
+                <h3 className={`text-xl text-background ${AGENCY_CARD_TITLE_CLASS}`}>{item.title}</h3>
+                <p className={`mt-2 text-sm text-background/80 ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{item.text}</p>
                 <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
                   Solicitar atendimento
                   <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />

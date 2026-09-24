@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
 import { googleReviewsFallbackUrl, type GoogleReview } from "@/lib/agencyGoogleReviews";
 import { getPersonInitials } from "@/components/shared/ClientAvatar";
+import { AGENCY_SECTION_SUBTITLE_CLASS, AGENCY_SECTION_TITLE_CLASS } from "@/lib/agencySiteTypography";
 
 function Stars({ value, className = "h-4 w-4" }: { value: number; className?: string }) {
   const rounded = Math.round(value);
@@ -105,12 +106,12 @@ export function AgencyGoogleReviewsSection({
     <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="bg-background">
       <div className={`${container} py-14 md:py-24`}>
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
+           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
-            <h2 id="avaliacoes-title" className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+             <h2 id="avaliacoes-title" className={`mt-4 ${AGENCY_SECTION_TITLE_CLASS}`}>
               {copy?.title ?? "O que dizem nossos viajantes"}
             </h2>
-            {copy?.subtitle && <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground md:text-base">{copy.subtitle}</p>}
+             {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
             {data && data.rating != null && (
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="text-2xl font-bold text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</span>
