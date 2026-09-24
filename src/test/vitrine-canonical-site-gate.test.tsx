@@ -82,9 +82,10 @@ describe("vitrine.tur.br/{agency_slug}", () => {
     expect(screen.queryByTestId("site-ads")).toBeNull();
   });
 
-  it("mantém a raiz de vitrine.tur.br na plataforma", async () => {
+  it("mostra a identificação neutra na raiz de vitrine.tur.br", async () => {
     await renderGate("vitrine.tur.br", "/");
-    expect(screen.getByTestId("platform")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "VITRINE" })).toBeInTheDocument();
+    expect(screen.queryByTestId("platform")).toBeNull();
     expect(fetchAgencyBySlug).not.toHaveBeenCalled();
   });
 

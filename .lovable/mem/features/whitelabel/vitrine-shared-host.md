@@ -10,3 +10,5 @@ type: feature
 - **Sinal de "Sites ADS ativo"** (escolha documentada): existência de linha ativa em `agency_public_domains` com aquele `agency_slug`, resolvida no servidor por `get_agency_by_slug` — a mesma fonte usada pela gestão Sites ADS. Nunca hardcode de slug/nome.
 - `sites.agentesdesonhos.com.br` continua como host técnico interno e é sempre noindex; no host canônico o noindex vale só para áreas privadas/técnicas (`shouldNoindexAgencyPath`).
 - Prefixo de rotas/links vem de `agencyRouteBasePath` + `agencySiteHref`; domínios próprios seguem sem prefixo e `?__agency_host` continua válido só em hosts técnicos.
+
+As raízes sem caminho de `vitrine.tur.br`, `seuroteiro.tur.br`, `seuorcamento.tur.br`, `proximaviagem.tur.br`, `contato.tur.br` e `carteiradigital.tur.br` exibem somente a nuvem Agentes de Sonhos e o nome do produto. Essa regra vale também para `www` e nunca pode interceptar links completos com slug, agência, código ou recurso público.
