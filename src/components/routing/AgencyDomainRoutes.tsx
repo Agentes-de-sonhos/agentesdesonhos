@@ -8,6 +8,7 @@ import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
 import { shouldNoindexAgencyPath } from "@/lib/agencySlugRouting";
 import { useNoindex } from "@/hooks/useNoindex";
+import { AgencySitePasswordGate } from "@/components/whitelabel/AgencySitePasswordGate";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
@@ -152,6 +153,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
         );
 
   return (
+      <AgencySitePasswordGate info={info}>
         <Routes>
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
           {construction && (
@@ -202,5 +204,6 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="*" element={<LinkUnavailable />} />
           </Route>
         </Routes>
+      </AgencySitePasswordGate>
   );
 }
