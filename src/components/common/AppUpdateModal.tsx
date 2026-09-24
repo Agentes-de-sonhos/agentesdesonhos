@@ -19,6 +19,7 @@ import {
   hasUnsavedChanges,
   dismissAppUpdate,
   isPublicUpdateContext,
+  APP_UPDATE_PROMPT_ENABLED,
 } from "@/hooks/useAppVersion";
 
 /**
