@@ -18,6 +18,18 @@ export interface AgencySiteContacts {
 }
 
 const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
+  "destinoscomaju.com.br": {
+    email: "contato@destinoscomaju.com.br",
+    instagram: "https://instagram.com/destinoscomaju",
+    instagramLabel: "@destinoscomaju",
+    phone: "(11) 95741-4840",
+  },
+  "www.destinoscomaju.com.br": {
+    email: "contato@destinoscomaju.com.br",
+    instagram: "https://instagram.com/destinoscomaju",
+    instagramLabel: "@destinoscomaju",
+    phone: "(11) 95741-4840",
+  },
   "casanovatur.demo.local": {
     email: "contact@casanovatur.com.br",
     instagram: "https://www.instagram.com/casanova_viagens_rs",

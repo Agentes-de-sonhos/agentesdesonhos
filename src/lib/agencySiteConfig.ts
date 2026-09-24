@@ -11,6 +11,7 @@ export type AgencySectionKey =
   | "highlights"
   | "dmc"
   | "signature"
+  | "authority"
   | "destinations"
   | "modules"
   | "offers"
@@ -36,6 +37,7 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "dmc", label: "Seção B2B / DMC", enabled: false, order: 0 },
   // Assinatura editorial de posicionamento (curta) — genérica, off por padrão.
   { key: "signature", label: "Assinatura editorial", enabled: false, order: 0.5 },
+  { key: "authority", label: "Autoridade editorial", enabled: false, order: 4.5 },
   { key: "offers", label: "Ofertas em destaque", enabled: true, order: 1 },
   { key: "destinations", label: "Descoberta de destinos", enabled: true, order: 2 },
   { key: "highlights", label: "Destaques", enabled: true, order: 3 },

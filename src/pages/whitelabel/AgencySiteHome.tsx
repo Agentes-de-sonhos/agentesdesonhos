@@ -37,6 +37,7 @@ import {
 } from "@/components/whitelabel/SiteLabCatalogChrome";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
+import { PlaceMapCard } from "@/components/shared/PlaceMapCard";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
 import heroFae from "@/assets/whitelabel/hero-fae.jpg";
@@ -297,6 +298,32 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   const renderSection = (key: AgencySectionKey) => {
     switch (key) {
+      case "map":
+        {
+          const m = profile.map;
+          if (!m) return null;
+          return (
+            <section key={key} id="mapa" className="bg-background">
+              <div className={`${container} py-14 md:py-24`}>
+                <SectionHeading
+                  title={m.title ?? "Onde estamos"}
+                  subtitle={m.subtitle}
+                  editorial={editorial}
+                />
+                <div className="mt-8 overflow-hidden rounded-2xl border border-border/60 shadow-sm">
+                  <PlaceMapCard
+                    latitude={m.latitude}
+                    longitude={m.longitude}
+                    address={m.address}
+                    name={m.name || name}
+                    placeId={m.placeId}
+                  />
+                </div>
+              </div>
+            </section>
+          );
+        }
+
       case "dmc":
         if (!dmc) return null;
         return (
@@ -1005,6 +1032,21 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         );
       }
 
+      case "avaliacoes":
+        if (!googleReviews) return null;
+        {
+          const copy = copyFor("avaliacoes");
+          return (
+            <AgencyGoogleReviewsSection
+              key={key}
+              hostname={hostname}
+              container={container}
+              title={copy.title}
+              subtitle={copy.subtitle}
+            />
+          );
+        }
+
       case "faq":
         {
         const copy = copyFor("faq");
@@ -1320,13 +1362,6 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         ) : (
           node
         );
-        // Avaliações do Google (ativação por hostname) imediatamente antes da FAQ.
-        if (section.key === "faq" && googleReviews && index !== 0) {
-          return (
-            <div key={`${section.key}-with-reviews`}>
-              <AgencyGoogleReviewsSection hostname={hostname} container={container} />
-              {tagged}
-            </div>
           );
         }
         if (!editorial || index !== 0) return tagged;

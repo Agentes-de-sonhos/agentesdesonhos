@@ -48,6 +48,7 @@ export const SITE_CATALOG: AgencyCatalogEntry[] = [
   { key: "hero", name: "Hero e carrossel de banners", classification: "recomendada", when: "Abertura de todo site: 1 a 5 banners com a promessa principal.", anchor: "#topo", fixed: true },
   { key: "requests", name: "Central de Solicitações", classification: "recomendada", when: "Captação principal: o visitante escolhe o serviço e envia o pedido.", anchor: "#cotacao", fixed: true },
   { key: "signature", name: "Assinatura editorial", classification: "recomendada", when: "Frase de posicionamento curta, para sites com linguagem editorial.", anchor: "#assinatura" },
+  { key: "authority", name: "Autoridade e especialidade", classification: "especializada", when: "Quando a agência possui experiência factual e verificável em um produto específico.", anchor: "#autoridade" },
   { key: "offers", name: "Ofertas em destaque", classification: "alternativa", when: "Somente quando a agência mantém uma vitrine de ofertas publicada.", anchor: "#ofertas" },
   { key: "destinations", name: "Descoberta e inspirações de destinos", classification: "recomendada", when: "Repertório visual de destinos, sem preço nem promessa comercial.", anchor: "#destinos" },
   { key: "highlights", name: "Destaques e curadoria", classification: "recomendada", when: "Três portas de entrada rápidas para iniciar o atendimento.", anchor: "#destaques" },

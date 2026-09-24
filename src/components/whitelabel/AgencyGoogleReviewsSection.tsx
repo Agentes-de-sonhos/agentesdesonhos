@@ -62,7 +62,15 @@ function ReviewCard({ review }: { review: GoogleReview }) {
   );
 }
 
-export function AgencyGoogleReviewsSection({ hostname, container }: { hostname: string; container: string }) {
+export function AgencyGoogleReviewsSection({
+  hostname,
+  container,
+  copy,
+}: {
+  hostname: string;
+  container: string;
+  copy?: { kicker?: string; title?: string; subtitle?: string };
+}) {
   const ref = useRef<HTMLElement | null>(null);
   const [near, setNear] = useState(false);
   useEffect(() => {
@@ -98,10 +106,11 @@ export function AgencyGoogleReviewsSection({ hostname, container }: { hostname: 
       <div className={`${container} py-14 md:py-24`}>
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">Avaliações no Google</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
             <h2 id="avaliacoes-title" className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
-              O que dizem nossos viajantes
+              {copy?.title ?? "O que dizem nossos viajantes"}
             </h2>
+            {copy?.subtitle && <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground md:text-base">{copy.subtitle}</p>}
             {data && data.rating != null && (
               <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="text-2xl font-bold text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</span>

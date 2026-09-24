@@ -285,7 +285,37 @@ const LUXURY_CURATED: AgencySiteProfile = {
  * seção): apenas o tema muda. Conteúdo exclusivo (DMC) nunca é herdado, pois é
  * resolvido por hostname em `resolveDmc`.
  */
-const EDITORIAL_ROSE: AgencySiteProfile = { key: "editorialRose" };
+const EDITORIAL_ROSE: AgencySiteProfile = {
+  key: "editorialRose",
+  sections: { ...CURATED_SECTIONS, map: { enabled: true, order: 11 } },
+  heroImage: "praia",
+  hero: [
+    { title: "Viagens que transformam, destinos que inspiram", subtitle: "Planejamento próximo e curadoria atenta para cada roteiro com a {agency}.", order: 1, enabled: true },
+    { title: "Europa, Parques e Cruzeiros com quem entende", subtitle: "Do primeiro voo ao retorno, cuidamos de cada detalhe da sua jornada.", order: 2, enabled: true }
+  ],
+  signature: {
+    kicker: "DESTINOS COM A JU",
+    title: "Sua viagem merece um olhar especializado.",
+    text: "Mais do que um roteiro, criamos experiências que conectam você aos melhores destinos do mundo, com o conforto e a segurança de um planejamento sob medida."
+  },
+  destinations: [
+    { key: "europa", image: "europa", label: "Europa", title: "Europa e Culturas", text: "Cidades históricas e vilas charmosas planejadas no seu ritmo.", service: "pacotes", enabled: true, order: 1 },
+    { key: "parques", image: "parques", label: "Família", title: "Parques e Orlando", text: "Logística completa para aproveitar o melhor dos parques com tranquilidade.", service: "ingressos", enabled: true, order: 2 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Navegação", title: "Cruzeiros Selecionados", text: "Os melhores itinerários e navios para a sua próxima aventura no mar.", service: "cruzeiros", enabled: true, order: 3 },
+    { key: "resorts", image: "resort", label: "Conforto", title: "Resorts e All Inclusive", text: "Estadias premium no Brasil e no mundo para relaxar com tudo pronto.", service: "hospedagem", enabled: true, order: 4 }
+  ],
+  map: {
+    latitude: -23.5505,
+    longitude: -46.6333,
+    address: "São Paulo, SP",
+    name: "Destinos com a Ju",
+    title: "Onde estamos",
+    subtitle: "Atendimento presencial com hora marcada ou consultoria digital completa."
+  },
+  copy: {
+    avaliacoes: { title: "O que dizem sobre a Ju", subtitle: "Relatos de quem já planejou e viveu experiências inesquecíveis conosco." }
+  }
+};
 
 /**
  * Preset ESTRUTURAL compartilhado da família "curadoria sob medida": mesma
