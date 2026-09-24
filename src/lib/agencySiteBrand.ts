@@ -7,7 +7,7 @@
  * domínios.
  */
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
-import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-atualizado.png.asset.json";
+import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
 import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";

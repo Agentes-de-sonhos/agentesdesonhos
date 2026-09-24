@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { BrandText } from "@/components/ui/brand-text";
-import logoAsset from "@/assets/whitelabel/logo-destinos-com-a-ju.png.asset.json";
+import logoAsset from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
 import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 
 /**
@@ -53,8 +53,8 @@ export default function DestinosComAJuComingSoon() {
           <img
             src={logoAsset.url}
             alt="Destinos com a Ju"
-            width={480}
-            height={252}
+            width={842}
+            height={624}
             className="mx-auto h-24 w-auto max-w-[280px] object-contain sm:h-32 sm:max-w-[360px]"
           />
 
