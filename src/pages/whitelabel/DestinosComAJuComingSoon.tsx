@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { BrandText } from "@/components/ui/brand-text";
-import logoAsset from "@/assets/whitelabel/logo-destinos-com-a-ju.png.asset.json";
+import logoAsset from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
 import { resolveAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 
 /**
