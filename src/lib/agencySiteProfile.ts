@@ -12,6 +12,7 @@
 import xcaretPanorama from "@/assets/whitelabel/xcaret/xcaret-panorama.webp.asset.json";
 import julianaXcaretAtXplor from "@/assets/whitelabel/xcaret/juliana-xplor-sign.webp.asset.json";
 import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
+import destinosXcaretCover from "@/assets/whitelabel/destinos-xcaret-capa.png.asset.json";
 import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
 import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front.webp.asset.json";
@@ -178,7 +179,13 @@ export interface AgencySiteProfile {
   featuredExperience?: AgencyFeaturedExperience;
 }
 
-export interface AgencyFeaturedImage { src: string; alt: string; position?: string }
+export interface AgencyFeaturedImage {
+  src: string;
+  alt: string;
+  position?: string;
+  /** "contain" preserva montagens completas; ausente mantém o recorte padrão. */
+  fit?: "cover" | "contain";
+}
 export interface AgencyFeaturedExperience {
   enabled: boolean;
   id?: string;
@@ -602,13 +609,14 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     kicker: "EXPERIÊNCIA E ESPECIALIZAÇÃO",
     title: "Xcaret com o olhar de quem viveu essa experiência",
     description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
-    mainImage: { src: xcaretPanorama.url, alt: "Vista aérea do Parque Xcaret com mar azul turquesa e vegetação da Riviera Maya", position: "left center" },
-    consultantImage: { src: julianaXcaretAtXplor.url, alt: "Juliana ao lado do letreiro Xplor por Xcaret em caverna iluminada", position: "50% 18%" },
-    badge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret 2026 Cancun Riviera Maya México" },
-    secondaryImages: [
-      { src: xcaretSnorkel.url, alt: "Casal fazendo snorkel em águas cristalinas no Xel-Há" },
-      { src: xcaretXoximilco.url, alt: "Festa mexicana em trajinera iluminada no Xoximilco" },
-    ],
+    mainImage: {
+      src: destinosXcaretCover.url,
+      alt: "Montagem com vista aérea do Parque Xcaret, o selo Xperts Xcaret 2026 e Juliana nos parques Xcaret, Xplor e Xenses",
+      position: "center",
+      fit: "contain",
+    },
+    consultantImage: null,
+    badge: null,
     highlights: ["Experiência vivida no destino", "Conhecimento dos parques e hotéis", "Planejamento personalizado", "Orientação antes, durante e depois da viagem"],
     ctaLabel: "Conheça o Xcaret com a Ju",
     ctaHref: "/xcaret",
