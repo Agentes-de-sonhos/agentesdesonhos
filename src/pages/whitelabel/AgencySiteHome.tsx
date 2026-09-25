@@ -1450,7 +1450,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         // A cor precisa ser a MESMA superfície da seção que abre a página.
         const surface =
           section.key === "dmc"
-            ? "bg-[hsl(var(--wl-navy))]"
+            ? dmc?.presentation?.surface === "light"
+              ? "bg-background"
+              : "bg-[hsl(var(--wl-navy))]"
             : section.key === "destinations" ||
                 section.key === "modules" ||
                 section.key === "differentials" ||

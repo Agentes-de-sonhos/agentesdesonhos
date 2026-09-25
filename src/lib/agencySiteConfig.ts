@@ -7,6 +7,8 @@
  * testimonials, team names): those only render when the profile provides them.
  */
 
+import dmcCristianePortugal from "@/assets/whitelabel/100-limites/dmc-cristiane-portugal.jpg.asset.json";
+
 export type AgencySectionKey =
   | "highlights"
   | "dmc"
@@ -349,6 +351,11 @@ export interface AgencyDmcConfig {
   /** Mensagem enviada ao WhatsApp real da agência (nunca telefone hardcoded). */
   whatsappMessage: string;
   note: string;
+  /** Ajustes visuais opcionais e declarativos; o padrão escuro permanece intacto. */
+  presentation?: {
+    surface?: "dark" | "light";
+    imageUrl?: string;
+  };
 }
 
 /**
@@ -372,6 +379,10 @@ export const DMC_BY_HOSTNAME: Record<string, AgencyDmcConfig> = (() => {
     whatsappMessage:
       "Olá! Sou agente de viagens e gostaria de conhecer os serviços DMC da 100 Limites em Portugal.",
     note: "Atuamos como parceira receptiva da sua agência: o cliente final continua sendo seu.",
+    presentation: {
+      surface: "light",
+      imageUrl: dmcCristianePortugal.url,
+    },
   };
   return {
     "100limites.tur.br": cemLimites,
