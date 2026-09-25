@@ -1250,7 +1250,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         <div
           className={`relative ${container} ${
             editorial
-              ? "pb-6 pt-20 md:pb-8 md:pt-24"
+              ? profile.heroPresentation?.actionsPlacement === "right"
+                ? "pb-10 pt-12 md:pb-16 md:pt-14"
+                : "pb-6 pt-20 md:pb-8 md:pt-24"
               : "pb-10 pt-20 md:pt-32"
           }`}
         >
@@ -1272,15 +1274,27 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
             </p>
           )}
+          <div className={profile.heroPresentation?.actionsPlacement === "right" ? "flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10" : undefined}>
           <h1
             className={
                editorial
-                 ? `${AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line" : ""}`
+                 ? `${AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""}`
                  : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
             {current.title}
           </h1>
+          {profile.heroPresentation?.actionsPlacement === "right" && profile.heroPresentation.cta && (
+            <Button
+              size="lg"
+              data-hero-cta-placement="right"
+              className="self-start bg-primary text-primary-foreground hover:bg-primary/90 lg:mb-1 lg:shrink-0 lg:self-end"
+              onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
+            >
+              {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+          </div>
           <p
             className={
                editorial
@@ -1294,14 +1308,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             data-hero-actions-placement={profile.heroPresentation?.actionsPlacement ?? "inline"}
             className={
               profile.heroPresentation?.actionsPlacement === "right"
-                ? "mt-7 flex flex-col items-end gap-4 md:absolute md:bottom-0 md:right-0 md:mt-0"
+                ? "mt-6 flex md:hidden"
                 : undefined
             }
           >
-            {profile.heroPresentation?.cta && (
+            {profile.heroPresentation?.cta && profile.heroPresentation.actionsPlacement !== "right" && (
               <Button
                 size="lg"
-                className={`${profile.heroPresentation.actionsPlacement === "right" ? "" : "mt-7"} bg-primary text-primary-foreground hover:bg-primary/90`}
+                className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
               >
                 {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
@@ -1369,6 +1383,24 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               <h2 className="absolute bottom-full left-4 mb-4 break-words text-pretty text-2xl font-bold leading-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.55)] md:left-6 md:mb-5 md:text-3xl lg:left-8">
                 {profile.requestCenter.title}
               </h2>
+            )}
+            {profile.heroPresentation?.actionsPlacement === "right" && slides.length > 1 && (
+              <div
+                data-hero-nav-placement="bottom-right"
+                className="absolute bottom-full right-4 mb-5 hidden items-center gap-3 md:right-6 md:mb-6 md:flex lg:right-8"
+              >
+                <button type="button" aria-label="Destaque anterior" onClick={() => setSlide((s) => (s - 1 + slides.length) % slides.length)} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white [&_svg]:text-white">
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex gap-2">
+                  {slides.map((_, i) => (
+                    <button key={i} type="button" aria-label={`Ir para o destaque ${i + 1}`} aria-current={i === slide} onClick={() => setSlide(i)} className={`h-1.5 rounded-full transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${i === slide ? "w-8 bg-white" : "w-4 bg-white/40"}`} />
+                  ))}
+                </div>
+                <button type="button" aria-label="Próximo destaque" onClick={() => setSlide((s) => (s + 1) % slides.length)} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white [&_svg]:text-white">
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
             )}
             <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
               <AgencyQuickQuote
