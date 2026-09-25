@@ -503,7 +503,6 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   heroImage: "europa",
   heroPresentation: {
     kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
-    cta: { label: "Começar a planejar", service: "pacotes" },
     preserveTitleLineBreaks: true,
     actionsPlacement: "right",
   },

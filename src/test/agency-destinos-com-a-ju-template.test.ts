@@ -51,10 +51,10 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       expect(profile.seo?.canonical).toBe("https://www.destinoscomaju.com.br/");
       expect(profile.heroPresentation).toEqual({
         kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
-        cta: { label: "Começar a planejar", service: "pacotes" },
         preserveTitleLineBreaks: true,
         actionsPlacement: "right",
       });
+      expect(profile.heroPresentation?.cta).toBeUndefined();
       expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
     }
   });
