@@ -43,7 +43,7 @@ export function AgencyDmcSection({
       <section
         id="dmc-agencias"
         aria-labelledby="dmc-agencias-title"
-        className={lightSurface ? "bg-background text-foreground" : "bg-[hsl(var(--wl-navy))] text-background"}
+        className={lightSurface ? "bg-card text-foreground" : "bg-[hsl(var(--wl-navy))] text-background"}
       >
         <div className={`${siteContainer(true)} grid items-center gap-12 py-20 md:py-24 lg:grid-cols-[1.05fr_0.95fr]`}>
           <div>
@@ -78,7 +78,7 @@ export function AgencyDmcSection({
                 <Button
                   asChild
                   size="lg"
-                  className="h-12 rounded-lg px-6 text-[15px] font-semibold text-primary-foreground [&_svg]:text-primary-foreground"
+                  className="h-12 rounded-lg px-6 text-[15px] font-semibold text-card [&_svg]:text-card"
                 >
                   <a href={href} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />
@@ -88,7 +88,7 @@ export function AgencyDmcSection({
               ) : (
                 <Button
                   size="lg"
-                  className="h-12 rounded-lg px-6 text-[15px] font-semibold text-primary-foreground [&_svg]:text-primary-foreground"
+                  className="h-12 rounded-lg px-6 text-[15px] font-semibold text-card [&_svg]:text-card"
                   onClick={onFallbackContact}
                 >
                   {config.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />

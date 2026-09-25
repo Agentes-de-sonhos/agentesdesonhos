@@ -1451,7 +1451,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const surface =
           section.key === "dmc"
             ? dmc?.presentation?.surface === "light"
-              ? "bg-background"
+              ? "bg-card"
               : "bg-[hsl(var(--wl-navy))]"
             : section.key === "destinations" ||
                 section.key === "modules" ||

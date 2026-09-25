@@ -19,10 +19,10 @@ describe("seção DMC da 100 Limites", () => {
   });
 
   it("mantém o layout e adapta contraste, foto e transição ao fundo claro", () => {
-    expect(dmcSource).toContain('lightSurface ? "bg-background text-foreground"');
+    expect(dmcSource).toContain('lightSurface ? "bg-card text-foreground"');
     expect(dmcSource).toContain("config.presentation?.imageUrl ?? destinoEuropa");
     expect(dmcSource).toContain("{!lightSurface && (");
-    expect(dmcSource).toContain("text-primary-foreground");
+    expect(dmcSource).toContain("text-card");
     expect(homeSource).toContain('dmc?.presentation?.surface === "light"');
   });
 });
