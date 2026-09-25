@@ -15,7 +15,7 @@ import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.we
 import destinosXcaretCover from "@/assets/whitelabel/destinos-xcaret-capa.png.asset.json";
 import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
 import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
-import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front.webp.asset.json";
+import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front-v2.png.asset.json";
 import {
   type AgencyDestination,
   type AgencyDifferential,
