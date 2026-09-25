@@ -65,6 +65,31 @@ function XcaretHeader({ info }: { info: AgencyDomainInfo }) {
   );
 }
 
+export function HeroVideoButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          aria-label="Assistir ao vídeo sobre o Xcaret"
+          className="group flex h-20 w-20 items-center justify-center rounded-full border border-background/60 bg-foreground/35 text-background shadow-lg backdrop-blur transition hover:scale-105 hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-background md:h-24 md:w-24"
+        >
+          <Play className="ml-1 h-8 w-8 md:h-10 md:w-10" aria-hidden />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader><DialogTitle>{XCARET_HERO_VIDEO?.title ?? "Vídeo em breve"}</DialogTitle></DialogHeader>
+        {XCARET_HERO_VIDEO ? (
+          <video src={XCARET_HERO_VIDEO.src} poster={XCARET_HERO_VIDEO.poster} controls autoPlay playsInline className="aspect-video w-full rounded-md bg-foreground" />
+        ) : (
+          <p className="text-sm leading-6 text-muted-foreground">O vídeo do Xcaret será exibido aqui assim que o arquivo for enviado.</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
