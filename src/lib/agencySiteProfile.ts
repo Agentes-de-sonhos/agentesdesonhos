@@ -64,6 +64,8 @@ export interface AgencyAuthorityContent {
   cta: string;
   service: string;
   image?: AgencyImageSlot;
+  /** Vídeo editorial opcional; ausente preserva a imagem compartilhada. */
+  video?: "disneyWishCruise";
 }
 
 export interface AgencyFooterContent {
@@ -387,7 +389,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
       "Juliana é especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em cruzeiros, além de conhecer companhias como MSC, Norwegian e Royal Caribbean.",
       "Esse repertório ajuda a comparar navios, itinerários, cabines, experiências a bordo e perfis de viagem com muito mais segurança. O objetivo não é apenas encontrar um cruzeiro, mas escolher aquele que realmente combina com você.",
     ],
-    cta: "Quero planejar meu cruzeiro", service: "cruzeiros", image: "cruzeiro",
+    cta: "Quero planejar meu cruzeiro", service: "cruzeiros", image: "cruzeiro", video: "disneyWishCruise",
   },
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
