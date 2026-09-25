@@ -105,9 +105,23 @@ const AUTHORITY_VIDEOS: Record<string, string> = {
   disneyWishCruise: disneyWishCruise.url,
 };
 
+function formatMediaTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+  const total = Math.floor(seconds);
+  const mm = Math.floor(total / 60);
+  const ss = total % 60;
+  return `${mm}:${String(ss).padStart(2, "0")}`;
+}
+
 function AuthorityMedia({ video, image }: { video?: string; image: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
 
+  // Som liga ao entrar na seção e desliga ao sair; navegadores podem exigir
+  // um clique prévio do visitante antes de permitir áudio automático.
   useEffect(() => {
     const element = videoRef.current;
     if (!element || !video) return;
@@ -115,8 +129,16 @@ function AuthorityMedia({ video, image }: { video?: string; image: string }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
-          void element.play().catch(() => undefined);
+          element.muted = false;
+          setMuted(false);
+          void element.play().catch(() => {
+            element.muted = true;
+            setMuted(true);
+            void element.play().catch(() => undefined);
+          });
         } else {
+          element.muted = true;
+          setMuted(true);
           element.pause();
         }
       },
@@ -131,20 +153,75 @@ function AuthorityMedia({ video, image }: { video?: string; image: string }) {
     return <img src={image} alt="Cruzeiro em alto-mar" loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />;
   }
 
+  const seek = (value: number) => {
+    const element = videoRef.current;
+    if (!element) return;
+    element.currentTime = value;
+    setCurrent(value);
+  };
+
   return (
-    <video
-      ref={videoRef}
-      src={video}
-      poster={image}
-      aria-label="Disney Wish em alto-mar"
-      muted
-      loop
-      playsInline
-      preload="metadata"
-      className="aspect-[4/3] w-full rounded-xl object-cover"
-    />
+    <div className="relative overflow-hidden rounded-xl">
+      <video
+        ref={videoRef}
+        src={video}
+        poster={image}
+        aria-label="Disney Wish em alto-mar"
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        className="aspect-[4/3] w-full object-cover"
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onTimeUpdate={(event) => setCurrent(event.currentTarget.currentTime)}
+        onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
+        onVolumeChange={(event) => setMuted(event.currentTarget.muted)}
+      />
+      <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-black/70 to-transparent px-3 pb-3 pt-8 text-white">
+        <button
+          type="button"
+          onClick={() => {
+            const element = videoRef.current;
+            if (!element) return;
+            if (element.paused) void element.play().catch(() => undefined);
+            else element.pause();
+          }}
+          aria-label={playing ? "Pausar vídeo" : "Reproduzir vídeo"}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20 backdrop-blur transition hover:bg-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {playing ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+        </button>
+        <span className="shrink-0 text-xs tabular-nums">{formatMediaTime(current)}</span>
+        <input
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={0.1}
+          value={Math.min(current, duration || 0)}
+          onChange={(event) => seek(Number(event.target.value))}
+          aria-label="Linha do tempo do vídeo"
+          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/30 accent-white"
+        />
+        <span className="shrink-0 text-xs tabular-nums">{formatMediaTime(duration)}</span>
+        <button
+          type="button"
+          onClick={() => {
+            const element = videoRef.current;
+            if (!element) return;
+            element.muted = !element.muted;
+            setMuted(element.muted);
+          }}
+          aria-label={muted ? "Ativar som" : "Desativar som"}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20 backdrop-blur transition hover:bg-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
+        </button>
+      </div>
+    </div>
   );
 }
+
 
 /** Kept exported: other white-label surfaces import this service list. */
 export const AGENCY_SERVICES = [
