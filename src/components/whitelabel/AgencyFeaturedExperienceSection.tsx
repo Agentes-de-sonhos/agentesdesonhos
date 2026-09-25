@@ -69,7 +69,11 @@ export function AgencyFeaturedExperienceSection({
         </div>
 
         <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
-          <div className="relative aspect-[16/10] overflow-hidden rounded-3xl bg-muted">
+          <div
+            className={`relative overflow-hidden rounded-3xl ${
+              config.mainImage.fit === "contain" ? "bg-transparent" : "aspect-[16/10] bg-muted"
+            }`}
+          >
             <img
               src={config.mainImage.src}
               alt={config.mainImage.alt}
@@ -77,7 +81,11 @@ export function AgencyFeaturedExperienceSection({
               decoding="async"
               width={1920}
               height={754}
-              className="h-full w-full origin-left scale-[1.08] object-cover"
+              className={
+                config.mainImage.fit === "contain"
+                  ? "h-auto w-full object-contain"
+                  : "h-full w-full origin-left scale-[1.08] object-cover"
+              }
               style={{ objectPosition: config.mainImage.position ?? "center" }}
             />
             {config.badge && (
