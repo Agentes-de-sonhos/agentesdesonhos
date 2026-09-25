@@ -1254,7 +1254,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               : "pb-10 pt-20 md:pt-32"
           }`}
         >
-          <div className={editorial ? AGENCY_HERO_COPY_CLASS : undefined}>
+          <div
+            className={`relative ${
+              editorial && profile.heroPresentation?.actionsPlacement !== "right"
+                ? AGENCY_HERO_COPY_CLASS
+                : "w-full"
+            }`}
+          >
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
@@ -1269,7 +1275,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <h1
             className={
                editorial
-                 ? AGENCY_HERO_TITLE_CLASS
+                 ? `${AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line" : ""}`
                  : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
@@ -1284,18 +1290,26 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           >
             {current.subtitle}
           </p>
-          {profile.heroPresentation?.cta && (
-            <Button
-              size="lg"
-              className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
-            >
-              {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          )}
+          <div
+            data-hero-actions-placement={profile.heroPresentation?.actionsPlacement ?? "inline"}
+            className={
+              profile.heroPresentation?.actionsPlacement === "right"
+                ? "mt-7 flex flex-col items-end gap-4 md:absolute md:bottom-0 md:right-0 md:mt-0"
+                : undefined
+            }
+          >
+            {profile.heroPresentation?.cta && (
+              <Button
+                size="lg"
+                className={`${profile.heroPresentation.actionsPlacement === "right" ? "" : "mt-7"} bg-primary text-primary-foreground hover:bg-primary/90`}
+                onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
+              >
+                {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
 
-          {slides.length > 1 && (
-            <div className={`flex items-center gap-3 ${editorial ? "mt-6" : "mt-8"}`}>
+            {slides.length > 1 && (
+              <div className={`flex items-center gap-3 ${profile.heroPresentation?.actionsPlacement === "right" ? "" : editorial ? "mt-6" : "mt-8"}`}>
               <button
                 type="button"
                 aria-label="Destaque anterior"
@@ -1330,8 +1344,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               >
                 <ChevronRight className="h-4 w-4" />
               </button>
-            </div>
-          )}
+              </div>
+            )}
+          </div>
           </div>
         </div>
       </section>
