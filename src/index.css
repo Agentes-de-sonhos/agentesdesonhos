@@ -532,12 +532,14 @@ img {
 
   --border: 216 18% 88%;
   --input: 216 18% 84%;
-  --ring: 335 58% 34%;
+  --ring: 339 61% 56%;
   --radius: 0.75rem;
 
   --wl-red: 337 61% 48%;
   --wl-navy: 216 52% 20%;
   --wl-ink: 216 52% 16%;
+  /* Verde do WhatsApp para os botões de conversa. */
+  --wl-whatsapp: 145 72% 38%;
   /* Rosé perolado (quase branco): superfícies leves e acabamento editorial. */
   --wl-sand: 340 30% 98.2%;
 }
