@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { BrandText } from "@/components/ui/brand-text";
 import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
+import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import {
   clearUnlock,
   isPasswordExemptPath,
