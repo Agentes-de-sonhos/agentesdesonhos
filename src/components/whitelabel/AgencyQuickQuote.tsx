@@ -45,6 +45,7 @@ export interface AgencyQuickQuoteProps {
     support?: string;
     notice?: string;
     submitLabel?: string;
+    titlePlacement?: "inside-card" | "above-card";
   };
 }
 
@@ -244,7 +245,7 @@ export function AgencyQuickQuote({
             : "rounded-[18px] border border-border/60 bg-card/95 p-4 shadow-2xl backdrop-blur supports-[backdrop-filter]:bg-card/90 md:p-6"
         }
       >
-        {(copy?.title || copy?.support) && (
+        {copy?.titlePlacement !== "above-card" && (copy?.title || copy?.support) && (
           <div className="mb-5 border-b border-border/70 pb-5">
             {copy.title && <h2 className="text-xl font-bold text-foreground md:text-2xl">{copy.title}</h2>}
             {copy.support && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">{copy.support}</p>}

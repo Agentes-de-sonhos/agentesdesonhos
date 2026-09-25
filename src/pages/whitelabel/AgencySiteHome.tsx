@@ -1350,6 +1350,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           }}
         >
           <div ref={requestCenterRef} className={`relative ${container}`}>
+            {profile.requestCenter?.titlePlacement === "above-card" && profile.requestCenter.title && (
+              <h2 className="absolute bottom-full left-4 mb-4 break-words text-pretty text-2xl font-bold leading-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.55)] md:left-6 md:mb-5 md:text-3xl lg:left-8">
+                {profile.requestCenter.title}
+              </h2>
+            )}
             <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
               <AgencyQuickQuote
                 hostname={hostname}
