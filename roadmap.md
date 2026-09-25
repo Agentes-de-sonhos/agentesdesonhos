@@ -39,3 +39,4 @@
 - [x] Clarear a seção “Sua DMC em Portugal” e substituir sua foto somente na 100 Limites.
 - [x] Substituir a foto da seção de cruzeiros da Destinos com a Ju pelo vídeo enviado, com reprodução automática ao entrar na tela.
 - [x] Personalizar integralmente o perfil editorial da 100 Limites para passageiros e agências, sem alterar outros tenants.
+- [ ] Criar a landing page Xcaret exclusiva da Destinos com a Ju, validar conteúdo, imagens, navegação e responsividade, sem publicar.

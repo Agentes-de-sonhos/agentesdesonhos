@@ -9,6 +9,7 @@ import { AGENCY_PUBLIC_TOOL_ROUTES } from "@/lib/agencyPublicToolRoutes";
 import { shouldNoindexAgencyPath } from "@/lib/agencySlugRouting";
 import { useNoindex } from "@/hooks/useNoindex";
 import { AgencySitePasswordGate } from "@/components/whitelabel/AgencySitePasswordGate";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
@@ -24,6 +25,7 @@ const CarteiraPublicaV2 = lazy(() => import("@/pages/CarteiraPublicaV2"));
 const FaturaPublica = lazy(() => import("@/pages/FaturaPublica"));
 const PoliticasPrivacidade = lazy(() => import("@/pages/PoliticasPrivacidade"));
 const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
+const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 
 const Fallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -185,6 +187,11 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               element={<StandaloneTool info={info} kind={r.kind} />}
             />
           ))}
+
+          {/* Landing institucional standalone, protegida pelo gate e isolada por perfil/hostname. */}
+          {resolveSiteProfile(info.hostname).key === "editorialRose" && (
+            <Route path="/xcaret" element={<XcaretLandingPage info={info} />} />
+          )}
 
           {/* Todas as demais rotas mantêm o chrome atual do site white label. */}
           <Route
