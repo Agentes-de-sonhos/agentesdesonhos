@@ -61,7 +61,15 @@ export interface AgencySectionCopy {
   title?: string;
   subtitle?: string;
   cta?: string;
+  /**
+   * Superfície opcional da seção. Ausente preserva o fundo padrão de marca;
+   * "navy" reaproveita o azul editorial já usado na seção de cruzeiros.
+   */
+  surface?: "navy";
+  /** Mantém o título em uma única linha em telas largas. */
+  titleSingleLine?: boolean;
 }
+
 
 export interface AgencyAuthorityContent {
   kicker: string;
