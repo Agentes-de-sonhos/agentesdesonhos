@@ -3,6 +3,8 @@ import xplorAsset from "@/assets/whitelabel/xcaret/xplor.webp.asset.json";
 import xplorFuegoAsset from "@/assets/whitelabel/xcaret/xplor-fuego.webp.asset.json";
 import xensesAsset from "@/assets/whitelabel/xcaret/xenses.webp.asset.json";
 import xoximilcoAsset from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
+import hotelMexicoAsset from "@/assets/whitelabel/xcaret/hotel-xcaret-mexico.webp.asset.json";
+import hotelArteAsset from "@/assets/whitelabel/xcaret/hotel-xcaret-arte.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
 
@@ -29,8 +31,8 @@ export const XCARET_IMAGES = {
   mexicoShow: official("https://www.xcaret.com/img/og/mexico-espectacular-og.jpg", "Artistas no espetáculo Xcaret México Espectacular", "https://www.xcaret.com/en/attractions/xcaret-mexico-espectacular/"),
   xenotes: official("https://www.xenotes.com/img/og/xenotes-og.jpg", "Cenote cercado pela vegetação da Riviera Maya", "https://www.xcaret.com/en/parks-and-tours/tour-xenotes/"),
   chichen: official("https://www.xcaret.com/img/og/chichen-itza-og.jpg", "Pirâmide de Chichén Itzá no México", "https://www.xcaret.com/en/parks-and-tours/tour-to-chichen-itza-clasico/"),
-  hotelMexico: official("https://www.hotelxcaret.com/img/og/hxm-og.jpg", "Piscinas e arquitetura do Hotel Xcaret México", "https://www.hotelxcaret.com/en/hotel-xcaret-mexico/"),
-  hotelArte: official("https://www.hotelxcaret.com/img/og/hxa-og.jpg", "Arquitetura e paisagem do Hotel Xcaret Arte", "https://www.hotelxcaretarte.com/en/"),
+  hotelMexico: official(hotelMexicoAsset.url, "Piscinas e arquitetura do Hotel Xcaret México", "https://hotel-xcaret-mexico.firstview.us/en/imagenes-multimedia"),
+  hotelArte: official(hotelArteAsset.url, "Piscina do Hotel Xcaret Arte", "https://hotel-xcaret-arte.firstview.us/en/imagenes-multimedia/infinity-pool-cayuco/contenido"),
   casaPlaya: official("https://www.lacasadelaplaya.com/img/og/lcdlp-og.jpg", "La Casa de la Playa diante do Caribe mexicano", "https://www.lacasadelaplaya.com/en/gallery/"),
 } as const;
 
