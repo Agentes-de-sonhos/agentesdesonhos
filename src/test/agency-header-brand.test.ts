@@ -21,7 +21,7 @@ describe("cabeçalho somente com logotipo por tenant", () => {
     const destinos = resolveAgencyHeaderBrandPreset("destinoscomaju.com.br");
     expect(destinos.logoClassName).toContain("md:h-24");
     expect(destinos.logoClassName).toContain("md:max-w-[180px]");
-    expect(destinos.logoUrl).toContain("logo-destinos-com-a-ju-setembro-2026.png");
+    expect(destinos.logoUrl).toContain("logo-destinos-com-a-ju-transparente.png");
     expect(resolveAgencyHeaderBrandPreset("paraisoviagens.com").logoClassName).toContain("md:h-16");
     expect(resolveAgencyHeaderBrandPreset("100limites.tur.br").logoClassName).toContain("md:h-[72px]");
     expect(resolveAgencyHeaderBrandPreset("essyatur.com.br").logoClassName).toContain("md:h-24");
