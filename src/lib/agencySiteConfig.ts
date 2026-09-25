@@ -150,6 +150,8 @@ export interface AgencyHeroSlide {
   title: string;
   /** `{agency}` is replaced by the agency display name. */
   subtitle: string;
+  /** Imagem editorial opcional por slide; ausente preserva o fallback atual. */
+  image?: AgencyImageSlot;
   order: number;
   enabled: boolean;
 }
@@ -203,6 +205,7 @@ export function resolveHeroSlides(
   coverImageUrl?: string | null,
   overrides?: AgencyHeroSlide[],
   fallbackImage?: string | null,
+  imageSlots?: Partial<Record<AgencyImageSlot, string>>,
 ): ResolvedHeroSlide[] {
   const source = (overrides?.length ? overrides : DEFAULT_HERO_SLIDES)
     .filter((s) => s.enabled && s.title.trim())
@@ -214,7 +217,7 @@ export function resolveHeroSlides(
   return list.map((s) => ({
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
-    image: coverImageUrl ?? fallbackImage ?? null,
+    image: coverImageUrl ?? (s.image ? imageSlots?.[s.image] : undefined) ?? fallbackImage ?? null,
   }));
 }
 
@@ -364,21 +367,19 @@ export interface AgencyDmcConfig {
  */
 export const DMC_BY_HOSTNAME: Record<string, AgencyDmcConfig> = (() => {
   const cemLimites: AgencyDmcConfig = {
-    kicker: "EXCLUSIVO PARA AGÊNCIAS DE VIAGENS",
+    kicker: "PARA AGÊNCIAS DE VIAGENS",
     title: "Sua DMC em Portugal",
-    text: "Conte com apoio local para criar experiências personalizadas para seus clientes em Portugal. Transfers privativos, passeios, roteiros sob medida, acompanhamento e serviços de concierge, coordenados com atenção a cada detalhe da viagem.",
+    text: "Uma parceira local para cuidar dos seus passageiros em Portugal. Com Amanda Larini em Lisboa, sua agência conta com apoio para organizar serviços e experiências sob medida, com atenção ao perfil de cada cliente e aos detalhes da operação.",
     services: [
       { key: "transfers", label: "Transfers privativos" },
       { key: "passeios", label: "Passeios e experiências" },
       { key: "roteiros", label: "Roteiros personalizados" },
       { key: "acompanhamento", label: "Acompanhamento local" },
-      { key: "guias", label: "Guias e parceiros especializados" },
-      { key: "concierge", label: "Concierge em Portugal" },
     ],
-    cta: "Falar sobre uma parceria",
+    cta: "Solicitar cotação para minha agência",
     whatsappMessage:
-      "Olá! Sou agente de viagens e gostaria de conhecer os serviços DMC da 100 Limites em Portugal.",
-    note: "Atuamos como parceira receptiva da sua agência: o cliente final continua sendo seu.",
+      "Olá, Amanda! Sou agente de viagens e gostaria de solicitar uma cotação de serviços da DMC em Portugal para meus clientes.",
+    note: "Cuidamos dos seus passageiros em parceria com sua agência, respeitando o relacionamento que você construiu com eles.",
     presentation: {
       surface: "light",
       imageUrl: dmcCristianePortugal.url,

@@ -363,7 +363,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
                 <BrandText>{name}</BrandText>
               </p>
             )}
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
+            <p className="mt-5 max-w-sm whitespace-pre-line text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
               {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
             </p>
             {(footer?.address || location) && (

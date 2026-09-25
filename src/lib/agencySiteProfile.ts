@@ -146,15 +146,134 @@ export interface AgencySiteProfile {
     image?: string;
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
     badge?: { value: string; label?: string };
+    /** Fatos institucionais confirmados, apresentados separadamente. */
+    facts?: string[];
+    /** Oculta o painel de imagem quando não existe retrato real autorizado. */
+    media?: "default" | "hidden";
   };
+  /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
+  conciergeSteps?: string[];
 }
 
 /* ------------------------------ PERFIS ------------------------------ */
 
 const CLASSIC: AgencySiteProfile = { key: "classic" };
 
-/** 100 Limites — DMC em Portugal, visual editorial vermelho (sem regressão). */
-const EDITORIAL_DMC: AgencySiteProfile = { key: "editorialDmc" };
+/** 100 Limites — consultoria global para passageiros e DMC em Portugal. */
+const EDITORIAL_DMC: AgencySiteProfile = {
+  key: "editorialDmc",
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Viagens", to: "/#destaques" },
+    { label: "Para agências", to: "/#dmc-agencias" },
+    { label: "Ofertas", to: "/ofertas" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Dúvidas", to: "/#faq" },
+  ],
+  sections: {
+    dmc: { enabled: true, order: 0 },
+    destinations: { order: 2 },
+    highlights: { order: 3 },
+    modules: { enabled: false },
+    about: { order: 5 },
+    differentials: { order: 6 },
+    concierge: { order: 7 },
+    faq: { order: 10 },
+  },
+  hero: [
+    {
+      title: "Seu próximo destino, com uma viagem feita para você",
+      subtitle: "Viagens pelo Brasil e pelo mundo, com planejamento cuidadoso e o melhor equilíbrio entre experiência e investimento.",
+      image: "brasil",
+      order: 1,
+      enabled: true,
+    },
+    {
+      title: "Em família, a dois ou entre amigos",
+      subtitle: "Roteiros pensados para o seu momento, com hospedagens, passeios e deslocamentos organizados no seu ritmo.",
+      image: "parques",
+      order: 2,
+      enabled: true,
+    },
+    {
+      title: "Atendimento próximo em cada etapa da viagem",
+      subtitle: "Conte com Amanda Larini para planejar, esclarecer dúvidas e acompanhar sua viagem, do primeiro contato ao retorno.",
+      image: "europa",
+      order: 3,
+      enabled: true,
+    },
+  ],
+  heroPresentation: {
+    kicker: "VIAGENS PERSONALIZADAS · BRASIL E MUNDO",
+  },
+  requestCenter: {
+    notice: "Cada solicitação é analisada pela Amanda, considerando seu perfil, suas preferências e o investimento que você deseja fazer.",
+  },
+  destinations: [
+    { key: "brasil-nordeste", image: "brasil", label: "Brasil", title: "Brasil e Nordeste", text: "Praias, natureza e cultura em diferentes regiões do país.", service: "pacotes", enabled: true, order: 1 },
+    { key: "europa-portugal", image: "europa", label: "Europa", title: "Europa e Portugal", text: "Cidades, paisagens e experiências com deslocamentos bem planejados.", service: "pacotes", enabled: true, order: 2 },
+    { key: "orlando-parques", image: "parques", label: "Família", title: "Orlando e parques", text: "Parques, ingressos, hospedagem e deslocamentos organizados no seu ritmo.", service: "ingressos", enabled: true, order: 3 },
+    { key: "caribe-mexico", image: "litoral", label: "Caribe", title: "Caribe e México", text: "Praias, resorts e experiências escolhidas para o seu perfil.", service: "pacotes", enabled: true, order: 4 },
+    { key: "america-sul", image: "safari", label: "América do Sul", title: "América do Sul", text: "Cultura, gastronomia e grandes paisagens perto de casa.", service: "pacotes", enabled: true, order: 5 },
+  ],
+  highlights: [
+    { title: "Viagens em família", text: "Hospedagens, passeios e deslocamentos pensados para diferentes idades, com atenção ao conforto e ao ritmo da família.", service: "pacotes", cta: "Planejar em família" },
+    { title: "Lua de mel", text: "Uma viagem para celebrar a dois, com destinos e experiências escolhidos conforme os seus desejos.", service: "pacotes", cta: "Planejar nossa viagem" },
+    { title: "Entre amigos", text: "Preferências combinadas e logística organizada para aproveitar a viagem com quem faz parte da sua história.", service: "pacotes", cta: "Planejar com amigos" },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Conheça Amanda Larini",
+    text: "À frente da 100 Limites desde 2015, Amanda Larini reúne mais de 20 anos de experiência no turismo e acompanha de perto o planejamento de cada cliente.\n\nSeu trabalho começa pela escuta: entender os gostos, as expectativas e o investimento de quem vai viajar para organizar uma experiência que faça sentido do início ao fim.\n\nHoje, vivendo em Lisboa, Amanda continua atendendo passageiros com viagens pelo Brasil e pelo mundo. Em Portugal, também atua como parceira de agências brasileiras, oferecendo serviços receptivos e apoio local aos seus clientes.",
+    facts: ["100 Limites desde 2015", "Mais de 20 anos de experiência da Amanda no turismo"],
+    media: "hidden",
+  },
+  differentials: [
+    { title: "Atendimento com a Amanda", text: "Seu planejamento é acompanhado por quem conhece suas preferências e participa das decisões com você.", icon: "consultivo" },
+    { title: "Reservas reconfirmadas", text: "Conferência dos serviços contratados, pagamentos e detalhes importantes antes da viagem.", icon: "conferido" },
+    { title: "Preparação antes do embarque", text: "Roteiro personalizado e reunião online para revisar a programação e esclarecer dúvidas.", icon: "fornecedores" },
+    { title: "Acompanhamento durante a viagem", text: "Apoio para orientações e imprevistos, com continuidade no atendimento até o retorno.", icon: "acompanhamento" },
+  ],
+  conciergeWhatsappLabel: "Falar com a Amanda",
+  conciergeSteps: [
+    "Conte sua ideia, suas preferências e o investimento previsto.",
+    "Receba uma proposta personalizada e ajuste os detalhes com a Amanda.",
+    "Confirme os serviços e prepare o embarque com as orientações da agência.",
+    "Consulte os documentos disponibilizados na Área do Cliente e conte com acompanhamento durante a viagem.",
+  ],
+  faq: [
+    { q: "Vocês organizam viagens apenas para Portugal?", a: "Não. A 100 Limites planeja viagens para destinos no Brasil e no mundo, conforme o perfil e as preferências de cada cliente." },
+    { q: "O atendimento pode ser feito online?", a: "Sim. O atendimento acontece por WhatsApp, e-mail e videochamada, permitindo organizar sua viagem de onde você estiver." },
+    { q: "Posso contratar serviços separados?", a: "Sim. Você pode solicitar serviços como passagens, hospedagem, transfers, ingressos e seguro, ou planejar uma viagem completa." },
+    { q: "Sou agente de viagens. Como solicito serviços em Portugal?", a: "Acesse a seção ‘Sua DMC em Portugal’ e clique em ‘Solicitar cotação para minha agência’. Informe os dados da viagem e os serviços desejados." },
+    { q: "A Amanda acompanha pessoalmente os passeios?", a: "O acompanhamento pode ser organizado conforme o roteiro, o serviço contratado e a disponibilidade. Essa condição é combinada na proposta." },
+    { q: "Como acompanho a minha viagem depois de fechar?", a: "Os documentos disponibilizados pela agência ficam reunidos na Área do Cliente para consulta durante a sua viagem." },
+  ],
+  footer: {
+    description: "Viagens pelo Brasil e pelo mundo. DMC em Portugal para agências parceiras.\nAtendimento online com Amanda Larini.",
+  },
+  copy: {
+    destinations: {
+      title: "Descubra o seu próximo destino",
+      subtitle: "Algumas inspirações para começar. Seu próximo destino pode estar aqui ou em qualquer outro lugar do mundo.",
+    },
+    highlights: {
+      title: "Uma viagem para cada momento",
+      subtitle: "O planejamento acompanha o seu jeito de viajar e as pessoas que vão com você.",
+    },
+    differentials: {
+      title: "Como cuidamos da sua viagem",
+    },
+    concierge: {
+      kicker: "ATENDIMENTO PERSONALIZADO",
+      title: "Vamos planejar sua próxima viagem?",
+      subtitle: "Conte para a Amanda para onde você quer ir, com quem pretende viajar e o que espera dessa experiência. A partir disso, vocês constroem uma proposta alinhada ao seu perfil.",
+      cta: "Solicitar atendimento",
+    },
+    faq: { title: "Perguntas frequentes" },
+  },
+};
 
 /** Paraíso Viagens — curadoria de luxo, sem DMC e sem depoimentos. */
 const LUXURY_CURATED: AgencySiteProfile = {
