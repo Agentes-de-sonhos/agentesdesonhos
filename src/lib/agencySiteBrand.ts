@@ -9,6 +9,7 @@
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { isEditorialTheme, isLuxuryTheme } from "@/lib/agencySiteTheme";
 import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
+import destinosComAJuHeaderLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-setembro-2026.png.asset.json";
 import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import paraisoFavicon from "@/assets/whitelabel/favicon-paraiso-viagens.png.asset.json";
@@ -58,6 +59,8 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
 
 export interface AgencyHeaderBrandPreset {
   logoOnly: boolean;
+  /** Optional artwork used only in the site header. */
+  logoUrl?: string;
   /** Stable header height across mobile and desktop. */
   headerClassName: string;
   /** Tenant-specific logo box; the source artwork remains unchanged. */
@@ -90,13 +93,15 @@ const LUXURY_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
 const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
   "destinoscomaju.com.br": {
     logoOnly: true,
+    logoUrl: destinosComAJuHeaderLogo.url,
     headerClassName: "h-[88px] md:h-[112px]",
-    logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[150px]",
+    logoClassName: "h-[72px] w-auto max-w-[165px] object-contain md:h-24 md:max-w-[180px]",
   },
   "www.destinoscomaju.com.br": {
     logoOnly: true,
+    logoUrl: destinosComAJuHeaderLogo.url,
     headerClassName: "h-[88px] md:h-[112px]",
-    logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[150px]",
+    logoClassName: "h-[72px] w-auto max-w-[165px] object-contain md:h-24 md:max-w-[180px]",
   },
   "paraisoviagens.com": {
     logoOnly: true,
