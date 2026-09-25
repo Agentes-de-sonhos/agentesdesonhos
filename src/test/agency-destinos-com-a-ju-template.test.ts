@@ -5,9 +5,11 @@ import { isUnderConstruction } from "@/lib/agencySiteStatus";
 import { resolveDmc, resolveSections } from "@/lib/agencySiteConfig";
 import { resolveAgencyFaviconUrl, resolveAgencyLogoOverride } from "@/lib/agencySiteBrand";
 import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
+import { readFileSync } from "node:fs";
 
 const JU_HOSTS = ["destinoscomaju.com.br", "www.destinoscomaju.com.br"];
 const LIMITES = "100limites.tur.br";
+const homeSource = readFileSync("src/pages/whitelabel/AgencySiteHome.tsx", "utf8");
 
 describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
   it("está no ar com o site completo, mantendo o template configurado", () => {
@@ -49,6 +51,25 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
         cta: { label: "Começar a planejar", service: "pacotes" },
       });
       expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
+    }
+  });
+
+  it("mantém a Central compacta com título externo, CTA curto e aviso aprovado", () => {
+    const requestCenter = resolveSiteProfile(JU_HOSTS[0]).requestCenter;
+    expect(requestCenter).toEqual({
+      title: "Por onde você quer começar?",
+      notice: "Sua solicitação não é processada automaticamente. Cada pedido é analisado com atenção para que as opções realmente façam sentido para a sua viagem.",
+      submitLabel: "Solicitar",
+      titlePlacement: "above-card",
+    });
+    expect(requestCenter?.support).toBeUndefined();
+    expect(homeSource).toContain('titlePlacement === "above-card"');
+    expect(homeSource).toContain("text-white");
+  });
+
+  it("preserva o padrão interno compartilhado nos demais perfis", () => {
+    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+      expect(resolveSiteProfile(host).requestCenter?.titlePlacement).not.toBe("above-card");
     }
   });
 

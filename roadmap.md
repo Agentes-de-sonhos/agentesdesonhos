@@ -33,3 +33,4 @@
 - [x] Evolução editorial exclusiva da Destinos com a Ju: conteúdo aprovado, testes focados, typecheck, build e conferência visual, sem publicar.
 - [x] Correção final declarativa da Destinos com a Ju: hero, menu, WhatsApp e resolução por hostname; teste focado e typecheck, sem publicar.
 - [x] Padronizar tipografia e largura dos sites white label, corrigir newsletter e validar desktop/mobile, sem publicar.
+- [x] Restaurar a Central compacta da Destinos com a Ju com título externo e CTA “Solicitar”, sem alterar outros tenants.

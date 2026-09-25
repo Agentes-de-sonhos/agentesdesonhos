@@ -129,6 +129,8 @@ export interface AgencySiteProfile {
     support?: string;
     notice?: string;
     submitLabel?: string;
+    /** Onde o título aparece; o padrão mantém título e apoio dentro do card. */
+    titlePlacement?: "inside-card" | "above-card";
   };
   /** Conteúdo institucional da seção "about" quando o perfil define a redação. */
   about?: {
@@ -348,9 +350,9 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   ],
   requestCenter: {
     title: "Por onde você quer começar?",
-    support: "Conte o que está planejando. A Juliana analisará pessoalmente a sua solicitação e entrará em contato para entender todos os detalhes.",
     notice: "Sua solicitação não é processada automaticamente. Cada pedido é analisado com atenção para que as opções realmente façam sentido para a sua viagem.",
-    submitLabel: "Enviar solicitação",
+    submitLabel: "Solicitar",
+    titlePlacement: "above-card",
   },
   signature: {
     kicker: "O JEITO DESTINOS COM A JU DE PLANEJAR",
