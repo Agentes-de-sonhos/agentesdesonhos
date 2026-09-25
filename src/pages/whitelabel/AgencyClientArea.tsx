@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";

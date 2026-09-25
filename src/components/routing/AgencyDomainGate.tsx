@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import {
   agencyHostFromLocation,
   fetchAgencyBySlug,
