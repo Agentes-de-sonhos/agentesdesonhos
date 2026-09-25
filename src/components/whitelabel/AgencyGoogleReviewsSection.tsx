@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
 import { googleReviewsFallbackUrl, type GoogleReview } from "@/lib/agencyGoogleReviews";
