@@ -142,7 +142,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     for (const hostname of JU_HOSTS) {
       const info = { hostname, logo_url: null } as Parameters<typeof resolveAgencyFaviconUrl>[0];
       expect(resolveAgencyFaviconUrl(info)).toContain("favicon-destinos-com-a-ju.png");
-      expect(resolveAgencyLogoOverride(hostname)).toContain("logo-destinos-com-a-ju-2026.png");
+      expect(resolveAgencyLogoOverride(hostname)).toContain("logo-destinos-com-a-ju-transparente.png");
     }
   });
 
