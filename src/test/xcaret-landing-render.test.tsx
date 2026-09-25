@@ -3,6 +3,12 @@ import { render, screen } from "@testing-library/react";
 import { Hero, Specialist, Closing } from "@/pages/whitelabel/XcaretLandingPage";
 import { XCARET_IMAGES, XCARET_MEDIA_SLOTS } from "@/components/landing/xcaret/content";
 
+class IO { observe() {} unobserve() {} disconnect() {} takeRecords() { return []; } }
+class RO { observe() {} unobserve() {} disconnect() {} }
+(globalThis as any).IntersectionObserver ??= IO;
+(globalThis as any).ResizeObserver ??= RO;
+window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, onchange: null, dispatchEvent: () => false })) as any;
+
 const img = (n: string) => ({ src: `/fixture/${n}.webp`, alt: `fixture ${n}`, source: "fixture" });
 const full = { portraitJuliana: img("portrait"), trainingPhoto: img("training"), expertBadge: img("badge"), julianaAtDestination: img("destino") };
 
