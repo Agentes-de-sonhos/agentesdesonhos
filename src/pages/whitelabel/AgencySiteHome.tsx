@@ -1251,7 +1251,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           className={`relative ${container} ${
             editorial
               ? profile.heroPresentation?.actionsPlacement === "right"
-                ? "pb-6 pt-12 md:pb-8 md:pt-14"
+                ? "pb-10 pt-12 md:pb-16 md:pt-14"
                 : "pb-6 pt-20 md:pb-8 md:pt-24"
               : "pb-10 pt-20 md:pt-32"
           }`}
