@@ -57,6 +57,8 @@ import destinoNorteAfrica from "@/assets/whitelabel/destino-norte-africa.jpg";
 import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
 import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import disneyWishCruise from "@/assets/whitelabel/destinos-com-a-ju/disney-wish-cruise.mp4.asset.json";
+import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front.webp.asset.json";
+import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
@@ -84,6 +86,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   gastronomia: destinoGastronomia,
   brasil: destinoBrasil,
   luademel: destinoLuaDeMel,
+  destinosStorefrontFront: destinosStorefrontFront.url,
+  destinosStorefrontSide: destinosStorefrontSide.url,
   norteafrica: destinoNorteAfrica,
   escandinavia: destinoEscandinavia,
   grupos: destinoGrupos,
@@ -794,15 +798,35 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     )}
                   </div>
                 </div>
-                {aboutCopy?.media !== "hidden" && <div className="overflow-hidden rounded-xl">
-                  <img
-                    src={info.cover_image_url || (aboutCopy?.image ? DESTINATION_IMAGES[aboutCopy.image] : undefined) || destinoEuropa}
-                    alt={`Viagens acompanhadas pela ${name}`}
-                    loading="lazy"
-                    width={900}
-                    height={1100}
-                    className="aspect-[4/5] w-full object-cover"
-                  />
+                {aboutCopy?.media !== "hidden" && <div className="grid gap-4">
+                  {aboutCopy?.images?.length ? (
+                    <div className="grid gap-4 sm:grid-cols-[1.05fr_0.95fr] md:grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+                      {aboutCopy.images.slice(0, 2).map((image, index) => (
+                        <figure key={image.src} className="overflow-hidden rounded-xl bg-muted">
+                          <img
+                            src={image.src}
+                            alt={image.alt}
+                            loading="lazy"
+                            width={900}
+                            height={1100}
+                            className={`w-full object-cover ${index === 0 ? "aspect-[4/5]" : "aspect-[4/5] sm:mt-10 md:mt-0 lg:mt-10"}`}
+                            style={{ objectPosition: image.position ?? "center" }}
+                          />
+                        </figure>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="overflow-hidden rounded-xl">
+                      <img
+                        src={info.cover_image_url || (aboutCopy?.image ? DESTINATION_IMAGES[aboutCopy.image] : undefined) || destinoEuropa}
+                        alt={`Viagens acompanhadas pela ${name}`}
+                        loading="lazy"
+                        width={900}
+                        height={1100}
+                        className="aspect-[4/5] w-full object-cover"
+                      />
+                    </div>
+                  )}
                 </div>}
               </div>
             </section>

@@ -96,6 +96,7 @@ export function resolveSections(
 export type AgencyImageSlot =
   | "litoral" | "resort" | "cruzeiro" | "europa" | "parques"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
+  | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos";
 
 export interface AgencyModule {

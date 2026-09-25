@@ -19,7 +19,7 @@ describe("landing Xcaret da Destinos com a Ju", () => {
     expect(XCARET_HERO_SLIDES).toHaveLength(6);
     expect(XCARET_EXPERIENCES).toHaveLength(5);
     expect(XCARET_FAQ).toHaveLength(7);
-    expect(Object.values(XCARET_MEDIA_SLOTS).every((slot) => slot === null)).toBe(true);
+    expect(Object.values(XCARET_MEDIA_SLOTS).every((slot) => slot?.src)).toBe(true);
     expect((source.match(/<section id=/g) ?? []).length).toBe(10); expect(source).toContain("<Specialist />");
     expect(source).toContain("Hotel Xcaret México");
     expect(source).toContain("Hotel Xcaret Arte");

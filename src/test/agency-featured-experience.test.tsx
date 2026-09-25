@@ -18,6 +18,8 @@ describe("Experiência em destaque", () => {
     render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
     expect(screen.getByRole("heading", { level: 2 }).textContent).toContain("Xcaret com o olhar");
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
+    expect(screen.getByAltText(/Selo Xperts Xcaret 2026/)).toBeTruthy();
+    expect(screen.getByAltText(/Juliana ao lado do letreiro Xplor/)).toBeTruthy();
     expect(screen.getByRole("link", { name: /Conheça o Xcaret com a Ju/ }).getAttribute("href")).toContain("/xcaret");
   });
 

@@ -22,10 +22,17 @@ describe("landing Xcaret renderizada", () => {
   });
 
   it("slots null omitem imagens sem espaço vazio", () => {
-    const { container } = render(<><Specialist /><Closing /></>);
-    expect(Object.values(XCARET_MEDIA_SLOTS).every((s) => s === null)).toBe(true);
+    const empty = { portraitJuliana: null, trainingPhoto: null, expertBadge: null, julianaAtDestination: null };
+    const { container } = render(<><Specialist slots={empty} /><Closing slots={empty} /></>);
     expect(container.querySelectorAll("img")).toHaveLength(0);
     expect(screen.queryByTestId("specialist-media")).toBeNull();
+  });
+
+  it("slots oficiais usam fotos reais da Juliana e o selo Xperts", () => {
+    expect(XCARET_MEDIA_SLOTS.portraitJuliana?.src).toContain("juliana-xcaret-selfie.webp");
+    expect(XCARET_MEDIA_SLOTS.trainingPhoto?.src).toContain("juliana-xcaret-training.webp");
+    expect(XCARET_MEDIA_SLOTS.expertBadge?.src).toContain("xperts-xcaret-badge.webp");
+    expect(XCARET_MEDIA_SLOTS.julianaAtDestination?.src).toContain("juliana-xcaret-hotel.webp");
   });
 
   it("slots preenchidos renderizam retrato, treinamento, selo e foto no destino", () => {
