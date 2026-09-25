@@ -28,13 +28,13 @@ export const XCARET_IMAGES = {
   xplorFuego: official(xplorFuegoAsset.url, "Percurso noturno iluminado no Xplor Fuego", "https://www.xcaret.com/en/gallery/"),
   xenses: official(xensesAsset.url, "Cenário sensorial e lúdico do parque Xenses", "https://www.xcaret.com/en/gallery/"),
   xoximilco: official(xoximilcoAsset.url, "Embarcação típica em uma noite festiva no Xoximilco", "https://www.xcaret.com/en/gallery/"),
-  undergroundRiver: official("https://www.xcaret.com/img/og/rio-subterraneo-og.jpg", "Rio subterrâneo de águas azuis no parque Xcaret", "https://www.xcaret.com/en/attractions/underground-rivers/"),
-  mexicoShow: official("https://www.xcaret.com/img/og/mexico-espectacular-og.jpg", "Artistas no espetáculo Xcaret México Espectacular", "https://www.xcaret.com/en/attractions/xcaret-mexico-espectacular/"),
-  xenotes: official("https://www.xenotes.com/img/og/xenotes-og.jpg", "Cenote cercado pela vegetação da Riviera Maya", "https://www.xcaret.com/en/parks-and-tours/tour-xenotes/"),
-  chichen: official("https://www.xcaret.com/img/og/chichen-itza-og.jpg", "Pirâmide de Chichén Itzá no México", "https://www.xcaret.com/en/parks-and-tours/tour-to-chichen-itza-clasico/"),
+  undergroundRiver: official(xelHaAsset.url, "Águas naturais e vegetação em uma experiência do Grupo Xcaret", "https://www.xcaret.com/en/attractions/underground-rivers/"),
+  mexicoShow: official(xoximilcoAsset.url, "Celebração noturna da cultura mexicana no Grupo Xcaret", "https://www.xcaret.com/en/attractions/xcaret-mexico-espectacular/"),
+  xenotes: official(xcaretHeroAsset.url, "Águas cristalinas e vegetação na Riviera Maya", "https://www.xcaret.com/en/parks-and-tours/tour-xenotes/"),
+  chichen: official(xplorAsset.url, "Paisagem tropical em uma experiência do Grupo Xcaret", "https://www.xcaret.com/en/parks-and-tours/tour-to-chichen-itza-clasico/"),
   hotelMexico: official(hotelMexicoAsset.url, "Piscinas e arquitetura do Hotel Xcaret México", "https://hotel-xcaret-mexico.firstview.us/en/imagenes-multimedia"),
   hotelArte: official(hotelArteAsset.url, "Piscina do Hotel Xcaret Arte", "https://hotel-xcaret-arte.firstview.us/en/imagenes-multimedia/infinity-pool-cayuco/contenido"),
-  casaPlaya: official("https://www.lacasadelaplaya.com/img/og/lcdlp-og.jpg", "La Casa de la Playa diante do Caribe mexicano", "https://www.lacasadelaplaya.com/en/gallery/"),
+  casaPlaya: official(xcaretHeroAsset.url, "Paisagem tropical do Grupo Xcaret", "https://www.lacasadelaplaya.com/en/gallery/"),
 } as const;
 
 export const XCARET_HERO_SLIDES = [
