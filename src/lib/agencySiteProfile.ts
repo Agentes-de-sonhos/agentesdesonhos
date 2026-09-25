@@ -344,7 +344,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     cta: { label: "Começar a planejar", service: "pacotes" },
   },
   hero: [
-    { title: "Sua viagem importa. \nCada detalhe também.", subtitle: "Consultoria completa e atendimento próximo para você viajar com tranquilidade, segurança e experiências que realmente combinam com você.", order: 1, enabled: true },
+    { title: "Sua viagem importa.\nCada detalhe também.", subtitle: "Consultoria completa e atendimento próximo para você viajar com tranquilidade, segurança \ne experiências que realmente combinam com você.", order: 1, enabled: true },
     { title: "Orlando, Europa, cruzeiros e resorts planejados por quem conhece", subtitle: "Destinos, hospedagens e experiências selecionados de acordo com o perfil, o momento e as prioridades de cada viajante.", order: 2, enabled: true },
     { title: "Do primeiro planejamento ao retorno, você viaja com suporte de verdade", subtitle: "Um atendimento conduzido de perto, com orientação, organização e acompanhamento antes, durante e depois da viagem.", order: 3, enabled: true },
   ],
@@ -423,7 +423,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   },
   copy: {
     destinations: { title: "Inspirações para a sua próxima viagem", subtitle: "Destinos e experiências que fazem parte do repertório da Destinos com a Ju. Escolha uma inspiração e conte como você imagina a sua viagem." },
-    modules: { title: "Viagens que planejamos com atenção a cada detalhe", subtitle: "A Destinos com a Ju combina consultoria, experiência e acompanhamento para criar viagens que respeitam o perfil de cada cliente." },
+    modules: { title: "Viagens que planejamos com atenção \na cada detalhe", subtitle: "A Destinos com a Ju combina consultoria, experiência e acompanhamento para criar viagens que respeitam o perfil de cada cliente." },
     differentials: { title: "O que você encontra na Destinos com a Ju", subtitle: "Mais do que reservas, você recebe orientação, acompanhamento e a tranquilidade de ter alguém cuidando da sua viagem." },
     concierge: { kicker: "SUA VIAGEM REALMENTE IMPORTA", title: "Aqui você não é apenas mais um cliente", subtitle: "Um consultor dedicado acompanha a sua viagem do início ao fim. Você recebe orientação para tomar decisões, entende cada escolha e sabe com quem contar caso aconteça algum imprevisto.", cta: "Solicitar atendimento personalizado" },
     avaliacoes: { kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju", subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes." },
