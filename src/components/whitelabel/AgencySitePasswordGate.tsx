@@ -64,7 +64,7 @@ export function AgencySitePasswordGate({ info, children }: { info: AgencyDomainI
   if (phase === "checking") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <AgencyBrandSpinner hostname={info.hostname} size="lg" />
       </div>
     );
   }
