@@ -1254,7 +1254,13 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               : "pb-10 pt-20 md:pt-32"
           }`}
         >
-          <div className={`${editorial ? AGENCY_HERO_COPY_CLASS : ""} relative`}>
+          <div
+            className={`relative ${
+              editorial && profile.heroPresentation?.actionsPlacement !== "right"
+                ? AGENCY_HERO_COPY_CLASS
+                : "w-full"
+            }`}
+          >
           {editorial ? (
             <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
