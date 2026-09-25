@@ -89,7 +89,7 @@ export function ClientAreaLogin({
 
           {whatsapp && (
             <div className="mt-6">
-              <Button asChild variant="outline" size="lg" className="min-h-11">
+              <Button asChild size="lg" className="wa-cta min-h-11">
                 <a href={whatsapp} target="_blank" rel="noopener noreferrer">
                   <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar com a agência
                 </a>

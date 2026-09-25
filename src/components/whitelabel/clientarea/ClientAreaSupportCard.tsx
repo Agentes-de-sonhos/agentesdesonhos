@@ -50,7 +50,7 @@ export function ClientAreaSupportCard({
 
       <div className="mt-5 flex flex-wrap gap-3">
         {whatsapp ? (
-          <Button asChild size="lg" className="min-h-11">
+          <Button asChild size="lg" className="wa-cta min-h-11">
             <a href={whatsapp} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar com a agência
             </a>
