@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
-  MapPin, CheckCircle2, Quote, Route, UserRound, FileCheck2, LifeBuoy, Handshake,
+  MapPin, CheckCircle2, Quote, Route, UserRound, Users, FileCheck2, LifeBuoy, Handshake,
   Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -161,6 +161,9 @@ const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
   "Roteiros desenhados para cada viajante": Route,
   "Seleção criteriosa de hospedagens": BedDouble,
   "Parceiros especializados": Handshake,
+  "Viagens em família": Users,
+  "Lua de mel": Sparkles,
+  "Entre amigos": UserRound,
 };
 
 /** Ícone semântico por diferencial (um símbolo distinto para cada um). */
@@ -332,6 +335,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         info.cover_image_url,
         profile.hero,
         HERO_IMAGES[profile.heroImage ?? "praia"] ?? heroPraia,
+        DESTINATION_IMAGES,
       ),
     [name, info.cover_image_url, profile],
   );
@@ -724,7 +728,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
-              <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[1.05fr_0.95fr] md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-center gap-10 py-14 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 md:py-24`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
@@ -763,6 +767,15 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   <p className="mt-8 whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base">
                     {bio}
                   </p>
+                  {!!aboutCopy?.facts?.length && (
+                    <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+                      {aboutCopy.facts.map((fact) => (
+                        <li key={fact} className="border-l-2 border-primary pl-4 text-sm font-semibold text-foreground">
+                          {fact}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <div className="mt-8 space-y-2 border-t border-foreground/10 pt-6">
                     {info.owner_name && (
                       <p className="text-sm text-muted-foreground">
@@ -770,14 +783,14 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         <span className="font-semibold text-foreground">{info.owner_name}</span>
                       </p>
                     )}
-                    {location && (
+                    {location && aboutCopy?.showLocation !== false && (
                       <p className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" aria-hidden="true" /> {location}
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="overflow-hidden rounded-xl">
+                {aboutCopy?.media !== "hidden" && <div className="overflow-hidden rounded-xl">
                   <img
                     src={info.cover_image_url || (aboutCopy?.image ? DESTINATION_IMAGES[aboutCopy.image] : undefined) || destinoEuropa}
                     alt={`Viagens acompanhadas pela ${name}`}
@@ -786,7 +799,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     height={1100}
                     className="aspect-[4/5] w-full object-cover"
                   />
-                </div>
+                </div>}
               </div>
             </section>
           );
@@ -931,12 +944,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     Como funciona
                   </h3>
                   <ol className="mt-7 space-y-6">
-                    {[
+                    {(profile.conciergeSteps ?? [
                       "Você envia a solicitação pela Central.",
                       "Montamos as melhores opções para o seu perfil.",
                       "Você recebe um orçamento claro para decidir.",
                       "Reservado, tudo fica na sua Área do Cliente.",
-                    ].map((step, i) => (
+                    ]).map((step, i) => (
                       <li key={step} className="flex gap-4">
                         <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/12 text-sm font-bold text-primary">
                           {i + 1}
