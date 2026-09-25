@@ -15,7 +15,6 @@ import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.we
 import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
 import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front.webp.asset.json";
-import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import {
   type AgencyDestination,
   type AgencyDifferential,
@@ -553,8 +552,8 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     image: "destinosStorefrontFront",
     images: [
       { src: destinosStorefrontFront.url, alt: "Fachada da loja Destinos com a Ju na Rua Pontins em Santana", position: "center" },
-      { src: destinosStorefrontSide.url, alt: "Fachada lateral da loja Destinos com a Ju com vitrine de viagem para Paris", position: "center" },
     ],
+
     badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
   },
   differentials: [

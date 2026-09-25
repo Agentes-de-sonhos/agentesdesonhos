@@ -800,7 +800,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 </div>
                 {aboutCopy?.media !== "hidden" && <div className="grid gap-4">
                   {aboutCopy?.images?.length ? (
-                    <div className="grid gap-4 sm:grid-cols-[1.05fr_0.95fr] md:grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]">
+                    <div className={`grid gap-4 ${aboutCopy.images.length > 1 ? "sm:grid-cols-[1.05fr_0.95fr] md:grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]" : "grid-cols-1"}`}>
                       {aboutCopy.images.slice(0, 2).map((image, index) => (
                         <figure key={image.src} className="overflow-hidden rounded-xl bg-muted">
                           <img
@@ -809,12 +809,19 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                             loading="lazy"
                             width={900}
                             height={1100}
-                            className={`w-full object-cover ${index === 0 ? "aspect-[4/5]" : "aspect-[4/5] sm:mt-10 md:mt-0 lg:mt-10"}`}
+                            className={`w-full object-cover ${
+                              aboutCopy.images!.length === 1
+                                ? "aspect-[4/5] md:aspect-[3/4]"
+                                : index === 0
+                                  ? "aspect-[4/5]"
+                                  : "aspect-[4/5] sm:mt-10 md:mt-0 lg:mt-10"
+                            }`}
                             style={{ objectPosition: image.position ?? "center" }}
                           />
                         </figure>
                       ))}
                     </div>
+
                   ) : (
                     <div className="overflow-hidden rounded-xl">
                       <img
