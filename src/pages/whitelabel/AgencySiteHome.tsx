@@ -613,7 +613,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const copy = copyFor("modules");
         if (editorial) {
           return (
-            <section key={key} id="campanhas" className="bg-[hsl(var(--wl-sand))]">
+            <section key={key} id="campanhas" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title={copy.title ?? "Experiências e campanhas"}
@@ -711,7 +711,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const copy = copyFor("destinations");
         if (editorial) {
           return (
-            <section key={key} id="destinos" className="bg-[hsl(var(--wl-sand))]">
+            <section key={key} id="destinos" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title={copy.title ?? "Descubra o seu próximo destino"}
@@ -965,7 +965,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const copy = copyFor("differentials");
         if (editorial) {
           return (
-            <section key={key} id="diferenciais" className="bg-[hsl(var(--wl-sand))]">
+            <section key={key} id="diferenciais" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
                   title={copy.title ?? "Diferenciais"}
@@ -1233,7 +1233,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const copy = copyFor("faq");
         if (editorial) {
           return (
-            <section key={key} id="faq" className="bg-[hsl(var(--wl-sand))]">
+            <section key={key} id="faq" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
               <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
@@ -1628,7 +1628,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 section.key === "modules" ||
                 section.key === "differentials" ||
                 section.key === "faq"
-              ? "bg-[hsl(var(--wl-sand))]"
+              ? "wl-soft-gradient bg-[hsl(var(--wl-sand))]"
               : "bg-background";
         return (
           <div
