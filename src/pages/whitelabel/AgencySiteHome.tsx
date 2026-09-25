@@ -19,6 +19,7 @@ import {
   agencyWhatsappNumber,
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
+import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
@@ -524,6 +525,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
       case "modules":
         {
+        if (profile.featuredExperience?.enabled) {
+          return <AgencyFeaturedExperienceSection key={key} config={profile.featuredExperience} container={container} />;
+        }
         const copy = copyFor("modules");
         if (editorial) {
           return (

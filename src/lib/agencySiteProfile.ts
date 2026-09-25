@@ -9,6 +9,10 @@
  * A engine (`AgencySiteHome`) é única e compartilhada: ela consome o perfil
  * resolvido pelo hostname e nunca contém condicionais de domínio no JSX.
  */
+import xcaretPanorama from "@/assets/whitelabel/xcaret/xcaret-panorama.webp.asset.json";
+import julianaXcaret from "@/assets/whitelabel/xcaret/juliana-xcaret.webp.asset.json";
+import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
+import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import {
   type AgencyDestination,
   type AgencyDifferential,
@@ -159,6 +163,26 @@ export interface AgencySiteProfile {
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
+  /** "Experiência em destaque": quando ativa, ocupa a posição da seção "modules". */
+  featuredExperience?: AgencyFeaturedExperience;
+}
+
+export interface AgencyFeaturedImage { src: string; alt: string; position?: string }
+export interface AgencyFeaturedExperience {
+  enabled: boolean;
+  id?: string;
+  kicker?: string;
+  title: string;
+  description: string;
+  mainImage: AgencyFeaturedImage;
+  consultantImage?: AgencyFeaturedImage | null;
+  badge?: AgencyFeaturedImage | null;
+  secondaryImages?: AgencyFeaturedImage[];
+  highlights?: string[];
+  ctaLabel?: string;
+  /** URL da landing; null mantém o botão inativo, sem link fictício. */
+  ctaHref?: string | null;
+  align?: "left" | "right";
 }
 
 /* ------------------------------ PERFIS ------------------------------ */
@@ -556,6 +580,23 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     whatsapp: "(11) 95741-4840", phone: "(11) 2959-6402", email: "contato@destinoscomaju.com.br",
     instagram: "https://instagram.com/destinoscomaju", instagramLabel: "@destinoscomaju",
     address: "Rua Pontins, 54 — Santana — São Paulo/SP", legalName: "FECAFER Agência de Viagens e Turismo Ltda.", cnpj: "23.593.301/0001-71",
+  },
+  featuredExperience: {
+    enabled: true,
+    id: "experiencia-xcaret",
+    kicker: "EXPERIÊNCIA E ESPECIALIZAÇÃO",
+    title: "Xcaret com o olhar de quem viveu essa experiência",
+    description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
+    mainImage: { src: xcaretPanorama.url, alt: "Vista aérea do Parque Xcaret com mar azul turquesa e vegetação da Riviera Maya", position: "30% center" },
+    consultantImage: { src: julianaXcaret.url, alt: "Juliana ao lado do letreiro Xcaret México durante sua visita ao parque", position: "60% center" },
+    badge: null,
+    secondaryImages: [
+      { src: xcaretSnorkel.url, alt: "Casal fazendo snorkel em águas cristalinas no Xel-Há" },
+      { src: xcaretXoximilco.url, alt: "Festa mexicana em trajinera iluminada no Xoximilco" },
+    ],
+    highlights: ["Experiência vivida no destino", "Conhecimento dos parques e hotéis", "Planejamento personalizado", "Orientação antes, durante e depois da viagem"],
+    ctaLabel: "Conheça o Xcaret com a Ju",
+    ctaHref: "/xcaret",
   },
   copy: {
     destinations: { title: "Inspirações para a sua próxima viagem", subtitle: "Destinos e experiências que fazem parte do repertório da Destinos com a Ju. Escolha uma inspiração e conte como você imagina a sua viagem." },
