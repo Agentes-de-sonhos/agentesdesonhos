@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { SEO } from "@/components/seo/SEO";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   XCARET_EXPERIENCES,
   XCARET_FAQ,
   XCARET_HERO_SLIDES,
+  XCARET_HERO_VIDEO,
   XCARET_IMAGES,
   XCARET_MEDIA_SLOTS,
   xcaretWhatsappUrl,
