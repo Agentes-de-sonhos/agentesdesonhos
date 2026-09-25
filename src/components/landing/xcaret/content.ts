@@ -11,6 +11,10 @@ import mexicoShowAsset from "@/assets/whitelabel/xcaret/mexico-espectacular.webp
 import xenotesAsset from "@/assets/whitelabel/xcaret/xenotes.webp.asset.json";
 import chichenAsset from "@/assets/whitelabel/xcaret/chichen-itza.webp.asset.json";
 import casaPlayaAsset from "@/assets/whitelabel/xcaret/la-casa-de-la-playa.webp.asset.json";
+import julianaXcaretSelfieAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-selfie.webp.asset.json";
+import julianaXcaretTrainingAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-training.webp.asset.json";
+import julianaXcaretHotelAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-hotel.webp.asset.json";
+import xpertsXcaretBadgeAsset from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
 
@@ -72,8 +76,8 @@ export const XCARET_MEDIA_SLOTS: {
   expertBadge: XcaretImage | null;
   julianaAtDestination: XcaretImage | null;
 } = {
-  portraitJuliana: null,
-  trainingPhoto: null,
-  expertBadge: null,
-  julianaAtDestination: null,
+  portraitJuliana: official(julianaXcaretSelfieAsset.url, "Juliana no parque Xcaret ao lado do letreiro comemorativo de 35 anos", "Arquivo enviado pela Destinos com a Ju"),
+  trainingPhoto: official(julianaXcaretTrainingAsset.url, "Juliana segurando certificado de treinamento Xcaret", "Arquivo enviado pela Destinos com a Ju"),
+  expertBadge: official(xpertsXcaretBadgeAsset.url, "Selo Xperts Xcaret 2026 Cancun Riviera Maya México", "PDF enviado pela Destinos com a Ju"),
+  julianaAtDestination: official(julianaXcaretHotelAsset.url, "Juliana em área externa do complexo Xcaret na Riviera Maya", "Arquivo enviado pela Destinos com a Ju"),
 };

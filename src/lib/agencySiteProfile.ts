@@ -10,9 +10,12 @@
  * resolvido pelo hostname e nunca contém condicionais de domínio no JSX.
  */
 import xcaretPanorama from "@/assets/whitelabel/xcaret/xcaret-panorama.webp.asset.json";
-import julianaXcaret from "@/assets/whitelabel/xcaret/juliana-xcaret.webp.asset.json";
+import julianaXcaretAtXplor from "@/assets/whitelabel/xcaret/juliana-xplor-sign.webp.asset.json";
+import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
 import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
+import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front.webp.asset.json";
+import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import {
   type AgencyDestination,
   type AgencyDifferential,
@@ -151,7 +154,8 @@ export interface AgencySiteProfile {
     kicker?: string;
     title?: string;
     text?: string;
-    image?: string;
+    image?: AgencyImageSlot;
+    images?: { src: string; alt: string; position?: string }[];
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
     badge?: { value: string; label?: string };
     /** Fatos institucionais confirmados, apresentados separadamente. */
@@ -547,7 +551,12 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
     title: "Uma história construída por paixão, experiência e proximidade",
     text: "A Destinos com a Ju nasceu em 2013, quando Juliana Neves Sanches transformou sua paixão por viagens em uma agência dedicada a criar experiências personalizadas.\n\nAo longo dos anos, Juliana construiu um repertório especialmente forte em Disney, Universal, viagens internacionais e cruzeiros. É especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em alto-mar, incluindo viagens com MSC, Norwegian e Royal Caribbean.\n\nHoje, a Destinos com a Ju atende diferentes perfis de viajantes, sempre com a mesma essência: ouvir com atenção, planejar cada detalhe e acompanhar o cliente do primeiro contato ao retorno.",
-    image: "europa", badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
+    image: "destinosStorefrontFront",
+    images: [
+      { src: destinosStorefrontFront.url, alt: "Fachada da loja Destinos com a Ju na Rua Pontins em Santana", position: "center" },
+      { src: destinosStorefrontSide.url, alt: "Fachada lateral da loja Destinos com a Ju com vitrine de viagem para Paris", position: "center" },
+    ],
+    badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
   },
   differentials: [
     { title: "Atendimento conduzido de perto", text: "A Juliana participa do planejamento e acompanha pessoalmente cada cliente durante as principais etapas da viagem.", icon: "consultivo" },
@@ -588,8 +597,8 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     title: "Xcaret com o olhar de quem viveu essa experiência",
     description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
     mainImage: { src: xcaretPanorama.url, alt: "Vista aérea do Parque Xcaret com mar azul turquesa e vegetação da Riviera Maya", position: "30% center" },
-    consultantImage: { src: julianaXcaret.url, alt: "Juliana ao lado do letreiro Xcaret México durante sua visita ao parque", position: "60% center" },
-    badge: null,
+    consultantImage: { src: julianaXcaretAtXplor.url, alt: "Juliana ao lado do letreiro Xplor por Xcaret em caverna iluminada", position: "50% center" },
+    badge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret 2026 Cancun Riviera Maya México" },
     secondaryImages: [
       { src: xcaretSnorkel.url, alt: "Casal fazendo snorkel em águas cristalinas no Xel-Há" },
       { src: xcaretXoximilco.url, alt: "Festa mexicana em trajinera iluminada no Xoximilco" },

@@ -44,6 +44,8 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       expect(profile.authority?.title).toContain("Cruzeiros");
       expect(profile.authority?.video).toBe("disneyWishCruise");
       expect(profile.about?.text).toContain("Juliana Neves Sanches");
+      expect(profile.about?.image).toBe("destinosStorefrontFront");
+      expect(profile.about?.images).toHaveLength(2);
       expect(profile.faq).toHaveLength(7);
       expect(profile.footer?.cnpj).toBe("23.593.301/0001-71");
       expect(profile.seo?.canonical).toBe("https://www.destinoscomaju.com.br/");
