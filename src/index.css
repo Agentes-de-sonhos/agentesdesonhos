@@ -519,7 +519,8 @@ img {
   --popover: 0 0% 100%;
   --popover-foreground: 216 46% 18%;
 
-  --primary: 335 58% 34%;
+  /* Rosa magenta da marca (#D34A79): mesma cor do botão Entrar da Área do Cliente. */
+  --primary: 339 61% 56%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 340 44% 95%;
