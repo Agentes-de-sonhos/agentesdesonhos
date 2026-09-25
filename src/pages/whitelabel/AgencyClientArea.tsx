@@ -320,7 +320,11 @@ export default function AgencyClientArea({
   if (checking) {
     return (
       <div style={brandStyle} className="flex min-h-[60vh] items-center justify-center" role="status" aria-live="polite">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
+        <AgencyBrandSpinner
+          hostname={hostname}
+          size="md"
+          fallbackClassName="h-6 w-6 animate-spin text-primary"
+        />
         <span className="sr-only">Validando seu acesso…</span>
       </div>
     );
