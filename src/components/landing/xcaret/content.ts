@@ -14,7 +14,6 @@ import casaPlayaAsset from "@/assets/whitelabel/xcaret/la-casa-de-la-playa.webp.
 import julianaXcaretSelfieAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-selfie.webp.asset.json";
 import julianaXcaretTrainingAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-training.webp.asset.json";
 import julianaXcaretHotelAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-hotel.webp.asset.json";
-import julianaXplorSignAsset from "@/assets/whitelabel/xcaret/juliana-xplor-sign.webp.asset.json";
 import xpertsXcaretBadgeAsset from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
@@ -82,8 +81,3 @@ export const XCARET_MEDIA_SLOTS: {
   expertBadge: official(xpertsXcaretBadgeAsset.url, "Selo Xperts Xcaret 2026 Cancun Riviera Maya México", "PDF enviado pela Destinos com a Ju"),
   julianaAtDestination: official(julianaXcaretHotelAsset.url, "Juliana em área externa do complexo Xcaret na Riviera Maya", "Arquivo enviado pela Destinos com a Ju"),
 };
-
-export const XCARET_HOME_IMAGES = {
-  consultant: official(julianaXplorSignAsset.url, "Juliana ao lado do letreiro Xplor por Xcaret em caverna iluminada", "Arquivo enviado pela Destinos com a Ju"),
-  badge: XCARET_MEDIA_SLOTS.expertBadge,
-} as const;
