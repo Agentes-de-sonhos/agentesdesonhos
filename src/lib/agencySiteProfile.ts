@@ -154,7 +154,7 @@ export interface AgencySiteProfile {
     kicker?: string;
     title?: string;
     text?: string;
-    image?: string;
+    image?: AgencyImageSlot;
     images?: { src: string; alt: string; position?: string }[];
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
     badge?: { value: string; label?: string };
