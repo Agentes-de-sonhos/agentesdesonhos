@@ -480,7 +480,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
             </ul>
           </div>
         </div>
-        <div className="border-t border-[var(--brand-border,hsl(var(--wl-ink)_/_0.12))] bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]">
+        <div className={footerBottomClass}>
           <div className={`${siteContainer(true)} py-6 text-xs text-[hsl(var(--wl-ink)_/_0.65)]`}>
             © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
           </div>
