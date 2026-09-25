@@ -553,8 +553,8 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     image: "destinosStorefrontFront",
     images: [
       { src: destinosStorefrontFront.url, alt: "Fachada da loja Destinos com a Ju na Rua Pontins em Santana", position: "center" },
-      { src: destinosStorefrontSide.url, alt: "Fachada lateral da loja Destinos com a Ju com vitrine de viagem para Paris", position: "center" },
     ],
+
     badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
   },
   differentials: [
