@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import {
   agencyHostFromLocation,
   fetchAgencyBySlug,
@@ -15,6 +14,7 @@ import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
 import PublicDomainRoot, { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
 import { resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
+import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 
 import { useNoindex } from "@/hooks/useNoindex";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -24,7 +24,7 @@ const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingS
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <AgencyBrandSpinner size="lg" />
   </div>
 );
 

@@ -1,6 +1,5 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useLocation, useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 import { shouldRenderUnderConstruction, resolveConstructionVariant } from "@/lib/agencySiteStatus";
@@ -10,6 +9,7 @@ import { shouldNoindexAgencyPath } from "@/lib/agencySlugRouting";
 import { useNoindex } from "@/hooks/useNoindex";
 import { AgencySitePasswordGate } from "@/components/whitelabel/AgencySitePasswordGate";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
@@ -29,7 +29,7 @@ const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPag
 
 const Fallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <AgencyBrandSpinner size="lg" />
   </div>
 );
 

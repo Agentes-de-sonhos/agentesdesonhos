@@ -559,6 +559,58 @@ img {
   );
 }
 
+/* Carregamento com a marca: giro 3D suave do símbolo, com leve fade nas bordas
+   da rotação. Respeita a preferência de movimento reduzido do sistema. */
+.wl-brand-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 600px;
+}
+
+.wl-brand-spinner-mark {
+  animation: wl-brand-flip 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+}
+
+@keyframes wl-brand-flip {
+  0% {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.55;
+  }
+  50% {
+    transform: rotateY(180deg);
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotateY(360deg);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-brand-spinner-mark {
+    animation: wl-brand-soft-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes wl-brand-soft-pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
 /* Botão de conversa no WhatsApp: verde do WhatsApp com texto branco.
    Classe utilitária reaproveitada pelo site e pela Área do Cliente. */
 .wa-cta {
