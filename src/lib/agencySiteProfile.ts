@@ -496,10 +496,8 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     { label: "Destinos", to: "/#destinos" },
     { label: "Experiências", to: "/#campanhas" },
     { label: "Cruzeiros", to: "/#autoridade" },
-    { label: "Xcaret", to: "/xcaret" },
     { label: "Ofertas", to: "/ofertas" },
     { label: "Sobre", to: "/#sobre" },
-    { label: "Avaliações", to: "/#avaliacoes" },
   ],
   sections: {
     dmc: { enabled: false }, testimonials: { enabled: false }, team: { enabled: false },
