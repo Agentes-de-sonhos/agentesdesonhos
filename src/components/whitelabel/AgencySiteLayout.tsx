@@ -55,6 +55,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
+  const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
   const navAll = siteNavLinks(info.hostname);
 
   if (editorial) {
@@ -65,9 +66,9 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
           className={`${siteContainer(true)} flex items-center justify-between gap-6 ${headerBrand.headerClassName}`}
         >
           <Link to={agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
-            {logoUrl ? (
+            {headerLogoUrl ? (
               <img
-                src={logoUrl}
+                src={headerLogoUrl}
                 alt={`Logo ${name}`}
                 className={headerBrand.logoClassName}
               />
@@ -77,7 +78,7 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
               </span>
             )}
             {/* Logotipos que já contêm o nome da marca não repetem o wordmark. */}
-            {!headerBrand.logoOnly && !(logoUrl && logoIncludesWordmark(info.hostname)) && (
+            {!headerBrand.logoOnly && !(headerLogoUrl && logoIncludesWordmark(info.hostname)) && (
               <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
                 <BrandText>{name}</BrandText>
               </span>
@@ -163,8 +164,8 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className={`mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 ${headerBrand.headerClassName}`}>
         <Link to={agencyContextHref("/")} className="flex items-center gap-3 min-w-0">
-          {logoUrl ? (
-            <img src={logoUrl} alt={`Logo ${name}`} className={headerBrand.logoClassName} />
+          {headerLogoUrl ? (
+            <img src={headerLogoUrl} alt={`Logo ${name}`} className={headerBrand.logoClassName} />
           ) : (
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground font-semibold">
               {name.slice(0, 1).toUpperCase()}
