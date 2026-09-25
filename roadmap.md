@@ -40,3 +40,4 @@
 - [x] Substituir a foto da seção de cruzeiros da Destinos com a Ju pelo vídeo enviado, com reprodução automática ao entrar na tela.
 - [x] Personalizar integralmente o perfil editorial da 100 Limites para passageiros e agências, sem alterar outros tenants.
 - [x] Criar a landing page Xcaret exclusiva da Destinos com a Ju, com rota protegida, conteúdo, imagens oficiais locais, navegação e responsividade, sem publicar.
+- [x] Aplicar fotos reais da Juliana, selo Xperts e fachadas da loja nas páginas da Destinos com a Ju, sem publicar.
