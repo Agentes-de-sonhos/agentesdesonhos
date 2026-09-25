@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
 import { googleReviewsFallbackUrl, type GoogleReview } from "@/lib/agencyGoogleReviews";
@@ -105,39 +107,59 @@ export function AgencyGoogleReviewsSection({
   return (
     <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="bg-background">
       <div className={`${container} py-14 md:py-24`}>
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-           <div className="min-w-0 flex-1">
+        <div className="flex w-full min-w-0 flex-col gap-6">
+          <div className="min-w-0">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
-             <h2 id="avaliacoes-title" className={`mt-4 ${AGENCY_SECTION_TITLE_CLASS}`}>
+            <h2
+              id="avaliacoes-title"
+              className={`mt-4 ${AGENCY_SECTION_TITLE_CLASS} lg:whitespace-nowrap lg:text-[clamp(1.75rem,2.45vw,2.5rem)]`}
+            >
               {copy?.title ?? "O que dizem nossos viajantes"}
             </h2>
-             {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
-            {data && data.rating != null && (
-              <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+            {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
+          </div>
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            {data && data.rating != null ? (
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="text-2xl font-bold text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</span>
                 <Stars value={data.rating} className="h-5 w-5" />
                 {data.total != null && <span>{data.total.toLocaleString("pt-BR")} avaliações no Google</span>}
               </div>
+            ) : <span />}
+            {googleUrl && (
+              <Button asChild variant="outline" size="lg" className="self-start md:self-auto">
+                <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+                  Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+                </a>
+              </Button>
             )}
           </div>
-          {googleUrl && (
-            <Button asChild variant="outline" size="lg" className="self-start md:self-auto">
-              <a href={googleUrl} target="_blank" rel="noopener noreferrer">
-                Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
-              </a>
-            </Button>
-          )}
         </div>
 
         {data ? (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {data.reviews.map((r, i) => <ReviewCard key={`${r.publishTime ?? i}-${i}`} review={r} />)}
-          </div>
+          <Carousel
+            opts={{ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" }}
+            className="mt-10"
+            aria-label="Galeria de avaliações"
+          >
+            <CarouselContent className="-ml-5">
+              {data.reviews.map((r, i) => (
+                <CarouselItem key={`${r.publishTime ?? i}-${i}`} className="pl-5 basis-full sm:basis-1/2 lg:basis-1/3">
+                  <ReviewCard review={r} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="mt-6 flex items-center justify-center gap-3 md:justify-end">
+              <CarouselPrevious className="static h-11 w-11 translate-y-0" />
+              <CarouselNext className="static h-11 w-11 translate-y-0" />
+            </div>
+          </Carousel>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-52 rounded-2xl" />)}
           </div>
         )}
+
         <div className="mt-6 flex flex-col gap-1 text-muted-foreground">
           <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
             Google Maps
