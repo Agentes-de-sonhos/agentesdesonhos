@@ -61,7 +61,10 @@ describe("tipografia compartilhada dos sites white label", () => {
       title: "Receba novidades e oportunidades",
       subtitle: "Deixe o seu contato para receber inspirações de destinos, cruzeiros, resorts e experiências selecionadas pela Destinos com a Ju.",
       cta: "Quero receber inspirações",
+      surface: "navy",
+      titleSingleLine: true,
     });
+
   });
 
   it("preserva textos e temas dos perfis com proporções diferentes", () => {

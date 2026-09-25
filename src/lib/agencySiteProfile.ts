@@ -61,7 +61,15 @@ export interface AgencySectionCopy {
   title?: string;
   subtitle?: string;
   cta?: string;
+  /**
+   * Superfície opcional da seção. Ausente preserva o fundo padrão de marca;
+   * "navy" reaproveita o azul editorial já usado na seção de cruzeiros.
+   */
+  surface?: "navy";
+  /** Mantém o título em uma única linha em telas largas. */
+  titleSingleLine?: boolean;
 }
+
 
 export interface AgencyAuthorityContent {
   kicker: string;
@@ -612,7 +620,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     concierge: { kicker: "SUA VIAGEM REALMENTE IMPORTA", title: "Aqui você não é apenas mais um cliente", subtitle: "Um consultor dedicado acompanha a sua viagem do início ao fim. Você recebe orientação para tomar decisões, entende cada escolha e sabe com quem contar caso aconteça algum imprevisto.", cta: "Solicitar atendimento personalizado" },
     avaliacoes: { kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju", subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes." },
     faq: { title: "Dúvidas frequentes" },
-    newsletter: { kicker: "INSPIRAÇÕES PARA VIAJAR", title: "Receba novidades e oportunidades", subtitle: "Deixe o seu contato para receber inspirações de destinos, cruzeiros, resorts e experiências selecionadas pela Destinos com a Ju.", cta: "Quero receber inspirações" },
+    newsletter: { kicker: "INSPIRAÇÕES PARA VIAJAR", title: "Receba novidades e oportunidades", subtitle: "Deixe o seu contato para receber inspirações de destinos, cruzeiros, resorts e experiências selecionadas pela Destinos com a Ju.", cta: "Quero receber inspirações", surface: "navy", titleSingleLine: true },
   },
 };
 
