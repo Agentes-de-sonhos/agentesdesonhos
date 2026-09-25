@@ -344,20 +344,38 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
       { label: "Termos de Uso", to: "/termosdeuso" },
     ];
+    /**
+     * Acabamento host-scoped do rodapé: rodapé branco e logotipo sem moldura
+     * (arte transparente), no mesmo tamanho do cabeçalho. Outros tenants
+     * mantêm exatamente o acabamento atual.
+     */
+    const plainFooter = profile.key === "editorialRose";
+    const footerShellClass = plainFooter
+      ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-background text-[hsl(var(--wl-ink))]"
+      : "wl-soft-gradient-footer bg-[var(--brand-tertiary,hsl(var(--wl-sand)))] text-[hsl(var(--wl-ink))]";
+    const footerBottomClass = plainFooter
+      ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-background"
+      : "border-t border-[var(--brand-border,hsl(var(--wl-ink)_/_0.12))] bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]";
+    const footerLogoClass = plainFooter
+      ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
+      : "h-12 w-auto max-w-[200px] object-contain";
     return (
-      <footer id="rodape" className="wl-soft-gradient-footer bg-[var(--brand-tertiary,hsl(var(--wl-sand)))] text-[hsl(var(--wl-ink))]">
+      <footer id="rodape" className={footerShellClass}>
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {logoUrl ? (
-              <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
-                <img
-                  src={logoUrl}
-                  alt={`Logo ${name}`}
-                  loading="lazy"
-                  className="h-12 w-auto max-w-[200px] object-contain"
-                />
-              </span>
-
+              plainFooter ? (
+                <img src={logoUrl} alt={`Logo ${name}`} loading="lazy" className={footerLogoClass} />
+              ) : (
+                <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
+                  <img
+                    src={logoUrl}
+                    alt={`Logo ${name}`}
+                    loading="lazy"
+                    className={footerLogoClass}
+                  />
+                </span>
+              )
             ) : (
               <p className="text-lg font-bold tracking-tight text-[hsl(var(--wl-ink))]">
                 <BrandText>{name}</BrandText>
