@@ -24,7 +24,7 @@ const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingS
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <AgencyBrandSpinner size="lg" />
   </div>
 );
 
