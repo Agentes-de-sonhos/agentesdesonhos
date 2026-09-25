@@ -29,7 +29,7 @@ const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPag
 
 const Fallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    <AgencyBrandSpinner size="lg" />
   </div>
 );
 
