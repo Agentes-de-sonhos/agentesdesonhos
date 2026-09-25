@@ -537,8 +537,25 @@ img {
   --wl-red: 337 61% 48%;
   --wl-navy: 216 52% 20%;
   --wl-ink: 216 52% 16%;
-  --wl-sand: 340 42% 96%;
+  /* Rosé perolado (quase branco): superfícies leves e acabamento editorial. */
+  --wl-sand: 340 30% 98.2%;
 }
+
+/* Degradê vertical suave (branco no topo → rosé perolado na base).
+   Escopo exclusivo do tenant rosé: nenhum outro white label muda. */
+.wl-editorial.wl-rose .wl-soft-gradient {
+  background-image: linear-gradient(to bottom, hsl(0 0% 100%), hsl(var(--wl-sand)));
+}
+
+.wl-editorial.wl-rose .wl-soft-gradient-footer {
+  background-image: linear-gradient(
+    to bottom,
+    hsl(0 0% 100%),
+    hsl(340 30% 98.6%) 45%,
+    hsl(340 32% 97.4%)
+  );
+}
+
 
 /* ===== Acabamento "siteBaseEditorial" (SiteLab Base) =========================
    Camada FINA e NEUTRA sobre `.wl-editorial`: mesma estrutura e comportamento,

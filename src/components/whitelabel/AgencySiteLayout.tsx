@@ -345,7 +345,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
       { label: "Termos de Uso", to: "/termosdeuso" },
     ];
     return (
-      <footer id="rodape" className="bg-[var(--brand-tertiary,hsl(var(--wl-sand)))] text-[hsl(var(--wl-ink))]">
+      <footer id="rodape" className="wl-soft-gradient-footer bg-[var(--brand-tertiary,hsl(var(--wl-sand)))] text-[hsl(var(--wl-ink))]">
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             {logoUrl ? (
