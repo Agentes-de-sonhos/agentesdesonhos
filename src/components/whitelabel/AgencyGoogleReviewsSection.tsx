@@ -105,7 +105,7 @@ export function AgencyGoogleReviewsSection({
   }
 
   return (
-    <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="bg-background">
+    <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
       <div className={`${container} py-14 md:py-24`}>
         <div className="flex w-full min-w-0 flex-col gap-6">
           <div className="min-w-0">

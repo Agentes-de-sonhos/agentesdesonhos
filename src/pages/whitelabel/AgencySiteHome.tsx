@@ -1248,7 +1248,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const copy = copyFor("faq");
         if (editorial) {
           return (
-            <section key={key} id="faq" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
+            <section key={key} id="faq" className="bg-background">
               <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
                 <div className="md:sticky md:top-28 md:self-start">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
