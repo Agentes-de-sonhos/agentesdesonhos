@@ -98,7 +98,7 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
             <Button asChild variant="outline" size="lg" className="h-auto min-h-12 w-full whitespace-normal border-background/70 bg-background/10 py-3 text-background hover:bg-background/20 hover:text-background sm:w-auto"><a href="#destino">Explorar o destino</a></Button>
           </div>
           <div className="mt-6 flex items-center gap-3">
-            {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="h-14 w-14 shrink-0 rounded-full bg-background object-contain p-1" />}
+            {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="w-36 max-w-[48vw] shrink-0 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-44" />}
             <p className="text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
           </div>
         </div>
@@ -159,7 +159,7 @@ export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
         </div>
       )}
       <div className={media.length ? "" : "mx-auto max-w-3xl"}>
-        <div className="flex items-center gap-3"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>{slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="h-16 w-16 object-contain" />}</div>
+        <div className="flex flex-wrap items-center gap-3"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>{slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="w-36 max-w-[52vw] rounded-lg bg-card object-contain p-2 shadow-sm ring-1 ring-border sm:w-44" />}</div>
         <h2 className={`${heading} mt-4`}>Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.</h2>
         <div className={`mt-6 space-y-4 ${body}`}><p>Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.</p><p>Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.</p><p>Quero ouvir o que você imagina para essas férias e transformar tantas possibilidades em uma viagem que faça sentido para você.</p></div>
         <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-muted-foreground">Destinos com a Ju</span></p>
@@ -173,7 +173,7 @@ export function Closing({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   return (
     <section id="contato" className="scroll-mt-24 bg-foreground py-16 text-background md:py-24"><div className={`${contentWidth} text-center`}><div className="mx-auto max-w-3xl">
       {slots.julianaAtDestination && <Photo image={slots.julianaAtDestination} className="mx-auto mb-8 aspect-[16/9] w-full max-w-2xl rounded-md object-cover" />}
-      {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="mx-auto mb-6 h-20 w-20 object-contain" />}
+      {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="mx-auto mb-6 w-44 max-w-[70vw] rounded-lg bg-background/95 object-contain p-2 shadow-md" />}
       <h2 className="text-balance text-3xl font-semibold leading-tight md:text-5xl">Seu próximo destino pode ser Xcaret. Vamos planejar juntos?</h2>
       <div className="mt-6 space-y-4 text-[16px] leading-7 text-background/80 md:text-[17px]"><p>Você já imaginou quais dessas experiências gostaria de viver? Agora, vamos combinar suas favoritas com a hospedagem e o ritmo que fazem sentido para você.</p><p>Conte quando pretende viajar, com quem e o que espera dessas férias. Eu ajudo você a transformar essa ideia em uma proposta personalizada.</p></div>
       <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-background/70">Destinos com a Ju</span></p>

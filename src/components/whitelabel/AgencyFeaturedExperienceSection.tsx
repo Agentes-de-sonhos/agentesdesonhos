@@ -77,7 +77,7 @@ export function AgencyFeaturedExperienceSection({
               decoding="async"
               width={1920}
               height={754}
-              className="h-full w-full object-cover"
+              className="h-full w-full origin-left scale-[1.08] object-cover"
               style={{ objectPosition: config.mainImage.position ?? "center" }}
             />
             {config.badge && (
@@ -85,7 +85,7 @@ export function AgencyFeaturedExperienceSection({
                 src={config.badge.src}
                 alt={config.badge.alt}
                 loading="lazy"
-                className="absolute right-4 top-4 h-20 w-20 rounded-full bg-background/90 object-contain p-2 md:h-24 md:w-24"
+                className="absolute right-4 top-4 w-36 max-w-[44%] rounded-xl bg-background/95 object-contain p-2 shadow-lg ring-1 ring-border/60 md:right-5 md:top-5 md:w-48"
               />
             )}
           </div>
@@ -98,7 +98,7 @@ export function AgencyFeaturedExperienceSection({
                   alt={config.consultantImage.alt}
                   loading="lazy"
                   decoding="async"
-                  className="aspect-[16/9] w-full object-cover"
+                  className="aspect-[4/3] w-full object-cover"
                   style={{ objectPosition: config.consultantImage.position ?? "center" }}
                 />
               </figure>

@@ -41,3 +41,4 @@
 - [x] Personalizar integralmente o perfil editorial da 100 Limites para passageiros e agências, sem alterar outros tenants.
 - [x] Criar a landing page Xcaret exclusiva da Destinos com a Ju, com rota protegida, conteúdo, imagens oficiais locais, navegação e responsividade, sem publicar.
 - [x] Aplicar fotos reais da Juliana, selo Xperts e fachadas da loja nas páginas da Destinos com a Ju, sem publicar.
+- [x] Ajustar selo retangular, enquadramento da Juliana e recorte lateral da seção Xcaret, sem publicar.
