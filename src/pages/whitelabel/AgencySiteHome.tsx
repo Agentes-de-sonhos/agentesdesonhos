@@ -4,7 +4,8 @@ import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
   MapPin, CheckCircle2, Quote, Route, UserRound, Users, FileCheck2, LifeBuoy, Handshake,
-  Award,
+  Award, Play, Pause, Volume2, VolumeX,
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
