@@ -159,6 +159,26 @@ export interface AgencySiteProfile {
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
+  /** "Experiência em destaque": quando ativa, ocupa a posição da seção "modules". */
+  featuredExperience?: AgencyFeaturedExperience;
+}
+
+export interface AgencyFeaturedImage { src: string; alt: string; position?: string }
+export interface AgencyFeaturedExperience {
+  enabled: boolean;
+  id?: string;
+  kicker?: string;
+  title: string;
+  description: string;
+  mainImage: AgencyFeaturedImage;
+  consultantImage?: AgencyFeaturedImage | null;
+  badge?: AgencyFeaturedImage | null;
+  secondaryImages?: AgencyFeaturedImage[];
+  highlights?: string[];
+  ctaLabel?: string;
+  /** URL da landing; null mantém o botão inativo, sem link fictício. */
+  ctaHref?: string | null;
+  align?: "left" | "right";
 }
 
 /* ------------------------------ PERFIS ------------------------------ */
