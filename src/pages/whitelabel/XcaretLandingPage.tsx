@@ -97,11 +97,17 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
             <WaButton label="Planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." className="w-full sm:w-auto" />
             <Button asChild variant="outline" size="lg" className="h-auto min-h-12 w-full whitespace-normal border-background/70 bg-background/10 py-3 text-background hover:bg-background/20 hover:text-background sm:w-auto"><a href="#destino">Explorar o destino</a></Button>
           </div>
-          <div className="mt-6 flex items-center gap-3">
+          <div className="mt-6 flex flex-col items-start gap-2">
             {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="w-36 max-w-[48vw] shrink-0 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-44" />}
-            <p className="text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
+            <p className="max-w-sm text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
           </div>
         </div>
+        <div className="pointer-events-auto hidden flex-1 items-center justify-center lg:flex">
+          <HeroVideoButton />
+        </div>
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
+        <div className="pointer-events-auto"><HeroVideoButton /></div>
       </div>
       <div className={`${contentWidth} flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:justify-between`}>
         <p className="max-w-xl text-sm font-medium text-background" aria-live="polite"><strong>{slide.name}</strong> · {slide.caption} <span className="ml-2 text-xs text-background/75">{String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span></p>
