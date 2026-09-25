@@ -1315,7 +1315,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             {profile.heroPresentation?.cta && profile.heroPresentation.actionsPlacement !== "right" && (
               <Button
                 size="lg"
-                className={`${profile.heroPresentation.actionsPlacement === "right" ? "" : "mt-7"} bg-primary text-primary-foreground hover:bg-primary/90`}
+                className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
               >
                 {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
