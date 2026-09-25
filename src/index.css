@@ -559,6 +559,21 @@ img {
   );
 }
 
+/* Botão de conversa no WhatsApp: verde do WhatsApp com texto branco.
+   Classe utilitária reaproveitada pelo site e pela Área do Cliente. */
+.wa-cta {
+  background-color: hsl(145 72% 38%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.wa-cta:hover {
+  background-color: hsl(145 72% 33%) !important;
+}
+.wa-cta svg {
+  color: #fff !important;
+}
+
+
 
 /* ===== Acabamento "siteBaseEditorial" (SiteLab Base) =========================
    Camada FINA e NEUTRA sobre `.wl-editorial`: mesma estrutura e comportamento,
