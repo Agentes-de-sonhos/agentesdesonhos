@@ -5,6 +5,7 @@ import xensesAsset from "@/assets/whitelabel/xcaret/xenses.webp.asset.json";
 import xoximilcoAsset from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import hotelMexicoAsset from "@/assets/whitelabel/xcaret/hotel-xcaret-mexico.webp.asset.json";
 import hotelArteAsset from "@/assets/whitelabel/xcaret/hotel-xcaret-arte.webp.asset.json";
+import xcaretHeroAsset from "@/assets/whitelabel/xcaret/xcaret-hero.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
 
@@ -18,8 +19,8 @@ const official = (src: string, alt: string, source: string): XcaretImage => ({ s
 
 export const XCARET_IMAGES = {
   xcaret: official(
-    "https://www.xcaret.com/assets/xcaret/galeria/sliders/xcaret/xc-galeria-3.webp",
-    "Águas cristalinas e vegetação tropical no parque Xcaret",
+    xcaretHeroAsset.url,
+    "Águas cristalinas e vegetação tropical em uma experiência do Grupo Xcaret",
     "https://www.xcaret.com/en/gallery/",
   ),
   xelHa: official(xelHaAsset.url, "Visitantes flutuando nas águas naturais de Xel-Há", "https://www.xcaret.com/en/gallery/"),
