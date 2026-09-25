@@ -5,7 +5,12 @@ import xensesAsset from "@/assets/whitelabel/xcaret/xenses.webp.asset.json";
 import xoximilcoAsset from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import hotelMexicoAsset from "@/assets/whitelabel/xcaret/hotel-xcaret-mexico.webp.asset.json";
 import hotelArteAsset from "@/assets/whitelabel/xcaret/hotel-xcaret-arte.webp.asset.json";
-import xcaretHeroAsset from "@/assets/whitelabel/xcaret/xcaret-hero.webp.asset.json";
+import xcaretAerialAsset from "@/assets/whitelabel/xcaret/xcaret-aerial.webp.asset.json";
+import undergroundRiverAsset from "@/assets/whitelabel/xcaret/underground-river.webp.asset.json";
+import mexicoShowAsset from "@/assets/whitelabel/xcaret/mexico-espectacular.webp.asset.json";
+import xenotesAsset from "@/assets/whitelabel/xcaret/xenotes.webp.asset.json";
+import chichenAsset from "@/assets/whitelabel/xcaret/chichen-itza.webp.asset.json";
+import casaPlayaAsset from "@/assets/whitelabel/xcaret/la-casa-de-la-playa.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
 
@@ -18,23 +23,19 @@ export function xcaretWhatsappUrl(message: string) {
 const official = (src: string, alt: string, source: string): XcaretImage => ({ src, alt, source });
 
 export const XCARET_IMAGES = {
-  xcaret: official(
-    xcaretHeroAsset.url,
-    "Águas cristalinas e vegetação tropical em uma experiência do Grupo Xcaret",
-    "https://www.xcaret.com/en/gallery/",
-  ),
+  xcaret: official(xcaretAerialAsset.url, "Vista aérea do parque Xcaret com o mar do Caribe e piscinas naturais costeiras", "https://blog.xcaret.com/es/tips-para-visitar-xcaret/"),
   xelHa: official(xelHaAsset.url, "Visitantes flutuando nas águas naturais de Xel-Há", "https://www.xcaret.com/en/gallery/"),
   xplor: official(xplorAsset.url, "Aventura de tirolesa sobre a vegetação no Xplor", "https://www.xcaret.com/en/gallery/"),
   xplorFuego: official(xplorFuegoAsset.url, "Percurso noturno iluminado no Xplor Fuego", "https://www.xcaret.com/en/gallery/"),
   xenses: official(xensesAsset.url, "Cenário sensorial e lúdico do parque Xenses", "https://www.xcaret.com/en/gallery/"),
   xoximilco: official(xoximilcoAsset.url, "Embarcação típica em uma noite festiva no Xoximilco", "https://www.xcaret.com/en/gallery/"),
-  undergroundRiver: official(xelHaAsset.url, "Águas naturais e vegetação em uma experiência do Grupo Xcaret", "https://www.xcaret.com/en/attractions/underground-rivers/"),
-  mexicoShow: official(xoximilcoAsset.url, "Celebração noturna da cultura mexicana no Grupo Xcaret", "https://www.xcaret.com/en/attractions/xcaret-mexico-espectacular/"),
-  xenotes: official(xcaretHeroAsset.url, "Águas cristalinas e vegetação na Riviera Maya", "https://www.xcaret.com/en/parks-and-tours/tour-xenotes/"),
-  chichen: official(xplorAsset.url, "Paisagem tropical em uma experiência do Grupo Xcaret", "https://www.xcaret.com/en/parks-and-tours/tour-to-chichen-itza-clasico/"),
+  undergroundRiver: official(undergroundRiverAsset.url, "Família com coletes na entrada do rio subterrâneo do parque Xcaret", "https://blog.xcaret.com/es/tips-para-visitar-xcaret/"),
+  mexicoShow: official(mexicoShowAsset.url, "Artistas mascarados no palco do Xcaret México Espectacular", "https://blog.xcaret.com/en/explore-xcaret-nature-culture-adventure/"),
+  xenotes: official(xenotesAsset.url, "Cenote em caverna e cenote aberto no passeio Xenotes", "https://blog.xcaret.com/es/poses-originales-fotos-xenotes/"),
+  chichen: official(chichenAsset.url, "Pirâmide de Kukulcán no sítio arqueológico de Chichén Itzá", "https://blog.xcaret.com/es/mi-primera-vez-en-chichen-itza-una-maravilla-del-mundo/"),
   hotelMexico: official(hotelMexicoAsset.url, "Piscinas e arquitetura do Hotel Xcaret México", "https://hotel-xcaret-mexico.firstview.us/en/imagenes-multimedia"),
   hotelArte: official(hotelArteAsset.url, "Piscina do Hotel Xcaret Arte", "https://hotel-xcaret-arte.firstview.us/en/imagenes-multimedia/infinity-pool-cayuco/contenido"),
-  casaPlaya: official(xcaretHeroAsset.url, "Paisagem tropical do Grupo Xcaret", "https://www.lacasadelaplaya.com/en/gallery/"),
+  casaPlaya: official(casaPlayaAsset.url, "Vista aérea do hotel La Casa de la Playa com piscina sobre o mar", "https://blog.xcaret.com/es/la-casa-de-la-playa-hotel-boutique-xcaret/"),
 } as const;
 
 export const XCARET_HERO_SLIDES = [
@@ -64,9 +65,15 @@ export const XCARET_FAQ = [
   ["Quanto custa uma viagem como essa?", "O investimento depende das datas, do hotel, da categoria de acomodação, da duração e do número de viajantes. Conte à Ju suas preferências para receber uma proposta personalizada."],
 ] as const;
 
-export const XCARET_MEDIA_SLOTS = {
+/** Fotos reais da Juliana e selo Expert: null omite o bloco sem placeholder. */
+export const XCARET_MEDIA_SLOTS: {
+  portraitJuliana: XcaretImage | null;
+  trainingPhoto: XcaretImage | null;
+  expertBadge: XcaretImage | null;
+  julianaAtDestination: XcaretImage | null;
+} = {
   portraitJuliana: null,
   trainingPhoto: null,
   expertBadge: null,
   julianaAtDestination: null,
-} as const;
+};

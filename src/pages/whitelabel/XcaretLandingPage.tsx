@@ -31,13 +31,15 @@ function Photo({ image, className = "", priority = false }: { image: XcaretImage
 
 function WaButton({ label, message, className = "" }: { label: string; message: string; className?: string }) {
   return (
-    <Button asChild size="lg" className={`min-h-12 rounded-md px-6 text-sm ${className}`}>
+    <Button asChild size="lg" className={`h-auto min-h-12 max-w-full whitespace-normal rounded-md px-6 py-3 text-center text-sm leading-5 ${className}`}>
       <a href={xcaretWhatsappUrl(message)} target="_blank" rel="noopener noreferrer">
-        <MessageCircle className="mr-2 h-4 w-4" aria-hidden /> {label}
+        <MessageCircle className="mr-2 h-4 w-4 shrink-0" aria-hidden /> <span>{label}</span>
       </a>
     </Button>
   );
 }
+
+type Slots = typeof XCARET_MEDIA_SLOTS;
 
 function SectionIntro({ title, children }: { title: string; children?: React.ReactNode }) {
   return <div className="mx-auto max-w-3xl text-center"><h2 className={heading}>{title}</h2>{children ? <div className={`mt-5 space-y-4 ${body}`}>{children}</div> : null}</div>;
@@ -49,7 +51,7 @@ function XcaretHeader({ info }: { info: AgencyDomainInfo }) {
   const links = [{ label: "Parques", to: "#parques" }, { label: "Hotéis", to: "#hoteis" }, { label: "Roteiro", to: "#roteiro" }, { label: "Dúvidas", to: "#duvidas" }];
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
-      <div className={`${contentWidth} flex h-[76px] items-center justify-between gap-4`}>
+      <div className={`${contentWidth} flex min-h-[76px] items-center justify-between gap-3 py-2`}>
         <Link to={agencyContextHref("/")} className="flex min-w-0 items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
           {logo && <img src={preset.logoUrl ?? logo} alt="Destinos com a Ju" className="h-14 w-auto max-w-[130px] object-contain" />}
           <span className="hidden text-sm font-medium text-muted-foreground sm:inline">Voltar ao site</span>
@@ -57,13 +59,13 @@ function XcaretHeader({ info }: { info: AgencyDomainInfo }) {
         <nav aria-label="Nesta página" className="hidden items-center gap-5 lg:flex">
           {links.map((link) => <a key={link.to} href={link.to} className="text-sm font-medium text-foreground/75 hover:text-primary">{link.label}</a>)}
         </nav>
-        <WaButton label="Falar com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." className="px-4" />
+        <WaButton label="Falar com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." className="min-h-11 shrink-0 px-3 text-xs sm:px-4 sm:text-sm" />
       </div>
     </header>
   );
 }
 
-function Hero() {
+export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   useEffect(() => {
@@ -71,40 +73,50 @@ function Hero() {
     const update = () => setCurrent(api.selectedScrollSnap());
     update(); api.on("select", update); return () => { api.off("select", update); };
   }, [api]);
+  const total = XCARET_HERO_SLIDES.length;
+  const slide = XCARET_HERO_SLIDES[current] ?? XCARET_HERO_SLIDES[0];
   return (
-    <section id="inicio" className="relative bg-foreground text-background">
-      <Carousel setApi={setApi} opts={{ loop: true }} aria-label="Destaques dos parques Xcaret">
-        <CarouselContent className="ml-0">
-          {XCARET_HERO_SLIDES.map((slide, index) => (
-            <CarouselItem key={slide.name} className="relative h-[680px] pl-0 sm:h-[720px] lg:h-[min(760px,calc(100vh-76px))]">
-              <Photo image={slide.image} priority={index === 0} className="absolute inset-0 h-full w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/55 to-foreground/15" />
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-foreground/75 to-transparent" />
-              <div className={`${contentWidth} relative flex h-full items-center pb-20 pt-12`}>
-                <div className="max-w-2xl text-background">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-background/80">Riviera Maya • México</p>
-                  <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] md:text-6xl lg:text-7xl">Xcaret. Um destino inteiro para se apaixonar.</h1>
-                  <p className="mt-5 max-w-xl text-[16px] leading-7 text-background/90 md:text-lg">Parques surpreendentes, hotéis à beira-mar e experiências mexicanas em uma viagem planejada para você pela Destinos com a Ju.</p>
-                  <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                    <WaButton label="Planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." />
-                    <Button asChild variant="outline" size="lg" className="min-h-12 border-background/70 bg-background/10 text-background hover:bg-background/20 hover:text-background"><a href="#destino">Explorar o destino</a></Button>
-                  </div>
-                  <p className="mt-6 text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
-                </div>
-              </div>
-              <div className={`${contentWidth} absolute inset-x-0 bottom-7 flex items-end justify-between gap-4`}>
-                <p className="max-w-xl text-sm font-medium text-background"><strong>{slide.name}</strong> · {slide.caption}</p>
-                <span className="shrink-0 text-xs text-background/75">{String(index + 1).padStart(2, "0")} / 06</span>
-              </div>
+    <section id="inicio" className="relative isolate flex min-h-[640px] flex-col bg-foreground text-background lg:min-h-[min(760px,calc(100vh-76px))]">
+      <Carousel setApi={setApi} opts={{ loop: true }} aria-label="Destaques dos parques Xcaret" className="absolute inset-0 -z-10 [&>div]:h-full">
+        <CarouselContent className="ml-0 h-full">
+          {XCARET_HERO_SLIDES.map((item, index) => (
+            <CarouselItem key={item.name} className="relative h-full pl-0" aria-roledescription="slide" aria-label={`${index + 1} de ${total}: ${item.name}`}>
+              <Photo image={item.image} priority={index === 0} className="absolute inset-0 h-full w-full object-cover" />
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious aria-label="Foto anterior" className="left-4 top-auto bottom-24 h-11 w-11 border-background/60 bg-foreground/25 text-background hover:bg-foreground/50 hover:text-background md:left-auto md:right-20" />
-        <CarouselNext aria-label="Próxima foto" className="right-4 top-auto bottom-24 h-11 w-11 border-background/60 bg-foreground/25 text-background hover:bg-foreground/50 hover:text-background" />
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-2 pb-3" aria-label={`Slide ${current + 1} de 6`}>
-          {XCARET_HERO_SLIDES.map((slide, index) => <button key={slide.name} type="button" aria-label={`Ir para ${slide.name}`} onClick={() => api?.scrollTo(index)} className={`h-2 min-w-2 rounded-full bg-background transition-[width,opacity] ${index === current ? "w-7 opacity-100" : "w-2 opacity-50"}`} />)}
-        </div>
       </Carousel>
+      <div className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/20" aria-hidden />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-1/2 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden />
+      <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-8 pt-14`}>
+        <div className="pointer-events-auto max-w-2xl text-background">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-background/80">Riviera Maya • México</p>
+          <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] md:text-6xl lg:text-7xl">Xcaret. Um destino inteiro para se apaixonar.</h1>
+          <p className="mt-5 max-w-xl text-[16px] leading-7 text-background/90 md:text-lg">Parques surpreendentes, hotéis à beira-mar e experiências mexicanas em uma viagem planejada para você pela Destinos com a Ju.</p>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <WaButton label="Planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." className="w-full sm:w-auto" />
+            <Button asChild variant="outline" size="lg" className="h-auto min-h-12 w-full whitespace-normal border-background/70 bg-background/10 py-3 text-background hover:bg-background/20 hover:text-background sm:w-auto"><a href="#destino">Explorar o destino</a></Button>
+          </div>
+          <div className="mt-6 flex items-center gap-3">
+            {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="h-14 w-14 shrink-0 rounded-full bg-background object-contain p-1" />}
+            <p className="text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
+          </div>
+        </div>
+      </div>
+      <div className={`${contentWidth} flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:justify-between`}>
+        <p className="max-w-xl text-sm font-medium text-background" aria-live="polite"><strong>{slide.name}</strong> · {slide.caption} <span className="ml-2 text-xs text-background/75">{String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span></p>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="icon" aria-label="Foto anterior" onClick={() => api?.scrollPrev()} className="h-11 w-11 shrink-0 rounded-full border-background/60 bg-foreground/25 text-background hover:bg-foreground/50 hover:text-background"><ArrowLeft className="h-4 w-4" aria-hidden /></Button>
+          <div className="flex" role="group" aria-label={`Slide ${current + 1} de ${total}`}>
+            {XCARET_HERO_SLIDES.map((item, index) => (
+              <button key={item.name} type="button" aria-label={`Ir para ${item.name}`} aria-current={index === current ? "true" : undefined} onClick={() => api?.scrollTo(index)} className="flex h-11 w-7 items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-background sm:w-9">
+                <span className={`block h-2 rounded-full bg-background transition-[width,opacity] ${index === current ? "w-5 opacity-100" : "w-2 opacity-50"}`} aria-hidden />
+              </button>
+            ))}
+          </div>
+          <Button type="button" variant="outline" size="icon" aria-label="Próxima foto" onClick={() => api?.scrollNext()} className="h-11 w-11 shrink-0 rounded-full border-background/60 bg-foreground/25 text-background hover:bg-foreground/50 hover:text-background"><ArrowRight className="h-4 w-4" aria-hidden /></Button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -137,11 +149,45 @@ const itinerary = [
   ["Dia 7", "Até a próxima, México", "Despedida e retorno, conforme o horário do voo."],
 ] as const;
 
+export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
+  const media = [slots.portraitJuliana, slots.trainingPhoto].filter((m): m is XcaretImage => !!m);
+  return (
+    <section id="especialista" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} ${media.length ? "grid items-center gap-10 lg:grid-cols-2" : ""}`}>
+      {media.length > 0 && (
+        <div className={`grid gap-4 ${media.length > 1 ? "sm:grid-cols-2" : ""}`} data-testid="specialist-media">
+          {media.map((m) => <Photo key={m.src} image={m} className="aspect-[4/5] w-full rounded-md object-cover" />)}
+        </div>
+      )}
+      <div className={media.length ? "" : "mx-auto max-w-3xl"}>
+        <div className="flex items-center gap-3"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>{slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="h-16 w-16 object-contain" />}</div>
+        <h2 className={`${heading} mt-4`}>Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.</h2>
+        <div className={`mt-6 space-y-4 ${body}`}><p>Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.</p><p>Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.</p><p>Quero ouvir o que você imagina para essas férias e transformar tantas possibilidades em uma viagem que faça sentido para você.</p></div>
+        <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-muted-foreground">Destinos com a Ju</span></p>
+        <WaButton label="Conversar com a Ju sobre minha viagem" message="Oi, Ju! Quero conhecer o Xcaret e gostaria da sua ajuda para planejar a viagem." className="mt-7 w-full sm:w-auto" />
+      </div>
+    </div></section>
+  );
+}
+
+export function Closing({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
+  return (
+    <section id="contato" className="scroll-mt-24 bg-foreground py-16 text-background md:py-24"><div className={`${contentWidth} text-center`}><div className="mx-auto max-w-3xl">
+      {slots.julianaAtDestination && <Photo image={slots.julianaAtDestination} className="mx-auto mb-8 aspect-[16/9] w-full max-w-2xl rounded-md object-cover" />}
+      {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="mx-auto mb-6 h-20 w-20 object-contain" />}
+      <h2 className="text-balance text-3xl font-semibold leading-tight md:text-5xl">Seu próximo destino pode ser Xcaret. Vamos planejar juntos?</h2>
+      <div className="mt-6 space-y-4 text-[16px] leading-7 text-background/80 md:text-[17px]"><p>Você já imaginou quais dessas experiências gostaria de viver? Agora, vamos combinar suas favoritas com a hospedagem e o ritmo que fazem sentido para você.</p><p>Conte quando pretende viajar, com quem e o que espera dessas férias. Eu ajudo você a transformar essa ideia em uma proposta personalizada.</p></div>
+      <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-background/70">Destinos com a Ju</span></p>
+      <WaButton label="Quero planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e quero planejar minha viagem. Gostaria de conversar sobre hotéis, experiências e valores." className="mt-7 w-full sm:w-auto"/>
+      <p className="mt-4 text-sm text-background/70">Ainda não definiu as datas? Podemos começar pelas suas ideias.</p>
+    </div></div></section>
+  );
+}
+
 export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) {
   useAgencySiteThemeOnBody(info.hostname);
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
-      <SEO exactTitle title="Xcaret com a Ju | Parques, Hotéis e Viagem Personalizada" description="Descubra parques, hotéis e experiências Xcaret na Riviera Maya com uma viagem personalizada pela Destinos com a Ju." canonical="https://www.destinoscomaju.com.br/xcaret" image={XCARET_IMAGES.xelHa.src} />
+      <SEO exactTitle title="Xcaret com a Ju | Parques, Hotéis e Viagem Personalizada" description="Descubra parques, hotéis e experiências Xcaret na Riviera Maya com uma viagem personalizada pela Destinos com a Ju." canonical="https://www.destinoscomaju.com.br/xcaret" image={XCARET_IMAGES.xcaret.src} />
       <XcaretHeader info={info} />
       <main>
         <Hero />
@@ -155,9 +201,7 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
           <p className="mx-auto mt-8 max-w-3xl text-center text-base leading-7 text-foreground">Com a Destinos com a Ju, você descobre quais dessas experiências combinam com você e como reuni-las em uma viagem planejada para o seu perfil.</p>
         </div></section>
 
-        <section id="especialista" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} ${XCARET_MEDIA_SLOTS.portraitJuliana ? "grid gap-10 lg:grid-cols-2" : ""}`}>
-          <div className="mx-auto max-w-3xl"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p><h2 className={`${heading} mt-4`}>Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.</h2><div className={`mt-6 space-y-4 ${body}`}><p>Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.</p><p>Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.</p><p>Quero ouvir o que você imagina para essas férias e transformar tantas possibilidades em uma viagem que faça sentido para você.</p></div><p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-muted-foreground">Destinos com a Ju</span></p><WaButton label="Conversar com a Ju sobre minha viagem" message="Oi, Ju! Quero conhecer o Xcaret e gostaria da sua ajuda para planejar a viagem." className="mt-7" /></div>
-        </div></section>
+        <Specialist />
 
         <section id="xcaret-parque" className="scroll-mt-24 py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="Xcaret. Um dia para descobrir, sentir e se encantar."><p>Nade por rios subterrâneos, descubra caminhos entre a vegetação e aproveite as águas do Caribe. No parque Xcaret, a natureza e a cultura mexicana fazem parte de cada descoberta.</p><p>Ao anoitecer, a experiência continua com o Xcaret México Espectacular, um espetáculo de música, dança e tradições que transforma o encerramento do dia em um dos grandes momentos da viagem.</p></SectionIntro>
@@ -193,7 +237,7 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
 
         <section id="duvidas" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} max-w-4xl`}><SectionIntro title="Pensando em conhecer o Xcaret? Tire suas primeiras dúvidas."/><Accordion type="single" collapsible className="mt-10 rounded-md border border-border bg-card px-5 md:px-7">{XCARET_FAQ.map(([q,a],index)=><AccordionItem value={`faq-${index}`} key={q}><AccordionTrigger className="min-h-14 text-left text-base hover:no-underline">{q}</AccordionTrigger><AccordionContent className="pr-8 text-[15px] leading-7 text-muted-foreground">{a}</AccordionContent></AccordionItem>)}</Accordion></div></section>
 
-        <section id="contato" className="scroll-mt-24 bg-foreground py-16 text-background md:py-24"><div className={`${contentWidth} text-center`}><div className="mx-auto max-w-3xl"><h2 className="text-balance text-3xl font-semibold leading-tight md:text-5xl">Seu próximo destino pode ser Xcaret. Vamos planejar juntos?</h2><div className="mt-6 space-y-4 text-[16px] leading-7 text-background/80 md:text-[17px]"><p>Você já imaginou quais dessas experiências gostaria de viver? Agora, vamos combinar suas favoritas com a hospedagem e o ritmo que fazem sentido para você.</p><p>Conte quando pretende viajar, com quem e o que espera dessas férias. Eu ajudo você a transformar essa ideia em uma proposta personalizada.</p></div><p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-background/70">Destinos com a Ju</span></p><WaButton label="Quero planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e quero planejar minha viagem. Gostaria de conversar sobre hotéis, experiências e valores." className="mt-7"/><p className="mt-4 text-sm text-background/70">Ainda não definiu as datas? Podemos começar pelas suas ideias.</p></div></div></section>
+        <Closing />
       </main>
       <AgencyFooter info={info} />
       <a href={agencySiteHref("/#destinos")} className="sr-only">Voltar aos destinos</a>
