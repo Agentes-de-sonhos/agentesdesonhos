@@ -55,6 +55,7 @@ import destinoLuaDeMel from "@/assets/whitelabel/destino-luademel.jpg";
 import destinoNorteAfrica from "@/assets/whitelabel/destino-norte-africa.jpg";
 import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
 import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
+import disneyWishCruise from "@/assets/whitelabel/destinos-com-a-ju/disney-wish-cruise.mp4.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
@@ -94,6 +95,51 @@ const HERO_IMAGES: Record<string, string> = {
   fae: heroFae,
   europa: destinoEuropa,
 };
+
+const AUTHORITY_VIDEOS: Record<string, string> = {
+  disneyWishCruise: disneyWishCruise.url,
+};
+
+function AuthorityMedia({ video, image }: { video?: string; image: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const element = videoRef.current;
+    if (!element || !video) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          void element.play().catch(() => undefined);
+        } else {
+          element.pause();
+        }
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [video]);
+
+  if (!video) {
+    return <img src={image} alt="Cruzeiro em alto-mar" loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />;
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      src={video}
+      poster={image}
+      aria-label="Disney Wish em alto-mar"
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      className="aspect-[4/3] w-full rounded-xl object-cover"
+    />
+  );
+}
 
 /** Kept exported: other white-label surfaces import this service list. */
 export const AGENCY_SERVICES = [
@@ -408,11 +454,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
             <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
-              <img
-                src={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
-                alt="Cruzeiro em alto-mar"
-                loading="lazy"
-                className="aspect-[4/3] w-full rounded-xl object-cover"
+              <AuthorityMedia
+                video={authority.video ? AUTHORITY_VIDEOS[authority.video] : undefined}
+                image={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
               />
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.kicker}</p>

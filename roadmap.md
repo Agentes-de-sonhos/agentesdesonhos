@@ -37,3 +37,4 @@
 - [x] Atualizar e ampliar o logotipo da Destinos com a Ju somente no cabeçalho.
 - [x] Ajustar a quebra do título e mover CTA/navegação do banner à direita somente na Destinos com a Ju.
 - [x] Clarear a seção “Sua DMC em Portugal” e substituir sua foto somente na 100 Limites.
+- [x] Substituir a foto da seção de cruzeiros da Destinos com a Ju pelo vídeo enviado, com reprodução automática ao entrar na tela.

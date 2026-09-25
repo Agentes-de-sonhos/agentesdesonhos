@@ -42,6 +42,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       expect(profile.destinations).toHaveLength(5);
       expect(profile.modules).toHaveLength(6);
       expect(profile.authority?.title).toContain("Cruzeiros");
+      expect(profile.authority?.video).toBe("disneyWishCruise");
       expect(profile.about?.text).toContain("Juliana Neves Sanches");
       expect(profile.faq).toHaveLength(7);
       expect(profile.footer?.cnpj).toBe("23.593.301/0001-71");
@@ -53,6 +54,17 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
         actionsPlacement: "right",
       });
       expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
+    }
+  });
+
+  it("usa o vídeo enviado somente na autoridade de cruzeiros da Destinos", () => {
+    expect(homeSource).toContain("disney-wish-cruise.mp4.asset.json");
+    expect(homeSource).toContain("IntersectionObserver");
+    expect(homeSource).toContain("playsInline");
+    expect(homeSource).toContain("muted");
+
+    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+      expect(resolveSiteProfile(host).authority?.video).toBeUndefined();
     }
   });
 
