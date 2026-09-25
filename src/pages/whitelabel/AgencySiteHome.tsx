@@ -13,6 +13,9 @@ import { BrandText } from "@/components/ui/brand-text";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,
+} from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import {
   type AgencyDomainInfo,
@@ -1076,22 +1079,34 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               {/* Valor da consultoria humana: lista opcional definida pelo perfil. */}
               {!!profile.conciergePoints?.length && (
                 <div className={`${container} pb-14 md:pb-24`}>
-                  <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {profile.conciergePoints.map((p) => (
-                      <li
-                        key={p.key}
-                        className="rounded-xl border border-border/70 bg-card p-6"
-                      >
-                        <CheckCircle2
-                          className="h-6 w-6 text-primary wl-accent-icon"
-                          aria-hidden="true"
-                          strokeWidth={1.6}
-                        />
-                        <h3 className="mt-4 text-base font-semibold text-foreground">{p.title}</h3>
-                        <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{p.text}</p>
-                      </li>
-                    ))}
-                  </ul>
+                  {/* Galeria das etapas: 1 card no celular, 2 no tablet e 4 no desktop. */}
+                  <Carousel
+                    opts={{ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" }}
+                    aria-label="Etapas do atendimento"
+                  >
+                    <CarouselContent className="-ml-5">
+                      {profile.conciergePoints.map((p) => (
+                        <CarouselItem
+                          key={p.key}
+                          className="pl-5 basis-full sm:basis-1/2 lg:basis-1/4"
+                        >
+                          <div className="h-full rounded-xl border border-border/70 bg-card p-6">
+                            <CheckCircle2
+                              className="h-6 w-6 text-primary wl-accent-icon"
+                              aria-hidden="true"
+                              strokeWidth={1.6}
+                            />
+                            <h3 className="mt-4 text-base font-semibold text-foreground">{p.title}</h3>
+                            <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{p.text}</p>
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <div className="mt-6 flex items-center justify-center gap-3 md:justify-end">
+                      <CarouselPrevious className="static h-11 w-11 translate-y-0" />
+                      <CarouselNext className="static h-11 w-11 translate-y-0" />
+                    </div>
+                  </Carousel>
                 </div>
               )}
             </section>

@@ -519,7 +519,8 @@ img {
   --popover: 0 0% 100%;
   --popover-foreground: 216 46% 18%;
 
-  --primary: 335 58% 34%;
+  /* Rosa magenta da marca (#D34A79): mesma cor do botão Entrar da Área do Cliente. */
+  --primary: 339 61% 56%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 340 44% 95%;
@@ -531,12 +532,14 @@ img {
 
   --border: 216 18% 88%;
   --input: 216 18% 84%;
-  --ring: 335 58% 34%;
+  --ring: 339 61% 56%;
   --radius: 0.75rem;
 
   --wl-red: 337 61% 48%;
   --wl-navy: 216 52% 20%;
   --wl-ink: 216 52% 16%;
+  /* Verde do WhatsApp para os botões de conversa. */
+  --wl-whatsapp: 145 72% 38%;
   /* Rosé perolado (quase branco): superfícies leves e acabamento editorial. */
   --wl-sand: 340 30% 98.2%;
 }
@@ -555,6 +558,21 @@ img {
     hsl(340 32% 97.4%)
   );
 }
+
+/* Botão de conversa no WhatsApp: verde do WhatsApp com texto branco.
+   Classe utilitária reaproveitada pelo site e pela Área do Cliente. */
+.wa-cta {
+  background-color: hsl(145 72% 38%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.wa-cta:hover {
+  background-color: hsl(145 72% 33%) !important;
+}
+.wa-cta svg {
+  color: #fff !important;
+}
+
 
 
 /* ===== Acabamento "siteBaseEditorial" (SiteLab Base) =========================
