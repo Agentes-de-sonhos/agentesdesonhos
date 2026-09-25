@@ -38,7 +38,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
   it("entrega conteúdo aprovado, cinco destinos e seis especialidades", () => {
     for (const host of JU_HOSTS) {
       const profile = resolveSiteProfile(host);
-      expect(profile.hero?.[0].title).toBe("Sua viagem importa. \nCada detalhe também.");
+      expect(profile.hero?.[0].title).toBe("Sua viagem importa.\nCada detalhe também.");
       expect(profile.destinations).toHaveLength(5);
       expect(profile.modules).toHaveLength(6);
       expect(profile.authority?.title).toContain("Cruzeiros");
@@ -49,8 +49,23 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       expect(profile.heroPresentation).toEqual({
         kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
         cta: { label: "Começar a planejar", service: "pacotes" },
+        preserveTitleLineBreaks: true,
+        actionsPlacement: "right",
       });
       expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
+    }
+  });
+
+  it("mantém a quebra do título e posiciona CTA e navegação à direita somente na Destinos", () => {
+    const ju = resolveSiteProfile(JU_HOSTS[0]);
+    expect(ju.heroPresentation?.preserveTitleLineBreaks).toBe(true);
+    expect(ju.heroPresentation?.actionsPlacement).toBe("right");
+    expect(homeSource).toContain("whitespace-pre-line");
+    expect(homeSource).toContain("data-hero-actions-placement");
+
+    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+      expect(resolveSiteProfile(host).heroPresentation?.actionsPlacement).not.toBe("right");
+      expect(resolveSiteProfile(host).heroPresentation?.preserveTitleLineBreaks).not.toBe(true);
     }
   });
 
