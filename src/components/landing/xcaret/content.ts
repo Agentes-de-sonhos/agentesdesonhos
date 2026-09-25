@@ -81,3 +81,6 @@ export const XCARET_MEDIA_SLOTS: {
   expertBadge: official(xpertsXcaretBadgeAsset.url, "Selo Xperts Xcaret 2026 Cancun Riviera Maya México", "PDF enviado pela Destinos com a Ju"),
   julianaAtDestination: official(julianaXcaretHotelAsset.url, "Juliana em área externa do complexo Xcaret na Riviera Maya", "Arquivo enviado pela Destinos com a Ju"),
 };
+
+/** Vídeo de apresentação exibido no botão de play do topo. Preencher src quando o arquivo for enviado. */
+export const XCARET_HERO_VIDEO: { src: string; poster?: string; title: string } | null = null;

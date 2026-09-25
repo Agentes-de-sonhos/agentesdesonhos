@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, ChevronDown, MessageCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, MessageCircle, Play } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { siteThemeRootClass } from "@/lib/agencySiteTheme";
@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { SEO } from "@/components/seo/SEO";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
   XCARET_EXPERIENCES,
   XCARET_FAQ,
   XCARET_HERO_SLIDES,
+  XCARET_HERO_VIDEO,
   XCARET_IMAGES,
   XCARET_MEDIA_SLOTS,
   xcaretWhatsappUrl,
@@ -65,6 +67,31 @@ function XcaretHeader({ info }: { info: AgencyDomainInfo }) {
   );
 }
 
+export function HeroVideoButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          aria-label="Assistir ao vídeo sobre o Xcaret"
+          className="group flex h-20 w-20 items-center justify-center rounded-full border border-background/60 bg-foreground/35 text-background shadow-lg backdrop-blur transition hover:scale-105 hover:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-background md:h-24 md:w-24"
+        >
+          <Play className="ml-1 h-8 w-8 md:h-10 md:w-10" aria-hidden />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader><DialogTitle>{XCARET_HERO_VIDEO?.title ?? "Vídeo em breve"}</DialogTitle></DialogHeader>
+        {XCARET_HERO_VIDEO ? (
+          <video src={XCARET_HERO_VIDEO.src} poster={XCARET_HERO_VIDEO.poster} controls autoPlay playsInline className="aspect-video w-full rounded-md bg-foreground" />
+        ) : (
+          <p className="text-sm leading-6 text-muted-foreground">O vídeo do Xcaret será exibido aqui assim que o arquivo for enviado.</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -97,11 +124,17 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
             <WaButton label="Planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." className="w-full sm:w-auto" />
             <Button asChild variant="outline" size="lg" className="h-auto min-h-12 w-full whitespace-normal border-background/70 bg-background/10 py-3 text-background hover:bg-background/20 hover:text-background sm:w-auto"><a href="#destino">Explorar o destino</a></Button>
           </div>
-          <div className="mt-6 flex items-center gap-3">
+          <div className="mt-6 flex flex-col items-start gap-2">
             {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="w-36 max-w-[48vw] shrink-0 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-44" />}
-            <p className="text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
+            <p className="max-w-sm text-sm text-background/80">Conheça com quem esteve lá: Juliana, sua especialista em Xcaret.</p>
           </div>
         </div>
+        <div className="pointer-events-auto hidden flex-1 items-center justify-center lg:flex">
+          <HeroVideoButton />
+        </div>
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
+        <div className="pointer-events-auto"><HeroVideoButton /></div>
       </div>
       <div className={`${contentWidth} flex flex-col gap-3 pb-4 sm:flex-row sm:items-end sm:justify-between`}>
         <p className="max-w-xl text-sm font-medium text-background" aria-live="polite"><strong>{slide.name}</strong> · {slide.caption} <span className="ml-2 text-xs text-background/75">{String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span></p>
