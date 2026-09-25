@@ -1,4 +1,5 @@
 import xelHaAsset from "@/assets/whitelabel/xcaret/xel-ha.webp.asset.json";
+import heroVideoAsset from "@/assets/landing/xcaret/xcaret-hoteis.mp4.asset.json";
 import xplorAsset from "@/assets/whitelabel/xcaret/xplor.webp.asset.json";
 import xplorFuegoAsset from "@/assets/whitelabel/xcaret/xplor-fuego.webp.asset.json";
 import xensesAsset from "@/assets/whitelabel/xcaret/xenses.webp.asset.json";
@@ -83,4 +84,7 @@ export const XCARET_MEDIA_SLOTS: {
 };
 
 /** Vídeo de apresentação exibido no botão de play do topo. Preencher src quando o arquivo for enviado. */
-export const XCARET_HERO_VIDEO: { src: string; poster?: string; title: string } | null = null;
+export const XCARET_HERO_VIDEO: { src: string; poster?: string; title: string } | null = {
+  src: heroVideoAsset.url,
+  title: "Conheça os hotéis Xcaret",
+};
