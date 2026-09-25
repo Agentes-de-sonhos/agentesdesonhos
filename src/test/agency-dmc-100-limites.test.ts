@@ -47,6 +47,8 @@ describe("seção DMC da 100 Limites", () => {
     ]);
     expect(profile.about?.media).toBe("hidden");
     expect(profile.footer?.description).toContain("DMC em Portugal para agências parceiras.");
+    expect(profile.footer?.showLocation).toBe(false);
+    expect(profile.navDensity).toBe("compact");
     expect(resolveSiteProfile("paraisoviagens.com").key).toBe("luxuryCurated");
     expect(resolveSiteProfile("destinoscomaju.com.br").key).toBe("editorialRose");
   });

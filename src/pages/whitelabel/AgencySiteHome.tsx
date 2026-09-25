@@ -161,6 +161,9 @@ const HIGHLIGHT_ICONS: Record<string, typeof Route> = {
   "Roteiros desenhados para cada viajante": Route,
   "Seleção criteriosa de hospedagens": BedDouble,
   "Parceiros especializados": Handshake,
+  "Viagens em família": Users,
+  "Lua de mel": Sparkles,
+  "Entre amigos": UserRound,
 };
 
 /** Ícone semântico por diferencial (um símbolo distinto para cada um). */
@@ -780,7 +783,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                         <span className="font-semibold text-foreground">{info.owner_name}</span>
                       </p>
                     )}
-                    {location && (
+                    {location && aboutCopy?.showLocation !== false && (
                       <p className="flex items-center gap-2 text-sm text-muted-foreground">
                         <MapPin className="h-4 w-4" aria-hidden="true" /> {location}
                       </p>

@@ -78,6 +78,8 @@ export interface AgencyFooterContent {
   address?: string;
   legalName?: string;
   cnpj?: string;
+  /** Exibe a cidade/UF do cadastro quando não há endereço editorial. */
+  showLocation?: boolean;
 }
 
 export interface AgencyHeroPresentation {
@@ -93,6 +95,8 @@ export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
   nav?: { label: string; to: string }[];
+  /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
+  navDensity?: "default" | "compact";
   /**
    * Perfil DEMONSTRATIVO (laboratório): libera conteúdo de exemplo em seções
    * normalmente condicionadas a dados reais e ativa a chrome do catálogo.
@@ -150,6 +154,8 @@ export interface AgencySiteProfile {
     facts?: string[];
     /** Oculta o painel de imagem quando não existe retrato real autorizado. */
     media?: "default" | "hidden";
+    /** Exibe a cidade/UF do cadastro sob o texto institucional. */
+    showLocation?: boolean;
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
@@ -171,6 +177,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     { label: "Sobre", to: "/#sobre" },
     { label: "Dúvidas", to: "/#faq" },
   ],
+  navDensity: "compact",
   sections: {
     dmc: { enabled: true, order: 0 },
     destinations: { order: 2 },
@@ -252,6 +259,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   ],
   footer: {
     description: "Viagens pelo Brasil e pelo mundo. DMC em Portugal para agências parceiras.\nAtendimento online com Amanda Larini.",
+    showLocation: false,
   },
   copy: {
     destinations: {

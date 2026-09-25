@@ -217,7 +217,7 @@ export function resolveHeroSlides(
   return list.map((s) => ({
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
-    image: coverImageUrl ?? (s.image ? imageSlots?.[s.image] : undefined) ?? fallbackImage ?? null,
+    image: (s.image ? imageSlots?.[s.image] : undefined) ?? coverImageUrl ?? fallbackImage ?? null,
   }));
 }
 
