@@ -8,8 +8,9 @@
  */
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { isEditorialTheme, isLuxuryTheme } from "@/lib/agencySiteTheme";
-import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-2026.png.asset.json";
-import destinosComAJuHeaderLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-setembro-2026.png.asset.json";
+/** Arte oficial definitiva, sem fundo (usada no cabeçalho e no rodapé). */
+import destinosComAJuLogo from "@/assets/whitelabel/logo-destinos-com-a-ju-transparente.png.asset.json";
+const destinosComAJuHeaderLogo = destinosComAJuLogo;
 import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import paraisoFavicon from "@/assets/whitelabel/favicon-paraiso-viagens.png.asset.json";
