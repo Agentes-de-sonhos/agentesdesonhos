@@ -596,8 +596,8 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     kicker: "EXPERIÊNCIA E ESPECIALIZAÇÃO",
     title: "Xcaret com o olhar de quem viveu essa experiência",
     description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
-    mainImage: { src: xcaretPanorama.url, alt: "Vista aérea do Parque Xcaret com mar azul turquesa e vegetação da Riviera Maya", position: "30% center" },
-    consultantImage: { src: julianaXcaretAtXplor.url, alt: "Juliana ao lado do letreiro Xplor por Xcaret em caverna iluminada", position: "50% center" },
+    mainImage: { src: xcaretPanorama.url, alt: "Vista aérea do Parque Xcaret com mar azul turquesa e vegetação da Riviera Maya", position: "left center" },
+    consultantImage: { src: julianaXcaretAtXplor.url, alt: "Juliana ao lado do letreiro Xplor por Xcaret em caverna iluminada", position: "50% 18%" },
     badge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret 2026 Cancun Riviera Maya México" },
     secondaryImages: [
       { src: xcaretSnorkel.url, alt: "Casal fazendo snorkel em águas cristalinas no Xel-Há" },

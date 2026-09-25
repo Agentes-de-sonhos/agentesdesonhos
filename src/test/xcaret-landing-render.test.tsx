@@ -38,7 +38,12 @@ describe("landing Xcaret renderizada", () => {
   it("slots preenchidos renderizam retrato, treinamento, selo e foto no destino", () => {
     render(<><Hero slots={full} /><Specialist slots={full} /><Closing slots={full} /></>);
     for (const k of ["portrait", "training", "destino"]) expect(screen.getByAltText(`fixture ${k}`)).toBeTruthy();
-    expect(screen.getAllByAltText("fixture badge")).toHaveLength(3);
+    const badges = screen.getAllByAltText("fixture badge");
+    expect(badges).toHaveLength(3);
+    for (const badge of badges) {
+      expect(badge.className).toMatch(/w-(36|44)/);
+      expect(badge.className).not.toContain("rounded-full");
+    }
   });
 
   it("imagens corrigidas apontam para os assets e fontes oficiais corretas", () => {

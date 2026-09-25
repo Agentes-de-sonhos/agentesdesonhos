@@ -18,8 +18,13 @@ describe("Experiência em destaque", () => {
     render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
     expect(screen.getByRole("heading", { level: 2 }).textContent).toContain("Xcaret com o olhar");
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
-    expect(screen.getByAltText(/Selo Xperts Xcaret 2026/)).toBeTruthy();
-    expect(screen.getByAltText(/Juliana ao lado do letreiro Xplor/)).toBeTruthy();
+    const badge = screen.getByAltText(/Selo Xperts Xcaret 2026/);
+    const juliana = screen.getByAltText(/Juliana ao lado do letreiro Xplor/);
+    expect(badge.className).toContain("rounded-xl");
+    expect(badge.className).not.toContain("rounded-full");
+    expect(juliana.getAttribute("style")).toContain("object-position: 50% 18%");
+    expect(juliana.className).toContain("aspect-[4/3]");
+    expect(screen.getByAltText(/Vista aérea do Parque Xcaret/).className).toContain("scale-[1.08]");
     expect(screen.getByRole("link", { name: /Conheça o Xcaret com a Ju/ }).getAttribute("href")).toContain("/xcaret");
   });
 
