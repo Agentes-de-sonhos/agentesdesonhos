@@ -53,7 +53,6 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
-  const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
