@@ -1250,7 +1250,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="faq" className="bg-background">
-              <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
+              <div className={`${container} grid gap-10 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
                 <div className="md:sticky md:top-28 md:self-start">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {copy.kicker ?? "Antes de solicitar"}
