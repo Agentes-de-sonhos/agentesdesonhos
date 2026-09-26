@@ -176,6 +176,8 @@ export interface AgencySiteProfile {
     media?: "default" | "hidden";
     /** Exibe a cidade/UF do cadastro sob o texto institucional. */
     showLocation?: boolean;
+    /** Nome exibido em "Atendimento com"; ausente mantém o nome do cadastro. */
+    ownerName?: string;
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
@@ -574,6 +576,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     ],
 
     badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
+    ownerName: "Juliana Neves Sanches e Equipe",
   },
   differentials: [
     { title: "Atendimento conduzido de perto", text: "A Juliana participa do planejamento e acompanha pessoalmente cada cliente durante as principais etapas da viagem.", icon: "consultivo" },
