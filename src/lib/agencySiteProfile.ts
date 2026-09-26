@@ -547,6 +547,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     title: "Uma viagem bem planejada começa por uma boa conversa.",
     text: "Antes de sugerir destinos, hotéis ou experiências, queremos entender quem vai viajar, o que espera viver e quais detalhes são realmente importantes. É assim que cada viagem ganha personalidade, tranquilidade e significado.",
   },
+  randomizeDestinations: true,
   destinations: [
     { key: "europa-no-seu-ritmo", image: "europaCastelo", label: "Cultura e experiências", title: "Europa no seu ritmo", text: "Cidades históricas, gastronomia, paisagens e experiências combinadas em um roteiro personalizado, com deslocamentos e hospedagens cuidadosamente planejados.", service: "pacotes", enabled: true, order: 1 },
     { key: "orlando-completo", image: "orlandoMagicKingdom", label: "Parques e entretenimento", title: "Orlando com planejamento completo", text: "Parques, ingressos, hospedagem, alimentação e deslocamentos organizados para aproveitar melhor cada dia da viagem.", service: "ingressos", enabled: true, order: 2 },
