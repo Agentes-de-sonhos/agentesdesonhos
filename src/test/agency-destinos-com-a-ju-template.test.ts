@@ -54,11 +54,24 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
         preserveTitleLineBreaks: true,
         actionsPlacement: "right",
         titleWeight: "regular",
+        overlay: "strongLeft",
       });
       expect(profile.heroPresentation?.cta).toBeUndefined();
       expect(profile.compactSectionSpacing).toBe(true);
       expect(profile.conciergeWhatsappLabel).toBe("Falar com a equipe");
     }
+  });
+
+  it("associa as três fotos do hero pelo título com recortes exclusivos", () => {
+    const hero = resolveSiteProfile(JU_HOSTS[0]).hero ?? [];
+    expect(hero.map(({ title, image, focalPoint, textWidth }) => ({ title, image, focalPoint, textWidth }))).toEqual([
+      { title: "Sua viagem importa.\nCada detalhe também.", image: "heroVarenna", focalPoint: "varenna", textWidth: undefined },
+      { title: "Orlando, Europa, cruzeiros e resorts\nplanejados por quem conhece", image: "heroSantoriniShip", focalPoint: "santoriniShip", textWidth: undefined },
+      { title: "Do primeiro planejamento ao retorno,\nvocê viaja com suporte de verdade", image: "heroAirportTraveler", focalPoint: "airportTraveler", textWidth: "narrowLeft" },
+    ]);
+    expect(homeSource).toContain("hero-varenna-lago-como.webp.asset.json");
+    expect(homeSource).toContain("hero-santorini-navio.webp.asset.json");
+    expect(homeSource).toContain("hero-viajante-aeroporto.webp.asset.json");
   });
 
   it("usa o vídeo enviado somente na autoridade de cruzeiros da Destinos", () => {
