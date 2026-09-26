@@ -520,7 +520,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (!s) return null;
         return (
           <section key={key} id="assinatura" className="bg-background">
-            <div className={`${container} py-16 md:py-24`}>
+            <div className={`${container} ${compactSpacing ? "pt-16 pb-8 md:pt-24 md:pb-12" : "py-16 md:py-24"}`}>
               <div className="mx-auto max-w-3xl text-center">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--brand-primary)] wl-kicker">
                   {s.kicker}
