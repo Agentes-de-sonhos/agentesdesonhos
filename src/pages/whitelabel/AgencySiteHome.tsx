@@ -372,7 +372,17 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     return resolveSections(overrides);
   }, [dmc, profile]);
   const modules = useMemo(() => resolveModules(undefined, profile.modules), [profile]);
-  const destinations = useMemo(() => resolveDestinations(undefined, profile.destinations), [profile]);
+  const destinations = useMemo(() => {
+    const list = resolveDestinations(undefined, profile.destinations);
+    if (!profile.randomizeDestinations || list.length < 2) return list;
+    // Sorteio único por carregamento: a ordem permanece estável durante a leitura.
+    const shuffled = [...list];
+    for (let i = shuffled.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [profile]);
   const highlights = profile.highlights ?? DEFAULT_HIGHLIGHTS;
   const differentials = profile.differentials ?? DEFAULT_DIFFERENTIALS;
   const faq = profile.faq ?? DEFAULT_FAQ;
