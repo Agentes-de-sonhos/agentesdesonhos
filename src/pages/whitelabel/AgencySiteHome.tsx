@@ -1263,7 +1263,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     {copy.title ?? "Perguntas frequentes"}
                   </h2>
                   <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
-                    Se a sua dúvida não estiver aqui, fale com um consultor da{" "}
+                    Se a sua dúvida não estiver aqui, fale com uma consultora da{" "}
                     <BrandText>{name}</BrandText>.
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
