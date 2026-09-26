@@ -111,11 +111,12 @@ export function AgencyQuickQuote({
   }, []);
 
   useEffect(() => {
-    if (!editorial) return;
+    // Vale para todos os temas: as setas discretas aparecem sempre que a
+    // trilha de serviços não couber na largura disponível (inclusive celular).
     syncRail();
     window.addEventListener("resize", syncRail);
     return () => window.removeEventListener("resize", syncRail);
-  }, [editorial, syncRail]);
+  }, [service.key, syncRail]);
 
   const scrollRail = useCallback((direction: -1 | 1) => {
     const el = railRef.current;
@@ -251,27 +252,27 @@ export function AgencyQuickQuote({
             {copy.support && <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">{copy.support}</p>}
           </div>
         )}
-        <div className={editorial ? "relative flex items-start gap-1" : undefined}>
-          {editorial && railOverflow && (
+        <div className="relative flex items-start gap-1">
+          {railOverflow && (
             <button
               type="button"
               aria-label="Categorias anteriores"
               onClick={() => scrollRail(-1)}
               disabled={atStart}
-              className="mt-1 hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-border disabled:hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:grid"
+              className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border/70 text-foreground/70 transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-border disabled:hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-9 sm:w-9"
             >
               <ChevronLeft className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
           <div
-            ref={editorial ? railRef : undefined}
-            onScroll={editorial ? syncRail : undefined}
+            ref={railRef}
+            onScroll={syncRail}
             role="tablist"
             aria-label="Serviços para cotação"
             className={
               editorial
                 ? "wl-rail flex min-w-0 flex-1 flex-nowrap snap-x snap-mandatory gap-1.5 overflow-x-auto px-1 pb-4"
-                : "-mx-1 flex gap-1 overflow-x-auto pb-3 [scrollbar-width:thin]"
+                : "wl-rail -mx-1 flex min-w-0 flex-1 flex-nowrap snap-x gap-1 overflow-x-auto px-1 pb-3"
             }
           >
             {REQUEST_SERVICES.map((item) => {
@@ -304,13 +305,13 @@ export function AgencyQuickQuote({
               );
             })}
           </div>
-          {editorial && railOverflow && (
+          {railOverflow && (
             <button
               type="button"
               aria-label="Próximas categorias"
               onClick={() => scrollRail(1)}
               disabled={atEnd}
-              className="mt-1 hidden h-9 w-9 shrink-0 place-items-center rounded-full border border-border text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-border disabled:hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:grid"
+              className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-border/70 text-foreground/70 transition-colors hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-border disabled:hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:h-9 sm:w-9"
             >
               <ChevronRight className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -345,7 +346,8 @@ export function AgencyQuickQuote({
           <Button
             size="lg"
             className={cn(
-              "w-full min-w-0 whitespace-nowrap px-4",
+              // No celular o botão ocupa a linha inteira das duas colunas.
+              "col-span-2 w-full min-w-0 whitespace-nowrap px-4 lg:col-span-1",
               editorial
                 ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[13px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
                 : "mt-1.5 h-11 rounded-xl md:mt-0",
