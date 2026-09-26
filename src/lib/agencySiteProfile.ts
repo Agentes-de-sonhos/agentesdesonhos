@@ -521,6 +521,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   heroPresentation: {
     kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
     preserveTitleLineBreaks: true,
+    titleWeight: "regular",
     actionsPlacement: "right",
   },
   hero: [
