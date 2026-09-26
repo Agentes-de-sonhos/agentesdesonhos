@@ -29,6 +29,19 @@ describe("atendimento programado do site white label", () => {
     expect(isWithinAssistHours(HOURS, new Date("2026-09-23T21:00:00Z"))).toBe(false);
   });
 
+  it("atende sábado das 9h às 14h e fecha depois", () => {
+    const destinos = resolveSiteAssist("destinoscomaju.com.br")!;
+    // Sábado, 10h em São Paulo (13:00Z).
+    expect(isWithinAssistHours(destinos.hours, new Date("2026-09-26T13:00:00Z"))).toBe(true);
+    // Sábado, 14h em São Paulo (17:00Z) — já encerrado.
+    expect(isWithinAssistHours(destinos.hours, new Date("2026-09-26T17:00:00Z"))).toBe(false);
+    // Sábado, 8h em São Paulo (11:00Z) — ainda fechado.
+    expect(isWithinAssistHours(destinos.hours, new Date("2026-09-26T11:00:00Z"))).toBe(false);
+    // Domingo permanece fechado.
+    expect(isWithinAssistHours(destinos.hours, new Date("2026-09-27T13:00:00Z"))).toBe(false);
+    expect(destinos.hoursLabel).toContain("sábados das 9h às 14h");
+  });
+
   it("contextualiza a mensagem pela página", () => {
     expect(assistWhatsappMessage("Destinos com a Ju", "/xcaret")).toContain("página do Xcaret");
     expect(assistWhatsappMessage("Destinos com a Ju", "/")).toContain("Estava no site");
