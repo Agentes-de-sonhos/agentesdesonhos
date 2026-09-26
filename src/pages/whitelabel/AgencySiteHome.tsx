@@ -1082,7 +1082,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               </div>
               {/* Valor da consultoria humana: lista opcional definida pelo perfil. */}
               {!!profile.conciergePoints?.length && (
-                <div className={`${container} pb-14 md:pb-24`}>
+                <div className={`${container} ${compactSpacing ? "pb-8 md:pb-12" : "pb-14 md:pb-24"}`}>
                   {/* Galeria das etapas: 1 card no celular, 2 no tablet e 4 no desktop. */}
                   <Carousel
                     opts={{ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" }}
