@@ -817,7 +817,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
-              <div className={`${container} grid items-center gap-10 py-14 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-center gap-10 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
