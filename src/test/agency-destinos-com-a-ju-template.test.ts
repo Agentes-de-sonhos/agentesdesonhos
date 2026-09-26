@@ -57,7 +57,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       });
       expect(profile.heroPresentation?.cta).toBeUndefined();
       expect(profile.compactSectionSpacing).toBe(true);
-      expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
+      expect(profile.conciergeWhatsappLabel).toBe("Falar com a equipe");
     }
   });
 
