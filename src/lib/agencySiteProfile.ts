@@ -104,6 +104,10 @@ export interface AgencyHeroPresentation {
   preserveTitleLineBreaks?: boolean;
   /** Posicionamento opcional do CTA e da navegação; o padrão permanece inline. */
   actionsPlacement?: "inline" | "right";
+  /** Peso do título dos banners; ausente mantém o peso forte compartilhado. */
+  titleWeight?: "regular";
+  /** Reduz os vãos verticais entre as seções deste perfil. */
+  compactSectionSpacing?: boolean;
 }
 
 export interface AgencySiteProfile {
