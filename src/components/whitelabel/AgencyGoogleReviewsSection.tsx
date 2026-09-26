@@ -69,10 +69,13 @@ export function AgencyGoogleReviewsSection({
   hostname,
   container,
   copy,
+  compactSpacing = false,
 }: {
   hostname: string;
   container: string;
   copy?: { kicker?: string; title?: string; subtitle?: string };
+  /** Reduz o vão superior da seção e o afastamento da atribuição do Google. */
+  compactSpacing?: boolean;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const [near, setNear] = useState(false);
