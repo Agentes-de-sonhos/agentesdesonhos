@@ -846,7 +846,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   )}
                   {aboutCopy?.badge && (
                     <div className="mt-8 inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6">
-                      <span className="text-4xl font-extrabold uppercase leading-none tracking-tight text-[hsl(var(--wl-ink))] md:text-5xl">
+                      <span className="text-4xl font-extrabold uppercase leading-none tracking-tight text-primary md:text-5xl">
                         {aboutCopy.badge.value}
                       </span>
                       {aboutCopy.badge.label && (
