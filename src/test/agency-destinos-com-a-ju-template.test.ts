@@ -53,8 +53,10 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
         kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
         preserveTitleLineBreaks: true,
         actionsPlacement: "right",
+        titleWeight: "regular",
       });
       expect(profile.heroPresentation?.cta).toBeUndefined();
+      expect(profile.compactSectionSpacing).toBe(true);
       expect(profile.conciergeWhatsappLabel).toBe("Falar com a Juliana");
     }
   });

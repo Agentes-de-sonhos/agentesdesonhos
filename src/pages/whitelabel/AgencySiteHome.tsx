@@ -72,6 +72,7 @@ import {
   AGENCY_HERO_COPY_CLASS,
   AGENCY_HERO_SUBTITLE_CLASS,
   AGENCY_HERO_TITLE_CLASS,
+  AGENCY_HERO_TITLE_LIGHT_CLASS,
   AGENCY_SECTION_HEADING_CLASS,
   AGENCY_SECTION_SUBTITLE_CLASS,
   AGENCY_SECTION_TITLE_CLASS,
@@ -326,6 +327,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  // Vãos verticais reduzidos: opt-in por perfil, sem alterar os demais sites.
+  const compactSpacing = profile.compactSectionSpacing === true;
   const copyFor = useCallback(
     (key: AgencySectionKey): AgencySectionCopy => profile.copy?.[key] ?? {},
     [profile],
@@ -520,7 +523,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (!s) return null;
         return (
           <section key={key} id="assinatura" className="bg-background">
-            <div className={`${container} py-16 md:py-24`}>
+            <div className={`${container} ${compactSpacing ? "pt-16 pb-8 md:pt-24 md:pb-12" : "py-16 md:py-24"}`}>
               <div className="mx-auto max-w-3xl text-center">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--brand-primary)] wl-kicker">
                   {s.kicker}
@@ -715,7 +718,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="destinos" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-14 md:py-24`}>
+              <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
                   title={copy.title ?? "Descubra o seu próximo destino"}
                   subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
@@ -817,7 +820,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
-              <div className={`${container} grid items-center gap-10 py-14 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-center gap-10 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
@@ -969,7 +972,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="diferenciais" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-14 md:py-24`}>
+              <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
                   title={copy.title ?? "Diferenciais"}
                   subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
@@ -1022,7 +1025,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="atendimento" className="bg-background">
-              <div className={`${container} grid items-stretch gap-10 py-14 md:grid-cols-2 md:gap-16 md:py-24`}>
+              <div className={`${container} grid items-stretch gap-10 md:grid-cols-2 md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {copy.kicker ?? "Gente cuidando de gente"}
@@ -1239,6 +1242,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               key={key}
               hostname={hostname}
               container={container}
+              compactSpacing={compactSpacing}
               copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
             />
           );
@@ -1250,7 +1254,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="faq" className="bg-background">
-              <div className={`${container} grid gap-10 py-14 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 md:py-24`}>
+              <div className={`${container} grid gap-10 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
                 <div className="md:sticky md:top-28 md:self-start">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {copy.kicker ?? "Antes de solicitar"}
@@ -1323,7 +1327,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="novidades" className="bg-background">
-              <div className={`${container} py-14 md:py-24`}>
+              <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <div className={`overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"}`}>
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
@@ -1465,7 +1469,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <h1
             className={
                editorial
-                 ? `${AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""}`
+                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""}`
                  : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >

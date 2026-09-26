@@ -69,10 +69,13 @@ export function AgencyGoogleReviewsSection({
   hostname,
   container,
   copy,
+  compactSpacing = false,
 }: {
   hostname: string;
   container: string;
   copy?: { kicker?: string; title?: string; subtitle?: string };
+  /** Reduz o vão superior da seção e o afastamento da atribuição do Google. */
+  compactSpacing?: boolean;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const [near, setNear] = useState(false);
@@ -106,7 +109,7 @@ export function AgencyGoogleReviewsSection({
 
   return (
     <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
-      <div className={`${container} py-14 md:py-24`}>
+      <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
         <div className="flex w-full min-w-0 flex-col gap-6">
           <div className="min-w-0">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
@@ -160,7 +163,7 @@ export function AgencyGoogleReviewsSection({
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-1 text-muted-foreground">
+        <div className={`${compactSpacing ? "mt-4" : "mt-6"} flex flex-col gap-1 text-muted-foreground`}>
           <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
             Google Maps
           </p>

@@ -104,10 +104,14 @@ export interface AgencyHeroPresentation {
   preserveTitleLineBreaks?: boolean;
   /** Posicionamento opcional do CTA e da navegação; o padrão permanece inline. */
   actionsPlacement?: "inline" | "right";
+  /** Peso do título dos banners; ausente mantém o peso forte compartilhado. */
+  titleWeight?: "regular";
 }
 
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
+  /** Reduz os vãos verticais entre as seções deste perfil. */
+  compactSectionSpacing?: boolean;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
   nav?: { label: string; to: string }[];
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
@@ -491,6 +495,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
  */
 const EDITORIAL_ROSE: AgencySiteProfile = {
   key: "editorialRose",
+  compactSectionSpacing: true,
   nav: [
     { label: "Início", to: "/" },
     { label: "Destinos", to: "/#destinos" },
@@ -516,6 +521,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   heroPresentation: {
     kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
     preserveTitleLineBreaks: true,
+    titleWeight: "regular",
     actionsPlacement: "right",
   },
   hero: [

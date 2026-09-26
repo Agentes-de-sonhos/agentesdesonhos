@@ -18,6 +18,13 @@ export const AGENCY_HERO_COPY_CLASS = "w-full md:max-w-[82%] lg:max-w-[78%]";
 export const AGENCY_HERO_TITLE_CLASS =
   "w-full max-w-[30ch] break-words text-pretty text-[2rem] font-extrabold leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.45)] md:text-[clamp(2.5rem,4vw,3.25rem)] md:leading-[1.04]";
 
+/**
+ * Variante do título do hero com peso regular: usada por perfis cuja direção
+ * editorial pede títulos leves nos banners da primeira dobra.
+ */
+export const AGENCY_HERO_TITLE_LIGHT_CLASS =
+  "w-full max-w-[30ch] break-words text-pretty text-[2rem] font-normal leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.45)] md:text-[clamp(2.5rem,4vw,3.25rem)] md:leading-[1.04]";
+
 export const AGENCY_HERO_SUBTITLE_CLASS =
   "mt-4 w-full max-w-[72rem] break-words text-pretty text-[15px] leading-relaxed text-white/90 md:text-[1.0625rem] md:leading-relaxed";
 
