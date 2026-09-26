@@ -106,12 +106,12 @@ export interface AgencyHeroPresentation {
   actionsPlacement?: "inline" | "right";
   /** Peso do título dos banners; ausente mantém o peso forte compartilhado. */
   titleWeight?: "regular";
-  /** Reduz os vãos verticais entre as seções deste perfil. */
-  compactSectionSpacing?: boolean;
 }
 
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
+  /** Reduz os vãos verticais entre as seções deste perfil. */
+  compactSectionSpacing?: boolean;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
   nav?: { label: string; to: string }[];
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
