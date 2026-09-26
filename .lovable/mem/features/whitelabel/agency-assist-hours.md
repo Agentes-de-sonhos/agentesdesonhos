@@ -6,7 +6,8 @@ type: feature
 
 # Atendimento com horário programado (site white label)
 
-- Configuração declarativa por hostname em `src/lib/agencySiteAssist.ts` (`ASSIST_BY_HOST`). Hosts sem preset não exibem o botão; os demais tenants seguem intactos.
+- Configuração declarativa por hostname em `src/lib/agencySiteAssist.ts` (`ASSIST_BY_HOST`). Hosts sem preset usam `DEFAULT_ASSIST` via `siteAssistConfig` (sempre disponível, WhatsApp direto).
+- Canal único: o botão de WhatsApp do cabeçalho foi removido; só existe o botão flutuante "Atendimento" com ícone de diálogo (`MessageCircle`) nos dois estados.
 - Horário SEMPRE avaliado no fuso `America/Sao_Paulo`, independente do relógio do visitante.
 - Faixas: janela principal (`days`, `startMinute`, `endMinute`) + `extra[]` para dias com horário diferente.
 - Destinos com a Ju (`destinoscomaju.com.br`): segunda a sexta das 9h às 18h e sábados das 9h às 14h. Domingo fechado.
