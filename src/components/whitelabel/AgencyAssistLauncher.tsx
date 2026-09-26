@@ -115,12 +115,12 @@ export function AgencyAssistLauncher({ info }: { info: AgencyDomainInfo }) {
       </div>
 
       {open && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-end p-4 sm:inset-auto sm:bottom-20 sm:right-4 print:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-end p-4 sm:inset-auto sm:bottom-4 sm:right-4 print:hidden">
           <div
             role="dialog"
             aria-modal="false"
             aria-label={config.offlineTitle}
-            className="w-full max-w-sm rounded-2xl border border-border/60 bg-background p-5 shadow-2xl"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-sm overflow-y-auto rounded-2xl border border-border/60 bg-background p-5 shadow-2xl"
           >
             <div className="flex items-start justify-between gap-3">
               <div>

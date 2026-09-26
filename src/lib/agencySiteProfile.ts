@@ -587,7 +587,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     { key: "proposta", title: "Receba uma proposta personalizada", text: "Você recebe opções claras, organizadas e explicadas para escolher com segurança." },
     { key: "acompanhamento", title: "Viaje com acompanhamento", text: "Depois da confirmação, documentos, roteiro e informações ficam organizados na Área do Cliente, com suporte durante toda a jornada." },
   ],
-  conciergeWhatsappLabel: "Falar com a Juliana",
+  conciergeWhatsappLabel: "Falar com a equipe",
   reviewsCopy: {
     kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju",
     subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes.",

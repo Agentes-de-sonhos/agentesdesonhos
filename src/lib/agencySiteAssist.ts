@@ -50,11 +50,11 @@ const DESTINOS_HOURS_LABEL = "segunda a sexta das 9h às 18h e sábados das 9h �
 
 const DESTINOS_ASSIST: AgencyAssistConfig = {
   hours: DESTINOS_HOURS,
-  onlineLabel: "Falar com a Juliana",
+  onlineLabel: "Falar com a equipe",
   offlineLabel: "Deixe sua mensagem",
   hoursLabel: DESTINOS_HOURS_LABEL,
   offlineTitle: "Atendimento encerrado por hoje",
-  offlineText: `Nosso atendimento ao vivo funciona ${DESTINOS_HOURS_LABEL}. Deixe seu recado que a Juliana entra em contato no início do próximo expediente.`,
+  offlineText: "Deixe seu recado que nossa equipe entra em contato no início do próximo expediente.",
 };
 
 /** Hosts com atendimento programado (root e www da mesma agência). */
