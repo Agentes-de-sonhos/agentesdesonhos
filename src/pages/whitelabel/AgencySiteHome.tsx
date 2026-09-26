@@ -62,6 +62,7 @@ import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
 import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import disneyWishCruise from "@/assets/whitelabel/destinos-com-a-ju/disney-wish-cruise.mp4.asset.json";
 import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front-v2.png.asset.json";
+import destinoEuropaCastelo from "@/assets/whitelabel/destino-europa-neuschwanstein.jpg.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
