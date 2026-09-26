@@ -12,12 +12,17 @@
 
 const SP_TIME_ZONE = "America/Sao_Paulo";
 
-export interface AgencyAssistHours {
+export interface AgencyAssistWindow {
   /** Dias atendidos: 0 = domingo ... 6 = sábado. */
   days: number[];
   /** Minutos desde a meia-noite (ex.: 9h = 540). */
   startMinute: number;
   endMinute: number;
+}
+
+export interface AgencyAssistHours extends AgencyAssistWindow {
+  /** Faixas adicionais (ex.: sábado com horário reduzido). */
+  extra?: AgencyAssistWindow[];
 }
 
 export interface AgencyAssistConfig {
@@ -26,7 +31,7 @@ export interface AgencyAssistConfig {
   onlineLabel: string;
   /** Texto curto do botão fora do expediente. */
   offlineLabel: string;
-  /** Resumo do horário mostrado ao visitante (ex.: "segunda a sexta, das 9h às 18h"). */
+  /** Resumo do horário mostrado ao visitante. */
   hoursLabel: string;
   /** Rótulo do cartão de recado. */
   offlineTitle: string;
@@ -34,20 +39,22 @@ export interface AgencyAssistConfig {
   offlineText: string;
 }
 
-const WEEKDAYS_9_TO_18: AgencyAssistHours = {
+const DESTINOS_HOURS: AgencyAssistHours = {
   days: [1, 2, 3, 4, 5],
   startMinute: 9 * 60,
   endMinute: 18 * 60,
+  extra: [{ days: [6], startMinute: 9 * 60, endMinute: 14 * 60 }],
 };
 
+const DESTINOS_HOURS_LABEL = "segunda a sexta das 9h às 18h e sábados das 9h às 14h";
+
 const DESTINOS_ASSIST: AgencyAssistConfig = {
-  hours: WEEKDAYS_9_TO_18,
+  hours: DESTINOS_HOURS,
   onlineLabel: "Falar com a Juliana",
   offlineLabel: "Deixe sua mensagem",
-  hoursLabel: "segunda a sexta, das 9h às 18h",
+  hoursLabel: DESTINOS_HOURS_LABEL,
   offlineTitle: "Atendimento encerrado por hoje",
-  offlineText:
-    "Nosso atendimento ao vivo funciona de segunda a sexta, das 9h às 18h. Deixe seu recado que a Juliana entra em contato no início do próximo expediente.",
+  offlineText: `Nosso atendimento ao vivo funciona ${DESTINOS_HOURS_LABEL}. Deixe seu recado que a Juliana entra em contato no início do próximo expediente.`,
 };
 
 /** Hosts com atendimento programado (root e www da mesma agência). */
@@ -88,11 +95,13 @@ export function saoPauloClock(date: Date = new Date()): { weekday: number; minut
   };
 }
 
-/** Verdadeiro somente dentro dos dias e da faixa de horário configurados. */
+/** Verdadeiro somente dentro dos dias e das faixas de horário configuradas. */
 export function isWithinAssistHours(hours: AgencyAssistHours, date: Date = new Date()): boolean {
   const { weekday, minutes } = saoPauloClock(date);
-  if (!hours.days.includes(weekday)) return false;
-  return minutes >= hours.startMinute && minutes < hours.endMinute;
+  const windows: AgencyAssistWindow[] = [hours, ...(hours.extra ?? [])];
+  return windows.some(
+    (w) => w.days.includes(weekday) && minutes >= w.startMinute && minutes < w.endMinute,
+  );
 }
 
 /** Contexto da página atual, usado para abrir a conversa já situada. */
