@@ -495,6 +495,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
  */
 const EDITORIAL_ROSE: AgencySiteProfile = {
   key: "editorialRose",
+  compactSectionSpacing: true,
   nav: [
     { label: "Início", to: "/" },
     { label: "Destinos", to: "/#destinos" },
