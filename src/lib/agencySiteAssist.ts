@@ -95,11 +95,13 @@ export function saoPauloClock(date: Date = new Date()): { weekday: number; minut
   };
 }
 
-/** Verdadeiro somente dentro dos dias e da faixa de horário configurados. */
+/** Verdadeiro somente dentro dos dias e das faixas de horário configuradas. */
 export function isWithinAssistHours(hours: AgencyAssistHours, date: Date = new Date()): boolean {
   const { weekday, minutes } = saoPauloClock(date);
-  if (!hours.days.includes(weekday)) return false;
-  return minutes >= hours.startMinute && minutes < hours.endMinute;
+  const windows: AgencyAssistWindow[] = [hours, ...(hours.extra ?? [])];
+  return windows.some(
+    (w) => w.days.includes(weekday) && minutes >= w.startMinute && minutes < w.endMinute,
+  );
 }
 
 /** Contexto da página atual, usado para abrir a conversa já situada. */
