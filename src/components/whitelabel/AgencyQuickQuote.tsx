@@ -345,7 +345,8 @@ export function AgencyQuickQuote({
           <Button
             size="lg"
             className={cn(
-              "w-full min-w-0 whitespace-nowrap px-4",
+              // No celular o botão ocupa a linha inteira das duas colunas.
+              "col-span-2 w-full min-w-0 whitespace-nowrap px-4 lg:col-span-1",
               editorial
                 ? "mt-2 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-[13px] font-semibold text-white hover:bg-[hsl(var(--wl-ink))]/90 md:mt-0"
                 : "mt-1.5 h-11 rounded-xl md:mt-0",
