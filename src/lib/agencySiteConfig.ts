@@ -96,6 +96,7 @@ export function resolveSections(
 export type AgencyImageSlot =
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "orlandoMagicKingdom" | "cruzeiroDisneyWish" | "nordesteResort"
+  | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos";
@@ -154,6 +155,10 @@ export interface AgencyHeroSlide {
   subtitle: string;
   /** Imagem editorial opcional por slide; ausente preserva o fallback atual. */
   image?: AgencyImageSlot;
+  /** Recorte responsivo opcional da foto, resolvido pela apresentação. */
+  focalPoint?: "varenna" | "santoriniShip" | "airportTraveler";
+  /** Limita a largura do texto quando o assunto principal ocupa a direita. */
+  textWidth?: "narrowLeft";
   order: number;
   enabled: boolean;
 }
@@ -195,6 +200,8 @@ export interface ResolvedHeroSlide {
   title: string;
   subtitle: string;
   image?: string | null;
+  focalPoint?: AgencyHeroSlide["focalPoint"];
+  textWidth?: AgencyHeroSlide["textWidth"];
 }
 
 /**
@@ -220,6 +227,8 @@ export function resolveHeroSlides(
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
     image: (s.image ? imageSlots?.[s.image] : undefined) ?? coverImageUrl ?? fallbackImage ?? null,
+    focalPoint: s.focalPoint,
+    textWidth: s.textWidth,
   }));
 }
 

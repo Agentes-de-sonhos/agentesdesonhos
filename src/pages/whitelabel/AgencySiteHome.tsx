@@ -67,6 +67,9 @@ import destinoCaribeMexico from "@/assets/whitelabel/destinos-com-a-ju/destino-c
 import destinoOrlandoMk from "@/assets/whitelabel/destinos-com-a-ju/destino-orlando-mk.avif.asset.json";
 import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
+import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
+import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
+import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
@@ -94,6 +97,9 @@ const DESTINATION_IMAGES: Record<string, string> = {
   orlandoMagicKingdom: destinoOrlandoMk.url,
   cruzeiroDisneyWish: destinoCruzeiroWish.url,
   nordesteResort: destinoNordesteResort.url,
+  heroVarenna: heroVarenna.url,
+  heroSantoriniShip: heroSantoriniShip.url,
+  heroAirportTraveler: heroAirportTraveler.url,
   parques: destinoParques,
   safari: destinoSafari,
   douro: destinoDouro,
@@ -452,6 +458,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   }, [paused, slides.length]);
 
   const current = slides[slide];
+  const heroImagePositionClass = {
+    varenna: "object-[66%_center] md:object-[center_52%]",
+    santoriniShip: "object-[64%_center] md:object-[center_58%]",
+    airportTraveler: "object-[68%_center] md:object-[64%_28%]",
+  }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`
     : null;
@@ -1429,14 +1440,20 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
       >
         <div className="absolute inset-0">
           {current.image ? (
-            <img src={current.image} alt="" className="h-full w-full object-cover" />
+            <img
+              src={current.image}
+              alt=""
+              className={`h-full w-full object-cover ${heroImagePositionClass}`}
+            />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70" />
           )}
           <div
             className={
               editorial
-                ? "absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.9)] via-[hsl(220_12%_7%/0.6)] to-[hsl(220_12%_7%/0.05)]"
+                ? profile.heroPresentation?.overlay === "strongLeft"
+                  ? "absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]"
+                  : "absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.9)] via-[hsl(220_12%_7%/0.6)] to-[hsl(220_12%_7%/0.05)]"
                 : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
             }
           />
@@ -1475,11 +1492,11 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
             </p>
           )}
-          <div className={profile.heroPresentation?.actionsPlacement === "right" ? "flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10" : undefined}>
+           <div className={profile.heroPresentation?.actionsPlacement === "right" ? "flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10" : undefined}>
           <h1
             className={
                editorial
-                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""}`
+                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""} ${current.textWidth === "narrowLeft" ? "lg:max-w-[21ch] lg:flex-none" : ""}`
                  : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
