@@ -869,10 +869,10 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     </ul>
                   )}
                   <div className="mt-8 space-y-2 border-t border-foreground/10 pt-6">
-                    {info.owner_name && (
+                    {(aboutCopy?.ownerName ?? info.owner_name) && (
                       <p className="text-sm text-muted-foreground">
                         Atendimento com{" "}
-                        <span className="font-semibold text-foreground">{info.owner_name}</span>
+                        <span className="font-semibold text-foreground">{aboutCopy?.ownerName ?? info.owner_name}</span>
                       </p>
                     )}
                     {location && aboutCopy?.showLocation !== false && (
