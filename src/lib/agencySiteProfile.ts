@@ -142,6 +142,8 @@ export interface AgencySiteProfile {
   /** Slot de imagem de fallback do hero (resolvido na apresentação). */
   heroImage?: string;
   destinations?: AgencyDestination[];
+  /** Embaralha a ordem das inspirações a cada carregamento (padrão: ordem declarada). */
+  randomizeDestinations?: boolean;
   modules?: AgencyModule[];
   highlights?: AgencyHighlight[];
   differentials?: AgencyDifferential[];
