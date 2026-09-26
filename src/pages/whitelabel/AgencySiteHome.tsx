@@ -461,7 +461,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
   const heroImagePositionClass = {
     varenna: "object-[66%_center] md:object-[center_52%]",
     santoriniShip: "object-[64%_center] md:object-[center_58%]",
-    airportTraveler: "object-[68%_center] md:object-[64%_48%]",
+    airportTraveler: "object-[68%_center] md:object-[64%_28%]",
   }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`
