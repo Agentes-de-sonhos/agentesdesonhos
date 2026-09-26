@@ -63,6 +63,10 @@ import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import disneyWishCruise from "@/assets/whitelabel/destinos-com-a-ju/disney-wish-cruise.mp4.asset.json";
 import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front-v2.png.asset.json";
 import destinoEuropaCastelo from "@/assets/whitelabel/destino-europa-neuschwanstein-2.jpg.asset.json";
+import destinoCaribeMexico from "@/assets/whitelabel/destinos-com-a-ju/destino-caribe-mexico.jpg.asset.json";
+import destinoOrlandoMk from "@/assets/whitelabel/destinos-com-a-ju/destino-orlando-mk.avif.asset.json";
+import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
+import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
@@ -86,6 +90,10 @@ const DESTINATION_IMAGES: Record<string, string> = {
   cruzeiro: destinoCruzeiro,
   europa: destinoEuropa,
   europaCastelo: destinoEuropaCastelo.url,
+  caribeMexico: destinoCaribeMexico.url,
+  orlandoMagicKingdom: destinoOrlandoMk.url,
+  cruzeiroDisneyWish: destinoCruzeiroWish.url,
+  nordesteResort: destinoNordesteResort.url,
   parques: destinoParques,
   safari: destinoSafari,
   douro: destinoDouro,

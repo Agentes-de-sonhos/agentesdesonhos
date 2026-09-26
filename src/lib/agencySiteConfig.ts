@@ -95,6 +95,7 @@ export function resolveSections(
  */
 export type AgencyImageSlot =
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
+  | "caribeMexico" | "orlandoMagicKingdom" | "cruzeiroDisneyWish" | "nordesteResort"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos";
