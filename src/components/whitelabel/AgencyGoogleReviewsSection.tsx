@@ -163,7 +163,7 @@ export function AgencyGoogleReviewsSection({
           </div>
         )}
 
-        <div className="mt-6 flex flex-col gap-1 text-muted-foreground">
+        <div className={`${compactSpacing ? "mt-4" : "mt-6"} flex flex-col gap-1 text-muted-foreground`}>
           <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
             Google Maps
           </p>
