@@ -78,7 +78,7 @@ export function TravelersFields({
       </div>
 
       {showAges && count > 0 && (
-        <fieldset className="min-w-0 md:col-span-full">
+        <fieldset className="col-span-2 min-w-0 md:col-span-full">
           <legend className={labelCls}>
             Idade das crianças<span aria-hidden="true" className="wl-required ml-0.5 text-destructive">*</span>
           </legend>
