@@ -969,7 +969,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         if (editorial) {
           return (
             <section key={key} id="diferenciais" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
-              <div className={`${container} py-14 md:py-24`}>
+              <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
                   title={copy.title ?? "Diferenciais"}
                   subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
