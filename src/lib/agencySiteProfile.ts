@@ -176,6 +176,8 @@ export interface AgencySiteProfile {
     media?: "default" | "hidden";
     /** Exibe a cidade/UF do cadastro sob o texto institucional. */
     showLocation?: boolean;
+    /** Nome exibido em "Atendimento com"; ausente mantém o nome do cadastro. */
+    ownerName?: string;
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
