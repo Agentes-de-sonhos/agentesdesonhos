@@ -326,6 +326,8 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  // Vãos verticais reduzidos: opt-in por perfil, sem alterar os demais sites.
+  const compactSpacing = profile.compactSectionSpacing === true;
   const copyFor = useCallback(
     (key: AgencySectionKey): AgencySectionCopy => profile.copy?.[key] ?? {},
     [profile],
