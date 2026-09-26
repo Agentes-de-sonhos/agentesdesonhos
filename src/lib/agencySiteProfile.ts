@@ -576,6 +576,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     ],
 
     badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
+    ownerName: "Juliana Neves Sanches e Equipe",
   },
   differentials: [
     { title: "Atendimento conduzido de perto", text: "A Juliana participa do planejamento e acompanha pessoalmente cada cliente durante as principais etapas da viagem.", icon: "consultivo" },
