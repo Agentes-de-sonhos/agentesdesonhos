@@ -94,7 +94,7 @@ export function resolveSections(
  * Mapeamento central em `AgencySiteHome` — nunca imports espalhados.
  */
 export type AgencyImageSlot =
-  | "litoral" | "resort" | "cruzeiro" | "europa" | "parques"
+  | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos";
