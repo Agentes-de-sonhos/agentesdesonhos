@@ -1465,7 +1465,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           <h1
             className={
                editorial
-                 ? `${AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""}`
+                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""}`
                  : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
             }
           >
