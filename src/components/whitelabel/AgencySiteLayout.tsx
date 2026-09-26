@@ -559,6 +559,7 @@ export function AgencySiteLayout({
       <AgencyBrandBar info={info} />
       <main>{children}</main>
       <AgencyFooter info={info} />
+      <AgencyAssistLauncher info={info} />
     </div>
   );
 }
