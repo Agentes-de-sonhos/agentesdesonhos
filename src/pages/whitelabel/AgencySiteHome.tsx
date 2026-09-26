@@ -1239,6 +1239,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
               key={key}
               hostname={hostname}
               container={container}
+              compactSpacing={compactSpacing}
               copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
             />
           );
