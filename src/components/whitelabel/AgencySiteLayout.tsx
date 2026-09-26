@@ -53,7 +53,6 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
-  const wa = agencyWhatsappNumber(info);
   const logoUrl = resolveAgencyLogoUrl(info);
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
@@ -106,17 +105,6 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
             >
               Área do Cliente
             </a>
-            {wa && (
-              <Button
-                asChild
-                size="lg"
-                className="h-11 rounded-lg bg-[hsl(var(--wl-ink))] px-5 text-white hover:bg-[hsl(var(--wl-ink))]/90"
-              >
-                <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
-                </a>
-              </Button>
-            )}
           </div>
 
           <button
@@ -143,17 +131,6 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
                   {l.label}
                 </a>
               ))}
-              {wa && (
-                <Button
-                  asChild
-                  size="lg"
-                  className="my-3 h-12 rounded-lg bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90"
-                >
-                  <a href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Atendimento
-                  </a>
-                </Button>
-              )}
             </nav>
           </div>
         )}

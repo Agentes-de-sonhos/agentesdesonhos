@@ -50,10 +50,23 @@ const DESTINOS_HOURS_LABEL = "segunda a sexta das 9h às 18h e sábados das 9h �
 
 const DESTINOS_ASSIST: AgencyAssistConfig = {
   hours: DESTINOS_HOURS,
-  onlineLabel: "Falar com a equipe",
-  offlineLabel: "Deixe sua mensagem",
+  onlineLabel: "Atendimento",
+  offlineLabel: "Atendimento",
   hoursLabel: DESTINOS_HOURS_LABEL,
   offlineTitle: "Atendimento encerrado por hoje",
+  offlineText: "Deixe seu recado que nossa equipe entra em contato no início do próximo expediente.",
+};
+
+/**
+ * Padrão para agências sem escala declarada: botão único de Atendimento
+ * disponível sempre, abrindo direto o WhatsApp do cadastro.
+ */
+export const DEFAULT_ASSIST: AgencyAssistConfig = {
+  hours: { days: [0, 1, 2, 3, 4, 5, 6], startMinute: 0, endMinute: 24 * 60 },
+  onlineLabel: "Atendimento",
+  offlineLabel: "Atendimento",
+  hoursLabel: "todos os dias",
+  offlineTitle: "Atendimento",
   offlineText: "Deixe seu recado que nossa equipe entra em contato no início do próximo expediente.",
 };
 
@@ -72,6 +85,11 @@ function normalizeHost(hostname?: string | null): string {
 
 export function resolveSiteAssist(hostname?: string | null): AgencyAssistConfig | null {
   return ASSIST_BY_HOST[normalizeHost(hostname)] ?? null;
+}
+
+/** Configuração efetiva usada no site: preset do host ou o padrão geral. */
+export function siteAssistConfig(hostname?: string | null): AgencyAssistConfig {
+  return resolveSiteAssist(hostname) ?? DEFAULT_ASSIST;
 }
 
 /** Dia da semana e minutos do dia no fuso de Brasília. */
