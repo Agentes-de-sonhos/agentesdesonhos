@@ -25,6 +25,7 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
+import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
 
 export const NAV_LINKS = [
   { label: "Início", to: "/" },
@@ -559,6 +560,7 @@ export function AgencySiteLayout({
       <AgencyBrandBar info={info} />
       <main>{children}</main>
       <AgencyFooter info={info} />
+      <AgencyAssistLauncher info={info} />
     </div>
   );
 }
