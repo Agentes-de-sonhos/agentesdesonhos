@@ -117,3 +117,58 @@ export function assistWhatsappMessage(
   const where = context ? `Estava vendo ${context} no site` : "Estava no site";
   return `Olá! ${where} da ${agencyName} e gostaria de falar sobre uma viagem.`;
 }
+
+/* ------------------------------------------------------------------ */
+/* Recado fora do expediente                                           */
+/* ------------------------------------------------------------------ */
+
+/** Chave de serviço reaproveitada (já consta na allowlist do endpoint e do SQL). */
+export const ASSIST_SERVICE_KEY = "inspiracoes";
+
+/** Origem semântica registrada na gestão/CRM da agência. */
+export const ASSIST_SOURCE_LABEL = "Site — Recado fora do expediente";
+
+export interface AssistMessageForm {
+  name: string;
+  phone: string;
+  message: string;
+}
+
+/** Máscara brasileira progressiva: (00) 00000-0000. */
+export function maskAssistPhone(value: string): string {
+  const digits = (value || "").replace(/\D/g, "").slice(0, 11);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
+export function validateAssistMessage(
+  form: AssistMessageForm,
+): Partial<Record<keyof AssistMessageForm, string>> {
+  const errors: Partial<Record<keyof AssistMessageForm, string>> = {};
+  if ((form.name || "").trim().length < 2) errors.name = "Informe o seu nome.";
+  if ((form.phone || "").replace(/\D/g, "").length < 10) {
+    errors.phone = "Informe um WhatsApp válido com DDD.";
+  }
+  if ((form.message || "").trim().length < 5) {
+    errors.message = "Conte em poucas palavras o que você precisa.";
+  }
+  return errors;
+}
+
+/** Payload do recado para o endpoint público compartilhado. */
+export function buildAssistMessagePayload(form: AssistMessageForm): Record<string, unknown> {
+  const message = (form.message || "").trim().slice(0, 2000);
+  return {
+    service_key: ASSIST_SERVICE_KEY,
+    service_label: ASSIST_SOURCE_LABEL,
+    lead_name: (form.name || "").trim(),
+    lead_phone: (form.phone || "").replace(/\D/g, "").slice(0, 11),
+    preferred_channel: "whatsapp",
+    summary: message,
+    notes: `Recado deixado pelo site fora do horário de atendimento: ${message}`,
+    consent: true,
+    consent_version: "v1",
+  };
+}
