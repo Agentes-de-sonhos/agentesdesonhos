@@ -111,11 +111,12 @@ export function AgencyQuickQuote({
   }, []);
 
   useEffect(() => {
-    if (!editorial) return;
+    // Vale para todos os temas: as setas discretas aparecem sempre que a
+    // trilha de serviços não couber na largura disponível (inclusive celular).
     syncRail();
     window.addEventListener("resize", syncRail);
     return () => window.removeEventListener("resize", syncRail);
-  }, [editorial, syncRail]);
+  }, [service.key, syncRail]);
 
   const scrollRail = useCallback((direction: -1 | 1) => {
     const el = railRef.current;

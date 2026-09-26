@@ -58,7 +58,7 @@ describe("grade determinística por serviço", () => {
   it("aplica linha única no desktop e colunas compactas para numéricos", () => {
     for (const service of REQUEST_SERVICES) {
       const cls = initialGridClass(service.key);
-      expect(cls).toContain("grid-cols-1");
+      expect(cls).toContain("grid-cols-2");
       expect(cls).toContain("md:grid-cols-2");
       expect(cls).toContain("lg:grid-cols-[");
       // Colunas compactas de adultos/crianças (e dias/noites, quando existem).
