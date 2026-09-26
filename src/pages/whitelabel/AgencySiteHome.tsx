@@ -85,6 +85,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   resort: destinoResort,
   cruzeiro: destinoCruzeiro,
   europa: destinoEuropa,
+  europaCastelo: destinoEuropaCastelo.url,
   parques: destinoParques,
   safari: destinoSafari,
   douro: destinoDouro,
