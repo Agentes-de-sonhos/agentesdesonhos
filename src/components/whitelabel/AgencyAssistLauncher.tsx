@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { CheckCircle2, Clock, Loader2, MessageCircle, X } from "lucide-react";
+import { CheckCircle2, Loader2, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import {
   buildAssistMessagePayload,
   isWithinAssistHours,
   maskAssistPhone,
-  resolveSiteAssist,
+  siteAssistConfig,
   validateAssistMessage,
   type AssistMessageForm,
 } from "@/lib/agencySiteAssist";
@@ -30,7 +30,7 @@ const EMPTY_FORM: AssistMessageForm = { name: "", phone: "", message: "" };
  * servidor pelo hostname). Hosts sem preset não renderizam nada.
  */
 export function AgencyAssistLauncher({ info }: { info: AgencyDomainInfo }) {
-  const config = resolveSiteAssist(info.hostname);
+  const config = siteAssistConfig(info.hostname);
   const location = useLocation();
   const name = agencyDisplayName(info);
   const digits = agencyWhatsappNumber(info);
@@ -108,7 +108,7 @@ export function AgencyAssistLauncher({ info }: { info: AgencyDomainInfo }) {
             aria-label={config.offlineLabel}
             className="flex items-center gap-2.5 rounded-full bg-[hsl(var(--wl-navy))] py-3 pl-3 pr-4 text-sm font-semibold text-white shadow-lg transition hover:brightness-110"
           >
-            <Clock className="h-5 w-5" aria-hidden="true" />
+            <MessageCircle className="h-5 w-5" aria-hidden="true" />
             <span className="hidden sm:inline">{config.offlineLabel}</span>
           </button>
         )}
