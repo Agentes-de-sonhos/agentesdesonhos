@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
+import { serviceIcon, serviceLabel } from "@/pages/whitelabel/AgencyOffersPage";
 import { CheckCircle2, Info, Loader2 } from "lucide-react";
 import {
   EMPTY_OFFER_REQUEST,
