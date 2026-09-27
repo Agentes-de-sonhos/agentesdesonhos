@@ -25,6 +25,8 @@ export interface OfferRow {
   price_from: number | null;
   currency: string;
   price_note: string | null;
+  base_pax: number | null;
+  max_installments: number | null;
   compare_at_price: number | null;
   payment_conditions: string | null;
   customized_fields: string[];

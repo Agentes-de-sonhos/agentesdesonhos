@@ -225,6 +225,13 @@
       "when": 1790520925098,
       "tag": "0031_offers_request_service_key",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790534770853,
+      "tag": "0032_offers_per_person_and_installments",
+      "breakpoints": true
     }
   ]
 }
