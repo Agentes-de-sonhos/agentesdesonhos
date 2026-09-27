@@ -5,7 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
+import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Package, type LucideIcon } from "lucide-react";
 import {
   filterPublicOffers,
   formatOfferPeriod,
@@ -13,8 +15,42 @@ import {
   isProvenPromotion,
   monthLabel,
   offerFilterOptions,
+  type OfferIncludedService,
   type PublicOffer,
 } from "@/lib/offers";
+
+const SERVICE_ICON: Record<string, LucideIcon> = {
+  flight: Plane,
+  hotel: Hotel,
+  car_rental: Car,
+  transfer: Bus,
+  attraction: Ticket,
+  insurance: ShieldCheck,
+  cruise: Ship,
+  train: Train,
+};
+
+const SERVICE_LABEL: Record<string, string> = {
+  flight: "Aéreo",
+  hotel: "Hospedagem",
+  car_rental: "Locação de carro",
+  transfer: "Transfer",
+  attraction: "Ingressos e passeios",
+  insurance: "Seguro viagem",
+  cruise: "Cruzeiro",
+  train: "Trem",
+  other: "Serviço incluso",
+};
+
+function serviceIcon(type: string): LucideIcon {
+  return SERVICE_ICON[type] ?? Package;
+}
+
+function serviceTooltip(svc: OfferIncludedService): string {
+  const label = SERVICE_LABEL[svc.type] ?? "Serviço incluso";
+  const extra = svc.detail || svc.name;
+  return extra ? `${label}: ${extra}` : label;
+}
 
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 
