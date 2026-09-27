@@ -11,7 +11,7 @@ describe("XcaretBookingBar", () => {
     expect(screen.getByLabelText(/Crianças/)).toBeTruthy();
     expect(screen.getByRole("button", { name: /Consultar disponibilidade/i })).toBeTruthy();
   });
-}
+
   it("exige hotel e datas antes de abrir o formulário", () => {
     render(<XcaretBookingBar hostname="www.destinoscomaju.com.br" agencyName="Destinos com a Ju" />);
     fireEvent.click(screen.getByRole("button", { name: /Consultar disponibilidade/i }));
