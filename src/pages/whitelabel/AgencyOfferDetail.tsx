@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
+import { serviceIcon, serviceLabel } from "@/pages/whitelabel/AgencyOffersPage";
 import { CheckCircle2, Info, Loader2 } from "lucide-react";
 import {
   EMPTY_OFFER_REQUEST,
@@ -102,13 +103,17 @@ export default function AgencyOfferDetail({ info, basePath = "" }: { info: Agenc
             <div>
               <h2 className="mb-3 text-lg font-semibold text-foreground">O que está incluído</h2>
               <ul className="space-y-2">
-                {offer.included_services.map((s, i) => (
-                  <li key={i} className="flex gap-2 text-sm">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span><strong>{s.type}</strong>{s.name ? ` · ${s.name}` : ""}{s.detail ? ` — ${s.detail}` : ""}</span>
-                  </li>
-                ))}
+                {offer.included_services.map((s, i) => {
+                  const Icon = serviceIcon(s.type);
+                  return (
+                    <li key={i} className="flex gap-2 text-sm">
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      <span><strong>{serviceLabel(s.type)}</strong>{s.name ? ` · ${s.name}` : ""}{s.detail ? ` — ${s.detail}` : ""}</span>
+                    </li>
+                  );
+                })}
               </ul>
+
             </div>
           )}
           {offer.payment_conditions && !closed && (

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
-import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Package, type LucideIcon } from "lucide-react";
+import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Route, Package, type LucideIcon } from "lucide-react";
 import {
   filterPublicOffers,
   formatOfferPeriod,
@@ -19,38 +19,85 @@ import {
   type PublicOffer,
 } from "@/lib/offers";
 
+// Aceita tanto os rótulos em português gerados pelo orçamento ("Aéreo", "Hospedagem", ...)
+// quanto chaves em inglês usadas em ofertas manuais/IA.
 const SERVICE_ICON: Record<string, LucideIcon> = {
+  aereo: Plane,
   flight: Plane,
+  hospedagem: Hotel,
   hotel: Hotel,
+  carro: Car,
+  locacao: Car,
   car_rental: Car,
   transfer: Bus,
+  translado: Bus,
+  ingressos: Ticket,
+  ingresso: Ticket,
   attraction: Ticket,
+  passeio: Ticket,
+  passeios: Ticket,
+  seguro: ShieldCheck,
   insurance: ShieldCheck,
+  cruzeiro: Ship,
   cruise: Ship,
+  trem: Train,
   train: Train,
+  rail_transport: Train,
+  circuito: Route,
+  circuit: Route,
 };
 
 const SERVICE_LABEL: Record<string, string> = {
+  aereo: "Aéreo",
   flight: "Aéreo",
+  hospedagem: "Hospedagem",
   hotel: "Hospedagem",
+  carro: "Locação de carro",
+  locacao: "Locação de carro",
   car_rental: "Locação de carro",
   transfer: "Transfer",
+  translado: "Transfer",
+  ingressos: "Ingressos e passeios",
+  ingresso: "Ingressos e passeios",
   attraction: "Ingressos e passeios",
+  passeio: "Ingressos e passeios",
+  passeios: "Ingressos e passeios",
+  seguro: "Seguro viagem",
   insurance: "Seguro viagem",
+  cruzeiro: "Cruzeiro",
   cruise: "Cruzeiro",
+  trem: "Trem",
   train: "Trem",
+  rail_transport: "Trem",
+  circuito: "Circuito",
+  circuit: "Circuito",
   other: "Serviço incluso",
+  outros: "Serviço incluso",
 };
 
-function serviceIcon(type: string): LucideIcon {
-  return SERVICE_ICON[type] ?? Package;
+function serviceKey(type: string | null | undefined): string {
+  return (type ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "_");
+}
+
+export function serviceIcon(type: string): LucideIcon {
+  return SERVICE_ICON[serviceKey(type)] ?? Package;
+}
+
+export function serviceLabel(type: string): string {
+  return SERVICE_LABEL[serviceKey(type)] ?? (type?.trim() || "Serviço incluso");
 }
 
 function serviceTooltip(svc: OfferIncludedService): string {
-  const label = SERVICE_LABEL[svc.type] ?? "Serviço incluso";
+  const label = serviceLabel(svc.type);
   const extra = svc.detail || svc.name;
   return extra ? `${label}: ${extra}` : label;
 }
+
 
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 
