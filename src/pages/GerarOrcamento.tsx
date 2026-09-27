@@ -83,6 +83,7 @@ import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEdito
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
+import { QuoteOfferPublishToggle } from "@/components/quote/QuoteOfferPublishToggle";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
 import { Sparkles } from "lucide-react";
 import { QuoteTitleField } from "@/components/quote/QuoteTitleField";

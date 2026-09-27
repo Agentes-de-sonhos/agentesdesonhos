@@ -19,6 +19,8 @@ const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGat
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
 const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
+const AgencyOffersPage = lazy(() => import("@/pages/whitelabel/AgencyOffersPage"));
+const AgencyOfferDetail = lazy(() => import("@/pages/whitelabel/AgencyOfferDetail"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
 const RoteiroPublicoV2 = lazy(() => import("@/pages/RoteiroPublicoV2"));
 const CarteiraPublicaV2 = lazy(() => import("@/pages/CarteiraPublicaV2"));
@@ -71,19 +73,6 @@ function CodePage({
  */
 function StandaloneTool({ info, kind }: { info: AgencyDomainInfo; kind: Parameters<typeof CodePage>[0]["kind"] }) {
   return <CodePage info={info} kind={kind} />;
-}
-
-function Ofertas({ info }: { info: AgencyDomainInfo }) {
-  return (
-    <VitrinePublica
-      slugOverride={info.public_slug || info.agency_slug}
-      tenantFallback={{
-        agencyName: info.agency_name,
-        logoUrl: info.logo_url,
-        phone: info.phone,
-      }}
-    />
-  );
 }
 
 /**
@@ -193,6 +182,17 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/xcaret" element={<XcaretLandingPage info={info} />} />
           )}
 
+          {/* Página de oferta: mesmo chrome, porém SEM qualquer atalho para WhatsApp. */}
+          <Route
+            element={
+              <AgencySiteLayout info={info} noWhatsapp>
+                <Outlet />
+              </AgencySiteLayout>
+            }
+          >
+            <Route path="/ofertas/:slug" element={<AgencyOfferDetail info={info} />} />
+          </Route>
+
           {/* Todas as demais rotas mantêm o chrome atual do site white label. */}
           <Route
             element={
@@ -205,7 +205,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/area-do-cliente" element={<AgencyClientArea info={info} />} />
             {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
             <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />
-            <Route path="/ofertas" element={<Ofertas info={info} />} />
+            <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
             <Route path="*" element={<LinkUnavailable />} />
