@@ -245,7 +245,7 @@ export default function MeusProjetos() {
   const { templates } = useItineraryTemplates();
   const { notes } = useNotes();
   const { canUseBookingRequests } = useBookingRequestCapability();
-  const { enabled: offersEnabled } = useOffersEnabled();
+  const { enabled: offersEnabled, isLoading: offersLoading } = useOffersEnabled();
 
   /**
    * A URL é a fonte de verdade da aba ativa: acesso direto, F5, voltar e
@@ -266,7 +266,10 @@ export default function MeusProjetos() {
 
   const defaultTab = isStartPlan ? "roteiros" : "orcamentos";
   const requestedTab = searchParams.get("tab");
-  const activeTab = requestedTab && allowedTabs.includes(requestedTab) ? requestedTab : defaultTab;
+  const activeTab =
+    requestedTab && (allowedTabs.includes(requestedTab) || (requestedTab === "offers" && offersLoading))
+      ? requestedTab
+      : defaultTab;
 
   useEffect(() => {
     if (requestedTab === activeTab) return;
