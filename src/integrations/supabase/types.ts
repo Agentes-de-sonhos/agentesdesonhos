@@ -17353,6 +17353,10 @@ export type Database = {
         Args: { p_quote_id: string; p_status: string }
         Returns: string
       }
+      offer_is_live: {
+        Args: { o: Database["public"]["Tables"]["offers"]["Row"] }
+        Returns: boolean
+      }
       offer_owner_for_host: { Args: { p_hostname: string }; Returns: string }
       offer_quote_structural: { Args: { p_quote_id: string }; Returns: Json }
       offer_restore_fields: {
