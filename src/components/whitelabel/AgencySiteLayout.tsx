@@ -198,9 +198,10 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   );
 }
 
-export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
+export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainInfo; noWhatsapp?: boolean }) {
   const name = agencyDisplayName(info);
-  const wa = agencyWhatsappNumber(info);
+  /* Páginas de oferta: nenhum atalho para WhatsApp (contato só pelo formulário). */
+  const wa = noWhatsapp ? null : agencyWhatsappNumber(info);
   const location = [info.city, info.state].filter(Boolean).join(" · ");
   const editorial = isEditorialTheme(info.hostname);
   const luxury = isLuxuryTheme(info.hostname);
@@ -209,7 +210,7 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
   const contacts = resolveSiteContacts(info.hostname);
   const profile = resolveSiteProfile(info.hostname);
   const footer = profile.footer;
-  const footerWhatsapp = footer?.whatsapp?.replace(/\D/g, "") || wa;
+  const footerWhatsapp = noWhatsapp ? null : footer?.whatsapp?.replace(/\D/g, "") || wa;
   const navAll = siteNavLinks(info.hostname);
 
   if (luxury) {
@@ -524,9 +525,11 @@ export function AgencyFooter({ info }: { info: AgencyDomainInfo }) {
 export function AgencySiteLayout({
   info,
   children,
+  noWhatsapp = false,
 }: {
   info: AgencyDomainInfo;
   children: React.ReactNode;
+  noWhatsapp?: boolean;
 }) {
   // Propaga o tema do tenant para o `body`, para que Dialog/Popover/Select/
   // Calendar renderizados em portal herdem os tokens da agência.
@@ -536,8 +539,8 @@ export function AgencySiteLayout({
     <div className={`min-h-screen bg-background ${siteThemeRootClass(info.hostname)}`}>
       <AgencyBrandBar info={info} />
       <main>{children}</main>
-      <AgencyFooter info={info} />
-      <AgencyAssistLauncher info={info} />
+      <AgencyFooter info={info} noWhatsapp={noWhatsapp} />
+      {!noWhatsapp && <AgencyAssistLauncher info={info} />}
     </div>
   );
 }

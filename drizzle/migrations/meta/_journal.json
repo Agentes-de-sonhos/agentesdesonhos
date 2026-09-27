@@ -204,6 +204,27 @@
       "when": 1790187030380,
       "tag": "0028_travel_service_bidirectional_materialization",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1790520763310,
+      "tag": "0029_offers_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1790520810723,
+      "tag": "0030_offers_derived_public_state",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790520925098,
+      "tag": "0031_offers_request_service_key",
+      "breakpoints": true
     }
   ]
 }

@@ -75,7 +75,8 @@ Deno.serve(async (req) => {
   }
 
   const serviceKey = (clean(body.service_key, 40) || "").toLowerCase();
-  if (!isAllowedServiceKey(serviceKey)) {
+  const isOffer = serviceKey === "oferta";
+  if (!isOffer && !isAllowedServiceKey(serviceKey)) {
     return json({ error: "Selecione o serviço desejado." }, 400);
   }
 
@@ -120,6 +121,41 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     { auth: { persistSession: false } },
   );
+
+  // Solicitação de oferta: o servidor valida a oferta pelo slug + hostname e
+  // grava a fotografia imutável na mesma transação (submit_offer_request).
+  if (isOffer) {
+    const slug = (clean(body.offer_slug, 120) || "").toLowerCase();
+    if (!/^[a-z0-9-]{3,120}$/.test(slug)) return json({ error: "Oferta não encontrada." }, 400);
+    const offerPayload: Record<string, unknown> = {
+      lead_name: payload.lead_name,
+      lead_phone: payload.lead_phone,
+      lead_email: payload.lead_email,
+      adults: clean(String(body.adults ?? ""), 4),
+      children: clean(String(body.children ?? ""), 4),
+      departure_city: clean(body.departure_city, 120),
+      notes: payload.notes,
+      consent: payload.consent,
+      consent_version: payload.consent_version,
+      idempotency_key: payload.idempotency_key,
+      session_id: payload.session_id,
+      source_url: payload.source_url,
+    };
+    if (payload.utm) offerPayload.utm = payload.utm;
+    const res = await supabase.rpc("submit_offer_request", {
+      p_hostname: hostname,
+      p_slug: slug,
+      p_payload: offerPayload,
+    });
+    if (res.error) {
+      console.error("[submit-agency-site-request] offer-rpc-error", trace, res.error.message);
+      return json({ error: "Não foi possível registrar sua solicitação agora. Tente novamente.", trace }, 500);
+    }
+    const r = (res.data ?? {}) as Record<string, unknown>;
+    if (r.error) return json({ error: String(r.error) }, 400);
+    console.log("[submit-agency-site-request] offer-ok", trace, hostname, r.duplicate === true ? "duplicate" : "created");
+    return json({ success: true, request_id: r.request_id ?? null, duplicate: r.duplicate === true });
+  }
 
   let data: unknown;
   try {
