@@ -1980,6 +1980,7 @@ export default function GerarOrcamento() {
               open={advancedSections.booking}
               onToggle={() => toggleAdvancedSection("booking")}
             />
+            <QuoteOfferPublishToggle quoteId={quote.id} optOut={(quote as any).offer_opt_out} />
           </div>
         )}
       />
