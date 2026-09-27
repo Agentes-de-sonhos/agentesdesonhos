@@ -701,6 +701,36 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_offer_settings: {
+        Row: {
+          agency_owner_id: string
+          auto_publish_new_quotes: boolean
+          auto_publish_since: string | null
+          created_at: string
+          default_validity_days: number
+          enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          agency_owner_id: string
+          auto_publish_new_quotes?: boolean
+          auto_publish_since?: string | null
+          created_at?: string
+          default_validity_days?: number
+          enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          agency_owner_id?: string
+          auto_publish_new_quotes?: boolean
+          auto_publish_since?: string | null
+          created_at?: string
+          default_validity_days?: number
+          enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agency_product_landings: {
         Row: {
           created_at: string
@@ -941,6 +971,7 @@ export type Database = {
           client_id: string | null
           consent_at: string | null
           consent_version: string | null
+          converted_quote_id: string | null
           created_at: string
           destination: string | null
           details: Json
@@ -952,6 +983,8 @@ export type Database = {
           lead_name: string
           lead_phone: string | null
           notes: string | null
+          offer_id: string | null
+          offer_snapshot: Json | null
           opportunity_id: string | null
           preferred_channel: string | null
           service_key: string
@@ -968,6 +1001,7 @@ export type Database = {
           client_id?: string | null
           consent_at?: string | null
           consent_version?: string | null
+          converted_quote_id?: string | null
           created_at?: string
           destination?: string | null
           details?: Json
@@ -979,6 +1013,8 @@ export type Database = {
           lead_name: string
           lead_phone?: string | null
           notes?: string | null
+          offer_id?: string | null
+          offer_snapshot?: Json | null
           opportunity_id?: string | null
           preferred_channel?: string | null
           service_key: string
@@ -995,6 +1031,7 @@ export type Database = {
           client_id?: string | null
           consent_at?: string | null
           consent_version?: string | null
+          converted_quote_id?: string | null
           created_at?: string
           destination?: string | null
           details?: Json
@@ -1006,6 +1043,8 @@ export type Database = {
           lead_name?: string
           lead_phone?: string | null
           notes?: string | null
+          offer_id?: string | null
+          offer_snapshot?: Json | null
           opportunity_id?: string | null
           preferred_channel?: string | null
           service_key?: string
@@ -1016,7 +1055,22 @@ export type Database = {
           summary?: string | null
           utm?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agency_site_requests_converted_quote_id_fkey"
+            columns: ["converted_quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_site_requests_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       agency_supplier_terms: {
         Row: {
@@ -9171,6 +9225,134 @@ export type Database = {
           },
         ]
       }
+      offers: {
+        Row: {
+          agency_owner_id: string
+          category: string
+          compare_at_price: number | null
+          cover_url: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          customized_fields: string[]
+          description: string | null
+          destination: string | null
+          ended_at: string | null
+          expires_at: string | null
+          gallery: Json
+          id: string
+          included_services: Json
+          last_synced_at: string | null
+          nights: number | null
+          origin: string
+          payment_conditions: string | null
+          price_from: number | null
+          price_mode: string
+          price_note: string | null
+          public_snapshot: Json
+          publish_at: string | null
+          requests_count: number
+          reviewed_at: string | null
+          service_types: string[]
+          slug: string
+          source_quote_id: string | null
+          source_quote_updated_at: string | null
+          status: string
+          sync_warning: string | null
+          title: string
+          travel_end: string | null
+          travel_start: string | null
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          agency_owner_id: string
+          category?: string
+          compare_at_price?: number | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customized_fields?: string[]
+          description?: string | null
+          destination?: string | null
+          ended_at?: string | null
+          expires_at?: string | null
+          gallery?: Json
+          id?: string
+          included_services?: Json
+          last_synced_at?: string | null
+          nights?: number | null
+          origin?: string
+          payment_conditions?: string | null
+          price_from?: number | null
+          price_mode?: string
+          price_note?: string | null
+          public_snapshot?: Json
+          publish_at?: string | null
+          requests_count?: number
+          reviewed_at?: string | null
+          service_types?: string[]
+          slug: string
+          source_quote_id?: string | null
+          source_quote_updated_at?: string | null
+          status?: string
+          sync_warning?: string | null
+          title?: string
+          travel_end?: string | null
+          travel_start?: string | null
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          agency_owner_id?: string
+          category?: string
+          compare_at_price?: number | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          customized_fields?: string[]
+          description?: string | null
+          destination?: string | null
+          ended_at?: string | null
+          expires_at?: string | null
+          gallery?: Json
+          id?: string
+          included_services?: Json
+          last_synced_at?: string | null
+          nights?: number | null
+          origin?: string
+          payment_conditions?: string | null
+          price_from?: number | null
+          price_mode?: string
+          price_note?: string | null
+          public_snapshot?: Json
+          publish_at?: string | null
+          requests_count?: number
+          reviewed_at?: string | null
+          service_types?: string[]
+          slug?: string
+          source_quote_id?: string | null
+          source_quote_updated_at?: string | null
+          status?: string
+          sync_warning?: string | null
+          title?: string
+          travel_end?: string | null
+          travel_start?: string | null
+          updated_at?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_source_quote_id_fkey"
+            columns: ["source_quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       online_meetings: {
         Row: {
           created_at: string
@@ -11959,6 +12141,7 @@ export type Database = {
           id: string
           installments_count: number | null
           investment_summary_layout: string | null
+          offer_opt_out: boolean
           opportunity_id: string | null
           package_total_amount: number | null
           payment_display_mode: string
@@ -12005,6 +12188,7 @@ export type Database = {
           id?: string
           installments_count?: number | null
           investment_summary_layout?: string | null
+          offer_opt_out?: boolean
           opportunity_id?: string | null
           package_total_amount?: number | null
           payment_display_mode?: string
@@ -12051,6 +12235,7 @@ export type Database = {
           id?: string
           installments_count?: number | null
           investment_summary_layout?: string | null
+          offer_opt_out?: boolean
           opportunity_id?: string | null
           package_total_amount?: number | null
           payment_display_mode?: string
@@ -16590,6 +16775,10 @@ export type Database = {
         Args: { p_id: string; p_nonce_hash: string }
         Returns: string
       }
+      create_quote_from_offer_request: {
+        Args: { p_request_id: string }
+        Returns: Json
+      }
       current_agency_can_use_booking_requests: { Args: never; Returns: boolean }
       current_agency_entitlements: {
         Args: never
@@ -16854,6 +17043,11 @@ export type Database = {
         Returns: Json
       }
       get_public_lead_form: { Args: { p_token: string }; Returns: Json }
+      get_public_offer_by_slug: {
+        Args: { p_hostname: string; p_slug: string }
+        Returns: Json
+      }
+      get_public_offers: { Args: { p_hostname: string }; Returns: Json }
       get_public_product_landing: {
         Args: { p_product_key: string; p_slug: string }
         Returns: Json
@@ -17146,6 +17340,39 @@ export type Database = {
       }
       normalize_public_hostname: { Args: { _raw: string }; Returns: string }
       normalize_public_slug: { Args: { _input: string }; Returns: string }
+      offer_agency_access: {
+        Args: { _edit: boolean; _owner: string }
+        Returns: boolean
+      }
+      offer_build_public_snapshot: {
+        Args: { o: Database["public"]["Tables"]["offers"]["Row"] }
+        Returns: Json
+      }
+      offer_create_from_quote: { Args: { p_quote_id: string }; Returns: Json }
+      offer_insert_from_quote: {
+        Args: { p_quote_id: string; p_status: string }
+        Returns: string
+      }
+      offer_owner_for_host: { Args: { p_hostname: string }; Returns: string }
+      offer_quote_structural: { Args: { p_quote_id: string }; Returns: Json }
+      offer_restore_fields: {
+        Args: { p_fields?: string[]; p_offer_id: string }
+        Returns: Json
+      }
+      offer_set_status: {
+        Args: { p_action: string; p_days?: number; p_offer_id: string }
+        Returns: Json
+      }
+      offer_settings_save: {
+        Args: { p_auto: boolean; p_days: number }
+        Returns: Json
+      }
+      offer_slugify: { Args: { _t: string }; Returns: string }
+      offer_sync_from_quote: {
+        Args: { p_offer_id: string }
+        Returns: undefined
+      }
+      offers_module_enabled: { Args: { _owner: string }; Returns: boolean }
       opportunity_visible: {
         Args: { _opportunity_id: string }
         Returns: boolean
@@ -17203,6 +17430,7 @@ export type Database = {
           version: number
         }[]
       }
+      process_offer_expirations: { Args: never; Returns: number }
       product_landing_next_notify_at: {
         Args: {
           p_days: string[]
@@ -17326,6 +17554,10 @@ export type Database = {
       }
       submit_conversational_lead: {
         Args: { p_payload: Json; p_token: string }
+        Returns: Json
+      }
+      submit_offer_request: {
+        Args: { p_hostname: string; p_payload: Json; p_slug: string }
         Returns: Json
       }
       submit_product_landing_lead: {
