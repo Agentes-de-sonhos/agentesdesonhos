@@ -4,7 +4,7 @@ import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
   MapPin, CheckCircle2, Quote, Route, UserRound, Users, FileCheck2, LifeBuoy, Handshake,
-  Award, Play, Pause, Volume2, VolumeX,
+  Award, Play, Pause,
 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -137,7 +137,7 @@ function formatMediaTime(seconds: number) {
 function AuthorityMedia({ video, image }: { video?: string; image: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [, setMuted] = useState(true);
   const [current, setCurrent] = useState(0);
   const [duration, setDuration] = useState(0);
 
@@ -225,19 +225,6 @@ function AuthorityMedia({ video, image }: { video?: string; image: string }) {
           className="h-2 w-full cursor-pointer appearance-none rounded-full bg-white/30 accent-white"
         />
         <span className="shrink-0 text-xs tabular-nums">{formatMediaTime(duration)}</span>
-        <button
-          type="button"
-          onClick={() => {
-            const element = videoRef.current;
-            if (!element) return;
-            element.muted = !element.muted;
-            setMuted(element.muted);
-          }}
-          aria-label={muted ? "Ativar som" : "Desativar som"}
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-white/20 backdrop-blur transition hover:bg-white/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          {muted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-        </button>
       </div>
     </div>
   );
