@@ -115,36 +115,38 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
       </Carousel>
       <div className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/20" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-1/2 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden />
-      <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-32 pt-14 md:pb-36`}>
-        <div className="pointer-events-auto max-w-2xl text-background">
+      <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-52 pt-14 md:pb-56 lg:pb-64`}>
+        <div className="pointer-events-auto max-w-3xl text-background">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-background/80">Riviera Maya • México</p>
-          <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.05] md:text-6xl lg:text-7xl">Xcaret. Um destino inteiro para se apaixonar.</h1>
+          <h1 className="mt-5 text-4xl font-semibold leading-[1.05] md:text-6xl lg:text-7xl">
+            <span className="block">Xcaret. Um destino inteiro</span>
+            <span className="block">para se apaixonar.</span>
+          </h1>
           <p className="mt-5 max-w-xl text-[16px] leading-7 text-background/90 md:text-lg">Parques surpreendentes, hotéis à beira-mar e experiências mexicanas em uma viagem planejada para você pela Destinos com a Ju.</p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <WaButton label="Planejar minha viagem com a Ju" message="Oi, Ju! Vi a página sobre Xcaret e gostaria de conhecer as opções para a minha viagem." className="w-full sm:w-auto" />
-            <Button asChild variant="outline" size="lg" className="h-auto min-h-12 w-full whitespace-normal border-background/70 bg-background/10 py-3 text-background hover:bg-background/20 hover:text-background sm:w-auto"><a href="#destino">Explorar o destino</a></Button>
-          </div>
           {slots.expertBadge && (
             <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="mt-6 w-36 max-w-[48vw] shrink-0 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-44 lg:hidden" />
           )}
         </div>
       </div>
       {slots.expertBadge && (
-        <img
-          src={slots.expertBadge.src}
-          alt={slots.expertBadge.alt}
-          className={`pointer-events-none absolute right-5 top-6 z-10 hidden w-40 rounded-lg bg-background/95 object-contain p-2 shadow-md md:right-8 lg:block`}
-        />
+        <div className={`${contentWidth} pointer-events-none absolute inset-x-0 top-6 z-10 hidden lg:block`}>
+          <img
+            src={slots.expertBadge.src}
+            alt={slots.expertBadge.alt}
+            className="ml-auto w-40 rounded-lg bg-background/95 object-contain p-2 shadow-md"
+          />
+        </div>
       )}
-      <div className="pointer-events-auto absolute right-[8%] top-[30%] z-10 hidden lg:block">
+      <div className="pointer-events-auto absolute right-[26%] top-[46%] z-10 hidden lg:block">
         <HeroVideoButton />
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
         <div className="pointer-events-auto"><HeroVideoButton /></div>
       </div>
-      <div className="absolute inset-x-0 bottom-28 z-10 md:bottom-32">
+      <div className="absolute inset-x-0 bottom-28 z-10 md:bottom-32 lg:bottom-56">
         <div className={`${contentWidth} flex flex-col gap-3 lg:items-end`}>
           <p className="max-w-xl text-sm font-medium text-background lg:text-right" aria-live="polite"><strong>{slide.name}</strong> · {slide.caption} <span className="ml-2 text-xs text-background/75">{String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span></p>
+
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" size="icon" aria-label="Foto anterior" onClick={() => api?.scrollPrev()} className="h-11 w-11 shrink-0 rounded-full border-background/60 bg-foreground/25 text-background hover:bg-foreground/50 hover:text-background"><ArrowLeft className="h-4 w-4" aria-hidden /></Button>
             <div className="flex" role="group" aria-label={`Slide ${current + 1} de ${total}`}>
