@@ -33,8 +33,10 @@ import {
   Star,
   Plus,
 } from "lucide-react";
-import { Ticket } from "lucide-react";
+import { Ticket, Tag } from "lucide-react";
 import { ReservasTab } from "@/components/reservas/ReservasTab";
+import { OffersTab } from "@/components/offers/OffersTab";
+import { useOffersEnabled } from "@/hooks/useOffers";
 import { useTravelFilesSummary, useQuoteFileNumbers } from "@/hooks/useTravelFiles";
 import { useBookingRequestCapability } from "@/hooks/useBookingRequestCapability";
 import { ClientAvatar, getPersonInitials } from "@/components/shared/ClientAvatar";
@@ -243,6 +245,7 @@ export default function MeusProjetos() {
   const { templates } = useItineraryTemplates();
   const { notes } = useNotes();
   const { canUseBookingRequests } = useBookingRequestCapability();
+  const { enabled: offersEnabled } = useOffersEnabled();
 
   /**
    * A URL é a fonte de verdade da aba ativa: acesso direto, F5, voltar e
@@ -257,8 +260,9 @@ export default function MeusProjetos() {
     tabs.push("roteiros", "modelos");
     if (!isAgencyAdmin && canUseBookingRequests) tabs.push("reservas");
     if (!isStartPlan) tabs.push("bloco-notas");
+    if (!isStartPlan && offersEnabled) tabs.push("offers");
     return tabs;
-  }, [isStartPlan, isAgencyAdmin, canUseBookingRequests]);
+  }, [isStartPlan, isAgencyAdmin, canUseBookingRequests, offersEnabled]);
 
   const defaultTab = isStartPlan ? "roteiros" : "orcamentos";
   const requestedTab = searchParams.get("tab");
@@ -623,6 +627,15 @@ export default function MeusProjetos() {
                     {getTabCount("modelos")}
                   </Badge>
                 </TabsTrigger>
+                {!isStartPlan && offersEnabled && (
+                  <TabsTrigger
+                    value="offers"
+                    className="relative h-auto rounded-none border-0 bg-transparent px-1 pb-3 pt-2 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity data-[state=active]:after:opacity-100"
+                  >
+                    <Tag className="h-4 w-4" />
+                    <span className="hidden sm:inline">Ofertas</span>
+                  </TabsTrigger>
+                )}
                 {!isAgencyAdmin && canUseBookingRequests && (
                   <TabsTrigger
                     value="reservas"
@@ -852,6 +865,11 @@ export default function MeusProjetos() {
               </Tabs>
             </TabsContent>
             {!isAgencyAdmin && canUseBookingRequests && (
+              {offersEnabled && !isStartPlan && (
+                <TabsContent value="offers" className="mt-5">
+                  <OffersTab />
+                </TabsContent>
+              )}
               <TabsContent value="reservas" className="mt-5">
                 <ReservasTab />
               </TabsContent>
