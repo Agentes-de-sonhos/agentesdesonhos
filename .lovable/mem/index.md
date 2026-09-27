@@ -14,3 +14,4 @@
 - [Solicitações do site → CRM](mem://features/whitelabel/site-request-notifications) — Reset total do formulário público, fila de notificações idempotente, WhatsApp preparado e aviso realtime com link da oportunidade
 - [Essya Tur Coming Soon](mem://features/whitelabel/essya-tur-coming-soon) — essyatur.com.br em construção, variante estática sem perfil, logo asset
 - [Atendimento com Horário Programado](mem://features/whitelabel/agency-assist-hours) — Botão flutuante WhatsApp direto em expediente e recado fora dele
+- [Módulo Ofertas](mem://features/offers-module) — Piloto Destinos com a Ju, sync por campo, /ofertas sem WhatsApp, preço nunca R$0
