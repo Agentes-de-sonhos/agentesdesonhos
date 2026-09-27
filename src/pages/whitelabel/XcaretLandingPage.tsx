@@ -116,12 +116,13 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
       <div className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/20" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-1/2 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden />
       <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-52 pt-14 md:pb-56 lg:pb-64`}>
-        <div className="pointer-events-auto max-w-3xl text-background">
+        <div className="pointer-events-auto max-w-3xl text-background lg:max-w-5xl">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-background/80">Riviera Maya • México</p>
-          <h1 className="mt-5 text-4xl font-semibold leading-[1.05] md:text-6xl lg:text-7xl">
-            <span className="block">Xcaret. Um destino inteiro</span>
-            <span className="block">para se apaixonar.</span>
+          <h1 className="mt-5 text-4xl font-semibold leading-[1.08] md:text-6xl">
+            <span className="block">Xcaret. Um destino</span>
+            <span className="block lg:whitespace-nowrap">inteiro para se apaixonar.</span>
           </h1>
+
           <p className="mt-5 max-w-xl text-[16px] leading-7 text-background/90 md:text-lg">Parques surpreendentes, hotéis à beira-mar e experiências mexicanas em uma viagem planejada para você pela Destinos com a Ju.</p>
           {slots.expertBadge && (
             <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="mt-6 w-36 max-w-[48vw] shrink-0 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-44 lg:hidden" />
@@ -137,7 +138,7 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           />
         </div>
       )}
-      <div className="pointer-events-auto absolute right-[26%] top-[46%] z-10 hidden lg:block">
+      <div className="pointer-events-auto absolute right-[25%] top-[32%] z-10 hidden lg:block">
         <HeroVideoButton />
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
