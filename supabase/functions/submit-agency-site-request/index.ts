@@ -75,7 +75,8 @@ Deno.serve(async (req) => {
   }
 
   const serviceKey = (clean(body.service_key, 40) || "").toLowerCase();
-  if (!isAllowedServiceKey(serviceKey)) {
+  const isOffer = serviceKey === "oferta";
+  if (!isOffer && !isAllowedServiceKey(serviceKey)) {
     return json({ error: "Selecione o serviço desejado." }, 400);
   }
 
