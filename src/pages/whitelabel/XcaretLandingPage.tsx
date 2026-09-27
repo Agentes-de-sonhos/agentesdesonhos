@@ -22,6 +22,7 @@ import {
   xcaretWhatsappUrl,
   type XcaretImage,
 } from "@/components/landing/xcaret/content";
+import { XcaretBookingBar } from "@/components/landing/xcaret/XcaretBookingBar";
 
 const contentWidth = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 const heading = "text-balance text-3xl font-semibold leading-tight text-foreground md:text-5xl";
@@ -224,6 +225,9 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
       <XcaretHeader info={info} />
       <main>
         <Hero />
+
+        <XcaretBookingBar hostname={info.hostname} agencyName={info.agency_name ?? "Destinos com a Ju"} />
+
 
         <section id="destino" className="scroll-mt-24 py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="Você chega pelo Caribe. E se apaixona por um México inteiro.">
