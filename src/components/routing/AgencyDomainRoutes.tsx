@@ -75,19 +75,6 @@ function StandaloneTool({ info, kind }: { info: AgencyDomainInfo; kind: Paramete
   return <CodePage info={info} kind={kind} />;
 }
 
-function Ofertas({ info }: { info: AgencyDomainInfo }) {
-  return (
-    <VitrinePublica
-      slugOverride={info.public_slug || info.agency_slug}
-      tenantFallback={{
-        agencyName: info.agency_name,
-        logoUrl: info.logo_url,
-        phone: info.phone,
-      }}
-    />
-  );
-}
-
 /**
  * `basePath` é o prefixo do tenant no host compartilhado (`/{agency_slug}`).
  * Em domínio próprio ele é vazio e nada muda no comportamento atual.
