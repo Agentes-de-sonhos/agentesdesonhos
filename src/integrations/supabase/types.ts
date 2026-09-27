@@ -9228,6 +9228,7 @@ export type Database = {
       offers: {
         Row: {
           agency_owner_id: string
+          base_pax: number | null
           category: string
           compare_at_price: number | null
           cover_url: string | null
@@ -9243,6 +9244,7 @@ export type Database = {
           id: string
           included_services: Json
           last_synced_at: string | null
+          max_installments: number | null
           nights: number | null
           origin: string
           payment_conditions: string | null
@@ -9267,6 +9269,7 @@ export type Database = {
         }
         Insert: {
           agency_owner_id: string
+          base_pax?: number | null
           category?: string
           compare_at_price?: number | null
           cover_url?: string | null
@@ -9282,6 +9285,7 @@ export type Database = {
           id?: string
           included_services?: Json
           last_synced_at?: string | null
+          max_installments?: number | null
           nights?: number | null
           origin?: string
           payment_conditions?: string | null
@@ -9306,6 +9310,7 @@ export type Database = {
         }
         Update: {
           agency_owner_id?: string
+          base_pax?: number | null
           category?: string
           compare_at_price?: number | null
           cover_url?: string | null
@@ -9321,6 +9326,7 @@ export type Database = {
           id?: string
           included_services?: Json
           last_synced_at?: string | null
+          max_installments?: number | null
           nights?: number | null
           origin?: string
           payment_conditions?: string | null

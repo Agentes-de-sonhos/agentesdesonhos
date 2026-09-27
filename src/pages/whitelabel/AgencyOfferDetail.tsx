@@ -21,6 +21,7 @@ import {
   formatOfferPeriod,
   formatOfferPrice,
   isProvenPromotion,
+  offerPricing,
   similarQuotePrefill,
   validateOfferRequest,
   type OfferRequestForm,
@@ -79,7 +80,8 @@ export default function AgencyOfferDetail({ info, basePath = "" }: { info: Agenc
 
   const closed = offer.status === "expired" || offer.status === "ended";
   const period = formatOfferPeriod(offer.travel_start, offer.travel_end);
-  const onRequest = offer.price_mode === "on_request" || !offer.price_from;
+  const pricing = offerPricing(offer);
+  const onRequest = pricing.total == null;
 
   return (
     <article className="mx-auto max-w-5xl px-4 py-10 md:py-14">
@@ -138,11 +140,18 @@ export default function AgencyOfferDetail({ info, basePath = "" }: { info: Agenc
                 <p className="text-xl font-semibold text-foreground">Solicite uma cotação</p>
               ) : (
                 <div>
-                  <p className="text-xs text-muted-foreground">Valor a partir de</p>
+                  <p className="text-xs text-muted-foreground">A partir de</p>
                   {isProvenPromotion(offer) && (
                     <p className="text-sm text-muted-foreground line-through">{formatOfferPrice(offer.compare_at_price, offer.currency)}</p>
                   )}
-                  <p className="text-3xl font-bold text-foreground">{formatOfferPrice(offer.price_from, offer.currency, offer.price_mode)}</p>
+                  <p className="flex flex-wrap items-baseline gap-1.5">
+                    <span className="text-3xl font-bold leading-tight text-foreground">{pricing.perPersonLabel ?? pricing.totalLabel}</span>
+                    {pricing.perPersonLabel && <span className="text-sm text-muted-foreground">/ pessoa</span>}
+                  </p>
+                  {pricing.installmentsLabel && (
+                    <p className="mt-1 text-sm font-medium text-primary">{pricing.installmentsLabel}</p>
+                  )}
+                  {pricing.totalNote && <p className="mt-1 text-xs text-muted-foreground">{pricing.totalNote}</p>}
                   {offer.price_note && <p className="mt-1 text-xs text-muted-foreground">{offer.price_note}</p>}
                 </div>
               )}

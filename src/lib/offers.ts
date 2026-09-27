@@ -31,6 +31,8 @@ export interface PublicOffer {
   price_from?: number | null;
   currency?: string;
   price_note?: string | null;
+  base_pax?: number | null;
+  max_installments?: number | null;
   compare_at_price?: number | null;
   payment_conditions?: string | null;
   publish_at?: string | null;
@@ -47,6 +49,8 @@ export const STRUCTURAL_FIELDS = [
   "service_types",
   "price_from",
   "currency",
+  "base_pax",
+  "max_installments",
   "payment_conditions",
 ] as const;
 
@@ -59,6 +63,8 @@ export const STRUCTURAL_FIELD_LABELS: Record<string, string> = {
   service_types: "Tipos de serviço",
   price_from: "Preço",
   currency: "Moeda",
+  base_pax: "Passageiros do valor total",
+  max_installments: "Parcelas máximas",
   payment_conditions: "Condições de pagamento",
 };
 
@@ -127,6 +133,57 @@ export function isProvenPromotion(o: Pick<PublicOffer, "price_mode" | "price_fro
     Number(o.compare_at_price) > Number(o.price_from)
   );
 }
+
+type PricingSource = Pick<PublicOffer, "price_mode" | "price_from" | "currency" | "base_pax" | "max_installments">;
+
+/**
+ * Apresentação do valor: destaque por pessoa quando há base de passageiros
+ * confiável; o total continua visível como informação de transparência.
+ * Nunca usar "sem juros" — o texto fala apenas em parcelas iguais.
+ */
+export interface OfferPricing {
+  mode: OfferPriceMode;
+  total: number | null;
+  pax: number | null;
+  perPerson: number | null;
+  totalLabel: string;
+  perPersonLabel: string | null;
+  totalNote: string | null;
+  installmentsLabel: string | null;
+}
+
+export function offerPricing(o: PricingSource): OfferPricing {
+  const mode = o.price_mode ?? "fixed";
+  const currency = o.currency || "BRL";
+  const rawTotal = Number(o.price_from);
+  const total = mode === "on_request" || !Number.isFinite(rawTotal) || rawTotal <= 0 ? null : rawTotal;
+  const rawPax = Number(o.base_pax);
+  const pax = Number.isFinite(rawPax) && rawPax > 0 ? Math.floor(rawPax) : null;
+  const perPerson = total != null && pax != null && pax > 1 ? total / pax : null;
+  const installments = Number(o.max_installments);
+  const maxInstallments = Number.isFinite(installments) && installments > 1 ? Math.floor(installments) : null;
+  const base = perPerson ?? total;
+
+  return {
+    mode,
+    total,
+    pax,
+    perPerson,
+    totalLabel: formatOfferPrice(total, currency, mode),
+    perPersonLabel: perPerson != null ? formatOfferPrice(perPerson, currency) : null,
+    totalNote:
+      perPerson != null && total != null
+        ? `Total de ${formatOfferPrice(total, currency)} para ${pax} passageiros`
+        : null,
+    installmentsLabel:
+      total != null && maxInstallments
+        ? base != null
+          ? `Em até ${maxInstallments}x iguais de ${formatOfferPrice(base / maxInstallments, currency)}`
+          : `Em até ${maxInstallments}x iguais`
+        : null,
+  };
+}
+
 
 /** "YYYY-MM-DD" → Date local (sem deslocamento de fuso). */
 export function parseLocalDate(value?: string | null): Date | null {

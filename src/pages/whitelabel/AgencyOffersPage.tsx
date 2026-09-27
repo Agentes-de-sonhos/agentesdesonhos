@@ -11,10 +11,10 @@ import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Route, Packag
 import {
   filterPublicOffers,
   formatOfferPeriod,
-  formatOfferPrice,
   isProvenPromotion,
   monthLabel,
   offerFilterOptions,
+  offerPricing,
   type OfferIncludedService,
   type PublicOffer,
 } from "@/lib/offers";
@@ -118,6 +118,7 @@ export function usePublicOffers(hostname: string) {
 
 export function OfferCard({ offer, href }: { offer: PublicOffer; href: string }) {
   const period = formatOfferPeriod(offer.travel_start, offer.travel_end);
+  const pricing = offerPricing(offer);
   return (
     <Link
       to={href}
@@ -159,12 +160,19 @@ export function OfferCard({ offer, href }: { offer: PublicOffer; href: string })
           </TooltipProvider>
         )}
         <div className="mt-auto pt-3">
-          {offer.price_mode === "on_request" || !offer.price_from ? (
+          {pricing.total == null ? (
             <p className="text-sm font-semibold text-foreground">Solicite uma cotação</p>
           ) : (
             <>
-              <p className="text-[11px] text-muted-foreground">Valor a partir de</p>
-              <p className="text-lg font-bold text-foreground">{formatOfferPrice(offer.price_from, offer.currency, offer.price_mode)}</p>
+              <p className="text-[11px] text-muted-foreground">A partir de</p>
+              <p className="flex flex-wrap items-baseline gap-1.5">
+                <span className="text-xl font-bold leading-tight text-foreground">{pricing.perPersonLabel ?? pricing.totalLabel}</span>
+                {pricing.perPersonLabel && <span className="text-xs text-muted-foreground">/ pessoa</span>}
+              </p>
+              {pricing.installmentsLabel && (
+                <p className="mt-0.5 text-xs font-medium text-primary">{pricing.installmentsLabel}</p>
+              )}
+              {pricing.totalNote && <p className="mt-0.5 text-[11px] text-muted-foreground">{pricing.totalNote}</p>}
             </>
           )}
         </div>

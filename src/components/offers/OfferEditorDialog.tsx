@@ -28,6 +28,8 @@ interface FormState {
   price_from: string;
   currency: string;
   price_note: string;
+  base_pax: string;
+  max_installments: string;
   compare_at_price: string;
   payment_conditions: string;
   included_services: OfferIncludedService[];
@@ -46,6 +48,8 @@ const EMPTY: FormState = {
   price_from: "",
   currency: "BRL",
   price_note: "",
+  base_pax: "",
+  max_installments: "",
   compare_at_price: "",
   payment_conditions: "",
   included_services: [],
@@ -65,6 +69,8 @@ function fromOffer(o: OfferRow): FormState {
     price_from: o.price_from != null ? String(o.price_from) : "",
     currency: o.currency ?? "BRL",
     price_note: o.price_note ?? "",
+    base_pax: o.base_pax != null ? String(o.base_pax) : "",
+    max_installments: o.max_installments != null ? String(o.max_installments) : "",
     compare_at_price: o.compare_at_price != null ? String(o.compare_at_price) : "",
     payment_conditions: o.payment_conditions ?? "",
     included_services: o.included_services ?? [],
@@ -74,6 +80,11 @@ function fromOffer(o: OfferRow): FormState {
 const num = (v: string) => {
   const n = Number(String(v).replace(",", "."));
   return Number.isFinite(n) && n > 0 ? n : null;
+};
+
+const intOrNull = (v: string, min: number, max: number) => {
+  const n = Math.round(Number(String(v).replace(",", ".")));
+  return Number.isFinite(n) && n >= min && n <= max ? n : null;
 };
 
 export function OfferEditorDialog({
@@ -173,6 +184,8 @@ export function OfferEditorDialog({
       nights: form.nights ? Math.max(0, Math.round(Number(form.nights))) : null,
       price_from: form.price_mode === "on_request" ? null : num(form.price_from),
       currency: form.currency,
+      base_pax: form.price_mode === "on_request" ? null : intOrNull(form.base_pax, 1, 99),
+      max_installments: form.price_mode === "on_request" ? null : intOrNull(form.max_installments, 1, 48),
       payment_conditions: form.payment_conditions.trim() || null,
     };
     if (offer) {
@@ -315,6 +328,29 @@ export function OfferEditorDialog({
                       <SelectItem value="EUR">EUR</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Passageiros do valor total<CustomTag field="base_pax" /></Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={form.base_pax}
+                    placeholder="Ex.: 5"
+                    onChange={(e) => set("base_pax", e.target.value)}
+                  />
+                  <p className="text-[11px] text-muted-foreground">O site divide o total por essa quantidade e destaca o valor por pessoa.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Máximo de parcelas<CustomTag field="max_installments" /></Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={48}
+                    value={form.max_installments}
+                    placeholder="Ex.: 10"
+                    onChange={(e) => set("max_installments", e.target.value)}
+                  />
+                  <p className="text-[11px] text-muted-foreground">Exibido como “Em até 10x iguais”. Deixe vazio para não divulgar parcelamento.</p>
                 </div>
                 <div className="space-y-1.5">
                   <Label>Observação do preço</Label>
