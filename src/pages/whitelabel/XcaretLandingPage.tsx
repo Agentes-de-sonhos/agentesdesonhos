@@ -138,7 +138,7 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           />
         </div>
       )}
-      <div className="pointer-events-auto absolute right-[25%] top-[32%] z-10 hidden lg:block">
+      <div className="pointer-events-auto absolute right-[29%] top-[24%] z-10 hidden lg:block">
         <HeroVideoButton />
       </div>
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
