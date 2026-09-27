@@ -68,7 +68,7 @@ export function XcaretBookingBar({ hostname, agencyName }: { hostname: string; a
   }
 
   return (
-    <section id="reservar" className="scroll-mt-24 border-b border-border bg-secondary py-10 md:py-14">
+    <section id="reservar" className="relative z-20 scroll-mt-24 bg-transparent pb-12 pt-10 md:pb-16 lg:-mt-[104px] lg:pt-0">
       <div className="mx-auto w-full max-w-[1200px] px-5 md:px-8">
         <div className="rounded-xl border border-border/70 bg-card p-5 shadow-[0_14px_40px_-28px_hsl(220_12%_10%/0.3)] md:p-7">
           <div className="flex flex-wrap items-center gap-3">
