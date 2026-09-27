@@ -867,12 +867,12 @@ export default function MeusProjetos() {
                 )}
               </Tabs>
             </TabsContent>
+            {offersEnabled && !isStartPlan && (
+              <TabsContent value="offers" className="mt-5">
+                <OffersTab />
+              </TabsContent>
+            )}
             {!isAgencyAdmin && canUseBookingRequests && (
-              {offersEnabled && !isStartPlan && (
-                <TabsContent value="offers" className="mt-5">
-                  <OffersTab />
-                </TabsContent>
-              )}
               <TabsContent value="reservas" className="mt-5">
                 <ReservasTab />
               </TabsContent>
