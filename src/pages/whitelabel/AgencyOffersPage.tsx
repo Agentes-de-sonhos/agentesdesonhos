@@ -87,6 +87,30 @@ export function OfferCard({ offer, href }: { offer: PublicOffer; href: string })
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{offer.destination}</p>
         <h3 className="text-base font-semibold leading-snug text-foreground">{offer.title}</h3>
         {period && <p className="text-sm text-muted-foreground">{period}{offer.nights ? ` · ${offer.nights} noites` : ""}</p>}
+        {(offer.included_services?.length ?? 0) > 0 && (
+          <TooltipProvider delayDuration={150}>
+            <div className="flex flex-wrap items-center gap-1.5 pt-1" aria-label="Serviços inclusos">
+              {offer.included_services!.map((svc, i) => {
+                const Icon = serviceIcon(svc.type);
+                return (
+                  <Tooltip key={`${svc.type}-${i}`}>
+                    <TooltipTrigger asChild>
+                      <span
+                        className="flex h-7 w-7 items-center justify-center rounded-full border border-border/60 bg-muted/60 text-muted-foreground transition-colors group-hover:border-primary/30 group-hover:text-primary"
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <Icon className="h-3.5 w-3.5" aria-hidden />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-xs">
+                      {serviceTooltip(svc)}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
+        )}
         <div className="mt-auto pt-3">
           {offer.price_mode === "on_request" || !offer.price_from ? (
             <p className="text-sm font-semibold text-foreground">Solicite uma cotação</p>
