@@ -62,3 +62,69 @@ export function whatsappConfigFromEnv(env: (key: string) => string | undefined):
     from: env("WHATSAPP_FROM") ?? null,
   };
 }
+
+const TWILIO_GATEWAY = "https://connector-gateway.lovable.dev/twilio";
+
+/** Garante o prefixo `whatsapp:` exigido pela Twilio. */
+export function toWhatsappAddress(value: string): string {
+  const v = value.trim();
+  return v.startsWith("whatsapp:") ? v : `whatsapp:${v}`;
+}
+
+export interface WhatsappSendOutcome {
+  ok: boolean;
+  status: WhatsappNotifyStatus;
+  reason: string;
+  providerMessageId?: string | null;
+}
+
+/**
+ * Envia o template aprovado pela Twilio (via gateway do conector). Nunca manda
+ * mensagem livre e nunca loga conteúdo/PII — apenas status HTTP.
+ */
+export async function sendWhatsappTemplate(
+  recipient: string | null | undefined,
+  variables: Record<string, string>,
+  config: WhatsappNotifyConfig,
+  env: (key: string) => string | undefined,
+): Promise<WhatsappSendOutcome> {
+  const plan = planWhatsappNotify(recipient, config);
+  if (plan.status !== "sent") {
+    return { ok: false, status: plan.status, reason: plan.reason };
+  }
+  const lovableKey = env("LOVABLE_API_KEY") ?? "";
+  const twilioKey = env("TWILIO_API_KEY") ?? "";
+  if (!lovableKey || !twilioKey) {
+    return { ok: false, status: "awaiting_template", reason: "Credenciais da Twilio não configuradas." };
+  }
+  try {
+    const res = await fetch(`${TWILIO_GATEWAY}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": twilioKey,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        To: toWhatsappAddress(recipient as string),
+        From: toWhatsappAddress((config.from ?? "").trim()),
+        ContentSid: (config.contentSid ?? "").trim(),
+        ContentVariables: JSON.stringify(variables),
+      }),
+    });
+    const payload = await res.json().catch(() => ({} as Record<string, unknown>));
+    if (!res.ok) {
+      console.error(`[whatsapp-notify] provider-error status=${res.status}`);
+      return { ok: false, status: "failed", reason: `Twilio retornou ${res.status}.` };
+    }
+    return {
+      ok: true,
+      status: "sent",
+      reason: "Aviso enviado pelo WhatsApp.",
+      providerMessageId: (payload as { sid?: string })?.sid ?? null,
+    };
+  } catch {
+    console.error("[whatsapp-notify] send-exception");
+    return { ok: false, status: "failed", reason: "Falha temporária no envio do WhatsApp." };
+  }
+}
