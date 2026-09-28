@@ -124,17 +124,14 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           </h1>
 
           <p className="mt-5 max-w-xl text-[16px] leading-7 text-background/90 md:text-lg">Parques surpreendentes, hotéis à beira-mar e experiências mexicanas em uma viagem planejada para você pela Destinos com a Ju.</p>
-          {slots.expertBadge && (
-            <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} className="mt-6 w-36 max-w-[48vw] shrink-0 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-44 lg:hidden" />
-          )}
         </div>
       </div>
       {slots.expertBadge && (
-        <div className={`${contentWidth} pointer-events-none absolute inset-x-0 top-6 z-10 hidden lg:block`}>
+        <div className={`${contentWidth} pointer-events-none absolute inset-x-0 top-4 z-10 sm:top-6`}>
           <img
             src={slots.expertBadge.src}
             alt={slots.expertBadge.alt}
-            className="ml-auto w-40 rounded-lg bg-background/95 object-contain p-2 shadow-md"
+            className="ml-auto w-28 rounded-lg bg-background/95 object-contain p-2 shadow-md sm:w-36 lg:w-40"
           />
         </div>
       )}
@@ -214,7 +211,6 @@ export function Closing({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   return (
     <section id="contato" className="scroll-mt-24 bg-foreground py-16 text-background md:py-24"><div className={`${contentWidth} text-center`}><div className="mx-auto max-w-3xl">
       {slots.julianaAtDestination && <Photo image={slots.julianaAtDestination} className="mx-auto mb-8 aspect-[16/9] w-full max-w-2xl rounded-md object-cover" />}
-      {slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="mx-auto mb-6 w-44 max-w-[70vw] rounded-lg bg-background/95 object-contain p-2 shadow-md" />}
       <h2 className="text-balance text-3xl font-semibold leading-tight md:text-5xl">Seu próximo destino pode ser Xcaret. Vamos planejar juntos?</h2>
       <div className="mt-6 space-y-4 text-pretty text-[16px] leading-7 text-background/80 md:text-[17px]"><p>Você já imaginou quais dessas experiências gostaria de viver? Agora, vamos combinar suas favoritas com a hospedagem e o ritmo que fazem sentido para você.</p><p>Conte quando pretende viajar, com quem e o que espera dessas férias. Eu ajudo você a transformar essa ideia em uma proposta personalizada.</p></div>
       <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-background/70">Destinos com a Ju</span></p>
