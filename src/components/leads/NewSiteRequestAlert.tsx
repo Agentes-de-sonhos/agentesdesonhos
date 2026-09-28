@@ -70,7 +70,10 @@ function SiteRequestAlertDialog() {
 
   const open = () => {
     if (!current) return;
-    const href = opportunityDeepLink(current.opportunity_id);
+    // No painel white label o funil vive em /gestao/crm/funil.
+    const href = nav.isAgencyAdmin
+      ? `${nav.crm("funil")}${current.opportunity_id ? `?opportunity=${current.opportunity_id}` : ""}`
+      : opportunityDeepLink(current.opportunity_id);
     dismiss();
     navigate(href);
   };
