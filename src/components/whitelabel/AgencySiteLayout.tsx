@@ -210,7 +210,7 @@ export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainI
   const contacts = resolveSiteContacts(info.hostname);
   const profile = resolveSiteProfile(info.hostname);
   const footer = profile.footer;
-  const footerWhatsapp = noWhatsapp ? null : footer?.whatsapp?.replace(/\D/g, "") || wa;
+  const footerWhatsapp = noWhatsapp || footer?.whatsappHidden ? null : footer?.whatsapp?.replace(/\D/g, "") || wa;
   const navAll = siteNavLinks(info.hostname);
 
   if (luxury) {
@@ -340,7 +340,8 @@ export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainI
       : "h-12 w-auto max-w-[200px] object-contain";
     return (
       <footer id="rodape" className={footerShellClass}>
-        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
+        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.75fr)_minmax(0,1.35fr)_minmax(0,0.75fr)] md:gap-10`}>
+
           <div>
             {logoUrl ? (
               plainFooter ? (
@@ -413,7 +414,7 @@ export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainI
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     <Mail className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" />
-                    <span className="break-all">{footer?.email ?? contacts.email}</span>
+                    <span className="whitespace-nowrap">{footer?.email ?? contacts.email}</span>
                   </a>
                 </li>
               ) : null}

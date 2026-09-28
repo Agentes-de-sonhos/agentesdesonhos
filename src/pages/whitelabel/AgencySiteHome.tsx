@@ -134,7 +134,7 @@ function formatMediaTime(seconds: number) {
   return `${mm}:${String(ss).padStart(2, "0")}`;
 }
 
-function AuthorityMedia({ video, image }: { video?: string; image: string }) {
+function AuthorityMedia({ video, image, label }: { video?: string; image: string; label?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [, setMuted] = useState(true);
@@ -187,7 +187,7 @@ function AuthorityMedia({ video, image }: { video?: string; image: string }) {
         ref={videoRef}
         src={video}
         poster={image}
-        aria-label="Disney Wish em alto-mar"
+        aria-label={label ? `${label} em alto-mar` : "Cruzeiro em alto-mar"}
         muted
         loop
         playsInline
@@ -229,6 +229,56 @@ function AuthorityMedia({ video, image }: { video?: string; image: string }) {
     </div>
   );
 }
+
+/**
+ * Galeria editorial de vídeos de cruzeiro: nome do navio sob o vídeo e setas
+ * para percorrer as companhias declaradas no perfil da agência.
+ */
+function AuthorityVideoGallery({
+  items,
+  fallbackImage,
+}: {
+  items: { key: string; label: string; video?: string; image: string }[];
+  fallbackImage: string;
+}) {
+  const [index, setIndex] = useState(0);
+  const total = items.length;
+  const active = items[Math.min(index, total - 1)];
+  if (!active) return <AuthorityMedia image={fallbackImage} />;
+
+  return (
+    <div>
+      <AuthorityMedia key={active.key} video={active.video} image={active.image || fallbackImage} label={active.label} />
+      <div className="mt-4 flex items-center justify-between gap-4">
+        <p className="min-w-0 truncate text-base font-semibold text-background" aria-live="polite">
+          {active.label}
+        </p>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            aria-label="Vídeo anterior"
+            disabled={total < 2}
+            onClick={() => setIndex((i) => (i - 1 + total) % total)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-background/15 text-background backdrop-blur transition hover:bg-background/25 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Próximo vídeo"
+            disabled={total < 2}
+            onClick={() => setIndex((i) => (i + 1) % total)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-background/15 text-background backdrop-blur transition hover:bg-background/25 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 
 /** Kept exported: other white-label surfaces import this service list. */
@@ -565,10 +615,23 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
             <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
-              <AuthorityMedia
-                video={authority.video ? AUTHORITY_VIDEOS[authority.video] : undefined}
-                image={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
-              />
+              {authority.videos?.length ? (
+                <AuthorityVideoGallery
+                  items={authority.videos.map((v) => ({
+                    key: v.key,
+                    label: v.label,
+                    video: v.video ? AUTHORITY_VIDEOS[v.video] : undefined,
+                    image: DESTINATION_IMAGES[v.image ?? authority.image ?? "cruzeiro"],
+                  }))}
+                  fallbackImage={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
+                />
+              ) : (
+                <AuthorityMedia
+                  video={authority.video ? AUTHORITY_VIDEOS[authority.video] : undefined}
+                  image={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
+                />
+              )}
+
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.kicker}</p>
                 <h2 className="mt-4 text-3xl font-extrabold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
@@ -1055,26 +1118,29 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     {copy.subtitle ??
                       "Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação, monta as melhores opções e explica cada detalhe antes de você decidir."}
                   </p>
-                  <div className="mt-9 flex flex-wrap gap-3">
-                     <Button
-                       size="lg"
-                       className="wl-cta-primary bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
-                       onClick={() => openRequest("pacotes")}
-                     >
-                       {copy.cta ?? "Solicitar atendimento"} <ArrowRight className="ml-2 h-4 w-4" />
-                     </Button>
-                    {waHref && (
-                      <Button
-                        asChild
-                        size="lg"
-                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
-                      >
-                        <a href={waHref} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle className="mr-2 h-4 w-4" /> {profile.conciergeWhatsappLabel ?? "Falar no WhatsApp"}
-                        </a>
-                      </Button>
-                    )}
-                  </div>
+                  {!profile.hideConciergeActions && (
+                    <div className="mt-9 flex flex-wrap gap-3">
+                       <Button
+                         size="lg"
+                         className="wl-cta-primary bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
+                         onClick={() => openRequest("pacotes")}
+                       >
+                         {copy.cta ?? "Solicitar atendimento"} <ArrowRight className="ml-2 h-4 w-4" />
+                       </Button>
+                      {waHref && (
+                        <Button
+                          asChild
+                          size="lg"
+                          className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
+                        >
+                          <a href={waHref} target="_blank" rel="noopener noreferrer">
+                            <MessageCircle className="mr-2 h-4 w-4" /> {profile.conciergeWhatsappLabel ?? "Falar no WhatsApp"}
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
                 </div>
                 <div className="rounded-xl bg-[hsl(var(--wl-navy))] p-8 md:p-10">
                   <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-background/75">

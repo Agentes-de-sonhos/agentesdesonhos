@@ -129,14 +129,8 @@ export function AgencyGoogleReviewsSection({
                 {data.total != null && <span>{data.total.toLocaleString("pt-BR")} avaliações no Google</span>}
               </div>
             ) : <span />}
-            {googleUrl && (
-              <Button asChild variant="outline" size="lg" className="self-start md:self-auto">
-                <a href={googleUrl} target="_blank" rel="noopener noreferrer">
-                  Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
-                </a>
-              </Button>
-            )}
           </div>
+
         </div>
 
         {data ? (
@@ -152,10 +146,20 @@ export function AgencyGoogleReviewsSection({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="mt-6 flex items-center justify-center gap-3 md:justify-end">
-              <CarouselPrevious className="static h-11 w-11 translate-y-0" />
-              <CarouselNext className="static h-11 w-11 translate-y-0" />
+            <div className="mt-6 flex flex-col-reverse items-stretch gap-4 md:flex-row md:items-center md:justify-between">
+              {googleUrl ? (
+                <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
+                  <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+                    Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+                  </a>
+                </Button>
+              ) : <span />}
+              <div className="flex items-center justify-center gap-3 md:justify-end">
+                <CarouselPrevious className="static h-11 w-11 translate-y-0" />
+                <CarouselNext className="static h-11 w-11 translate-y-0" />
+              </div>
             </div>
+
           </Carousel>
         ) : (
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
