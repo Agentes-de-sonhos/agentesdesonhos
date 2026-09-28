@@ -1501,6 +1501,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           exactTitle
           description={profile.seo.description}
           canonical={profile.seo.canonical ?? "/"}
+          jsonLd={jsonLd}
         />
       )}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
@@ -1521,7 +1522,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           {current.image ? (
             <img
               src={current.image}
-              alt=""
+              alt={`${name} — ${(current.title ?? "").replace(/\s*\n\s*/g, " ")}`}
               className={`h-full w-full object-cover ${heroImagePositionClass}`}
             />
           ) : (
