@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
+import { SEO } from "@/components/seo/SEO";
 import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Route, Package, type LucideIcon } from "lucide-react";
 import {
   filterPublicOffers,
