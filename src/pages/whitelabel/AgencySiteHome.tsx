@@ -134,7 +134,7 @@ function formatMediaTime(seconds: number) {
   return `${mm}:${String(ss).padStart(2, "0")}`;
 }
 
-function AuthorityMedia({ video, image }: { video?: string; image: string }) {
+function AuthorityMedia({ video, image, label }: { video?: string; image: string; label?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
   const [, setMuted] = useState(true);
@@ -187,7 +187,7 @@ function AuthorityMedia({ video, image }: { video?: string; image: string }) {
         ref={videoRef}
         src={video}
         poster={image}
-        aria-label="Disney Wish em alto-mar"
+        aria-label={label ? `${label} em alto-mar` : "Cruzeiro em alto-mar"}
         muted
         loop
         playsInline
