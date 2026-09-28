@@ -791,7 +791,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 >
                   <img
                     src={DESTINATION_IMAGES[d.image]}
-                    alt={d.title}
+                    alt={d.label ? `${d.title} — ${d.label}` : d.title}
                     loading="lazy"
                     className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                   />
@@ -837,7 +837,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     >
                       <img
                         src={DESTINATION_IMAGES[d.image]}
-                        alt={d.title}
+                        alt={d.label ? `${d.title} — ${d.label}` : d.title}
                         loading="lazy"
                         className="h-[360px] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03] md:h-full"
                       />
@@ -884,7 +884,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   >
                     <img
                       src={DESTINATION_IMAGES[d.image]}
-                      alt={d.title}
+                      alt={d.label ? `${d.title} — ${d.label}` : d.title}
                       loading="lazy"
                       className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                     />
