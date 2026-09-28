@@ -524,7 +524,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   sections: {
     dmc: { enabled: false }, testimonials: { enabled: false }, team: { enabled: false },
     credentials: { enabled: false }, highlights: { enabled: false },
-    signature: { enabled: true, order: 1 }, destinations: { order: 2 }, modules: { order: 3 },
+    signature: { enabled: true, order: 1 }, modules: { order: 2 }, destinations: { order: 3 },
     authority: { enabled: true, order: 4 }, about: { order: 5 }, differentials: { order: 6 },
     concierge: { order: 7 }, avaliacoes: { enabled: true, order: 8 }, faq: { order: 9 },
     newsletter: { order: 10 }, offers: { order: 11 },
@@ -582,6 +582,10 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
       "Esse repertório ajuda a comparar navios, itinerários, cabines, experiências a bordo e perfis de viagem com muito mais segurança. O objetivo não é apenas encontrar um cruzeiro, mas escolher aquele que realmente combina com você.",
     ],
     cta: "Quero planejar meu cruzeiro", service: "cruzeiros", image: "cruzeiro", video: "disneyWishCruise",
+    videos: [
+      { key: "disney-wish", label: "Disney Wish", video: "disneyWishCruise", image: "cruzeiro" },
+    ],
+
   },
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
@@ -608,6 +612,8 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     { key: "acompanhamento", title: "Viaje com acompanhamento", text: "Depois da confirmação, documentos, roteiro e informações ficam organizados na Área do Cliente, com suporte durante toda a jornada." },
   ],
   conciergeWhatsappLabel: "Falar com a equipe",
+  hideConciergeActions: true,
+
   reviewsCopy: {
     kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Ju",
     subtitle: "Avaliações reais de clientes que confiaram à Destinos com a Ju o planejamento de momentos importantes.",
@@ -623,7 +629,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   ],
   footer: {
     description: "Consultoria completa para viagens personalizadas, com planejamento e acompanhamento antes, durante e depois.",
-    whatsapp: "(11) 95741-4840", phone: "(11) 2959-6402", email: "contato@destinoscomaju.com.br",
+    whatsapp: "(11) 95741-4840", whatsappHidden: true, phone: "(11) 2959-6402", email: "contato@destinoscomaju.com.br",
     instagram: "https://instagram.com/destinoscomaju", instagramLabel: "@destinoscomaju",
     address: "Rua Pontins, 54 — Santana — São Paulo/SP", legalName: "FECAFER Agência de Viagens e Turismo Ltda.", cnpj: "23.593.301/0001-71",
   },
@@ -631,7 +637,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     enabled: true,
     id: "experiencia-xcaret",
     kicker: "EXPERIÊNCIA E ESPECIALIZAÇÃO",
-    title: "Xcaret com o olhar de quem viveu essa experiência",
+    title: "Somos uma agência Expert Xcaret Oficial",
     description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
     mainImage: {
       src: destinosXcaretCover.url,
