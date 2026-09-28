@@ -26,7 +26,7 @@ import { XcaretBookingBar } from "@/components/landing/xcaret/XcaretBookingBar";
 
 const contentWidth = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 const heading = "text-balance text-3xl font-semibold leading-tight text-foreground md:text-5xl";
-const body = "text-[16px] leading-7 text-muted-foreground md:text-[17px]";
+const body = "text-pretty text-[16px] leading-7 text-muted-foreground md:text-[17px]";
 
 function Photo({ image, className = "", priority = false }: { image: XcaretImage; className?: string; priority?: boolean }) {
   return <img src={image.src} alt={image.alt} className={className} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} sizes="(max-width: 768px) 100vw, 50vw" />;
@@ -166,16 +166,13 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   );
 }
 
-const experienceCards = [
-  ["Parques e experiências", "Da tranquilidade da água às aventuras na selva.", XCARET_IMAGES.undergroundRiver],
-  ["Hotéis para diferentes estilos", "Em família, a dois ou em uma viagem com mais exclusividade.", XCARET_IMAGES.hotelMexico],
-  ["A essência do México", "Gastronomia, música e tradições que fazem parte da viagem.", XCARET_IMAGES.mexicoShow],
-] as const;
-
-const xcaretCards = [
-  ["Uma natureza que surpreende", "Rios, cavernas e águas cristalinas para explorar de um jeito diferente.", XCARET_IMAGES.undergroundRiver],
+const unifiedCards = [
+  ["Natureza que surpreende", "Rios subterrâneos, cavernas e águas cristalinas para explorar de um jeito diferente.", XCARET_IMAGES.undergroundRiver],
   ["Tempo para curtir o Caribe", "Entre uma descoberta e outra, aproveite a paisagem e os espaços para relaxar.", XCARET_IMAGES.xcaret],
   ["Um México que emociona", "Música, cores e tradições em um espetáculo para guardar na memória.", XCARET_IMAGES.mexicoShow],
+  ["Aventura na selva", "Tirolesas, trilhas e percursos que levam a viagem para outro ritmo.", XCARET_IMAGES.xplor],
+  ["Dias dentro d'água", "Snorkel, enseadas e piscinas naturais cercadas de vegetação.", XCARET_IMAGES.xelHa],
+  ["Hotéis para cada estilo", "Em família, a dois ou em uma viagem com mais exclusividade.", XCARET_IMAGES.hotelMexico],
 ] as const;
 
 const hotels = [
@@ -195,20 +192,19 @@ const itinerary = [
 ] as const;
 
 export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
-  const media = [slots.portraitJuliana, slots.trainingPhoto].filter((m): m is XcaretImage => !!m);
+  const media = [slots.portraitJuliana, slots.trainingPhoto, slots.julianaExtra].filter((m): m is XcaretImage => !!m);
   return (
     <section id="especialista" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} ${media.length ? "grid items-center gap-10 lg:grid-cols-2" : ""}`}>
       {media.length > 0 && (
         <div className={`grid gap-4 ${media.length > 1 ? "sm:grid-cols-2" : ""}`} data-testid="specialist-media">
-          {media.map((m) => <Photo key={m.src} image={m} className="aspect-[4/5] w-full rounded-md object-cover" />)}
+          {media.map((m, index) => <Photo key={m.src} image={m} className={`aspect-[4/5] w-full rounded-md object-cover ${media.length === 3 && index === 2 ? "sm:col-span-2 sm:aspect-[16/9]" : ""}`} />)}
         </div>
       )}
       <div className={media.length ? "" : "mx-auto max-w-3xl"}>
-        <div className="flex flex-wrap items-center gap-3"><p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>{slots.expertBadge && <img src={slots.expertBadge.src} alt={slots.expertBadge.alt} loading="lazy" className="w-36 max-w-[52vw] rounded-lg bg-card object-contain p-2 shadow-sm ring-1 ring-border sm:w-44" />}</div>
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>
         <h2 className={`${heading} mt-4`}>Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.</h2>
         <div className={`mt-6 space-y-4 ${body}`}><p>Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.</p><p>Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.</p><p>Quero ouvir o que você imagina para essas férias e transformar tantas possibilidades em uma viagem que faça sentido para você.</p></div>
         <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-muted-foreground">Destinos com a Ju</span></p>
-        <WaButton label="Conversar com a Ju sobre minha viagem" message="Oi, Ju! Quero conhecer o Xcaret e gostaria da sua ajuda para planejar a viagem." className="mt-7 w-full sm:w-auto" />
       </div>
     </div></section>
   );
