@@ -79,7 +79,7 @@ export function useAgencySiteRequestAlerts() {
           schema: "public",
           table: "agency_site_requests",
           // Admin: sem filtro de tenant (RLS libera a leitura global).
-          ...(isAdmin ? {} : { filter: `agency_user_id=eq.${user.id}` }),
+          ...(isAdmin ? {} : { filter: `agency_user_id=eq.${tenantId}` }),
         },
         (payload) => {
           const alert = toSiteRequestAlert(payload.new as Record<string, unknown>);
@@ -97,7 +97,7 @@ export function useAgencySiteRequestAlerts() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, isAdmin, roleLoading, qc]);
+  }, [user?.id, isAdmin, roleLoading, teamLoading, tenantId, qc]);
 
 
   return { current: queue[0] ?? null, pending: Math.max(0, queue.length - 1), dismiss };
