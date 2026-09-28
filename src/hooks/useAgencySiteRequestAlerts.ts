@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useTeamSession } from "@/contexts/TeamSessionContext";
 
 /** Aviso interno de uma solicitação recebida pelo site da agência. */
 export interface SiteRequestAlert {
@@ -55,16 +56,20 @@ export function opportunityDeepLink(opportunityId: string | null): string {
 export function useAgencySiteRequestAlerts() {
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const { agencyId, loading: teamLoading } = useTeamSession();
   const qc = useQueryClient();
   const [queue, setQueue] = useState<SiteRequestAlert[]>([]);
   const seenRef = useRef<Set<string>>(new Set());
 
   const dismiss = useCallback(() => setQueue((q) => q.slice(1)), []);
 
+  // Titular da agência OU colaborador da equipe: o canal escuta a agência ativa.
+  const tenantId = agencyId ?? user?.id ?? null;
+
   useEffect(() => {
-    if (!user?.id || roleLoading) return;
+    if (!user?.id || roleLoading || teamLoading || !tenantId) return;
     seenRef.current = new Set();
-    const scope = isAdmin ? "all" : user.id;
+    const scope = isAdmin ? "all" : tenantId;
     const channel = supabase
       .channel(`agency-site-requests:${scope}`)
       .on(
