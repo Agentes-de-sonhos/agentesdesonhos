@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useOptionalTeamSession } from "@/contexts/TeamSessionContext";
 
 /** Aviso interno de uma solicitação recebida pelo site da agência. */
 export interface SiteRequestAlert {
@@ -55,16 +56,22 @@ export function opportunityDeepLink(opportunityId: string | null): string {
 export function useAgencySiteRequestAlerts() {
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
+  const team = useOptionalTeamSession();
+  const agencyId = team?.agencyId ?? null;
+  const teamLoading = team?.loading ?? false;
   const qc = useQueryClient();
   const [queue, setQueue] = useState<SiteRequestAlert[]>([]);
   const seenRef = useRef<Set<string>>(new Set());
 
   const dismiss = useCallback(() => setQueue((q) => q.slice(1)), []);
 
+  // Titular da agência OU colaborador da equipe: o canal escuta a agência ativa.
+  const tenantId = agencyId ?? user?.id ?? null;
+
   useEffect(() => {
-    if (!user?.id || roleLoading) return;
+    if (!user?.id || roleLoading || teamLoading || !tenantId) return;
     seenRef.current = new Set();
-    const scope = isAdmin ? "all" : user.id;
+    const scope = isAdmin ? "all" : tenantId;
     const channel = supabase
       .channel(`agency-site-requests:${scope}`)
       .on(
@@ -74,7 +81,7 @@ export function useAgencySiteRequestAlerts() {
           schema: "public",
           table: "agency_site_requests",
           // Admin: sem filtro de tenant (RLS libera a leitura global).
-          ...(isAdmin ? {} : { filter: `agency_user_id=eq.${user.id}` }),
+          ...(isAdmin ? {} : { filter: `agency_user_id=eq.${tenantId}` }),
         },
         (payload) => {
           const alert = toSiteRequestAlert(payload.new as Record<string, unknown>);
@@ -92,7 +99,7 @@ export function useAgencySiteRequestAlerts() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, isAdmin, roleLoading, qc]);
+  }, [user?.id, isAdmin, roleLoading, teamLoading, tenantId, qc]);
 
 
   return { current: queue[0] ?? null, pending: Math.max(0, queue.length - 1), dismiss };

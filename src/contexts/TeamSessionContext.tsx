@@ -168,6 +168,14 @@ export function useTeamSession() {
   return ctx
 }
 
+/**
+ * Versão tolerante: retorna null fora do provider, para componentes que podem
+ * ser montados em áreas sem sessão de equipe.
+ */
+export function useOptionalTeamSession() {
+  return useContext(TeamSessionContext) ?? null
+}
+
 /** Conveniência: retorna se o usuário atual é colaborador (subusuário) da equipe */
 export function useIsTeamMember() {
   const { member } = useTeamSession()
