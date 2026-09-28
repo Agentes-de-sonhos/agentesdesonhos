@@ -40,3 +40,14 @@ if (!("IntersectionObserver" in window)) {
     value: MockIntersectionObserver,
   });
 }
+
+// jsdom não implementa ResizeObserver; carrosséis (embla) o exigem.
+if (!("ResizeObserver" in globalThis)) {
+  class MockResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  Object.defineProperty(globalThis, "ResizeObserver", { writable: true, value: MockResizeObserver });
+  Object.defineProperty(window, "ResizeObserver", { writable: true, value: MockResizeObserver });
+}
