@@ -23,6 +23,7 @@ import { WorkspaceShell } from "@/workspace/WorkspaceShell";
 import { titleForPath } from "@/workspace/routeTitle";
 import { AgencyCommunityGate } from "./AgencyCommunityGate";
 import { isSiteLabDemoHost } from "@/lib/sitelabModels";
+import { NewSiteRequestAlert } from "@/components/leads/NewSiteRequestAlert";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
@@ -144,7 +145,13 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     { path: "*", element: e(AgencyAdminNotFound) },
   ]);
 
-  return <AgencyAdminLayout info={info}>{routes}</AgencyAdminLayout>;
+  return (
+    <AgencyAdminLayout info={info}>
+      {routes}
+      {/* Aviso em tempo real das solicitações recebidas pelo site da agência. */}
+      <NewSiteRequestAlert />
+    </AgencyAdminLayout>
+  );
 }
 
 /** Caminho inicial da primeira janela, a partir da URL real do navegador. */

@@ -1,9 +1,38 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Globe, ArrowRight, X } from "lucide-react";
 import { opportunityDeepLink, useAgencySiteRequestAlerts } from "@/hooks/useAgencySiteRequestAlerts";
+import { useAdminNav } from "@/lib/agencyAdminNav";
+
+/**
+ * Instância única por página: o painel white label monta este aviso dentro de
+ * cada aba do workspace (para ter contexto de rota), e sem esse controle a
+ * mesma solicitação abriria vários pop-ups e assinaturas em paralelo.
+ */
+let activeOwner: symbol | null = null;
+
+export function NewSiteRequestAlert() {
+  const tokenRef = useRef<symbol>(Symbol("site-request-alert"));
+  const [owner, setOwner] = useState(false);
+
+  useEffect(() => {
+    const token = tokenRef.current;
+    if (activeOwner === null) {
+      activeOwner = token;
+      setOwner(true);
+    }
+    return () => {
+      if (activeOwner === token) {
+        activeOwner = null;
+      }
+    };
+  }, []);
+
+  if (!owner) return null;
+  return <SiteRequestAlertDialog />;
+}
 
 function formatDateTime(iso: string) {
   try {
@@ -18,8 +47,9 @@ function formatDateTime(iso: string) {
  * pelo site da agência — inclusive dentro da própria Gestão de Oportunidades.
  * Aparece uma única vez por solicitação.
  */
-export function NewSiteRequestAlert() {
+function SiteRequestAlertDialog() {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { current, pending, dismiss } = useAgencySiteRequestAlerts();
   const chimedRef = useRef<string | null>(null);
 
@@ -40,7 +70,10 @@ export function NewSiteRequestAlert() {
 
   const open = () => {
     if (!current) return;
-    const href = opportunityDeepLink(current.opportunity_id);
+    // No painel white label o funil vive em /gestao/crm/funil.
+    const href = nav.isAgencyAdmin
+      ? `${nav.crm("funil")}${current.opportunity_id ? `?opportunity=${current.opportunity_id}` : ""}`
+      : opportunityDeepLink(current.opportunity_id);
     dismiss();
     navigate(href);
   };
