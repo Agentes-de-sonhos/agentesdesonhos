@@ -202,6 +202,19 @@ export function ClientsManager() {
                 />
                 <FormField
                   control={form.control}
+                  name="referred_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Indicado por</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="notes"
                   render={({ field }) => (
                     <FormItem>
