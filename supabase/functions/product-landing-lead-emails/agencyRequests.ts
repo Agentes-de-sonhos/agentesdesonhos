@@ -4,6 +4,11 @@
 // (UNIQUE (request_id, channel) + status por linha). Uma falha aqui nunca cria
 // uma segunda oportunidade: a solicitação e o CRM já estão gravados.
 import { escapeHtml, formatInTz, toE164Br } from "./template.ts";
+import {
+  sendWhatsappTemplate,
+  templateVariables,
+  whatsappConfigFromEnv,
+} from "../_shared/whatsapp-request-notify.ts";
 
 const APP_BASE = "https://app.agentesdesonhos.com.br";
 const TZ = "America/Sao_Paulo";
