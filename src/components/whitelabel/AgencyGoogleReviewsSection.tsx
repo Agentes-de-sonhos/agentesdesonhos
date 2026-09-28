@@ -129,14 +129,8 @@ export function AgencyGoogleReviewsSection({
                 {data.total != null && <span>{data.total.toLocaleString("pt-BR")} avaliações no Google</span>}
               </div>
             ) : <span />}
-            {googleUrl && (
-              <Button asChild variant="outline" size="lg" className="self-start md:self-auto">
-                <a href={googleUrl} target="_blank" rel="noopener noreferrer">
-                  Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
-                </a>
-              </Button>
-            )}
           </div>
+
         </div>
 
         {data ? (
