@@ -253,6 +253,13 @@
       "when": 1790624949905,
       "tag": "0035_clients_referred_by",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790625124199,
+      "tag": "0036_traveler_visas",
+      "breakpoints": true
     }
   ]
 }

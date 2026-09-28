@@ -15389,6 +15389,50 @@ export type Database = {
           },
         ]
       }
+      traveler_visas: {
+        Row: {
+          created_at: string
+          data_vencimento: string | null
+          id: string
+          numero: string | null
+          observacoes: string | null
+          tipo: string
+          traveler_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_vencimento?: string | null
+          id?: string
+          numero?: string | null
+          observacoes?: string | null
+          tipo: string
+          traveler_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_vencimento?: string | null
+          id?: string
+          numero?: string | null
+          observacoes?: string | null
+          tipo?: string
+          traveler_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traveler_visas_traveler_id_fkey"
+            columns: ["traveler_id"]
+            isOneToOne: false
+            referencedRelation: "travelers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       travelers: {
         Row: {
           client_id: string
