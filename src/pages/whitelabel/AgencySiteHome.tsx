@@ -63,6 +63,7 @@ import destinoNorteAfrica from "@/assets/whitelabel/destino-norte-africa.jpg";
 import destinoEscandinavia from "@/assets/whitelabel/destino-escandinavia.jpg";
 import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import disneyWishCruise from "@/assets/whitelabel/destinos-com-a-ju/disney-wish-cruise.mp4.asset.json";
+import legendOfTheSeas from "@/assets/whitelabel/destinos-com-a-ju/legend-of-the-seas.mp4.asset.json";
 import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front-v2.png.asset.json";
 import destinoEuropaCastelo from "@/assets/whitelabel/destino-europa-neuschwanstein-2.jpg.asset.json";
 import destinoCaribeMexico from "@/assets/whitelabel/destinos-com-a-ju/destino-caribe-mexico.jpg.asset.json";
@@ -126,6 +127,7 @@ const HERO_IMAGES: Record<string, string> = {
 
 const AUTHORITY_VIDEOS: Record<string, string> = {
   disneyWishCruise: disneyWishCruise.url,
+  legendOfTheSeas: legendOfTheSeas.url,
 };
 
 function formatMediaTime(seconds: number) {
