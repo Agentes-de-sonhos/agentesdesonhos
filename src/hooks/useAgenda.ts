@@ -604,7 +604,7 @@ export function useAgenda(year?: number) {
       reminderDates(doc.data_vencimento)
         .filter((r) => r.date.startsWith(String(currentYear)))
         .map((r) => ({
-          id: `docexp_${doc.id}_${r.days ?? r.label}`,
+          id: `docexp_${doc.id}_${r.label}`,
           title: `🛂 ${doc.documentLabel} de ${doc.travelerName} vence em ${formatBrDate(doc.data_vencimento)}`,
           description: `Avisar ${doc.clientName} com ${r.label} de antecedência sobre a renovação.`,
           event_type: 'vencimento_documento',
