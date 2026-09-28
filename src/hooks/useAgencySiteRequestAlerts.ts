@@ -47,9 +47,14 @@ export function opportunityDeepLink(opportunityId: string | null): string {
  * Assina as solicitações públicas da PRÓPRIA agência (filtro estrito por
  * agency_user_id, reforçado pela RLS da tabela) e mantém uma fila de avisos sem
  * repetição: reconexão, refetch ou segunda inscrição não duplicam o pop-up.
+ *
+ * Administradores da plataforma acompanham as solicitações de todas as agências
+ * (sem filtro de tenant) — a própria RLS da tabela já autoriza essa leitura
+ * apenas para quem tem o papel admin.
  */
 export function useAgencySiteRequestAlerts() {
   const { user } = useAuth();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const qc = useQueryClient();
   const [queue, setQueue] = useState<SiteRequestAlert[]>([]);
   const seenRef = useRef<Set<string>>(new Set());
@@ -57,17 +62,19 @@ export function useAgencySiteRequestAlerts() {
   const dismiss = useCallback(() => setQueue((q) => q.slice(1)), []);
 
   useEffect(() => {
-    if (!user?.id) return;
+    if (!user?.id || roleLoading) return;
     seenRef.current = new Set();
+    const scope = isAdmin ? "all" : user.id;
     const channel = supabase
-      .channel(`agency-site-requests:${user.id}`)
+      .channel(`agency-site-requests:${scope}`)
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
           table: "agency_site_requests",
-          filter: `agency_user_id=eq.${user.id}`,
+          // Admin: sem filtro de tenant (RLS libera a leitura global).
+          ...(isAdmin ? {} : { filter: `agency_user_id=eq.${user.id}` }),
         },
         (payload) => {
           const alert = toSiteRequestAlert(payload.new as Record<string, unknown>);
@@ -85,7 +92,8 @@ export function useAgencySiteRequestAlerts() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id, qc]);
+  }, [user?.id, isAdmin, roleLoading, qc]);
+
 
   return { current: queue[0] ?? null, pending: Math.max(0, queue.length - 1), dismiss };
 }
