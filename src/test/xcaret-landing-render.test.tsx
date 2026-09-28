@@ -10,40 +10,35 @@ class RO { observe() {} unobserve() {} disconnect() {} }
 window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, onchange: null, dispatchEvent: () => false })) as any;
 
 const img = (n: string) => ({ src: `/fixture/${n}.webp`, alt: `fixture ${n}`, source: "fixture" });
-const full = { portraitJuliana: img("portrait"), trainingPhoto: img("training"), expertBadge: img("badge"), julianaAtDestination: img("destino") };
+const full = { portraitJuliana: img("portrait"), trainingPhoto: img("training"), julianaExtra: img("extra"), expertBadge: null, julianaAtDestination: img("destino") };
 
 describe("landing Xcaret renderizada", () => {
-  it("hero com um único H1, 6 indicadores e texto fixo", () => {
+  it("hero com um único H1 e 6 indicadores", () => {
     const { container } = render(<Hero />);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: /^Ir para/ })).toHaveLength(6);
     expect(screen.getByRole("button", { name: "Ir para Xcaret" }).getAttribute("aria-current")).toBe("true");
-    expect(container.querySelectorAll('a[href^="https://wa.me/5511957414840"]').length).toBeGreaterThan(0);
   });
 
   it("slots null omitem imagens sem espaço vazio", () => {
-    const empty = { portraitJuliana: null, trainingPhoto: null, expertBadge: null, julianaAtDestination: null };
+    const empty = { portraitJuliana: null, trainingPhoto: null, julianaExtra: null, expertBadge: null, julianaAtDestination: null };
     const { container } = render(<><Specialist slots={empty} /><Closing slots={empty} /></>);
     expect(container.querySelectorAll("img")).toHaveLength(0);
     expect(screen.queryByTestId("specialist-media")).toBeNull();
   });
 
-  it("slots oficiais usam fotos reais da Juliana e o selo Xperts", () => {
+  it("slots oficiais usam três fotos reais da Juliana e não trazem selo", () => {
     expect(XCARET_MEDIA_SLOTS.portraitJuliana?.src).toContain("juliana-xcaret-selfie.webp");
     expect(XCARET_MEDIA_SLOTS.trainingPhoto?.src).toContain("juliana-xcaret-training.webp");
-    expect(XCARET_MEDIA_SLOTS.expertBadge?.src).toContain("xperts-xcaret-badge.webp");
+    expect(XCARET_MEDIA_SLOTS.julianaExtra?.src).toContain("juliana-xplor-buggy.webp");
     expect(XCARET_MEDIA_SLOTS.julianaAtDestination?.src).toContain("juliana-xcaret-hotel.webp");
+    expect(XCARET_MEDIA_SLOTS.expertBadge).toBeNull();
   });
 
-  it("slots preenchidos renderizam retrato, treinamento, selo e foto no destino", () => {
-    render(<><Hero slots={full} /><Specialist slots={full} /><Closing slots={full} /></>);
-    for (const k of ["portrait", "training", "destino"]) expect(screen.getByAltText(`fixture ${k}`)).toBeTruthy();
-    const badges = screen.getAllByAltText("fixture badge");
-    expect(badges).toHaveLength(3);
-    for (const badge of badges) {
-      expect(badge.className).toMatch(/w-(36|44)/);
-      expect(badge.className).not.toContain("rounded-full");
-    }
+  it("atendimento pessoal mostra três fotos e nenhum botão de WhatsApp", () => {
+    const { container } = render(<Specialist slots={full} />);
+    for (const k of ["portrait", "training", "extra"]) expect(screen.getByAltText(`fixture ${k}`)).toBeTruthy();
+    expect(container.querySelectorAll('a[href^="https://wa.me/"]')).toHaveLength(0);
   });
 
   it("imagens corrigidas apontam para os assets e fontes oficiais corretas", () => {
