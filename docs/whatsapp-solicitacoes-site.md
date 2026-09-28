@@ -1,9 +1,18 @@
-# Aviso por WhatsApp de novas solicitações do site (preparado, desativado)
+# Aviso por WhatsApp de novas solicitações do site (ATIVO)
 
-Estado atual: **preparado e inerte**. Toda solicitação cria uma linha de aviso
-no canal `whatsapp_agency` com status `awaiting_template`. Nada é enviado
-enquanto não existir template aprovado e configuração válida. A ausência de
-telefone, template ou configuração **nunca** faz a solicitação falhar.
+Estado atual: **ativo** (migração 0033). Toda solicitação cria uma linha de aviso
+no canal `whatsapp_agency` com status `pending`; o worker
+`product-landing-lead-emails` envia o template aprovado pela Twilio (gateway do
+conector), com `{{1}}` = nome da agência e `{{2}}` = link da oportunidade.
+Content SID em uso: `HX60959ee2d583d76836dbd5337741c9af` (template
+`nova_solicitacao_site_ads`, Utility, `pt_BR`, aprovado). Remetente:
+`whatsapp:+5511926703859`. A ausência de telefone válido marca a linha como
+`skipped`; falhas de envio voltam para `pending` (até 5 tentativas) e **nunca**
+fazem a solicitação falhar. Mensagem livre fora da janela de 24h continua proibida.
+
+O pedido de reserva de orçamento público (`submit-booking-request`) permanece
+inerte: depende do template próprio `nova_solicitacao_orcamento_ads`, ainda não
+aprovado.
 
 ## Template sugerido
 
