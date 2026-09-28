@@ -230,6 +230,56 @@ function AuthorityMedia({ video, image, label }: { video?: string; image: string
   );
 }
 
+/**
+ * Galeria editorial de vídeos de cruzeiro: nome do navio sob o vídeo e setas
+ * para percorrer as companhias declaradas no perfil da agência.
+ */
+function AuthorityVideoGallery({
+  items,
+  fallbackImage,
+}: {
+  items: { key: string; label: string; video?: string; image: string }[];
+  fallbackImage: string;
+}) {
+  const [index, setIndex] = useState(0);
+  const total = items.length;
+  const active = items[Math.min(index, total - 1)];
+  if (!active) return <AuthorityMedia image={fallbackImage} />;
+
+  return (
+    <div>
+      <AuthorityMedia key={active.key} video={active.video} image={active.image || fallbackImage} label={active.label} />
+      <div className="mt-4 flex items-center justify-between gap-4">
+        <p className="min-w-0 truncate text-base font-semibold text-background" aria-live="polite">
+          {active.label}
+        </p>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            aria-label="Vídeo anterior"
+            disabled={total < 2}
+            onClick={() => setIndex((i) => (i - 1 + total) % total)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-background/15 text-background backdrop-blur transition hover:bg-background/25 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            aria-label="Próximo vídeo"
+            disabled={total < 2}
+            onClick={() => setIndex((i) => (i + 1) % total)}
+            className="grid h-10 w-10 place-items-center rounded-full bg-background/15 text-background backdrop-blur transition hover:bg-background/25 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 
 /** Kept exported: other white-label surfaces import this service list. */
 export const AGENCY_SERVICES = [
