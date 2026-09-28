@@ -24,6 +24,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useTravelers, useTravelerDocuments, getTravelerDocumentSignedUrl, type Traveler } from "@/hooks/useTravelers";
 import { useToast } from "@/hooks/use-toast";
+import { TravelerVisasSection } from "@/components/crm/TravelerVisasSection";
 
 interface TravelersSectionProps {
   clientId: string;
@@ -190,6 +191,9 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
                         <p className="text-muted-foreground">{t.observacoes}</p>
                       </div>
                     )}
+
+                    {/* Vistos */}
+                    <TravelerVisasSection travelerId={t.id} />
 
                     {/* Documents sub-section */}
                     <TravelerDocumentsSection travelerId={t.id} travelerName={t.nome_completo} />
