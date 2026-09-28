@@ -15,3 +15,7 @@ Allow: /
 Disallow: /.lovable/
 
 Sitemap: https://agentesdesonhos.com.br/sitemap.xml
+
+# Sites white label (mesmos arquivos estáticos servidos em cada domínio).
+# Cada sitemap lista somente URLs do seu próprio host.
+Sitemap: https://www.destinoscomaju.com.br/sitemap-destinoscomaju.xml
