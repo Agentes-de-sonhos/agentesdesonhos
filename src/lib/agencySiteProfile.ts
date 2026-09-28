@@ -81,11 +81,18 @@ export interface AgencyAuthorityContent {
   image?: AgencyImageSlot;
   /** Vídeo editorial opcional; ausente preserva a imagem compartilhada. */
   video?: "disneyWishCruise";
+  /**
+   * Galeria editorial de vídeos (companhia/navio). Quando definida, o media da
+   * seção vira galeria navegável com o nome do navio sob o vídeo.
+   */
+  videos?: { key: string; label: string; video?: "disneyWishCruise"; image?: AgencyImageSlot }[];
 }
 
 export interface AgencyFooterContent {
   description?: string;
   whatsapp?: string;
+  /** Oculta a linha de WhatsApp no rodapé sem afetar os demais canais. */
+  whatsappHidden?: boolean;
   phone?: string;
   email?: string;
   instagram?: string;
@@ -96,6 +103,7 @@ export interface AgencyFooterContent {
   /** Exibe a cidade/UF do cadastro quando não há endereço editorial. */
   showLocation?: boolean;
 }
+
 
 export interface AgencyHeroPresentation {
   kicker?: string;
@@ -139,6 +147,9 @@ export interface AgencySiteProfile {
   heroPresentation?: AgencyHeroPresentation;
   /** Rótulo opcional do WhatsApp no concierge (fallback compartilhado intacto). */
   conciergeWhatsappLabel?: string;
+  /** Oculta os botões de ação da seção "concierge" (mantém o conteúdo). */
+  hideConciergeActions?: boolean;
+
   /** Slot de imagem de fallback do hero (resolvido na apresentação). */
   heroImage?: string;
   destinations?: AgencyDestination[];
