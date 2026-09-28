@@ -12,8 +12,8 @@ describe("landing Xcaret da Destinos com a Ju", () => {
     expect(routes).toContain('<Route path="/xcaret" element={<XcaretLandingPage info={info} />} />');
     expect(routes.indexOf("<AgencySitePasswordGate")).toBeLessThan(routes.indexOf('<Route path="/xcaret"'));
     // O menu permanece enxuto: o link interno para /xcaret vem da seção destacada.
-    expect(resolveSiteProfile("destinoscomaju.com.br").copy.featuredExperience?.ctaHref).toBe("/xcaret");
-    expect(resolveSiteProfile("paraisoviagens.com").copy.featuredExperience?.ctaHref).not.toBe("/xcaret");
+    expect(resolveSiteProfile("destinoscomaju.com.br").featuredExperience?.ctaHref).toBe("/xcaret");
+    expect(resolveSiteProfile("paraisoviagens.com").featuredExperience?.ctaHref).not.toBe("/xcaret");
   });
 
   it("mantém a quantidade aprovada de conteúdo e mídia opcional real", () => {
