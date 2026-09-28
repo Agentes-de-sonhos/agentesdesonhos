@@ -1118,26 +1118,29 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     {copy.subtitle ??
                       "Nada de robô decidindo pela sua viagem. Um consultor analisa a sua solicitação, monta as melhores opções e explica cada detalhe antes de você decidir."}
                   </p>
-                  <div className="mt-9 flex flex-wrap gap-3">
-                     <Button
-                       size="lg"
-                       className="wl-cta-primary bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
-                       onClick={() => openRequest("pacotes")}
-                     >
-                       {copy.cta ?? "Solicitar atendimento"} <ArrowRight className="ml-2 h-4 w-4" />
-                     </Button>
-                    {waHref && (
-                      <Button
-                        asChild
-                        size="lg"
-                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
-                      >
-                        <a href={waHref} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle className="mr-2 h-4 w-4" /> {profile.conciergeWhatsappLabel ?? "Falar no WhatsApp"}
-                        </a>
-                      </Button>
-                    )}
-                  </div>
+                  {!profile.hideConciergeActions && (
+                    <div className="mt-9 flex flex-wrap gap-3">
+                       <Button
+                         size="lg"
+                         className="wl-cta-primary bg-[hsl(var(--wl-ink))] text-white hover:bg-[hsl(var(--wl-ink))]/90 focus-visible:ring-[hsl(var(--wl-ink))] [&_svg]:text-white"
+                         onClick={() => openRequest("pacotes")}
+                       >
+                         {copy.cta ?? "Solicitar atendimento"} <ArrowRight className="ml-2 h-4 w-4" />
+                       </Button>
+                      {waHref && (
+                        <Button
+                          asChild
+                          size="lg"
+                          className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
+                        >
+                          <a href={waHref} target="_blank" rel="noopener noreferrer">
+                            <MessageCircle className="mr-2 h-4 w-4" /> {profile.conciergeWhatsappLabel ?? "Falar no WhatsApp"}
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
                 </div>
                 <div className="rounded-xl bg-[hsl(var(--wl-navy))] p-8 md:p-10">
                   <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-background/75">
