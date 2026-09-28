@@ -218,8 +218,19 @@ export default function AgencyOffersPage({ info, basePath = "" }: { info: Agency
   }
   if (offers.length === 0) return legacy;
 
+  const agencyName = info.agency_name || "nossa equipe";
+
   return (
     <>
+      {/* Canonical próprio do domínio da agência (sem basePath interno). */}
+      {basePath === "" && (
+        <SEO
+          exactTitle
+          title={`Ofertas de viagem | ${info.agency_name || "Ofertas"}`}
+          description={`Oportunidades de viagem selecionadas por ${agencyName}, com destinos, períodos e condições atualizados.`}
+          canonical={`https://${info.hostname}/ofertas`}
+        />
+      )}
       <section className="mx-auto max-w-6xl px-4 py-12 md:py-16">
         <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">Ofertas</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">Oportunidades de viagem selecionadas pela nossa equipe.</p>
