@@ -20,7 +20,11 @@ if (!("IntersectionObserver" in window)) {
     readonly root: Element | null = null;
     readonly rootMargin = "";
     readonly thresholds: ReadonlyArray<number> = [];
-    observe() {}
+    constructor(private readonly cb?: IntersectionObserverCallback) {}
+    observe(target: Element) {
+      // Dispara imediatamente: em jsdom nada entra em viewport por conta própria.
+      this.cb?.([{ isIntersecting: true, target } as unknown as IntersectionObserverEntry], this);
+    }
     unobserve() {}
     disconnect() {}
     takeRecords(): IntersectionObserverEntry[] {
