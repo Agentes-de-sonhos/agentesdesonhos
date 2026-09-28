@@ -232,7 +232,7 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
   useAgencySiteThemeOnBody(info.hostname);
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
-      <SEO exactTitle title="Xcaret com a Ju | Parques, Hotéis e Viagem Personalizada" description="Descubra parques, hotéis e experiências Xcaret na Riviera Maya com uma viagem personalizada pela Destinos com a Ju." canonical="https://www.destinoscomaju.com.br/xcaret" image={XCARET_IMAGES.xcaret.src} />
+      <SEO exactTitle title="Xcaret com a Ju | Parques, Hotéis e Viagem Personalizada" description="Descubra parques, hotéis e experiências Xcaret na Riviera Maya com uma viagem personalizada pela Destinos com a Ju." canonical="https://www.destinoscomaju.com.br/xcaret" image={XCARET_IMAGES.xcaret.src} jsonLd={XCARET_JSON_LD} />
       <XcaretHeader info={info} />
       <main>
         <Hero />
