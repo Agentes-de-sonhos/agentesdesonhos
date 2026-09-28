@@ -81,10 +81,11 @@ export function ClientsManager() {
         status: client.status || "lead",
         travel_preferences: client.travel_preferences || "",
         internal_notes: client.internal_notes || "",
+        referred_by: client.referred_by || "",
       });
     } else {
       setEditingClient(null);
-      form.reset({ name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "" });
+      form.reset({ name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "", referred_by: "" });
     }
     setIsDialogOpen(true);
   };
@@ -99,6 +100,7 @@ export function ClientsManager() {
       status: data.status || "lead",
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
+      referred_by: data.referred_by?.trim() || null,
     };
     if (editingClient) {
       await updateClient({ id: editingClient.id, ...payload });
