@@ -29,6 +29,8 @@ import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import { AgencyGoogleReviewsSection } from "@/components/whitelabel/AgencyGoogleReviewsSection";
 import { isGoogleReviewsEnabled } from "@/lib/agencyGoogleReviews";
+import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
+import { buildAgencyJsonLd } from "@/lib/agencySiteJsonLd";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
@@ -380,6 +382,20 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  // Nota média e total de avaliações do Google (quando o host tem Place
+  // configurado) para compor o aggregateRating dos dados estruturados.
+  const reviewsForJsonLd = useAgencyGoogleReviews(hostname, googleReviews);
+  const jsonLd = useMemo(
+    () =>
+      buildAgencyJsonLd(profile, {
+        name,
+        siteUrl: profile.seo?.canonical ?? `https://${hostname}/`,
+        rating: reviewsForJsonLd.data
+          ? { rating: reviewsForJsonLd.data.rating, total: reviewsForJsonLd.data.total }
+          : null,
+      }) ?? undefined,
+    [profile, name, hostname, reviewsForJsonLd.data],
+  );
   // Vãos verticais reduzidos: opt-in por perfil, sem alterar os demais sites.
   const compactSpacing = profile.compactSectionSpacing === true;
   const copyFor = useCallback(
