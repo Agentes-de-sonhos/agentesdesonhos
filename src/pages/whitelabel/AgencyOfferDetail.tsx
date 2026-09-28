@@ -85,9 +85,24 @@ export default function AgencyOfferDetail({ info, basePath = "" }: { info: Agenc
 
   return (
     <article className="mx-auto max-w-5xl px-4 py-10 md:py-14">
+      {/* Canonical próprio da oferta; ofertas encerradas saem do índice. */}
+      {basePath === "" && offer.slug && (
+        <SEO
+          exactTitle
+          title={`${offer.title ?? "Oferta"} | ${info.agency_name || "Ofertas"}`}
+          description={offer.description?.slice(0, 160) || `Oferta de viagem para ${offer.destination ?? "destinos selecionados"}.`}
+          canonical={`https://${info.hostname}/ofertas/${offer.slug}`}
+          noindex={closed}
+          image={offer.cover_url ?? undefined}
+        />
+      )}
       {offer.cover_url && (
         <div className="relative aspect-[16/8] overflow-hidden rounded-3xl bg-muted">
-          <img src={offer.cover_url} alt={offer.title ?? ""} className={`h-full w-full object-cover ${closed ? "grayscale" : ""}`} />
+          <img
+            src={offer.cover_url}
+            alt={offer.title ? `${offer.title}${offer.destination ? ` — ${offer.destination}` : ""}` : ""}
+            className={`h-full w-full object-cover ${closed ? "grayscale" : ""}`}
+          />
         </div>
       )}
       <div className="mt-8 grid gap-10 md:grid-cols-[1fr_320px]">
