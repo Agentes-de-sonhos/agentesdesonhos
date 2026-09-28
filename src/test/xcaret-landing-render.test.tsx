@@ -10,7 +10,7 @@ class RO { observe() {} unobserve() {} disconnect() {} }
 window.matchMedia ??= ((q: string) => ({ matches: false, media: q, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, onchange: null, dispatchEvent: () => false })) as any;
 
 const img = (n: string) => ({ src: `/fixture/${n}.webp`, alt: `fixture ${n}`, source: "fixture" });
-const full = { portraitJuliana: img("portrait"), trainingPhoto: img("training"), julianaExtra: img("extra"), expertBadge: null, julianaAtDestination: img("destino") };
+const full = { portraitJuliana: img("portrait"), trainingPhoto: img("training"), julianaExtra: img("extra"), expertBadge: img("badge"), julianaAtDestination: img("destino") };
 
 describe("landing Xcaret renderizada", () => {
   it("hero com um único H1 e 6 indicadores", () => {
@@ -27,18 +27,27 @@ describe("landing Xcaret renderizada", () => {
     expect(screen.queryByTestId("specialist-media")).toBeNull();
   });
 
-  it("slots oficiais usam três fotos reais da Juliana e não trazem selo", () => {
+  it("slots oficiais usam três fotos reais da Juliana e mantêm o selo Xperts", () => {
     expect(XCARET_MEDIA_SLOTS.portraitJuliana?.src).toContain("juliana-xcaret-selfie.webp");
     expect(XCARET_MEDIA_SLOTS.trainingPhoto?.src).toContain("juliana-xcaret-training.webp");
     expect(XCARET_MEDIA_SLOTS.julianaExtra?.src).toContain("juliana-xplor-buggy.webp");
     expect(XCARET_MEDIA_SLOTS.julianaAtDestination?.src).toContain("juliana-xcaret-hotel.webp");
-    expect(XCARET_MEDIA_SLOTS.expertBadge).toBeNull();
+    expect(XCARET_MEDIA_SLOTS.expertBadge?.src).toContain("xperts-xcaret-badge.webp");
   });
 
   it("atendimento pessoal mostra três fotos e nenhum botão de WhatsApp", () => {
     const { container } = render(<Specialist slots={full} />);
     for (const k of ["portrait", "training", "extra"]) expect(screen.getByAltText(`fixture ${k}`)).toBeTruthy();
     expect(container.querySelectorAll('a[href^="https://wa.me/"]')).toHaveLength(0);
+    expect(screen.queryByAltText("fixture badge")).toBeNull();
+  });
+
+  it("mostra o selo somente no canto superior do hero, não no fechamento", () => {
+    const hero = render(<Hero slots={full} />);
+    expect(hero.getByAltText("fixture badge")).toBeTruthy();
+    hero.unmount();
+    const closing = render(<Closing slots={full} />);
+    expect(closing.queryByAltText("fixture badge")).toBeNull();
   });
 
   it("imagens corrigidas apontam para os assets e fontes oficiais corretas", () => {
