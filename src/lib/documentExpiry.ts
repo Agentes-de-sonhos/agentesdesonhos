@@ -94,3 +94,25 @@ export function whatsappLink(phone: string | null | undefined, message: string):
   const withCountry = digits.startsWith("55") ? digits : `55${digits}`;
   return `https://wa.me/${withCountry}?text=${encodeURIComponent(message)}`;
 }
+
+/** Janelas de aviso recomendadas: 6 meses e 3 meses antes do vencimento. */
+export const REMINDER_WINDOWS = [
+  { days: 180, label: "6 meses" },
+  { days: 90, label: "3 meses" },
+] as const;
+
+function toIsoDate(d: Date): string {
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
+/** Datas em que o aviso deve aparecer na agenda para um vencimento. */
+export function reminderDates(dateValue: string): { date: string; label: string }[] {
+  const target = parseLocalDate(dateValue);
+  if (!target) return [];
+  return REMINDER_WINDOWS.map((w) => {
+    const d = new Date(target.getFullYear(), target.getMonth(), target.getDate() - w.days);
+    return { date: toIsoDate(d), label: w.label };
+  });
+}
