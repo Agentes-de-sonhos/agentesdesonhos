@@ -16,14 +16,14 @@ Object.defineProperty(window, "matchMedia", {
 
 // jsdom não implementa IntersectionObserver; carrosséis (embla) o exigem.
 if (!("IntersectionObserver" in window)) {
-  class MockIntersectionObserver implements IntersectionObserver {
+  class MockIntersectionObserver {
     readonly root: Element | null = null;
     readonly rootMargin = "";
     readonly thresholds: ReadonlyArray<number> = [];
     constructor(private readonly cb?: IntersectionObserverCallback) {}
     observe(target: Element) {
       // Dispara imediatamente: em jsdom nada entra em viewport por conta própria.
-      this.cb?.([{ isIntersecting: true, target } as unknown as IntersectionObserverEntry], this);
+      this.cb?.([{ isIntersecting: true, target } as unknown as IntersectionObserverEntry], this as unknown as IntersectionObserver);
     }
     unobserve() {}
     disconnect() {}
