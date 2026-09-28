@@ -1,0 +1,2 @@
+ALTER TABLE public.clients ADD COLUMN IF NOT EXISTS referred_by TEXT;
+COMMENT ON COLUMN public.clients.referred_by IS 'Nome da indicacao (quem indicou o cliente), exibido como etiqueta na oportunidade.';

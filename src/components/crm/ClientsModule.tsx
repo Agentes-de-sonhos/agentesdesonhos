@@ -84,6 +84,7 @@ import { cn } from "@/lib/utils";
 import { ImportContactsDialog } from "./ImportContactsDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { AgencyCompaniesPanel } from "@/components/crm/AgencyCompaniesPanel";
+import { DocumentExpiryRadar } from "@/components/crm/DocumentExpiryRadar";
 import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
 import { KanbanToolbarSlot } from "@/components/crm/kanban/KanbanToolbarSlot";
 import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
@@ -150,6 +151,7 @@ const clientSchema = z.object({
   status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
+  referred_by: z.string().optional(),
   birthday_day: z.string().optional(),
   birthday_month: z.string().optional(),
   birthday_year: z.string().optional(),
@@ -175,7 +177,7 @@ export function ClientsModule() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [contactView, setContactView] = useState<"pessoas" | "empresas">("pessoas");
+  const [contactView, setContactView] = useState<"pessoas" | "empresas" | "documentos">("pessoas");
   // Pedido de "criar empresa" enviado ao painel; é consumido uma única vez.
   const [companyCreateRequested, setCompanyCreateRequested] = useState(false);
 
@@ -243,6 +245,7 @@ export function ClientsModule() {
       status: "lead",
       travel_preferences: "",
       internal_notes: "",
+      referred_by: "",
       birthday_day: "",
       birthday_month: "",
       birthday_year: "",
@@ -263,6 +266,7 @@ export function ClientsModule() {
         status: client.status || "lead",
         travel_preferences: client.travel_preferences || "",
         internal_notes: client.internal_notes || "",
+        referred_by: client.referred_by || "",
         birthday_day: client.birthday_day?.toString() || "",
         birthday_month: client.birthday_month?.toString() || "",
         birthday_year: client.birthday_year?.toString() || "",
@@ -278,6 +282,7 @@ export function ClientsModule() {
         status: "lead",
         travel_preferences: "",
         internal_notes: "",
+        referred_by: "",
         birthday_day: "",
         birthday_month: "",
         birthday_year: "",
@@ -326,6 +331,7 @@ export function ClientsModule() {
       status: data.status,
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
+      referred_by: data.referred_by?.trim() || null,
       birthday_day: bDay,
       birthday_month: bMonth,
       birthday_year: bYear,
@@ -621,6 +627,19 @@ export function ClientsModule() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="referred_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Indicado por</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 {editingClient?.internal_notes ? (
                   <FormField
                     control={form.control}
@@ -667,6 +686,7 @@ export function ClientsModule() {
         {([
           { key: "pessoas", label: "Pessoas" },
           { key: "empresas", label: "Empresas" },
+          { key: "documentos", label: "Validade de documentos" },
         ] as const).map((tab) => (
           <button
             key={tab.key}
@@ -684,7 +704,9 @@ export function ClientsModule() {
         ))}
       </div>
 
-      {contactView === "empresas" ? (
+      {contactView === "documentos" ? (
+        <DocumentExpiryRadar />
+      ) : contactView === "empresas" ? (
         <AgencyCompaniesPanel
           createRequested={companyCreateRequested}
           onCreateHandled={() => setCompanyCreateRequested(false)}

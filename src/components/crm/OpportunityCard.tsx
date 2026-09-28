@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Cake } from "lucide-react";
+import { Cake, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -123,6 +123,7 @@ const clientSchema = z.object({
   status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]).optional(),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
+  referred_by: z.string().optional(),
   birthday_day: z.string().optional(),
   birthday_month: z.string().optional(),
   birthday_year: z.string().optional(),
@@ -207,6 +208,7 @@ export function OpportunityCard({
       status: (opportunity.client?.status as any) || "lead",
       travel_preferences: opportunity.client?.travel_preferences || "",
       internal_notes: opportunity.client?.internal_notes || "",
+      referred_by: opportunity.client?.referred_by || "",
       birthday_day: opportunity.client?.birthday_day?.toString() || "",
       birthday_month: opportunity.client?.birthday_month?.toString() || "",
       birthday_year: opportunity.client?.birthday_year?.toString() || "",
@@ -330,6 +332,7 @@ export function OpportunityCard({
         status: (opportunity.client.status as any) || "lead",
         travel_preferences: opportunity.client.travel_preferences || "",
         internal_notes: opportunity.client.internal_notes || "",
+        referred_by: opportunity.client.referred_by || "",
         birthday_day: opportunity.client.birthday_day?.toString() || "",
         birthday_month: opportunity.client.birthday_month?.toString() || "",
         birthday_year: opportunity.client.birthday_year?.toString() || "",
@@ -353,6 +356,7 @@ export function OpportunityCard({
       status: data.status || "lead",
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
+      referred_by: data.referred_by?.trim() || null,
       birthday_day: bDay,
       birthday_month: bMonth,
       birthday_year: bYear,
@@ -453,6 +457,17 @@ export function OpportunityCard({
                   {opportunity.destination}
                 </span>
               </div>
+              {opportunity.client?.referred_by && (
+                <div className="mt-1.5">
+                  <span
+                    className="inline-flex max-w-full items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                    title={`Indicado por: ${opportunity.client.referred_by}`}
+                  >
+                    <UserPlus className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">Indicado por: {opportunity.client.referred_by}</span>
+                  </span>
+                </div>
+              )}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -807,6 +822,19 @@ export function OpportunityCard({
                     <FormLabel>Observações Internas</FormLabel>
                     <FormControl>
                       <Textarea placeholder="Notas internas (não visíveis ao cliente)..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={clientForm.control}
+                name="referred_by"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Indicado por</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex.: Primo da Roberta" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -82,6 +82,7 @@ export const eventTypeColors: Record<string, string> = {
   viagem: '#14b8a6',
   aniversario: '#ec4899',
   followup: '#0ea5e9',
+  vencimento_documento: '#d97706',
   // Preset events
   feriado: '#ef4444',
   comemorativo: '#ec4899',
@@ -99,6 +100,7 @@ export const eventTypeLabels: Record<string, string> = {
   viagem: 'Viagem',
   aniversario: 'Aniversário',
   followup: 'Follow-up CRM',
+  vencimento_documento: 'Vencimento de Documentos',
   // Preset events
   feriado: 'Feriado',
   comemorativo: 'Data Comemorativa',

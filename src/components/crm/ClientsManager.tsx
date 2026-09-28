@@ -45,6 +45,7 @@ const clientSchema = z.object({
   status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]).optional(),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
+  referred_by: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -58,7 +59,7 @@ export function ClientsManager() {
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
-    defaultValues: { name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "" },
+    defaultValues: { name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "", referred_by: "" },
   });
 
   const filteredClients = clients.filter(
@@ -80,10 +81,11 @@ export function ClientsManager() {
         status: client.status || "lead",
         travel_preferences: client.travel_preferences || "",
         internal_notes: client.internal_notes || "",
+        referred_by: client.referred_by || "",
       });
     } else {
       setEditingClient(null);
-      form.reset({ name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "" });
+      form.reset({ name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "", referred_by: "" });
     }
     setIsDialogOpen(true);
   };
@@ -98,6 +100,7 @@ export function ClientsManager() {
       status: data.status || "lead",
       travel_preferences: data.travel_preferences || null,
       internal_notes: data.internal_notes || null,
+      referred_by: data.referred_by?.trim() || null,
     };
     if (editingClient) {
       await updateClient({ id: editingClient.id, ...payload });
@@ -192,6 +195,19 @@ export function ClientsManager() {
                       <FormLabel>Cidade</FormLabel>
                       <FormControl>
                         <Input placeholder="São Paulo, SP" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="referred_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Indicado por</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

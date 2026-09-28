@@ -2872,6 +2872,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           phone_normalized: string | null
+          referred_by: string | null
           status: string | null
           subcategory_id: string | null
           travel_preferences: string | null
@@ -2895,6 +2896,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           phone_normalized?: string | null
+          referred_by?: string | null
           status?: string | null
           subcategory_id?: string | null
           travel_preferences?: string | null
@@ -2918,6 +2920,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           phone_normalized?: string | null
+          referred_by?: string | null
           status?: string | null
           subcategory_id?: string | null
           travel_preferences?: string | null
@@ -15379,6 +15382,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "traveler_documents_traveler_id_fkey"
+            columns: ["traveler_id"]
+            isOneToOne: false
+            referencedRelation: "travelers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      traveler_visas: {
+        Row: {
+          created_at: string
+          data_vencimento: string | null
+          id: string
+          numero: string | null
+          observacoes: string | null
+          tipo: string
+          traveler_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          data_vencimento?: string | null
+          id?: string
+          numero?: string | null
+          observacoes?: string | null
+          tipo: string
+          traveler_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          data_vencimento?: string | null
+          id?: string
+          numero?: string | null
+          observacoes?: string | null
+          tipo?: string
+          traveler_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "traveler_visas_traveler_id_fkey"
             columns: ["traveler_id"]
             isOneToOne: false
             referencedRelation: "travelers"

@@ -4,6 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { toast } from "sonner";
 import { followupCivilDate, followupEventTime } from "@/lib/followupTime";
+import { reminderDates, formatBrDate } from "@/lib/documentExpiry";
+import { useDocumentExpiryRadar } from "@/hooks/useTravelerVisas";
 
 // Debounced fire-and-forget Google Calendar sync trigger.
 // Avoids spamming the edge function when the user makes several edits in a row.
@@ -209,6 +211,9 @@ export function useAgenda(year?: number) {
     staleTime: 2 * 60 * 1000,
   });
 
+  // Documentos com validade (passaportes e vistos) para projetar avisos na agenda
+  const { data: expiringDocuments = [] } = useDocumentExpiryRadar();
+
   // Build complete list of event types for filter (deduplicated)
   const seenTypeIds = new Set<string>();
   const allEventTypes: EventTypeOption[] = [];
@@ -237,6 +242,17 @@ export function useAgenda(year?: number) {
     });
   }
   
+  // Vencimento de documentos (passaportes e vistos) — pode ser desligado no filtro
+  if (!seenTypeIds.has('vencimento_documento')) {
+    seenTypeIds.add('vencimento_documento');
+    allEventTypes.push({
+      id: 'vencimento_documento',
+      name: eventTypeLabels['vencimento_documento'],
+      color: eventTypeColors['vencimento_documento'],
+      isCustom: false,
+    });
+  }
+
   // Preset event types (skip duplicates like 'trade')
   presetEventTypes.forEach(type => {
     if (!seenTypeIds.has(type)) {
@@ -583,6 +599,22 @@ export function useAgenda(year?: number) {
         opportunity_id: fu.opportunity_id,
       };
     }),
+    // Vencimentos de documentos: avisos projetados 6 e 3 meses antes
+    ...expiringDocuments.flatMap((doc): CalendarEvent[] =>
+      reminderDates(doc.data_vencimento)
+        .filter((r) => r.date.startsWith(String(currentYear)))
+        .map((r) => ({
+          id: `docexp_${doc.id}_${r.label}`,
+          title: `🛂 ${doc.documentLabel} de ${doc.travelerName} vence em ${formatBrDate(doc.data_vencimento)}`,
+          description: `Avisar ${doc.clientName} com ${r.label} de antecedência sobre a renovação.`,
+          event_type: 'vencimento_documento',
+          event_date: r.date,
+          event_time: null,
+          color: eventTypeColors['vencimento_documento'],
+          isPreset: false,
+          client_id: doc.clientId,
+        }))
+    ),
   ];
 
   // Filter events by hidden types (but always keep highlighted events)
