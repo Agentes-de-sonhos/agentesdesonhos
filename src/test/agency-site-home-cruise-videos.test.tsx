@@ -35,7 +35,7 @@ const info: AgencyDomainInfo = {
 } as unknown as AgencyDomainInfo;
 
 describe("galeria de vídeos de cruzeiros — Destinos com a Ju", () => {
-  it("renderiza Disney Wish e Legend of the Seas com o vídeo correto", () => {
+  it("renderiza Disney Wish, Legend of the Seas e MSC World America na ordem correta", () => {
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false, gcTime: 0, staleTime: 0 } },
     });
@@ -58,5 +58,11 @@ describe("galeria de vídeos de cruzeiros — Destinos com a Ju", () => {
 
     expect(screen.getByText("Legend of the Seas")).toBeTruthy();
     expect(container.querySelector('video[src*="legend-of-the-seas.mp4"]')).toBeTruthy();
+
+    // ...e mantém o MSC World America na terceira posição da galeria.
+    fireEvent.click(screen.getByRole("button", { name: "Próximo vídeo" }));
+
+    expect(screen.getByText("MSC World America")).toBeTruthy();
+    expect(container.querySelector('video[src*="msc-world-america.mp4"]')).toBeTruthy();
   });
 });

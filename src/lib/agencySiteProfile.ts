@@ -80,12 +80,12 @@ export interface AgencyAuthorityContent {
   service: string;
   image?: AgencyImageSlot;
   /** Vídeo editorial opcional; ausente preserva a imagem compartilhada. */
-  video?: "disneyWishCruise" | "legendOfTheSeas";
+  video?: "disneyWishCruise" | "legendOfTheSeas" | "mscWorldAmerica";
   /**
    * Galeria editorial de vídeos (companhia/navio). Quando definida, o media da
    * seção vira galeria navegável com o nome do navio sob o vídeo.
    */
-  videos?: { key: string; label: string; video?: "disneyWishCruise" | "legendOfTheSeas"; image?: AgencyImageSlot }[];
+  videos?: { key: string; label: string; video?: "disneyWishCruise" | "legendOfTheSeas" | "mscWorldAmerica"; image?: AgencyImageSlot }[];
 }
 
 export interface AgencyFooterContent {
@@ -585,6 +585,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     videos: [
       { key: "disney-wish", label: "Disney Wish", video: "disneyWishCruise", image: "cruzeiro" },
       { key: "legend-of-the-seas", label: "Legend of the Seas", video: "legendOfTheSeas", image: "cruzeiro" },
+      { key: "msc-world-america", label: "MSC World America", video: "mscWorldAmerica", image: "cruzeiro" },
     ],
 
   },
