@@ -29,6 +29,8 @@ import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import { AgencyGoogleReviewsSection } from "@/components/whitelabel/AgencyGoogleReviewsSection";
 import { isGoogleReviewsEnabled } from "@/lib/agencyGoogleReviews";
+import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
+import { buildAgencyJsonLd } from "@/lib/agencySiteJsonLd";
 import {
   DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
@@ -171,7 +173,7 @@ function AuthorityMedia({ video, image, label }: { video?: string; image: string
   }, [video]);
 
   if (!video) {
-    return <img src={image} alt="Cruzeiro em alto-mar" loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />;
+    return <img src={image} alt={label ? `${label} — cruzeiro em alto-mar` : "Cruzeiro em alto-mar"} loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />;
   }
 
   const seek = (value: number) => {
@@ -380,6 +382,20 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  // Nota média e total de avaliações do Google (quando o host tem Place
+  // configurado) para compor o aggregateRating dos dados estruturados.
+  const reviewsForJsonLd = useAgencyGoogleReviews(hostname, googleReviews);
+  const jsonLd = useMemo(
+    () =>
+      buildAgencyJsonLd(profile, {
+        name,
+        siteUrl: profile.seo?.canonical ?? `https://${hostname}/`,
+        rating: reviewsForJsonLd.data
+          ? { rating: reviewsForJsonLd.data.rating, total: reviewsForJsonLd.data.total }
+          : null,
+      }) ?? undefined,
+    [profile, name, hostname, reviewsForJsonLd.data],
+  );
   // Vãos verticais reduzidos: opt-in por perfil, sem alterar os demais sites.
   const compactSpacing = profile.compactSectionSpacing === true;
   const copyFor = useCallback(
@@ -775,7 +791,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                 >
                   <img
                     src={DESTINATION_IMAGES[d.image]}
-                    alt={d.title}
+                    alt={d.label ? `${d.title} — ${d.label}` : d.title}
                     loading="lazy"
                     className="h-64 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                   />
@@ -821,7 +837,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                     >
                       <img
                         src={DESTINATION_IMAGES[d.image]}
-                        alt={d.title}
+                        alt={d.label ? `${d.title} — ${d.label}` : d.title}
                         loading="lazy"
                         className="h-[360px] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03] md:h-full"
                       />
@@ -868,7 +884,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
                   >
                     <img
                       src={DESTINATION_IMAGES[d.image]}
-                      alt={d.title}
+                      alt={d.label ? `${d.title} — ${d.label}` : d.title}
                       loading="lazy"
                       className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
                     />
@@ -1485,6 +1501,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           exactTitle
           description={profile.seo.description}
           canonical={profile.seo.canonical ?? "/"}
+          jsonLd={jsonLd}
         />
       )}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
@@ -1505,7 +1522,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           {current.image ? (
             <img
               src={current.image}
-              alt=""
+              alt={`${name} — ${(current.title ?? "").replace(/\s*\n\s*/g, " ")}`}
               className={`h-full w-full object-cover ${heroImagePositionClass}`}
             />
           ) : (
