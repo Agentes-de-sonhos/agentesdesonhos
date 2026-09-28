@@ -24,6 +24,7 @@ export interface Client {
   status: ClientStatus;
   travel_preferences: string | null;
   internal_notes: string | null;
+  referred_by?: string | null;
   birthday_day: number | null;
   birthday_month: number | null;
   birthday_year: number | null;
