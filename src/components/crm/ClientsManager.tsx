@@ -45,6 +45,7 @@ const clientSchema = z.object({
   status: z.enum(["lead", "em_negociacao", "cliente_ativo", "fidelizado"]).optional(),
   travel_preferences: z.string().optional(),
   internal_notes: z.string().optional(),
+  referred_by: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -58,7 +59,7 @@ export function ClientsManager() {
 
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
-    defaultValues: { name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "" },
+    defaultValues: { name: "", email: "", phone: "", city: "", notes: "", status: "lead", travel_preferences: "", internal_notes: "", referred_by: "" },
   });
 
   const filteredClients = clients.filter(
