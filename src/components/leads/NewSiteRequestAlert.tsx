@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,22 @@ function formatDateTime(iso: string) {
 export function NewSiteRequestAlert() {
   const navigate = useNavigate();
   const { current, pending, dismiss } = useAgencySiteRequestAlerts();
+  const chimedRef = useRef<string | null>(null);
+
+  // Aviso sonoro discreto, uma única vez por solicitação.
+  useEffect(() => {
+    if (!current || chimedRef.current === current.id) return;
+    chimedRef.current = current.id;
+    try {
+      const audio = new Audio(
+        "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=",
+      );
+      audio.volume = 0.4;
+      audio.play().catch(() => {});
+    } catch {
+      /* navegador pode bloquear áudio sem interação: o aviso visual basta. */
+    }
+  }, [current]);
 
   const open = () => {
     if (!current) return;
@@ -27,6 +44,7 @@ export function NewSiteRequestAlert() {
     dismiss();
     navigate(href);
   };
+
 
   return (
     <Dialog open={!!current} onOpenChange={(next) => !next && dismiss()}>
