@@ -74,7 +74,14 @@ export function NewSiteRequestAlert() {
                   <span className="font-medium">{current.destination}</span>
                 </p>
               )}
+              {current.hostname && (
+                <p>
+                  <span className="text-muted-foreground">Site: </span>
+                  <span className="font-medium">{current.hostname}</span>
+                </p>
+              )}
             </div>
+
 
             {pending > 0 && (
               <p className="text-center text-xs text-muted-foreground">
