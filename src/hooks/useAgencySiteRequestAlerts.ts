@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useTeamSession } from "@/contexts/TeamSessionContext";
+import { useOptionalTeamSession } from "@/contexts/TeamSessionContext";
 
 /** Aviso interno de uma solicitação recebida pelo site da agência. */
 export interface SiteRequestAlert {
@@ -56,7 +56,9 @@ export function opportunityDeepLink(opportunityId: string | null): string {
 export function useAgencySiteRequestAlerts() {
   const { user } = useAuth();
   const { isAdmin, loading: roleLoading } = useUserRole();
-  const { agencyId, loading: teamLoading } = useTeamSession();
+  const team = useOptionalTeamSession();
+  const agencyId = team?.agencyId ?? null;
+  const teamLoading = team?.loading ?? false;
   const qc = useQueryClient();
   const [queue, setQueue] = useState<SiteRequestAlert[]>([]);
   const seenRef = useRef<Set<string>>(new Set());
