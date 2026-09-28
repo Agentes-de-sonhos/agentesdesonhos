@@ -150,12 +150,37 @@ export async function drainAgencyRequestQueue(
   let failed = 0;
 
   for (const row of rows) {
-    // WhatsApp nunca é enviado por aqui: fica aguardando template aprovado.
-    if (row.channel === "whatsapp_agency" || !row.recipient) {
+    // WhatsApp: envia o template aprovado (Utility) pela Twilio. Quando a
+    // configuração estiver incompleta, a linha volta para pending/skipped.
+    if (row.channel === "whatsapp_agency") {
+      const outcome = await sendWhatsappTemplate(
+        row.recipient,
+        templateVariables(row.agency_name, opportunityDeepLink(row.opportunity_id)),
+        whatsappConfigFromEnv((k) => Deno.env.get(k)),
+        (k) => Deno.env.get(k),
+      );
+      if (outcome.ok) {
+        await supabase.rpc("complete_agency_request_notification", {
+          p_notification_id: row.notification_id,
+          p_status: "sent",
+          p_provider_message_id: outcome.providerMessageId ?? null,
+        });
+        sent++;
+      } else {
+        await supabase.rpc("complete_agency_request_notification", {
+          p_notification_id: row.notification_id,
+          p_status: outcome.status === "failed" ? "pending" : "skipped",
+          p_error: outcome.reason,
+        });
+        if (outcome.status === "failed") failed++;
+      }
+      continue;
+    }
+    if (!row.recipient) {
       await supabase.rpc("complete_agency_request_notification", {
         p_notification_id: row.notification_id,
         p_status: "skipped",
-        p_error: "Canal sem destinatário ou sem template aprovado.",
+        p_error: "Canal sem destinatário.",
       });
       continue;
     }
