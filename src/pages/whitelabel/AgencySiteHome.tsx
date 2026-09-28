@@ -173,7 +173,7 @@ function AuthorityMedia({ video, image, label }: { video?: string; image: string
   }, [video]);
 
   if (!video) {
-    return <img src={image} alt="Cruzeiro em alto-mar" loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />;
+    return <img src={image} alt={label ? `${label} — cruzeiro em alto-mar` : "Cruzeiro em alto-mar"} loading="lazy" className="aspect-[4/3] w-full rounded-xl object-cover" />;
   }
 
   const seek = (value: number) => {
