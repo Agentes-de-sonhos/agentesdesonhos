@@ -16,7 +16,6 @@ import julianaXcaretSelfieAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-
 import julianaXcaretTrainingAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-training.webp.asset.json";
 import julianaXcaretHotelAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-hotel.webp.asset.json";
 import julianaXplorBuggyAsset from "@/assets/whitelabel/xcaret/juliana-xplor-buggy.webp.asset.json";
-import xpertsXcaretBadgeAsset from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
 
