@@ -49,12 +49,14 @@ describe("galeria de vídeos de cruzeiros — Destinos com a Ju", () => {
       </HelmetProvider>,
     );
 
+    // A galeria mostra apenas o vídeo ativo: começa no Disney Wish...
     expect(screen.getByText("Disney Wish")).toBeTruthy();
-    expect(screen.getByText("Legend of the Seas")).toBeTruthy();
+    expect(container.querySelector('video[src*="disney-wish-cruise.mp4"]')).toBeTruthy();
 
-    const legendVideo = container.querySelector(
-      'video[src*="legend-of-the-seas.mp4"]',
-    );
-    expect(legendVideo).toBeTruthy();
+    // ...e navega para o Legend of the Seas com a seta "Próximo vídeo".
+    fireEvent.click(screen.getByRole("button", { name: "Próximo vídeo" }));
+
+    expect(screen.getByText("Legend of the Seas")).toBeTruthy();
+    expect(container.querySelector('video[src*="legend-of-the-seas.mp4"]')).toBeTruthy();
   });
 });
