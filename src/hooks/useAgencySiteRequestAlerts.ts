@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 
 /** Aviso interno de uma solicitação recebida pelo site da agência. */
 export interface SiteRequestAlert {
@@ -9,6 +10,7 @@ export interface SiteRequestAlert {
   lead_name: string;
   service_label: string | null;
   destination: string | null;
+  hostname: string | null;
   opportunity_id: string | null;
   created_at: string;
 }
@@ -29,6 +31,7 @@ export function toSiteRequestAlert(row: Record<string, unknown> | null | undefin
         ? row.service_key
         : null,
     destination: typeof row.destination === "string" ? row.destination : null,
+    hostname: typeof row.hostname === "string" && row.hostname ? row.hostname : null,
     opportunity_id: typeof row.opportunity_id === "string" ? row.opportunity_id : null,
     created_at: typeof row.created_at === "string" ? row.created_at : new Date().toISOString(),
   };
@@ -38,6 +41,7 @@ export function toSiteRequestAlert(row: Record<string, unknown> | null | undefin
 export function opportunityDeepLink(opportunityId: string | null): string {
   return opportunityId ? `/crm?opportunity=${opportunityId}` : "/crm";
 }
+
 
 /**
  * Assina as solicitações públicas da PRÓPRIA agência (filtro estrito por
