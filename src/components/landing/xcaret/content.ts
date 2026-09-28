@@ -15,6 +15,7 @@ import casaPlayaAsset from "@/assets/whitelabel/xcaret/la-casa-de-la-playa.webp.
 import julianaXcaretSelfieAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-selfie.webp.asset.json";
 import julianaXcaretTrainingAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-training.webp.asset.json";
 import julianaXcaretHotelAsset from "@/assets/whitelabel/xcaret/juliana-xcaret-hotel.webp.asset.json";
+import julianaXplorBuggyAsset from "@/assets/whitelabel/xcaret/juliana-xplor-buggy.webp.asset.json";
 import xpertsXcaretBadgeAsset from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 
 export type XcaretImage = { src: string; alt: string; source: string };
@@ -70,16 +71,18 @@ export const XCARET_FAQ = [
   ["Quanto custa uma viagem como essa?", "O investimento depende das datas, do hotel, da categoria de acomodação, da duração e do número de viajantes. Conte à Ju suas preferências para receber uma proposta personalizada."],
 ] as const;
 
-/** Fotos reais da Juliana e selo Expert: null omite o bloco sem placeholder. */
+/** Fotos reais da Juliana: null omite o bloco sem placeholder. */
 export const XCARET_MEDIA_SLOTS: {
   portraitJuliana: XcaretImage | null;
   trainingPhoto: XcaretImage | null;
+  julianaExtra: XcaretImage | null;
   expertBadge: XcaretImage | null;
   julianaAtDestination: XcaretImage | null;
 } = {
   portraitJuliana: official(julianaXcaretSelfieAsset.url, "Juliana no parque Xcaret ao lado do letreiro comemorativo de 35 anos", "Arquivo enviado pela Destinos com a Ju"),
   trainingPhoto: official(julianaXcaretTrainingAsset.url, "Juliana segurando certificado de treinamento Xcaret", "Arquivo enviado pela Destinos com a Ju"),
-  expertBadge: official(xpertsXcaretBadgeAsset.url, "Selo Xperts Xcaret 2026 Cancun Riviera Maya México", "PDF enviado pela Destinos com a Ju"),
+  julianaExtra: official(julianaXplorBuggyAsset.url, "Juliana em veículo anfíbio durante a aventura no parque Xplor", "Arquivo enviado pela Destinos com a Ju"),
+  expertBadge: null,
   julianaAtDestination: official(julianaXcaretHotelAsset.url, "Juliana em área externa do complexo Xcaret na Riviera Maya", "Arquivo enviado pela Destinos com a Ju"),
 };
 
