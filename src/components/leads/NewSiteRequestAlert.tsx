@@ -47,8 +47,9 @@ function formatDateTime(iso: string) {
  * pelo site da agência — inclusive dentro da própria Gestão de Oportunidades.
  * Aparece uma única vez por solicitação.
  */
-export function NewSiteRequestAlert() {
+function SiteRequestAlertDialog() {
   const navigate = useNavigate();
+  const nav = useAdminNav();
   const { current, pending, dismiss } = useAgencySiteRequestAlerts();
   const chimedRef = useRef<string | null>(null);
 
