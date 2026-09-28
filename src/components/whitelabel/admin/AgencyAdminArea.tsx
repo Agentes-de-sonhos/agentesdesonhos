@@ -23,6 +23,7 @@ import { WorkspaceShell } from "@/workspace/WorkspaceShell";
 import { titleForPath } from "@/workspace/routeTitle";
 import { AgencyCommunityGate } from "./AgencyCommunityGate";
 import { isSiteLabDemoHost } from "@/lib/sitelabModels";
+import { NewSiteRequestAlert } from "@/components/leads/NewSiteRequestAlert";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
