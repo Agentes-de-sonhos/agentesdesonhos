@@ -7,8 +7,8 @@ import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 // jsdom não implementa reprodução de mídia; o player editorial chama play().catch().
-HTMLMediaElement.prototype.play ??= (() => Promise.resolve()) as typeof HTMLMediaElement.prototype.play;
-HTMLMediaElement.prototype.pause ??= (() => {}) as typeof HTMLMediaElement.prototype.pause;
+HTMLMediaElement.prototype.play = (() => Promise.resolve()) as typeof HTMLMediaElement.prototype.play;
+HTMLMediaElement.prototype.pause = (() => {}) as typeof HTMLMediaElement.prototype.pause;
 
 
 const info: AgencyDomainInfo = {
