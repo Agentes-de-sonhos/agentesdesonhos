@@ -228,6 +228,34 @@ export function Closing({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   );
 }
 
+/**
+ * Dados estruturados da página: serviço de consultoria da agência para o
+ * destino, mais a trilha de navegação. Não declara preço nem avaliação.
+ */
+const XCARET_JSON_LD: Record<string, unknown>[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://www.destinoscomaju.com.br/xcaret#service",
+    name: "Planejamento de viagem para o Xcaret com a Destinos com a Ju",
+    serviceType: "Consultoria de viagens para o universo Xcaret",
+    description:
+      "Consultoria especializada para escolher parques, hotéis e experiências Xcaret na Riviera Maya, com roteiro personalizado e acompanhamento antes, durante e depois da viagem.",
+    url: "https://www.destinoscomaju.com.br/xcaret",
+    provider: { "@type": "TravelAgency", name: "Destinos com a Ju", url: "https://www.destinoscomaju.com.br/" },
+    areaServed: { "@type": "Place", name: "Riviera Maya, México" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Início", item: "https://www.destinoscomaju.com.br/" },
+      { "@type": "ListItem", position: 2, name: "Xcaret", item: "https://www.destinoscomaju.com.br/xcaret" },
+    ],
+  },
+];
+
+
 export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) {
   useAgencySiteThemeOnBody(info.hostname);
   return (
