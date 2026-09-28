@@ -232,6 +232,13 @@
       "when": 1790534770853,
       "tag": "0032_offers_per_person_and_installments",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790604086545,
+      "tag": "0033_whatsapp_request_notify_enabled",
+      "breakpoints": true
     }
   ]
 }
