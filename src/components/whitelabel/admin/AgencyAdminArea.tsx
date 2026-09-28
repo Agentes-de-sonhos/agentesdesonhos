@@ -144,7 +144,13 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     { path: "*", element: e(AgencyAdminNotFound) },
   ]);
 
-  return <AgencyAdminLayout info={info}>{routes}</AgencyAdminLayout>;
+  return (
+    <AgencyAdminLayout info={info}>
+      {routes}
+      {/* Aviso em tempo real das solicitações recebidas pelo site da agência. */}
+      <NewSiteRequestAlert />
+    </AgencyAdminLayout>
+  );
 }
 
 /** Caminho inicial da primeira janela, a partir da URL real do navegador. */
