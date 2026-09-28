@@ -14,6 +14,7 @@ describe("aviso interno de solicitação do site", () => {
       lead_name: "Maria Souza",
       service_label: "Aéreo",
       destination: "Lisboa",
+      hostname: "destinoscomaju.com.br",
       opportunity_id: "22222222-2222-4222-8222-222222222222",
       created_at: "2026-02-01T12:00:00Z",
       lead_email: "maria@exemplo.com",
@@ -21,11 +22,13 @@ describe("aviso interno de solicitação do site", () => {
     });
     expect(alert).toBeTruthy();
     expect(Object.keys(alert!).sort()).toEqual(
-      ["created_at", "destination", "id", "lead_name", "opportunity_id", "service_label"],
+      ["created_at", "destination", "hostname", "id", "lead_name", "opportunity_id", "service_label"],
     );
+    expect(alert!.hostname).toBe("destinoscomaju.com.br");
     expect(JSON.stringify(alert)).not.toContain("maria@exemplo.com");
     expect(JSON.stringify(alert)).not.toContain("988887777");
   });
+
 
   it("descarta linha sem identificador", () => {
     expect(toSiteRequestAlert(null)).toBeNull();
