@@ -615,10 +615,23 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
             <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
-              <AuthorityMedia
-                video={authority.video ? AUTHORITY_VIDEOS[authority.video] : undefined}
-                image={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
-              />
+              {authority.videos?.length ? (
+                <AuthorityVideoGallery
+                  items={authority.videos.map((v) => ({
+                    key: v.key,
+                    label: v.label,
+                    video: v.video ? AUTHORITY_VIDEOS[v.video] : undefined,
+                    image: DESTINATION_IMAGES[v.image ?? authority.image ?? "cruzeiro"],
+                  }))}
+                  fallbackImage={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
+                />
+              ) : (
+                <AuthorityMedia
+                  video={authority.video ? AUTHORITY_VIDEOS[authority.video] : undefined}
+                  image={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
+                />
+              )}
+
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.kicker}</p>
                 <h2 className="mt-4 text-3xl font-extrabold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
