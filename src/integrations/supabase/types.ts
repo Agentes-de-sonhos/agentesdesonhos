@@ -209,6 +209,107 @@ export type Database = {
         }
         Relationships: []
       }
+      ads_briefing_email_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          job_id: string
+          job_json_text: string
+          job_sha256: string
+          lease_until: string | null
+          next_attempt_at: string
+          payload: Json
+          provider_message_id: string | null
+          safe_error: string | null
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          job_id: string
+          job_json_text: string
+          job_sha256: string
+          lease_until?: string | null
+          next_attempt_at?: string
+          payload: Json
+          provider_message_id?: string | null
+          safe_error?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          job_id?: string
+          job_json_text?: string
+          job_sha256?: string
+          lease_until?: string | null
+          next_attempt_at?: string
+          payload?: Json
+          provider_message_id?: string | null
+          safe_error?: string | null
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      ads_briefing_integration: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          token_sha256: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id: string
+          token_sha256: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          token_sha256?: string
+        }
+        Relationships: []
+      }
+      ads_production_runs: {
+        Row: {
+          job_id: string
+          lease_token: string | null
+          lease_until: string | null
+          stages: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          job_id: string
+          lease_token?: string | null
+          lease_until?: string | null
+          stages?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          job_id?: string
+          lease_token?: string | null
+          lease_until?: string | null
+          stages?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ads_production_runs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "ads_briefing_email_deliveries"
+            referencedColumns: ["job_id"]
+          },
+        ]
+      }
       advisor_reviews: {
         Row: {
           comment: string | null
@@ -16515,6 +16616,58 @@ export type Database = {
           _user_id: string
         }
         Returns: Json
+      }
+      ads_claim_briefing_delivery: {
+        Args: { p_job_id: string }
+        Returns: {
+          attempts: number
+          job_id: string
+          job_json_text: string
+          job_sha256: string
+          payload: Json
+        }[]
+      }
+      ads_claim_production_job: {
+        Args: { p_job_id: string; p_lease_token: string }
+        Returns: Json
+      }
+      ads_complete_briefing_delivery: {
+        Args: {
+          p_error: string
+          p_job_id: string
+          p_provider_message_id: string
+          p_success: boolean
+        }
+        Returns: string
+      }
+      ads_due_briefing_deliveries: {
+        Args: { p_limit: number }
+        Returns: {
+          job_id: string
+        }[]
+      }
+      ads_enqueue_briefing: {
+        Args: {
+          p_job_id: string
+          p_job_json_text: string
+          p_job_sha256: string
+          p_payload: Json
+        }
+        Returns: string
+      }
+      ads_record_production_stage: {
+        Args: {
+          p_job_id: string
+          p_lease_token: string
+          p_result: Json
+          p_stage: string
+          p_status: string
+        }
+        Returns: Json
+      }
+      ads_resume_production_job: {
+        Args: { p_job_id: string }
+        Returns: boolean
       }
       agency_admin_access_check: { Args: { p_hostname: string }; Returns: Json }
       agency_can_use_booking_requests: {
