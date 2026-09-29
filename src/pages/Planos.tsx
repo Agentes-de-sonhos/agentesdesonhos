@@ -125,27 +125,17 @@ export default function Planos() {
   });
   const effectivePlan = user ? offer.effectivePlan : null;
 
-  const handleAction = async (plan: PlanConfig) => {
+  // Checkout direto via Payment Link do Stripe (com 15 dias de teste configurados lá).
+  const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/00w5kD0rg1GS6uMcdx9sk0b";
+
+  const handleAction = (plan: PlanConfig) => {
     if (loadingPlan) return;
     // Mesma checagem do botão: nunca iniciar checkout durante carregamento,
     // com promoção vigente, com plano herdado da master ou já contratado.
     if (getButtonConfig(plan).disabled) return;
 
-    // Paid plan — go directly to Stripe checkout (both logged-in and not)
     setLoadingPlan(plan.id);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-public-checkout", {
-        body: { plan: plan.id },
-      });
-      if (error) throw error;
-      if (data?.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      console.error("Checkout error:", err);
-    } finally {
-      setLoadingPlan(null);
-    }
+    window.location.href = STRIPE_PAYMENT_LINK;
   };
 
   const getButtonConfig = (plan: PlanConfig) => {
