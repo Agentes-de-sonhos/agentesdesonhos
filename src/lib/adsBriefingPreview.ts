@@ -82,7 +82,7 @@ export const ADS_PREVIEW_PROFILE: AgencySiteProfile = {
     text: "Viagens personalizadas para famílias, com foco no Brasil: praias e férias em família.",
   },
   destinations: [
-    { key: "praias-brasil", image: "praia", label: "Brasil", title: "Praias no Brasil", text: "Férias de praia pelo Brasil, planejadas para a família.", service: "pacotes", enabled: true, order: 1 },
+    { key: "praias-brasil", image: "litoral", label: "Brasil", title: "Praias no Brasil", text: "Férias de praia pelo Brasil, planejadas para a família.", service: "pacotes", enabled: true, order: 1 },
     { key: "ferias-familia", image: "brasil", label: "Família", title: "Férias em família", text: "Viagens pensadas para quem viaja com a família.", service: "pacotes", enabled: true, order: 2 },
   ],
   differentials: [
