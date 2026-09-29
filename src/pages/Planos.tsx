@@ -312,7 +312,8 @@ export default function Planos() {
         </div>
 
         <p className="text-xs text-center text-muted-foreground mt-8 max-w-lg mx-auto">
-          Pagamento seguro via Stripe. Cancele quando quiser, sem fidelidade. Após o pagamento, você receberá um e-mail para concluir seu cadastro.
+          Pagamento seguro via Stripe. Nada é cobrado hoje: o cartão é usado apenas para iniciar o
+          teste e a primeira cobrança acontece após 15 dias. Cancele quando quiser, sem fidelidade.
         </p>
 
         {/* Bloco de confiança */}
@@ -323,13 +324,14 @@ export default function Planos() {
                 <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <div className="space-y-1.5">
-                <h3 className="font-semibold text-base tracking-tight">Assine com tranquilidade</h3>
+                <h3 className="font-semibold text-base tracking-tight">Teste sem compromisso</h3>
                 <p className="text-sm text-muted-foreground leading-[1.65]">
-                  Aproveite 50% de desconto por tempo limitado. Teste a Agentes de Sonhos por 30 dias
-                  e, se a plataforma não fizer sentido para você, devolvemos o valor pago. Sem
-                  fidelidade: você pode cancelar quando quiser.
+                  Você tem 15 dias para usar todos os recursos da Agentes de Sonhos. Se cancelar
+                  antes do fim do período de teste, nenhum valor é cobrado. Sem fidelidade: você
+                  pode cancelar quando quiser.
                 </p>
               </div>
+
             </CardContent>
           </Card>
         </div>
