@@ -64,5 +64,11 @@ describe("galeria de vídeos de cruzeiros — Destinos com a Ju", () => {
 
     expect(screen.getByText("MSC World America")).toBeTruthy();
     expect(container.querySelector('video[src*="msc-world-america.mp4"]')).toBeTruthy();
+
+    // ...e fecha a galeria com o Norwegian Luna na última posição.
+    fireEvent.click(screen.getByRole("button", { name: "Próximo vídeo" }));
+
+    expect(screen.getByText("Norwegian Luna")).toBeTruthy();
+    expect(container.querySelector('video[src*="norwegian-luna.mp4"]')).toBeTruthy();
   });
 });
