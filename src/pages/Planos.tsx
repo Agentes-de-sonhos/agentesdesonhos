@@ -236,9 +236,10 @@ export default function Planos() {
                 <CardContent className="flex flex-col flex-1 p-7 pt-8">
                   {plan.highlighted && plan.badge && (
                     <p className="text-center text-xs font-semibold text-primary mb-3 -mt-2">
-                      Melhor custo-benefício
+                      Sem cobrança nos primeiros 15 dias
                     </p>
                   )}
+
                   {/* Plan header */}
                   <div className="flex items-center gap-2 mb-4">
                     <div className={cn(
