@@ -38,51 +38,31 @@ interface PlanConfig {
 
 const plans: PlanConfig[] = [
   {
-    id: "profissional",
-    name: "Profissional",
-    price: "49",
-    priceValue: 49,
-    originalPrice: "98",
-    period: "/mês",
-    description: "Tudo que você precisa para operar sua agência com eficiência.",
-    microcopy: "Ideal para operação diária",
-    badge: "50% OFF",
-    icon: Sparkles,
-    features: [
-      "Todos os treinamentos da EducaTravel e materiais complementares",
-      "Notícias do trade, Agenda e Mapa do Turismo",
-      "Materiais de divulgação e Benefícios",
-      "Orçamentos",
-      "Carteira Digital",
-      "Vitrine de Ofertas",
-      "Networking com agentes",
-      "IA limitada: até 5 usos/dia",
-    ],
-  },
-  {
     id: "premium",
     name: "Premium",
-    price: "98",
-    priceValue: 98,
-    originalPrice: "196",
+    price: "196",
+    priceValue: 196,
     period: "/mês",
     description: "Para agentes que querem escalar resultados e se conectar com o mercado.",
-    microcopy: "Para quem quer crescer mais rápido",
-    badge: "MAIS ESCOLHIDO",
+    microcopy: "15 dias de teste grátis · cancele quando quiser",
+    badge: "15 DIAS GRÁTIS",
     highlighted: true,
     icon: Crown,
     features: [
-      "Tudo do plano Profissional",
+      "Todos os treinamentos da EducaTravel e materiais complementares",
+      "Notícias do trade, Agenda e Mapa do Turismo",
+      "Orçamentos, Roteiros e Carteira Digital",
+      "Vitrine de Ofertas e materiais de divulgação",
       "CRM completo",
       "Gestão Financeira",
       "IA ilimitada",
-      "Comunidade exclusiva",
-      "Eventos exclusivos",
+      "Comunidade e eventos exclusivos",
       "Oportunidade em Fam Trips",
       "Acesso completo sem limitações",
     ],
   },
 ];
+
 
 const PLAN_HIERARCHY: Record<string, number> = {
   start: 0,
@@ -162,8 +142,8 @@ export default function Planos() {
       return { label: "Plano inferior", disabled: true };
     }
 
-    if (plan.id === "premium") return { label: "Assinar Premium", disabled: false };
-    return { label: "Assinar plano", disabled: false };
+    return { label: "Começar teste de 15 dias grátis", disabled: false };
+
   };
 
   return (
@@ -201,12 +181,14 @@ export default function Planos() {
 
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            Escolha o plano ideal para você
+            Teste a plataforma completa por 15 dias
           </h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Comece grátis ou desbloqueie todo o potencial da plataforma.
+            Um único plano, com todos os recursos liberados. A primeira cobrança acontece somente
+            após os 15 dias de teste.
           </p>
         </div>
+
 
         {offer.coveredByPromo && (
           <div
@@ -222,7 +204,7 @@ export default function Planos() {
 
 
         {/* Plans grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 gap-6 items-stretch max-w-md mx-auto">
           {plans.map((plan) => {
             const { label, disabled } = getButtonConfig(plan);
             const isLoading = loadingPlan === plan.id;
@@ -254,9 +236,10 @@ export default function Planos() {
                 <CardContent className="flex flex-col flex-1 p-7 pt-8">
                   {plan.highlighted && plan.badge && (
                     <p className="text-center text-xs font-semibold text-primary mb-3 -mt-2">
-                      Melhor custo-benefício
+                      Sem cobrança nos primeiros 15 dias
                     </p>
                   )}
+
                   {/* Plan header */}
                   <div className="flex items-center gap-2 mb-4">
                     <div className={cn(
@@ -273,16 +256,6 @@ export default function Planos() {
 
                   {/* Price */}
                   <div className="mb-1">
-                    {plan.originalPrice && (
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-sm text-muted-foreground line-through">
-                          R$ {plan.originalPrice}
-                        </span>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wide">
-                          50% OFF
-                        </span>
-                      </div>
-                    )}
                     <div className="flex items-baseline gap-1">
                       <span className="text-muted-foreground text-base">R$</span>
                       <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
@@ -291,6 +264,7 @@ export default function Planos() {
                       )}
                     </div>
                   </div>
+
 
                   <p className="text-xs text-muted-foreground mb-4">{plan.microcopy}</p>
                   <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
@@ -338,7 +312,8 @@ export default function Planos() {
         </div>
 
         <p className="text-xs text-center text-muted-foreground mt-8 max-w-lg mx-auto">
-          Pagamento seguro via Stripe. Cancele quando quiser, sem fidelidade. Após o pagamento, você receberá um e-mail para concluir seu cadastro.
+          Pagamento seguro via Stripe. Nada é cobrado hoje: o cartão é usado apenas para iniciar o
+          teste e a primeira cobrança acontece após 15 dias. Cancele quando quiser, sem fidelidade.
         </p>
 
         {/* Bloco de confiança */}
@@ -349,13 +324,14 @@ export default function Planos() {
                 <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <div className="space-y-1.5">
-                <h3 className="font-semibold text-base tracking-tight">Assine com tranquilidade</h3>
+                <h3 className="font-semibold text-base tracking-tight">Teste sem compromisso</h3>
                 <p className="text-sm text-muted-foreground leading-[1.65]">
-                  Aproveite 50% de desconto por tempo limitado. Teste a Agentes de Sonhos por 30 dias
-                  e, se a plataforma não fizer sentido para você, devolvemos o valor pago. Sem
-                  fidelidade: você pode cancelar quando quiser.
+                  Você tem 15 dias para usar todos os recursos da Agentes de Sonhos. Se cancelar
+                  antes do fim do período de teste, nenhum valor é cobrado. Sem fidelidade: você
+                  pode cancelar quando quiser.
                 </p>
               </div>
+
             </CardContent>
           </Card>
         </div>

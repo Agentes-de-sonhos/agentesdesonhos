@@ -7,8 +7,13 @@ const corsHeaders = {
 
 const PRICE_IDS: Record<string, string> = {
   profissional: "price_1TToCFFkGdVt5nieNMQEBoo1",
-  premium: "price_1TToClFkGdVt5niefGXbFhpe",
+  premium: "price_1UL3WmFkGdVt5nieiiPBhTvG",
 };
+
+const TRIAL_DAYS: Record<string, number> = {
+  premium: 15,
+};
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -40,13 +45,17 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://agentesdesonhos.lovable.app";
 
+    const trialDays = TRIAL_DAYS[plan];
+
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
+      ...(trialDays ? { subscription_data: { trial_period_days: trialDays } } : {}),
       success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },
     });
+
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
