@@ -7,8 +7,13 @@ const corsHeaders = {
 
 const PRICE_IDS: Record<string, string> = {
   profissional: "price_1TToCFFkGdVt5nieNMQEBoo1",
-  premium: "price_1TToClFkGdVt5niefGXbFhpe",
+  premium: "price_1UL3WmFkGdVt5nieiiPBhTvG",
 };
+
+const TRIAL_DAYS: Record<string, number> = {
+  premium: 15,
+};
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
