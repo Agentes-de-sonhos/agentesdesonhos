@@ -361,6 +361,12 @@ export default function Planos() {
                     </div>
                   </div>
 
+                  <p className="text-xs font-semibold text-primary mb-3">
+                    Economize R$ {MONTHLY_SAVINGS}/mês em relação às ferramentas separadas
+                  </p>
+
+
+
 
                   <p className="text-xs text-muted-foreground mb-4">{plan.microcopy}</p>
                   <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
