@@ -18,6 +18,7 @@ import essyaFavicon from "@/assets/whitelabel/favicon-essya-tur.png.asset.json";
 import limitesFavicon from "@/assets/whitelabel/favicon-100-limites-2.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
 import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";
+import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
@@ -30,6 +31,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "www.faeviagens.com.br": faeLogo.url,
   /** Casa Nova Tur — placeholder transparente enviado pela agência (host técnico). */
   "casanovatur.demo.local": casaNovaLogo.url,
+  /** Briefing 14 — rascunho técnico, sem associação a domínio público. */
+  "briefing-14-v1.preview.local": mundoEmCoresLogo.url,
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
@@ -56,6 +59,7 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "www.faeviagens.com.br",
   "casanovatur.demo.local",
   "www.essyatur.com.br",
+  "briefing-14-v1.preview.local",
 ]);
 
 export interface AgencyHeaderBrandPreset {
@@ -133,6 +137,11 @@ const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
     logoOnly: true,
     headerClassName: "h-[88px] md:h-[112px]",
     logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[160px]",
+  },
+  "briefing-14-v1.preview.local": {
+    logoOnly: true,
+    headerClassName: "h-24 md:h-[112px]",
+    logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
   },
 };
 

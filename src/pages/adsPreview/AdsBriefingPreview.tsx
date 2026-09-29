@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
-import { ADS_PREVIEW_INFO, isTechnicalPreviewHost } from "@/lib/adsBriefingPreview";
+import { isTechnicalPreviewHost, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
+import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -14,13 +16,16 @@ const SAFE_BUTTON = /anterior|próxim|proxim|slide|foto|vídeo|video|play|pausar
  * desativadas e qualquer escrita/função de backend é bloqueada enquanto montada.
  */
 export default function AdsBriefingPreview() {
+  const { jobId } = useParams<{ jobId: string }>();
+  const fixture = resolveAdsPreviewFixture(jobId);
   const allowed = isTechnicalPreviewHost(window.location.hostname);
   const [notice, setNotice] = useState(false);
+  useAgencyFavicon(allowed ? fixture?.info.logo_url : null);
 
   useEffect(() => {
-    if (!allowed) return;
+    if (!allowed || !fixture) return;
     const prevTitle = document.title;
-    document.title = "Prévia de teste — agência fictícia";
+    document.title = fixture.documentTitle;
     const existing = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
     const prevRobots = existing?.content ?? null;
     const robots = existing ?? document.createElement("meta");
@@ -74,9 +79,9 @@ export default function AdsBriefingPreview() {
       window.fetch = origFetch;
       window.open = origOpen;
     };
-  }, [allowed]);
+  }, [allowed, fixture]);
 
-  if (!allowed) {
+  if (!allowed || !fixture) {
     return (
       <Suspense fallback={null}>
         <NotFound />
@@ -85,17 +90,17 @@ export default function AdsBriefingPreview() {
   }
 
   return (
-    <div className="min-h-screen bg-background" data-ads-preview="ads-email-test-v1">
+    <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       <div
         role="status"
         className="sticky top-0 z-[100] bg-foreground px-4 py-2 text-center text-sm font-medium text-background"
       >
-        Prévia de teste — agência fictícia · ações desativadas
+        {fixture.notice}
         {notice && <span className="ml-2 opacity-80">(esta ação não funciona na prévia)</span>}
       </div>
       <Suspense fallback={null}>
-        <AgencySiteLayout info={ADS_PREVIEW_INFO}>
-          <AgencySiteHome info={ADS_PREVIEW_INFO} />
+        <AgencySiteLayout info={fixture.info} noWhatsapp>
+          <AgencySiteHome info={fixture.info} />
         </AgencySiteLayout>
       </Suspense>
     </div>
