@@ -190,22 +190,43 @@ const itinerary = [
 
 export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   const media = [slots.portraitJuliana, slots.trainingPhoto, slots.julianaExtra].filter((m): m is XcaretImage => !!m);
+  const intro = (
+    <>
+      <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>
+      <h2 className={`${heading} mt-4`}>Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.</h2>
+    </>
+  );
+  const text = (
+    <>
+      <div className={`space-y-4 ${body}`}><p>Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.</p><p>Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.</p><p>Quero ouvir o que você imagina para essas férias e transformar tantas possibilidades em uma viagem que faça sentido para você.</p></div>
+      <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-muted-foreground">Destinos com a Ju</span></p>
+    </>
+  );
   return (
-    <section id="especialista" className="scroll-mt-24 bg-secondary pb-8 pt-16 md:pb-10 md:pt-24"><div className={`${contentWidth} ${media.length ? "grid items-center gap-10 lg:grid-cols-2" : ""}`}>
-      {media.length > 0 && (
-        <div className={`grid gap-4 ${media.length > 1 ? "sm:grid-cols-2" : ""}`} data-testid="specialist-media">
-          {media.map((m, index) => <Photo key={m.src} image={m} className={`aspect-[4/5] w-full rounded-md object-cover ${media.length === 3 && index === 2 ? "sm:col-span-2 sm:aspect-[16/9]" : ""}`} />)}
-        </div>
+    <section id="especialista" className="scroll-mt-24 bg-secondary pb-8 pt-16 md:pb-10 md:pt-24"><div className={contentWidth}>
+      {media.length === 0 ? (
+        <div className="mx-auto max-w-3xl">{intro}<div className="mt-6">{text}</div></div>
+      ) : (
+        <>
+          {/* Mobile e tablet: título, galeria deslizável e depois o texto. */}
+          <div className="lg:hidden">
+            {intro}
+            <Carousel opts={{ align: "start" }} className="mt-6" aria-label="Fotos da Juliana no Xcaret"><CarouselContent data-testid="specialist-media">{media.map((m) => <CarouselItem key={m.src} className="basis-full"><Photo image={m} className="aspect-[4/5] w-full rounded-md object-cover" /></CarouselItem>)}</CarouselContent><CarouselPrevious aria-label="Foto anterior" className="left-2 h-11 w-11" /><CarouselNext aria-label="Próxima foto" className="right-2 h-11 w-11" /></Carousel>
+            <div className="mt-8">{text}</div>
+          </div>
+          {/* Desktop: composição em duas colunas. */}
+          <div className="hidden items-center gap-10 lg:grid lg:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2" data-testid="specialist-media-desktop">
+              {media.map((m, index) => <Photo key={m.src} image={m} className={`aspect-[4/5] w-full rounded-md object-cover ${media.length === 3 && index === 2 ? "sm:col-span-2 sm:aspect-[16/9]" : ""}`} />)}
+            </div>
+            <div>{intro}<div className="mt-6">{text}</div></div>
+          </div>
+        </>
       )}
-      <div className={media.length ? "" : "mx-auto max-w-3xl"}>
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-primary">Atendimento pessoal</p>
-        <h2 className={`${heading} mt-4`}>Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.</h2>
-        <div className={`mt-6 space-y-4 ${body}`}><p>Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.</p><p>Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.</p><p>Quero ouvir o que você imagina para essas férias e transformar tantas possibilidades em uma viagem que faça sentido para você.</p></div>
-        <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-muted-foreground">Destinos com a Ju</span></p>
-      </div>
     </div></section>
   );
 }
+
 
 export function Closing({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   return (
