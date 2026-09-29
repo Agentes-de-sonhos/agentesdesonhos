@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
 import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
