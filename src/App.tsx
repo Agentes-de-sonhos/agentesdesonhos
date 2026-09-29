@@ -282,8 +282,8 @@ const App = () => {
             <Route path="/captura-cartao/:token" element={<CardCaptureQuickAccess />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
-            {/* Prévia técnica ADS (fixture fictícia): só no host id-preview; demais hosts = 404. */}
-            <Route path="/ads-briefing-preview/ads-email-test-v1" element={<AdsBriefingPreview />} />
+            {/* Prévias técnicas ADS: fixtures locais isoladas; só no host id-preview, demais hosts = 404. */}
+            <Route path="/ads-briefing-preview/:jobId" element={<AdsBriefingPreview />} />
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
             {/* /sitelab-base/gestao/* é montado fora deste router (ver topo). */}

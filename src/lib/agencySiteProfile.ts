@@ -28,7 +28,7 @@ import {
   type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
-import { ADS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -43,7 +43,9 @@ export type AgencySiteProfileKey =
   /** Laboratório visual neutro (SiteLab Base): estrutura editorial, conteúdo demo. */
   | "siteLabBase"
   /** Fixture FICTÍCIA da prévia técnica ADS (ads-email-test-v1), só host sintético. */
-  | "adsEmailTestV1";
+  | "adsEmailTestV1"
+  /** Rascunho técnico isolado do briefing 14; não vinculado a domínio público. */
+  | "mundoEmCoresBriefing14";
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
@@ -1279,6 +1281,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "www.essyatur.com.br": "essyaCurated",
   /** Host sintético da prévia ADS — nunca aponta para tenants reais. */
   "ads-email-test-v1.demo.local": "adsEmailTestV1",
+  /** Host sintético do rascunho briefing-14 — domínio público ainda não vinculado. */
+  "briefing-14-v1.preview.local": "mundoEmCoresBriefing14",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -1291,6 +1295,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   essyaCurated: ESSYA_CURATED,
   siteLabBase: SITE_LAB_BASE,
   adsEmailTestV1: ADS_PREVIEW_PROFILE,
+  mundoEmCoresBriefing14: MUNDO_EM_CORES_PREVIEW_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
