@@ -21,10 +21,12 @@ export default function AdsBriefingPreview() {
     if (!allowed) return;
     const prevTitle = document.title;
     document.title = "Prévia de teste — agência fictícia";
-    const robots = document.createElement("meta");
+    const existing = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    const prevRobots = existing?.content ?? null;
+    const robots = existing ?? document.createElement("meta");
     robots.name = "robots";
     robots.content = "noindex,nofollow";
-    document.head.appendChild(robots);
+    if (!existing) document.head.appendChild(robots);
 
     const flash = () => {
       setNotice(true);
@@ -65,7 +67,8 @@ export default function AdsBriefingPreview() {
 
     return () => {
       document.title = prevTitle;
-      robots.remove();
+      if (prevRobots === null) robots.remove();
+      else robots.content = prevRobots;
       document.removeEventListener("click", onClick, true);
       document.removeEventListener("submit", onSubmit, true);
       window.fetch = origFetch;
