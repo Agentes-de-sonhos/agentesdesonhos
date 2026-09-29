@@ -181,12 +181,14 @@ export default function Planos() {
 
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            Escolha o plano ideal para você
+            Teste a plataforma completa por 15 dias
           </h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Comece grátis ou desbloqueie todo o potencial da plataforma.
+            Um único plano, com todos os recursos liberados. A primeira cobrança acontece somente
+            após os 15 dias de teste.
           </p>
         </div>
+
 
         {offer.coveredByPromo && (
           <div
