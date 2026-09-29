@@ -80,12 +80,12 @@ export interface AgencyAuthorityContent {
   service: string;
   image?: AgencyImageSlot;
   /** Vídeo editorial opcional; ausente preserva a imagem compartilhada. */
-  video?: "disneyWishCruise" | "legendOfTheSeas" | "mscWorldAmerica";
+  video?: "disneyWishCruise" | "legendOfTheSeas" | "mscWorldAmerica" | "norwegianLuna";
   /**
    * Galeria editorial de vídeos (companhia/navio). Quando definida, o media da
    * seção vira galeria navegável com o nome do navio sob o vídeo.
    */
-  videos?: { key: string; label: string; video?: "disneyWishCruise" | "legendOfTheSeas" | "mscWorldAmerica"; image?: AgencyImageSlot }[];
+  videos?: { key: string; label: string; video?: "disneyWishCruise" | "legendOfTheSeas" | "mscWorldAmerica" | "norwegianLuna"; image?: AgencyImageSlot }[];
 }
 
 export interface AgencyFooterContent {
@@ -586,6 +586,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
       { key: "disney-wish", label: "Disney Wish", video: "disneyWishCruise", image: "cruzeiro" },
       { key: "legend-of-the-seas", label: "Legend of the Seas", video: "legendOfTheSeas", image: "cruzeiro" },
       { key: "msc-world-america", label: "MSC World America", video: "mscWorldAmerica", image: "cruzeiro" },
+      { key: "norwegian-luna", label: "Norwegian Luna", video: "norwegianLuna", image: "cruzeiro" },
     ],
 
   },
