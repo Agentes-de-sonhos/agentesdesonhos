@@ -212,11 +212,11 @@ export default function Planos() {
 
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
-            Teste a plataforma completa por 15 dias
+            Tudo o que a sua agência precisa por menos da metade do preço
           </h1>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Um único plano, com todos os recursos liberados. A primeira cobrança acontece somente
-            após os 15 dias de teste.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            IA para orçamentos e roteiros, carteira digital, CRM, financeiro, treinamentos e
+            comunidade em uma única plataforma integrada. Teste 15 dias sem compromisso.
           </p>
         </div>
 
@@ -232,9 +232,72 @@ export default function Planos() {
           </div>
         )}
 
+        {/* Ancoragem de preço */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <Card className="border-border/60 rounded-2xl overflow-hidden">
+            <CardContent className="p-6 sm:p-8">
+              <div className="flex items-center gap-2 mb-1">
+                <Calculator className="h-4 w-4 text-primary" />
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">
+                  Se você contratasse tudo separado
+                </h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                Hoje, para ter uma agência profissional, você precisaria de várias assinaturas — e
+                elas não conversam entre si.
+              </p>
+
+              <div className="divide-y divide-border/60">
+                {marketTools.map((tool) => (
+                  <div
+                    key={tool.label}
+                    className="flex items-start justify-between gap-4 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-medium leading-snug">{tool.label}</p>
+                      <p className="text-xs text-muted-foreground">{tool.note}</p>
+                    </div>
+                    <span className="text-sm font-semibold whitespace-nowrap text-muted-foreground">
+                      R$ {tool.price} /mês
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between gap-4 pt-4 mt-1 border-t border-border">
+                <span className="text-sm font-semibold">Total contratado separadamente</span>
+                <span className="text-lg font-bold line-through text-muted-foreground whitespace-nowrap">
+                  R$ {MARKET_TOTAL} /mês
+                </span>
+              </div>
+
+              <div className="mt-6 rounded-xl bg-primary/[0.05] border border-primary/20 p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold">Na Agentes de Sonhos, tudo integrado</p>
+                    <p className="text-xs text-muted-foreground">
+                      E ainda inclui Central de reservas, Operações, Agenda, Notícias do trade,
+                      Treinamentos EducaTravel e Comunidade.
+                    </p>
+                  </div>
+                  <span className="text-2xl font-bold text-primary whitespace-nowrap">
+                    R$ {PLAN_PRICE} /mês
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-primary mt-4">
+                  Sua economia: R$ {MONTHLY_SAVINGS} todos os meses ({SAVINGS_PERCENT}% menos), mais
+                  de R$ {(MONTHLY_SAVINGS * 12).toLocaleString("pt-BR")} por ano.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Além da economia, você ganha tempo: o orçamento aprovado já vira passageiro no
+                  CRM, gera a carteira digital e alimenta o seu financeiro sem retrabalho.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
 
-        {/* Plans grid */}
         <div className="grid grid-cols-1 gap-6 items-stretch max-w-md mx-auto">
           {plans.map((plan) => {
             const { label, disabled } = getButtonConfig(plan);
