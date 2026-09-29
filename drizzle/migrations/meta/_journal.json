@@ -260,6 +260,13 @@
       "when": 1790625124199,
       "tag": "0036_traveler_visas",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1790695894796,
+      "tag": "0037_ads_briefing_email",
+      "breakpoints": true
     }
   ]
 }

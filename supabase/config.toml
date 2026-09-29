@@ -124,3 +124,6 @@ verify_jwt = false
 
 [functions.client-area-auth]
 verify_jwt = false
+
+[functions.ads-briefing-email]
+verify_jwt = false
