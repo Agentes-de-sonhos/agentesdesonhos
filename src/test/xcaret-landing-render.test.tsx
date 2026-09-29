@@ -37,10 +37,20 @@ describe("landing Xcaret renderizada", () => {
 
   it("atendimento pessoal mostra três fotos e nenhum botão de WhatsApp", () => {
     const { container } = render(<Specialist slots={full} />);
-    for (const k of ["portrait", "training", "extra"]) expect(screen.getByAltText(`fixture ${k}`)).toBeTruthy();
+    for (const k of ["portrait", "training", "extra"]) expect(screen.getAllByAltText(`fixture ${k}`).length).toBeGreaterThan(0);
     expect(container.querySelectorAll('a[href^="https://wa.me/"]')).toHaveLength(0);
     expect(screen.queryByAltText("fixture badge")).toBeNull();
   });
+
+  it("no mobile a seção começa pelo título, seguido da galeria e do texto", () => {
+    const { container } = render(<Specialist slots={full} />);
+    const mobile = container.querySelector(".lg\\:hidden") as HTMLElement;
+    expect(mobile).toBeTruthy();
+    const order = Array.from(mobile.querySelectorAll("h2, [data-testid='specialist-media'], p"));
+    expect(order.findIndex((el) => el.tagName === "H2")).toBeLessThan(order.findIndex((el) => el.getAttribute("data-testid") === "specialist-media"));
+    expect(mobile.querySelector("[aria-label='Próxima foto']")).toBeTruthy();
+  });
+
 
   it("mostra o selo somente no canto superior do hero, não no fechamento", () => {
     const hero = render(<Hero slots={full} />);
