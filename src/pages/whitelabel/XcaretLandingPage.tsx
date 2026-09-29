@@ -191,7 +191,7 @@ const itinerary = [
 export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   const media = [slots.portraitJuliana, slots.trainingPhoto, slots.julianaExtra].filter((m): m is XcaretImage => !!m);
   return (
-    <section id="especialista" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} ${media.length ? "grid items-center gap-10 lg:grid-cols-2" : ""}`}>
+    <section id="especialista" className="scroll-mt-24 bg-secondary pb-8 pt-16 md:pb-10 md:pt-24"><div className={`${contentWidth} ${media.length ? "grid items-center gap-10 lg:grid-cols-2" : ""}`}>
       {media.length > 0 && (
         <div className={`grid gap-4 ${media.length > 1 ? "sm:grid-cols-2" : ""}`} data-testid="specialist-media">
           {media.map((m, index) => <Photo key={m.src} image={m} className={`aspect-[4/5] w-full rounded-md object-cover ${media.length === 3 && index === 2 ? "sm:col-span-2 sm:aspect-[16/9]" : ""}`} />)}
@@ -260,18 +260,19 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
         <XcaretBookingBar hostname={info.hostname} agencyName={info.agency_name ?? "Destinos com a Ju"} />
 
 
-        <section id="destino" className="scroll-mt-24 py-16 md:py-24"><div className={contentWidth}>
+        <section id="destino" className="scroll-mt-24 pb-16 pt-4 md:pb-24 md:pt-8"><div className={contentWidth}>
           <SectionIntro title="Xcaret: um México inteiro para descobrir, sentir e se encantar.">
             <p>Na Riviera Maya, perto de Playa del Carmen, o universo Xcaret reúne parques, hotéis à beira-mar e experiências que unem natureza, aventura e cultura mexicana.</p>
             <p>Nade por rios subterrâneos, aproveite as águas do Caribe e encerre o dia com o Xcaret México Espectacular, um espetáculo de música, dança e tradições. Entre uma descoberta e outra, tempo para curtir o seu hotel no seu ritmo.</p>
           </SectionIntro>
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{unifiedCards.map(([title, text, image]) => <article key={title} className="overflow-hidden rounded-md border border-border bg-card"><Photo image={image} className="aspect-[4/3] w-full object-cover" /><div className="p-5"><h3 className="text-pretty text-xl font-semibold">{title}</h3><p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">{text}</p></div></article>)}</div>
+          <Carousel opts={{ align: "start" }} className="mx-auto mt-10 max-w-[1120px]" aria-label="Descobertas do universo Xcaret"><CarouselContent>{unifiedCards.map(([title, text, image]) => <CarouselItem key={title} className="basis-[88%] sm:basis-1/2 lg:basis-1/3"><article className="h-full overflow-hidden rounded-md border border-border bg-card"><Photo image={image} className="aspect-[4/3] w-full object-cover" /><div className="p-5"><h3 className="text-pretty text-xl font-semibold">{title}</h3><p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">{text}</p></div></article></CarouselItem>)}</CarouselContent><CarouselPrevious aria-label="Descoberta anterior" className="-left-2 top-[35%] h-11 w-11 md:-left-5"/><CarouselNext aria-label="Próxima descoberta" className="-right-2 top-[35%] h-11 w-11 md:-right-5"/></Carousel>
           <p className="mx-auto mt-8 max-w-3xl text-pretty text-center text-base leading-7 text-foreground">Com a Destinos com a Ju, você descobre quais dessas experiências combinam com você e como reuni-las em uma viagem planejada para o seu perfil.</p>
         </div></section>
 
+
         <Specialist />
 
-        <section id="parques" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={contentWidth}>
+        <section id="parques" className="scroll-mt-24 bg-secondary pb-16 pt-6 md:pb-24 md:pt-8"><div className={contentWidth}>
           <SectionIntro title="Qual dessas experiências tem a sua cara?"><p>Um mergulho em águas cristalinas, uma aventura sobre a selva ou uma noite de festa mexicana. Descubra outras formas de aproveitar o universo Xcaret e escolha suas favoritas com a ajuda da Ju.</p></SectionIntro>
           <Carousel opts={{ align: "start" }} className="mx-auto mt-10 max-w-[1120px]" aria-label="Outras experiências Xcaret"><CarouselContent>{XCARET_EXPERIENCES.map((item) => <CarouselItem key={item.title} className="basis-[88%] sm:basis-1/2 lg:basis-1/3"><article className="h-full overflow-hidden rounded-md bg-card shadow-sm"><Photo image={item.image} className="aspect-[4/3] w-full object-cover"/><div className="p-5"><h3 className="text-xl font-semibold">{item.title}</h3><p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">{item.text}</p></div></article></CarouselItem>)}</CarouselContent><CarouselPrevious aria-label="Experiência anterior" className="-left-2 top-[35%] h-11 w-11 md:-left-5"/><CarouselNext aria-label="Próxima experiência" className="-right-2 top-[35%] h-11 w-11 md:-right-5"/></Carousel>
           <div className="mx-auto mt-8 max-w-3xl text-center"><p className={body}>Você não precisa fazer tudo. A Ju ajuda a combinar suas experiências favoritas com tempo para aproveitar o hotel e descansar.</p></div>
