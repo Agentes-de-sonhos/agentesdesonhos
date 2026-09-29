@@ -256,16 +256,6 @@ export default function Planos() {
 
                   {/* Price */}
                   <div className="mb-1">
-                    {plan.originalPrice && (
-                      <div className="flex items-baseline gap-2 mb-1">
-                        <span className="text-sm text-muted-foreground line-through">
-                          R$ {plan.originalPrice}
-                        </span>
-                        <span className="text-xs font-bold text-primary uppercase tracking-wide">
-                          50% OFF
-                        </span>
-                      </div>
-                    )}
                     <div className="flex items-baseline gap-1">
                       <span className="text-muted-foreground text-base">R$</span>
                       <span className="text-4xl font-bold tracking-tight">{plan.price}</span>
@@ -274,6 +264,7 @@ export default function Planos() {
                       )}
                     </div>
                   </div>
+
 
                   <p className="text-xs text-muted-foreground mb-4">{plan.microcopy}</p>
                   <p className="text-sm text-muted-foreground mb-6">{plan.description}</p>
