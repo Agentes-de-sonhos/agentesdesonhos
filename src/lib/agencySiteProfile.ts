@@ -28,6 +28,7 @@ import {
   type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
+import { ADS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -40,7 +41,9 @@ export type AgencySiteProfileKey =
   /** Essyatur — atendimento próximo, famílias/parques, luxo (São Paulo/SP). */
   | "essyaCurated"
   /** Laboratório visual neutro (SiteLab Base): estrutura editorial, conteúdo demo. */
-  | "siteLabBase";
+  | "siteLabBase"
+  /** Fixture FICTÍCIA da prévia técnica ADS (ads-email-test-v1), só host sintético. */
+  | "adsEmailTestV1";
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
@@ -1274,6 +1277,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   /** Host técnico de prévia da Casa Nova Tur (o domínio real não é vinculado). */
   "casanovatur.demo.local": "casaNovaCurated",
   "www.essyatur.com.br": "essyaCurated",
+  /** Host sintético da prévia ADS — nunca aponta para tenants reais. */
+  "ads-email-test-v1.demo.local": "adsEmailTestV1",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -1285,6 +1290,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   casaNovaCurated: CASA_NOVA_CURATED,
   essyaCurated: ESSYA_CURATED,
   siteLabBase: SITE_LAB_BASE,
+  adsEmailTestV1: ADS_PREVIEW_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {

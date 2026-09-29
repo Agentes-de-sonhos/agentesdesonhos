@@ -157,6 +157,7 @@ const Blog = lazy(() => import("./pages/Blog"));
 const DashboardFornecedor = lazy(() => import("./pages/DashboardFornecedor"));
 const AgendaTrade = lazy(() => import("./pages/AgendaTrade"));
 const FaturaPublica = lazy(() => import("./pages/FaturaPublica"));
+const AdsBriefingPreview = lazy(() => import("./pages/adsPreview/AdsBriefingPreview"));
 const SiteLabRoot = lazy(() => import("./pages/sitelab/SiteLabRoot"));
 const SiteLabAdminEntry = lazy(() => import("./pages/sitelab/SiteLabAdminEntry"));
 // ── Fallback spinner ───────────────────────────────────────
@@ -281,6 +282,8 @@ const App = () => {
             <Route path="/captura-cartao/:token" element={<CardCaptureQuickAccess />} />
             <Route path="/certificate-test" element={<CertificateTest />} />
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
+            {/* Prévia técnica ADS (fixture fictícia): só no host id-preview; demais hosts = 404. */}
+            <Route path="/ads-briefing-preview/ads-email-test-v1" element={<AdsBriefingPreview />} />
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
             {/* /sitelab-base/gestao/* é montado fora deste router (ver topo). */}
