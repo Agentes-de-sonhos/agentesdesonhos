@@ -45,13 +45,17 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get("origin") || "https://agentesdesonhos.lovable.app";
 
+    const trialDays = TRIAL_DAYS[plan];
+
     const session = await stripe.checkout.sessions.create({
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
+      ...(trialDays ? { subscription_data: { trial_period_days: trialDays } } : {}),
       success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },
     });
+
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
