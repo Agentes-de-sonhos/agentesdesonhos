@@ -142,8 +142,8 @@ export default function Planos() {
       return { label: "Plano inferior", disabled: true };
     }
 
-    if (plan.id === "premium") return { label: "Assinar Premium", disabled: false };
-    return { label: "Assinar plano", disabled: false };
+    return { label: "Começar teste de 15 dias grátis", disabled: false };
+
   };
 
   return (
