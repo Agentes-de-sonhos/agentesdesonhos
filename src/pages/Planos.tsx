@@ -14,6 +14,8 @@ import {
   Star,
   Sparkles,
   ShieldCheck,
+  Calculator,
+
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
