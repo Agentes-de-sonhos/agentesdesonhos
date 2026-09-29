@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { renderLeadEmail } from "./template.ts";
 import { drainConversationalQueue } from "./conversational.ts";
 import { drainAgencyRequestQueue } from "./agencyRequests.ts";
+import { drainAdsBriefingEmails } from "../_shared/adsBriefingSend.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -113,7 +114,15 @@ Deno.serve(async (req) => {
   // ... e também a fila das solicitações do site white label.
   const agencyRequests = await drainAgencyRequestQueue(supabase, resendKey, FROM, limit);
 
-  return new Response(JSON.stringify({ claimed: rows.length, sent, failed, conversational, agencyRequests }), {
+  // Retry isolado dos briefings ADS (fila própria; falha aqui não afeta as demais).
+  let adsBriefing: unknown = null;
+  try {
+    adsBriefing = await drainAdsBriefingEmails(supabase, resendKey, 5);
+  } catch {
+    console.error("[lead-emails] ads-briefing-drain-error");
+  }
+
+  return new Response(JSON.stringify({ claimed: rows.length, sent, failed, conversational, agencyRequests, adsBriefing }), {
     status: 200,
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
