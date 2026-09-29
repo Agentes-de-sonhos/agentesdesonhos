@@ -49,19 +49,50 @@ const plans: PlanConfig[] = [
     highlighted: true,
     icon: Crown,
     features: [
-      "Todos os treinamentos da EducaTravel e materiais complementares",
-      "Notícias do trade, Agenda e Mapa do Turismo",
-      "Orçamentos, Roteiros e Carteira Digital",
-      "Vitrine de Ofertas e materiais de divulgação",
-      "CRM completo",
-      "Gestão Financeira",
-      "IA ilimitada",
-      "Comunidade e eventos exclusivos",
-      "Oportunidade em Fam Trips",
-      "Acesso completo sem limitações",
+      "Orçamentos personalizados com a identidade visual da agência + IA",
+      "Roteiros sob medida para qualquer lugar do mundo com IA",
+      "Carteira Digital com todas as informações e vouchers da viagem",
+      "Gestão de clientes: CRM de passageiros, acompanhantes e radar de passaportes e vistos",
+      "Gestão de atendimento e oportunidades",
+      "Gestão de operações das viagens",
+      "Gestão financeira completa: vendas, comissões e despesas",
+      "Central de reservas",
+      "Notícias do trade",
+      "Agenda integrada",
+      "Treinamentos e capacitação EducaTravel",
+      "Comunidade exclusiva de agentes e eventos",
     ],
   },
 ];
+
+const marketTools: { label: string; note: string; price: number }[] = [
+  {
+    label: "Criador de Roteiros & Orçamentos com IA",
+    note: "softwares de propostas e itinerários",
+    price: 100,
+  },
+  {
+    label: "App / Carteira Digital de Viagem para o cliente",
+    note: "apps de entrega de voucher",
+    price: 80,
+  },
+  {
+    label: "CRM e Gestão de Atendimento / Oportunidades",
+    note: "controle de clientes e funil de vendas",
+    price: 190,
+  },
+  {
+    label: "Sistema Financeiro para Agências",
+    note: "controle de vendas e comissões",
+    price: 150,
+  },
+];
+
+const MARKET_TOTAL = marketTools.reduce((sum, t) => sum + t.price, 0);
+const PLAN_PRICE = 196;
+const MONTHLY_SAVINGS = MARKET_TOTAL - PLAN_PRICE;
+const SAVINGS_PERCENT = Math.round((MONTHLY_SAVINGS / MARKET_TOTAL) * 100);
+
 
 
 const PLAN_HIERARCHY: Record<string, number> = {
