@@ -4,9 +4,11 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
-// Build-time version identifier used by the "new version available" modal.
-// Regenerated on every build so cached clients can detect a fresh deploy.
-const BUILD_ID = String(Date.now());
+// Manual release key used by the "new version available" modal.
+// IMPORTANT: intentionally NOT generated per build. Routine deploys keep the
+// same key, so no user ever sees the update prompt. Bump it (e.g.
+// "2026.10.01-v1") only when we deliberately want everyone to refresh.
+const BUILD_ID = "2026.09.30-v1";
 
 function appVersionPlugin() {
   return {
