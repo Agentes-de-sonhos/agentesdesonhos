@@ -49,7 +49,7 @@ export const NAV_LINKS: AgencySiteNavItem[] = [
  * o link "/ofertas" também sai do menu (config declarativa, sem condicional
  * por agência). Nenhum tenant atual é afetado — o default mantém o link.
  */
-export function siteNavLinks(hostname?: string | null) {
+export function siteNavLinks(hostname?: string | null): AgencySiteNavItem[] {
   const profile = resolveSiteProfile(hostname);
   if (profile.nav?.length) return profile.nav;
   const offersEnabled = sectionOverrideEnabled(profile.sections?.offers);
