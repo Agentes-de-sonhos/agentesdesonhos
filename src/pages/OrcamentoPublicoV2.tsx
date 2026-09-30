@@ -85,7 +85,7 @@ export default function OrcamentoPublicoV2({
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />}>
       <OrcamentoPublico
         quoteOverride={quote}
         agentProfileOverride={agentProfile}
