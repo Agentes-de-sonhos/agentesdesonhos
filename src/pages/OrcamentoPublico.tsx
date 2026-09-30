@@ -1431,9 +1431,10 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader
+        logoUrl={(brandProfile as any)?.agency_logo_url ?? null}
+        agencyName={(brandProfile as any)?.agency_name ?? null}
+      />
     );
   }
 
