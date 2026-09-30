@@ -65,9 +65,11 @@ export default function OrcamentoPublicoV2({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-primary/5">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader
+        logoUrl={loaderBrand.logoUrl}
+        agencyName={loaderBrand.agencyName}
+        className="bg-gradient-to-br from-background via-muted/20 to-primary/5"
+      />
     );
   }
 
