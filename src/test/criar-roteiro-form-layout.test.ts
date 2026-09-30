@@ -16,12 +16,19 @@ describe("Criar Roteiro — navegação e layout", () => {
 
   it("bloco de importação fica no cabeçalho do card, antes do formulário", () => {
     const header = page.indexOf("Novo Roteiro de Viagem");
-    const importBlock = page.indexOf("Já tem um roteiro pronto?");
+    const importBlock = page.indexOf("Já tem um roteiro ou orçamento?");
     const formTag = page.indexOf("onSubmit={handleCreateItinerary}");
     expect(header).toBeLessThan(importBlock);
     expect(importBlock).toBeLessThan(formTag);
-    expect(page).toContain("setImportWizardOpen(true)");
+    expect(page).toContain("setImportSourceOpen(true)");
     expect(page).toContain("ImportItineraryWizard");
+  });
+
+  it("importação unificada oferece arquivo e orçamento", () => {
+    expect(page).toContain("<ImportSourceDialog");
+    expect(page).toContain("onPickFile={() => setImportWizardOpen(true)}");
+    expect(page).toContain("onPickQuote={() => setImportQuoteOpen(true)}");
+    expect(page).toContain("<ImportQuoteItineraryDialog");
   });
 
   it("usa Download + Importar e mantém a descrição em uma linha no desktop", () => {
