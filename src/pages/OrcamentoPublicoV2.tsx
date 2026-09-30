@@ -1,9 +1,10 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Quote, ServiceType, ServiceData } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { usePublicLoaderBrand } from "@/hooks/usePublicLoaderBrand";
 
 const OrcamentoPublico = lazy(() => import("@/pages/OrcamentoPublico"));
 
