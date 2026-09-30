@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import { Loader2, CalendarCheck, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TripPeriodField } from "@/components/shared/TripPeriodField";
+import { TripDatePicker } from "@/components/whitelabel/TripDatePicker";
 import {
   AlertDialog,
   AlertDialogAction,
