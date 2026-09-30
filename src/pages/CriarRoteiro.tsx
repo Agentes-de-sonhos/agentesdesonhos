@@ -1580,9 +1580,21 @@ export default function CriarRoteiro() {
         />
       )}
 
+      <ImportSourceDialog
+        open={importSourceOpen}
+        onOpenChange={setImportSourceOpen}
+        onPickFile={() => setImportWizardOpen(true)}
+        onPickQuote={() => setImportQuoteOpen(true)}
+      />
+
       <ImportItineraryWizard
         open={importWizardOpen}
         onOpenChange={setImportWizardOpen}
+      />
+
+      <ImportQuoteItineraryDialog
+        open={importQuoteOpen}
+        onOpenChange={setImportQuoteOpen}
       />
 
       <AlertDialog
