@@ -75,6 +75,7 @@ import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
+import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-100-limites.png.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
@@ -117,6 +118,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   norteafrica: destinoNorteAfrica,
   escandinavia: destinoEscandinavia,
   grupos: destinoGrupos,
+  amanda100Limites: bannerAmanda100Limites.url,
 };
 
 /** Slots de imagem de hero (fallback quando a agência não tem capa própria). */
@@ -531,6 +533,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     varenna: "object-[66%_center] md:object-[center_52%]",
     santoriniShip: "object-[64%_center] md:object-[center_58%]",
     airportTraveler: "object-[68%_center] md:object-[64%_28%]",
+    amandaRight: "object-[72%_center] sm:object-[68%_center] md:object-center",
   }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`

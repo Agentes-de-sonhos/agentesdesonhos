@@ -289,7 +289,9 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     {
       title: "Atendimento próximo em cada etapa da viagem",
       subtitle: "Conte com Amanda Larini para planejar, esclarecer dúvidas e acompanhar sua viagem, do primeiro contato ao retorno.",
-      image: "europa",
+      image: "amanda100Limites",
+      focalPoint: "amandaRight",
+      textWidth: "narrowLeft",
       order: 3,
       enabled: true,
     },
