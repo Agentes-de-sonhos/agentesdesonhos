@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 
-const INACTIVITY_TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+const INACTIVITY_TIMEOUT_MS = 24 * 60 * 60 * 1000; // 24 hours
 const COUNTDOWN_SECONDS = 30;
 
 const ACTIVITY_EVENTS: (keyof DocumentEventMap)[] = [

@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { isActiveImpersonatingUser } from "@/lib/impersonation";
 
 const HEARTBEAT_INTERVAL = 60_000; // 1 minute
-const INACTIVITY_TIMEOUT = 20 * 60 * 1000; // 20 minutes
+const INACTIVITY_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
 
 interface SharedTrackerState {
   userId: string | null;
