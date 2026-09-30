@@ -1,7 +1,8 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { usePublicLoaderBrand } from "@/hooks/usePublicLoaderBrand";
 
 const CarteiraPublicaV2 = lazy(() => import("@/pages/CarteiraPublicaV2"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
