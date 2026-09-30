@@ -128,7 +128,7 @@ export interface AgencySiteProfile {
   /** Reduz os vãos verticais entre as seções deste perfil. */
   compactSectionSpacing?: boolean;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
-  nav?: { label: string; to: string }[];
+  nav?: { label: string; to: string; children?: { label: string; to: string }[] }[];
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
   navDensity?: "default" | "compact";
   /**
@@ -238,11 +238,26 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
   nav: [
     { label: "Início", to: "/" },
-    { label: "Destinos", to: "/#destinos" },
-    { label: "Viagens", to: "/#destaques" },
-    { label: "Para agências", to: "/#dmc-agencias" },
+    {
+      label: "Quem Somos",
+      to: "/quem-somos/agencia",
+      children: [
+        { label: "DMC em Portugal", to: "/quem-somos/dmc" },
+        { label: "A Agência", to: "/quem-somos/agencia" },
+      ],
+    },
+    { label: "Frota", to: "/frota" },
+    {
+      label: "Passeios",
+      to: "/passeios/lisboa",
+      children: [
+        { label: "Lisboa", to: "/passeios/lisboa" },
+        { label: "Portugal", to: "/passeios/portugal" },
+      ],
+    },
+    { label: "Europa", to: "/europa" },
+    { label: "Pet Friendly", to: "/pet-friendly" },
     { label: "Ofertas", to: "/ofertas" },
-    { label: "Sobre", to: "/#sobre" },
     { label: "Dúvidas", to: "/#faq" },
   ],
   navDensity: "compact",
