@@ -702,17 +702,17 @@ export default function CriarRoteiro() {
                       </p>
                     </div>
 
-                    {/* Importação de roteiro pronto (mesma funcionalidade/modal de antes) */}
+                    {/* Importação unificada: roteiro pronto (arquivo) ou orçamento */}
                     <div className="flex flex-col items-start gap-1 md:shrink-0 md:items-end">
                       <div className="flex items-center gap-1.5 text-sm font-medium">
                         <FileText className="h-4 w-4 text-primary" />
-                        Já tem um roteiro pronto?
+                        Já tem um roteiro ou orçamento?
                       </div>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setImportWizardOpen(true)}
+                        onClick={() => setImportSourceOpen(true)}
                         className="shrink-0 h-9 rounded-lg"
                       >
                         <Download className="h-4 w-4" />
