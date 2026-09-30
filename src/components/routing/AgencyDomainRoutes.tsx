@@ -9,6 +9,7 @@ import { shouldNoindexAgencyPath } from "@/lib/agencySlugRouting";
 import { useNoindex } from "@/hooks/useNoindex";
 import { AgencySitePasswordGate } from "@/components/whitelabel/AgencySitePasswordGate";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { resolveContentPages } from "@/lib/agencySiteContentPages";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
@@ -28,6 +29,7 @@ const FaturaPublica = lazy(() => import("@/pages/FaturaPublica"));
 const PoliticasPrivacidade = lazy(() => import("@/pages/PoliticasPrivacidade"));
 const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
+const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
 
 const Fallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">

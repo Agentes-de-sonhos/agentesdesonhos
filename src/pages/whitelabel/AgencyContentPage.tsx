@@ -1,4 +1,3 @@
-import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
