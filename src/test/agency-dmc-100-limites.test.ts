@@ -53,9 +53,26 @@ describe("seção DMC da 100 Limites", () => {
     expect(resolveSiteProfile("destinoscomaju.com.br").key).toBe("editorialRose");
   });
 
-  it("mantém Para agências no menu desktop/mobile e oculta campanhas genéricas", () => {
+  it("mantém o menu do portfólio (com submenus) e oculta campanhas genéricas", () => {
     const links = siteNavLinks("100limites.tur.br");
-    expect(links).toContainEqual({ label: "Para agências", to: "/#dmc-agencias" });
+    expect(links.map((l) => l.label)).toEqual([
+      "Início",
+      "Quem Somos",
+      "Frota",
+      "Passeios",
+      "Europa",
+      "Pet Friendly",
+      "Ofertas",
+      "Dúvidas",
+    ]);
+    expect(links.find((l) => l.label === "Quem Somos")?.children).toEqual([
+      { label: "DMC em Portugal", to: "/quem-somos/dmc" },
+      { label: "A Agência", to: "/quem-somos/agencia" },
+    ]);
+    expect(links.find((l) => l.label === "Passeios")?.children).toEqual([
+      { label: "Lisboa", to: "/passeios/lisboa" },
+      { label: "Portugal", to: "/passeios/portugal" },
+    ]);
     expect(resolveSections(resolveSiteProfile("100limites.tur.br").sections).map((section) => section.key))
       .not.toContain("modules");
     expect(resolveSections(resolveSiteProfile("paraisoviagens.com").sections).map((section) => section.key))
