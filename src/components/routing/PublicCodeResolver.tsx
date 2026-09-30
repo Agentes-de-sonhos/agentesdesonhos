@@ -99,7 +99,7 @@ export default function PublicCodeResolver() {
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />}>
       {resolved === "quote" ? <OrcamentoPublicoV2 /> : resolved === "itinerary" ? <RoteiroPublicoV2 /> : <CarteiraPublicaV2 />}
     </Suspense>
   );
