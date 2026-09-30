@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram } from "lucide-react";
+import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,14 @@ import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
 
-export const NAV_LINKS = [
+/** Item de menu do site: pode ter um submenu declarado pelo perfil. */
+export interface AgencySiteNavItem {
+  label: string;
+  to: string;
+  children?: { label: string; to: string }[];
+}
+
+export const NAV_LINKS: AgencySiteNavItem[] = [
   { label: "Início", to: "/" },
   { label: "Solicitações", to: "/#solicitacoes" },
   { label: "Experiências", to: "/#campanhas" },
@@ -42,7 +49,7 @@ export const NAV_LINKS = [
  * o link "/ofertas" também sai do menu (config declarativa, sem condicional
  * por agência). Nenhum tenant atual é afetado — o default mantém o link.
  */
-export function siteNavLinks(hostname?: string | null) {
+export function siteNavLinks(hostname?: string | null): AgencySiteNavItem[] {
   const profile = resolveSiteProfile(hostname);
   if (profile.nav?.length) return profile.nav;
   const offersEnabled = sectionOverrideEnabled(profile.sections?.offers);
@@ -87,15 +94,41 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
 
 
           <nav className={`hidden items-center lg:flex ${resolveSiteProfile(info.hostname).navDensity === "compact" ? "gap-4 xl:gap-5" : "gap-8"}`}>
-            {mainLinks.map((l) => (
-              <a
-                key={l.to}
-                href={agencySiteHref(l.to)}
-                className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
-              >
-                {l.label}
-              </a>
-            ))}
+            {mainLinks.map((l) =>
+              l.children?.length ? (
+                /* Submenu: abre no hover e também no foco por teclado. */
+                <div key={l.to} className="group relative">
+                  <a
+                    href={agencySiteHref(l.to)}
+                    className="flex items-center gap-1 text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
+                  >
+                    {l.label}
+                    <ChevronDown className="h-4 w-4 opacity-70" />
+                  </a>
+                  <div className="invisible absolute left-0 top-full z-50 min-w-[13rem] pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                    <div className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-lg">
+                      {l.children.map((c) => (
+                        <a
+                          key={c.to}
+                          href={agencySiteHref(c.to)}
+                          className="block px-4 py-3 text-[15px] text-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <a
+                  key={l.to}
+                  href={agencySiteHref(l.to)}
+                  className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
+                >
+                  {l.label}
+                </a>
+              ),
+            )}
           </nav>
 
           <div className="hidden items-center gap-5 md:flex">
@@ -122,14 +155,29 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
           <div className="border-t border-border/60 bg-background lg:hidden">
             <nav className={`${siteContainer(true)} flex flex-col py-2`}>
               {navAll.map((l) => (
-                <a
-                  key={l.to}
-                  href={agencySiteHref(l.to)}
-                  onClick={() => setOpen(false)}
-                  className="min-h-[52px] py-3.5 text-[15px] font-medium text-foreground/80"
-                >
-                  {l.label}
-                </a>
+                <div key={l.to} className="flex flex-col">
+                  <a
+                    href={agencySiteHref(l.to)}
+                    onClick={() => setOpen(false)}
+                    className="min-h-[52px] py-3.5 text-[15px] font-medium text-foreground/80"
+                  >
+                    {l.label}
+                  </a>
+                  {l.children?.length ? (
+                    <div className="mb-2 flex flex-col border-l border-border/60 pl-3">
+                      {l.children.map((c) => (
+                        <a
+                          key={c.to}
+                          href={agencySiteHref(c.to)}
+                          onClick={() => setOpen(false)}
+                          className="min-h-[44px] py-2.5 text-[15px] text-foreground/65"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               ))}
             </nav>
           </div>
