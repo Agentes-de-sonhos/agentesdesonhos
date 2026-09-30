@@ -416,7 +416,7 @@ export function ClientsModule() {
               aria-label={contactView === "empresas" ? "Nova empresa" : "Novo cliente"}
             >
               <Plus className="h-3.5 w-3.5" />{" "}
-              {contactView === "empresas" ? "Nova empresa" : "Nova pessoa"}
+              {contactView === "empresas" ? "Nova empresa" : "Novo cliente"}
             </Button>
           )}
 
