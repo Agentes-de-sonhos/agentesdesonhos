@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Site da 100 Limites: menu com submenus e páginas Quem Somos (DMC/Agência), Frota, Passeios (Lisboa/Portugal), Europa e Pet Friendly, sem publicar.
 - [x] Criar e validar a prévia técnica isolada do briefing 14 para O Mundo em Cores, preservando a fixture ADS existente, tenants e banco, sem publicar.
 - [x] Criar páginas neutras nas raízes dos seis domínios públicos, preservando todos os links completos, sem publicar.
 - [x] Reorganizar o editor de orçamento conforme escopo aprovado, validar testes, tipos e build, sem publicar.
