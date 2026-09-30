@@ -544,11 +544,12 @@ export function useItineraries() {
         end_date: string;
         show_pricing_section: boolean;
         pricing_content: string | null;
+        passengers: { name: string; age?: number | null }[];
       }>;
     }) => {
       const { error } = await supabase
         .from("itineraries")
-        .update(updates)
+        .update(updates as never)
         .eq("id", itineraryId);
 
       if (error) throw error;
@@ -563,10 +564,17 @@ export function useItineraries() {
       itineraryId,
       startDate,
       endDate,
+      extraDaysStrategy = "delete",
     }: {
       itineraryId: string;
       startDate: Date;
       endDate: Date;
+      /**
+       * Quando o período encurta, define o destino das atividades dos dias
+       * que ficariam fora: `merge` move para o último dia mantido (padrão
+       * seguro exposto na interface) e `delete` remove junto com o dia.
+       */
+      extraDaysStrategy?: "delete" | "merge";
     }) => {
       const startStr = format(startDate, "yyyy-MM-dd");
       const endStr = format(endDate, "yyyy-MM-dd");
@@ -606,7 +614,15 @@ export function useItineraries() {
 
       // Remove extra days (cascade deletes activities)
       if (existing.length > newDayCount) {
-        const toDelete = existing.slice(newDayCount).map((d) => d.id);
+        const toDelete = existing.slice(newDayCount).map((d) => d.id as string);
+        if (extraDaysStrategy === "merge" && keptCount > 0) {
+          const lastKeptId = existing[keptCount - 1].id as string;
+          const { error: moveErr } = await supabase
+            .from("itinerary_activities")
+            .update({ day_id: lastKeptId })
+            .in("day_id", toDelete);
+          if (moveErr) throw moveErr;
+        }
         const { error } = await supabase
           .from("itinerary_days")
           .delete()

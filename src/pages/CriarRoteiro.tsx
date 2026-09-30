@@ -18,7 +18,10 @@ import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
 import { QuoteStepsGuide } from "@/components/quote/QuoteStepsGuide";
 import { ItinerarySettingsModal } from "@/components/itinerary/ItinerarySettingsModal";
 import { ItineraryDaysOrganizer } from "@/components/itinerary/ItineraryDaysOrganizer";
-import { TripPeriodField } from "@/components/shared/TripPeriodField";
+import { ItineraryDatesEditor } from "@/components/itinerary/ItineraryDatesEditor";
+import { ItineraryPassengersCard } from "@/components/itinerary/ItineraryPassengersCard";
+import { ImportSourceDialog } from "@/components/itinerary/ImportSourceDialog";
+import { ImportQuoteItineraryDialog } from "@/components/itinerary/ImportQuoteItineraryDialog";
 import { AIGeneratingOverlay } from "@/components/itinerary/AIGeneratingOverlay";
 import { CriticalErrorState } from "@/components/common/CriticalErrorState";
 import { BrandCloudLoader } from "@/components/shared/BrandCloudLoader";
@@ -119,6 +122,8 @@ export default function CriarRoteiro() {
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
   const [templateTargetItinerary, setTemplateTargetItinerary] = useState<Itinerary | null>(null);
   const [importWizardOpen, setImportWizardOpen] = useState(false);
+  const [importSourceOpen, setImportSourceOpen] = useState(false);
+  const [importQuoteOpen, setImportQuoteOpen] = useState(false);
   const [listSearch, setListSearch] = useState("");
   const debouncedListSearch = useDebounce(listSearch, 200);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -156,6 +161,7 @@ export default function CriarRoteiro() {
   const [editChildren, setEditChildren] = useState(0);
   const [savingTravelers, setSavingTravelers] = useState(false);
   const [savingDates, setSavingDates] = useState(false);
+  const [savingPassengers, setSavingPassengers] = useState(false);
   const [isEditingHeadline, setIsEditingHeadline] = useState(false);
   const [editHeadline, setEditHeadline] = useState("");
   const [savingHeadline, setSavingHeadline] = useState(false);
@@ -696,17 +702,17 @@ export default function CriarRoteiro() {
                       </p>
                     </div>
 
-                    {/* Importação de roteiro pronto (mesma funcionalidade/modal de antes) */}
+                    {/* Importação unificada: roteiro pronto (arquivo) ou orçamento */}
                     <div className="flex flex-col items-start gap-1 md:shrink-0 md:items-end">
                       <div className="flex items-center gap-1.5 text-sm font-medium">
                         <FileText className="h-4 w-4 text-primary" />
-                        Já tem um roteiro pronto?
+                        Já tem um roteiro ou orçamento?
                       </div>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        onClick={() => setImportWizardOpen(true)}
+                        onClick={() => setImportSourceOpen(true)}
                         className="shrink-0 h-9 rounded-lg"
                       >
                         <Download className="h-4 w-4" />
@@ -1149,17 +1155,16 @@ export default function CriarRoteiro() {
                   {/* Datas */}
                   <div className="sm:col-span-2">
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Datas da viagem</div>
-                    <TripPeriodField
-                      id="itinerary-period"
-                      label=""
+                    <ItineraryDatesEditor
                       start={currentItinerary.startDate}
                       end={currentItinerary.endDate}
-                      triggerClassName="w-full rounded-xl"
-                      onChange={async ({ start, end }) => {
+                      days={currentItinerary.days || []}
+                      saving={savingDates}
+                      onApply={async ({ start, end, extraDaysStrategy }) => {
                         if (!start || !end || savingDates) return;
                         setSavingDates(true);
                         try {
-                          await adjustItineraryDates.mutateAsync({ itineraryId: currentItinerary.id, startDate: parseLocalDate(start), endDate: parseLocalDate(end) });
+                          await adjustItineraryDates.mutateAsync({ itineraryId: currentItinerary.id, startDate: parseLocalDate(start), endDate: parseLocalDate(end), extraDaysStrategy });
                           await loadItinerary(currentItinerary.id);
                           toast.success("Datas atualizadas!");
                         } catch (err: any) { toast.error(err?.message || "Não foi possível salvar."); }
@@ -1168,6 +1173,27 @@ export default function CriarRoteiro() {
                     />
                   </div>
                 </div>
+
+                {/* Nomes dos viajantes */}
+                <ItineraryPassengersCard
+                  passengers={currentItinerary.passengers || []}
+                  saving={savingPassengers}
+                  onSave={async (passengers) => {
+                    setSavingPassengers(true);
+                    try {
+                      await updateItineraryDetails.mutateAsync({
+                        itineraryId: currentItinerary.id,
+                        updates: { passengers },
+                      });
+                      setCurrentItinerary({ ...currentItinerary, passengers });
+                      toast.success("Viajantes atualizados!");
+                    } catch {
+                      toast.error("Não foi possível salvar os nomes.");
+                    } finally {
+                      setSavingPassengers(false);
+                    }
+                  }}
+                />
 
                 {/* Frase de destaque */}
                 {(() => {
@@ -1554,9 +1580,21 @@ export default function CriarRoteiro() {
         />
       )}
 
+      <ImportSourceDialog
+        open={importSourceOpen}
+        onOpenChange={setImportSourceOpen}
+        onPickFile={() => setImportWizardOpen(true)}
+        onPickQuote={() => setImportQuoteOpen(true)}
+      />
+
       <ImportItineraryWizard
         open={importWizardOpen}
         onOpenChange={setImportWizardOpen}
+      />
+
+      <ImportQuoteItineraryDialog
+        open={importQuoteOpen}
+        onOpenChange={setImportQuoteOpen}
       />
 
       <AlertDialog
