@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram } from "lucide-react";
+import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
@@ -148,14 +148,29 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
           <div className="border-t border-border/60 bg-background lg:hidden">
             <nav className={`${siteContainer(true)} flex flex-col py-2`}>
               {navAll.map((l) => (
-                <a
-                  key={l.to}
-                  href={agencySiteHref(l.to)}
-                  onClick={() => setOpen(false)}
-                  className="min-h-[52px] py-3.5 text-[15px] font-medium text-foreground/80"
-                >
-                  {l.label}
-                </a>
+                <div key={l.to} className="flex flex-col">
+                  <a
+                    href={agencySiteHref(l.to)}
+                    onClick={() => setOpen(false)}
+                    className="min-h-[52px] py-3.5 text-[15px] font-medium text-foreground/80"
+                  >
+                    {l.label}
+                  </a>
+                  {l.children?.length ? (
+                    <div className="mb-2 flex flex-col border-l border-border/60 pl-3">
+                      {l.children.map((c) => (
+                        <a
+                          key={c.to}
+                          href={agencySiteHref(c.to)}
+                          onClick={() => setOpen(false)}
+                          className="min-h-[44px] py-2.5 text-[15px] text-foreground/65"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
               ))}
             </nav>
           </div>
