@@ -544,6 +544,7 @@ export function useItineraries() {
         end_date: string;
         show_pricing_section: boolean;
         pricing_content: string | null;
+        passengers: { name: string; age?: number | null }[];
       }>;
     }) => {
       const { error } = await supabase
