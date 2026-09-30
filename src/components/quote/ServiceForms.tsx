@@ -214,6 +214,16 @@ function normalizeLegs(init: any): {
   return { outbound, internal, return_ };
 }
 
+/**
+ * Valores por pessoa nunca são obrigatórios: um pacote fechado pode ser salvo
+ * sem detalhar preço por serviço. Campo vazio, nulo ou inválido vira 0.
+ */
+const optionalPriceField = z.preprocess((v) => {
+  if (v === "" || v === null || v === undefined) return 0;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : 0;
+}, z.number().min(0)).optional().default(0);
+
 const flightSchema = z.object({
   option_label: z.string().optional(),
   service_description: z.string().optional(),
@@ -227,8 +237,8 @@ const flightSchema = z.object({
   includes_boarding_fee: z.boolean(),
   fees_amount: z.number().min(0).optional(),
   charge_fees_first_installment: z.boolean().optional(),
-  adult_price: z.number().min(0),
-  child_price: z.number().min(0),
+  adult_price: optionalPriceField,
+  child_price: optionalPriceField,
   is_unit_price: z.boolean(),
   notes: z.string().optional(),
   outbound_legs: z.array(flightLegSchema),
@@ -1686,8 +1696,8 @@ const attractionSchema = z.object({
   ticket_type: z.string().optional(),
   service_description: z.string().optional(),
   date: z.date().optional().nullable(),
-  adult_price: z.number().min(0),
-  child_price: z.number().min(0),
+  adult_price: optionalPriceField,
+  child_price: optionalPriceField,
   notes: z.string().optional(),
 });
 
@@ -2417,8 +2427,8 @@ const railSchema = z.object({
   assigned_seat: z.boolean().optional(),
   private_cabin: z.boolean().optional(),
   panoramic_view: z.boolean().optional(),
-  adult_price: z.number().min(0),
-  child_price: z.number().min(0),
+  adult_price: optionalPriceField,
+  child_price: optionalPriceField,
 });
 
 function RailTransportForm({
