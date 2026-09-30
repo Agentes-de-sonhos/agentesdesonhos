@@ -33,7 +33,8 @@ describe("seção DMC da 100 Limites", () => {
     expect(profile.key).toBe("editorialDmc");
     expect(profile.heroPresentation?.kicker).toBe("VIAGENS PERSONALIZADAS · BRASIL E MUNDO");
     expect(profile.hero).toHaveLength(3);
-    expect(profile.hero?.map((slide) => slide.image)).toEqual(["brasil", "parques", "europa"]);
+    expect(profile.hero?.map((slide) => slide.image)).toEqual(["brasil", "parques", "amanda100Limites"]);
+    expect(profile.hero?.[2]).toMatchObject({ focalPoint: "amandaRight", textWidth: "narrowLeft" });
     expect(profile.requestCenter?.notice).toContain("Cada solicitação é analisada pela Amanda");
     expect(profile.destinations?.map((destination) => destination.title)).toEqual([
       "Brasil e Nordeste", "Europa e Portugal", "Orlando e parques", "Caribe e México", "América do Sul",
@@ -81,9 +82,9 @@ describe("seção DMC da 100 Limites", () => {
 
   it("resolve imagens variadas por banner sem alterar o fallback compartilhado", () => {
     const profile = resolveSiteProfile("100limites.tur.br");
-    const images = { brasil: "/brasil.jpg", parques: "/parques.jpg", europa: "/europa.jpg" };
+    const images = { brasil: "/brasil.jpg", parques: "/parques.jpg", amanda100Limites: "/amanda.png" };
     expect(resolveHeroSlides("100 Limites", null, profile.hero, "/fallback.jpg", images).map((slide) => slide.image))
-      .toEqual(["/brasil.jpg", "/parques.jpg", "/europa.jpg"]);
+      .toEqual(["/brasil.jpg", "/parques.jpg", "/amanda.png"]);
     expect(resolveHeroSlides("Outra", null, undefined, "/fallback.jpg").every((slide) => slide.image === "/fallback.jpg"))
       .toBe(true);
   });

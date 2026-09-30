@@ -99,7 +99,7 @@ export type AgencyImageSlot =
   | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
-  | "norteafrica" | "escandinavia" | "grupos";
+  | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites";
 
 export interface AgencyModule {
   key: string;
@@ -156,7 +156,7 @@ export interface AgencyHeroSlide {
   /** Imagem editorial opcional por slide; ausente preserva o fallback atual. */
   image?: AgencyImageSlot;
   /** Recorte responsivo opcional da foto, resolvido pela apresentação. */
-  focalPoint?: "varenna" | "santoriniShip" | "airportTraveler";
+  focalPoint?: "varenna" | "santoriniShip" | "airportTraveler" | "amandaRight";
   /** Limita a largura do texto quando o assunto principal ocupa a direita. */
   textWidth?: "narrowLeft";
   order: number;
