@@ -18,11 +18,22 @@ describe("configurações compactas do Roteiro", () => {
 
   it("mantém dados iniciais, período contínuo, capa, apresentação e passageiros separados", () => {
     for (const field of ["Destino", "Adultos", "Crianças", "Datas da viagem", "Frase de destaque do roteiro", "Capa e fotos", "Apresentação do destino"]) expect(page).toContain(field);
-    expect(page).toContain("<TripPeriodField");
+    expect(page).toContain("<ItineraryDatesEditor");
     expect(page).toContain("adjustItineraryDates.mutateAsync");
     expect(page).toContain("travelers_count: editAdults + editChildren");
     expect(hook).toContain("adultsCount: data.travelers_count as number");
     expect(hook).toContain("childrenCount: 0");
+  });
+
+  it("permite editar a data inicial sem apagar atividades e gerenciar os nomes dos viajantes", () => {
+    const datesEditor = readFileSync("src/components/itinerary/ItineraryDatesEditor.tsx", "utf8");
+    expect(datesEditor).toContain("Aplicar novas datas");
+    expect(datesEditor).toContain("Manter atividades no último dia");
+    expect(datesEditor).toContain("Excluir os dias extras");
+    expect(hook).toContain('extraDaysStrategy = "delete"');
+    expect(hook).toContain('.update({ day_id: lastKeptId })');
+    expect(page).toContain("<ItineraryPassengersCard");
+    expect(page).toContain("updates: { passengers }");
   });
 
   it("move somente a gestão dos dias e preserva a programação completa na página", () => {
