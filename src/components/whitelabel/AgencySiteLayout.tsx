@@ -87,15 +87,41 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
 
 
           <nav className={`hidden items-center lg:flex ${resolveSiteProfile(info.hostname).navDensity === "compact" ? "gap-4 xl:gap-5" : "gap-8"}`}>
-            {mainLinks.map((l) => (
-              <a
-                key={l.to}
-                href={agencySiteHref(l.to)}
-                className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
-              >
-                {l.label}
-              </a>
-            ))}
+            {mainLinks.map((l) =>
+              l.children?.length ? (
+                /* Submenu: abre no hover e também no foco por teclado. */
+                <div key={l.to} className="group relative">
+                  <a
+                    href={agencySiteHref(l.to)}
+                    className="flex items-center gap-1 text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
+                  >
+                    {l.label}
+                    <ChevronDown className="h-4 w-4 opacity-70" />
+                  </a>
+                  <div className="invisible absolute left-0 top-full z-50 min-w-[13rem] pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                    <div className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-lg">
+                      {l.children.map((c) => (
+                        <a
+                          key={c.to}
+                          href={agencySiteHref(c.to)}
+                          className="block px-4 py-3 text-[15px] text-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground"
+                        >
+                          {c.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <a
+                  key={l.to}
+                  href={agencySiteHref(l.to)}
+                  className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
+                >
+                  {l.label}
+                </a>
+              ),
+            )}
           </nav>
 
           <div className="hidden items-center gap-5 md:flex">
