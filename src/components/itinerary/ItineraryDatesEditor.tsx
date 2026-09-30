@@ -74,16 +74,38 @@ export function ItineraryDatesEditor({ start, end, days, saving, onApply }: Itin
 
   return (
     <div className="space-y-2">
-      <TripPeriodField
-        id="itinerary-period"
-        label=""
-        start={draft.start}
-        end={draft.end}
-        triggerClassName="w-full rounded-xl"
-        onChange={({ start: nextStart, end: nextEnd }) => setDraft({ start: nextStart, end: nextEnd })}
-      />
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <TripDatePicker
+          id="itinerary-start"
+          mode="single"
+          label="Início"
+          labelVariant="form"
+          dateFormat="short"
+          start={draft.start}
+          triggerClassName="w-full rounded-xl"
+          onChange={({ start: nextStart }) =>
+            setDraft((prev) => ({
+              start: nextStart,
+              end: prev.end && nextStart && prev.end < nextStart ? nextStart : prev.end,
+            }))
+          }
+        />
+        <TripDatePicker
+          id="itinerary-end"
+          mode="single"
+          label="Fim"
+          labelVariant="form"
+          dateFormat="short"
+          start={draft.end}
+          disabledDates={(date) =>
+            !!draft.start && date < parseLocalDate(draft.start)
+          }
+          triggerClassName="w-full rounded-xl"
+          onChange={({ start: nextEnd }) => setDraft((prev) => ({ ...prev, end: nextEnd }))}
+        />
+      </div>
       <p className="text-xs text-muted-foreground">
-        Clique na nova data de início e depois na de fim. As atividades já criadas acompanham os dias.
+        Escolha a nova data de início e, se precisar, a de fim. As atividades já criadas acompanham os dias.
       </p>
       {dirty ? (
         <div className="flex flex-wrap items-center gap-2">
