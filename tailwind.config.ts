@@ -105,6 +105,18 @@ export default {
           "0%": { transform: "translateX(-150%) skewX(-20deg)" },
           "100%": { transform: "translateX(250%) skewX(-20deg)" },
         },
+        "brand-breathe": {
+          "0%, 100%": { transform: "scale(0.97)", opacity: "0.85" },
+          "50%": { transform: "scale(1.03)", opacity: "1" },
+        },
+        "brand-halo": {
+          "0%, 100%": { transform: "scale(0.9)", opacity: "0.35" },
+          "50%": { transform: "scale(1.1)", opacity: "0.7" },
+        },
+        "brand-sheen": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(200%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
