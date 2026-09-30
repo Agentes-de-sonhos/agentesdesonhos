@@ -122,6 +122,8 @@ export default function CriarRoteiro() {
   const [generatedLinkUrl, setGeneratedLinkUrl] = useState<string | null>(null);
   const [templateTargetItinerary, setTemplateTargetItinerary] = useState<Itinerary | null>(null);
   const [importWizardOpen, setImportWizardOpen] = useState(false);
+  const [importSourceOpen, setImportSourceOpen] = useState(false);
+  const [importQuoteOpen, setImportQuoteOpen] = useState(false);
   const [listSearch, setListSearch] = useState("");
   const debouncedListSearch = useDebounce(listSearch, 200);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
