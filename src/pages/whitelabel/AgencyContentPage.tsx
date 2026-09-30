@@ -43,13 +43,7 @@ const IMAGES: Record<string, string> = {
  * configuração declarativa do perfil (`agencySiteContentPages`). Nenhuma
  * consulta ao backend: só conteúdo editorial e links para a home.
  */
-export default function AgencyContentPage({
-  info,
-  page,
-}: {
-  info: AgencyDomainInfo;
-  page: AgencyContentPageData;
-}) {
+export default function AgencyContentPage({ page }: { page: AgencyContentPageData }) {
   const heroUrl = page.heroImage ? IMAGES[page.heroImage] : undefined;
   const requestHref = agencySiteHref("/#solicitacoes");
 
