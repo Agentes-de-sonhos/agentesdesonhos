@@ -1149,17 +1149,16 @@ export default function CriarRoteiro() {
                   {/* Datas */}
                   <div className="sm:col-span-2">
                     <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Datas da viagem</div>
-                    <TripPeriodField
-                      id="itinerary-period"
-                      label=""
+                    <ItineraryDatesEditor
                       start={currentItinerary.startDate}
                       end={currentItinerary.endDate}
-                      triggerClassName="w-full rounded-xl"
-                      onChange={async ({ start, end }) => {
+                      days={currentItinerary.days || []}
+                      saving={savingDates}
+                      onApply={async ({ start, end, extraDaysStrategy }) => {
                         if (!start || !end || savingDates) return;
                         setSavingDates(true);
                         try {
-                          await adjustItineraryDates.mutateAsync({ itineraryId: currentItinerary.id, startDate: parseLocalDate(start), endDate: parseLocalDate(end) });
+                          await adjustItineraryDates.mutateAsync({ itineraryId: currentItinerary.id, startDate: parseLocalDate(start), endDate: parseLocalDate(end), extraDaysStrategy });
                           await loadItinerary(currentItinerary.id);
                           toast.success("Datas atualizadas!");
                         } catch (err: any) { toast.error(err?.message || "Não foi possível salvar."); }
@@ -1168,6 +1167,27 @@ export default function CriarRoteiro() {
                     />
                   </div>
                 </div>
+
+                {/* Nomes dos viajantes */}
+                <ItineraryPassengersCard
+                  passengers={currentItinerary.passengers || []}
+                  saving={savingPassengers}
+                  onSave={async (passengers) => {
+                    setSavingPassengers(true);
+                    try {
+                      await updateItineraryDetails.mutateAsync({
+                        itineraryId: currentItinerary.id,
+                        updates: { passengers },
+                      });
+                      setCurrentItinerary({ ...currentItinerary, passengers });
+                      toast.success("Viajantes atualizados!");
+                    } catch {
+                      toast.error("Não foi possível salvar os nomes.");
+                    } finally {
+                      setSavingPassengers(false);
+                    }
+                  }}
+                />
 
                 {/* Frase de destaque */}
                 {(() => {
