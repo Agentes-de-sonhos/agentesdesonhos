@@ -549,7 +549,7 @@ export function useItineraries() {
     }) => {
       const { error } = await supabase
         .from("itineraries")
-        .update(updates)
+        .update(updates as never)
         .eq("id", itineraryId);
 
       if (error) throw error;
