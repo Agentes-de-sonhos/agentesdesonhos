@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
 import { useResolvedServiceImage } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation, calculateServicePayment } from "@/lib/servicePayment";
