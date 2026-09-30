@@ -1600,14 +1600,14 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           )}
 
-          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-40 sm:pt-52 pb-20 sm:pb-24 flex flex-col text-white animate-fade-up">
-            <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
+          <div className="relative max-w-4xl mx-auto px-5 sm:px-8 pt-40 sm:pt-52 pb-20 sm:pb-24 flex flex-col items-center text-center text-white animate-fade-up">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
               <MapPin className="h-3 w-3" /> {quote.destination}
             </span>
-            <h1 className="mt-4 text-[2.15rem] sm:text-7xl font-extrabold leading-[1.02] tracking-[-0.025em] max-w-3xl drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] whitespace-nowrap">
+            <h1 className="mt-4 text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-[-0.02em] max-w-3xl break-words text-balance drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]">
               {tripTitle || quote.destination}
             </h1>
-            <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed">
+            <p className="mt-4 text-base sm:text-xl font-light text-white/90 max-w-2xl leading-relaxed text-pretty">
               {tripTitle
                 ? t("heroWithTitle", { name: quote.client_name })
                 : t("heroNoTitle", {
@@ -1618,7 +1618,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </p>
 
             {/* meta chips */}
-            <div className="mt-7 flex flex-wrap gap-2 sm:gap-3">
+            <div className="mt-7 flex flex-wrap justify-center gap-2 sm:gap-3">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Calendar className="h-4 w-4 opacity-80" />
                 {formatDateShort(quote.start_date)} – {formatDateShort(quote.end_date)}
@@ -1639,6 +1639,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 </div>
               )}
             </div>
+
           </div>
 
         </div>
