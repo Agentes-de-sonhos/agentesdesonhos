@@ -161,6 +161,7 @@ export default function CriarRoteiro() {
   const [editChildren, setEditChildren] = useState(0);
   const [savingTravelers, setSavingTravelers] = useState(false);
   const [savingDates, setSavingDates] = useState(false);
+  const [savingPassengers, setSavingPassengers] = useState(false);
   const [isEditingHeadline, setIsEditingHeadline] = useState(false);
   const [editHeadline, setEditHeadline] = useState("");
   const [savingHeadline, setSavingHeadline] = useState(false);
