@@ -18,6 +18,7 @@ export default function PublicCodeResolver() {
   const [resolved, setResolved] = useState<"quote" | "carteira" | "itinerary" | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const loaderBrand = usePublicLoaderBrand(agencySlug);
 
   useEffect(() => {
     const hostname = window.location.hostname;
