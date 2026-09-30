@@ -1,7 +1,8 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { usePublicLoaderBrand } from "@/hooks/usePublicLoaderBrand";
 
 const CarteiraPublicaV2 = lazy(() => import("@/pages/CarteiraPublicaV2"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
@@ -17,6 +18,7 @@ export default function PublicCodeResolver() {
   const [resolved, setResolved] = useState<"quote" | "carteira" | "itinerary" | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const loaderBrand = usePublicLoaderBrand(agencySlug);
 
   useEffect(() => {
     const hostname = window.location.hostname;
@@ -82,11 +84,7 @@ export default function PublicCodeResolver() {
   }, [agencySlug, accessCode]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />;
   }
 
   if (error) {
@@ -101,7 +99,7 @@ export default function PublicCodeResolver() {
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />}>
       {resolved === "quote" ? <OrcamentoPublicoV2 /> : resolved === "itinerary" ? <RoteiroPublicoV2 /> : <CarteiraPublicaV2 />}
     </Suspense>
   );

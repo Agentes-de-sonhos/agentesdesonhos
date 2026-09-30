@@ -105,6 +105,18 @@ export default {
           "0%": { transform: "translateX(-150%) skewX(-20deg)" },
           "100%": { transform: "translateX(250%) skewX(-20deg)" },
         },
+        "brand-breathe": {
+          "0%, 100%": { transform: "scale(0.97)", opacity: "0.85" },
+          "50%": { transform: "scale(1.03)", opacity: "1" },
+        },
+        "brand-halo": {
+          "0%, 100%": { transform: "scale(0.9)", opacity: "0.35" },
+          "50%": { transform: "scale(1.1)", opacity: "0.7" },
+        },
+        "brand-sheen": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(200%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -114,6 +126,9 @@ export default {
         "scale-in": "scale-in 0.2s ease-out",
         "fade-up": "fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both",
         "shimmer-slide": "shimmer-slide 3.2s ease-in-out infinite",
+        "brand-breathe": "brand-breathe 1.8s cubic-bezier(0.4,0,0.6,1) infinite",
+        "brand-halo": "brand-halo 1.8s cubic-bezier(0.4,0,0.6,1) infinite",
+        "brand-sheen": "brand-sheen 1.4s ease-in-out infinite",
       },
     },
   },

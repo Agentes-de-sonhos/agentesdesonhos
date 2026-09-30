@@ -1,9 +1,10 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Quote, ServiceType, ServiceData } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { usePublicLoaderBrand } from "@/hooks/usePublicLoaderBrand";
 
 const OrcamentoPublico = lazy(() => import("@/pages/OrcamentoPublico"));
 
@@ -42,6 +43,7 @@ export default function OrcamentoPublicoV2({
   const [agentProfile, setAgentProfile] = useState<AgentProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const loaderBrand = usePublicLoaderBrand(agencySlug);
 
   useEffect(() => {
     if (!agencySlug || !accessCode) {
@@ -63,9 +65,11 @@ export default function OrcamentoPublicoV2({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-primary/5">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader
+        logoUrl={loaderBrand.logoUrl}
+        agencyName={loaderBrand.agencyName}
+        className="bg-gradient-to-br from-background via-muted/20 to-primary/5"
+      />
     );
   }
 
@@ -81,7 +85,7 @@ export default function OrcamentoPublicoV2({
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />}>
       <OrcamentoPublico
         quoteOverride={quote}
         agentProfileOverride={agentProfile}
