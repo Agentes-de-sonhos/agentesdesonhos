@@ -27,7 +27,14 @@ import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
 
-export const NAV_LINKS = [
+/** Item de menu do site: pode ter um submenu declarado pelo perfil. */
+export interface AgencySiteNavItem {
+  label: string;
+  to: string;
+  children?: { label: string; to: string }[];
+}
+
+export const NAV_LINKS: AgencySiteNavItem[] = [
   { label: "Início", to: "/" },
   { label: "Solicitações", to: "/#solicitacoes" },
   { label: "Experiências", to: "/#campanhas" },
