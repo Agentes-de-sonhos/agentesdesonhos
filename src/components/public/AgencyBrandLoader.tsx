@@ -41,7 +41,7 @@ export function AgencyBrandLoader({ logoUrl, agencyName, className }: AgencyBran
             src={logoUrl as string}
             alt={agencyName?.trim() || "Logotipo da agência"}
             onError={() => setFailed(true)}
-            className="relative h-20 w-auto max-w-[220px] object-contain animate-brand-breathe motion-reduce:animate-none"
+            className="relative h-24 w-auto min-w-[160px] max-w-[260px] object-contain animate-brand-breathe motion-reduce:animate-none"
           />
         </div>
       ) : (
