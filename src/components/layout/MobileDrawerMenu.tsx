@@ -13,7 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import {
   APP_AGENDA_ITEM,
   APP_CREATE_GROUP,
@@ -47,7 +47,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const isStartPlan = !isPromotor && plan === "start";
   const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
   const isAdsGestao = isAdsGestaoMenuUser(isAdmin, plan);
-  const hideOthersSection = isAdsEssencial || isAdsGestao || isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const hideOthersSection = isAdsEssencial || isAdsGestao || isAdsEssencialGestaoMenuUser(isAdmin, plan) || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const isPermitted = useCallback((item: AppSidebarItem) => {
     if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;

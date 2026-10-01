@@ -14,7 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
 import {
   APP_AGENDA_ITEM,
@@ -53,7 +53,7 @@ export function AppSidebar() {
   const isStartPlan = !isPromotor && plan === "start";
   const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
   const isAdsGestao = isAdsGestaoMenuUser(isAdmin, plan);
-  const hideOthersSection = isAdsEssencial || isAdsGestao || isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const hideOthersSection = isAdsEssencial || isAdsGestao || isAdsEssencialGestaoMenuUser(isAdmin, plan) || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const clearTimers = useCallback(() => {
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);

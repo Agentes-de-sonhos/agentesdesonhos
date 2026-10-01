@@ -18151,6 +18151,8 @@ export type Database = {
         | "ads_essencial"
         | "ads_gestao"
         | "ads_gestao_equipe"
+        | "ads_essencial_gestao"
+        | "ads_essencial_gestao_equipe"
       team_data_scope:
         | "own"
         | "created"
@@ -18345,6 +18347,8 @@ export const Constants = {
         "ads_essencial",
         "ads_gestao",
         "ads_gestao_equipe",
+        "ads_essencial_gestao",
+        "ads_essencial_gestao_equipe",
       ],
       team_data_scope: [
         "own",

@@ -281,6 +281,20 @@
       "when": 1790884736473,
       "tag": "0039_ads_gestao_team_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1790886964594,
+      "tag": "0040_add_ads_essencial_gestao_plans",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1790886985319,
+      "tag": "0041_ads_essencial_gestao_team_limits",
+      "breakpoints": true
     }
   ]
 }
