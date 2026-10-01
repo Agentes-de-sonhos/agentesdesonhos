@@ -54,6 +54,8 @@ export function isPublicUpdateContext(): boolean {
    * ambiente de demonstração.
    */
   const sharedSlugAdmin = cleanPath.replace(/^\/[^/]+(?=\/gestao(\/|$))/, "");
+  /* Login do painel é tela pública: nunca recebe o aviso. */
+  if (sharedSlugAdmin === "/gestao/login") return true;
   if (
     !cleanPath.startsWith("/sitelab-base") &&
     sharedSlugAdmin !== "/gestao/login" &&
