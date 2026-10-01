@@ -53,13 +53,15 @@ export function isPublicUpdateContext(): boolean {
    * atualização — exceto a tela de login, que é pública, e o Site Lab, que é
    * ambiente de demonstração.
    */
+  const sharedSlugAdmin = cleanPath.replace(/^\/[^/]+(?=\/gestao(\/|$))/, "");
   if (
     !cleanPath.startsWith("/sitelab-base") &&
-    cleanPath !== "/gestao/login" &&
-    (cleanPath === "/gestao" || cleanPath.startsWith("/gestao/"))
+    sharedSlugAdmin !== "/gestao/login" &&
+    (sharedSlugAdmin === "/gestao" || sharedSlugAdmin.startsWith("/gestao/"))
   ) {
     return false;
   }
+
 
 
   // Structural white-label detection: any hostname that could belong to an
