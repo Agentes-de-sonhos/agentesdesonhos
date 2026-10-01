@@ -1,3 +1,5 @@
+import { descriptionToPlainText } from "@/lib/richDescription";
+import { FormattedText } from "@/components/ui/formatted-text";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -182,7 +184,7 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
     case "circuit":
       if (data.duration) details.push(`Duração: ${data.duration}`);
       if (data.itinerary) details.push(data.itinerary);
-      if (data.notes) details.push(data.notes);
+      if (data.notes) details.push(descriptionToPlainText(data.notes));
       break;
   }
   return details;
@@ -304,9 +306,9 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
                     </div>
                   )}
                   {service.description && (
-                    <p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 italic whitespace-pre-wrap break-words">
-                      {service.description}
-                    </p>
+                    <div className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3 break-words">
+                      <FormattedText>{service.description}</FormattedText>
+                    </div>
                   )}
                 </div>
               </div>
