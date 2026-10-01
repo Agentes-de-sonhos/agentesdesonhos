@@ -151,8 +151,9 @@ function getServiceSummary(service: QuoteService): string {
     case "rail_transport": return `${data.origin_city || ""} → ${data.destination_city || ""}`;
     case "circuit": return data.circuit_name || t("svc_circuit");
     case "other": {
-      // Para evitar duplicação, mostra empresa OU primeira linha da descrição (curta)
+      // Subtítulo só quando a empresa foi informada; nunca repetir a descrição.
       if (data.company_name) return data.company_name;
+      if (data.custom_title?.trim()) return "";
       const firstLine = (data.description || "").split("\n")[0].trim();
       return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || t("svc_other"));
     }
@@ -424,12 +425,14 @@ function FlightBody({ data }: { data: any }) {
         </div>
       </div>
 
-      <FlightDirectionGroup title={t("ida")} icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
+      <div className={`grid grid-cols-1 gap-4 ${!data.is_one_way && retLegs.length > 0 ? "md:grid-cols-2" : ""}`}>
+        <FlightDirectionGroup title={t("ida")} icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
+        {!data.is_one_way && retLegs.length > 0 && (
+          <FlightDirectionGroup title={t("volta")} icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
+        )}
+      </div>
       {intLegs.length > 0 && (
         <FlightDirectionGroup title={t("internalLeg")} icon={<Plane className="h-3.5 w-3.5" />} legs={intLegs} />
-      )}
-      {!data.is_one_way && retLegs.length > 0 && (
-        <FlightDirectionGroup title={t("volta")} icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
       )}
 
       {/* Inclusions */}
@@ -919,9 +922,11 @@ function CollapsibleServiceCard({
               </Badge>
             )}
           </div>
-          <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
-            {summary}
-          </span>
+          {summary && (
+            <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
+              {summary}
+            </span>
+          )}
         </div>
       </div>
       <div className="flex items-center gap-3">
@@ -1945,33 +1950,35 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
               className="rounded-2xl border border-primary/25 bg-primary/[0.05] p-6 sm:p-7 animate-fade-up"
               aria-labelledby="investimento-total-title"
             >
-              <div className="flex flex-col items-center text-center">
-                <span
-                  className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
-                  aria-hidden="true"
-                >
-                  <Wallet className="h-5 w-5" />
-                </span>
-                <p
-                  id="investimento-total-title"
-                  className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80"
-                >
-                  {t("totalInvestmentTitle")}
-                </p>
-                <div className="mt-4 flex flex-col items-center gap-1">
-                  <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                    {t("passengerCount")}
+              <div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center gap-5 md:gap-8">
+                <div className="flex flex-col items-center text-center">
+                  <span
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
+                    aria-hidden="true"
+                  >
+                    <Wallet className="h-5 w-5" />
+                  </span>
+                  <p
+                    id="investimento-total-title"
+                    className="mt-3 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-primary/80"
+                  >
+                    {t("totalInvestmentTitle")}
                   </p>
-                  <p className="text-base sm:text-lg font-semibold text-primary">
-                    {buildPassengerLabel(quote)}
-                  </p>
-                </div>
-                <div className="mt-5 w-full flex justify-center">
-                  <div className="inline-block rounded-2xl bg-white border border-primary/20 shadow-sm px-8 sm:px-14 py-5 sm:py-6 text-center">
-                    {primaryDisplay}
+                  <div className="mt-4 flex flex-col items-center gap-1">
+                    <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                      {t("passengerCount")}
+                    </p>
+                    <p className="text-base sm:text-lg font-semibold text-primary">
+                      {buildPassengerLabel(quote)}
+                    </p>
                   </div>
                 </div>
-                {secondaryDisplay}
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-full rounded-2xl bg-white border border-primary/20 shadow-sm px-6 sm:px-8 py-5 sm:py-6 text-center">
+                    {primaryDisplay}
+                  </div>
+                  {secondaryDisplay && <div className="mt-3">{secondaryDisplay}</div>}
+                </div>
               </div>
             </section>
           );
