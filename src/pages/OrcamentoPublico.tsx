@@ -433,7 +433,8 @@ function FlightBody({ data }: { data: any }) {
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 gap-4 ${!data.is_one_way && retLegs.length > 0 ? "md:grid-cols-2" : ""}`}>
+      {/* Ida e volta lado a lado também no mobile, quando houver trecho de volta */}
+      <div className={`grid gap-3 md:gap-4 ${!data.is_one_way && retLegs.length > 0 ? "grid-cols-2" : "grid-cols-1"}`}>
         <FlightDirectionGroup title={t("ida")} icon={<PlaneTakeoff className="h-3.5 w-3.5" />} legs={outLegs} fallbackDate={data.departure_date} />
         {!data.is_one_way && retLegs.length > 0 && (
           <FlightDirectionGroup title={t("volta")} icon={<PlaneLanding className="h-3.5 w-3.5" />} legs={retLegs} fallbackDate={data.return_date} />
@@ -1126,8 +1127,8 @@ function MobileFloatingCta({ href }: { href: string }) {
   }, []);
   return (
     <div
-      data-mobile-position="bottom-left"
-      className={`fixed left-4 z-40 sm:hidden transition-all duration-300 ease-out ${
+      data-mobile-position="bottom-center"
+      className={`fixed inset-x-0 z-40 flex justify-center px-4 sm:hidden transition-all duration-300 ease-out ${
         visible ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-3 pointer-events-none"
       }`}
       style={{
