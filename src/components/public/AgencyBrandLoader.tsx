@@ -1,30 +1,40 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { readLoaderBrand, writeLoaderBrand } from "@/lib/publicLoaderBrandCache";
 
 interface AgencyBrandLoaderProps {
-  /** Logotipo da agência (quando já resolvido). Sem logo, cai no carregador discreto. */
+  /** Logotipo da agência (quando já resolvido). */
   logoUrl?: string | null;
   /** Nome da agência — usado apenas como texto alternativo da imagem. */
   agencyName?: string | null;
+  /** Chave do link (token/código) para lembrar o logotipo nos próximos acessos. */
+  cacheKey?: string | null;
   className?: string;
 }
 
 /**
- * Tela de carregamento das páginas PÚBLICAS de orçamento.
- *
- * Exibe o logotipo da agência com "respiração" suave (zoom discreto + halo na
- * cor da marca) em vez do círculo girando genérico. Sem logotipo cadastrado —
- * ou se a imagem falhar — mantém o carregador atual, sem quebrar o layout.
+ * Tela de carregamento das páginas PÚBLICAS (orçamento, roteiro, carteira).
+ * Logotipo da agência com "respiração" suave + halo, sempre centralizado na
+ * tela. Sem logotipo conhecido — ou se a imagem falhar — usa o carregador discreto.
  */
-export function AgencyBrandLoader({ logoUrl, agencyName, className }: AgencyBrandLoaderProps) {
+export function AgencyBrandLoader({ logoUrl, agencyName, cacheKey, className }: AgencyBrandLoaderProps) {
+  const cached = readLoaderBrand(cacheKey);
+  const effectiveLogo = logoUrl || cached?.logoUrl || null;
+  const effectiveName = agencyName || cached?.agencyName || null;
   const [failed, setFailed] = useState(false);
-  const showLogo = Boolean(logoUrl) && !failed;
+  const showLogo = Boolean(effectiveLogo) && !failed;
+
+  useEffect(() => {
+    if (logoUrl) writeLoaderBrand(cacheKey, logoUrl, agencyName);
+  }, [cacheKey, logoUrl, agencyName]);
+
+  useEffect(() => setFailed(false), [effectiveLogo]);
 
   return (
     <div
       className={cn(
-        "min-h-screen flex flex-col items-center justify-center gap-6 bg-background",
+        "fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background",
         className,
       )}
       role="status"
@@ -38,10 +48,10 @@ export function AgencyBrandLoader({ logoUrl, agencyName, className }: AgencyBran
             className="absolute h-32 w-32 rounded-full bg-primary/20 blur-3xl animate-brand-halo motion-reduce:animate-none"
           />
           <img
-            src={logoUrl as string}
-            alt={agencyName?.trim() || "Logotipo da agência"}
+            src={effectiveLogo as string}
+            alt={effectiveName?.trim() || "Logotipo da agência"}
             onError={() => setFailed(true)}
-            className="relative h-24 w-auto min-w-[160px] max-w-[260px] object-contain animate-brand-breathe motion-reduce:animate-none"
+            className="relative h-24 w-auto max-w-[260px] object-contain animate-brand-breathe motion-reduce:animate-none"
           />
         </div>
       ) : (
@@ -57,6 +67,31 @@ export function AgencyBrandLoader({ logoUrl, agencyName, className }: AgencyBran
       <span className="sr-only">Carregando…</span>
     </div>
   );
+}
+
+/**
+ * Mantém o carregador visível por um instante após os dados chegarem quando há
+ * logotipo, para que a animação da marca seja realmente vista.
+ */
+export function useBrandLoaderHold(isLoading: boolean, logoUrl?: string | null, holdMs = 1100) {
+  const [holding, setHolding] = useState(false);
+  const [wasLoading, setWasLoading] = useState(isLoading);
+
+  useEffect(() => {
+    if (isLoading) {
+      setWasLoading(true);
+      return;
+    }
+    if (wasLoading && logoUrl) {
+      setHolding(true);
+      const t = window.setTimeout(() => setHolding(false), holdMs);
+      setWasLoading(false);
+      return () => window.clearTimeout(t);
+    }
+    setWasLoading(false);
+  }, [isLoading, logoUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return isLoading || holding;
 }
 
 export default AgencyBrandLoader;
