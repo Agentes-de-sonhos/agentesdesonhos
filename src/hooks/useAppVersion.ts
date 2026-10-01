@@ -113,9 +113,8 @@ export function isPublicUpdateContext(): boolean {
     // agency management) served under the main domain as demo/preview routes.
     "/sitelab-base",
     "/area-do-cliente",
-    "/gestao/",
   ];
-  if (path === "/gestao") return true;
+
   if (publicPrefixes.some((p) => path === p || path.startsWith(p))) return true;
   if (/^\/[^/]+\/ofertas\/?$/.test(path)) return true;
 
