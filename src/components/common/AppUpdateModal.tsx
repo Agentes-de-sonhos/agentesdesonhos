@@ -105,9 +105,9 @@ export function AppUpdateModal() {
                 Nova versão disponível
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Disponibilizamos uma nova versão do Agentes de Sonhos.
-                Você pode atualizar agora ou continuar trabalhando e
-                fazer isso depois. Antes de atualizar, salve suas alterações.
+                {whiteLabel
+                  ? "Disponibilizamos uma nova versão do sistema. Você pode atualizar agora ou continuar trabalhando e fazer isso depois. Antes de atualizar, salve suas alterações."
+                  : "Disponibilizamos uma nova versão do Agentes de Sonhos. Você pode atualizar agora ou continuar trabalhando e fazer isso depois. Antes de atualizar, salve suas alterações."}
               </p>
             </div>
 
