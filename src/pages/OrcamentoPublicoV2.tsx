@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Quote, ServiceType, ServiceData } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
-import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { AgencyBrandLoader, useBrandLoaderHold } from "@/components/public/AgencyBrandLoader";
 import { usePublicLoaderBrand } from "@/hooks/usePublicLoaderBrand";
 
 const OrcamentoPublico = lazy(() => import("@/pages/OrcamentoPublico"));
@@ -63,12 +63,15 @@ export default function OrcamentoPublicoV2({
       .finally(() => setLoading(false));
   }, [agencySlug, accessCode]);
 
-  if (loading) {
+  const loaderLogo = (agentProfile as any)?.agency_logo_url || loaderBrand.logoUrl;
+  const showBrandLoader = useBrandLoaderHold(loading, loaderLogo);
+
+  if (showBrandLoader) {
     return (
       <AgencyBrandLoader
-        logoUrl={loaderBrand.logoUrl}
-        agencyName={loaderBrand.agencyName}
-        className="bg-gradient-to-br from-background via-muted/20 to-primary/5"
+        logoUrl={loaderLogo}
+        agencyName={(agentProfile as any)?.agency_name || loaderBrand.agencyName}
+        cacheKey={agencySlug && accessCode ? `c:${agencySlug}/${accessCode}` : null}
       />
     );
   }
