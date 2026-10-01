@@ -59,11 +59,13 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
   const handleSave = async (data: any) => {
     if (editingTraveler) {
       await updateTraveler({ id: editingTraveler.id, ...data });
+      setFormOpen(false);
+      setEditingTraveler(null);
     } else {
-      await createTraveler({ ...data, client_id: clientId });
+      // Mantém o pop-up aberto e libera a aba de documentos do novo viajante.
+      const created = await createTraveler({ ...data, client_id: clientId });
+      if (created) setEditingTraveler(created);
     }
-    setFormOpen(false);
-    setEditingTraveler(null);
   };
 
   const formatDate = (d: string | null) => {

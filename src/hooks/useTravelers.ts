@@ -52,8 +52,13 @@ export function useTravelers(clientId: string) {
   const createTraveler = useMutation({
     mutationFn: async (data: Omit<Traveler, "id" | "user_id" | "created_at" | "updated_at">) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await supabase.from("travelers").insert({ ...data, user_id: user.id });
+      const { data: created, error } = await supabase
+        .from("travelers")
+        .insert({ ...data, user_id: user.id })
+        .select("*")
+        .single();
       if (error) throw error;
+      return created as Traveler;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["travelers", clientId] });
