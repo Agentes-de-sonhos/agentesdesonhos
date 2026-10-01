@@ -85,7 +85,7 @@ describe("Outros Serviços — formulário manual", () => {
     expect(positions.every((p) => p >= 0)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
     expect(OTHER_FORM_FIELD_ORDER[0]).toBe("company_name");
-    expect(OTHER_FORM_FIELD_ORDER[OTHER_FORM_FIELD_ORDER.length - 1]).toBe("custom_title");
+    expect(OTHER_FORM_FIELD_ORDER[OTHER_FORM_FIELD_ORDER.length - 1]).toBe("icon_id");
   });
 
   it("não busca com menos de 3 caracteres e limita a 5 sugestões", async () => {
@@ -156,5 +156,30 @@ describe("Outros Serviços — formulário manual", () => {
   it("mantém o fallback 'Outros Serviços' como placeholder do título do bloco", async () => {
     await renderOther();
     expect(screen.getByPlaceholderText("Outros Serviços")).toBeTruthy();
+  });
+
+  it("permite escolher e salvar o ícone do cabeçalho", async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    await renderOther({ onSubmit });
+
+    await user.click(screen.getByRole("button", { name: /Alterar ícone de Outros Serviços/i }));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(dialog.querySelector('button[title="Ingresso"]') as HTMLButtonElement);
+    await user.click(screen.getByRole("button", { name: /Aplicar/i }));
+    await user.click(screen.getByRole("button", { name: /^Salvar$/i }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].icon_id).toBe("ticket");
+  });
+
+  it("mantém o ícone de pacote para serviços antigos", async () => {
+    await renderOther({
+      initialData: {
+        service_data: { company_name: "Serviço legado", description: "", price: 0 } as any,
+        amount: 0,
+      } as any,
+    });
+    expect(screen.getByText("Pacote / outros serviços")).toBeTruthy();
   });
 });

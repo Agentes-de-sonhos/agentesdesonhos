@@ -15,6 +15,7 @@ import type { QuoteService, ServiceType } from "@/types/quote";
 import { formatCompositionLabel, readCompositionCounts } from "@/lib/attractionFareComposition";
 import { FLIGHT_STATUS_CLASS, FLIGHT_STATUS_LABEL, analyzeFlight, formatMissingFlightFields, type FlightStatus } from "./flight-wizard/flightStatus";
 import { segmentLabel, splitFlightLegs } from "@/lib/flightSegments";
+import { includedIconComponent, sanitizeIncludedIconId } from "@/lib/includedIcons";
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor,
   useSensor, useSensors, type DragEndEvent,
@@ -198,7 +199,12 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle, currency = 'BRL' }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
-  const Icon = SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
+  const customOtherIcon = service.service_type === "other"
+    ? sanitizeIncludedIconId((service.service_data as any)?.icon_id)
+    : null;
+  const Icon = customOtherIcon
+    ? includedIconComponent(customOtherIcon)
+    : SERVICE_ICONS[service.service_type as ServiceType] || MoreHorizontal;
   const label = getServiceLabel(service);
   const details = getServiceDetails(service, currency);
   const images = service.image_urls?.length ? service.image_urls : (service.image_url ? [service.image_url] : []);

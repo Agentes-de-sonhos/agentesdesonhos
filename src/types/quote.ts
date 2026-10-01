@@ -325,6 +325,8 @@ export interface OtherServiceData {
   price: number;
   /** Título customizado do bloco "Outros Serviços". Se vazio, usa "Outros Serviços". */
   custom_title?: string;
+  /** Identificador allowlisted do ícone exibido no cabeçalho. */
+  icon_id?: string;
 }
 
 export interface CircuitData {

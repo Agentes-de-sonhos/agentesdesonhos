@@ -40,6 +40,7 @@ import {
   Luggage,
   Wifi,
   ShoppingBag,
+  Package,
   Sparkles,
   Users,
   Headphones,
@@ -116,6 +117,7 @@ export const INCLUDED_ICONS: IncludedIconDef[] = [
   { id: "gift", label: "Brinde / extra", category: "servicos", aliases: ["brinde", "extra", "cortesia", "presente"], Icon: Gift },
   { id: "kids", label: "Criança", category: "servicos", aliases: ["crianca", "kids", "familia", "bebe"], Icon: Baby },
   { id: "accessibility", label: "Acessibilidade", category: "servicos", aliases: ["acessibilidade", "mobilidade", "cadeirante"], Icon: Accessibility },
+  { id: "package", label: "Pacote / outros serviços", category: "servicos", aliases: ["pacote", "caixa", "outros servicos", "servico"], Icon: Package },
   { id: "sparkles", label: "Personalizado", category: "servicos", aliases: ["personalizado", "exclusivo", "especial", "geral", "outro"], Icon: Sparkles },
 ];
 

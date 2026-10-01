@@ -30,7 +30,7 @@ import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
-import { includedIconComponent, includedIconLabel } from "@/lib/includedIcons";
+import { includedIconComponent, includedIconLabel, sanitizeIncludedIconId } from "@/lib/includedIcons";
 import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSignature";
 import { PublicInvestmentSummary } from "@/components/quote/PublicInvestmentSummary";
 import CruiseItineraryTimeline from "@/components/quote/CruiseItineraryTimeline";
@@ -79,6 +79,14 @@ const SERVICE_ICONS: Record<ServiceType, React.ReactNode> = {
   attraction: <Ticket className="h-5 w-5" />, insurance: <Shield className="h-5 w-5" />,
   cruise: <Ship className="h-5 w-5" />, rail_transport: <TramFront className="h-5 w-5" />, circuit: <Map className="h-5 w-5" />, other: <Package className="h-5 w-5" />,
 };
+
+function getServiceIcon(service: QuoteService): React.ReactNode {
+  if (service.service_type !== "other") return SERVICE_ICONS[service.service_type as ServiceType] || SERVICE_ICONS.other;
+  const iconId = sanitizeIncludedIconId((service.service_data as any)?.icon_id);
+  if (!iconId) return SERVICE_ICONS.other;
+  const Icon = includedIconComponent(iconId);
+  return <Icon className="h-5 w-5" aria-hidden="true" />;
+}
 
 /**
  * Cabeçalho do serviço no orçamento WEB: mantém o degradê histórico do
@@ -910,7 +918,7 @@ function CollapsibleServiceCard({
           className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm"
           style={SERVICE_ICON_STYLE}
         >
-          {SERVICE_ICONS[type]}
+          {getServiceIcon(service)}
         </div>
         <div className="flex flex-col items-start gap-0.5">
           <div className="flex items-center gap-2">
