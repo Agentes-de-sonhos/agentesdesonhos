@@ -43,3 +43,16 @@ export function isItemHiddenForUser(
   if (!shouldApplyPremiumFundadorFilter(isAdmin, plan)) return false;
   return HIDDEN_ITEM_KEYS.has(itemKey);
 }
+// Teste de 15 dias (Premium com trial, contas criadas desde 28/09/2026):
+// oculta toda a seção "OUTRAS" (incluindo "Mais...") do menu lateral.
+const TRIAL_15_START = Date.parse("2026-09-28T03:00:00Z"); // 28/09 00:00 BRT
+
+export function isTrial15MenuUser(
+  isAdmin: boolean,
+  plan: string | null | undefined,
+  userCreatedAt: string | null | undefined,
+): boolean {
+  if (isAdmin || plan !== "premium" || !userCreatedAt) return false;
+  const created = Date.parse(userCreatedAt);
+  return Number.isFinite(created) && created >= TRIAL_15_START;
+}

@@ -13,7 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import {
   APP_AGENDA_ITEM,
   APP_CREATE_GROUP,
@@ -36,7 +36,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { can, isTeamMember } = usePermissions();
@@ -45,6 +45,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
+  const hideOthersSection = isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const isPermitted = useCallback((item: AppSidebarItem) => {
     if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;
@@ -120,7 +121,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
           {renderGroup(createGroup)}
           {section("MEU TRABALHO")}{renderGroup(projectsGroup)}{isPermitted(APP_AGENDA_ITEM) && renderItem(APP_AGENDA_ITEM)}
           {section("GESTÃO")}{management.map((item) => renderItem(item))}
-          {section("OUTRAS")}{others.map((item) => renderItem(item))}{renderGroup(moreGroup)}
+          {!hideOthersSection && <>{section("OUTRAS")}{others.map((item) => renderItem(item))}{renderGroup(moreGroup)}</>}
         </div>
         <div className="shrink-0 border-t border-sidebar-border p-3">
           {isAdmin && <div className="mb-1">{renderItem(ADMIN_ITEM)}</div>}
