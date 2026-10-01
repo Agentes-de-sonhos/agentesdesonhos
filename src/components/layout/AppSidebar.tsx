@@ -14,7 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isAdsEssencialMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
 import {
   APP_AGENDA_ITEM,
@@ -51,7 +51,8 @@ export function AppSidebar() {
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
-  const hideOthersSection = isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
+  const hideOthersSection = isAdsEssencial || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const clearTimers = useCallback(() => {
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
@@ -101,7 +102,7 @@ export function AppSidebar() {
   const createGroup = useMemo(() => filterGroup(APP_CREATE_GROUP), [filterGroup]);
   const projectsGroup = useMemo(() => filterGroup(APP_PROJECTS_GROUP), [filterGroup]);
   const moreGroup = useMemo(() => filterGroup(APP_MORE_GROUP), [filterGroup]);
-  const managementItems = useMemo(() => APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted]);
+  const managementItems = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted, isAdsEssencial]);
   const otherItems = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
 
   const isItemActive = (item: AppSidebarItem) => {
@@ -256,7 +257,7 @@ export function AppSidebar() {
           </nav>
           {!collapsed && (
             <div data-sidebar-expanded-navigation>
-              <div className="px-3">{sectionLabel("GESTÃO")}</div>
+              {managementItems.length > 0 && <div className="px-3">{sectionLabel("GESTÃO")}</div>}
               <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
               {!hideOthersSection && (
                 <>

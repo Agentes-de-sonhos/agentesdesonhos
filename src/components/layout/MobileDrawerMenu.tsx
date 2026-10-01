@@ -13,7 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isAdsEssencialMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import {
   APP_AGENDA_ITEM,
   APP_CREATE_GROUP,
@@ -45,7 +45,8 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
-  const hideOthersSection = isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
+  const hideOthersSection = isAdsEssencial || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const isPermitted = useCallback((item: AppSidebarItem) => {
     if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;
@@ -58,7 +59,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const createGroup = useMemo(() => filtered(APP_CREATE_GROUP), [filtered]);
   const projectsGroup = useMemo(() => filtered(APP_PROJECTS_GROUP), [filtered]);
   const moreGroup = useMemo(() => filtered(APP_MORE_GROUP), [filtered]);
-  const management = useMemo(() => APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted]);
+  const management = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted, isAdsEssencial]);
   const others = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
 
   const isActive = (item: AppSidebarItem) => {
@@ -120,7 +121,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
         <div className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
           {renderGroup(createGroup)}
           {section("MEU TRABALHO")}{renderGroup(projectsGroup)}{isPermitted(APP_AGENDA_ITEM) && renderItem(APP_AGENDA_ITEM)}
-          {section("GESTÃO")}{management.map((item) => renderItem(item))}
+          {management.length > 0 && section("GESTÃO")}{management.map((item) => renderItem(item))}
           {!hideOthersSection && <>{section("OUTRAS")}{others.map((item) => renderItem(item))}{renderGroup(moreGroup)}</>}
         </div>
         <div className="shrink-0 border-t border-sidebar-border p-3">

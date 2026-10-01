@@ -56,3 +56,8 @@ export function isTrial15MenuUser(
   const created = Date.parse(userCreatedAt);
   return Number.isFinite(created) && created >= TRIAL_15_START;
 }
+
+// ADS Essencial: só Criar novo, Meus projetos e Agenda (sem GESTÃO e OUTRAS).
+export function isAdsEssencialMenuUser(isAdmin: boolean, plan: string | null | undefined): boolean {
+  return !isAdmin && plan === "ads_essencial";
+}

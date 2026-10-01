@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro' | 'promo_grupo_sc';
+export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro' | 'promo_grupo_sc' | 'ads_essencial';
 
 /**
  * Planos que herdam integralmente a configuração de outro plano.
@@ -110,6 +110,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   fundador: ALL_FEATURES,
   fornecedor_parceiro: [],
   promo_grupo_sc: ALL_FEATURES,
+  ads_essencial: ['quote_generator', 'itinerary', 'trip_wallet', 'agenda'],
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
@@ -122,6 +123,7 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   fundador: 'Plano Fundador',
   fornecedor_parceiro: 'Fornecedor Parceiro',
   promo_grupo_sc: 'Promoção Grupo SC',
+  ads_essencial: 'ADS Essencial',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
@@ -134,6 +136,7 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   fundador: 'Acesso vitalício completo — plano exclusivo dos primeiros membros',
   fornecedor_parceiro: 'Plano destinado a fornecedores parceiros — acesso restrito ao próprio perfil de empresa',
   promo_grupo_sc: 'Campanha Grupo SC — acesso equivalente ao Premium por 3 meses a partir da ativação',
+  ads_essencial: 'Orçamentos, roteiros, carteira digital, meus projetos e agenda — R$ 87/mês',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
@@ -146,6 +149,7 @@ export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   fundador: 1000,
   fornecedor_parceiro: 0,
   promo_grupo_sc: 999999,
+  ads_essencial: 0,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
@@ -240,4 +244,5 @@ export const LAUNCH_DATE = new Date('2026-03-16T00:00:00-03:00');
 export const STRIPE_PRICE_IDS: Partial<Record<SubscriptionPlan, string>> = {
   profissional: 'price_1TLxTbFkGdVt5nie0MpVjQM3',
   premium: 'price_1TLxU4FkGdVt5nieNT6rfU3u',
+  ads_essencial: 'price_1ULpgeFkGdVt5nie4zhdYYVm', // R$ 87/mês recorrente
 };
