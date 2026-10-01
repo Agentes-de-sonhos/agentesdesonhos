@@ -8,6 +8,7 @@ const corsHeaders = {
 };
 
 const PLAN_MAP: Record<string, string> = {
+  "prod_VMYoWNDkxtmJJg": "ads_essencial",
   "prod_U9J9e1DdfeYvXg": "fundador",
   // Profissional — todos os produtos historicamente usados
   "prod_U9jMtBbO6vmjsl": "profissional",
