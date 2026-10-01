@@ -14,7 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isItemHiddenForUser } from "@/lib/sidebarVisibility";
+import { isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
 import {
   APP_AGENDA_ITEM,
@@ -39,7 +39,7 @@ export function AppSidebar() {
   const [upgradeFeature, setUpgradeFeature] = useState<Feature | null>(null);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { can, isTeamMember } = usePermissions();
@@ -51,6 +51,7 @@ export function AppSidebar() {
   const isEducaPass = !isPromotor && plan === "educa_pass";
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
+  const hideOthersSection = isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const clearTimers = useCallback(() => {
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
@@ -257,11 +258,15 @@ export function AppSidebar() {
             <div data-sidebar-expanded-navigation>
               <div className="px-3">{sectionLabel("GESTÃO")}</div>
               <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
-              <div className="px-3">{sectionLabel("OUTRAS")}</div>
-              <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
-                {otherItems.map((item) => renderItem(item))}
-                {renderGroup(moreGroup)}
-              </nav>
+              {!hideOthersSection && (
+                <>
+                  <div className="px-3">{sectionLabel("OUTRAS")}</div>
+                  <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>
+                    {otherItems.map((item) => renderItem(item))}
+                    {renderGroup(moreGroup)}
+                  </nav>
+                </>
+              )}
             </div>
           )}
         </div>
