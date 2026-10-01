@@ -121,6 +121,19 @@ export function isPublicUpdateContext(): boolean {
   return false;
 }
 
+/**
+ * True no painel administrativo white label: o aviso aparece, mas com texto
+ * neutro (sem a marca da plataforma) para preservar a identidade da agência.
+ */
+export function isAgencyAdminUpdateContext(): boolean {
+  if (typeof window === "undefined") return false;
+  const cleanPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (cleanPath.startsWith("/sitelab-base")) return false;
+  const internal = cleanPath.replace(/^\/[^/]+(?=\/gestao(\/|$))/, "");
+  if (internal === "/gestao/login") return false;
+  return internal === "/gestao" || internal.startsWith("/gestao/");
+}
+
 async function fetchRemoteVersion(): Promise<string | null> {
   try {
     const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, {
