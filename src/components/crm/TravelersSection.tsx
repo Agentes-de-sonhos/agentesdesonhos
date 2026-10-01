@@ -22,6 +22,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTravelers, useTravelerDocuments, getTravelerDocumentSignedUrl, type Traveler } from "@/hooks/useTravelers";
 import { useToast } from "@/hooks/use-toast";
 import { TravelerVisasSection } from "@/components/crm/TravelerVisasSection";
@@ -202,11 +203,9 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
                       </div>
                     )}
 
-                    {/* Vistos */}
-                    <TravelerVisasSection travelerId={t.id} />
-
-                    {/* Documents sub-section */}
-                    <TravelerDocumentsSection travelerId={t.id} travelerName={t.nome_completo} />
+                    <Button size="sm" variant="outline" onClick={() => handleOpenEdit(t, "docs")}>
+                      <FileUp className="mr-1.5 h-3.5 w-3.5" /> Vistos e documentos
+                    </Button>
                   </div>
                 )}
               </div>
@@ -222,10 +221,12 @@ function TravelerForm({
   traveler,
   onSave,
   isSubmitting,
+  initialTab = "dados",
 }: {
   traveler: Traveler | null;
   onSave: (data: any) => Promise<void>;
   isSubmitting: boolean;
+  initialTab?: "dados" | "docs";
 }) {
   const [form, setForm] = useState({
     nome_completo: traveler?.nome_completo || "",
@@ -252,10 +253,17 @@ function TravelerForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <div>
       <DialogHeader>
         <DialogTitle>{traveler ? "Editar Viajante" : "Novo Viajante"}</DialogTitle>
       </DialogHeader>
+      <Tabs defaultValue={initialTab} className="mt-4">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="dados">Dados</TabsTrigger>
+          <TabsTrigger value="docs">Documentos &amp; Vistos</TabsTrigger>
+        </TabsList>
+        <TabsContent value="dados">
+    <form onSubmit={handleSubmit}>
       <div className="space-y-4 py-4">
         <div>
           <Label>Nome Completo *</Label>
@@ -329,7 +337,74 @@ function TravelerForm({
         </Button>
       </DialogFooter>
     </form>
+        </TabsContent>
+        <TabsContent value="docs" className="mt-4">
+          {traveler ? (
+            <TravelerDocsPanel travelerId={traveler.id} travelerName={traveler.nome_completo} />
+          ) : (
+            <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+              Salve os dados do viajante para adicionar vistos e documentos.
+            </p>
+          )}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
+}
+
+/** Vistos + upload de documentos de um viajante (mesmo bloco para titular e acompanhantes). */
+export function TravelerDocsPanel({ travelerId, travelerName }: { travelerId: string; travelerName: string }) {
+  return (
+    <div className="space-y-4">
+      <TravelerVisasSection travelerId={travelerId} />
+      <TravelerDocumentsSection travelerId={travelerId} travelerName={travelerName} />
+    </div>
+  );
+}
+
+/**
+ * Aba "Documentos & Vistos" do cadastro do cliente: usa o viajante titular
+ * (is_responsavel) e cria-o sob demanda quando ainda não existe.
+ */
+export function ClientDocumentsPanel({ clientId, clientName }: { clientId: string; clientName: string }) {
+  const { travelers, isLoading, createTraveler, isCreating } = useTravelers(clientId);
+  const holder =
+    travelers.find((t) => t.is_responsavel) ??
+    travelers.find((t) => t.nome_completo.trim().toLowerCase() === clientName.trim().toLowerCase());
+
+  if (isLoading) return <p className="py-4 text-center text-sm text-muted-foreground">Carregando...</p>;
+
+  if (!holder) {
+    return (
+      <div className="space-y-3 rounded-lg border border-dashed p-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          Para anexar vistos e documentos, ative o cadastro de documentos do titular.
+        </p>
+        <Button
+          type="button"
+          size="sm"
+          disabled={isCreating}
+          onClick={() =>
+            createTraveler({
+              client_id: clientId,
+              nome_completo: clientName,
+              data_nascimento: null,
+              cpf: null,
+              passaporte: null,
+              validade_passaporte: null,
+              nacionalidade: null,
+              observacoes: null,
+              is_responsavel: true,
+            })
+          }
+        >
+          <Plus className="mr-1.5 h-4 w-4" /> Ativar documentos de {clientName}
+        </Button>
+      </div>
+    );
+  }
+
+  return <TravelerDocsPanel travelerId={holder.id} travelerName={holder.nome_completo} />;
 }
 
 function TravelerDocumentsSection({ travelerId, travelerName }: { travelerId: string; travelerName: string }) {
