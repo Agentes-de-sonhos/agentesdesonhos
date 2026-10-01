@@ -449,46 +449,58 @@ function TravelerDocumentsSection({ travelerId, travelerName }: { travelerId: st
     DOCUMENT_TYPES.find((d) => d.value === tipo)?.label || tipo;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h4 className="text-sm font-medium flex items-center gap-1.5">
-          <Shield className="h-3.5 w-3.5" /> Documentos
-        </h4>
-        <div className="flex items-center gap-2">
-          <Select value={tipoDoc} onValueChange={setTipoDoc}>
-            <SelectTrigger className="h-8 w-[140px] text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {DOCUMENT_TYPES.map((d) => (
-                <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            size="sm" variant="outline" className="h-8"
-            disabled={isUploading}
-            onClick={() => document.getElementById(fileInputId)?.click()}
-          >
-            <FileUp className="mr-1 h-3.5 w-3.5" />
-            {isUploading ? "Enviando..." : "Upload"}
-          </Button>
-          <input
-            id={fileInputId}
-            type="file"
-            className="hidden"
-            accept=".pdf,.jpg,.jpeg,.png"
-            onChange={handleFileChange}
-          />
-        </div>
+    <div className="rounded-lg border bg-muted/20 p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="flex items-center gap-2 text-sm font-medium">
+          <Shield className="h-4 w-4 text-primary" />
+          Documentos {documents.length > 0 && <span className="text-muted-foreground">({documents.length})</span>}
+        </p>
+        <Button
+          size="sm" variant="outline"
+          disabled={isUploading}
+          onClick={() => document.getElementById(fileInputId)?.click()}
+        >
+          <FileUp className="mr-1.5 h-3.5 w-3.5" />
+          {isUploading ? "Enviando..." : "Enviar documento"}
+        </Button>
+        <input
+          id={fileInputId}
+          type="file"
+          className="hidden"
+          accept=".pdf,.jpg,.jpeg,.png"
+          onChange={handleFileChange}
+        />
+      </div>
+
+      <div className="mb-2 flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">Tipo do próximo envio:</span>
+        <Select value={tipoDoc} onValueChange={setTipoDoc}>
+          <SelectTrigger className="h-8 w-[150px] bg-background text-xs">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {DOCUMENT_TYPES.map((d) => (
+              <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {documents.length === 0 ? (
-        <p className="text-xs text-muted-foreground text-center py-2">Nenhum documento</p>
+        <button
+          type="button"
+          disabled={isUploading}
+          onClick={() => document.getElementById(fileInputId)?.click()}
+          className="flex w-full flex-col items-center gap-1 rounded-md border border-dashed bg-background px-3 py-5 text-center transition-colors hover:border-primary/50"
+        >
+          <FileUp className="h-5 w-5 text-primary" />
+          <span className="text-sm font-medium">Clique para enviar um arquivo</span>
+          <span className="text-xs text-muted-foreground">Passaporte, RG, vistos, vacinas (PDF, PNG ou JPG)</span>
+        </button>
       ) : (
-        <div className="space-y-1.5">
+        <ul className="space-y-2">
           {documents.map((doc) => (
-            <div key={doc.id} className="flex items-center justify-between p-2 rounded border text-sm">
+            <li key={doc.id} className="flex items-center justify-between gap-2 rounded-md bg-background px-3 py-2 text-sm">
               <div className="flex items-center gap-2 min-w-0">
                 <Badge variant="outline" className="text-[10px] shrink-0">{getDocLabel(doc.tipo_documento)}</Badge>
                 <span className="truncate">{doc.nome_arquivo}</span>
