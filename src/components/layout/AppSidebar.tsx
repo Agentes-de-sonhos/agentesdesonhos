@@ -14,7 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isAdsEssencialMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
 import {
   APP_AGENDA_ITEM,
@@ -52,7 +52,8 @@ export function AppSidebar() {
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
   const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
-  const hideOthersSection = isAdsEssencial || isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const isAdsGestao = isAdsGestaoMenuUser(isAdmin, plan);
+  const hideOthersSection = isAdsEssencial || isAdsGestao || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const clearTimers = useCallback(() => {
     if (collapseTimerRef.current) clearTimeout(collapseTimerRef.current);
@@ -99,8 +100,8 @@ export function AppSidebar() {
     items: group.items.filter(isPermitted),
   }), [isPermitted]);
 
-  const createGroup = useMemo(() => filterGroup(APP_CREATE_GROUP), [filterGroup]);
-  const projectsGroup = useMemo(() => filterGroup(APP_PROJECTS_GROUP), [filterGroup]);
+  const createGroup = useMemo(() => isAdsGestao ? { ...APP_CREATE_GROUP, items: [] } : filterGroup(APP_CREATE_GROUP), [filterGroup, isAdsGestao]);
+  const projectsGroup = useMemo(() => isAdsGestao ? { ...APP_PROJECTS_GROUP, items: [] } : filterGroup(APP_PROJECTS_GROUP), [filterGroup, isAdsGestao]);
   const moreGroup = useMemo(() => filterGroup(APP_MORE_GROUP), [filterGroup]);
   const managementItems = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted, isAdsEssencial]);
   const otherItems = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);

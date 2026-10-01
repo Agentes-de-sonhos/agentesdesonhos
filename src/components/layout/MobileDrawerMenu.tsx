@@ -13,7 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isAdsEssencialMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import {
   APP_AGENDA_ITEM,
   APP_CREATE_GROUP,
@@ -46,7 +46,8 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const isCartaoDigital = !isPromotor && plan === "cartao_digital";
   const isStartPlan = !isPromotor && plan === "start";
   const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
-  const hideOthersSection = isAdsEssencial || isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const isAdsGestao = isAdsGestaoMenuUser(isAdmin, plan);
+  const hideOthersSection = isAdsEssencial || isAdsGestao || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const isPermitted = useCallback((item: AppSidebarItem) => {
     if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;
@@ -56,8 +57,8 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
     return canAccessRoute(item.url.split("?")[0], can);
   }, [can, isAdmin, isTeamMember, plan]);
   const filtered = useCallback((group: AppSidebarGroup) => ({ ...group, items: group.items.filter(isPermitted) }), [isPermitted]);
-  const createGroup = useMemo(() => filtered(APP_CREATE_GROUP), [filtered]);
-  const projectsGroup = useMemo(() => filtered(APP_PROJECTS_GROUP), [filtered]);
+  const createGroup = useMemo(() => isAdsGestao ? { ...APP_CREATE_GROUP, items: [] } : filtered(APP_CREATE_GROUP), [filtered, isAdsGestao]);
+  const projectsGroup = useMemo(() => isAdsGestao ? { ...APP_PROJECTS_GROUP, items: [] } : filtered(APP_PROJECTS_GROUP), [filtered, isAdsGestao]);
   const moreGroup = useMemo(() => filtered(APP_MORE_GROUP), [filtered]);
   const management = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted, isAdsEssencial]);
   const others = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
