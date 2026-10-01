@@ -14,6 +14,7 @@ const TEST_PLANS: { id: SubscriptionPlan; label: string; icon: typeof Star; desc
   { id: "start", label: "Start", icon: Star, description: "Gratuito — acesso básico" },
   { id: "profissional", label: "Profissional", icon: Sparkles, description: "R$49/mês — acesso intermediário" },
   { id: "premium", label: "Premium", icon: Crown, description: "R$98/mês — acesso total" },
+  { id: "ads_essencial", label: "ADS Essencial", icon: Star, description: "R$87/mês — orçamentos, roteiros, carteira e agenda" },
 ];
 
 export function AdminPlanSwitcher() {
@@ -29,7 +30,7 @@ export function AdminPlanSwitcher() {
     try {
       const { error } = await supabase
         .from("subscriptions")
-        .update({ plan: targetPlan })
+        .update({ plan: targetPlan as any })
         .eq("user_id", user.id)
         .eq("is_active", true);
 
@@ -66,7 +67,7 @@ export function AdminPlanSwitcher() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {TEST_PLANS.map(({ id, label, icon: Icon, description }) => {
             const isActive = plan === id;
             const isLoading = switching === id;

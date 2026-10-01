@@ -257,7 +257,7 @@ export function AppSidebar() {
           </nav>
           {!collapsed && (
             <div data-sidebar-expanded-navigation>
-              <div className="px-3">{sectionLabel("GESTÃO")}</div>
+              {managementItems.length > 0 && <div className="px-3">{sectionLabel("GESTÃO")}</div>}
               <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
               {!hideOthersSection && (
                 <>

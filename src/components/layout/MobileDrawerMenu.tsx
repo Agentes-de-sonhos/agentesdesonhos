@@ -121,7 +121,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
         <div className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
           {renderGroup(createGroup)}
           {section("MEU TRABALHO")}{renderGroup(projectsGroup)}{isPermitted(APP_AGENDA_ITEM) && renderItem(APP_AGENDA_ITEM)}
-          {section("GESTÃO")}{management.map((item) => renderItem(item))}
+          {management.length > 0 && section("GESTÃO")}{management.map((item) => renderItem(item))}
           {!hideOthersSection && <>{section("OUTRAS")}{others.map((item) => renderItem(item))}{renderGroup(moreGroup)}</>}
         </div>
         <div className="shrink-0 border-t border-sidebar-border p-3">
