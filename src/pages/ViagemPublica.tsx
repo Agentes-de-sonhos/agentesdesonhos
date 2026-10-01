@@ -953,7 +953,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
               <BoardingFact icon={Shirt} label={t("fldDressCode")} value={data.dress_code || t("cruiseDressDefault")} />
               <BoardingFact icon={Users} label={t("fldChegada")} value={data.recommended_arrival || t("cruiseArrivalDefault")} />
               <BoardingFact icon={Briefcase} label={t("fldBagagem")} value={data.baggage_policy || t("attrConfirmarPending")} />
-              {data.boarding_notes && <BoardingFact icon={FileText} label={t("fldObservacoes")} value={data.boarding_notes} />}
+              {data.boarding_notes && <BoardingFact icon={FileText} label={t("fldObservacoes")} value={descriptionToPlainText(data.boarding_notes)} />}
             </div>
           </div>
         )}
