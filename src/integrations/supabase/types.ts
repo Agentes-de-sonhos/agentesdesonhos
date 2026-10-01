@@ -18148,6 +18148,7 @@ export type Database = {
         | "start"
         | "fornecedor_parceiro"
         | "promo_grupo_sc"
+        | "ads_essencial"
       team_data_scope:
         | "own"
         | "created"
@@ -18339,6 +18340,7 @@ export const Constants = {
         "start",
         "fornecedor_parceiro",
         "promo_grupo_sc",
+        "ads_essencial",
       ],
       team_data_scope: [
         "own",
