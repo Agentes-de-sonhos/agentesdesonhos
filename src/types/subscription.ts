@@ -1,4 +1,4 @@
-export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro' | 'promo_grupo_sc' | 'ads_essencial';
+export type SubscriptionPlan = 'start' | 'educa_pass' | 'cartao_digital' | 'essencial' | 'profissional' | 'premium' | 'fundador' | 'fornecedor_parceiro' | 'promo_grupo_sc' | 'ads_essencial' | 'ads_gestao' | 'ads_gestao_equipe';
 
 /**
  * Planos que herdam integralmente a configuração de outro plano.
@@ -111,6 +111,8 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   fornecedor_parceiro: [],
   promo_grupo_sc: ALL_FEATURES,
   ads_essencial: ['quote_generator', 'itinerary', 'trip_wallet', 'agenda'],
+  ads_gestao: ['crm_basic', 'financial', 'agenda', 'community'],
+  ads_gestao_equipe: ['crm_basic', 'financial', 'agenda', 'community'],
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
@@ -124,6 +126,8 @@ export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
   fornecedor_parceiro: 'Fornecedor Parceiro',
   promo_grupo_sc: 'Promoção Grupo SC',
   ads_essencial: 'ADS Essencial',
+  ads_gestao: 'ADS Gestão',
+  ads_gestao_equipe: 'ADS Gestão Equipe',
 };
 
 export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
@@ -137,6 +141,8 @@ export const PLAN_DESCRIPTIONS: Record<SubscriptionPlan, string> = {
   fornecedor_parceiro: 'Plano destinado a fornecedores parceiros — acesso restrito ao próprio perfil de empresa',
   promo_grupo_sc: 'Campanha Grupo SC — acesso equivalente ao Premium por 3 meses a partir da ativação',
   ads_essencial: 'Orçamentos, roteiros, carteira digital, meus projetos e agenda — R$ 87/mês',
+  ads_gestao: 'Clientes, oportunidades, operações, reservas, financeiro, agenda e comunidade — até 2 usuários, R$ 87/mês',
+  ads_gestao_equipe: 'Clientes, oportunidades, operações, reservas, financeiro, agenda e comunidade — até 5 usuários, R$ 167/mês',
 };
 
 export const AI_LIMITS: Record<SubscriptionPlan, number> = {
@@ -150,6 +156,8 @@ export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   fornecedor_parceiro: 0,
   promo_grupo_sc: 999999,
   ads_essencial: 0,
+  ads_gestao: 0,
+  ads_gestao_equipe: 0,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
@@ -245,4 +253,6 @@ export const STRIPE_PRICE_IDS: Partial<Record<SubscriptionPlan, string>> = {
   profissional: 'price_1TLxTbFkGdVt5nie0MpVjQM3',
   premium: 'price_1TLxU4FkGdVt5nieNT6rfU3u',
   ads_essencial: 'price_1ULpgeFkGdVt5nie4zhdYYVm', // R$ 87/mês recorrente
+  ads_gestao: 'price_1ULq6OFkGdVt5nien9POsrh1', // R$ 87/mês, até 2 usuários
+  ads_gestao_equipe: 'price_1ULq7aFkGdVt5nieiHvSndPk', // R$ 167/mês, até 5 usuários
 };

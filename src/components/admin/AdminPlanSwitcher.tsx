@@ -15,6 +15,8 @@ const TEST_PLANS: { id: SubscriptionPlan; label: string; icon: typeof Star; desc
   { id: "profissional", label: "Profissional", icon: Sparkles, description: "R$49/mês — acesso intermediário" },
   { id: "premium", label: "Premium", icon: Crown, description: "R$98/mês — acesso total" },
   { id: "ads_essencial", label: "ADS Essencial", icon: Star, description: "R$87/mês — orçamentos, roteiros, carteira e agenda" },
+  { id: "ads_gestao", label: "ADS Gestão", icon: Star, description: "R$87/mês — CRM, financeiro, agenda e comunidade (2 usuários)" },
+  { id: "ads_gestao_equipe", label: "ADS Gestão Equipe", icon: Star, description: "R$167/mês — CRM, financeiro, agenda e comunidade (5 usuários)" },
 ];
 
 export function AdminPlanSwitcher() {
