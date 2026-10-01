@@ -86,6 +86,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AgencyCompaniesPanel } from "@/components/crm/AgencyCompaniesPanel";
 import { DocumentExpiryRadar } from "@/components/crm/DocumentExpiryRadar";
 import { ClientAreaAccessSection } from "@/components/crm/ClientAreaAccessSection";
+import { ClientDocumentsPanel } from "@/components/crm/TravelersSection";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KanbanToolbarSlot } from "@/components/crm/kanban/KanbanToolbarSlot";
 import { useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
 
@@ -456,6 +458,12 @@ export function ClientsModule() {
                   : "Informe os dados de contato do novo cliente."}
               </DialogDescription>
             </DialogHeader>
+            <Tabs key={editingClient?.id ?? "new"} defaultValue="dados">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="dados">Dados Cadastrais</TabsTrigger>
+                <TabsTrigger value="docs">Documentos &amp; Vistos</TabsTrigger>
+              </TabsList>
+              <TabsContent value="dados" className="mt-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -679,6 +687,17 @@ export function ClientsModule() {
                 />
               </div>
             )}
+              </TabsContent>
+              <TabsContent value="docs" className="mt-4">
+                {editingClient?.id ? (
+                  <ClientDocumentsPanel clientId={editingClient.id} clientName={editingClient.name} />
+                ) : (
+                  <p className="rounded-lg border border-dashed p-4 text-center text-sm text-muted-foreground">
+                    Crie o cliente primeiro; em seguida, abra "Editar" para anexar vistos e documentos.
+                  </p>
+                )}
+              </TabsContent>
+            </Tabs>
           </DialogContent>
         </Dialog>
       </div>
