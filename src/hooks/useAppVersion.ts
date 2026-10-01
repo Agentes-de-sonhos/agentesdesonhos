@@ -45,6 +45,22 @@ export function isPublicUpdateContext(): boolean {
   if (typeof window === "undefined") return true;
   const host = window.location.hostname.toLowerCase();
   const path = window.location.pathname;
+  const cleanPath = path.replace(/\/+$/, "") || "/";
+
+  /**
+   * Painel administrativo white label (/gestao). É uma superfície de TRABALHO
+   * da agência (não do cliente final), então recebe o aviso pontual de
+   * atualização — exceto a tela de login, que é pública, e o Site Lab, que é
+   * ambiente de demonstração.
+   */
+  if (
+    !cleanPath.startsWith("/sitelab-base") &&
+    cleanPath !== "/gestao/login" &&
+    (cleanPath === "/gestao" || cleanPath.startsWith("/gestao/"))
+  ) {
+    return false;
+  }
+
 
   // Structural white-label detection: any hostname that could belong to an
   // agency (custom domain, any TLD) — plus the ?__agency_host preview mode —
