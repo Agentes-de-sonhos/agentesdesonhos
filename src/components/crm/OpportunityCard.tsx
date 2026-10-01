@@ -448,6 +448,17 @@ export function OpportunityCard({
           {/* Header: client name + menu */}
           <div className="flex items-start justify-between gap-2 mb-2.5">
             <div className="flex-1 min-w-0">
+              {opportunity.client?.referred_by && (
+                <div className="mb-1">
+                  <span
+                    className="inline-flex max-w-full items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
+                    title={`Indicado por ${opportunity.client.referred_by}`}
+                  >
+                    <UserPlus className="h-3 w-3 flex-shrink-0" />
+                    <span className="truncate">Indicado por {opportunity.client.referred_by}</span>
+                  </span>
+                </div>
+              )}
               <p className="font-bold text-sm text-foreground leading-tight truncate">
                 {opportunity.client?.name}
               </p>
@@ -457,17 +468,6 @@ export function OpportunityCard({
                   {opportunity.destination}
                 </span>
               </div>
-              {opportunity.client?.referred_by && (
-                <div className="mt-1.5">
-                  <span
-                    className="inline-flex max-w-full items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary"
-                    title={`Indicado por: ${opportunity.client.referred_by}`}
-                  >
-                    <UserPlus className="h-3 w-3 flex-shrink-0" />
-                    <span className="truncate">Indicado por: {opportunity.client.referred_by}</span>
-                  </span>
-                </div>
-              )}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
