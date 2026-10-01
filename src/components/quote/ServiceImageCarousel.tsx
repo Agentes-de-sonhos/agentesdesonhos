@@ -117,7 +117,7 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
           <img
             src={srcs[0]}
             alt={alt}
-            className="w-full aspect-[4/3] sm:h-56 lg:h-52 sm:aspect-auto object-cover hover:scale-105 transition-transform duration-300"
+            className="w-full aspect-[3/1] sm:h-56 lg:h-52 sm:aspect-auto object-cover hover:scale-105 transition-transform duration-300"
             loading="lazy"
             onError={() => markFailed(usable[0].ref)}
           />
