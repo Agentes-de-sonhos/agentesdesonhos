@@ -458,6 +458,7 @@ export function ClientsModule() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="name"
@@ -471,6 +472,20 @@ export function ClientsModule() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="referred_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Indicado por</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
@@ -622,19 +637,6 @@ export function ClientsModule() {
                       <FormLabel>Observações Gerais</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Anotações sobre o cliente (não visíveis ao cliente)..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="referred_by"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Indicado por</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

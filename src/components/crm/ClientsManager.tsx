@@ -142,6 +142,7 @@ export function ClientsManager() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="name"
@@ -155,6 +156,20 @@ export function ClientsManager() {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="referred_by"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Indicado por</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FormField
                     control={form.control}
@@ -195,19 +210,6 @@ export function ClientsManager() {
                       <FormLabel>Cidade</FormLabel>
                       <FormControl>
                         <Input placeholder="São Paulo, SP" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="referred_by"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Indicado por</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex.: Primo da Roberta" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
