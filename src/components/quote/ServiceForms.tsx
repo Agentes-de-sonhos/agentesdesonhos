@@ -88,6 +88,8 @@ import { useAirports } from "@/hooks/useAirports";
 import { fetchPlaceMetadata, extractPlaceDescription } from "@/lib/hotelMetadata";
 import { suggestServiceDescription } from "@/lib/serviceDescriptionSuggestion";
 import { TripPeriodField, parseYMD, toYMD } from "@/components/shared/TripPeriodField";
+import { IncludedIconPicker } from "@/components/quote/IncludedIconPicker";
+import { includedIconComponent, includedIconLabel, sanitizeIncludedIconId, type IncludedIconId } from "@/lib/includedIcons";
 
 
 /** Parse "YYYY-MM-DD" as a local date to avoid UTC-shift bug (-1 day).
@@ -2399,6 +2401,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
 /* ━━━━━━━━━━━━━━━━━━━ OTHER FORM ━━━━━━━━━━━━━━━━━━━ */
 const otherSchema = z.object({
   custom_title: z.string().max(80, "Máximo 80 caracteres").optional(),
+  icon_id: z.string().optional(),
   option_label: z.string().optional(),
   company_name: z.string().optional(),
   description: z.string().optional(),
@@ -2689,15 +2692,20 @@ export const OTHER_FORM_FIELD_ORDER = [
   "price",
   "payment",
   "custom_title",
+  "icon_id",
 ] as const;
 
 function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData, paymentSlot, photoSlot, onPlaceIdChange, destinationContext }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const [placeId, setPlaceId] = useState<string | null>((init as any)?.place_id ?? null);
+  const initialIconId = sanitizeIncludedIconId((init as any)?.icon_id) ?? undefined;
+  const [iconId, setIconId] = useState<IncludedIconId | undefined>(initialIconId);
+  const [iconPickerOpen, setIconPickerOpen] = useState(false);
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
     defaultValues: {
       custom_title: init?.custom_title || "",
+      icon_id: initialIconId || "",
       company_name: init?.company_name || "",
       description: init?.description || "",
       price: init?.price || initialData?.amount || 0,
@@ -2739,6 +2747,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
       company_name: values.company_name || "",
       description: values.description,
       price: values.price,
+      ...(sanitizeIncludedIconId(iconId) ? { icon_id: sanitizeIncludedIconId(iconId) as string } : {}),
       ...(placeId ? { place_id: placeId } : {}),
     }, values.price, values.option_label || undefined);
   };
@@ -2797,6 +2806,41 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
             <FormMessage />
           </FormItem>
         )} />
+        {(() => {
+          const EffectiveIcon = includedIconComponent(iconId || "package");
+          const itemText = form.watch("custom_title")?.trim() || form.watch("company_name")?.trim() || "Outros Serviços";
+          return (
+            <div className="space-y-2">
+              <FormLabel>Ícone do cabeçalho <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-full justify-start gap-3"
+                onClick={() => setIconPickerOpen(true)}
+                aria-label={`Alterar ícone de ${itemText}`}
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                  <EffectiveIcon className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <span className="flex-1 text-left">{includedIconLabel(iconId || "package")}</span>
+                <Pencil className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              </Button>
+              <p className="text-xs text-muted-foreground">Escolha o símbolo que aparecerá ao lado do título deste bloco.</p>
+              <IncludedIconPicker
+                open={iconPickerOpen}
+                onOpenChange={setIconPickerOpen}
+                itemText={itemText}
+                currentIconId={iconId}
+                autoIconId="package"
+                onApply={(nextIconId) => {
+                  const next = nextIconId ?? undefined;
+                  setIconId(next);
+                  form.setValue("icon_id", next || "", { shouldDirty: true });
+                }}
+              />
+            </div>
+          );
+        })()}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Opção recomendada" />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>

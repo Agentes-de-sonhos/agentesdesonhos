@@ -9,6 +9,7 @@ import { splitFlightLegs } from "@/lib/flightSegments";
 import { agencyBrandInputFromProfile, resolveBrandPalette, normalizeBrandHex } from "@/lib/brandTheme";
 import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
 import { includedIconSvgMarkup } from "@/lib/includedIconSvg";
+import { sanitizeIncludedIconId } from "@/lib/includedIcons";
 import { iconKeyForIncludedItem } from "@/lib/whatsIncluded";
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { supabase } from "@/integrations/supabase/client";
@@ -507,9 +508,12 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
     quote.services
       ?.map((service) => {
         const label = getServiceLabel(service, t);
-        const emoji = SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
-        const details = getServiceDetails(service, t, formatDate, locale);
         const data = service.service_data as any;
+        const customOtherIcon = service.service_type === "other" ? sanitizeIncludedIconId(data?.icon_id) : null;
+        const emoji = customOtherIcon
+          ? includedIconSvgMarkup(customOtherIcon, 18, C.primaryOnTertiary)
+          : SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
+        const details = getServiceDetails(service, t, formatDate, locale);
         const notesText = service.service_type === "attraction" ? data?.notes : null;
         const descText = service.description || null;
         // Summary alinhado ao link público
