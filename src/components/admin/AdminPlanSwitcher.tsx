@@ -17,6 +17,8 @@ const TEST_PLANS: { id: SubscriptionPlan; label: string; icon: typeof Star; desc
   { id: "ads_essencial", label: "ADS Essencial", icon: Star, description: "R$87/mês — orçamentos, roteiros, carteira e agenda" },
   { id: "ads_gestao", label: "ADS Gestão", icon: Star, description: "R$87/mês — CRM, financeiro, agenda e comunidade (2 usuários)" },
   { id: "ads_gestao_equipe", label: "ADS Gestão Equipe", icon: Star, description: "R$167/mês — CRM, financeiro, agenda e comunidade (5 usuários)" },
+  { id: "ads_essencial_gestao", label: "ADS Essencial + Gestão", icon: Crown, description: "R$167/mês — essencial + gestão completa (2 usuários)" },
+  { id: "ads_essencial_gestao_equipe", label: "ADS Essencial + Gestão Equipe", icon: Crown, description: "R$197/mês — essencial + gestão completa (5 usuários)" },
 ];
 
 export function AdminPlanSwitcher() {
