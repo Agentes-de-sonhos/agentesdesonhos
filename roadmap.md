@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Orçamentos: permitir escolher o ícone do cabeçalho de Outros Serviços, refletindo no editor, link público e PDF, sem publicar.
+- [x] Orçamentos: permitir escolher o ícone do cabeçalho de Outros Serviços, refletindo no editor, link público e PDF, sem publicar.
 - [x] Roteiros: editar data inicial com deslocamento em cascata e confirmação antes de descartar atividades, gerenciar nomes dos viajantes após a criação e unificar o botão Importar (arquivo ou orçamento), sem publicar.
 - [x] Site da 100 Limites: menu com submenus e páginas Quem Somos (DMC/Agência), Frota, Passeios (Lisboa/Portugal), Europa e Pet Friendly, sem publicar.
 - [x] Criar e validar a prévia técnica isolada do briefing 14 para O Mundo em Cores, preservando a fixture ADS existente, tenants e banco, sem publicar.
