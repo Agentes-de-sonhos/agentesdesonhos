@@ -61,3 +61,8 @@ export function isTrial15MenuUser(
 export function isAdsEssencialMenuUser(isAdmin: boolean, plan: string | null | undefined): boolean {
   return !isAdmin && plan === "ads_essencial";
 }
+
+// ADS Gestão / Gestão Equipe: só GESTÃO e Agenda (sem Criar novo, Meus projetos e OUTRAS).
+export function isAdsGestaoMenuUser(isAdmin: boolean, plan: string | null | undefined): boolean {
+  return !isAdmin && (plan === "ads_gestao" || plan === "ads_gestao_equipe");
+}

@@ -274,6 +274,13 @@
       "when": 1790884712736,
       "tag": "0038_add_ads_gestao_plans",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1790884736473,
+      "tag": "0039_ads_gestao_team_limits",
+      "breakpoints": true
     }
   ]
 }

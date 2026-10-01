@@ -12,6 +12,8 @@ const PRICE_TO_PLAN: Record<string, string> = {
   "price_1TToCFFkGdVt5nieNMQEBoo1": "profissional",
   "price_1TToClFkGdVt5niefGXbFhpe": "premium",
   "price_1ULpgeFkGdVt5nie4zhdYYVm": "ads_essencial",
+  "price_1ULq6OFkGdVt5nien9POsrh1": "ads_gestao",
+  "price_1ULq7aFkGdVt5nieiHvSndPk": "ads_gestao_equipe",
 };
 
 Deno.serve(async (req) => {
