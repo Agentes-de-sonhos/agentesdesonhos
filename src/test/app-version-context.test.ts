@@ -72,13 +72,22 @@ describe("isPublicUpdateContext — white label suppression", () => {
     }
   });
 
-  it("suppresses agency client area and agency management surfaces", () => {
-    for (const path of ["/area-do-cliente", "/area-do-cliente/viagens/1", "/gestao", "/gestao/clientes"]) {
+  it("suppresses agency client area and public agency surfaces", () => {
+    for (const path of ["/area-do-cliente", "/area-do-cliente/viagens/1", "/gestao/login"]) {
       setLocation(`https://app.agentesdesonhos.com.br${path}`);
       expect(isPublicUpdateContext(), path).toBe(true);
       setLocation(`https://exemploagencia.com.br${path}`);
       expect(isPublicUpdateContext(), `agency ${path}`).toBe(true);
     }
+  });
+
+  it("allows the white-label agency management panel (/gestao)", () => {
+    for (const path of ["/gestao", "/gestao/clientes", "/minha-agencia/gestao/financeiro"]) {
+      setLocation(`https://exemploagencia.com.br${path}`);
+      expect(isPublicUpdateContext(), `agency ${path}`).toBe(false);
+    }
+    setLocation("https://exemploagencia.com.br/minha-agencia/gestao/login");
+    expect(isPublicUpdateContext()).toBe(true);
   });
 
   it("keeps the main platform CRM management route eligible", () => {

@@ -45,6 +45,26 @@ export function isPublicUpdateContext(): boolean {
   if (typeof window === "undefined") return true;
   const host = window.location.hostname.toLowerCase();
   const path = window.location.pathname;
+  const cleanPath = path.replace(/\/+$/, "") || "/";
+
+  /**
+   * Painel administrativo white label (/gestao). É uma superfície de TRABALHO
+   * da agência (não do cliente final), então recebe o aviso pontual de
+   * atualização — exceto a tela de login, que é pública, e o Site Lab, que é
+   * ambiente de demonstração.
+   */
+  const sharedSlugAdmin = cleanPath.replace(/^\/[^/]+(?=\/gestao(\/|$))/, "");
+  /* Login do painel é tela pública: nunca recebe o aviso. */
+  if (sharedSlugAdmin === "/gestao/login") return true;
+  if (
+    !cleanPath.startsWith("/sitelab-base") &&
+    sharedSlugAdmin !== "/gestao/login" &&
+    (sharedSlugAdmin === "/gestao" || sharedSlugAdmin.startsWith("/gestao/"))
+  ) {
+    return false;
+  }
+
+
 
   // Structural white-label detection: any hostname that could belong to an
   // agency (custom domain, any TLD) — plus the ?__agency_host preview mode —
@@ -95,13 +115,25 @@ export function isPublicUpdateContext(): boolean {
     // agency management) served under the main domain as demo/preview routes.
     "/sitelab-base",
     "/area-do-cliente",
-    "/gestao/",
   ];
-  if (path === "/gestao") return true;
+
   if (publicPrefixes.some((p) => path === p || path.startsWith(p))) return true;
   if (/^\/[^/]+\/ofertas\/?$/.test(path)) return true;
 
   return false;
+}
+
+/**
+ * True no painel administrativo white label: o aviso aparece, mas com texto
+ * neutro (sem a marca da plataforma) para preservar a identidade da agência.
+ */
+export function isAgencyAdminUpdateContext(): boolean {
+  if (typeof window === "undefined") return false;
+  const cleanPath = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (cleanPath.startsWith("/sitelab-base")) return false;
+  const internal = cleanPath.replace(/^\/[^/]+(?=\/gestao(\/|$))/, "");
+  if (internal === "/gestao/login") return false;
+  return internal === "/gestao" || internal.startsWith("/gestao/");
 }
 
 async function fetchRemoteVersion(): Promise<string | null> {

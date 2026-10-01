@@ -19,6 +19,7 @@ import {
   hasUnsavedChanges,
   dismissAppUpdate,
   isPublicUpdateContext,
+  isAgencyAdminUpdateContext,
   APP_UPDATE_PROMPT_ENABLED,
 } from "@/hooks/useAppVersion";
 
@@ -31,6 +32,8 @@ export function AppUpdateModal() {
   // Structural guard: agency / Site Lab surfaces must never mount the
   // Agentes de Sonhos update prompt, even if a version is detected.
   const suppressed = !APP_UPDATE_PROMPT_ENABLED || isPublicUpdateContext();
+  /* No painel white label o texto é neutro, sem a marca da plataforma. */
+  const whiteLabel = isAgencyAdminUpdateContext();
   const { updateAvailable, remoteVersion } = useAppVersion();
   const [open, setOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -102,9 +105,9 @@ export function AppUpdateModal() {
                 Nova versão disponível
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Disponibilizamos uma nova versão do Agentes de Sonhos.
-                Você pode atualizar agora ou continuar trabalhando e
-                fazer isso depois. Antes de atualizar, salve suas alterações.
+                {whiteLabel
+                  ? "Disponibilizamos uma nova versão do sistema. Você pode atualizar agora ou continuar trabalhando e fazer isso depois. Antes de atualizar, salve suas alterações."
+                  : "Disponibilizamos uma nova versão do Agentes de Sonhos. Você pode atualizar agora ou continuar trabalhando e fazer isso depois. Antes de atualizar, salve suas alterações."}
               </p>
             </div>
 
