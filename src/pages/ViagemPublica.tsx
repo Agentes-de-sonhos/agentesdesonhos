@@ -1,3 +1,5 @@
+import { descriptionToPlainText } from "@/lib/richDescription";
+import { FormattedText } from "@/components/ui/formatted-text";
 import { useNoindex } from "@/hooks/useNoindex";
 import { useState, useEffect, useRef, useCallback, createContext, useContext, useMemo } from "react";
 import { BrandText } from "@/components/ui/brand-text";
@@ -488,7 +490,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.locator_code) details.push(`${t('fldLocalizador')}: ${data.locator_code}`);
       if (data.flight_status) details.push(`${t('fldStatus')}: ${statusMap[data.flight_status] || data.flight_status}`);
       // Legacy compat
-      if (!data.segments && data.notes) details.push(`${t('fldObs')}: ${data.notes}`);
+      if (!data.segments && data.notes) details.push(`${t('fldObs')}: ${descriptionToPlainText(data.notes)}`);
       const firstDate = data.segments?.[0]?.flight_date || data.departure_date || '';
       const lastDate = data.segments?.[data.segments?.length - 1]?.flight_date || data.return_date || '';
       return { 
@@ -606,7 +608,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.origin_station) details.push(`${t('fldEmbarque')}: ${data.origin_station}`);
       if (data.destination_station) details.push(`${t('fldDesembarque')}: ${data.destination_station}`);
       if (data.passengers?.length > 0) details.push(`${t('fldPassageiros')}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      if (data.boarding_notes) details.push(`📋 ${data.boarding_notes}`);
+      if (data.boarding_notes) details.push(`📋 ${descriptionToPlainText(data.boarding_notes)}`);
       return { title: `${data.origin_city} → ${data.destination_city}`, details, dates: data.travel_date ? `${formatDate(data.travel_date)}${time ? ` • ${time}` : ''}` : undefined };
     }
     case "other": {
@@ -634,7 +636,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.guide_meeting_point) otherDetails.push(`${t('fldPontoEncontro')}: ${data.guide_meeting_point}`);
       if (data.description) otherDetails.push(data.description);
       if (data.agency_tips) otherDetails.push(`${t('fldDicas')}: ${data.agency_tips}`);
-      if (data.agency_notes) otherDetails.push(`${t('fldObs')}: ${data.agency_notes}`);
+      if (data.agency_notes) otherDetails.push(`${t('fldObs')}: ${descriptionToPlainText(data.agency_notes)}`);
       return { title: data.service_name || t('fldServico'), details: otherDetails, dates: data.date ? formatDate(data.date) : undefined };
     }
     default:
@@ -915,7 +917,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTerminal")}: {data.boarding_terminal}</p>}
             {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentosField")}: {data.required_documents}</p>}
             {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldImigracao")}: {data.immigration_rules}</p>}
-            {data.boarding_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.boarding_notes}</p>}
+            {data.boarding_notes && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.boarding_notes)}</FormattedText></div>}
           </div>
         )}
 
@@ -951,7 +953,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
               <BoardingFact icon={Shirt} label={t("fldDressCode")} value={data.dress_code || t("cruiseDressDefault")} />
               <BoardingFact icon={Users} label={t("fldChegada")} value={data.recommended_arrival || t("cruiseArrivalDefault")} />
               <BoardingFact icon={Briefcase} label={t("fldBagagem")} value={data.baggage_policy || t("attrConfirmarPending")} />
-              {data.boarding_notes && <BoardingFact icon={FileText} label={t("fldObservacoes")} value={data.boarding_notes} />}
+              {data.boarding_notes && <BoardingFact icon={FileText} label={t("fldObservacoes")} value={descriptionToPlainText(data.boarding_notes)} />}
             </div>
           </div>
         )}
@@ -1130,13 +1132,13 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-2 w-full min-w-0 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1.5">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secObservacoesColon")}</p>
             {data.notes && (
-              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.notes}</p>
+              <div className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]"><FormattedText>{String(data.notes)}</FormattedText></div>
             )}
             {data.special_requests && (
               <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{t("fldSolicitacoes")}: {data.special_requests}</p>
             )}
             {data.agency_notes && (
-              <p className="w-full min-w-0 text-[13px] italic text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{data.agency_notes}</p>
+              <div className="w-full min-w-0 text-[13px] italic text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]"><FormattedText>{String(data.agency_notes)}</FormattedText></div>
             )}
           </div>
         )}
@@ -1371,7 +1373,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
                 <p className="text-xs text-foreground">{data.plan_b}</p>
               </div>
             )}
-            {data.agency_notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic mt-1">{data.agency_notes}</p>}
+            {data.agency_notes && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic mt-1"><FormattedText>{String(data.agency_notes)}</FormattedText></div>}
           </div>
         )}
 
@@ -1485,7 +1487,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isAttraction && data.agency_notes && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secObservacoesEmoji")}</p>
-            <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>
+            <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.agency_notes)}</FormattedText></div>
           </div>
         )}
 
@@ -1596,7 +1598,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isInsurance && data.agency_notes && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secObservacoesEmoji")}</p>
-            <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>
+            <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.agency_notes)}</FormattedText></div>
           </div>
         )}
 
@@ -1704,7 +1706,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isOther && data.agency_notes && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secObservacoesEmoji")}</p>
-            <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.agency_notes}</p>
+            <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.agency_notes)}</FormattedText></div>
           </div>
         )}
 

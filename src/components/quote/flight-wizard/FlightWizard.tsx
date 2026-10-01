@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { TextareaWithTemplate } from "@/components/notes/TextareaWithTemplate";
+import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { suggestAirlines } from "@/lib/airlines";
 import { searchAirportsSync, type AirportSuggestion } from "@/lib/airports";
@@ -666,14 +666,14 @@ export function FlightWizard({
             )}
             <div className="space-y-2">
               <Label>Descrição (opcional)</Label>
-              <TextareaWithTemplate placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]"
+              <RichTextareaWithTemplate placeholder="Detalhes, diferenciais, informações complementares..." className="min-h-[80px]"
                 value={data.description || ""}
                 onValueChange={(v) => upd({ description: v })}
                 onChange={(e) => upd({ description: e.target.value })} />
             </div>
             <div className="space-y-2">
               <Label>Observações</Label>
-              <TextareaWithTemplate placeholder="Observações adicionais..."
+              <RichTextareaWithTemplate placeholder="Observações adicionais..."
                 value={data.notes || ""}
                 onValueChange={(v) => upd({ notes: v })}
                 onChange={(e) => upd({ notes: e.target.value })} />

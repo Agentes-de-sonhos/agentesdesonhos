@@ -885,7 +885,7 @@ function CollapsibleServiceCard({
   const parseDetail = (line: string): Array<{ label?: string; value: string }> => {
     if (!line) return [];
     // Multi-line text → render as a single free-form block (notes, itineraries)
-    if (line.includes("\n")) return [{ value: line }];
+    if (line.includes("\n") || /<\/?(p|ul|ol|img|h[1-6]|br)\b/i.test(line)) return [{ value: line }];
     const parts = line.split(" | ").map(p => p.trim()).filter(Boolean);
     const out: Array<{ label?: string; value: string }> = [];
     for (const p of parts) {

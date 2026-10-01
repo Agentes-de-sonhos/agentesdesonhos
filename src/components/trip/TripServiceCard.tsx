@@ -1,3 +1,4 @@
+import { FormattedText } from "@/components/ui/formatted-text";
 import { useState, useRef } from "react";
 import { SecureFileLink } from "@/components/trip/SecureFileLink";
 import { format } from "date-fns";
@@ -280,7 +281,7 @@ export function TripServiceCard({
               </span>
               <p className="font-medium truncate">{getServiceDescription(service)}</p>
               {dates && <p className="text-sm text-muted-foreground">{dates}</p>}
-              {notes && <p className="text-xs text-muted-foreground mt-1 italic">{notes}</p>}
+              {notes && <div className="text-xs text-muted-foreground mt-1"><FormattedText>{String(notes)}</FormattedText></div>}
               
               {/* Attachments section */}
               {attachments.length > 0 && (

@@ -1,3 +1,4 @@
+import { descriptionToPlainText } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
@@ -170,7 +171,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.carry_on || data.checked_baggage) details.push(`${t("fldBagagem")}: ${data.carry_on ? `${t("fldMao")}: ${data.carry_on}` : ''} ${data.checked_baggage ? `${t("fldDespachada")}: ${data.checked_baggage}` : ''}`);
       if (data.recommended_arrival) details.push(`${t("fldAntecedencia")}: ${data.recommended_arrival}`);
       if (data.required_documents) details.push(`${t("fldDocumentos")}: ${data.required_documents}`);
-      if (data.boarding_notes || data.notes) details.push(`${t("fldObs")}: ${data.boarding_notes || data.notes}`);
+      if (data.boarding_notes || data.notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.boarding_notes || data.notes)}`);
       break;
     case "hotel": {
       const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: t("catBoutique"), resort: t("catResort"), pousada: t("catPousada") };
@@ -190,7 +191,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.guests?.length > 0) details.push(`${t("fldHospedes")}: ${data.guests.map((g: any) => g.name).join(', ')}`);
       if (data.cancellation_policy) details.push(`${t("fldCancelamento")}: ${data.cancellation_policy}`);
       if (data.mandatory_fees) details.push(`${t("fldTaxasDestino")}: ${data.mandatory_fees}`);
-      if (data.notes) details.push(`${t("fldObs")}: ${data.notes}`);
+      if (data.notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.notes)}`);
       break;
     }
     case "car_rental":
@@ -209,7 +210,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       }
       if (data.deposit_amount) details.push(`${t("fldCaucao")}: ${data.deposit_amount}`);
       if (data.required_documents) details.push(`${t("fldDocumentos")}: ${data.required_documents}`);
-      if (data.notes) details.push(`${t("fldObs")}: ${data.notes}`);
+      if (data.notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.notes)}`);
       break;
       break;
     case "transfer": {
@@ -234,7 +235,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.vehicle_type) details.push(`${t("fldVeiculo")}: ${data.vehicle_type}`);
       if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
       if (data.plan_b) details.push(`${t("fldPlanoB")}: ${data.plan_b}`);
-      if (data.notes) details.push(`${t("fldObs")}: ${data.notes}`);
+      if (data.notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.notes)}`);
       break;
     }
     case "attraction": {
@@ -255,7 +256,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.usage_instructions) details.push(`${t("fldInstrucoes")}: ${data.usage_instructions}`);
       if (data.cancellation_policy) details.push(`${t("fldCancelamento")}: ${data.cancellation_policy}`);
       if (data.agency_tips) details.push(`${t("fldDicas")}: ${data.agency_tips}`);
-      if (data.agency_notes) details.push(`${t("fldObs")}: ${data.agency_notes}`);
+      if (data.agency_notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.agency_notes)}`);
       break;
     }
     case "insurance": {
@@ -278,7 +279,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.insured_persons?.length > 0) details.push(`${t("fldSegurados")}: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
       if (data.how_to_activate) details.push(`${t("fldComoAcionar")}: ${data.how_to_activate}`);
       if (data.agency_tips) details.push(`${t("fldDicas")}: ${data.agency_tips}`);
-      if (data.agency_notes || data.notes) details.push(`${t("fldObs")}: ${data.agency_notes || data.notes}`);
+      if (data.agency_notes || data.notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.agency_notes || data.notes)}`);
       break;
     }
     case "cruise":
@@ -302,7 +303,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.boarding_terminal) details.push(`${t("fldTerminal")}: ${data.boarding_terminal}`);
       if (data.recommended_arrival) details.push(`${t("fldChegadaRecomendada")}: ${data.recommended_arrival}`);
       if (data.required_documents) details.push(`${t("fldDocumentos")}: ${data.required_documents}`);
-      if (data.boarding_notes) details.push(`${t("fldOrientacoes")}: ${data.boarding_notes}`);
+      if (data.boarding_notes) details.push(`${t("fldOrientacoes")}: ${descriptionToPlainText(data.boarding_notes)}`);
       break;
     case "train":
       details.push(`🚆 ${data.origin_city} → ${data.destination_city}`);
@@ -313,7 +314,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.origin_station) details.push(`${t("fldEmbarque")}: ${data.origin_station}`);
       if (data.destination_station) details.push(`${t("fldDesembarque")}: ${data.destination_station}`);
       if (data.passengers?.length > 0) details.push(`${t("fldPassageiros")}: ${data.passengers.map((p: any) => p.name).join(', ')}`);
-      if (data.boarding_notes) details.push(`${t("fldOrientacoes")}: ${data.boarding_notes}`);
+      if (data.boarding_notes) details.push(`${t("fldOrientacoes")}: ${descriptionToPlainText(data.boarding_notes)}`);
       break;
     case "other": {
       const otherTypeMap: Record<string, string> = { restaurante: t("otherRestaurante"), guia_turistico: t("otherGuiaTuristico"), chip_internet: t("otherChipInternet"), experiencia: t("otherExperiencia"), evento: t("otherEvento"), spa_wellness: t("otherSpaWellness"), servico_vip: t("otherServicoVip"), concierge: t("otherConcierge"), personalizado: t("otherPersonalizado") };
@@ -333,9 +334,9 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.chip_activation_instructions) details.push(`${t("fldAtivacao")}: ${data.chip_activation_instructions}`);
       if (data.guide_name) details.push(`${t("fldGuia")}: ${data.guide_name}${data.guide_language ? ` (${data.guide_language})` : ''}`);
       if (data.guide_meeting_point) details.push(`${t("fldPontoEncontro")}: ${data.guide_meeting_point}`);
-      if (data.description) details.push(data.description);
+      if (data.description) details.push(descriptionToPlainText(data.description));
       if (data.agency_tips) details.push(`${t("fldDicas")}: ${data.agency_tips}`);
-      if (data.agency_notes) details.push(`${t("fldObs")}: ${data.agency_notes}`);
+      if (data.agency_notes) details.push(`${t("fldObs")}: ${descriptionToPlainText(data.agency_notes)}`);
       break;
     }
   }

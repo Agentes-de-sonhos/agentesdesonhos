@@ -1,3 +1,4 @@
+import { sanitizedDescriptionHtml, descriptionToPlainText } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { type PublicLocale, DEFAULT_PUBLIC_LOCALE, formatPublicShortDate, formatPublicLongDate, pluralize } from "@/i18n/publicMaterials/locale";
@@ -513,9 +514,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         const emoji = customOtherIcon
           ? includedIconSvgMarkup(customOtherIcon, 18, C.primaryOnTertiary)
           : SERVICE_EMOJI[service.service_type as ServiceType] || "📋";
-        const details = getServiceDetails(service, t, formatDate, locale);
-        const notesText = service.service_type === "attraction" ? data?.notes : null;
-        const descText = service.description || null;
+        const details = getServiceDetails(service, t, formatDate, locale).map((d) => descriptionToPlainText(d));
+        const notesText = service.service_type === "attraction" && data?.notes ? sanitizedDescriptionHtml(data.notes) : null;
+        const descText = service.description ? sanitizedDescriptionHtml(service.description) : null;
         // Summary alinhado ao link público
         let summary = "";
         switch (service.service_type) {
@@ -670,13 +671,13 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
 
         const descHtml = descText ? `
           <div class="pdf-block pdf-desc" style="margin-top:8px;background:${C.tertiary};border-left:3px solid ${C.border};border-radius:6px;padding:8px 12px;word-wrap:break-word;overflow-wrap:break-word;">
-            <p style="margin:0;font-size:12px;color:${C.mutedT};line-height:1.5;white-space:pre-wrap;word-break:break-word;">${descText}</p>
+            <div style="margin:0;font-size:12px;color:${C.mutedT};line-height:1.5;word-break:break-word;">${descText}</div>
           </div>
         ` : "";
 
         const notesHtml = notesText ? `
           <div class="pdf-block pdf-notes" style="margin-top:4px;">
-            <p style="margin:2px 0;font-size:12px;color:${C.muted};line-height:1.45;font-style:italic;border-left:2px solid ${C.border};padding-left:10px;white-space:pre-wrap;word-break:break-word;">${notesText}</p>
+            <div style="margin:2px 0;font-size:12px;color:${C.muted};line-height:1.45;font-style:italic;border-left:2px solid ${C.border};padding-left:10px;word-break:break-word;">${notesText}</div>
           </div>
         ` : "";
 
