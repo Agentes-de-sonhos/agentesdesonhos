@@ -267,6 +267,13 @@
       "when": 1790695894796,
       "tag": "0037_ads_briefing_email",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1790884712736,
+      "tag": "0038_add_ads_gestao_plans",
+      "breakpoints": true
     }
   ]
 }
