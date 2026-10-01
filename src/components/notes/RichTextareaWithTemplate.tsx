@@ -26,7 +26,7 @@ export function RichTextareaWithTemplate({ value, onValueChange, className }: Pr
   return (
     <div className={cn("relative", className?.includes("hidden") && "hidden")}>
       <RichContentEditor
-        content={html}
+        content={html || "<p></p>"}
         onChange={handleChange}
         editorClassName="min-h-[160px] [&_.ProseMirror]:min-h-[140px]"
       />
