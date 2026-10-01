@@ -88,7 +88,7 @@ export default function OrcamentoPublicoV2({
   }
 
   return (
-    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderLogo} agencyName={loaderBrand.agencyName} cacheKey={agencySlug && accessCode ? `c:${agencySlug}/${accessCode}` : null} />}>
       <OrcamentoPublico
         quoteOverride={quote}
         agentProfileOverride={agentProfile}

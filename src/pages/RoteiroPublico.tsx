@@ -1,3 +1,4 @@
+import { AgencyBrandLoader, useBrandLoaderHold } from "@/components/public/AgencyBrandLoader";
 import { useEffect, useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
@@ -227,11 +228,16 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
     }
   };
 
-  if (isLoading) {
+  const loaderLogo = (agentProfile as any)?.agency_logo_url || (itineraryBrand as any)?.agency_logo_url || null;
+  const profilePending = !!itinerary?.userId && agentProfile === undefined;
+  const showBrandLoader = useBrandLoaderHold(isLoading || profilePending, loaderLogo);
+  if (showBrandLoader) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader
+        logoUrl={loaderLogo}
+        agencyName={(agentProfile as any)?.agency_name ?? null}
+        cacheKey={token ? `r:${token}` : null}
+      />
     );
   }
 

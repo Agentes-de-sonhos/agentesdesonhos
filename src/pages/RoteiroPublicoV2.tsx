@@ -1,3 +1,5 @@
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { usePublicLoaderBrand } from "@/hooks/usePublicLoaderBrand";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -22,6 +24,8 @@ export default function RoteiroPublicoV2({
   const [error, setError] = useState("");
 
   const t = itineraryTranslator(null);
+  const loaderBrand = usePublicLoaderBrand(agencySlug);
+  const cacheKey = agencySlug && accessCode ? `c:${agencySlug}/${accessCode}` : null;
 
   useEffect(() => {
     if (!agencySlug || !accessCode) {
@@ -55,9 +59,7 @@ export default function RoteiroPublicoV2({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/20 to-primary/5">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} cacheKey={cacheKey} />
     );
   }
 
@@ -73,7 +75,7 @@ export default function RoteiroPublicoV2({
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} cacheKey={cacheKey} />}>
       <RoteiroPublico tokenOverride={shareToken} />
     </Suspense>
   );

@@ -1,3 +1,4 @@
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
@@ -584,9 +585,7 @@ export default function CarteiraPublicaV2({
 
   if (loading && !needsPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader logoUrl={(branding as any)?.agency_logo_url} agencyName={(branding as any)?.agency_name ?? null} cacheKey={typeof window !== "undefined" ? `w:${window.location.pathname}` : null} />
     );
   }
 
@@ -645,9 +644,7 @@ export default function CarteiraPublicaV2({
 
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader logoUrl={(branding as any)?.agency_logo_url} agencyName={(branding as any)?.agency_name ?? null} cacheKey={typeof window !== "undefined" ? `w:${window.location.pathname}` : null} />
     }>
       <ViagemPublica 
         preLoadedTrip={tripData.trip} 
