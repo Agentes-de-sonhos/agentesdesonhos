@@ -83,8 +83,9 @@ export default function PublicCodeResolver() {
     tryResolve();
   }, [agencySlug, accessCode]);
 
+  const cacheKey = agencySlug && accessCode ? `c:${agencySlug}/${accessCode}` : null;
   if (loading) {
-    return <AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />;
+    return <AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} cacheKey={cacheKey} />;
   }
 
   if (error) {
@@ -99,7 +100,7 @@ export default function PublicCodeResolver() {
   }
 
   return (
-    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} />}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} cacheKey={cacheKey} />}>
       {resolved === "quote" ? <OrcamentoPublicoV2 /> : resolved === "itinerary" ? <RoteiroPublicoV2 /> : <CarteiraPublicaV2 />}
     </Suspense>
   );

@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
-import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
+import { AgencyBrandLoader, useBrandLoaderHold } from "@/components/public/AgencyBrandLoader";
 import { useResolvedServiceImage } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
 import { extractServicePaymentConfig, extractFlightFeeInfo, getServicePaymentDisplay, getRoomPaymentSimulation, calculateServicePayment } from "@/lib/servicePayment";
@@ -1430,11 +1430,15 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const brandInput = agencyBrandInputFromProfile(brandProfile as any);
   useAgencyBrandTheme(brandInput);
 
-  if (isLoading) {
+  const loaderLogo = (brandProfile as any)?.agency_logo_url ?? null;
+  const showBrandLoader = useBrandLoaderHold(isLoading, loaderLogo);
+
+  if (showBrandLoader) {
     return (
       <AgencyBrandLoader
-        logoUrl={(brandProfile as any)?.agency_logo_url ?? null}
+        logoUrl={loaderLogo}
         agencyName={(brandProfile as any)?.agency_name ?? null}
+        cacheKey={token ? `q:${token}` : null}
       />
     );
   }

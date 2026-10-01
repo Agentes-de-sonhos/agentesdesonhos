@@ -1,3 +1,4 @@
+import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useParams } from "react-router-dom";
@@ -155,9 +156,7 @@ export default function CarteiraPublica() {
 
   if (loading && !needsPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader cacheKey={typeof window !== "undefined" ? `w:${window.location.pathname}` : null} />
     );
   }
 
@@ -203,9 +202,7 @@ export default function CarteiraPublica() {
   // This avoids React Router state loss issues that could cause attachments to not display
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <AgencyBrandLoader cacheKey={typeof window !== "undefined" ? `w:${window.location.pathname}` : null} />
     }>
       <ViagemPublica 
         preLoadedTrip={tripData.trip} 
