@@ -86,11 +86,13 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
               <Plus className="mr-2 h-4 w-4" /> Adicionar Viajante
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
             <TravelerForm
+              key={editingTraveler?.id ?? "new"}
               traveler={editingTraveler}
               onSave={handleSave}
               isSubmitting={isCreating}
+              initialTab={editingTraveler && !formOpenedForEdit(editingTraveler, travelers) ? "docs" : "dados"}
             />
           </DialogContent>
         </Dialog>
