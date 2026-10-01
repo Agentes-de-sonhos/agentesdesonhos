@@ -157,6 +157,9 @@ const clientSchema = z.object({
   birthday_day: z.string().optional(),
   birthday_month: z.string().optional(),
   birthday_year: z.string().optional(),
+  cpf: z.string().optional(),
+  passaporte: z.string().optional(),
+  validade_passaporte: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
@@ -272,7 +275,23 @@ export function ClientsModule() {
         birthday_day: client.birthday_day?.toString() || "",
         birthday_month: client.birthday_month?.toString() || "",
         birthday_year: client.birthday_year?.toString() || "",
+        cpf: "",
+        passaporte: "",
+        validade_passaporte: "",
       });
+      supabase
+        .from("travelers")
+        .select("cpf, passaporte, validade_passaporte")
+        .eq("client_id", client.id)
+        .eq("is_responsavel", true)
+        .limit(1)
+        .maybeSingle()
+        .then(({ data: h }) => {
+          if (!h) return;
+          form.setValue("cpf", h.cpf || "");
+          form.setValue("passaporte", h.passaporte || "");
+          form.setValue("validade_passaporte", h.validade_passaporte || "");
+        });
     } else {
       setEditingClient(null);
       form.reset({
@@ -348,6 +367,34 @@ export function ClientsModule() {
       const result = await createClient(payload);
       clientId = result?.id;
       createdClient = (result as Client) ?? null;
+    }
+
+    // Sincroniza CPF/passaporte com o viajante titular do cliente.
+    if (clientId && user) {
+      const docs = {
+        cpf: data.cpf?.trim() || null,
+        passaporte: data.passaporte?.trim() || null,
+        validade_passaporte: data.validade_passaporte || null,
+      };
+      const { data: holder } = await supabase
+        .from("travelers")
+        .select("id")
+        .eq("client_id", clientId)
+        .eq("is_responsavel", true)
+        .limit(1)
+        .maybeSingle();
+      if (holder?.id) {
+        await supabase.from("travelers").update(docs).eq("id", holder.id);
+      } else if (docs.cpf || docs.passaporte || docs.validade_passaporte) {
+        await supabase.from("travelers").insert({
+          ...docs,
+          client_id: clientId,
+          user_id: user.id,
+          nome_completo: data.name,
+          is_responsavel: true,
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["travelers", clientId] });
     }
 
     if (clientId && bDay && bMonth) {
@@ -493,6 +540,44 @@ export function ClientsModule() {
                     </FormItem>
                   )}
                 />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="cpf"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CPF</FormLabel>
+                        <FormControl>
+                          <Input placeholder="000.000.000-00" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="passaporte"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nº do Passaporte</FormLabel>
+                        <FormControl>
+                          <Input placeholder="AB123456" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="validade_passaporte"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Validade do Passaporte</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <FormField
