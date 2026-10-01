@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { readLoaderBrand, writeLoaderBrand } from "@/lib/publicLoaderBrandCache";
@@ -75,21 +75,27 @@ export function AgencyBrandLoader({ logoUrl, agencyName, cacheKey, className }: 
  */
 export function useBrandLoaderHold(isLoading: boolean, logoUrl?: string | null, holdMs = 1100) {
   const [holding, setHolding] = useState(false);
-  const [wasLoading, setWasLoading] = useState(isLoading);
+  const wasLoadingRef = useRef(isLoading);
+  const logoRef = useRef(logoUrl);
+  logoRef.current = logoUrl;
 
+  // Depende só de isLoading: mudanças de logo/cores durante o "hold" não podem
+  // cancelar o temporizador (isso travava a tela no logotipo).
   useEffect(() => {
     if (isLoading) {
-      setWasLoading(true);
+      wasLoadingRef.current = true;
       return;
     }
-    if (wasLoading && logoUrl) {
-      setHolding(true);
-      const t = window.setTimeout(() => setHolding(false), holdMs);
-      setWasLoading(false);
-      return () => window.clearTimeout(t);
-    }
-    setWasLoading(false);
-  }, [isLoading, logoUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!wasLoadingRef.current) return;
+    wasLoadingRef.current = false;
+    if (!logoRef.current) return;
+    setHolding(true);
+    const t = window.setTimeout(() => setHolding(false), holdMs);
+    return () => {
+      window.clearTimeout(t);
+      setHolding(false);
+    };
+  }, [isLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return isLoading || holding;
 }

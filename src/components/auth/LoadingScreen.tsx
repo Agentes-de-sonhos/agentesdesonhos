@@ -9,6 +9,18 @@ interface Props {
   escalateAfterMs?: number;
 }
 
+const INTERNAL_PREFIXES = /^\/(dashboard|admin|auth|ferramentas-ia|crm|financeiro|gestao|meu-|minha-|configuracoes|comunidade|planos)/;
+
+function isPublicClientPath(): boolean {
+  if (typeof window === "undefined") return false;
+  const { hostname, pathname } = window.location;
+  if (hostname.endsWith(".tur.br")) return true;
+  if (/^\/(orcamento|roteiro|viagem|c|v|fatura)\//.test(pathname)) return true;
+  // /:agencySlug/:accessCode (links públicos por código)
+  const parts = pathname.split("/").filter(Boolean);
+  return parts.length === 2 && !INTERNAL_PREFIXES.test(pathname);
+}
+
 /**
  * Global loading fallback used after login while session/plan/role data resolves.
  * Escalates the message after a few seconds so users never face a blank screen
@@ -25,6 +37,15 @@ export function LoadingScreen({
     const t = window.setTimeout(() => setEscalated(true), escalateAfterMs);
     return () => window.clearTimeout(t);
   }, [escalateAfterMs]);
+
+  // Links públicos de clientes nunca exibem textos da área interna.
+  if (isPublicClientPath()) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-background" role="status" aria-busy="true">
+        <span className="sr-only">Carregando…</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-6">
