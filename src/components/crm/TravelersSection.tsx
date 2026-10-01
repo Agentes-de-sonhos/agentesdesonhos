@@ -45,14 +45,17 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
   const [formOpen, setFormOpen] = useState(false);
   const [editingTraveler, setEditingTraveler] = useState<Traveler | null>(null);
   const [expandedTraveler, setExpandedTraveler] = useState<string | null>(null);
+  const [initialTab, setInitialTab] = useState<"dados" | "docs">("dados");
 
   const handleOpenCreate = () => {
     setEditingTraveler(null);
+    setInitialTab("dados");
     setFormOpen(true);
   };
 
-  const handleOpenEdit = (t: Traveler) => {
+  const handleOpenEdit = (t: Traveler, tab: "dados" | "docs" = "dados") => {
     setEditingTraveler(t);
+    setInitialTab(tab);
     setFormOpen(true);
   };
 
@@ -64,7 +67,10 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
     } else {
       // Mantém o pop-up aberto e libera a aba de documentos do novo viajante.
       const created = await createTraveler({ ...data, client_id: clientId });
-      if (created) setEditingTraveler(created);
+      if (created) {
+        setInitialTab("docs");
+        setEditingTraveler(created);
+      }
     }
   };
 
@@ -92,7 +98,7 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
               traveler={editingTraveler}
               onSave={handleSave}
               isSubmitting={isCreating}
-              initialTab={editingTraveler && !formOpenedForEdit(editingTraveler, travelers) ? "docs" : "dados"}
+              initialTab={initialTab}
             />
           </DialogContent>
         </Dialog>
