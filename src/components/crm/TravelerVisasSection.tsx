@@ -63,7 +63,7 @@ export function TravelerVisasSection({ travelerId }: { travelerId: string }) {
       <div className="mb-2 flex items-center justify-between">
         <p className="flex items-center gap-2 text-sm font-medium">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          Vistos
+          Vistos {visas.length > 0 && <span className="text-muted-foreground">({visas.length})</span>}
         </p>
         <Button size="sm" variant="outline" onClick={openCreate}>
           <Plus className="mr-1.5 h-3.5 w-3.5" /> Adicionar visto

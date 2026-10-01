@@ -536,9 +536,9 @@ function TravelerDocumentsSection({ travelerId, travelerName }: { travelerId: st
                   </AlertDialogContent>
                 </AlertDialog>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
