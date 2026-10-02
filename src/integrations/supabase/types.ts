@@ -544,6 +544,7 @@ export type Database = {
           legal_body_html: string
           logo_url: string | null
           name: string
+          render_config: Json | null
           signature_config: Json
           status: string
           updated_at: string
@@ -565,6 +566,7 @@ export type Database = {
           legal_body_html?: string
           logo_url?: string | null
           name: string
+          render_config?: Json | null
           signature_config?: Json
           status?: string
           updated_at?: string
@@ -586,6 +588,7 @@ export type Database = {
           legal_body_html?: string
           logo_url?: string | null
           name?: string
+          render_config?: Json | null
           signature_config?: Json
           status?: string
           updated_at?: string
