@@ -18,7 +18,7 @@ export const PUBLIC_ROUTE_PREFIXES = [
   '/orcamento', '/roteiro', '/viagem', '/fatura', '/c/', '/v/', '/lp/',
   '/formulario', '/pesquisa', '/playbook', '/ativar-cartao', '/captura-cartao',
   '/politicasdeprivacidade', '/termosdeuso', '/blog', '/planos',
-  '/desconto30off', '/experiencias', '/cadastro-fornecedor', '/cadastro-guia',
+  '/desconto30off', '/experiencias', '/demonstracao-crm', '/cadastro-fornecedor', '/cadastro-guia',
   '/.lovable', '/certificate-test',
 ]
 
