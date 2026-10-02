@@ -21,8 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Building2, X } from "lucide-react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ServiceFormHeader } from "@/components/quote/ServiceModeChooser";
 
