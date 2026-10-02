@@ -273,75 +273,6 @@ export function ServiceModal(props: Props) {
               "[&_button[role=combobox]]:bg-muted",
             )}
           >
-            {serviceType !== "other" && hasLinkedSupplier && (
-              <div className="rounded-xl border border-border bg-card p-4">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-muted-foreground">Fornecedor vinculado</p>
-                      <p className="text-sm font-medium truncate">
-                        {supplier.supplier_name || "Sem nome"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditSupplierOpen((v) => !v)}
-                    >
-                      {editSupplierOpen ? "Fechar" : "Alterar"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSupplier({ operator_id: null, supplier_name: "" })}
-                      title="Remover fornecedor"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                <Collapsible open={editSupplierOpen} onOpenChange={setEditSupplierOpen}>
-                  <CollapsibleContent className="pt-3">
-                    <SupplierSelector value={supplier} onChange={setSupplier} />
-                    <p className="mt-1.5 text-xs text-muted-foreground">
-                      A alteração será aplicada ao salvar o serviço.
-                    </p>
-                  </CollapsibleContent>
-                </Collapsible>
-              </div>
-            )}
-            {serviceType !== "other" && editingService && !hasLinkedSupplier && (
-              <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Building2 className="h-4 w-4" />
-                  Nenhum fornecedor vinculado
-                  {supplier.supplier_name ? (
-                    <span className="text-foreground font-medium">· {supplier.supplier_name}</span>
-                  ) : null}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditSupplierOpen((v) => !v)}
-                >
-                  {editSupplierOpen ? "Fechar" : "Vincular"}
-                </Button>
-              </div>
-            )}
-            {serviceType !== "other" && editingService && !hasLinkedSupplier && editSupplierOpen && (
-              <div className="rounded-xl border border-border bg-card p-4">
-                <SupplierSelector value={supplier} onChange={setSupplier} />
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  A vinculação será aplicada ao salvar o serviço.
-                </p>
-              </div>
-            )}
             <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 shadow-sm">
               <ServiceFormHeader
                 serviceType={serviceType}
@@ -386,7 +317,7 @@ export function ServiceModal(props: Props) {
                     />
                   )
                 )}
-                supplierSlot={serviceType === "other" ? supplierField : undefined}
+                supplierSlot={supplierField}
                 onChooserActiveChange={setIsChooserActive}
               />
             </div>

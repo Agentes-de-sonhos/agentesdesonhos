@@ -851,6 +851,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
             </div>
           )}
         </div>
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -1306,6 +1307,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         <FormField control={form.control} name="notes" render={({ field }) => (
           <FormItem><FormLabel>Observações</FormLabel><FormControl><RichTextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -1485,6 +1487,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           <FormItem><FormLabel>Observações</FormLabel><FormControl><RichTextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Grupo econômico" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -1682,6 +1685,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStar
 
         {renderPaymentSlot(paymentSlot, isRoundTrip ? price * 2 : price)}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Transfer privativo" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>
@@ -1899,6 +1903,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSt
           </p>
         )}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Ingresso com fila rápida" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading || !!compositionError || paxOutOfSync || compositionPending}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -2001,6 +2006,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           <FormItem><FormLabel>Observações</FormLabel><FormControl><RichTextareaWithTemplate placeholder="Observações adicionais..." onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Cobertura ampliada" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -2390,6 +2396,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
         )} />
 
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Cabine com varanda" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -2674,6 +2681,7 @@ function RailTransportForm({
         )}
 
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Primeira classe" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -2933,6 +2941,7 @@ function CircuitForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialDa
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price"))}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Circuito clássico" />
+        <SupplierSlotOutlet />
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -3593,6 +3602,12 @@ function GenericModeChooser({
   );
 }
 
+const SupplierSlotContext = React.createContext<React.ReactNode>(null);
+function SupplierSlotOutlet() {
+  const slot = React.useContext(SupplierSlotContext);
+  return slot ? <>{slot}</> : null;
+}
+
 export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, supplierSlot, destinationContext }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
@@ -3620,7 +3635,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       hasSavedService={!!initialData}
       photoQuery={serviceType === 'attraction' ? photoQuery : undefined}
       photoContext={destinationContext}
-      conciseLabel={serviceType === 'other'}
+      conciseLabel
     />
   );
   // Sugestões editáveis derivadas do orçamento (destino, datas, passageiros).
@@ -3664,9 +3679,11 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   }
 
   return (
+    <SupplierSlotContext.Provider value={serviceType === 'other' ? null : supplierSlot}>
     <div className="space-y-4">
       {!(['flight','hotel','car_rental','transfer','attraction','insurance','cruise','circuit','rail_transport','other'] as ServiceType[]).includes(serviceType) && photoSlotElement}
       {formElement}
     </div>
+    </SupplierSlotContext.Provider>
   );
 }
