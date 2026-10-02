@@ -572,7 +572,7 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
     contracted_name: payload.agency.trade_name || '',
   });
   payload.sections = resolved.sections;
-  payload.dynamic = resolved.dynamic;
+  payload.dynamic = { ...resolved.dynamic, missing_labels: resolved.dynamic.missing.map((t) => SLOT_MISSING_LABEL(cfg, t)) };
   payload.render = { mode: cfg.mode, footer_text: cfg.footer_text, blocks: cfg.blocks };
   return payload;
 }
@@ -665,11 +665,10 @@ export function validateContractPayload(payload: ContractPayload): ContractValid
   if (!payload.insurance.contracted && !payload.insurance.refusal_acknowledged)
     push('insurance', 'Registre a ciência da recusa do seguro viagem.', 'warning');
   if (payload.dynamic) {
-    const cfgLike = { slots: {}, lists: {}, tables: {}, checks: {}, choices: {}, ...(payload as { _cfg?: object })._cfg };
-    void cfgLike;
-    for (const token of payload.dynamic.missing) {
-      push(`dyn_${token}`, `Campo obrigatório do contrato pendente: ${DYNAMIC_LABELS[token] ?? token.split(':')[1]}.`);
-    }
+    payload.dynamic.missing.forEach((token, i) => {
+      const label = payload.dynamic!.missing_labels?.[i] ?? token.split(':')[1];
+      push(`dyn_${token}`, `Campo obrigatório do contrato pendente: ${label}.`);
+    });
     // No modelo com seguro no corpo, a pendência do seguro é bloqueante (escolha explícita no Anexo).
     issues.splice(0, issues.length, ...issues.filter((i) => i.field !== 'insurance'));
   }

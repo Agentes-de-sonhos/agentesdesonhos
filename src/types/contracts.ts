@@ -308,4 +308,5 @@ export interface ContractDynamicSnapshot {
   checks: Record<string, boolean>;
   choices: Record<string, string | null>;
   missing: string[];
+  missing_labels?: string[];
 }
