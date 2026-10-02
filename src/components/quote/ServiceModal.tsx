@@ -165,6 +165,31 @@ export function ServiceModal(props: Props) {
     return doSubmit(service_data, amount, option_label, description, image_url, image_urls);
   };
 
+  const supplierField = (
+    <div className="space-y-3" data-testid="other-service-supplier-field">
+      <p className="text-sm font-medium">Fornecedor <span className="font-normal text-muted-foreground">(opcional)</span></p>
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-border bg-card p-3">
+        <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
+          <Building2 className="h-4 w-4 shrink-0" />
+          <span className="truncate">
+            {supplier.operator_id || supplier.supplier_name?.trim()
+              ? supplier.supplier_name || "Fornecedor vinculado"
+              : "Nenhum fornecedor vinculado"}
+          </span>
+        </div>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setEditSupplierOpen((value) => !value)}>
+          {editSupplierOpen ? "Fechar" : "Vincular"}
+        </Button>
+      </div>
+      {editSupplierOpen && (
+        <div className="rounded-xl border border-border bg-card p-4">
+          <SupplierSelector value={supplier} onChange={setSupplier} />
+          <p className="mt-1.5 text-xs text-muted-foreground">A vinculação será aplicada ao salvar o serviço.</p>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -248,7 +273,7 @@ export function ServiceModal(props: Props) {
               "[&_button[role=combobox]]:bg-muted",
             )}
           >
-            {hasLinkedSupplier && (
+            {serviceType !== "other" && hasLinkedSupplier && (
               <div className="rounded-xl border border-border bg-card p-4">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
@@ -290,7 +315,7 @@ export function ServiceModal(props: Props) {
                 </Collapsible>
               </div>
             )}
-            {editingService && !hasLinkedSupplier && (
+            {serviceType !== "other" && editingService && !hasLinkedSupplier && (
               <div className="flex items-center justify-between rounded-xl border border-dashed border-border bg-card p-3">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Building2 className="h-4 w-4" />
@@ -309,7 +334,7 @@ export function ServiceModal(props: Props) {
                 </Button>
               </div>
             )}
-            {editingService && !hasLinkedSupplier && editSupplierOpen && (
+            {serviceType !== "other" && editingService && !hasLinkedSupplier && editSupplierOpen && (
               <div className="rounded-xl border border-border bg-card p-4">
                 <SupplierSelector value={supplier} onChange={setSupplier} />
                 <p className="mt-1.5 text-xs text-muted-foreground">
@@ -361,6 +386,7 @@ export function ServiceModal(props: Props) {
                     />
                   )
                 )}
+                supplierSlot={serviceType === "other" ? supplierField : undefined}
                 onChooserActiveChange={setIsChooserActive}
               />
             </div>

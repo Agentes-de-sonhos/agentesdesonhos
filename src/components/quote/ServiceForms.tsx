@@ -128,6 +128,8 @@ interface ServiceFormProps {
   paymentSlot?: ((liveAmount: number) => React.ReactNode) | React.ReactNode;
   /** Optional slot for photo upload */
   photoSlot?: React.ReactNode;
+  /** Optional slot rendered immediately before the actions in Outros Serviços. */
+  supplierSlot?: React.ReactNode;
   /** Destino/contexto do orçamento — usado para priorizar buscas de lugares. */
   destinationContext?: string | null;
   /** Sugestões editáveis derivadas do orçamento/oportunidade (destino, datas, passageiros). */
@@ -2405,7 +2407,7 @@ const otherSchema = z.object({
   option_label: z.string().optional(),
   company_name: z.string().optional(),
   description: z.string().optional(),
-  price: z.number().min(0),
+  price: optionalPriceField,
 });
 
 /* ━━━━━━━━━━━━━━━━━━━ RAIL TRANSPORT FORM ━━━━━━━━━━━━━━━━━━━ */
@@ -2686,16 +2688,17 @@ export const OTHER_SERVICE_NAME_LABEL = "Nome do serviço, atividade ou empresa"
 export const OTHER_SERVICE_NAME_PLACEHOLDER = "Digite o nome do passeio, atividade, atração ou empresa…";
 /** Ordem oficial dos campos do formulário manual de Outros Serviços. */
 export const OTHER_FORM_FIELD_ORDER = [
+  "custom_title",
+  "icon_id",
   "company_name",
   "description",
   "photos",
   "price",
   "payment",
-  "custom_title",
-  "icon_id",
+  "supplier",
 ] as const;
 
-function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData, paymentSlot, photoSlot, onPlaceIdChange, destinationContext }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
+function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData, paymentSlot, photoSlot, supplierSlot, onPlaceIdChange, destinationContext }: Omit<ServiceFormProps, "serviceType"> & { onPlaceIdChange?: (id: string | null) => void }) {
   const init = initialData?.service_data;
   const [placeId, setPlaceId] = useState<string | null>((init as any)?.place_id ?? null);
   const initialIconId = sanitizeIncludedIconId((init as any)?.icon_id) ?? undefined;
@@ -2708,7 +2711,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
       icon_id: initialIconId || "",
       company_name: init?.company_name || "",
       description: init?.description || "",
-      price: init?.price || initialData?.amount || 0,
+      price: init?.price ?? initialData?.amount ?? undefined,
       option_label: initialData?.option_label || "",
     },
   });
@@ -2746,16 +2749,67 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
       custom_title: values.custom_title?.trim() || "",
       company_name: values.company_name || "",
       description: values.description,
-      price: values.price,
+      price: values.price ?? 0,
       ...(sanitizeIncludedIconId(iconId) ? { icon_id: sanitizeIncludedIconId(iconId) as string } : {}),
       ...(placeId ? { place_id: placeId } : {}),
-    }, values.price, values.option_label || undefined);
+    }, values.price ?? 0, values.option_label || undefined);
   };
 
   return (
     <Form {...form}>
       <RequiredFieldsScope schema={otherSchema}>
       <form onSubmit={form.handleSubmit(handleSubmit, (errs) => focusFirstInvalidField(errs as Record<string, unknown>))} className="space-y-4">
+        <div className="grid gap-4 md:grid-cols-2">
+          <FormField control={form.control} name="custom_title" render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-2">
+                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                Título do bloco
+              </FormLabel>
+              <FormControl>
+                <Input placeholder="Outros Serviços" maxLength={80} {...field} />
+              </FormControl>
+              <p className="text-xs text-muted-foreground">
+                Se ficar vazio, usaremos “Outros Serviços”.
+              </p>
+              <FormMessage />
+            </FormItem>
+          )} />
+          {(() => {
+            const EffectiveIcon = includedIconComponent(iconId || "package");
+            const itemText = form.watch("custom_title")?.trim() || form.watch("company_name")?.trim() || "Outros Serviços";
+            return (
+              <div className="space-y-2">
+                <FormLabel>Ícone do cabeçalho</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 w-full justify-start gap-3"
+                  onClick={() => setIconPickerOpen(true)}
+                  aria-label={`Alterar ícone de ${itemText}`}
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <EffectiveIcon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span className="flex-1 text-left">{includedIconLabel(iconId || "package")}</span>
+                  <Pencil className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                </Button>
+                <IncludedIconPicker
+                  open={iconPickerOpen}
+                  onOpenChange={setIconPickerOpen}
+                  itemText={itemText}
+                  currentIconId={iconId}
+                  autoIconId="package"
+                  onApply={(nextIconId) => {
+                    const next = nextIconId ?? undefined;
+                    setIconId(next);
+                    form.setValue("icon_id", next || "", { shouldDirty: true });
+                  }}
+                />
+              </div>
+            );
+          })()}
+        </div>
         <FormField control={form.control} name="company_name" render={({ field }) => (
           <FormItem><FormLabel>{OTHER_SERVICE_NAME_LABEL}</FormLabel><FormControl>
             <PlacesAutocomplete
@@ -2780,68 +2834,15 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
           <FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="description" render={({ field }) => (
-          <FormItem><FormLabel>Descrição do Serviço</FormLabel><FormControl><RichTextareaWithTemplate placeholder="Descreva o serviço..." rows={3} onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Descrição</FormLabel><FormControl><RichTextareaWithTemplate placeholder="Descreva o serviço..." rows={3} onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         {photoSlot}
         <FormField control={form.control} name="price" render={({ field }) => (
-          <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} /></FormControl><FormMessage /></FormItem>
+          <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))} /></FormControl><FormMessage /></FormItem>
         )} />
-        {renderPaymentSlot(paymentSlot, form.watch("price"))}
-        <FormField control={form.control} name="custom_title" render={({ field }) => (
-          <FormItem>
-            <FormLabel className="flex items-center gap-2">
-              <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-              Título do Bloco <span className="text-muted-foreground font-normal">(opcional)</span>
-            </FormLabel>
-            <FormControl>
-              <Input
-                placeholder="Outros Serviços"
-                maxLength={80}
-                {...field}
-              />
-            </FormControl>
-            <p className="text-xs text-muted-foreground">
-              Personalize o nome deste bloco. Ex: "Chip Internacional", "Seguro Viagem", "Ingressos Disney". Se vazio, usaremos "Outros Serviços".
-            </p>
-            <FormMessage />
-          </FormItem>
-        )} />
-        {(() => {
-          const EffectiveIcon = includedIconComponent(iconId || "package");
-          const itemText = form.watch("custom_title")?.trim() || form.watch("company_name")?.trim() || "Outros Serviços";
-          return (
-            <div className="space-y-2">
-              <FormLabel>Ícone do cabeçalho <span className="text-muted-foreground font-normal">(opcional)</span></FormLabel>
-              <Button
-                type="button"
-                variant="outline"
-                className="h-12 w-full justify-start gap-3"
-                onClick={() => setIconPickerOpen(true)}
-                aria-label={`Alterar ícone de ${itemText}`}
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-                  <EffectiveIcon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                <span className="flex-1 text-left">{includedIconLabel(iconId || "package")}</span>
-                <Pencil className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              </Button>
-              <p className="text-xs text-muted-foreground">Escolha o símbolo que aparecerá ao lado do título deste bloco.</p>
-              <IncludedIconPicker
-                open={iconPickerOpen}
-                onOpenChange={setIconPickerOpen}
-                itemText={itemText}
-                currentIconId={iconId}
-                autoIconId="package"
-                onApply={(nextIconId) => {
-                  const next = nextIconId ?? undefined;
-                  setIconId(next);
-                  form.setValue("icon_id", next || "", { shouldDirty: true });
-                }}
-              />
-            </div>
-          );
-        })()}
+        {renderPaymentSlot(paymentSlot, form.watch("price") ?? 0)}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Opção recomendada" />
+        {supplierSlot}
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>
@@ -2985,7 +2986,7 @@ export function photoKeys(urls: string[]): string[] {
 
 
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange, photoQuery, photoContext }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void; photoQuery?: string | null; photoContext?: string | null }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange, photoQuery, photoContext, conciseLabel = false }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void; photoQuery?: string | null; photoContext?: string | null; conciseLabel?: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -3148,7 +3149,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Fotos do serviço <span className="text-muted-foreground font-normal">(opcional — máx. {MAX_IMAGES_PER_SERVICE})</span></p>
+      <p className="text-sm font-medium">{conciseLabel ? "Fotos" : "Fotos do serviço"} <span className="text-muted-foreground font-normal">{conciseLabel ? `Máx. ${MAX_IMAGES_PER_SERVICE} fotos` : `(opcional — máx. ${MAX_IMAGES_PER_SERVICE})`}</span></p>
       <div className="flex flex-wrap gap-2">
         {imageUrls.map((url, i) => (
           <div key={thumbKeys[i]} className="relative inline-block">
@@ -3592,7 +3593,7 @@ function GenericModeChooser({
   );
 }
 
-export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, destinationContext }: ServiceFormProps) {
+export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, supplierSlot, destinationContext }: ServiceFormProps) {
   const initUrls: string[] = initialData?.image_urls?.length ? initialData.image_urls : (initialData?.image_url ? [initialData.image_url] : []);
   const [serviceImageUrls, setServiceImageUrls] = useState<string[]>(initUrls);
   const [isImgUploading, setIsImgUploading] = useState(false);
@@ -3619,6 +3620,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
       hasSavedService={!!initialData}
       photoQuery={serviceType === 'attraction' ? photoQuery : undefined}
       photoContext={destinationContext}
+      conciseLabel={serviceType === 'other'}
     />
   );
   // Sugestões editáveis derivadas do orçamento (destino, datas, passageiros).
@@ -3637,7 +3639,7 @@ export function ServiceForm({ serviceType, onSubmit, onSubmitMany, onCancel, isL
   const formProps = {
     prefill,
     onSubmit: wrappedSubmit, onCancel, isLoading: isLoading || isImgUploading, showOptionLabel: hasMultipleOptions || !!showOptionLabel,
-    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, photoSlot: photoSlotElement, destinationContext,
+    tripStartDate, tripEndDate, adultsCount, childrenCount, initialData, paymentSlot, supplierSlot, photoSlot: photoSlotElement, destinationContext,
     // Documentos com vários serviços do mesmo tipo (3 ingressos, 2 transfers...)
     // criam um serviço por item — disponível para todos os tipos importáveis.
     ...(onSubmitMany ? { onSubmitMany } : {}),

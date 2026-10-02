@@ -73,19 +73,27 @@ describe("Outros Serviços — formulário manual", () => {
     expect(screen.getByPlaceholderText(OTHER_SERVICE_NAME_PLACEHOLDER)).toBeTruthy();
   });
 
-  it("apresenta os campos na ordem oficial: nome, descrição, fotos, valor, pagamento, título", async () => {
-    await renderOther({ paymentSlot: <div data-testid="payment-slot" /> });
+  it("apresenta os campos na ordem oficial aprovada", async () => {
+    await renderOther({ paymentSlot: <div data-testid="payment-slot" />, supplierSlot: <div data-testid="supplier-slot">Fornecedor</div> });
     const html = document.body.innerHTML;
     const positions = [
+      html.indexOf("Título do bloco"),
+      html.indexOf("Ícone do cabeçalho"),
       html.indexOf(OTHER_SERVICE_NAME_LABEL),
-      html.indexOf("Descrição do Serviço"),
+      html.indexOf(">Descrição<"),
+      html.indexOf(">Fotos "),
       html.indexOf("Valor (R$)"),
-      html.indexOf("Título do Bloco"),
+      html.indexOf('data-testid="payment-slot"'),
+      html.indexOf('data-testid="supplier-slot"'),
     ];
     expect(positions.every((p) => p >= 0)).toBe(true);
     expect([...positions].sort((a, b) => a - b)).toEqual(positions);
-    expect(OTHER_FORM_FIELD_ORDER[0]).toBe("company_name");
-    expect(OTHER_FORM_FIELD_ORDER[OTHER_FORM_FIELD_ORDER.length - 1]).toBe("icon_id");
+    expect(OTHER_FORM_FIELD_ORDER[0]).toBe("custom_title");
+    expect(OTHER_FORM_FIELD_ORDER[OTHER_FORM_FIELD_ORDER.length - 1]).toBe("supplier");
+    expect(screen.queryByText(/Descrição do Serviço/)).toBeNull();
+    expect(screen.queryByText(/Fotos do serviço/)).toBeNull();
+    expect(screen.queryByText(/Aparência no orçamento/)).toBeNull();
+    expect(screen.queryByText(/Chip Internacional|Chip Ilimitado/)).toBeNull();
   });
 
   it("não busca com menos de 3 caracteres e limita a 5 sugestões", async () => {
@@ -133,6 +141,19 @@ describe("Outros Serviços — formulário manual", () => {
     const [data] = onSubmit.mock.calls[0];
     expect(data.company_name).toBe("servico exclusivo do agente");
     expect(data.place_id).toBeUndefined();
+  });
+
+  it("permite salvar com o valor vazio e envia zero no modelo atual", async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+    await renderOther({ onSubmit });
+    const valueInput = screen.getByLabelText("Valor (R$)") as HTMLInputElement;
+    expect(valueInput.value).toBe("");
+    expect(screen.queryByTestId("required-field-mark")).toBeNull();
+    await user.click(screen.getByRole("button", { name: /^Salvar$/i }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].price).toBe(0);
+    expect(onSubmit.mock.calls[0][1]).toBe(0);
   });
 
   it("serviço antigo sem place_id continua editável e salva sem fotos", async () => {
