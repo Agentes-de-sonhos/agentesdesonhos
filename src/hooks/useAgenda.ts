@@ -57,7 +57,7 @@ export function useAgenda(year?: number) {
 
   // Fetch agency events for the user
   const { data: agencyEvents = [], isLoading: agencyLoading } = useQuery({
-    queryKey: ["agency-events", user?.id, currentYear],
+    queryKey: ["agency-events", user?.id, agencyOwnerId, currentYear],
     queryFn: async () => {
       if (!user?.id) return [];
       const startDate = `${currentYear}-01-01`;
@@ -66,7 +66,7 @@ export function useAgenda(year?: number) {
       const { data, error } = await supabase
         .from("agency_events")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId || user.id)
         .is("deleted_at", null)
         .neq("event_type", "followup")
         .gte("event_date", startDate)
@@ -309,7 +309,8 @@ export function useAgenda(year?: number) {
           event_date: event.event_date,
           event_time: event.event_time,
           color: event.color,
-          user_id: user.id,
+          // Colaboradores gravam na agenda da agência (regra de acesso da equipe).
+          user_id: agencyOwnerId || user.id,
           client_id: event.client_id || null,
           opportunity_id: event.opportunity_id || null,
           location_city: event.location_city || null,
