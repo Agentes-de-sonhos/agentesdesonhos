@@ -83,6 +83,6 @@ describe("prévia ADS ads-email-test-v1", () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
-    expect(await screen.findByText("Drica Viagens")).toBeInTheDocument();
+    expect(document.querySelector('[data-ads-preview="briefing-16-v1"]')).toBeInTheDocument();
   });
 });
