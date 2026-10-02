@@ -141,7 +141,7 @@ export default function DemonstracaoCrm() {
   const [clients, setClients] = useState(initialClients);
   const [opps, setOpps] = useState(initialOpps);
   const [ops, setOps] = useState(initialOps);
-  const [tab, setTab] = useState("clientes");
+  const [tab, setTab] = useState("funil");
   const [search, setSearch] = useState("");
   const [celebrate, setCelebrate] = useState<string | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
@@ -162,7 +162,7 @@ export default function DemonstracaoCrm() {
   const client = (id: string) => clients.find((c) => c.id === id);
   const q = search.trim().toLowerCase();
 
-  const reset = () => { setClients(initialClients()); setOpps(initialOpps()); setOps(initialOps()); setTab("clientes"); setProfileId(null); toast.success("Demonstração reiniciada"); };
+  const reset = () => { setClients(initialClients()); setOpps(initialOpps()); setOps(initialOps()); setTab("funil"); setProfileId(null); toast.success("Demonstração reiniciada"); };
 
   const moveOpp = (id: string, to: OpportunityStage) => {
     const o = opps.find((x) => x.id === id);
@@ -216,7 +216,6 @@ export default function DemonstracaoCrm() {
               <TabsTrigger value="clientes" className="gap-1.5 px-2.5 text-xs"><Users className="h-4 w-4" />Clientes</TabsTrigger>
               <TabsTrigger value="funil" className="gap-1.5 px-2.5 text-xs"><Kanban className="h-4 w-4" />Oportunidades</TabsTrigger>
               <TabsTrigger value="operacoes" className="gap-1.5 px-2.5 text-xs"><Briefcase className="h-4 w-4" />Operações</TabsTrigger>
-              <TabsTrigger value="dashboard" className="gap-1.5 px-2.5 text-xs"><LayoutDashboard className="h-4 w-4" />Visão Geral</TabsTrigger>
             </TabsList>
             {tab !== "dashboard" && !profile && (
               <div className="flex flex-1 flex-wrap items-center gap-1.5">
@@ -290,7 +289,7 @@ export default function DemonstracaoCrm() {
           <TabsContent value="funil" className="mt-4">
             <p className="mb-3 text-xs text-muted-foreground">Dica: arraste um card até <strong className="text-foreground">Fechado</strong> e veja a viagem seguir para Operações.</p>
             <DndContext sensors={sensors} onDragEnd={(e: DragEndEvent) => e.over && moveOpp(String(e.active.id), e.over.id as OpportunityStage)}>
-              <div className="flex gap-3 overflow-x-auto pb-4">
+              <div className="flex min-h-[calc(100dvh-17rem)] items-start gap-3 overflow-x-auto pb-4">
                 {FUNNEL.map((st) => {
                   const items = filteredOpps.filter((o) => o.stage === st);
                   return (
@@ -335,7 +334,7 @@ export default function DemonstracaoCrm() {
           {/* OPERAÇÕES */}
           <TabsContent value="operacoes" className="mt-4">
             <DndContext sensors={sensors} onDragEnd={(e: DragEndEvent) => e.over && moveOp(String(e.active.id), e.over.id as OperationStage)}>
-              <div className="flex gap-3 overflow-x-auto pb-4">
+              <div className="flex min-h-[calc(100dvh-17rem)] items-start gap-3 overflow-x-auto pb-4">
                 {OPERATION_STAGES.map((st) => {
                   const items = filteredOps.filter((o) => o.stage === st.key);
                   return (
@@ -379,7 +378,6 @@ export default function DemonstracaoCrm() {
           </TabsContent>
 
           {/* VISÃO GERAL */}
-          <TabsContent value="dashboard" className="mt-4"><Overview clients={clients} opps={opps} ops={ops} /></TabsContent>
         </Tabs>
       </main>
 
