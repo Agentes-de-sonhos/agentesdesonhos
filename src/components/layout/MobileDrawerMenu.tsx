@@ -1,3 +1,4 @@
+import { useTeamSession } from "@/contexts/TeamSessionContext";
 import { useCallback, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { ChevronDown, ChevronRight, Cloud, Lock, Shield, X } from "lucide-react";
@@ -40,6 +41,8 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { can, isTeamMember } = usePermissions();
+  const { agencyId: menuAgencyId } = useTeamSession();
+  const isUpToReservas = isMenuUpToReservasAgency(isAdmin, menuAgencyId);
   const { trackSectionVisit } = useGamificationLite();
   const openInternalWindow = useOpenInternalWindow();
   const isEducaPass = !isPromotor && plan === "educa_pass";
@@ -47,7 +50,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const isStartPlan = !isPromotor && plan === "start";
   const isAdsEssencial = isAdsEssencialMenuUser(isAdmin, plan);
   const isAdsGestao = isAdsGestaoMenuUser(isAdmin, plan);
-  const hideOthersSection = isAdsEssencial || isAdsGestao || isAdsEssencialGestaoMenuUser(isAdmin, plan) || isTrial15MenuUser(isAdmin, plan, user?.created_at);
+  const hideOthersSection = isUpToReservas || isAdsEssencial || isAdsGestao || isAdsEssencialGestaoMenuUser(isAdmin, plan) || isTrial15MenuUser(isAdmin, plan, user?.created_at);
 
   const isPermitted = useCallback((item: AppSidebarItem) => {
     if (isItemHiddenForUser(item.key, isAdmin, plan)) return false;
@@ -60,7 +63,7 @@ export function MobileDrawerMenu({ open, onClose }: { open: boolean; onClose: ()
   const createGroup = useMemo(() => isAdsGestao ? { ...APP_CREATE_GROUP, items: [] } : filtered(APP_CREATE_GROUP), [filtered, isAdsGestao]);
   const projectsGroup = useMemo(() => isAdsGestao ? { ...APP_PROJECTS_GROUP, items: [] } : filtered(APP_PROJECTS_GROUP), [filtered, isAdsGestao]);
   const moreGroup = useMemo(() => filtered(APP_MORE_GROUP), [filtered]);
-  const management = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted), [isPermitted, isAdsEssencial]);
+  const management = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted).filter((i) => !(isUpToReservas && i.key === "financeiro")), [isPermitted, isAdsEssencial, isUpToReservas]);
   const others = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
 
   const isActive = (item: AppSidebarItem) => {
