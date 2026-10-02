@@ -117,11 +117,11 @@ describe("Outros Serviços — formulário manual", () => {
     await waitFor(() => expect(screen.getAllByText(/^Passeio 0$/).length).toBeGreaterThan(0), { timeout: 2000 });
     await act(async () => { screen.getAllByText("Passeio 0")[0].click(); });
     await waitFor(() => expect(input.value).toBe("Passeio 0"));
-    const description = screen.getByPlaceholderText("Descreva o serviço...") as HTMLTextAreaElement;
-    await waitFor(() => expect(description.value.length).toBeGreaterThan(0), { timeout: 2000 });
+    const description = document.querySelector('[contenteditable="true"]') as HTMLElement;
+    await waitFor(() => expect(description.textContent?.length).toBeGreaterThan(0), { timeout: 2000 });
     await user.clear(description);
     await user.type(description, "Texto do agente");
-    expect(description.value).toBe("Texto do agente");
+    expect(description.textContent).toContain("Texto do agente");
   });
 
   it("busca sem resultado mantém o preenchimento manual e salva normalmente", async () => {
