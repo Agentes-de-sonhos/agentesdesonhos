@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Criar e validar a prévia técnica isolada do briefing 16 para Drica Viagens, preservando fixtures, tenants e banco, sem publicar.
 - [x] Orçamentos: reorganizar exclusivamente o modal de Outros Serviços, tornar valor opcional e mover fornecedor para o final, sem publicar.
 - [x] Orçamentos: permitir escolher o ícone do cabeçalho de Outros Serviços, refletindo no editor, link público e PDF, sem publicar.
 - [x] Roteiros: editar data inicial com deslocamento em cascata e confirmação antes de descartar atividades, gerenciar nomes dos viajantes após a criação e unificar o botão Importar (arquivo ou orçamento), sem publicar.
