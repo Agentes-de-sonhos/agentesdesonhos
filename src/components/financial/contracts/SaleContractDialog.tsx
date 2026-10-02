@@ -55,6 +55,7 @@ import { useSupportWhatsApp } from '@/hooks/usePlatformSetting';
 import { useSaleTravelers } from './useSaleTravelers';
 import { QuickTravelerDialog } from './QuickTravelerDialog';
 import { ContractTemplateMissingNotice } from './ContractTemplateMissingNotice';
+import { TemplateDynamicFields } from './TemplateDynamicFields';
 
 interface Props {
   sale: Sale | null;
@@ -529,6 +530,15 @@ export function SaleContractDialog({ sale, open, onOpenChange }: Props) {
                     </Field>
                   </div>
                 </FormSection>
+
+                {templateData?.template?.render_config?.mode === 'slotted' && (
+                  <TemplateDynamicFields
+                    cfg={templateData.template.render_config}
+                    dynamic={payload?.dynamic}
+                    overrides={overrides}
+                    setOverrides={setOverrides}
+                  />
+                )}
 
                 <FormSection
                   title="Passageiros"
