@@ -13,7 +13,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useOpenInternalWindow } from "@/workspace/useOpenInternalWindow";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isMenuUpToReservasAgency, isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import {
   APP_AGENDA_ITEM,
   APP_CREATE_GROUP,

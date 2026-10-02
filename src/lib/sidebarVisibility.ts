@@ -71,3 +71,13 @@ export function isAdsEssencialGestaoMenuUser(isAdmin: boolean, plan: string | nu
 export function isAdsGestaoMenuUser(isAdmin: boolean, plan: string | null | undefined): boolean {
   return !isAdmin && (plan === "ads_gestao" || plan === "ads_gestao_equipe");
 }
+
+// Menu exclusivo por agência: só itens até "Reservas" (sem Financeiro e sem OUTRAS).
+// Vale para a titular e para todos os colaboradores da agência.
+const AGENCIES_MENU_UP_TO_RESERVAS = new Set<string>([
+  "e419971b-9634-4790-a43a-0e88d80cf95a", // Intermundo Turismo
+]);
+
+export function isMenuUpToReservasAgency(isAdmin: boolean, agencyId: string | null | undefined): boolean {
+  return !isAdmin && !!agencyId && AGENCIES_MENU_UP_TO_RESERVAS.has(agencyId);
+}

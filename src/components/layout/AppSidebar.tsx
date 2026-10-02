@@ -14,7 +14,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { canAccessRoute } from "@/lib/routePermissions";
-import { isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
+import { isMenuUpToReservasAgency, isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
 import {
   APP_AGENDA_ITEM,
