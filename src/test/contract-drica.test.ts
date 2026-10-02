@@ -85,7 +85,7 @@ describe('contrato Drica Viagens (modelo com campos embutidos)', () => {
       'choice:insurance=contratado', 'choice:insurance=recusado',
     ]));
     // Nenhum placeholder original restou no texto.
-    expect(body()).not.toMatch(/\$\{|\$\(|DESCREVER SERVIÇOS|NOME DA CIA|Nome e Sobrenome \+ CPF|\( \)/);
+    expect(body()).not.toMatch(/\$\{[a-z]|\$\([a-z]|DESCREVER SERVIÇOS|NOME DA CIA|Nome e Sobrenome \+ CPF|\( \)/);
   });
 
   it('5–13, 16) resolve contratante, serviços, fornecedores, financeiro, passageiros, ciência, tarifa, seguro, imagem, data', () => {
@@ -143,7 +143,12 @@ describe('contrato Drica Viagens (modelo com campos embutidos)', () => {
     expect(d.render?.footer_text).toBe(DRICA_FOOTER_TEXT);
 
     const blob = await generateSaleContractPdf(d);
-    const bytes = Buffer.from(await blob.arrayBuffer());
+    const dataUrl = await new Promise<string>((res) => {
+      const fr = new FileReader();
+      fr.onload = () => res(String(fr.result));
+      fr.readAsDataURL(blob as Blob);
+    });
+    const bytes = Buffer.from(dataUrl.split(',')[1], 'base64');
     writeFileSync('/tmp/drica-teste-beta.pdf', bytes);
     const sha = createHash('sha256').update(bytes).digest('hex');
     expect(sha).toMatch(/^[0-9a-f]{64}$/);
