@@ -433,7 +433,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                               📤→
                             </Button>
                           )}
-                          {c.status !== "cancelado" && (
+                          {(c.status !== "cancelado" || Number(c.received_amount) > 0) && (
                             <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] text-emerald-600"
                               title={c.status === "recebido" ? "Editar recebimento" : "Registrar recebimento"}
                               onClick={() => setReceivePayment(c)}>
@@ -535,6 +535,17 @@ function ReceivePaymentDialog({ commission, open, onOpenChange }: { commission: 
         </div>
         <div className="flex justify-end gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          {alreadyReceived > 0 && (
+            <Button variant="outline" size="sm" className="text-destructive border-destructive/40 hover:bg-destructive/10"
+              disabled={saveMutation.isPending}
+              onClick={() => {
+                if (window.confirm("Cancelar o recebimento desta comissão? O valor recebido será zerado e a data removida.")) {
+                  saveMutation.mutate({ received_amount: 0, received_date: null });
+                }
+              }}>
+              Cancelar recebimento
+            </Button>
+          )}
           {canEditDate && (
             <Button variant="outline" size="sm" disabled={saveMutation.isPending || !date}
               onClick={() => saveMutation.mutate({ received_amount: alreadyReceived, received_date: date })}>
