@@ -86,7 +86,7 @@ const initialOpps = (): DemoOpp[] => [
 const initialOps = (): DemoOp[] => [
   { id: "p1", clientId: "c5", title: "Paris e Londres", pax: 2, value: 32000, start: "2026-11-03", end: "2026-11-15", stage: "documentacao", priority: "alta", payment: "pago",
     done: ["Passaporte"], timeline: [{ text: "Venda confirmada", at: now - 20 * DAY }, { text: "Aéreo emitido", at: now - 15 * DAY }, { text: "Movida para Documentação", at: now - 6 * DAY }], notes: [] },
-  { id: "p2", clientId: "c4", title: "Gramado Natal Luz", pax: 4, value: 12400, start: "2026-12-05", end: "2026-12-10", stage: "emissao_reservas", priority: "normal", payment: "parcial",
+  { id: "p2", clientId: "c4", title: "Gramado Natal Luz", pax: 4, value: 12400, start: "2026-12-05", end: "2026-12-10", stage: "emissao", priority: "normal", payment: "parcial",
     done: ["Hotel confirmado"], timeline: [{ text: "Venda confirmada", at: now - 10 * DAY }], notes: [] },
 ];
 
