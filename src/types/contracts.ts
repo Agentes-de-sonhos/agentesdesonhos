@@ -44,6 +44,7 @@ export interface AgencyContractTemplate {
   contract_title: string;
   effective_from: string | null;
   effective_until: string | null;
+  render_config?: ContractRenderConfig | null;
   created_at: string;
   updated_at: string;
 }
@@ -258,7 +259,53 @@ export interface ContractPayload {
   insurance: ContractInsuranceBlock;
   attachments: ContractAttachment[];
   legal_body_html: string;
-  sections: { title: string | null; body_html: string }[];
+  sections: { title: string | null; body_html: string; blocks?: ResolvedContractBlock[] }[];
+  /** Configuração de renderização do modelo (blocos padrão on/off, rodapé literal). */
+  render?: Pick<ContractRenderConfig, 'mode' | 'footer_text' | 'blocks'>;
+  /** Valores resolvidos dos campos dinâmicos e suas origens (congelados no snapshot). */
+  dynamic?: ContractDynamicSnapshot;
   signature_config: ContractSignatureConfig;
   footer_config: ContractFooterConfig;
+}
+// ── Modelos com campos dinâmicos dentro do texto fixo (genérico, sem hard-code por agência) ──
+export type ContractBlockKey =
+  | 'meta_line' | 'contractor' | 'passengers' | 'trip_summary' | 'services' | 'financial'
+  | 'insurance' | 'special_conditions' | 'attachments' | 'signatures' | 'standard_footer';
+
+export interface ContractSlotDef { label: string; source: string; required: boolean; fallback?: string }
+export interface ContractListDef { label: string; source: string; required: boolean }
+export interface ContractTableDef { label: string; source: string; columns: string[]; header: string[]; required: boolean }
+export interface ContractCheckDef { label: string; required: boolean }
+export interface ContractChoiceDef { label: string; options: Record<string, string>; required: boolean; source?: string }
+export interface ContractSignatureBlockDef {
+  contracted_label: string; contractor_label: string; witnesses_label: string;
+  witness_name_label: string; witness_doc_label: string; witnesses: number;
+}
+
+export interface ContractRenderConfig {
+  mode?: 'standard' | 'slotted';
+  footer_text?: string;
+  blocks?: Partial<Record<ContractBlockKey, boolean>>;
+  slots?: Record<string, ContractSlotDef>;
+  lists?: Record<string, ContractListDef>;
+  tables?: Record<string, ContractTableDef>;
+  checks?: Record<string, ContractCheckDef>;
+  choices?: Record<string, ContractChoiceDef>;
+  signatures?: ContractSignatureBlockDef;
+}
+
+export type ResolvedContractBlock =
+  | { kind: 'text'; text: string }
+  | { kind: 'list'; items: string[] }
+  | { kind: 'table'; header: string[]; rows: string[][] }
+  | { kind: 'signatures'; def: ContractSignatureBlockDef; contractor_name: string; contracted_name: string };
+
+export interface ResolvedSlotValue { value: string | null; source: string; required: boolean }
+
+export interface ContractDynamicSnapshot {
+  slots: Record<string, ResolvedSlotValue>;
+  lists: Record<string, string[]>;
+  checks: Record<string, boolean>;
+  choices: Record<string, string | null>;
+  missing: string[];
 }
