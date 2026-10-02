@@ -85,6 +85,7 @@ export async function generateSaleContractPdf(
   const pageH = doc.internal.pageSize.getHeight();
   const cW = pageW - M_L - M_R;
   let y = 16;
+  const show = (k: string) => (payload.render?.blocks as Record<string, boolean> | undefined)?.[k] !== false;
 
   const ensure = (need: number) => {
     if (y + need > pageH - 18) {
@@ -187,8 +188,11 @@ export async function generateSaleContractPdf(
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(20, 20, 20);
-  doc.text(payload.contract_title, pageW / 2, y, { align: 'center' });
-  y += 5;
+  const titleLines: string[] = doc.splitTextToSize(payload.contract_title, cW);
+  titleLines.forEach((l) => {
+    doc.text(l, pageW / 2, y, { align: 'center' });
+    y += 5.5;
+  });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(100, 100, 100);
@@ -198,10 +202,11 @@ export async function generateSaleContractPdf(
     `Emitido em ${new Date(payload.emitted_at).toLocaleString('pt-BR')}`,
     payload.emission_city ? `Local: ${payload.emission_city}` : '',
   ].filter(Boolean);
-  doc.text(meta.join('   •   '), pageW / 2, y, { align: 'center' });
-  y += 8;
+  if (show('meta_line')) doc.text(meta.join('   •   '), pageW / 2, y, { align: 'center' });
+  y += show('meta_line') ? 8 : 3;
 
   // ── Contratante ──
+  if (show('contractor')) {
   sectionTitle('Contratante');
   kv('Nome', payload.client.name);
   kv(payload.client.person_type === 'juridica' ? 'CNPJ' : 'CPF', payload.client.document);
@@ -213,7 +218,9 @@ export async function generateSaleContractPdf(
   kv('Responsável financeiro', payload.client.financial_responsible);
   kv('Contratante é passageiro', payload.client.is_passenger ? 'Sim' : 'Não');
 
+  }
   // ── Passageiros ──
+  if (show('passengers')) {
   sectionTitle('Passageiros');
   payload.passengers.forEach((p, i) => {
     ensure(10);
@@ -246,7 +253,9 @@ export async function generateSaleContractPdf(
     y += 1;
   });
 
+  }
   // ── Viagem ──
+  if (show('trip_summary')) {
   sectionTitle('Objeto e dados da viagem');
   kv('Título', payload.trip.title);
   kv('Abrangência', payload.trip.scope ? (payload.trip.scope === 'nacional' ? 'Nacional' : 'Internacional') : undefined);
@@ -259,7 +268,9 @@ export async function generateSaleContractPdf(
   kv('Finalidade', payload.trip.purpose);
   if (payload.trip.program_note) text(payload.trip.program_note, 9);
 
+  }
   // ── Serviços ──
+  if (show('services')) {
   sectionTitle('Serviços contratados');
   const colW = [38, cW - 38 - 30, 30];
   ensure(8);
@@ -304,9 +315,11 @@ export async function generateSaleContractPdf(
     payload.not_included.forEach((i) => text(`•  ${i}`, 9, 'normal', 4));
   }
 
+  }
   // ── Financeiro ──
-  sectionTitle('Valores e condições de pagamento');
   const f = payload.financial;
+  if (show('financial')) {
+  sectionTitle('Valores e condições de pagamento');
   kv('Valor bruto dos serviços', formatMoney(f.gross, f.currency));
   if (f.discounts) kv('Descontos', `- ${formatMoney(f.discounts, f.currency)}`);
   if (f.taxes) kv('Taxas', formatMoney(f.taxes, f.currency));
@@ -370,7 +383,9 @@ export async function generateSaleContractPdf(
     if (supplierNote) text(supplierNote, 8);
   }
 
+  }
   // ── Seguro ──
+  if (show('insurance')) {
   sectionTitle('Seguro viagem');
   if (payload.insurance.contracted) {
     kv('Situação', 'Contratado');
@@ -386,6 +401,7 @@ export async function generateSaleContractPdf(
     );
   }
 
+  }
   // ── Condições específicas ──
   const cond = payload.conditions;
   const condEntries: [string, string | undefined][] = [
@@ -397,7 +413,7 @@ export async function generateSaleContractPdf(
     ['Menores de idade', cond.minors],
     ['Observações gerais', cond.general_notes],
   ];
-  if (condEntries.some(([, v]) => v)) {
+  if (show('special_conditions') && condEntries.some(([, v]) => v)) {
     sectionTitle('Condições específicas');
     for (const [label, value] of condEntries) {
       if (!value) continue;
@@ -415,19 +431,88 @@ export async function generateSaleContractPdf(
     for (const line of htmlToLines(payload.legal_body_html)) text(line, 9);
   }
   for (const s of payload.sections) {
+    if (s.blocks) {
+      // Modelo com campos embutidos: texto fixo já resolvido, na ordem original.
+      if (s.title) sectionTitle(s.title);
+      for (const b of s.blocks) {
+        if (b.kind === 'text') {
+          text(b.text, 9);
+          y += 1.2;
+        } else if (b.kind === 'list') {
+          b.items.forEach((i) => text(`•  ${i}`, 9, 'normal', 4));
+          y += 1.2;
+        } else if (b.kind === 'table') {
+          const cols = b.header.length || 1;
+          const colWidth = cW / cols;
+          ensure(10);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8.5);
+          doc.setTextColor(60, 60, 60);
+          b.header.forEach((h, i) => doc.text(h, M_L + i * colWidth + 1, y));
+          y += 2;
+          doc.setDrawColor(215, 215, 215);
+          doc.line(M_L, y, pageW - M_R, y);
+          y += 4;
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(35, 35, 35);
+          for (const row of b.rows) {
+            const cells = row.map((c) => doc.splitTextToSize(c, colWidth - 3) as string[]);
+            const h = Math.max(...cells.map((c) => c.length)) * 4 + 1;
+            ensure(h);
+            cells.forEach((c, i) => doc.text(c, M_L + i * colWidth + 1, y));
+            y += h;
+          }
+          y += 2;
+        } else if (b.kind === 'signatures') {
+          const half = cW / 2 - 6;
+          const sig = (label: string, x: number, w: number) => {
+            doc.setDrawColor(120, 120, 120);
+            doc.line(x, y, x + w, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.5);
+            doc.setTextColor(50, 50, 50);
+            doc.text(doc.splitTextToSize(label, w)[0] ?? '', x, y + 4);
+          };
+          ensure(60);
+          y += 12;
+          sig(b.def.contracted_label, M_L, half);
+          y += 16;
+          sig(`${b.def.contractor_label} ${b.contractor_name}`.trim(), M_L, half);
+          y += 14;
+          text(b.def.witnesses_label, 9, 'bold');
+          y += 10;
+          // Testemunhas nunca são preenchidas com passageiros: linhas em branco.
+          for (let w = 0; w < b.def.witnesses; w += 2) {
+            ensure(16);
+            const xs = [M_L, M_L + half + 12].slice(0, Math.min(2, b.def.witnesses - w));
+            xs.forEach((x) => {
+              doc.setDrawColor(120, 120, 120);
+              doc.line(x, y, x + half, y);
+              doc.setFontSize(8.5);
+              doc.setTextColor(50, 50, 50);
+              doc.text(b.def.witness_name_label, x, y + 4);
+              doc.text(b.def.witness_doc_label, x, y + 8.5);
+            });
+            y += 16;
+          }
+        }
+      }
+      continue;
+    }
     if (!s.body_html) continue;
     sectionTitle(s.title || 'Cláusulas adicionais');
     for (const line of htmlToLines(s.body_html)) text(line, 9);
   }
 
   // ── Anexos ──
-  if (payload.attachments.length) {
+  if (show('attachments') && payload.attachments.length) {
     sectionTitle('Anexos');
     text('Os documentos abaixo integram este contrato para todos os fins de direito:', 9);
     payload.attachments.forEach((a) => text(`•  ${a.label}`, 9, 'normal', 4));
   }
 
   // ── Assinaturas ──
+  if (show('signatures')) {
   ensure(50);
   sectionTitle('Aceite e assinaturas');
   text(
@@ -506,6 +591,7 @@ export async function generateSaleContractPdf(
     doc.text('Testemunha 2', M_L + sigW + 12, y);
   }
 
+  }
   // ── Footer on every page ──
   const pages = doc.getNumberOfPages();
   const clientDoc = payload.client.document
@@ -534,6 +620,18 @@ export async function generateSaleContractPdf(
     `Documento vinculado à venda ${saleRef}${payload.receipt_number ? ` e ao recibo ${payload.receipt_number}` : ''}.`;
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
+    if (payload.render?.footer_text) {
+      // Rodapé literal da agência em todas as páginas.
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(110, 110, 110);
+      doc.setDrawColor(215, 215, 215);
+      doc.line(M_L, pageH - 14, pageW - M_R, pageH - 14);
+      doc.text(doc.splitTextToSize(payload.render.footer_text, cW - 30)[0] ?? '', M_L, pageH - 9);
+      if (payload.footer_config.show_pagination !== false)
+        doc.text(`Página ${i} de ${pages}`, pageW - M_R, pageH - 9, { align: 'right' });
+    }
+    if (!show('standard_footer')) continue;
     if (i > 1) {
       doc.setFontSize(6.5);
       doc.setTextColor(130, 130, 130);

@@ -1,0 +1,2 @@
+ALTER TABLE public.agency_contract_templates ADD COLUMN IF NOT EXISTS render_config jsonb;
+COMMENT ON COLUMN public.agency_contract_templates.render_config IS 'Optional generic render config: standard blocks on/off, literal footer, dynamic slot definitions embedded in fixed legal text. NULL = standard rendering.';

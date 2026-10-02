@@ -295,6 +295,13 @@
       "when": 1790886985319,
       "tag": "0041_ads_essencial_gestao_team_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1790971039618,
+      "tag": "0042_contract_template_render_config",
+      "breakpoints": true
     }
   ]
 }

@@ -11,6 +11,7 @@ import type {
 import { PRODUCT_TYPES, type Sale, type SaleProduct, type CustomerPayment } from '@/types/financial';
 import type { ScopeProvenanceEntry } from '@/lib/contractScope';
 import type { InsuranceFieldProvenance } from '@/lib/insuranceSources';
+import { emissionParts, formatNumberBR, isSlottedConfig, resolveSlottedSections, SLOT_MISSING_LABEL } from '@/lib/contractSlots';
 
 export interface TravelerRow {
   id: string;
@@ -189,6 +190,21 @@ export interface ContractDraftOverrides {
   passenger_ids?: string[];
   /** Passageiros com papel explícito de assinatura, confirmado pela agência. */
   signatory_ids?: string[];
+  // ── Campos de modelos com dados embutidos no texto (override só do contrato; não altera o CRM) ──
+  client_marital_status?: string;
+  client_profession?: string;
+  client_rg?: string;
+  /** Companhia(s) aérea(s) confirmadas — padrão: fornecedores dos serviços aéreos da venda. */
+  suppliers_airlines?: string;
+  /** Consolidadora(s)/operadora(s) — padrão: operadoras vinculadas aos serviços. */
+  suppliers_operators?: string;
+  /** Agência de viagens — padrão: nome comercial do modelo. */
+  suppliers_travel_agency?: string;
+  /** Data da entrada (YYYY-MM-DD) — padrão: 1º pagamento registrado. */
+  down_payment_date?: string;
+  /** Escolhas e ciências explícitas do modelo (nunca preenchidas automaticamente). */
+  template_choices?: Record<string, string>;
+  template_checks?: Record<string, boolean>;
 }
 
 export interface BuildContractInput {
@@ -410,7 +426,7 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
 
   const nights = diffNights(sale.start_date, sale.end_date);
 
-  return {
+  const payload: ContractPayload = {
     contract_title: template?.contract_title || 'Contrato de Prestação de Serviços Turísticos',
     contract_number: input.contractNumber,
     revision: input.revision,
@@ -506,6 +522,59 @@ export function buildContractPayload(input: BuildContractInput): ContractPayload
     signature_config: template?.signature_config ?? {},
     footer_config: template?.footer_config ?? {},
   };
+
+  const cfg = template?.render_config;
+  if (!isSlottedConfig(cfg) || !cfg) return payload;
+
+  // ── Modelo com campos embutidos: resolve os tokens do texto fixo ──
+  const responsible = travelers.find((t) => t.is_responsavel);
+  const uniq = (arr: (string | undefined | null)[]) =>
+    Array.from(new Map(arr.filter((v): v is string => !!v?.trim()).map((v) => [v.trim().toLocaleLowerCase(), v.trim()])).values()).join(', ');
+  const airlinesDefault = uniq(products.filter((p) => p.product_type === 'aereo').map((p) => p.supplier_name));
+  const operatorsDefault = uniq(products.map((p) => (p.operator_id ? input.operatorNames?.[p.operator_id] : undefined)));
+  const firstReceived = plan.received[0];
+  const downValue = downPayment > 0 ? downPayment : firstReceived?.amount ?? 0;
+  const downDate = overrides.down_payment_date || firstReceived?.date || '';
+  const dueDay = overrides.first_due_date ? String(parseLocalDate(overrides.first_due_date)?.getDate() ?? '') : '';
+  const em = emissionParts(payload.emitted_at);
+  const contractorCpf = overrides.client_document || responsible?.cpf || '';
+  const insuranceChoice = overrides.insurance_contracted ? 'contratado' : overrides.insurance_refusal_ack ? 'recusado' : null;
+  const methodLabel = formatPaymentMethodLabel(payload.financial.payment_method);
+
+  const resolved = resolveSlottedSections(payload.sections, cfg, {
+    values: {
+      'contractor.name': payload.client.name,
+      'contractor.nationality': overrides.client_nationality || responsible?.nacionalidade || '',
+      'contractor.marital_status': overrides.client_marital_status,
+      'contractor.profession': overrides.client_profession,
+      'contractor.rg': overrides.client_rg,
+      'contractor.cpf': contractorCpf,
+      'contractor.address': overrides.client_address,
+      'suppliers.airlines': overrides.suppliers_airlines ?? airlinesDefault,
+      'suppliers.operators': overrides.suppliers_operators ?? operatorsDefault,
+      'suppliers.travel_agency': overrides.suppliers_travel_agency ?? payload.agency.trade_name,
+      'financial.total': total > 0 ? formatNumberBR(total) : '',
+      'financial.down_payment': downValue > 0 ? formatNumberBR(downValue) : '',
+      'financial.down_payment_date': downValue > 0 && downDate ? formatDateBR(downDate) : '',
+      'financial.installments_count': plan.installmentsCount ? String(plan.installmentsCount) : '',
+      'financial.installment_value': plan.installmentValue ? formatNumberBR(plan.installmentValue) : '',
+      'financial.due_day': plan.installmentsCount ? dueDay : '',
+      'financial.payment_method': methodLabel,
+      'emission.day': em.day,
+      'emission.month': em.month,
+      'emission.year': em.year,
+    },
+    lists: { included: payload.included },
+    tables: { passengers: passengers.map((p) => ({ name: p.name, cpf: p.cpf ?? '' })) },
+    checks: overrides.template_checks ?? {},
+    choices: { ...(overrides.template_choices ?? {}), insurance: insuranceChoice },
+    contractor_name: payload.client.name,
+    contracted_name: payload.agency.trade_name || '',
+  });
+  payload.sections = resolved.sections;
+  payload.dynamic = { ...resolved.dynamic, missing_labels: resolved.dynamic.missing.map((t) => SLOT_MISSING_LABEL(cfg, t)) };
+  payload.render = { mode: cfg.mode, footer_text: cfg.footer_text, blocks: cfg.blocks };
+  return payload;
 }
 
 export interface ContractValidationIssue {
@@ -595,6 +664,14 @@ export function validateContractPayload(payload: ContractPayload): ContractValid
 
   if (!payload.insurance.contracted && !payload.insurance.refusal_acknowledged)
     push('insurance', 'Registre a ciência da recusa do seguro viagem.', 'warning');
+  if (payload.dynamic) {
+    payload.dynamic.missing.forEach((token, i) => {
+      const label = payload.dynamic!.missing_labels?.[i] ?? token.split(':')[1];
+      push(`dyn_${token}`, `Campo obrigatório do contrato pendente: ${label}.`);
+    });
+    // No modelo com seguro no corpo, a pendência do seguro é bloqueante (escolha explícita no Anexo).
+    issues.splice(0, issues.length, ...issues.filter((i) => i.field !== 'insurance'));
+  }
   if (!payload.legal_body_html && !payload.sections.length)
     push('template', 'O modelo de contrato desta agência ainda não possui texto jurídico.');
   return issues;
