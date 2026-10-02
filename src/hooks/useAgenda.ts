@@ -66,7 +66,8 @@ export function useAgenda(year?: number) {
       const { data, error } = await supabase
         .from("agency_events")
         .select("*")
-        .eq("user_id", agencyOwnerId || user.id)
+        // Agenda individual: cada pessoa (titular ou colaborador) vê a própria.
+        .eq("user_id", user.id)
         .is("deleted_at", null)
         .neq("event_type", "followup")
         .gte("event_date", startDate)
@@ -309,8 +310,8 @@ export function useAgenda(year?: number) {
           event_date: event.event_date,
           event_time: event.event_time,
           color: event.color,
-          // Colaboradores gravam na agenda da agência (regra de acesso da equipe).
-          user_id: agencyOwnerId || user.id,
+          // Agenda individual: grava sempre no próprio usuário.
+          user_id: user.id,
           client_id: event.client_id || null,
           opportunity_id: event.opportunity_id || null,
           location_city: event.location_city || null,
@@ -328,9 +329,17 @@ export function useAgenda(year?: number) {
       toast.success("Evento criado com sucesso!");
       triggerGoogleCalendarSync();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Error creating event:", error);
-      toast.error("Erro ao criar evento");
+      const msg = String(error?.message || "");
+      const hint = /JWT|auth|sess/i.test(msg)
+        ? "Sua sessão expirou. Atualize a página e entre novamente."
+        : /row-level security|permission/i.test(msg)
+        ? "Sem permissão para criar eventos nesta agenda."
+        : /fetch|network/i.test(msg)
+        ? "Falha de conexão. Verifique a internet e tente de novo."
+        : msg || "Tente novamente.";
+      toast.error("Erro ao criar evento", { description: hint });
     },
   });
 
