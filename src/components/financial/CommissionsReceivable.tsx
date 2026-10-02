@@ -433,8 +433,9 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
                               📤→
                             </Button>
                           )}
-                          {c.status !== "recebido" && c.status !== "cancelado" && (
-                            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] text-emerald-600" title="Registrar recebimento"
+                          {c.status !== "cancelado" && (
+                            <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] text-emerald-600"
+                              title={c.status === "recebido" ? "Editar recebimento" : "Registrar recebimento"}
                               onClick={() => setReceivePayment(c)}>
                               <CheckCircle className="h-3.5 w-3.5" />
                             </Button>
@@ -479,7 +480,8 @@ function ReceivePaymentDialog({ commission, open, onOpenChange }: { commission: 
   const alreadyReceived = Number(commission.received_amount) || 0;
   const remaining = Math.max(expected - alreadyReceived, 0);
   const [amount, setAmount] = useState<number>(remaining);
-  const [date, setDate] = useState<string>(today());
+  const [date, setDate] = useState<string>(commission.received_date || today());
+  const canEditDate = alreadyReceived > 0 && !!commission.received_date;
 
   const saveMutation = useMutation({
     mutationFn: async (values: { received_amount: number; received_date: string | null }) => {
@@ -533,6 +535,12 @@ function ReceivePaymentDialog({ commission, open, onOpenChange }: { commission: 
         </div>
         <div className="flex justify-end gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancelar</Button>
+          {canEditDate && (
+            <Button variant="outline" size="sm" disabled={saveMutation.isPending || !date}
+              onClick={() => saveMutation.mutate({ received_amount: alreadyReceived, received_date: date })}>
+              Salvar só a data
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={() => handleSave(true)} disabled={saveMutation.isPending || remaining <= 0}>
             Receber total
           </Button>

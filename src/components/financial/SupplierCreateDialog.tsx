@@ -45,7 +45,7 @@ export function SupplierCreateDialog({ open, onOpenChange }: Props) {
           is_published: false,
           is_public_visible: false,
           is_active: true,
-          source: "agency_private",
+          source: "agency",
         })
         .select("id")
         .single();
