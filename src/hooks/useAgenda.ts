@@ -57,7 +57,7 @@ export function useAgenda(year?: number) {
 
   // Fetch agency events for the user
   const { data: agencyEvents = [], isLoading: agencyLoading } = useQuery({
-    queryKey: ["agency-events", user?.id, currentYear],
+    queryKey: ["agency-events", user?.id, agencyOwnerId, currentYear],
     queryFn: async () => {
       if (!user?.id) return [];
       const startDate = `${currentYear}-01-01`;
@@ -66,7 +66,7 @@ export function useAgenda(year?: number) {
       const { data, error } = await supabase
         .from("agency_events")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("user_id", agencyOwnerId || user.id)
         .is("deleted_at", null)
         .neq("event_type", "followup")
         .gte("event_date", startDate)
