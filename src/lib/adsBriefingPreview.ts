@@ -7,6 +7,7 @@ import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
+import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
 export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
@@ -270,6 +271,165 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   },
 };
 
+export const DRICA_VIAGENS_PREVIEW_JOB_ID = "briefing-16-v1";
+export const DRICA_VIAGENS_PREVIEW_PATH = `/ads-briefing-preview/${DRICA_VIAGENS_PREVIEW_JOB_ID}`;
+/** Host sintético exclusivo: não representa nem vincula o domínio informado. */
+export const DRICA_VIAGENS_PREVIEW_HOST = "briefing-16-v1.preview.local";
+
+export const DRICA_VIAGENS_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-000000000016",
+  agency_slug: "",
+  public_slug: null,
+  hostname: DRICA_VIAGENS_PREVIEW_HOST,
+  is_primary: false,
+  agency_name: "Drica Viagens",
+  owner_name: "Adriana Martins",
+  logo_url: dricaViagensLogo.url,
+  cover_image_url: null,
+  primary_color: "#990033",
+  secondary_color: "#336687",
+  secondary_auto: false,
+  tertiary_color: null,
+  tertiary_auto: true,
+  on_secondary_color: null,
+  // Canais aparecem somente como informação editorial; CTAs permanecem bloqueados.
+  phone: null,
+  city: "Rio de Janeiro",
+  state: "RJ",
+  bio: null,
+  cnpj: null,
+  whatsapp_group_url: null,
+};
+
+export const DRICA_VIAGENS_PREVIEW_PROFILE: AgencySiteProfile = {
+  key: "dricaViagensBriefing16",
+  compactSectionSpacing: true,
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Inspirações", to: "/#destinos" },
+    { label: "Viagens", to: "/#campanhas" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Atendimento", to: "/#atendimento" },
+    { label: "Dúvidas", to: "/#faq" },
+  ],
+  sections: {
+    dmc: { enabled: false },
+    offers: { enabled: false },
+    credentials: { enabled: false },
+    team: { enabled: false },
+    testimonials: { enabled: false },
+    avaliacoes: { enabled: false },
+    newsletter: { enabled: false },
+    authority: { enabled: false },
+    highlights: { enabled: false },
+    signature: { enabled: true, order: 1 },
+    destinations: { enabled: true, order: 2 },
+    modules: { enabled: true, order: 3 },
+    about: { enabled: true, order: 4 },
+    differentials: { enabled: true, order: 5 },
+    concierge: { enabled: true, order: 6 },
+    faq: { enabled: true, order: 7 },
+  },
+  heroImage: "europa",
+  heroPresentation: {
+    kicker: "VIAGENS SOB MEDIDA · RIO DE JANEIRO",
+    overlay: "strongLeft",
+  },
+  hero: [
+    {
+      title: "Sua viagem, planejada com escuta e cuidado",
+      subtitle: "Consultoria completa e atendimento pessoal com Adriana Martins, do primeiro plano ao retorno.",
+      image: "heroVarenna",
+      order: 1,
+      enabled: true,
+    },
+    {
+      title: "Famílias, parques e experiências para todas as gerações",
+      subtitle: "Orlando e roteiros em família organizados com atenção ao ritmo, ao conforto e às escolhas de cada viajante.",
+      image: "orlandoMagicKingdom",
+      order: 2,
+      enabled: true,
+    },
+    {
+      title: "Do Japão à Europa, cada detalhe faz parte da jornada",
+      subtitle: "Destinos, hotéis e serviços selecionados com critério para uma experiência segura e verdadeiramente pessoal.",
+      image: "europaCastelo",
+      order: 3,
+      enabled: true,
+    },
+  ],
+  signature: {
+    kicker: "DRICA VIAGENS",
+    title: "Consultoria próxima para viagens que combinam com você.",
+    text: "Cada roteiro nasce da escuta, ganha forma com uma curadoria criteriosa e segue acompanhado antes, durante e depois da viagem.",
+  },
+  destinations: [
+    { key: "orlando", image: "orlandoMagicKingdom", label: "Famílias e parques", title: "Orlando", text: "Parques, hospedagem e deslocamentos combinados para diferentes idades aproveitarem bem cada dia.", service: "ingressos", enabled: true, order: 1 },
+    { key: "londres-europa", image: "heroVarenna", label: "Europa", title: "Londres e Europa", text: "Cidades clássicas e novas descobertas em roteiros organizados no ritmo de cada viajante.", service: "pacotes", enabled: true, order: 2 },
+    { key: "leste-europeu", image: "europaCastelo", label: "Circuitos", title: "Leste Europeu", text: "História, cultura e paisagens conectadas por uma logística cuidadosamente planejada.", service: "pacotes", enabled: true, order: 3 },
+    { key: "disney-cruise", image: "cruzeiroDisneyWish", label: "Cruzeiros", title: "Disney Cruise Line", text: "Navios, cabines e itinerários avaliados para uma experiência em família no mar.", service: "cruzeiros", enabled: true, order: 4 },
+    { key: "japao", image: "escandinavia", label: "Ásia", title: "Japão", text: "Tradição, cidades contemporâneas e experiências culturais em uma jornada bem conectada.", service: "pacotes", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "eua-canada", title: "Estados Unidos e Canadá", text: "Roteiros urbanos, parques e natureza com serviços selecionados para o perfil da viagem.", service: "pacotes", image: "grupos", enabled: true, order: 1 },
+    { key: "europa", title: "Europa", text: "Viagens personalizadas, circuitos e grupos acompanhados com cada etapa bem organizada.", service: "pacotes", image: "europa", enabled: true, order: 2 },
+    { key: "grupos", title: "Grupos acompanhados", text: "Experiências compartilhadas com programação e logística planejadas com cuidado.", service: "pacotes", image: "grupos", enabled: true, order: 3 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação para escolher itinerário, navio, cabine e serviços adequados ao seu jeito de viajar.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 4 },
+    { key: "asia-oceania", title: "Ásia e Oceania", text: "Destinos distantes transformados em roteiros claros, conectados e personalizados.", service: "pacotes", image: "escandinavia", enabled: true, order: 5 },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Adriana Martins, atendimento pessoal do início ao retorno.",
+    text: "Proprietária e consultora da Drica Viagens, Adriana Martins conduz pessoalmente o atendimento. Desde 2010, a agência cria viagens sob medida com escuta atenta, conhecimento dos destinos e curadoria criteriosa de hotéis e serviços. O planejamento acolhe viajantes solo, famílias multigeracionais e pessoas 60+ com clareza e cuidado em cada escolha.",
+    badge: { value: "Desde 2010", label: "Drica Viagens" },
+    media: "hidden",
+    showLocation: true,
+    ownerName: "Adriana Martins",
+  },
+  differentials: [
+    { title: "Escuta de verdade", text: "Preferências, necessidades e expectativas orientam cada decisão do planejamento.", icon: "consultivo" },
+    { title: "Curadoria criteriosa", text: "Hotéis e serviços são avaliados com atenção ao perfil e ao contexto da viagem.", icon: "conferido" },
+    { title: "Conhecimento dos destinos", text: "Experiência e repertório ajudam a construir roteiros coerentes e bem conectados.", icon: "fornecedores" },
+    { title: "Acompanhamento próximo", text: "A agência orienta antes, durante e depois e auxilia no contato com o fornecedor quando há imprevistos.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa por WhatsApp, telefone, e-mail ou videochamada para entender quem vai viajar.",
+    "Curadoria de destinos, hotéis e serviços alinhados ao perfil e às prioridades da viagem.",
+    "Apresentação das opções, esclarecimento de dúvidas e ajustes antes das reservas.",
+    "Orientação antes, durante e depois, com auxílio no acompanhamento junto ao fornecedor em caso de imprevisto.",
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "O atendimento é feito pessoalmente por Adriana Martins, por WhatsApp, telefone, e-mail ou videochamada. A conversa inicial orienta a criação de uma proposta sob medida." },
+    { q: "A Drica Viagens atende famílias e pessoas 60+?", a: "Sim. O planejamento considera diferentes gerações, necessidades de mobilidade, ritmo, conforto e interesses de cada viajante." },
+    { q: "Quais são as principais especialidades?", a: "Estados Unidos e Canadá, Europa, grupos acompanhados, cruzeiros, Ásia e Oceania, com atenção especial a famílias, parques e turismo esportivo." },
+    { q: "Há apoio durante a viagem?", a: "Em caso de imprevisto, o suporte direto é prestado pelo fornecedor responsável. A Drica Viagens auxilia o cliente no acompanhamento e na comunicação durante o processo." },
+    { q: "É possível planejar uma viagem para uma pessoa só?", a: "Sim. A consultoria também atende viajantes solo, construindo o roteiro conforme preferências, ritmo e necessidades individuais." },
+  ],
+  copy: {
+    destinations: { title: "Inspirações para a sua próxima viagem", subtitle: "Destinos que ganham forma em roteiros personalizados para você e para quem viaja ao seu lado." },
+    modules: { title: "Viagens para diferentes momentos", subtitle: "Consultoria completa para destinos, estilos e perfis diversos." },
+    differentials: { title: "Cuidado presente em cada escolha", subtitle: "Atendimento pessoal, conhecimento e curadoria para viajar com mais segurança." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Um processo próximo e profissional, conduzido pela proprietária." },
+    faq: { title: "Dúvidas frequentes" },
+  },
+  footer: {
+    description: "Viagens sob medida, famílias e parques, turismo esportivo, grupos acompanhados e grandes destinos pelo mundo.",
+    whatsapp: "+55 21 98790-7853",
+    phone: "+55 21 98790-7853",
+    email: "faleconosco@dricaviagens.rio",
+    instagram: "https://www.instagram.com/dricaviagens",
+    instagramLabel: "@dricaviagens",
+    legalName: "Maralba Viagens e Turismo Ltda",
+    cnpj: "11.636.130/0001-31",
+    showLocation: true,
+  },
+  seo: {
+    title: "Prévia para revisão — Drica Viagens",
+    description: "Prévia técnica revisável do site Drica Viagens.",
+  },
+};
+
 export interface AdsBriefingPreviewFixture {
   jobId: string;
   info: AgencyDomainInfo;
@@ -294,6 +454,14 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     profile: MUNDO_EM_CORES_PREVIEW_PROFILE,
     notice: "Prévia para revisão — sem publicação · ações desativadas",
     documentTitle: "Prévia para revisão — O Mundo em Cores",
+    realAgency: true,
+  },
+  [DRICA_VIAGENS_PREVIEW_JOB_ID]: {
+    jobId: DRICA_VIAGENS_PREVIEW_JOB_ID,
+    info: DRICA_VIAGENS_PREVIEW_INFO,
+    profile: DRICA_VIAGENS_PREVIEW_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Drica Viagens",
     realAgency: true,
   },
 };

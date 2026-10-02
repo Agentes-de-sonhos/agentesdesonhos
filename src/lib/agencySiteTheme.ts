@@ -38,6 +38,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "casanovatur.demo.local": "casaNovaEditorial",
   "www.essyatur.com.br": "essyaEditorial",
   "briefing-14-v1.preview.local": "siteBaseEditorial",
+  "briefing-16-v1.preview.local": "siteBaseEditorial",
 };
 
 function normalizeHost(hostname?: string | null): string {

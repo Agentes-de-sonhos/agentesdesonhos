@@ -7,6 +7,8 @@ import {
   ADS_PREVIEW_INFO,
   MUNDO_EM_CORES_PREVIEW_HOST,
   MUNDO_EM_CORES_PREVIEW_INFO,
+  DRICA_VIAGENS_PREVIEW_HOST,
+  DRICA_VIAGENS_PREVIEW_INFO,
   resolveAdsPreviewFixture,
 } from "@/lib/adsBriefingPreview";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
@@ -37,6 +39,20 @@ describe("prévia ADS ads-email-test-v1", () => {
     expect(MUNDO_EM_CORES_PREVIEW_INFO.hostname).not.toContain("omundoemcores.com.br");
     expect(resolveSiteProfile("www.destinoscomaju.com.br").key).toBe("editorialRose");
   });
+  it("mantém briefing-16 isolado, com identidade e conteúdo locais", () => {
+    const fixture = resolveAdsPreviewFixture("briefing-16-v1");
+    expect(fixture?.profile.key).toBe("dricaViagensBriefing16");
+    expect(fixture?.info.agency_name).toBe("Drica Viagens");
+    expect(resolveSiteProfile(DRICA_VIAGENS_PREVIEW_HOST).key).toBe("dricaViagensBriefing16");
+    expect(DRICA_VIAGENS_PREVIEW_INFO.agency_slug).toBe("");
+    expect(DRICA_VIAGENS_PREVIEW_INFO.public_slug).toBeNull();
+    expect(DRICA_VIAGENS_PREVIEW_INFO.phone).toBeNull();
+    expect(DRICA_VIAGENS_PREVIEW_INFO.user_id).toBe("00000000-0000-0000-0000-000000000016");
+    expect(DRICA_VIAGENS_PREVIEW_INFO.hostname).not.toContain("dricaviagens.rio");
+    expect(resolveSiteProfile("dricaviagens.rio").key).toBe("classic");
+    expect(fixture?.profile.sections?.offers).toEqual({ enabled: false });
+    expect(fixture?.profile.sections?.testimonials).toEqual({ enabled: false });
+  });
   it("não resolve identificadores desconhecidos", () => {
     expect(resolveAdsPreviewFixture("briefing-999-v1")).toBeNull();
   });
@@ -57,5 +73,16 @@ describe("prévia ADS ads-email-test-v1", () => {
     );
     expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
     expect(screen.queryByText(/agência fictícia/i)).toBeNull();
+  });
+  it("renderiza o briefing-16 somente pela rota técnica", async () => {
+    Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
+    const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+    render(
+      <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-16-v1"]}>
+        <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
+    expect(await screen.findByText("Drica Viagens")).toBeInTheDocument();
   });
 });
