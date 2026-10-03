@@ -17,11 +17,15 @@ export interface HotelAmenity {
   description?: string;
 }
 
+export interface HotelReview { author: string; text: string; rating?: number; relativeTime?: string }
+
 export interface HotelGoogleData {
   rating: number;
   totalReviews: number;
   reviewsUrl: string;
-  featuredReview?: { author: string; text: string; relativeTime?: string };
+  featuredReview?: HotelReview;
+  /** Até 5 avaliações importadas uma vez do Google. */
+  reviews?: HotelReview[];
   /** Indica que os números são ilustrativos (página modelo). */
   illustrative?: boolean;
 }
