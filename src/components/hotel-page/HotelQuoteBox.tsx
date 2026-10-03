@@ -26,7 +26,7 @@ function Stepper({ label, value, min, max, onChange }: { label: string; value: n
   return (
     <div>
       <Label className="text-sm font-medium">{label}</Label>
-      <div className="mt-1.5 flex h-11 items-center rounded-lg border border-border bg-background">
+      <div className="mt-1.5 flex h-11 items-center rounded-lg border border-border bg-card">
         <button type="button" aria-label={`Diminuir ${label}`} disabled={value <= min} onClick={() => onChange(value - 1)} className="grid h-full w-10 place-items-center text-primary disabled:opacity-40">
           <Minus className="h-4 w-4" />
         </button>
@@ -115,14 +115,14 @@ export function HotelQuoteBox({
           <Label htmlFor="hq-in" className="text-sm font-medium">Entrada</Label>
           <div className="relative mt-1.5">
             <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="hq-in" type="date" min={today} value={checkIn} onChange={(e) => { setCheckIn(e.target.value); if (checkOut && checkOut <= e.target.value) setCheckOut(""); }} className="h-11 bg-background pl-9" />
+            <Input id="hq-in" type="date" min={today} value={checkIn} onChange={(e) => { setCheckIn(e.target.value); if (checkOut && checkOut <= e.target.value) setCheckOut(""); }} className="h-11 bg-card pl-9" />
           </div>
         </div>
         <div>
           <Label htmlFor="hq-out" className="text-sm font-medium">Saída</Label>
           <div className="relative mt-1.5">
             <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="hq-out" type="date" min={checkIn || today} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="h-11 bg-background pl-9" />
+            <Input id="hq-out" type="date" min={checkIn || today} value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="h-11 bg-card pl-9" />
           </div>
         </div>
         <Stepper label="Adultos" value={adults} min={1} max={10} onChange={setAdults} />
@@ -139,7 +139,7 @@ export function HotelQuoteBox({
                 id={`hq-age-${i}`}
                 value={a}
                 onChange={(e) => setAges((prev) => prev.map((v, k) => (k === i ? (e.target.value === "" ? "" : Number(e.target.value)) : v)))}
-                className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-2 text-sm"
+                className="mt-1 h-10 w-full rounded-lg border border-border bg-card px-2 text-sm"
               >
                 <option value="">Selecione</option>
                 {Array.from({ length: 18 }, (_, n) => (
