@@ -48,6 +48,71 @@ export function BrazilResortsMap({
     ? list.filter((r) => prettyName(r.name).toLowerCase().includes(query.trim().toLowerCase()))
     : list;
 
+  // Barra de estados: arrastar com o mouse + setas laterais.
+  const railRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ down: boolean; moved: boolean; startX: number; startScroll: number }>({ down: false, moved: false, startX: 0, startScroll: 0 });
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = railRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    updateArrows();
+    const onDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      drag.current = { down: true, moved: false, startX: e.pageX, startScroll: el.scrollLeft };
+      el.style.cursor = "grabbing";
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!drag.current.down) return;
+      const dx = e.pageX - drag.current.startX;
+      if (Math.abs(dx) > 4) drag.current.moved = true;
+      el.scrollLeft = drag.current.startScroll - dx;
+    };
+    const onUp = () => {
+      drag.current.down = false;
+      el.style.cursor = "";
+    };
+    const onClickCapture = (e: MouseEvent) => {
+      if (drag.current.moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        drag.current.moved = false;
+      }
+    };
+    const onLeave = () => onUp();
+    el.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("mouseleave", onLeave);
+    el.addEventListener("click", onClickCapture, true);
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      el.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("mouseleave", onLeave);
+      el.removeEventListener("click", onClickCapture, true);
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [updateArrows]);
+
+  const scrollRail = (dir: -1 | 1) => {
+    const el = railRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(240, el.clientWidth * 0.7), behavior: "smooth" });
+  };
+
+
   return (
     <div className="w-full">
       <div className="text-center">
