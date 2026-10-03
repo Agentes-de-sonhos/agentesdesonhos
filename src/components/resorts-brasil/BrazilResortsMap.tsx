@@ -116,15 +116,7 @@ export function BrazilResortsMap({
         </section>
 
         <div className="mx-auto mt-10 max-w-4xl">
-          <div className="flex flex-wrap justify-center gap-2">
-            <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
-            {ufsWithResorts.map(([uf, name]) => (
-              <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
-                {name} ({counts[uf]})
-              </Chip>
-            ))}
-          </div>
-          <div className="relative mx-auto mt-5 max-w-md">
+          <div className="relative mx-auto max-w-md">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <input
               type="search"
@@ -134,6 +126,18 @@ export function BrazilResortsMap({
               aria-label="Buscar resort pelo nome"
               className="h-11 w-full rounded-full border border-border bg-card pl-10 pr-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
+          </div>
+          <div
+            className="mt-5 flex gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            role="tablist"
+            aria-label="Filtrar resorts por estado"
+          >
+            <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
+            {ufsWithResorts.map(([uf, name]) => (
+              <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
+                {name} ({counts[uf]})
+              </Chip>
+            ))}
           </div>
         </div>
 
