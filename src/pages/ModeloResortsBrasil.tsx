@@ -14,7 +14,7 @@ export default function ModeloResortsBrasil() {
   return (
     <main className="min-h-screen bg-background px-4 py-12 md:py-20">
       <div className="mx-auto max-w-7xl">
-        <BrazilResortsMap />
+        <BrazilResortsMap resortHref={(slug) => `/modelos/hotel/${slug}`} />
       </div>
     </main>
   );

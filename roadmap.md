@@ -50,3 +50,4 @@
 - [x] Ajustar selo retangular, enquadramento da Juliana e recorte lateral da seção Xcaret, sem publicar.
 
 - [x] Atualizar exclusivamente o hero da Destinos com a Ju com as três fotos aprovadas, recortes responsivos e contraste; validar desktop/mobile, tipos e build; não publicar.
+- Textos 'Por que escolher' e 'Destaques' dos 78 resorts — aguardando documento do usuário
