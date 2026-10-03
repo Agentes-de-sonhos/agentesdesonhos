@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BRAZIL_RESORTS, type BrazilResort } from "./resortsData";
+import { BRAZIL_STATE_PATHS, BRAZIL_VIEWBOX } from "./brazilStatePaths";
 
 const LOGOS = import.meta.glob("@/assets/resorts-brasil/*.webp", { eager: true, import: "default" }) as Record<string, string>;
 const logoFor = (slug: string) =>
@@ -55,32 +56,47 @@ export function BrazilResortsMap({
       <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
         {/* Mapa */}
         <div className="mx-auto w-full max-w-md lg:sticky lg:top-24">
-          <div className="grid grid-cols-7 gap-1.5" role="group" aria-label="Mapa do Brasil por estado">
-            {STATES.map(([uf, name, col, row]) => {
+          <svg viewBox={BRAZIL_VIEWBOX} className="h-auto w-full" role="group" aria-label="Mapa do Brasil por estado">
+            {STATES.map(([uf, name]) => {
+              const shape = BRAZIL_STATE_PATHS[uf];
+              if (!shape) return null;
               const n = counts[uf] ?? 0;
               const active = selected === uf;
               return (
-                <button
+                <g
                   key={uf}
-                  type="button"
-                  disabled={!n}
-                  onClick={() => setSelected(active ? null : uf)}
-                  title={n ? `${name} · ${n} resort${n > 1 ? "s" : ""}` : name}
-                  aria-pressed={active}
-                  style={{ gridColumn: col, gridRow: row }}
-                  className={cn(
-                    "relative flex aspect-square flex-col items-center justify-center rounded-lg text-xs font-semibold transition-all",
-                    !n && "cursor-default bg-muted text-muted-foreground/60",
-                    n > 0 && !active && "bg-primary/15 text-primary hover:scale-105 hover:bg-primary/25",
-                    active && "scale-105 bg-primary text-primary-foreground shadow-lg",
-                  )}
+                  role={n ? "button" : undefined}
+                  tabIndex={n ? 0 : -1}
+                  aria-label={n ? `${name}, ${n} resort${n > 1 ? "s" : ""}` : name}
+                  aria-pressed={n ? active : undefined}
+                  onClick={() => n && setSelected(active ? null : uf)}
+                  onKeyDown={(e) => n && (e.key === "Enter" || e.key === " ") && (e.preventDefault(), setSelected(active ? null : uf))}
+                  className={cn("group outline-none", n ? "cursor-pointer" : "cursor-default")}
                 >
-                  {uf}
-                  {n > 0 && <span className="text-[10px] font-normal opacity-80">{n}</span>}
-                </button>
+                  <title>{n ? `${name} · ${n} resort${n > 1 ? "s" : ""}` : name}</title>
+                  <path
+                    d={shape.d}
+                    strokeWidth={1.5}
+                    strokeLinejoin="round"
+                    className={cn(
+                      "stroke-background transition-colors duration-200",
+                      !n && "fill-muted",
+                      n > 0 && !active && "fill-primary/25 group-hover:fill-primary/45 group-focus-visible:fill-primary/45",
+                      active && "fill-primary",
+                    )}
+                  />
+                  {n > 0 && (
+                    <g className="pointer-events-none">
+                      <circle cx={shape.cx} cy={shape.cy} r={17} className={active ? "fill-background" : "fill-primary"} />
+                      <text x={shape.cx} y={shape.cy} dy="0.35em" textAnchor="middle" fontSize={15} fontWeight={700}
+                        className={active ? "fill-primary" : "fill-primary-foreground"}>{n}</text>
+                    </g>
+                  )}
+                </g>
               );
             })}
-          </div>
+          </svg>
+          <p className="mt-2 text-center text-xs text-muted-foreground">Os números indicam a quantidade de resorts por estado.</p>
         </div>
 
         {/* Lista */}
