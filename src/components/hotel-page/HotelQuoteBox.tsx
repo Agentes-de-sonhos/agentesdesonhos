@@ -101,9 +101,9 @@ export function HotelQuoteBox({
     : 0;
 
   return (
-    <section className="rounded-2xl border border-primary/15 bg-primary/5 p-5 md:p-6">
+    <section className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
       <div className="flex items-start gap-3">
-        <FileText className="mt-0.5 h-7 w-7 shrink-0 text-primary" aria-hidden />
+        <Bed className="mt-0.5 h-7 w-7 shrink-0 text-primary" aria-hidden />
         <div>
           <h2 className="text-xl font-bold text-foreground">Solicite seu orçamento</h2>
           <p className="text-sm text-muted-foreground">Informe o período da hospedagem e quem vai viajar.</p>
