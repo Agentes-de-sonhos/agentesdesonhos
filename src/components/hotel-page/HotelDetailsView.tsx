@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { HotelGallery } from "./HotelGallery";
 import { HotelQuoteBox } from "./HotelQuoteBox";
-import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest } from "./types";
+import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest, HotelReview } from "./types";
 
 const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   restaurant: UtensilsCrossed, "room-service": ConciergeBell, spa: Sparkles, gym: Dumbbell,
