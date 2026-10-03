@@ -24,7 +24,7 @@ const STATE_NAME: Record<string, string> = {
 };
 
 /** Textos curados por resort (a receber). Chave = slug. */
-export const RESORT_TEXTS: Partial<Record<string, Pick<HotelPageData, "descriptionTitle" | "description" | "amenities" | "checkIn" | "checkOut">>> = {};
+export const RESORT_TEXTS: Partial<Record<string, Partial<Pick<HotelPageData, "descriptionTitle" | "description" | "amenities" | "checkIn" | "checkOut">>>> = {};
 
 const DATA = googleData as Record<string, GoogleSnapshot>;
 
