@@ -32,6 +32,7 @@ const LandingPage = lazy(() => import("./pages/LandingPage"));
 const Agende = lazy(() => import("./pages/Agende"));
 const DemonstracaoCrm = lazy(() => import("./pages/DemonstracaoCrm"));
 const ModeloResortsBrasil = lazy(() => import("./pages/ModeloResortsBrasil"));
+const ModeloHotel = lazy(() => import("./pages/ModeloHotel"));
 const OrlandoMagicLandingPage = lazy(() => import("./pages/OrlandoMagicLandingPage"));
 const ComandatubaLandingPage = lazy(() => import("./pages/ComandatubaLandingPage"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -253,6 +254,7 @@ const App = () => {
             <Route path="/planos" element={<Planos />} />
             <Route path="/demonstracao-crm" element={<DemonstracaoCrm />} />
             <Route path="/modelos/resorts-brasil" element={<ModeloResortsBrasil />} />
+            <Route path="/modelos/hotel" element={<ModeloHotel />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/experiencias/orlando-magic/demo" element={<OrlandoMagicLandingPage />} />
             <Route path="/experiencias/transamerica-comandatuba/demo" element={<ComandatubaLandingPage />} />
