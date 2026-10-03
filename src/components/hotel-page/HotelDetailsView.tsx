@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { HotelGallery } from "./HotelGallery";
 import { HotelQuoteBox } from "./HotelQuoteBox";
-import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest } from "./types";
+import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest, HotelReview } from "./types";
 
 const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   restaurant: UtensilsCrossed, "room-service": ConciergeBell, spa: Sparkles, gym: Dumbbell,
@@ -112,6 +112,45 @@ function AmenitiesCarousel({ amenities }: { amenities: HotelPageData["amenities"
   );
 }
 
+function ReviewsCarousel({ reviews }: { reviews: HotelReview[] }) {
+  const [i, setI] = useState(0);
+  const [open, setOpen] = useState(false);
+  if (!reviews.length) return null;
+  const r = reviews[i];
+  const go = (d: number) => { setOpen(false); setI((i + d + reviews.length) % reviews.length); };
+  return (
+    <div className="mt-4 border-t border-border pt-4">
+      <div key={i} className="animate-fade-in">
+        {r.rating ? <Stars value={r.rating} /> : null}
+        <p className={`mt-2 whitespace-pre-line text-sm text-foreground ${open ? "" : "line-clamp-5"}`}>“{r.text}”</p>
+        {r.text.length > 220 && (
+          <button type="button" onClick={() => setOpen(!open)} className="mt-1 text-xs font-medium text-primary hover:underline">
+            {open ? "Ler menos" : "Ler mais"}
+          </button>
+        )}
+        <div className="mt-3 flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-primary font-semibold text-primary-foreground">{r.author.charAt(0)}</span>
+          <div>
+            <p className="text-sm font-semibold">{r.author}</p>
+            {r.relativeTime && <p className="text-xs text-muted-foreground">{r.relativeTime}</p>}
+          </div>
+        </div>
+      </div>
+      {reviews.length > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <button type="button" onClick={() => go(-1)} aria-label="Avaliação anterior" className="grid h-8 w-8 place-items-center rounded-full border border-border transition hover:bg-muted">
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="text-xs tabular-nums text-muted-foreground">{i + 1} de {reviews.length}</span>
+          <button type="button" onClick={() => go(1)} aria-label="Próxima avaliação" className="grid h-8 w-8 place-items-center rounded-full border border-border transition hover:bg-muted">
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function HotelDetailsView({
   hotel, onSubmitQuote, previewMode,
 }: {
@@ -137,8 +176,8 @@ export function HotelDetailsView({
 
       <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={previewMode} />
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="space-y-8">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="min-w-0 space-y-8">
           {hotel.description.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{hotel.descriptionTitle || "Por que escolher este hotel?"}</h2>
@@ -195,20 +234,7 @@ export function HotelDetailsView({
               <a href={g.reviewsUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
                 Ver avaliações <ChevronRight className="h-4 w-4" />
               </a>
-              {g.featuredReview && (
-                <div className="mt-4 border-t border-border pt-4">
-                  <p className="text-sm text-foreground">“{g.featuredReview.text}”</p>
-                  <div className="mt-3 flex items-center gap-3">
-                    <span className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground font-semibold">
-                      {g.featuredReview.author.charAt(0)}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold">{g.featuredReview.author}</p>
-                      {g.featuredReview.relativeTime && <p className="text-xs text-muted-foreground">{g.featuredReview.relativeTime}</p>}
-                    </div>
-                  </div>
-                </div>
-              )}
+              <ReviewsCarousel reviews={g.reviews?.length ? g.reviews.slice(0, 5) : g.featuredReview ? [g.featuredReview] : []} />
             </section>
           )}
 
