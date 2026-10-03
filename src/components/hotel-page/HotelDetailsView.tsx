@@ -9,7 +9,7 @@ import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest } from "./types
 const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   restaurant: UtensilsCrossed, "room-service": ConciergeBell, spa: Sparkles, gym: Dumbbell,
   pets: PawPrint, pool: Waves, wifi: Wifi, parking: ParkingCircle, kids: Baby,
-  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble,
+  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble,
 };
 
 function Stars({ value, className }: { value: number; className?: string }) {
@@ -60,7 +60,7 @@ export function HotelDetailsView({
         <div className="space-y-8">
           {hotel.description.length > 0 && (
             <section>
-              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Por que escolher este hotel?</h2>
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{hotel.descriptionTitle || "Por que escolher este hotel?"}</h2>
               <div className="mt-4 space-y-4 leading-relaxed text-muted-foreground">
                 {hotel.description.map((p, i) => <p key={i}>{p}</p>)}
               </div>
@@ -74,9 +74,12 @@ export function HotelDetailsView({
                 {hotel.amenities.map((a) => {
                   const Icon = AMENITY_ICONS[a.icon] ?? Sparkles;
                   return (
-                    <li key={a.label} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-4 text-sm">
+                    <li key={a.label} className={`flex gap-3 rounded-xl border border-border bg-card px-4 py-4 text-sm ${a.description ? "items-start" : "items-center"}`}>
                       <Icon className="h-6 w-6 shrink-0 text-primary" aria-hidden />
-                      <span>{a.label}</span>
+                      <div>
+                        <span className={a.description ? "font-semibold" : undefined}>{a.label}</span>
+                        {a.description && <p className="mt-1 leading-relaxed text-muted-foreground">{a.description}</p>}
+                      </div>
                     </li>
                   );
                 })}

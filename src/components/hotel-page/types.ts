@@ -4,7 +4,7 @@
  */
 export type HotelAmenityIcon =
   | "restaurant" | "room-service" | "spa" | "gym" | "pets" | "pool"
-  | "wifi" | "parking" | "kids" | "beach" | "bar" | "all-inclusive";
+  | "wifi" | "parking" | "kids" | "beach" | "bar" | "all-inclusive" | "leisure";
 
 export interface HotelPhoto {
   url: string;
@@ -14,6 +14,7 @@ export interface HotelPhoto {
 export interface HotelAmenity {
   icon: HotelAmenityIcon;
   label: string;
+  description?: string;
 }
 
 export interface HotelGoogleData {
@@ -33,6 +34,7 @@ export interface HotelPageData {
   city: string;
   state: string;
   photos: HotelPhoto[];
+  descriptionTitle?: string;
   description: string[];
   amenities: HotelAmenity[];
   checkIn?: string;
