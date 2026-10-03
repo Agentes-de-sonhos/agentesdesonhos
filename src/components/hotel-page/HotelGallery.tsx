@@ -39,7 +39,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
         src={photos[i].url}
         alt={photos[i].alt}
         loading={eager ? "eager" : "lazy"}
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
     </button>
   );
@@ -62,7 +62,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
       <div className="hidden gap-2 md:grid">
         <div className="grid h-[420px] grid-cols-[2.2fr_1fr] gap-2">
           <Tile i={0} eager className="h-full" />
-          <div className="grid grid-rows-2 gap-2">
+          <div className="grid min-h-0 grid-rows-2 gap-2">
             {side1 ? <Tile i={1} /> : <div className="rounded-xl bg-muted" />}
             {side2 ? <Tile i={2} /> : <div className="rounded-xl bg-muted" />}
           </div>
@@ -74,7 +74,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
               const last = k === thumbs.length - 1;
               return last ? (
                 <button key={i} type="button" onClick={() => setOpen(0)} className="relative overflow-hidden rounded-xl bg-muted">
-                  <img src={photos[i].url} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img src={photos[i].url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                   <span className="absolute inset-0 grid place-items-center bg-foreground/45 text-sm font-semibold text-background">
                     <span className="flex items-center gap-1.5"><Images className="h-4 w-4" />Ver todas as fotos</span>
                   </span>

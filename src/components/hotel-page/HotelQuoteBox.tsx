@@ -110,7 +110,7 @@ export function HotelQuoteBox({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_150px_150px_auto] lg:items-end">
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-[1fr_1fr_150px_150px_auto] lg:items-end">
         <div>
           <Label htmlFor="hq-in" className="text-sm font-medium">Entrada</Label>
           <div className="relative mt-1.5">
@@ -127,7 +127,7 @@ export function HotelQuoteBox({
         </div>
         <Stepper label="Adultos" value={adults} min={1} max={10} onChange={setAdults} />
         <Stepper label="Crianças" value={ages.length} min={0} max={6} onChange={setChildren} />
-        <Button onClick={start} size="lg" className="h-11 w-full sm:col-span-2 lg:col-span-1 lg:w-auto">Solicitar orçamento</Button>
+        <Button onClick={start} size="lg" className="col-span-2 h-11 w-full lg:col-span-1 lg:w-auto">Solicitar orçamento</Button>
       </div>
 
       {ages.length > 0 && (
