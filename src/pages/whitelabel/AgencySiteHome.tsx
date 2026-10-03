@@ -1,3 +1,4 @@
+import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -1776,6 +1777,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           </div>
         );
       })}
+
+      {profile.resortsMap?.enabled && profile.resortsMap.showOnHome && (
+        <section id="resorts-brasil" className="bg-background py-16 md:py-24">
+          <div className={container}><BrazilResortsMap /></div>
+        </section>
+      )}
 
       {/* Captação "Receba inspirações": tenant resolvido no servidor pelo hostname. */}
       <AgencyInspirationDialog

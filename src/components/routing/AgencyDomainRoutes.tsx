@@ -1,3 +1,4 @@
+import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useLocation, useParams } from "react-router-dom";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
@@ -208,6 +209,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
             <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />
             <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
+            {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
+              <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap /></div>} />
+            )}
             {/* Páginas institucionais declaradas pelo perfil do hostname. */}
             {resolveContentPages(info.hostname).map((p) => (
               <Route key={p.path} path={p.path} element={<AgencyContentPage page={p} />} />
