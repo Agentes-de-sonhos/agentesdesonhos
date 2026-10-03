@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { MapPin, Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BRAZIL_RESORTS, type BrazilResort } from "./resortsData";
@@ -47,6 +47,71 @@ export function BrazilResortsMap({
   const filtered = query.trim()
     ? list.filter((r) => prettyName(r.name).toLowerCase().includes(query.trim().toLowerCase()))
     : list;
+
+  // Barra de estados: arrastar com o mouse + setas laterais.
+  const railRef = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ down: boolean; moved: boolean; startX: number; startScroll: number }>({ down: false, moved: false, startX: 0, startScroll: 0 });
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  const updateArrows = useCallback(() => {
+    const el = railRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = railRef.current;
+    if (!el) return;
+    updateArrows();
+    const onDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      drag.current = { down: true, moved: false, startX: e.pageX, startScroll: el.scrollLeft };
+      el.style.cursor = "grabbing";
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!drag.current.down) return;
+      const dx = e.pageX - drag.current.startX;
+      if (Math.abs(dx) > 4) drag.current.moved = true;
+      el.scrollLeft = drag.current.startScroll - dx;
+    };
+    const onUp = () => {
+      drag.current.down = false;
+      el.style.cursor = "";
+    };
+    const onClickCapture = (e: MouseEvent) => {
+      if (drag.current.moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        drag.current.moved = false;
+      }
+    };
+    const onLeave = () => onUp();
+    el.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("mouseleave", onLeave);
+    el.addEventListener("click", onClickCapture, true);
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      el.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("mouseleave", onLeave);
+      el.removeEventListener("click", onClickCapture, true);
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, [updateArrows]);
+
+  const scrollRail = (dir: -1 | 1) => {
+    const el = railRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * Math.max(240, el.clientWidth * 0.7), behavior: "smooth" });
+  };
+
 
   return (
     <div className="w-full">
@@ -127,17 +192,41 @@ export function BrazilResortsMap({
               className="h-11 w-full rounded-full border border-border bg-card pl-10 pr-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <div
-            className="mt-5 flex gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            role="tablist"
-            aria-label="Filtrar resorts por estado"
-          >
-            <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
-            {ufsWithResorts.map(([uf, name]) => (
-              <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
-                {name} ({counts[uf]})
-              </Chip>
-            ))}
+          <div className="relative mt-5">
+            {canLeft && (
+              <button
+                type="button"
+                aria-label="Rolar estados para a esquerda"
+                onClick={() => scrollRail(-1)}
+                className="absolute -left-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition hover:bg-muted"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden />
+              </button>
+            )}
+            <div
+              ref={railRef}
+              className="flex cursor-grab select-none gap-2 overflow-x-auto px-10 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&:not(:active)]:cursor-grab"
+              role="tablist"
+              aria-label="Filtrar resorts por estado"
+              style={{ WebkitTouchCallout: "none" }}
+            >
+              <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
+              {ufsWithResorts.map(([uf, name]) => (
+                <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
+                  {name} ({counts[uf]})
+                </Chip>
+              ))}
+            </div>
+            {canRight && (
+              <button
+                type="button"
+                aria-label="Rolar estados para a direita"
+                onClick={() => scrollRail(1)}
+                className="absolute -right-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition hover:bg-muted"
+              >
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </button>
+            )}
           </div>
         </div>
 
