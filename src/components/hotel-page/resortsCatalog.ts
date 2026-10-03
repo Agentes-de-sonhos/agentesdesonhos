@@ -33,7 +33,7 @@ export function getResortPage(slug: string): HotelPageData | null {
   const base = BRAZIL_RESORTS.find((r) => r.slug === slug);
   const g = DATA[slug];
   if (!base || !g) return null;
-  const texts = RESORT_TEXTS[slug] ?? {};
+  const texts: NonNullable<(typeof RESORT_TEXTS)[string]> = RESORT_TEXTS[slug] ?? {};
   return {
     slug,
     name: g.placeName,
@@ -47,7 +47,7 @@ export function getResortPage(slug: string): HotelPageData | null {
     checkIn: texts.checkIn,
     checkOut: texts.checkOut,
     google: g.rating
-      ? { rating: g.rating, totalReviews: g.total ?? 0, reviewsUrl: g.mapsUrl, reviews: g.reviews.slice(0, 5) }
+      ? { rating: g.rating, totalReviews: g.total ?? 0, reviewsUrl: g.mapsUrl, reviews: [...g.reviews].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 5) }
       : undefined,
     location: { lat: g.lat, lng: g.lng, mapsUrl: g.mapsUrl },
   };
