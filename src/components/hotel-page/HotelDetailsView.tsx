@@ -32,6 +32,86 @@ function Stars({ value, className }: { value: number; className?: string }) {
   );
 }
 
+function AmenitiesCarousel({ amenities }: { amenities: HotelPageData["amenities"] }) {
+  const trackRef = useRef<HTMLUListElement>(null);
+  const drag = useRef({ down: false, startX: 0, startScroll: 0, moved: false });
+  const [canPrev, setCanPrev] = useState(false);
+  const [canNext, setCanNext] = useState(true);
+
+  const updateArrows = () => {
+    const el = trackRef.current;
+    if (!el) return;
+    setCanPrev(el.scrollLeft > 4);
+    setCanNext(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  };
+
+  const scrollByCards = (dir: -1 | 1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: "smooth" });
+  };
+
+  return (
+    <div className="group/car relative mt-4">
+      <ul
+        ref={trackRef}
+        onScroll={updateArrows}
+        onPointerDown={(e) => {
+          const el = trackRef.current;
+          if (!el) return;
+          drag.current = { down: true, startX: e.clientX, startScroll: el.scrollLeft, moved: false };
+        }}
+        onPointerMove={(e) => {
+          const el = trackRef.current;
+          if (!el || !drag.current.down) return;
+          const dx = e.clientX - drag.current.startX;
+          if (Math.abs(dx) > 4) drag.current.moved = true;
+          el.scrollLeft = drag.current.startScroll - dx;
+        }}
+        onPointerUp={() => { drag.current.down = false; }}
+        onPointerLeave={() => { drag.current.down = false; }}
+        className="flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-1 select-none active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {amenities.map((a) => {
+          const Icon = AMENITY_ICONS[a.icon] ?? Sparkles;
+          return (
+            <li
+              key={a.label}
+              className={`flex w-[85%] shrink-0 snap-start gap-3 rounded-xl border border-border bg-card px-4 py-4 text-sm sm:w-[calc(50%-6px)] lg:w-[calc(33.333%-8px)] ${a.description ? "items-start" : "items-center"}`}
+            >
+              <Icon className="h-6 w-6 shrink-0 text-primary" aria-hidden />
+              <div>
+                <span className={a.description ? "font-semibold" : undefined}>{a.label}</span>
+                {a.description && <p className="mt-1 leading-relaxed text-muted-foreground">{a.description}</p>}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      {canPrev && (
+        <button
+          type="button"
+          onClick={() => scrollByCards(-1)}
+          aria-label="Destaques anteriores"
+          className="absolute -left-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-border bg-background text-foreground shadow-md transition hover:bg-muted"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </button>
+      )}
+      {canNext && (
+        <button
+          type="button"
+          onClick={() => scrollByCards(1)}
+          aria-label="Próximos destaques"
+          className="absolute -right-3 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full border border-border bg-background text-foreground shadow-md transition hover:bg-muted"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function HotelDetailsView({
   hotel, onSubmitQuote, previewMode,
 }: {
