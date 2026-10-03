@@ -205,6 +205,8 @@ export interface AgencySiteProfile {
   conciergeSteps?: string[];
   /** "Experiência em destaque": quando ativa, ocupa a posição da seção "modules". */
   featuredExperience?: AgencyFeaturedExperience;
+  /** Mapa de Resorts do Brasil (opcional): página /resorts-brasil e/ou seção na home. Ausente = desligado. */
+  resortsMap?: { enabled: boolean; showOnHome?: boolean };
 }
 
 export interface AgencyFeaturedImage {
