@@ -36,8 +36,10 @@ export const NANNAI_MURO_ALTO: HotelPageData = {
   ],
   descriptionTitle: "Por que escolher o NANNAI Muro Alto?",
   description: [
-    "O NANNAI Muro Alto combina a estrutura de um resort com uma proposta de hospedagem que valoriza espaço, privacidade e tempo para descansar. Seus bangalôs estão entre os principais diferenciais, com opções de piscina privativa que tornam a própria acomodação parte da viagem.",
-    "À beira da praia de Muro Alto, a experiência se completa com gastronomia de referências brasileiras e internacionais e o SPA by L’Occitane. É uma escolha especialmente interessante para uma viagem a dois ou para quem quer alternar momentos de praia, boa mesa e descanso, aproveitando o resort no próprio ritmo.",
+    "Há viagens em que a hospedagem é parte do roteiro. No NANNAI Muro Alto, ela pode ser o principal motivo da viagem. À beira da praia de Muro Alto, em Pernambuco, o resort reúne arquitetura tropical, jardins e espaços que convidam a aproveitar os dias sem pressa. É uma escolha especialmente interessante para quem valoriza privacidade, boa gastronomia e tempo de qualidade a dois.",
+    "Os bangalôs são uma das marcas do NANNAI. Para quem escolhe uma categoria com piscina privativa, o descanso ganha um espaço próprio: um mergulho entre uma atividade e outra, uma tarde na varanda ou simplesmente o prazer de aproveitar a acomodação. Há também apartamentos, permitindo escolher a hospedagem que melhor combina com a ocasião. Essa variedade merece atenção na reserva, porque a categoria escolhida faz diferença na experiência.",
+    "A gastronomia também merece espaço nos planos. O Restaurante NANNAI combina referências regionais e internacionais, enquanto o TiaTê valoriza sabores locais em um ambiente de cozinha aberta. Já o Salero traz tapas e drinques à beira da praia, criando diferentes oportunidades para transformar uma refeição em um momento especial da viagem.",
+    "Entre a praia, as piscinas e os tratamentos do SPA by L’Occitane, cada dia pode seguir um ritmo diferente. Para casais, o conjunto favorece uma escapada romântica ou uma comemoração especial; para quem viaja com amigos ou em família, permite combinar encontros com momentos de descanso. A proposta é aproveitar a diversidade de um resort com espaço para viver a hospedagem de forma mais pessoal.",
   ],
   amenities: [
     { icon: "pool", label: "Bangalôs com piscina privativa", description: "Opções de hospedagem para quem valoriza privacidade e quer aproveitar momentos de descanso na própria acomodação." },
