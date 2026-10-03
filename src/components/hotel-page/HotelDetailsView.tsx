@@ -71,20 +71,7 @@ export function HotelDetailsView({
           {hotel.amenities.length > 0 && (
             <section className="border-t border-border pt-8">
               <h2 className="text-xl font-bold">Destaques do hotel</h2>
-              <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {hotel.amenities.map((a) => {
-                  const Icon = AMENITY_ICONS[a.icon] ?? Sparkles;
-                  return (
-                    <li key={a.label} className={`flex gap-3 rounded-xl border border-border bg-card px-4 py-4 text-sm ${a.description ? "items-start" : "items-center"}`}>
-                      <Icon className="h-6 w-6 shrink-0 text-primary" aria-hidden />
-                      <div>
-                        <span className={a.description ? "font-semibold" : undefined}>{a.label}</span>
-                        {a.description && <p className="mt-1 leading-relaxed text-muted-foreground">{a.description}</p>}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+              <AmenitiesCarousel amenities={hotel.amenities} />
             </section>
           )}
 
