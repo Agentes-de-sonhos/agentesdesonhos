@@ -52,7 +52,7 @@ function AmenitiesCarousel({ amenities }: { amenities: HotelPageData["amenities"
   };
 
   return (
-    <div className="group/car relative mt-4">
+    <div className="group/car relative mt-4 flex flex-1 flex-col">
       <ul
         ref={trackRef}
         onScroll={updateArrows}
@@ -70,7 +70,7 @@ function AmenitiesCarousel({ amenities }: { amenities: HotelPageData["amenities"
         }}
         onPointerUp={() => { drag.current.down = false; }}
         onPointerLeave={() => { drag.current.down = false; }}
-        className="flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-1 select-none active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex flex-1 cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-1 select-none active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {amenities.map((a) => {
           const Icon = AMENITY_ICONS[a.icon] ?? Sparkles;
@@ -177,7 +177,7 @@ export function HotelDetailsView({
       <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={previewMode} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="min-w-0 space-y-8">
+        <div className="min-w-0 flex flex-col gap-8">
           {hotel.description.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{hotel.descriptionTitle || "Por que escolher este hotel?"}</h2>
@@ -188,7 +188,7 @@ export function HotelDetailsView({
           )}
 
           {hotel.amenities.length > 0 && (
-            <section className="border-t border-border pt-8">
+            <section className="flex flex-1 flex-col border-t border-border pt-8">
               <h2 className="text-xl font-bold">Destaques do hotel</h2>
               <AmenitiesCarousel amenities={hotel.amenities} />
             </section>
