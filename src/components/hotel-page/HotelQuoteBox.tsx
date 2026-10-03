@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { z } from "zod";
-import { CalendarDays, CheckCircle2, FileText, Loader2, Minus, Plus } from "lucide-react";
+import { Bed, CalendarDays, CheckCircle2, Loader2, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
