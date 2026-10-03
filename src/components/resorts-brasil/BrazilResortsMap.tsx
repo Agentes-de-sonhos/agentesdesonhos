@@ -263,7 +263,7 @@ export function BrazilResortsMap({
                         <MapPin className="h-3 w-3" aria-hidden /> {STATE_NAME[r.uf]}
                       </p>
                       {onQuote && (
-                        <Button size="sm" variant="outline" className="mt-3 rounded-full" onClick={() => onQuote(r, STATE_NAME[r.uf])}>
+                        <Button size="sm" variant="outline" className="relative z-20 mt-3 rounded-full" onClick={() => onQuote(r, STATE_NAME[r.uf])}>
                           Solicitar cotação
                         </Button>
                       )}
