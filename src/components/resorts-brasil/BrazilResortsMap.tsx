@@ -58,21 +58,9 @@ export function BrazilResortsMap({
         </p>
       </div>
 
-      <div className="mt-12 grid gap-8 lg:grid-cols-[380px_minmax(0,1fr)] lg:items-start">
-        {/* Painel lateral */}
-        <aside className="rounded-3xl border border-border bg-card p-6 shadow-sm lg:sticky lg:top-6">
-          <div className="flex items-baseline justify-between gap-3">
-            <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{selected ? "Estado" : "Brasil"}</p>
-              <p className="mt-1 font-display text-2xl text-foreground">{selected ? STATE_NAME[selected] : "Todos os estados"}</p>
-            </div>
-            <p className="shrink-0 text-right">
-              <span className="block font-display text-3xl text-primary">{list.length}</span>
-              <span className="text-xs text-muted-foreground">resort{list.length > 1 ? "s" : ""}</span>
-            </p>
-          </div>
-
-          <svg viewBox={BRAZIL_VIEWBOX} className="mx-auto mt-6 h-auto w-full max-w-sm" role="group" aria-label="Mapa do Brasil por estado">
+      <div className="mt-10">
+        <section>
+          <svg viewBox={BRAZIL_VIEWBOX} className="mx-auto h-auto w-full max-w-2xl" role="group" aria-label="Mapa do Brasil por estado">
             {STATES.map(([uf, name]) => {
               const shape = BRAZIL_STATE_PATHS[uf];
               if (!shape) return null;
@@ -113,7 +101,30 @@ export function BrazilResortsMap({
             })}
           </svg>
 
-          <div className="relative mt-6">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            {selected ? (
+              <>
+                <span className="font-medium text-foreground">{STATE_NAME[selected]}</span> · {list.length} resort{list.length > 1 ? "s" : ""} ·{" "}
+                <button type="button" onClick={() => setSelected(null)} className="text-primary underline-offset-4 hover:underline">
+                  ver todos
+                </button>
+              </>
+            ) : (
+              "Os números indicam a quantidade de resorts por estado."
+            )}
+          </p>
+        </section>
+
+        <div className="mx-auto mt-10 max-w-4xl">
+          <div className="flex flex-wrap justify-center gap-2">
+            <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
+            {ufsWithResorts.map(([uf, name]) => (
+              <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
+                {name} ({counts[uf]})
+              </Chip>
+            ))}
+          </div>
+          <div className="relative mx-auto mt-5 max-w-md">
             <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <input
               type="search"
@@ -121,35 +132,20 @@ export function BrazilResortsMap({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Buscar resort pelo nome"
               aria-label="Buscar resort pelo nome"
-              className="h-11 w-full rounded-full border border-border bg-background pl-10 pr-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+              className="h-11 w-full rounded-full border border-border bg-card pl-10 pr-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-
-          {selected && (
-            <button type="button" onClick={() => setSelected(null)}
-              className="mt-4 w-full text-center text-sm text-primary underline-offset-4 hover:underline">
-              Ver todos os estados
-            </button>
-          )}
-        </aside>
+        </div>
 
         {/* Lista */}
-        <div className="min-w-0">
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:thin]">
-            <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
-            {ufsWithResorts.map(([uf, name]) => (
-              <Chip key={uf} active={selected === uf} onClick={() => setSelected(uf)}>
-                {name} ({counts[uf]})
-              </Chip>
-            ))}
-          </div>
+        <div className="mt-10 min-w-0">
 
           {filtered.length === 0 ? (
             <p className="mt-10 rounded-3xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
               Nenhum resort encontrado com esse nome.
             </p>
           ) : (
-            <ul className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {filtered.map((r) => {
                 const logo = logoFor(r.slug);
                 const name = prettyName(r.name);
