@@ -29,9 +29,12 @@ const prettyName = (name: string) =>
 
 export function BrazilResortsMap({
   onQuote,
+  resortHref,
   title = "Explore os resorts do Brasil",
 }: {
   onQuote?: (resort: BrazilResort, stateName: string) => void;
+  /** Quando informado, cada card abre a página do resort. */
+  resortHref?: (slug: string) => string;
   title?: string;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
@@ -243,7 +246,10 @@ export function BrazilResortsMap({
                 const logo = logoFor(r.slug);
                 const name = prettyName(r.name);
                 return (
-                  <li key={r.slug} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
+                  <li key={r.slug} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
+                    {resortHref && (
+                      <a href={resortHref(r.slug)} className="absolute inset-0 z-10" aria-label={`Ver página do ${name}`} />
+                    )}
                     <div className="flex h-32 items-center justify-center bg-card px-6">
                       {logo ? (
                         <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="max-h-20 w-full object-contain transition duration-300 group-hover:scale-105" />
