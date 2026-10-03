@@ -9,7 +9,7 @@ import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest } from "./types
 const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   restaurant: UtensilsCrossed, "room-service": ConciergeBell, spa: Sparkles, gym: Dumbbell,
   pets: PawPrint, pool: Waves, wifi: Wifi, parking: ParkingCircle, kids: Baby,
-  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble,
+  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble,
 };
 
 function Stars({ value, className }: { value: number; className?: string }) {
