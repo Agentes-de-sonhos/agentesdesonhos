@@ -8,7 +8,7 @@ import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 // IMPORTANT: intentionally NOT generated per build. Routine deploys keep the
 // same key, so no user ever sees the update prompt. Bump it (e.g.
 // "2026.10.01-v1") only when we deliberately want everyone to refresh.
-const BUILD_ID = "2026.09.30-v1";
+const BUILD_ID = "2026.10.03-v1";
 
 function appVersionPlugin() {
   return {
