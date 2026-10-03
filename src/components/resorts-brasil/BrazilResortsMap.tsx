@@ -192,17 +192,41 @@ export function BrazilResortsMap({
               className="h-11 w-full rounded-full border border-border bg-card pl-10 pr-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
           </div>
-          <div
-            className="mt-5 flex gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            role="tablist"
-            aria-label="Filtrar resorts por estado"
-          >
-            <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
-            {ufsWithResorts.map(([uf, name]) => (
-              <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
-                {name} ({counts[uf]})
-              </Chip>
-            ))}
+          <div className="relative mt-5">
+            {canLeft && (
+              <button
+                type="button"
+                aria-label="Rolar estados para a esquerda"
+                onClick={() => scrollRail(-1)}
+                className="absolute -left-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition hover:bg-muted"
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden />
+              </button>
+            )}
+            <div
+              ref={railRef}
+              className="flex cursor-grab select-none gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&:not(:active)]:cursor-grab"
+              role="tablist"
+              aria-label="Filtrar resorts por estado"
+              style={{ WebkitTouchCallout: "none" }}
+            >
+              <Chip active={!selected} onClick={() => setSelected(null)}>Todos ({BRAZIL_RESORTS.length})</Chip>
+              {ufsWithResorts.map(([uf, name]) => (
+                <Chip key={uf} active={selected === uf} onClick={() => setSelected(selected === uf ? null : uf)}>
+                  {name} ({counts[uf]})
+                </Chip>
+              ))}
+            </div>
+            {canRight && (
+              <button
+                type="button"
+                aria-label="Rolar estados para a direita"
+                onClick={() => scrollRail(1)}
+                className="absolute -right-1 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition hover:bg-muted"
+              >
+                <ChevronRight className="h-4 w-4" aria-hidden />
+              </button>
+            )}
           </div>
         </div>
 
