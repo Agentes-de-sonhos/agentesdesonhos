@@ -155,7 +155,7 @@ export function BrazilResortsMap({
                 const name = prettyName(r.name);
                 return (
                   <li key={r.slug} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
-                    <div className="flex h-32 items-center justify-center bg-background/60 px-6">
+                    <div className="flex h-32 items-center justify-center bg-card px-6">
                       {logo ? (
                         <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="max-h-20 w-full object-contain transition duration-300 group-hover:scale-105" />
                       ) : (
