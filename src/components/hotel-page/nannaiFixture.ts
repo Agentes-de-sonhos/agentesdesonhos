@@ -36,10 +36,9 @@ export const NANNAI_MURO_ALTO: HotelPageData = {
   ],
   descriptionTitle: "Por que escolher o NANNAI Muro Alto?",
   description: [
-    "Há viagens em que a hospedagem é parte do roteiro. No NANNAI Muro Alto, ela pode ser o principal motivo da viagem. À beira da praia de Muro Alto, em Pernambuco, o resort reúne arquitetura tropical, jardins e espaços que convidam a aproveitar os dias sem pressa. É uma escolha especialmente interessante para quem valoriza privacidade, boa gastronomia e tempo de qualidade a dois.",
-    "Os bangalôs são uma das marcas do NANNAI. Para quem escolhe uma categoria com piscina privativa, o descanso ganha um espaço próprio: um mergulho entre uma atividade e outra, uma tarde na varanda ou simplesmente o prazer de aproveitar a acomodação. Há também apartamentos, permitindo escolher a hospedagem que melhor combina com a ocasião. Essa variedade merece atenção na reserva, porque a categoria escolhida faz diferença na experiência.",
-    "A gastronomia também merece espaço nos planos. O Restaurante NANNAI combina referências regionais e internacionais, enquanto o TiaTê valoriza sabores locais em um ambiente de cozinha aberta. Já o Salero traz tapas e drinques à beira da praia, criando diferentes oportunidades para transformar uma refeição em um momento especial da viagem.",
-    "Entre a praia, as piscinas e os tratamentos do SPA by L’Occitane, cada dia pode seguir um ritmo diferente. Para casais, o conjunto favorece uma escapada romântica ou uma comemoração especial; para quem viaja com amigos ou em família, permite combinar encontros com momentos de descanso. A proposta é aproveitar a diversidade de um resort com espaço para viver a hospedagem de forma mais pessoal.",
+    "O NANNAI Muro Alto é uma escolha para quem quer desacelerar à beira-mar, com privacidade, boa gastronomia e conforto. Em meio a jardins e arquitetura tropical, o resort oferece um cenário especialmente convidativo para viagens a dois e comemorações especiais.",
+    "Seus bangalôs são parte da identidade do hotel, com opções de piscina privativa que tornam a própria acomodação um convite ao descanso. A gastronomia amplia a experiência, dos sabores regionais do TiaTê às tapas e aos drinques do Salero.",
+    "Entre a praia de Muro Alto, as piscinas e o SPA by L’Occitane, o prazer está em escolher como aproveitar cada dia: um mergulho, uma refeição sem pressa ou uma pausa para cuidar de si.",
   ],
   amenities: [
     { icon: "pool", label: "Bangalôs com piscina privativa", description: "Opções de hospedagem para quem valoriza privacidade e quer aproveitar momentos de descanso na própria acomodação." },
