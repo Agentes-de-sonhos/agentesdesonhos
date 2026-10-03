@@ -100,9 +100,9 @@ export function BrazilResortsMap({
               const name = prettyName(r.name);
               return (
                 <li key={r.slug} className="flex flex-col rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
-                  <div className="flex h-20 items-center justify-center">
+                  <div className="flex h-24 items-center justify-center">
                     {logo ? (
-                      <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="max-h-16 max-w-full object-contain" />
+                      <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="h-20 w-full object-contain" />
                     ) : (
                       <span className="font-display text-lg text-foreground">{name}</span>
                     )}
