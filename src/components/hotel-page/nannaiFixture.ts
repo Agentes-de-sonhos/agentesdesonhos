@@ -36,9 +36,9 @@ export const NANNAI_MURO_ALTO: HotelPageData = {
   ],
   descriptionTitle: "Por que escolher o NANNAI Muro Alto?",
   description: [
-    "O NANNAI Muro Alto é uma escolha para quem quer desacelerar à beira-mar, com privacidade, boa gastronomia e conforto. Em meio a jardins e arquitetura tropical, o resort oferece um cenário especialmente convidativo para viagens a dois e comemorações especiais.",
-    "Seus bangalôs são parte da identidade do hotel, com opções de piscina privativa que tornam a própria acomodação um convite ao descanso. A gastronomia amplia a experiência, dos sabores regionais do TiaTê às tapas e aos drinques do Salero.",
-    "Entre a praia de Muro Alto, as piscinas e o SPA by L’Occitane, o prazer está em escolher como aproveitar cada dia: um mergulho, uma refeição sem pressa ou uma pausa para cuidar de si.",
+    "O NANNAI Muro Alto é uma escolha para quem deseja desacelerar à beira-mar, com privacidade, conforto e boa gastronomia. Entre jardins e arquitetura tropical, o resort cria um cenário convidativo para viagens a dois, comemorações especiais e dias dedicados ao prazer de estar junto. A proposta é aproveitar o tempo com liberdade, alternando momentos de descanso com as experiências do hotel.",
+    "Os bangalôs são uma das marcas do NANNAI, com opções de piscina privativa que tornam a própria acomodação parte importante da viagem. Varandas e ambientes acolhedores convidam a prolongar o descanso entre um passeio e outro. À mesa, a experiência ganha novos sabores: o TiaTê valoriza referências locais em um ambiente de cozinha aberta, enquanto o Salero reúne tapas e drinques à beira da praia.",
+    "A praia de Muro Alto, as piscinas e o SPA by L’Occitane oferecem diferentes maneiras de aproveitar a estadia. Você pode começar o dia com um mergulho, reservar uma pausa para cuidar de si e terminar com uma refeição sem pressa. Essa combinação de hospedagem, gastronomia e bem-estar faz do NANNAI um destino para quem valoriza os detalhes e quer aproveitar o resort no próprio ritmo.",
   ],
   amenities: [
     { icon: "pool", label: "Bangalôs com piscina privativa", description: "Opções de hospedagem para quem valoriza privacidade e quer aproveitar momentos de descanso na própria acomodação." },
