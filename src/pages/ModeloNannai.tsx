@@ -13,7 +13,7 @@ export default function ModeloNannai() {
     return () => m.remove();
   }, []);
   return (
-    <main className="min-h-screen bg-background px-4 py-8 md:py-12">
+    <main className="min-h-screen bg-public-root px-4 py-8 md:py-12">
       <div className="mx-auto max-w-6xl">
         <HotelDetailsView hotel={NANNAI_MURO_ALTO} previewMode />
       </div>
