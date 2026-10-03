@@ -205,7 +205,7 @@ export function BrazilResortsMap({
             )}
             <div
               ref={railRef}
-              className="flex cursor-grab select-none gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&:not(:active)]:cursor-grab"
+              className="flex cursor-grab select-none gap-2 overflow-x-auto px-10 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&:not(:active)]:cursor-grab"
               role="tablist"
               aria-label="Filtrar resorts por estado"
               style={{ WebkitTouchCallout: "none" }}
