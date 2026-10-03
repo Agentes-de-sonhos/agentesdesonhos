@@ -1,6 +1,7 @@
+import { useRef, useState } from "react";
 import {
   BedDouble, Clock, Dumbbell, ExternalLink, MapPin, PawPrint, ParkingCircle, Baby, Waves,
-  Sparkles, Star, UtensilsCrossed, ConciergeBell, Wifi, Wine, Umbrella, ChevronRight, type LucideIcon,
+  Sparkles, Star, UtensilsCrossed, ConciergeBell, Wifi, Wine, Umbrella, ChevronRight, ChevronLeft, type LucideIcon,
 } from "lucide-react";
 import { HotelGallery } from "./HotelGallery";
 import { HotelQuoteBox } from "./HotelQuoteBox";
