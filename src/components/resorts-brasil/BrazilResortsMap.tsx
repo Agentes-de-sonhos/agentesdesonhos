@@ -145,7 +145,7 @@ export function BrazilResortsMap({
               Nenhum resort encontrado com esse nome.
             </p>
           ) : (
-            <ul className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+            <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
               {filtered.map((r) => {
                 const logo = logoFor(r.slug);
                 const name = prettyName(r.name);
