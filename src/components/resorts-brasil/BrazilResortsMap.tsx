@@ -6,11 +6,11 @@ import { BRAZIL_RESORTS, type BrazilResort } from "./resortsData";
 import { BRAZIL_STATE_PATHS, BRAZIL_VIEWBOX } from "./brazilStatePaths";
 
 const LOGOS = import.meta.glob("@/assets/resorts-brasil/*.webp", { eager: true, import: "default" }) as Record<string, string>;
-const logoFor = (slug: string) =>
+export const logoFor = (slug: string) =>
   Object.entries(LOGOS).find(([p]) => p.endsWith(`/${slug}.webp`))?.[1];
 
 /** Mapa-grade (cartograma) do Brasil: [UF, nome, coluna, linha]. */
-const STATES: [string, string, number, number][] = [
+export const STATES: [string, string, number, number][] = [
   ["RR", "Roraima", 3, 1], ["AP", "Amapá", 5, 1],
   ["AM", "Amazonas", 2, 2], ["PA", "Pará", 4, 2], ["MA", "Maranhão", 5, 2], ["CE", "Ceará", 6, 2], ["RN", "Rio Grande do Norte", 7, 2],
   ["AC", "Acre", 1, 3], ["RO", "Rondônia", 2, 3], ["TO", "Tocantins", 4, 3], ["PI", "Piauí", 5, 3], ["PB", "Paraíba", 7, 3],
@@ -20,9 +20,9 @@ const STATES: [string, string, number, number][] = [
   ["SP", "São Paulo", 4, 6], ["RJ", "Rio de Janeiro", 5, 6], ["PR", "Paraná", 3, 6],
   ["SC", "Santa Catarina", 3, 7], ["RS", "Rio Grande do Sul", 2, 7],
 ];
-const STATE_NAME = Object.fromEntries(STATES.map(([uf, n]) => [uf, n]));
+export const STATE_NAME = Object.fromEntries(STATES.map(([uf, n]) => [uf, n]));
 
-const prettyName = (name: string) =>
+export const prettyName = (name: string) =>
   name === name.toLowerCase()
     ? name.replace(/\b\p{L}/gu, (c) => c.toUpperCase()).replace(/\bClubmed\b/, "Club Med")
     : name;

@@ -552,6 +552,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     credentials: { enabled: false }, highlights: { enabled: false },
     signature: { enabled: true, order: 1 }, modules: { order: 2 }, destinations: { order: 3 },
     authority: { enabled: true, order: 4 }, about: { order: 5 }, differentials: { order: 6 },
+    resorts: { enabled: true, order: 3.5 },
     concierge: { order: 7 }, avaliacoes: { enabled: true, order: 8 }, faq: { order: 9 },
     newsletter: { order: 10 }, offers: { order: 11 },
   },
