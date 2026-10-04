@@ -21,14 +21,9 @@ export const ORLANDO_CARDS: { id: string; title: string; description: string }[]
     "description": "Cinema, aventuras e universos imersivos para diferentes estilos de viajante."
   },
   {
-    "id": "seaworld",
-    "title": "SeaWorld Orlando",
-    "description": "Montanhas-russas, vida marinha e entretenimento em um dia de descobertas."
-  },
-  {
-    "id": "busch-gardens",
-    "title": "Busch Gardens Tampa Bay",
-    "description": "Montanhas-russas e experiências com animais em um passeio até Tampa."
+    "id": "united-parks",
+    "title": "United Parks & Resorts",
+    "description": "Montanhas-russas, vida marinha e parques aquáticos em Orlando e Tampa."
   },
   {
     "id": "legoland",
@@ -72,7 +67,7 @@ export const ORLANDO_GROUPS: { id: string; name: string }[] = [
   },
   {
     "id": "united-parks",
-    "name": "SeaWorld e outros parques do grupo"
+    "name": "United Parks & Resorts"
   },
   {
     "id": "legoland",
