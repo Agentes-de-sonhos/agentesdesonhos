@@ -40,8 +40,10 @@ function Stepper({ label, value, min, max, onChange }: { label: string; value: n
 }
 
 export function HotelQuoteBox({
-  hotelSlug, hotelName, onSubmit, previewMode,
+  hotelSlug, hotelName, onSubmit, previewMode, whatsappUrl,
 }: {
+  /** Link opcional para o cliente continuar a conversa no WhatsApp da agência. */
+  whatsappUrl?: (req: HotelQuoteRequest) => string | null;
   hotelSlug: string;
   hotelName: string;
   /** Envio para o CRM da agência. Na página modelo, nada é enviado. */
@@ -57,6 +59,10 @@ export function HotelQuoteBox({
   const [contact, setContact] = useState({ name: "", whatsapp: "", email: "" });
   const [contactErrors, setContactErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [consent, setConsent] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+  const [lastReq, setLastReq] = useState<HotelQuoteRequest | null>(null);
+  const needsConsent = !!onSubmit && !previewMode;
 
   const today = todayIso();
 
@@ -81,7 +87,9 @@ export function HotelQuoteBox({
       return setContactErrors(errs);
     }
     setContactErrors({});
+    if (needsConsent && !consent) return setContactErrors({ consent: "Autorize o contato para enviar." });
     setStatus("sending");
+    setSendError(null);
     try {
       const req: HotelQuoteRequest = {
         hotelSlug, hotelName, checkIn, checkOut, adults,
@@ -90,8 +98,10 @@ export function HotelQuoteBox({
       };
       if (onSubmit) await onSubmit(req);
       else await new Promise((r) => setTimeout(r, 600));
+      setLastReq(req);
       setStatus("done");
-    } catch {
+    } catch (e) {
+      setSendError(e instanceof Error && e.message ? e.message : null);
       setStatus("error");
     }
   }
@@ -163,7 +173,14 @@ export function HotelQuoteBox({
                   ? "Prévia: nesta página modelo nada foi enviado. No site da agência, a solicitação entra no CRM e o consultor retorna em breve."
                   : "Nosso consultor vai retornar em breve com as opções e valores."}
               </DialogDescription>
-              <Button className="mt-5" onClick={() => setOpen(false)}>Fechar</Button>
+              <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                {!previewMode && lastReq && whatsappUrl?.(lastReq) && (
+                  <Button asChild variant="outline">
+                    <a href={whatsappUrl(lastReq)!} target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+                  </Button>
+                )}
+                <Button onClick={() => setOpen(false)}>Fechar</Button>
+              </div>
             </div>
           ) : (
             <>
@@ -196,7 +213,16 @@ export function HotelQuoteBox({
                   </div>
                 ))}
               </div>
-              {status === "error" && <p className="text-sm text-destructive">Não foi possível enviar agora. Tente novamente.</p>}
+              {needsConsent && (
+                <div>
+                  <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 accent-primary" />
+                    Autorizo a agência a entrar em contato comigo sobre esta solicitação, conforme a LGPD.
+                  </label>
+                  {contactErrors.consent && <p className="mt-1 text-xs text-destructive">{contactErrors.consent}</p>}
+                </div>
+              )}
+              {status === "error" && <p className="text-sm text-destructive">{sendError ?? "Não foi possível enviar agora. Tente novamente."}</p>}
               <Button onClick={confirm} disabled={status === "sending"} size="lg" className="w-full">
                 {status === "sending" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Confirmar solicitação

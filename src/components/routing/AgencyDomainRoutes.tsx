@@ -1,4 +1,4 @@
-import ModeloResort from "@/pages/ModeloResort";
+import AgencyResortPage from "@/pages/whitelabel/AgencyResortPage";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { lazy, Suspense } from "react";
@@ -215,7 +215,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
             )}
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
-              <Route path="/resorts-brasil/:slug" element={<ModeloResort />} />
+              <Route path="/resorts-brasil/:slug" element={<AgencyResortPage info={info} />} />
             )}
             {/* Páginas institucionais declaradas pelo perfil do hostname. */}
             {resolveContentPages(info.hostname).map((p) => (
