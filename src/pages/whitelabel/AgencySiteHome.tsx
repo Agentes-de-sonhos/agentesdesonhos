@@ -1,4 +1,5 @@
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
+import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -1342,6 +1343,18 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
           </section>
         );
       }
+
+      case "resorts":
+        return (
+          <section key={key} id="resorts" className="bg-background py-14 md:py-20">
+            <div className={container}>
+              <AgencyResortsSection
+                allHref={agencySiteHref("/resorts-brasil")}
+                resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)}
+              />
+            </div>
+          </section>
+        );
 
       case "avaliacoes":
         if (!googleReviews) return null;
