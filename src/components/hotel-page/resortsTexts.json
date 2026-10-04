@@ -1,0 +1,2688 @@
+{
+ "almenat": {
+  "description": [
+   "O Almenat é uma escolha para quem quer sair do ritmo de São Paulo sem transformar a viagem em uma longa jornada. Em Embu das Artes, o hotel ocupa uma área cercada pela Mata Atlântica e combina essa presença do verde com arquitetura contemporânea. A proposta interessa a casais, famílias e grupos que desejam trocar a rotina por alguns dias de convivência, lazer e descanso.",
+   "A experiência vai além de encontrar uma piscina para relaxar. O boliche é um diferencial para reunir pessoas de idades diferentes, enquanto as piscinas coberta e externa e as áreas esportivas permitem variar o programa. Os espaços do hotel favorecem tanto uma tarde de atividades quanto uma pausa entre as refeições, sem exigir um roteiro cheio de deslocamentos.",
+   "Outro atrativo é a possibilidade de combinar a hospedagem com o lado cultural de Embu das Artes, conhecido pelo artesanato e pela produção artística. Você pode dedicar parte da viagem à cidade e reservar outra parte para aproveitar o hotel. Essa combinação de natureza, lazer e proximidade de um destino cultural torna o Almenat interessante para uma escapada com mais personalidade."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Mata Atlântica ao redor",
+    "description": "Uma hospedagem cercada pelo verde em Embu das Artes."
+   },
+   {
+    "icon": "kids",
+    "label": "Boliche no hotel",
+    "description": "Uma opção de lazer para reunir família e amigos."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas coberta e externa",
+    "description": "Diferentes ambientes para aproveitar os momentos de descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Arquitetura contemporânea",
+    "description": "Espaços que aproximam os ambientes internos da paisagem."
+   },
+   {
+    "icon": "beach",
+    "label": "Embu das Artes por perto",
+    "description": "Combine a estadia com artesanato e passeios culturais."
+   }
+  ]
+ },
+ "blue-tree-thermas-de-lins-resort": {
+  "description": [
+   "No Blue Tree Thermas de Lins, as águas termais são o principal motivo para transformar alguns dias no interior paulista em uma viagem de descanso. O complexo de piscinas utiliza água naturalmente quente, mineral e corrente, permitindo aproveitar os mergulhos em diferentes épocas do ano. Ao redor, as áreas verdes completam uma proposta que combina lazer aquático e convivência em família.",
+   "A estrutura atende quem quer alternar piscina com movimento: há quadras esportivas, espaços para caminhar e programação de recreação para diferentes idades. Para as crianças, as atividades monitoradas dão variedade aos dias de hospedagem. Os adultos também encontram opções para participar, acompanhar a família ou reservar um tempo para relaxar, conforme o ritmo que preferirem para as férias.",
+   "A pensão completa ajuda a organizar a estadia, com as refeições concentradas no próprio resort e bebidas não alcoólicas incluídas durante esses momentos. Assim, sobra mais tempo para aproveitar a estrutura e menos necessidade de planejar saídas. É uma escolha especialmente interessante para famílias e para quem procura uma experiência de águas quentes acompanhada de lazer, sem depender apenas de um passeio pontual a um parque."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Águas termais naturais",
+    "description": "Piscinas de água mineral, corrente e naturalmente quente."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer para diferentes idades",
+    "description": "Programação que combina atividades infantis e opções para adultos."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Pensão completa",
+    "description": "Refeições no resort, com bebidas não alcoólicas durante seu serviço."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes ao ar livre",
+    "description": "Quadras e áreas verdes para variar o programa."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscinas como protagonista",
+    "description": "A experiência termal acompanha toda a hospedagem."
+   }
+  ]
+ },
+ "bourbon-atibaia-resort": {
+  "description": [
+   "O Bourbon Resort Atibaia faz sentido para quem quer que o próprio hotel ofereça boa parte do programa da viagem. Em uma extensa área verde no interior paulista, reúne lazer aquático, esportes e espaços pensados para famílias. É uma escolha para férias com crianças, encontros entre amigos ou fins de semana em que cada pessoa possa encontrar uma atividade do seu interesse.",
+   "A Fun Beach acrescenta uma proposta de praia ao resort, com piscina de ondas e rio lento. As áreas temáticas da Turma da Mônica dão identidade à experiência infantil, enquanto outras atrações, como boliche e atividades esportivas, ampliam as possibilidades de convivência. O diferencial está nessa variedade: a viagem pode ter dias mais movimentados e outros dedicados a aproveitar as piscinas.",
+   "A gastronomia e os ambientes de encontro completam a hospedagem, com opções para fazer das refeições parte do lazer. A proximidade relativa da capital também favorece escapadas sem depender de avião. Para quem busca um resort com programação e estrutura familiar como elementos centrais, o Bourbon Atibaia permite concentrar a viagem em um único endereço e aproveitar mais tempo junto de quem acompanha você."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Fun Beach",
+    "description": "Piscina de ondas e rio lento ampliam o lazer aquático."
+   },
+   {
+    "icon": "kids",
+    "label": "Turma da Mônica",
+    "description": "Ambientes temáticos dão personalidade à experiência das crianças."
+   },
+   {
+    "icon": "spa",
+    "label": "Boliche e entretenimento",
+    "description": "Opções para compartilhar a diversão entre diferentes idades."
+   },
+   {
+    "icon": "gym",
+    "label": "Esportes e áreas verdes",
+    "description": "Estrutura para alternar atividades e momentos ao ar livre."
+   },
+   {
+    "icon": "leisure",
+    "label": "Escapada no interior paulista",
+    "description": "Uma opção de férias sem necessidade de viagem aérea."
+   }
+  ]
+ },
+ "casa-grande-hotel-resort-spa": {
+  "description": [
+   "O Casa Grande combina a experiência de praia no Guarujá com a personalidade de um hotel de arquitetura colonial brasileira. Na Praia da Enseada, seus jardins e palmeiras ajudam a criar uma atmosfera diferente da hospedagem urbana convencional. É uma escolha interessante para quem valoriza o cenário do hotel tanto quanto o destino, seja em uma viagem a dois ou em férias com a família.",
+   "A gastronomia e a proposta de spa acrescentam motivos para aproveitar a estadia além dos momentos na areia. Os restaurantes permitem incluir refeições no roteiro do próprio resort, enquanto a estrutura de lazer oferece alternativas para dividir o dia entre piscina e descanso. A arquitetura e os espaços de convivência tornam agradável simplesmente ficar no hotel, sem precisar preencher todas as horas com passeios.",
+   "A localização na Enseada mantém a viagem conectada ao Guarujá e às opções do entorno, favorecendo quem gosta de combinar resort com saídas pela cidade. Você pode passar a manhã na praia, dedicar a tarde ao lazer e terminar o dia com uma refeição especial. O conjunto interessa a quem procura uma hospedagem com tradição, identidade visual e diferentes maneiras de aproveitar o litoral paulista."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia da Enseada",
+    "description": "Hospedagem na orla de uma das praias mais conhecidas do Guarujá."
+   },
+   {
+    "icon": "leisure",
+    "label": "Arquitetura colonial brasileira",
+    "description": "Um estilo que dá identidade aos ambientes do hotel."
+   },
+   {
+    "icon": "leisure",
+    "label": "Jardins e palmeiras",
+    "description": "Áreas externas que convidam a aproveitar o tempo livre."
+   },
+   {
+    "icon": "spa",
+    "label": "Gastronomia e spa",
+    "description": "Experiências que complementam os dias de praia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Resort conectado à cidade",
+    "description": "Combine a estrutura do hotel com passeios pelo Guarujá."
+   }
+  ]
+ },
+ "clara-resorts": {
+  "description": [
+   "O Clara Dourado é uma escolha para quem deseja trocar a cidade por uma viagem em que o contato com a natureza aparece no programa de cada dia. No interior paulista, o resort reúne paisagem de campo, áreas verdes e atividades que interessam a diferentes idades. Sua proposta combina conforto e lazer com oportunidades de explorar, brincar e compartilhar experiências ao ar livre.",
+   "As opções de aventura dão personalidade à hospedagem: tirolesa, arvorismo, cavalgadas e atividades no lago permitem fazer mais do que alternar refeições e piscina. Cada família pode escolher seu ritmo, participando das experiências disponíveis ou reservando momentos para apenas aproveitar os espaços do resort. A programação cria possibilidades para crianças e adultos encontrarem seus próprios interesses durante a viagem.",
+   "As acomodações também variam, incluindo opções na Vila do Lago e categorias com piscina privativa. A gastronomia completa o conjunto e ajuda a transformar os encontros à mesa em parte das férias. Para famílias que procuram natureza com uma estrutura organizada de lazer, o Clara Dourado oferece uma experiência em que a paisagem participa da hospedagem, acompanhando tanto os dias de aventura quanto as pausas para descanso."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Aventura na natureza",
+    "description": "Tirolesa, arvorismo e outras experiências ampliam o programa da viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Atividades no lago",
+    "description": "Opções como caiaque e stand-up paddle aproximam o lazer da paisagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cavalgadas",
+    "description": "Uma oportunidade de aproveitar o ambiente de campo."
+   },
+   {
+    "icon": "leisure",
+    "label": "Vila do Lago",
+    "description": "Categorias de acomodação com diferentes propostas de conforto."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer em família",
+    "description": "Programação e espaços para compartilhar experiências entre gerações."
+   }
+  ]
+ },
+ "clubmed": {
+  "description": [
+   "O Club Med Lake Paradise leva a proposta de férias all inclusive para um cenário de lago e áreas verdes em Mogi das Cruzes. É uma escolha para quer mudar de ritmo sem precisar viajar ao litoral, combinando dias ao ar livre com a vida social característica do Club Med. Famílias, casais e amigos encontram uma hospedagem em que as atividades ajudam a construir o roteiro.",
+   "O lago e a estrutura esportiva são parte da identidade do resort. As opções incluem modalidades terrestres e aquáticas, com possibilidades como vela, caiaque, tênis e golfe, conforme a programação e as condições de operação. A experiência interessa tanto a quem já pratica esportes quanto a quem gosta de experimentar algo novo durante as férias, intercalando movimento com momentos de piscina.",
+   "O sistema all inclusive organiza refeições e bebidas dentro da proposta contratada, enquanto a equipe de G.O.s participa das atividades e do entretenimento. Essa combinação favorece viagens em que o grupo quer aproveitar bastante o hotel, com menos decisões sobre onde comer ou o que fazer. O Lake Paradise se destaca para quem prefere férias ativas, natureza e oportunidades de encontro a uma hospedagem centrada apenas no descanso."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Cenário de lago",
+    "description": "Água e áreas verdes dão personalidade à hospedagem."
+   },
+   {
+    "icon": "restaurant",
+    "label": "All inclusive Club Med",
+    "description": "Refeições, bebidas e atividades conforme a proposta contratada."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes aquáticos",
+    "description": "Opções para aproveitar o lago dentro da operação do resort."
+   },
+   {
+    "icon": "gym",
+    "label": "Golfe e esportes terrestres",
+    "description": "Estrutura para férias com movimento e novas experiências."
+   },
+   {
+    "icon": "leisure",
+    "label": "Vida social e G.O.s",
+    "description": "Programação que favorece encontros e entretenimento durante a estadia."
+   }
+  ]
+ },
+ "japy-golf-resort-hotel": {
+  "description": [
+   "O Japy Golf Resort Hotel é uma escolha para quem quer combinar lazer de resort com uma paisagem marcante do interior paulista. Em Cabreúva, o cenário da Serra do Japi acompanha a hospedagem e ajuda a mudar o ritmo da viagem. O golfe dá identidade ao empreendimento, mas a proposta também contempla famílias e viajantes que desejam aproveitar piscinas, gastronomia e tempo livre.",
+   "O campo de golfe e o Beach Club diferenciam o hotel de uma hospedagem de campo convencional. Há piscinas externas, estrutura aquática infantil e opções aquecidas para variar os momentos de lazer. Assim, você pode organizar um dia mais esportivo e outro dedicado a descansar, sem precisar escolher entre uma viagem voltada aos adultos ou uma estadia com programas para as crianças.",
+   "As acomodações e os espaços de convivência completam a experiência em meio à natureza. Para quem aprecia golfe, a modalidade pode ser o motivo principal da viagem; para os acompanhantes, a variedade de lazer permite construir outro roteiro no mesmo endereço. O Japy interessa especialmente a famílias e grupos com preferências diferentes, que procuram um resort no interior em que a paisagem e o esporte tenham presença real."
+  ],
+  "amenities": [
+   {
+    "icon": "gym",
+    "label": "Golfe como diferencial",
+    "description": "Campo de 18 buracos dá identidade à proposta esportiva."
+   },
+   {
+    "icon": "leisure",
+    "label": "Paisagem da Serra do Japi",
+    "description": "O entorno natural participa da experiência de hospedagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Beach Club",
+    "description": "Um ambiente adicional para aproveitar os dias de lazer."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e estrutura infantil",
+    "description": "Opções aquáticas para adultos e crianças."
+   },
+   {
+    "icon": "spa",
+    "label": "Programação em família",
+    "description": "Alternativas para quem joga golfe e para seus acompanhantes."
+   }
+  ]
+ },
+ "cyan-resort": {
+  "description": [
+   "O Cyan Resort é uma escolha prática para quem quer aproveitar alguns dias de lazer no interior de São Paulo com opções dentro e fora do hotel. Em Itupeva, sua localização próxima a parques e ao Outlet Premium permite combinar hospedagem, entretenimento e compras. Ao mesmo tempo, a estrutura do resort oferece motivos para reservar dias inteiros apenas para ficar e aproveitar a viagem em família.",
+   "As piscinas são parte importante da experiência, com uma área em estilo prainha e uma opção coberta e aquecida. A recreação atende diferentes idades, enquanto as quadras de beach tennis e outros espaços esportivos ampliam as possibilidades para os adultos. O jardim secreto acrescenta um ambiente mais reservado, interessante para uma pausa entre os momentos de maior movimento.",
+   "A pensão completa concentra café da manhã, almoço e jantar no hotel e facilita o planejamento dos dias. Você pode alternar uma saída para os parques com outro dia de piscina e atividades, sem mudar de hospedagem. Essa flexibilidade torna o Cyan especialmente interessante para famílias que desejam uma viagem com variedade, aproveitando o resort como destino e também como base para explorar as atrações de Itupeva."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Piscina em estilo prainha",
+    "description": "Uma proposta de lazer aquático com clima de férias."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscina coberta e aquecida",
+    "description": "Mais uma opção para os momentos de descanso."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação para várias idades",
+    "description": "Programação para crianças, adolescentes e adultos."
+   },
+   {
+    "icon": "spa",
+    "label": "Beach tennis e jardim secreto",
+    "description": "Espaços para alternar movimento e pausas."
+   },
+   {
+    "icon": "leisure",
+    "label": "Parques no entorno",
+    "description": "Combine o resort com Hopi Hari e Wet’n Wild, com ingressos à parte."
+   }
+  ]
+ },
+ "fazenda-dona-carolina": {
+  "description": [
+   "Na Fazenda Dona Carolina, a história não aparece apenas na decoração: ela faz parte do lugar em que você se hospeda. Em Itatiba, a antiga fazenda de café reúne construções históricas, natureza preservada e uma proposta de lazer que mantém o ambiente rural presente. É uma escolha para famílias e casais que querem descansar com conforto, mas também viver experiências ligadas à identidade da propriedade.",
+   "As atividades permitem explorar a fazenda de maneiras diferentes, com cavalgadas, passeios de charrete, caiaque e opções de aventura. O contato com a produção de café e de cachaça acrescenta conteúdo à viagem e ajuda a compreender o lugar além da paisagem. Para quem gosta de destinos com histórias para contar, esses momentos tornam a hospedagem mais interessante do que uma sequência de atividades genéricas.",
+   "A gastronomia acompanha essa atmosfera, do café da manhã colonial aos restaurantes e aos ambientes de encontro. Você pode dedicar parte do dia ao lazer e reservar outra parte para aproveitar a arquitetura, o verde e uma refeição sem pressa. O conjunto faz da Dona Carolina uma opção para quem valoriza uma viagem de campo com memória, personalidade e diferentes formas de aproveitar o tempo junto."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Fazenda histórica de café",
+    "description": "A trajetória da propriedade participa da experiência de hospedagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Café e cachaça da fazenda",
+    "description": "Experiências para conhecer a produção e os sabores locais."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cavalgadas e charrete",
+    "description": "Atividades que preservam o caráter rural da viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Natureza e aventura",
+    "description": "Caiaque, tirolesa e outras opções para variar o roteiro."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Café da manhã colonial",
+    "description": "Uma experiência gastronômica alinhada à atmosfera da fazenda."
+   }
+  ]
+ },
+ "resort-fazenda-sao-joao": {
+  "description": [
+   "O Resort Fazenda São João combina o ambiente de campo com uma proposta de férias em família em São Pedro, no interior paulista. Bosques e lago dão espaço ao contato com a natureza, enquanto a estrutura de lazer permite montar a viagem em torno do próprio resort. É uma escolha para quem quer reunir adultos e crianças sem depender de passeios externos para preencher cada dia.",
+   "A recreação e as atividades para diferentes idades são parte central da hospedagem. O Acqua Bravos amplia o programa com uma proposta de parque aquático tematizado, acrescentando variedade aos momentos de piscina. Entre um mergulho e outro, as áreas externas permitem aproveitar o cenário de campo e alternar o movimento da programação com momentos mais livres de convivência.",
+   "A gastronomia completa a experiência, com as refeições como pontos de encontro ao longo dos dias de lazer. Em vez de organizar vários deslocamentos, a família pode concentrar o tempo no hotel e escolher como participar das atividades disponíveis. O São João interessa especialmente a quem procura um resort de campo com identidade familiar, no qual a natureza compõe o cenário e a diversão acompanha a estadia."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Acqua Bravos",
+    "description": "Parque aquático tematizado amplia as opções de lazer."
+   },
+   {
+    "icon": "leisure",
+    "label": "Ambiente de campo",
+    "description": "Bosques e lago ajudam a mudar o ritmo da viagem."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação em família",
+    "description": "Programação para compartilhar atividades entre diferentes idades."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia no resort",
+    "description": "As refeições acompanham os encontros ao longo da estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Viagem centrada no hotel",
+    "description": "Estrutura para aproveitar os dias sem depender de saídas."
+   }
+  ]
+ },
+ "grand-hotel-campos-do-jordao": {
+  "description": [
+   "O Grande Hotel Campos do Jordão é uma escolha para quem valoriza o charme da serra acompanhado de uma hospedagem com tradição. A arquitetura Art Nouveau e o ambiente de estação climática dão personalidade à viagem, criando um cenário que combina com fins de semana a dois e encontros em família. Aqui, o hotel pode ocupar tanto espaço no roteiro quanto os passeios pela cidade.",
+   "A gastronomia tem papel importante na experiência, ligada à história do empreendimento como hotel-escola do Senac. Restaurantes e diferentes ambientes permitem aproveitar as refeições como momentos da viagem, em vez de apenas intervalos entre atividades. As acomodações têm categorias variadas, o que ajuda a escolher o espaço adequado à ocasião, seja uma escapada romântica ou uma estadia com mais pessoas.",
+   "Outra vantagem é combinar os atrativos de Campos do Jordão com tempo para desfrutar do próprio hotel. Você pode explorar a cidade durante o dia e voltar para uma refeição e uma noite em um ambiente de identidade clássica. É uma opção para quem deseja uma viagem de serra com conforto, boa mesa e uma atmosfera que preserva a história da hospitalidade no destino."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Arquitetura Art Nouveau",
+    "description": "Um estilo marcante que dá identidade à hospedagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Gastronomia como experiência",
+    "description": "Restaurantes e ambientes para aproveitar as refeições sem pressa."
+   },
+   {
+    "icon": "leisure",
+    "label": "Tradição Senac",
+    "description": "A história de hotel-escola integra a identidade do empreendimento."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cenário de serra",
+    "description": "Uma proposta alinhada ao clima e ao charme de Campos do Jordão."
+   },
+   {
+    "icon": "spa",
+    "label": "Categorias variadas",
+    "description": "Acomodações para diferentes ocasiões e composições de viagem."
+   }
+  ]
+ },
+ "grand-hotel-sao-pedro": {
+  "description": [
+   "O Grande Hotel São Pedro reúne arquitetura Art Déco, jardins históricos e uma proposta de descanso na estância de Águas de São Pedro. É uma escolha para quem aprecia hotéis com personalidade e quer aproveitar o interior paulista em um ritmo mais tranquilo. A paisagem de bosques e áreas verdes acompanha a hospedagem, criando oportunidades para caminhar, conversar e dedicar tempo ao próprio hotel.",
+   "A gastronomia é um dos elementos que definem a experiência, vinculada à trajetória do empreendimento como hotel-escola do Senac. Diferentes restaurantes e ambientes ampliam as possibilidades de encontro à mesa, enquanto a estrutura de lazer permite alternar atividades e descanso. As opções de acomodação atendem ocasiões variadas, de viagens a dois a estadias com a família reunida.",
+   "A cidade e o hotel formam uma combinação interessante para uma viagem sem excesso de deslocamentos. Você pode conhecer a estância, aproveitar os jardins e reservar tempo para refeições e atividades dentro da propriedade. Para quem procura uma hospedagem que una memória, conforto e convivência, o Grande Hotel São Pedro oferece uma experiência em que arquitetura, paisagem e boa mesa têm presença tão importante quanto o lazer."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Arquitetura Art Déco",
+    "description": "A identidade histórica acompanha os ambientes do hotel."
+   },
+   {
+    "icon": "leisure",
+    "label": "Bosques e jardins",
+    "description": "Áreas verdes que convidam a caminhadas e momentos de descanso."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia Senac",
+    "description": "A tradição de hotel-escola participa da experiência à mesa."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer entre gerações",
+    "description": "Espaços para combinar atividades e convivência em família."
+   },
+   {
+    "icon": "leisure",
+    "label": "Águas de São Pedro",
+    "description": "Hospedagem integrada ao cenário de uma estância do interior paulista."
+   }
+  ]
+ },
+ "hot-beach-resort": {
+  "description": [
+   "O Hot Beach Resort é uma escolha para quem quer fazer do parque aquático o centro da viagem a Olímpia. Localizado ao lado do Hot Beach Olímpia, combina hospedagem e acesso ao parque em uma experiência que reduz os deslocamentos entre diversão e descanso. Faz sentido especialmente para famílias que preferem aproveitar várias vezes as atrações, em vez de concentrar tudo em uma única visita.",
+   "O cenário de praia artificial, as águas quentes e as piscinas do resort ajudam a manter o clima de férias mesmo fora do parque. A proximidade da Vila Guarani acrescenta outra possibilidade de lazer e convivência ao programa. Assim, você pode organizar o dia entre as atrações aquáticas, uma pausa na acomodação e os espaços do complexo, respeitando o ritmo das crianças e dos adultos.",
+   "Os restaurantes e a programação de recreação completam a estadia, tornando o hotel parte ativa da experiência. O diferencial está na integração: não é apenas dormir perto de uma atração, mas ter uma base conectada ao lazer que motivou a viagem. Para quem deseja dias de piscina, brincadeiras e tempo em família, o Hot Beach Resort facilita aproveitar Olímpia com mais praticidade."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Anexo ao Hot Beach Olímpia",
+    "description": "A proximidade do parque facilita alternar diversão e descanso."
+   },
+   {
+    "icon": "pool",
+    "label": "Acesso ao parque aquático",
+    "description": "Hospedagem com acesso ilimitado conforme as condições vigentes."
+   },
+   {
+    "icon": "pool",
+    "label": "Clima de praia no interior",
+    "description": "Praia artificial e águas quentes dão personalidade à viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Vila Guarani ao lado",
+    "description": "Mais opções de encontro e entretenimento no complexo."
+   },
+   {
+    "icon": "spa",
+    "label": "Recreação em família",
+    "description": "Atividades para prolongar a diversão dentro do resort."
+   }
+  ]
+ },
+ "hot-beach-celebration": {
+  "description": [
+   "O Hot Beach Celebration combina lazer de resort com a possibilidade de aproveitar o parque Hot Beach Olímpia durante a viagem. Sua proposta interessa a famílias que querem dividir os dias entre atrações aquáticas e momentos no hotel, sem precisar mudar de hospedagem. Em vez de concentrar toda a experiência no parque, você encontra também piscinas e espaços para aproveitar o tempo livre na própria propriedade.",
+   "O transporte oferecido entre o resort e o Hot Beach, em horários definidos, ajuda a organizar as saídas. Quando a preferência é ficar, a estrutura de lazer permite reservar um dia mais tranquilo ou uma pausa depois das atrações. A existência de acomodações pet friendly também diferencia o Celebration, abrindo uma possibilidade para quem deseja incluir o animal de estimação nas férias.",
+   "As categorias de quarto e os serviços do hotel completam a proposta de uma base confortável em Olímpia. Você pode planejar dias de parque e outros voltados à convivência, aproveitando as piscinas sem manter a mesma intensidade durante toda a estadia. É uma escolha para quem valoriza flexibilidade, estrutura familiar e a conveniência de combinar hospedagem e diversão aquática em uma única viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Acesso ao Hot Beach",
+    "description": "O parque aquático integra os benefícios da hospedagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Transporte para o parque",
+    "description": "Transfer em horários definidos facilita os deslocamentos."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas no resort",
+    "description": "Espaços para aproveitar os dias em que a escolha é ficar."
+   },
+   {
+    "icon": "pets",
+    "label": "Opções pet friendly",
+    "description": "Categorias específicas recebem pets conforme a política vigente."
+   },
+   {
+    "icon": "leisure",
+    "label": "Flexibilidade em Olímpia",
+    "description": "Alterne dias de parque com lazer e descanso no hotel."
+   }
+  ]
+ },
+ "hot-beach-raizes": {
+  "description": [
+   "O Hot Beach Raízes é uma escolha para quem quer aproveitar Olímpia com uma hospedagem de proposta mais intimista. Antigo Thermas Park, o resort valoriza o paisagismo, os ambientes arborizados e as piscinas de águas quentes. Seu perfil interessa a casais e famílias que desejam incluir parques na viagem, mas também procuram um hotel em que os momentos de descanso tenham espaço próprio.",
+   "A escala e a atmosfera do Raízes são parte do diferencial em relação às outras opções do complexo Hot Beach. As áreas externas convidam a aproveitar o verde e permanecer no hotel, sem fazer do parque o único programa das férias. A proposta permite alternar dias mais movimentados com tardes dedicadas às piscinas e ao prazer de descansar em um cenário cuidado.",
+   "A integração com as opções de lazer do Hot Beach amplia o roteiro, enquanto a localização em Olímpia mantém a viagem conectada aos atrativos da cidade. Para quem prefere uma experiência mais reservada dentro de um destino conhecido pela diversão aquática, o Raízes oferece uma combinação interessante. É uma opção para aproveitar águas quentes e passeios, preservando uma base de hospedagem com identidade própria."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Proposta intimista",
+    "description": "Uma alternativa de hospedagem mais reservada no complexo Hot Beach."
+   },
+   {
+    "icon": "spa",
+    "label": "Paisagismo arborizado",
+    "description": "O verde acompanha os espaços de descanso e lazer."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscinas de águas quentes",
+    "description": "Mergulhos fazem parte da experiência dentro do hotel."
+   },
+   {
+    "icon": "spa",
+    "label": "Identidade Thermas Park",
+    "description": "O antigo resort mantém sua proposta de conforto e natureza."
+   },
+   {
+    "icon": "pool",
+    "label": "Olímpia com outro ritmo",
+    "description": "Combine atrações aquáticas com tempo para aproveitar a hospedagem."
+   }
+  ]
+ },
+ "hot-beach-suites": {
+  "description": [
+   "O Hot Beach Suites é uma escolha para quem deseja aproveitar Olímpia com mais espaço e autonomia na hospedagem. Sua proposta de apartamentos de férias, com cozinha e ambientes para convivência, faz sentido para famílias e grupos que preferem uma estrutura além do quarto convencional. A proximidade do Hot Beach Olímpia permite manter a diversão aquática como parte importante da viagem.",
+   "As acomodações têm capacidade para grupos maiores, conforme a categoria, e a varanda gourmet amplia as possibilidades de aproveitar o tempo junto. Isso ajuda a organizar a rotina de quem viaja com crianças ou pretende permanecer mais dias, dividindo os momentos entre parque, lazer do resort e descanso no apartamento. O espaço para estar é tão relevante quanto o espaço para dormir.",
+   "O acesso ao parque e a estrutura do complexo complementam essa experiência, permitindo combinar independência com serviços de hospedagem. Você pode passar o dia nas atrações e voltar para uma acomodação que favorece a convivência do grupo. O Suites se destaca quando a prioridade é reunir mais pessoas, manter uma rotina flexível e aproveitar Olímpia com o conforto de um apartamento integrado a uma proposta de resort."
+  ],
+  "amenities": [
+   {
+    "icon": "restaurant",
+    "label": "Apartamento com cozinha",
+    "description": "Mais autonomia para organizar a rotina durante as férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Espaço para grupos maiores",
+    "description": "Categorias que acomodam até sete pessoas."
+   },
+   {
+    "icon": "leisure",
+    "label": "Varanda gourmet",
+    "description": "Um ambiente adicional para convivência na acomodação."
+   },
+   {
+    "icon": "leisure",
+    "label": "Hot Beach por perto",
+    "description": "Hospedagem próxima ao parque, com acesso conforme as condições vigentes."
+   },
+   {
+    "icon": "spa",
+    "label": "Proposta de férias prolongadas",
+    "description": "Estrutura que favorece estadias com mais espaço e flexibilidade."
+   }
+  ]
+ },
+ "hotel-jp": {
+  "description": [
+   "O Hotel JP é uma escolha para quem quer aproveitar Ribeirão Preto sem abrir mão de uma estrutura de lazer na própria hospedagem. A proposta de resort urbano combina o acesso à cidade com piscinas e áreas para descansar, atendendo tanto viagens em família quanto estadias que misturam trabalho e tempo livre. Você pode explorar o destino e ainda reservar parte dos dias para ficar.",
+   "As piscinas aquecidas e o bar molhado dão destaque ao lazer aquático, enquanto quadras esportivas, saunas e jacuzzi ampliam as possibilidades de descanso e movimento. Para quem viaja com crianças, o espaço kids e a programação disponível ajudam a variar a rotina. É uma estrutura que permite aproveitar a hospedagem mesmo quando não há um passeio marcado para cada período do dia.",
+   "Os restaurantes e as acomodações completam a experiência, com a conveniência de concentrar parte das refeições e do lazer em um só endereço. A cidade continua por perto para quem deseja conhecer a gastronomia, fazer compras ou participar de eventos. O JP interessa especialmente a viajantes que valorizam essa combinação de praticidade urbana e tempo de resort, sem precisar escolher apenas um desses estilos de viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Resort urbano",
+    "description": "Combine a estrutura de lazer com passeios por Ribeirão Preto."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscinas aquecidas",
+    "description": "O lazer aquático ocupa um lugar central na hospedagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Bar molhado",
+    "description": "Um espaço de encontro junto à área de piscina."
+   },
+   {
+    "icon": "spa",
+    "label": "Saunas e jacuzzi",
+    "description": "Alternativas para acrescentar pausas de descanso ao roteiro."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes e espaço kids",
+    "description": "Opções para variar o programa entre adultos e crianças."
+   }
+  ]
+ },
+ "mavsa": {
+  "description": [
+   "O Mavsa é uma escolha para quem busca uma viagem em que gastronomia, lazer e entretenimento estejam concentrados no próprio resort. Em Cesário Lange, a proposta all inclusive permite organizar férias em família ou encontros entre amigos com menos decisões sobre o programa de cada dia. A estrutura ampla e os ambientes tematizados ajudam a fazer da hospedagem uma parte importante do destino.",
+   "A Cidade dos Sonhos reúne jogos e ambientes infantis, enquanto as piscinas e as atividades no lago permitem variar o ritmo da estadia. Há espaço para acompanhar a programação, aproveitar as piscinas e dedicar tempo a experiências compartilhadas. A proposta também valoriza o entretenimento, com atividades e apresentações conforme o calendário, interessante para quem gosta de férias com movimento e diferentes programas ao longo do dia.",
+   "A gastronomia e as bebidas dentro do sistema contratado acompanham essa experiência, favorecendo os encontros entre uma atividade e outra. Para quem parte da região de São Paulo, o interior oferece uma mudança de cenário sem depender de viagem aérea. O Mavsa se destaca para famílias e grupos que querem aproveitar intensamente o resort, alternando lazer, refeições e convivência em uma hospedagem de proposta abrangente."
+  ],
+  "amenities": [
+   {
+    "icon": "restaurant",
+    "label": "All inclusive",
+    "description": "Refeições e bebidas integram a experiência conforme o sistema contratado."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer aquático",
+    "description": "Piscinas e atrações para aproveitar os dias de férias."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cidade dos Sonhos",
+    "description": "Jogos e ambientes infantis acrescentam uma identidade própria ao lazer."
+   },
+   {
+    "icon": "kids",
+    "label": "Entretenimento e recreação",
+    "description": "Atividades e apresentações variam conforme o calendário."
+   },
+   {
+    "icon": "leisure",
+    "label": "Atividades no lago",
+    "description": "Caiaque e stand-up paddle aproximam o lazer da paisagem do resort."
+   }
+  ]
+ },
+ "novotel-itu": {
+  "description": [
+   "O Novotel Itu combina lazer em família com uma proposta de bem-estar no interior paulista. A estrutura permite aproveitar alguns dias de férias sem depender de passeios externos, mas mantém a cidade de Itu como possibilidade para ampliar o roteiro. É uma escolha para quem deseja equilibrar atividades para as crianças, momentos de descanso para os adultos e a praticidade de uma hospedagem com pensão completa.",
+   "O parque aquático é um dos atrativos para os dias de diversão, enquanto a piscina de borda infinita e o spa L’Occitane oferecem outros ritmos para a estadia. Quadras esportivas e recreação acrescentam alternativas para quem gosta de se movimentar. Essa variedade ajuda famílias com preferências diferentes a aproveitar a mesma viagem, compartilhando parte do programa e escolhendo outras experiências individualmente.",
+   "As refeições no resort e as categorias de acomodação completam o conjunto, favorecendo uma rotina organizada durante as férias. A localização também permite combinar o hotel com uma visita ao centro histórico de Itu. Para quem busca uma escapada que reúna lazer aquático, esporte e cuidados de bem-estar, o Novotel oferece uma proposta em que adultos e crianças encontram motivos próprios para aproveitar a hospedagem."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Parque aquático",
+    "description": "Uma atração central para os dias de diversão em família."
+   },
+   {
+    "icon": "spa",
+    "label": "Spa L’Occitane",
+    "description": "Experiências de bem-estar para complementar a hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscina de borda infinita",
+    "description": "Um ambiente adicional para os momentos de descanso."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Pensão completa",
+    "description": "As principais refeições fazem parte da rotina no resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "Itu no roteiro",
+    "description": "Combine o hotel com passeios pelo centro histórico da cidade."
+   }
+  ]
+ },
+ "royal-palm-plaza-resort-campinas": {
+  "description": [
+   "O Royal Palm Plaza é uma escolha para quem deseja encontrar uma ampla programação de resort sem se afastar da estrutura de Campinas. A hospedagem combina lazer em família, gastronomia e ambientes de descanso, permitindo que o próprio hotel ocupe boa parte das férias. Faz sentido para viagens com crianças e também para encontros entre amigos ou ocasiões em que diferentes gerações viajam juntas.",
+   "As piscinas climatizadas, as áreas infantis temáticas e as opções esportivas permitem variar os dias sem repetir apenas um programa. Para os adultos, os espaços gastronômicos e de bem-estar acrescentam outros motivos para aproveitar o resort. O diferencial está em oferecer possibilidades para o grupo inteiro, deixando cada pessoa escolher entre acompanhar atividades, descansar ou compartilhar momentos de lazer.",
+   "A gastronomia tem presença importante, com restaurantes, cafés e bares de propostas diferentes. Do encontro descontraído a uma refeição mais especial, ela ajuda a construir a experiência da viagem. A localização urbana também favorece quem precisa combinar lazer com compromissos na região. Para famílias que procuram variedade e conveniência, o Royal Palm Plaza reúne programas infantis e experiências para adultos em uma mesma hospedagem."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Piscinas climatizadas",
+    "description": "Diferentes áreas aquáticas para aproveitar o lazer do resort."
+   },
+   {
+    "icon": "kids",
+    "label": "Áreas infantis temáticas",
+    "description": "Ambientes dedicados à diversão e à imaginação das crianças."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia variada",
+    "description": "Restaurantes, cafés e bares com propostas distintas."
+   },
+   {
+    "icon": "spa",
+    "label": "Bem-estar para adultos",
+    "description": "Espaços e serviços para acrescentar pausas ao roteiro."
+   },
+   {
+    "icon": "leisure",
+    "label": "Conveniência em Campinas",
+    "description": "Uma experiência de resort integrada à estrutura da cidade."
+   }
+  ]
+ },
+ "sofitel-jequitimar-guaruja": {
+  "description": [
+   "O Jequitimar é uma escolha para quem quer aproveitar a Praia de Pernambuco com a conveniência de um resort à beira-mar. No Guarujá, a combinação de mar e Mata Atlântica cria um cenário convidativo para férias em família, viagens a dois e comemorações. A proposta permite que praia, gastronomia e descanso façam parte do mesmo roteiro, sem concentrar a experiência apenas nos passeios pela cidade.",
+   "Os restaurantes e bares acrescentam variedade aos momentos à mesa, enquanto o spa Jequitimar with L’Occitane oferece uma pausa dedicada ao bem-estar. Há também atividades ao ar livre e programação para diferentes idades. Você pode alternar uma manhã de praia com uma tarde no hotel e escolher entre participar do lazer ou aproveitar os ambientes da hospedagem com mais calma.",
+   "As categorias de acomodação incluem diferentes vistas e configurações, permitindo ajustar a estadia à ocasião. A proximidade das opções do Guarujá facilita combinar o resort com uma saída pela região. Para quem busca uma viagem de litoral em que o hotel tenha presença real na experiência, o Jequitimar reúne cenário de praia e serviços que ampliam as possibilidades de aproveitar o tempo livre."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia de Pernambuco",
+    "description": "Hospedagem à beira-mar em um cenário marcante do Guarujá."
+   },
+   {
+    "icon": "spa",
+    "label": "Spa with L’Occitane",
+    "description": "Uma pausa de bem-estar para complementar os dias de praia."
+   },
+   {
+    "icon": "spa",
+    "label": "Restaurantes e bares",
+    "description": "Diferentes ambientes para aproveitar a gastronomia do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer entre gerações",
+    "description": "Programação e atividades para adultos e crianças."
+   },
+   {
+    "icon": "leisure",
+    "label": "Categorias com diferentes vistas",
+    "description": "Escolha a acomodação que melhor combina com a ocasião."
+   }
+  ]
+ },
+ "taua-resort-atibaia": {
+  "description": [
+   "O Tauá Atibaia é uma escolha para quem quer férias em família com o lazer aquático como parte central da experiência. No interior de São Paulo, a estrutura reúne programas para diferentes idades e permite aproveitar vários dias sem depender de saídas. A proposta interessa especialmente a quem viaja com crianças e deseja um hotel em que a diversão tenha espaço e variedade.",
+   "O AquaPark Indoor é um dos principais diferenciais, oferecendo uma opção de parque aquático em ambiente coberto. A Ilha Tauá amplia o programa com outras atrações de água, enquanto os espaços esportivos e a recreação permitem mudar de atividade ao longo do dia. Essa combinação ajuda a organizar as férias em ritmos diferentes, alternando brincadeiras, momentos de piscina e pausas para descansar.",
+   "A pensão completa facilita a rotina das refeições e mantém a família próxima da estrutura de lazer. Para quem parte da capital paulista ou da região, a localização favorece uma viagem sem necessidade de avião. O Tauá Atibaia se destaca para grupos que querem aproveitar intensamente o resort, com opções para preencher os dias e liberdade para escolher quanto movimento incluir em cada momento da hospedagem."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "AquaPark Indoor",
+    "description": "Parque aquático coberto entre os principais diferenciais do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Ilha Tauá",
+    "description": "Mais atrações para ampliar os dias de lazer aquático."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação em família",
+    "description": "Programação para diferentes idades ao longo da estadia."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Pensão completa",
+    "description": "Refeições organizadas dentro do próprio resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes e lazer ativo",
+    "description": "Alternativas para variar o programa além das piscinas."
+   }
+  ]
+ },
+ "villa-rossa": {
+  "description": [
+   "O Villa Rossa é uma escolha para quem quer trocar o ritmo da cidade por alguns dias cercados de natureza em São Roque. A proposta combina lazer em família, gastronomia e espaços de descanso, mantendo o ambiente do hotel como parte importante da viagem. É um destino para casais, famílias e grupos que desejam compartilhar tempo livre sem organizar um passeio para cada período do dia.",
+   "A estrutura permite alternar atividades e momentos mais tranquilos, aproveitando os ambientes externos e as opções de lazer disponíveis. A paisagem também acompanha as refeições: o restaurante La Piazza oferece vista para o hotel e para a região, transformando a mesa em um ponto de encontro. Essa ligação entre gastronomia e cenário ajuda a dar personalidade à hospedagem no interior.",
+   "A pensão completa acrescenta praticidade e favorece quem prefere concentrar parte da viagem no resort. Ao mesmo tempo, a localização permite incluir os atrativos de São Roque no roteiro, conforme o interesse do grupo. Para quem busca natureza com conforto e uma experiência em que ficar no hotel também seja um bom programa, o Villa Rossa oferece uma combinação de convivência, descanso e boa mesa."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Natureza em São Roque",
+    "description": "Um cenário verde para mudar o ritmo da viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "La Piazza com vista",
+    "description": "A paisagem acompanha os encontros à mesa."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Pensão completa",
+    "description": "As principais refeições integram a proposta de hospedagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer em família",
+    "description": "Espaços para combinar atividades e tempo compartilhado."
+   },
+   {
+    "icon": "leisure",
+    "label": "Hotel e destino no roteiro",
+    "description": "Alterne a estrutura do resort com passeios por São Roque."
+   }
+  ]
+ },
+ "clubmed-rj": {
+  "description": [
+   "Entre a Mata Atlântica e o mar de Mangaratiba, o Club Med Rio das Pedras dá às férias o cenário da Costa Verde. Em Mangaratiba, a natureza acompanha a estadia e dá contexto a uma proposta que mistura descanso, esportes e convivência. É uma escolha para casais, amigos e famílias que gostam de ter atividades à disposição e preferem decidir o programa depois de chegar.",
+   "Os esportes aquáticos ajudam a diferenciar a experiência de um resort dedicado apenas à piscina. Modalidades como esqui aquático e wakeboard fazem parte da oferta do hotel, junto de outras atividades e da presença dos G.O.s, que conduzem a programação. O sistema all inclusive reúne refeições, bebidas e entretenimento, facilitando a organização dos dias sem transformar cada escolha em uma nova reserva.",
+   "Para quem deseja uma hospedagem mais reservada, a área La Réserve oferece uma proposta própria, com serviços e espaços vinculados à sua categoria. Nas demais acomodações, o atrativo continua sendo a combinação entre paisagem e vida de resort. Você pode alternar uma manhã ativa com uma tarde à beira-mar e terminar o dia aproveitando a gastronomia e os encontros que dão identidade ao Club Med."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Mata Atlântica e mar",
+    "description": "A paisagem da Costa Verde faz parte da experiência de hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Esportes aquáticos",
+    "description": "Esqui aquático e wakeboard estão entre as modalidades oferecidas."
+   },
+   {
+    "icon": "restaurant",
+    "label": "All inclusive Club Med",
+    "description": "Refeições, bebidas e programação reunidas na proposta da estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Convivência com os G.O.s",
+    "description": "A equipe participa das atividades e do entretenimento do resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "La Réserve",
+    "description": "Uma opção de categoria com ambientes e serviços mais reservados."
+   }
+  ]
+ },
+ "le-canton": {
+  "description": [
+   "No Le Canton, a viagem à serra ganha um cenário de vila suíça, com jardins, construções temáticas e um castelo. Em Teresópolis, construções inspiradas nas vilas suíças, jardins e um castelo ajudam a criar uma atmosfera lúdica, que combina especialmente com férias em família. O destino reúne diferentes hotéis e permite escolher a hospedagem de acordo com o tipo de ambiente e de experiência que você procura.",
+   "O Parc Magique é um dos elementos que dão personalidade ao complexo: um parque de diversões coberto, pensado para acrescentar outro programa aos dias de resort. As piscinas climatizadas, as atividades de lazer e os espaços para crianças ampliam essa variedade. Mais do que depender de um passeio externo para entreter a família, a proposta é encontrar diferentes possibilidades no destino.",
+   "O descanso dos adultos também tem espaço, com gastronomia, paisagem de montanha e o SPA by L’Occitane. Você pode dividir o dia entre acompanhar as brincadeiras, aproveitar uma refeição e reservar uma pausa para si. Como Village, Magique e Fazenda têm propostas distintas, a escolha do hotel importa: ela ajuda a ajustar a viagem entre o clima de vila, a proximidade das atrações e a vivência do campo."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Atmosfera suíça na serra",
+    "description": "Arquitetura e jardins dão uma identidade própria ao complexo."
+   },
+   {
+    "icon": "kids",
+    "label": "Parc Magique",
+    "description": "Um parque de diversões coberto amplia os programas em família."
+   },
+   {
+    "icon": "leisure",
+    "label": "Três propostas de hospedagem",
+    "description": "Village, Magique e Fazenda oferecem experiências diferentes."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas climatizadas",
+    "description": "Ambientes para incluir momentos de água e lazer na viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "SPA by L’Occitane",
+    "description": "Uma opção para reservar uma pausa de bem-estar durante a estadia."
+   }
+  ]
+ },
+ "clara-arte-resort": {
+  "description": [
+   "Arte, natureza e hospedagem se encontram no Clara Arte, uma base para descobrir Inhotim com tempo. Em Brumadinho, o resort aproxima hospedagem, arte e natureza, criando uma experiência que começa antes de entrar em uma galeria e continua depois do passeio. O interesse está nessa ligação com o lugar, que dá um sentido particular aos dias de descanso.",
+   "A arquitetura e os ambientes do hotel acompanham essa proposta, com acomodações que convidam a observar a paisagem e permanecer no resort. As categorias oferecem características diferentes, permitindo buscar uma experiência mais intimista ou espaço para viajar em família. A gastronomia acrescenta outro ponto de encontro entre sensibilidade e prazer, fazendo das refeições parte do programa, em vez de apenas uma pausa entre visitas.",
+   "Para casais e viajantes interessados em arte, o principal benefício é poder organizar o roteiro com menos pressa. Você pode dedicar um dia às obras e aos jardins de Inhotim e reservar outro para aproveitar os ambientes e o lazer do Clara Arte. Essa combinação também funciona para famílias que querem ampliar o repertório da viagem, alternando descobertas culturais com o conforto de uma estadia cercada pelo verde."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Inhotim como parte do roteiro",
+    "description": "A localização favorece uma viagem dedicada à arte e aos jardins."
+   },
+   {
+    "icon": "leisure",
+    "label": "Arquitetura integrada à paisagem",
+    "description": "Os ambientes acompanham a proposta de aproximação com a natureza."
+   },
+   {
+    "icon": "spa",
+    "label": "Gastronomia na experiência",
+    "description": "As refeições ganham espaço no programa da estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Acomodações com propostas diferentes",
+    "description": "Categorias permitem ajustar a hospedagem ao perfil da viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Descanso entre visitas",
+    "description": "Uma base para aproveitar o destino cultural com mais tempo."
+   }
+  ]
+ },
+ "santissimo-resort": {
+  "description": [
+   "Conhecer Tiradentes e aproveitar lazer de resort fazem parte da mesma viagem no Santíssimo. É uma escolha para quem gosta de passear por ruas de pedra, descobrir restaurantes e observar a arquitetura da cidade, mas também quer voltar a um hotel onde o descanso tenha espaço no roteiro, sem depender de outro deslocamento.",
+   "A prainha com areia e as piscinas aquecidas permitem alternar o ritmo da viagem. Enquanto as crianças encontram atrações próprias, os adultos podem aproveitar a paisagem, uma refeição ou uma pausa ao sol. A Serra de São José ajuda a compor o cenário, aproximando a experiência da natureza que acompanha Tiradentes e acrescentando outra perspectiva aos passeios pelo patrimônio histórico.",
+   "Essa combinação favorece tanto uma escapada a dois quanto uma viagem em família, especialmente quando cada pessoa deseja aproveitar o destino de um jeito. Você pode sair para explorar a cidade e manter parte do dia livre para o hotel, ou dedicar mais tempo às piscinas e aos encontros à mesa. O Santíssimo faz sentido para quem procura viver Tiradentes com conforto e variedade, equilibrando descobertas culturais com os prazeres de uma estadia sem pressa."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Perto do centro histórico",
+    "description": "A localização facilita combinar a hospedagem com passeios em Tiradentes."
+   },
+   {
+    "icon": "leisure",
+    "label": "Serra de São José no cenário",
+    "description": "A paisagem acrescenta natureza à experiência na cidade histórica."
+   },
+   {
+    "icon": "pool",
+    "label": "Prainha e piscinas aquecidas",
+    "description": "A estrutura aquática acrescenta lazer aos dias na cidade histórica."
+   },
+   {
+    "icon": "spa",
+    "label": "Arena Kids e recreação",
+    "description": "Espaços e atividades ajudam a organizar viagens com crianças."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cultura e descanso na mesma viagem",
+    "description": "Uma proposta para dividir o tempo entre a cidade e o hotel."
+   }
+  ]
+ },
+ "taua-resort-caete": {
+  "description": [
+   "No Tauá Caeté, a proposta é reunir a família em torno de atividades, refeições e dias de lazer no interior mineiro. No interior de Minas Gerais, o hotel combina paisagem, refeições e uma programação que favorece a convivência entre gerações. A proposta interessa especialmente a quem procura dias com atividades disponíveis e prefere reunir todos em um destino onde o lazer possa acontecer sem organizar um passeio diferente a cada manhã.",
+   "A recreação dos Taualegres tem um papel importante nessa experiência, com propostas para diferentes idades e espaços que ajudam as crianças a entrar no clima das férias. As piscinas e as áreas de lazer permitem alternar brincadeiras, atividades em grupo e descanso. Para os adultos, essa variedade oferece a possibilidade de acompanhar a programação ou aproveitar intervalos mais tranquilos.",
+   "O ambiente mineiro também aparece no tempo à mesa, fazendo das refeições ocasiões para encontrar a família e planejar o restante do dia. Você pode combinar uma manhã de lazer com uma tarde livre, seguindo a vontade do grupo. O Tauá Caeté é um destino de convivência, com entretenimento e estrutura para passar alguns dias junto e voltar com boas histórias."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Recreação dos Taualegres",
+    "description": "Atividades para diferentes idades dão ritmo à estadia em família."
+   },
+   {
+    "icon": "kids",
+    "label": "Destino para reunir a família",
+    "description": "A estrutura favorece viagens com crianças e encontros entre gerações."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer",
+    "description": "Ambientes para alternar brincadeiras e momentos de descanso."
+   },
+   {
+    "icon": "leisure",
+    "label": "Paisagem do interior mineiro",
+    "description": "O entorno ajuda a criar uma pausa na rotina."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Encontros à mesa",
+    "description": "As refeições fazem parte da experiência de convivência do resort."
+   }
+  ]
+ },
+ "thermas-all-inclusive": {
+  "description": [
+   "Em Poços de Caldas, o Thermas All Inclusive Resort reúne lazer aquático e alimentação em uma hospedagem ligada ao complexo Walter World. Instalado no complexo do Walter World, o resort tem uma proposta voltada a férias em família, com acomodações amplas e a paisagem das montanhas como parte do cenário. A viagem pode combinar descanso, momentos na água e entretenimento sem exigir um roteiro cheio de deslocamentos.",
+   "O sistema all inclusive, com alimentação e bebidas dentro das condições da hospedagem, ajuda a simplificar a rotina de quem viaja com diferentes idades. As áreas de piscina oferecem um ponto de encontro entre as atividades, enquanto os ambientes do hotel permitem passar parte do dia entre uma refeição e outra. A relação com o parque temático acrescenta personalidade ao destino e merece entrar no planejamento da reserva.",
+   "Poços de Caldas oferece passeios para quem deseja conhecer a cidade além do resort. Você pode reservar um período para explorar o destino e voltar para uma tarde de lazer, ou concentrar a estadia na estrutura do hotel. Essa flexibilidade interessa a famílias que valorizam refeições organizadas, diversão e a possibilidade de equilibrar programas urbanos com dias mais livres."
+  ],
+  "amenities": [
+   {
+    "icon": "all-inclusive",
+    "label": "Sistema all inclusive",
+    "description": "Alimentação e bebidas ajudam a simplificar a organização das férias."
+   },
+   {
+    "icon": "leisure",
+    "label": "Complexo Walter World",
+    "description": "A localização conecta a hospedagem à identidade do parque temático."
+   },
+   {
+    "icon": "pool",
+    "label": "Lazer aquático",
+    "description": "As piscinas são um dos pontos de encontro da estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Paisagem das montanhas",
+    "description": "O entorno de Poços de Caldas acompanha a experiência no resort."
+   },
+   {
+    "icon": "kids",
+    "label": "Acomodações amplas",
+    "description": "Uma característica relevante para quem viaja em família."
+   }
+  ]
+ },
+ "vale-suico-resort": {
+  "description": [
+   "Paisagem de serra, lago e piscinas dão o ritmo dos dias no Vale Suíço, no sul de Minas. Em Itapeva, o hotel reúne áreas verdes, lago e ambientes de lazer que convidam a trocar a rotina por uma viagem com mais tempo ao ar livre. A localização próxima ao eixo da Fernão Dias favorece escapadas de casais, encontros entre amigos e férias em família.",
+   "As piscinas aquecidas e climatizadas ajudam a fazer da água parte do programa, enquanto as áreas esportivas e os espaços infantis permitem variar as atividades. A proposta não exige que todos sigam o mesmo ritmo: uma parte do grupo pode aproveitar o lazer, enquanto outra prefere descansar ou simplesmente observar o entorno. Essa variedade é interessante para viagens em que convivência e autonomia precisam funcionar juntas.",
+   "A pensão completa organiza os dias ao redor das refeições, com momentos para prolongar a conversa e reunir novamente o grupo. O cenário de serra também combina com uma estadia a dois, especialmente para quem gosta de alternar atividades e descanso. No Vale Suíço, paisagem, lazer e tempo compartilhado ajudam a construir a viagem de acordo com a companhia e a ocasião."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Paisagem do sul de Minas",
+    "description": "Áreas verdes e lago compõem o cenário da hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscinas aquecidas e climatizadas",
+    "description": "O lazer aquático tem presença importante na proposta do resort."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Pensão completa",
+    "description": "As refeições ajudam a organizar os dias de descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Esporte e atividades ao ar livre",
+    "description": "A estrutura oferece opções para variar o programa."
+   },
+   {
+    "icon": "spa",
+    "label": "Viagens com diferentes idades",
+    "description": "Espaços infantis e lazer diversificado favorecem a convivência em família."
+   }
+  ]
+ },
+ "china-park-eco-resort": {
+  "description": [
+   "O teleférico e a paisagem das montanhas capixabas dão ao China Park uma experiência de férias em família. Em Domingos Martins, o resort combina a paisagem da serra com atrações que tornam o próprio hotel parte do destino. Essa proposta interessa a famílias e grupos que gostam de variar o programa durante o dia, entre atividades ao ar livre, momentos na água e pausas para descansar.",
+   "O teleférico é um dos diferenciais mais reconhecíveis da experiência, levando o passeio para outra perspectiva da paisagem. O parque aquático e o centro termal ampliam as possibilidades de lazer, com ambientes distintos para aproveitar a estadia. As atividades de aventura acrescentam movimento ao roteiro e permitem que cada pessoa encontre uma maneira de participar, conforme a idade e a disposição.",
+   "A alimentação e a recreação ajudam a reunir o grupo depois de cada atividade, criando uma rotina de férias sem planejar todos os horários fora do resort. Você pode dedicar parte do dia às atrações e reservar outra para caminhar, conversar ou apreciar as montanhas. No China Park, natureza e variedade de programas compõem uma viagem voltada à convivência."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Teleférico na montanha",
+    "description": "Uma atração que oferece outra perspectiva da paisagem capixaba."
+   },
+   {
+    "icon": "pool",
+    "label": "Centro termal",
+    "description": "Ambientes de água aquecida acrescentam momentos de descanso ao lazer."
+   },
+   {
+    "icon": "pool",
+    "label": "Parque aquático",
+    "description": "Outra possibilidade para aproveitar a estadia em família."
+   },
+   {
+    "icon": "leisure",
+    "label": "Aventura ao ar livre",
+    "description": "Atividades permitem incluir movimento no roteiro da viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cenário das montanhas capixabas",
+    "description": "A natureza acompanha os dias no resort."
+   }
+  ]
+ },
+ "blue-tree-daj": {
+  "description": [
+   "Às margens da represa de Chavantes, o Blue Tree Daj combina marina, natureza e dias de descanso. Em Ribeirão Claro, o resort está ligado à paisagem da represa de Chavantes e tem na marina um dos seus diferenciais. A proposta combina com casais, famílias e amigos que valorizam dias ao ar livre e procuram uma hospedagem em que o entorno participe da experiência.",
+   "A relação com a represa acrescenta possibilidades náuticas ao roteiro, mediante as condições de contratação de cada atividade. As áreas de lazer e as piscinas permitem alternar esses programas com momentos mais tranquilos no hotel. A gastronomia oferece outros encontros durante o dia, fazendo das refeições uma oportunidade para aproveitar a companhia e prolongar o ritmo de descanso.",
+   "Você pode reservar parte da estadia para conhecer a paisagem a partir da água e deixar outros períodos livres para observar o entorno ou aproveitar a estrutura do resort. Essa liberdade interessa a quem prefere uma viagem sem agenda cheia, com escolhas definidas conforme a disposição. O Daj faz sentido para quem procura essa combinação de marina, natureza e conforto, trocando a rotina por alguns dias de convivência em um cenário ligado à represa."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Represa de Chavantes",
+    "description": "A paisagem de água dá identidade à hospedagem no norte do Paraná."
+   },
+   {
+    "icon": "beach",
+    "label": "Marina no resort",
+    "description": "Uma estrutura que permite planejar experiências náuticas na região."
+   },
+   {
+    "icon": "leisure",
+    "label": "Natureza ao redor",
+    "description": "O entorno convida a passar mais tempo ao ar livre."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia e convivência",
+    "description": "As refeições acrescentam encontros aos dias de descanso."
+   },
+   {
+    "icon": "pool",
+    "label": "Lazer junto à paisagem",
+    "description": "Piscinas e áreas do hotel permitem alternar atividades e pausas."
+   }
+  ]
+ },
+ "bourbon-cataratas-do-iguacu-thermas-eco-resort": {
+  "description": [
+   "Áreas verdes, águas termais e lazer infantil permitem aproveitar Foz além dos passeios no Bourbon Thermas Eco Resort. A propriedade reúne áreas verdes, lazer e águas termais, formando uma base que vai além de dormir entre os passeios. A proposta interessa especialmente a famílias que querem alternar programas no destino com momentos de descanso e atividades para as crianças.",
+   "Os espaços ligados à Turma da Mônica são uma das marcas da experiência infantil e ajudam a dar personalidade às férias. As piscinas e as áreas esportivas ampliam as opções para diferentes idades, enquanto os caminhos em meio ao verde aproximam a hospedagem da natureza. Essa variedade permite que cada pessoa encontre um programa, mantendo oportunidades para reunir novamente a família ao longo do dia.",
+   "A gastronomia completa os encontros e oferece uma pausa depois das visitas às atrações da região. Você pode reservar um dia para as Cataratas e deixar outro mais livre para aproveitar o resort, ajustando o ritmo conforme a companhia. O Bourbon faz sentido para quem busca essa combinação de destino e hospedagem, com estrutura para transformar os intervalos entre os passeios em uma parte relevante das férias."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Águas termais",
+    "description": "O lazer aquático acrescenta momentos de descanso à estadia."
+   },
+   {
+    "icon": "spa",
+    "label": "Espaços Turma da Mônica",
+    "description": "Uma identidade própria para os programas infantis do resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "Áreas verdes e caminhos",
+    "description": "A natureza participa dos momentos dentro do hotel."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes e lazer em família",
+    "description": "Opções para envolver diferentes idades durante a viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Base para explorar Foz",
+    "description": "Combine as atrações da região com dias dedicados ao resort."
+   }
+  ]
+ },
+ "jurema-aguas-quentes": {
+  "description": [
+   "As águas naturalmente quentes conectam as diferentes experiências de hospedagem de Jurema, no interior do Paraná. Em Iretama, no interior do Paraná, o destino reúne resorts com propostas diferentes, em um cenário de natureza e lazer. A experiência interessa a famílias, casais e grupos que querem descansar e encontrar atividades disponíveis, escolhendo a hospedagem conforme o estilo de férias e o conforto que procuram.",
+   "As piscinas de águas naturalmente quentes são o elemento que conecta a identidade do destino, permitindo dedicar parte dos dias ao prazer de estar na água. O entorno acrescenta áreas verdes e programas ao ar livre, enquanto a gastronomia ajuda a organizar os encontros da companhia. A combinação permite alternar atividades com períodos tranquilos, deixando espaço para aproveitar o ritmo do lugar.",
+   "Lagos de Jurema e Jardins de Jurema têm características próprias, por isso a escolha da unidade faz diferença no roteiro e nas estruturas disponíveis. Você pode buscar uma viagem com mais convivência familiar ou uma proposta de descanso ajustada à ocasião. Jurema faz sentido para quem valoriza essa relação entre natureza, água e hospedagem, reservando alguns dias para aproveitar o destino termal com tempo e sem mudar de base."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Águas naturalmente quentes",
+    "description": "As piscinas termais são o centro da identidade do destino."
+   },
+   {
+    "icon": "leisure",
+    "label": "Diferentes propostas de resort",
+    "description": "Lagos e Jardins de Jurema permitem escolher a experiência de hospedagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Natureza no interior do Paraná",
+    "description": "Áreas verdes acompanham os dias de descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Atividades e lazer",
+    "description": "Programas para alternar momentos na água e convivência."
+   },
+   {
+    "icon": "beach",
+    "label": "Gastronomia na estadia",
+    "description": "As refeições ajudam a reunir a companhia ao longo da viagem."
+   }
+  ]
+ },
+ "mabu-hoteis-resorts": {
+  "description": [
+   "Águas termais e o Blue Park fazem da hospedagem no Mabu uma parte importante das férias em Foz. As águas termais, provenientes do Aquífero Guarani, dão identidade à experiência e permitem reservar dias para o próprio hotel. A proposta combina especialmente com famílias que querem alternar os passeios pelo destino com momentos de descanso e diversão na água.",
+   "O Blue Park acrescenta outro programa à viagem, com atrações que ampliam as possibilidades de lazer do complexo. As condições de acesso previstas na hospedagem ajudam a definir como incluí-lo no roteiro. Dentro do resort, as áreas de piscina e os ambientes para diferentes idades permitem variar o dia, enquanto a gastronomia cria oportunidades para reunir novamente a família entre uma atividade e outra.",
+   "Foz oferece atrações que podem ocupar boa parte da viagem, mas o Mabu permite deixar períodos livres para aproveitar a base escolhida. Você pode planejar uma saída para conhecer a região e reservar o dia seguinte para o hotel e o parque aquático. Essa combinação faz sentido para quem valoriza águas termais, entretenimento e conforto, buscando uma estadia em que o resort também tenha lugar nas lembranças das férias."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Águas termais do Aquífero Guarani",
+    "description": "Um elemento que dá identidade ao lazer aquático do resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "Blue Park",
+    "description": "O parque amplia os programas de água conforme o acesso da reserva."
+   },
+   {
+    "icon": "kids",
+    "label": "Viagens em família",
+    "description": "Estrutura e atividades permitem envolver diferentes idades."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia e convivência",
+    "description": "As refeições criam encontros entre os períodos de lazer."
+   },
+   {
+    "icon": "leisure",
+    "label": "Base em Foz do Iguaçu",
+    "description": "Combine as atrações do destino com dias dedicados ao hotel."
+   }
+  ]
+ },
+ "recanto-cataratas-thermas-resort": {
+  "description": [
+   "Piscinas, boliche e entretenimento dão motivos para reservar tempo ao Recanto Cataratas durante a viagem a Foz. A hospedagem combina lazer termal, piscinas e ambientes de entretenimento, formando uma base para alternar dias de passeio com períodos mais livres. A proposta interessa a famílias, casais e grupos que desejam variedade de programas sem precisar sair do hotel a cada momento.",
+   "A piscina coberta acrescenta outra possibilidade ao lazer aquático, enquanto as áreas externas permitem aproveitar o tempo ao ar livre. O boliche e os espaços de jogos ajudam a variar a experiência, criando programas para reunir pessoas de diferentes idades. Essa combinação é interessante para quem quer manter parte da viagem aberta ao que o grupo tem vontade de fazer depois de voltar de uma atração.",
+   "A gastronomia e os ambientes de convivência completam os encontros ao longo da estadia. Você pode reservar uma manhã para conhecer o destino e dedicar o restante do dia ao descanso ou ao entretenimento do hotel. O Recanto faz sentido para quem valoriza essa relação entre passeios e estrutura de resort, buscando uma hospedagem que acrescente conforto, lazer e tempo compartilhado à experiência em Foz."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Lazer termal",
+    "description": "As piscinas dão espaço ao descanso nos dias de hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscina coberta",
+    "description": "Outro ambiente para incluir momentos na água durante a viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Boliche e jogos",
+    "description": "Programas para reunir família e amigos dentro do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Variedade de entretenimento",
+    "description": "Ambientes de lazer ajudam a aproveitar os intervalos entre os passeios."
+   },
+   {
+    "icon": "leisure",
+    "label": "Foz com tempo para o hotel",
+    "description": "Uma base para combinar atrações do destino e dias de descanso."
+   }
+  ]
+ },
+ "wish-foz-do-iguacu": {
+  "description": [
+   "O campo de golfe e as construções de inspiração residencial dão ao Wish Foz uma atmosfera própria. O resort tem arquitetura inspirada em residências americanas, com construções distribuídas pela propriedade e uma atmosfera diferente de um hotel concentrado em um único edifício. A proposta combina com casais e famílias que valorizam espaço, paisagem e momentos ao ar livre.",
+   "O campo de golfe é um dos diferenciais e acrescenta uma possibilidade para quem deseja incluir o esporte na viagem, conforme contratação e condições de uso. As piscinas e as áreas de lazer oferecem outras formas de aproveitar o resort, enquanto a programação infantil ajuda a organizar a estadia em família. Essa variedade permite alternar atividades com períodos mais tranquilos, sem que todos precisem seguir o mesmo ritmo.",
+   "A localização em Foz favorece combinar os programas do hotel com as atrações da região, reservando dias para descobrir o destino e outros para descansar. Você pode voltar de um passeio e aproveitar uma refeição, caminhar pela propriedade ou simplesmente prolongar a pausa. O Wish faz sentido para quem procura essa combinação de natureza, arquitetura e lazer, usando a hospedagem como parte importante da experiência da viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "gym",
+    "label": "Campo de golfe",
+    "description": "Um diferencial para quem deseja incluir o esporte no roteiro."
+   },
+   {
+    "icon": "leisure",
+    "label": "Arquitetura de inspiração residencial",
+    "description": "Construções distribuídas pela propriedade criam uma atmosfera própria."
+   },
+   {
+    "icon": "leisure",
+    "label": "Áreas verdes",
+    "description": "A paisagem acompanha os momentos de descanso e convivência."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer infantil",
+    "description": "Opções para conciliar atividades em família e períodos mais livres."
+   },
+   {
+    "icon": "leisure",
+    "label": "Destino e resort na mesma viagem",
+    "description": "Combine as atrações de Foz com tempo para aproveitar o hotel."
+   }
+  ]
+ },
+ "machadinho-thermas-resort-spa": {
+  "description": [
+   "As águas termais são o centro da experiência no Machadinho Thermas, no interior gaúcho. No interior do Rio Grande do Sul, o resort combina a paisagem da região com piscinas e ambientes de lazer, oferecendo uma proposta que interessa a casais, famílias e grupos. O destino convida a aproveitar o próprio hotel, sem necessidade de preencher a viagem com deslocamentos e passeios.",
+   "As piscinas de águas naturalmente quentes permitem alternar momentos de convivência e períodos mais tranquilos, enquanto os ambientes cobertos e externos ampliam as formas de aproveitar a estadia. A programação de recreação acrescenta atividades para diferentes idades, ajudando cada pessoa a encontrar um programa. Essa variedade favorece viagens em que todos querem estar juntos, mas nem sempre desejam seguir o mesmo ritmo.",
+   "A gastronomia organiza outros encontros ao longo do dia e completa a experiência de permanecer no resort. Você pode dedicar uma manhã à água, reservar a tarde para descansar e voltar a reunir a companhia durante as refeições. O Machadinho Thermas faz sentido para quem valoriza essa combinação de destino termal, lazer e convivência, buscando uma pausa na rotina com tempo para aproveitar as escolhas da hospedagem."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Águas naturalmente quentes",
+    "description": "As piscinas termais dão identidade à experiência do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Ambientes cobertos e externos",
+    "description": "Diferentes espaços para aproveitar o lazer aquático."
+   },
+   {
+    "icon": "leisure",
+    "label": "Paisagem do interior gaúcho",
+    "description": "O entorno acompanha os dias de descanso."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação para diferentes idades",
+    "description": "Atividades permitem variar os programas em família."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia e convivência",
+    "description": "As refeições acrescentam encontros à rotina da estadia."
+   }
+  ]
+ },
+ "wish-serrano": {
+  "description": [
+   "O Wish Serrano combina a localização central em Gramado com gastronomia e lazer no hotel. Próximo às ruas e atrações da cidade, o hotel permite reservar tempo para os passeios e também para o descanso. A proposta interessa a casais e famílias que gostam de descobrir o destino, mas valorizam encontrar experiências dentro da base escolhida para a viagem.",
+   "A gastronomia é um dos elementos que acrescentam variedade à estadia, com restaurantes de propostas diferentes para transformar as refeições em parte do roteiro. As piscinas e os ambientes de lazer ampliam os programas entre uma saída e outra. O verde e as referências da paisagem serrana ajudam a criar uma atmosfera própria, aproximando o descanso do cenário que torna Gramado um destino de férias.",
+   "Você pode dedicar a manhã à cidade e voltar para uma tarde mais livre, ou organizar um dia com menos passeios para aproveitar o hotel. Essa combinação é interessante para viagens em que adultos e crianças desejam programas diferentes, mantendo momentos de encontro na estadia. O Wish Serrano faz sentido para quem procura essa relação entre destino, gastronomia e conforto, com liberdade para conhecer Gramado e aproveitar o tempo de hospedagem."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Localização central em Gramado",
+    "description": "Uma base para combinar os passeios da cidade com o descanso."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Restaurantes com propostas diferentes",
+    "description": "A gastronomia amplia as experiências dentro do hotel."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer",
+    "description": "Alternativas para aproveitar os intervalos entre as saídas."
+   },
+   {
+    "icon": "leisure",
+    "label": "Atmosfera de serra",
+    "description": "O verde e os ambientes acompanham o cenário do destino."
+   },
+   {
+    "icon": "leisure",
+    "label": "Cidade e hotel na mesma viagem",
+    "description": "Uma proposta para equilibrar descobertas e tempo de hospedagem."
+   }
+  ]
+ },
+ "costao-do-santinho": {
+  "description": [
+   "No Costão do Santinho, praia, trilhas e patrimônio arqueológico acrescentam descobertas aos dias de resort. Na praia do Santinho, o resort combina mar, vegetação e uma paisagem que convida a descobrir o entorno além das piscinas. A proposta all inclusive interessa a famílias, casais e grupos que gostam de ter entretenimento disponível e também querem passar tempo ao ar livre.",
+   "As trilhas e as referências arqueológicas da região acrescentam uma experiência própria ao roteiro, aproximando a viagem da história e da paisagem local. Dentro do resort, as piscinas e a programação permitem alternar atividades com períodos mais tranquilos. A gastronomia amplia os encontros ao longo da estadia, com ambientes para variar as refeições e aproveitar a companhia depois dos programas do dia.",
+   "Essa combinação permite construir férias com diferentes ritmos: uma manhã de descoberta pelo entorno, uma tarde de lazer ou um dia dedicado apenas ao descanso. As atividades para crianças ajudam a organizar viagens em família, enquanto os adultos encontram possibilidades para participar ou reservar momentos mais livres. O Costão faz sentido para quem valoriza essa relação entre cenário natural e estrutura de resort, aproveitando o litoral catarinense como parte da experiência."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Praia do Santinho",
+    "description": "O litoral de Florianópolis participa dos dias de descanso e lazer."
+   },
+   {
+    "icon": "gym",
+    "label": "Trilhas e patrimônio arqueológico",
+    "description": "O entorno oferece descobertas ligadas à natureza e à história local."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Sistema all inclusive",
+    "description": "Gastronomia e bebidas integram a proposta de férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Programação e entretenimento",
+    "description": "Atividades ampliam os programas para diferentes idades."
+   },
+   {
+    "icon": "beach",
+    "label": "Natureza ao redor",
+    "description": "Mar e vegetação dão identidade ao cenário do resort."
+   }
+  ]
+ },
+ "fazzenda-park-hotel": {
+  "description": [
+   "A atmosfera de campo e a programação em família dão identidade às férias no Fazzenda Park Resort. Em Gaspar, no Vale Europeu catarinense, a propriedade reúne áreas verdes, paisagens rurais e ambientes que favorecem a convivência. A proposta combina especialmente com famílias e grupos que querem aproveitar o hotel como destino, alternando atividades com momentos mais livres ao longo da estadia.",
+   "Passeios a cavalo, contato com animais e atividades no lago aproximam as férias da vida ao ar livre. As piscinas e a programação oferecem outros programas para crianças e adultos, permitindo variar o lazer conforme a disposição. A estrutura facilita encontros entre gerações, com oportunidades para participar das atividades em grupo ou simplesmente aproveitar uma pausa em meio à paisagem.",
+   "A gastronomia ocupa um espaço importante nessa rotina, com refeições que ajudam a reunir novamente a companhia e prolongar os momentos de conversa. A proposta all inclusive organiza alimentação e bebidas conforme as condições da hospedagem, acrescentando praticidade à viagem. O Fazzenda faz sentido para quem procura essa combinação de ambiente rural, entretenimento e convivência, valorizando dias em que o tempo pode ser dividido entre brincar, descansar e estar junto."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Atmosfera de fazenda",
+    "description": "O cenário rural dá personalidade aos dias de hospedagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Passeios e vida de campo",
+    "description": "Cavalos, animais e atividades no lago aproximam a estadia do ambiente rural."
+   },
+   {
+    "icon": "beach",
+    "label": "Proposta all inclusive",
+    "description": "Alimentação e bebidas acompanham a rotina das férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e programação",
+    "description": "Diferentes possibilidades para aproveitar o resort em família."
+   },
+   {
+    "icon": "kids",
+    "label": "Convivência entre gerações",
+    "description": "A estrutura favorece encontros com crianças, adultos e grupos."
+   }
+  ]
+ },
+ "monthez": {
+  "description": [
+   "A vista de Brusque a partir de uma colina é um dos principais atrativos da hospedagem no Monthez. Instalado em uma colina, o hotel tem na vista da cidade e na arquitetura de inspiração germânica dois elementos que dão personalidade à estadia. A proposta interessa a casais, famílias e viajantes que desejam combinar passeios pela região com descanso, sem deixar a experiência do hotel em segundo plano.",
+   "O Restaurante Lalo é um dos ambientes que aproximam gastronomia e paisagem, permitindo reservar uma refeição como parte do programa da viagem. As piscinas e as áreas de lazer acrescentam outras possibilidades para os períodos no hotel. Essa combinação permite alternar saídas pela cidade com uma tarde mais livre, aproveitando o conforto da hospedagem e os espaços de convivência.",
+   "Brusque amplia o roteiro com referências culturais e opções de compras. Você pode dedicar parte da estadia a esses programas e manter tempo para aproveitar a vista ou uma refeição sem pressa. O Monthez combina cidade, cenário e hospedagem em uma base com identidade para conhecer o Vale Europeu catarinense e descansar entre as descobertas."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Vista a partir da colina",
+    "description": "A localização oferece outra perspectiva da paisagem de Brusque."
+   },
+   {
+    "icon": "leisure",
+    "label": "Arquitetura de inspiração germânica",
+    "description": "Um elemento que aproxima a hospedagem da identidade regional."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Restaurante Lalo",
+    "description": "Gastronomia e vista se encontram em um dos ambientes do hotel."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer",
+    "description": "Opções para reservar períodos de descanso durante a viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Brusque no roteiro",
+    "description": "Combine a hospedagem com compras e passeios pelo Vale Europeu."
+   }
+  ]
+ },
+ "iberostar-grand-amazon": {
+  "description": [
+   "No Grand Amazon Expedition, navegação, hospedagem e passeios guiados se encontram em uma viagem pela Amazônia. Com embarque em Manaus, o navio-hotel transforma o próprio deslocamento em parte da viagem, aproximando os dias da paisagem dos rios e da floresta. A proposta interessa a viajantes que valorizam descobertas de natureza e preferem um roteiro organizado, com conforto entre uma atividade e outra.",
+   "As expedições previstas na programação ajudam a conhecer o entorno com o acompanhamento de guias, alternando os períodos de navegação com experiências fora do navio. Os roteiros pelo Rio Negro, pelo Solimões ou pela combinação dos dois oferecem perspectivas diferentes do destino. Essa escolha é importante para ajustar a duração e o tipo de viagem ao que você deseja descobrir.",
+   "A bordo, a gastronomia e a proposta all inclusive completam os encontros, enquanto os ambientes de lazer permitem descansar e observar a paisagem entre os programas. Você pode aproveitar uma atividade e voltar para uma refeição ou um período mais tranquilo no convés. O Grand Amazon faz sentido para quem procura essa combinação de expedição e conforto, vivendo a Amazônia a partir de uma hospedagem que acompanha o caminho da viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Navio-hotel na Amazônia",
+    "description": "A navegação faz parte da experiência de hospedagem e descoberta."
+   },
+   {
+    "icon": "leisure",
+    "label": "Expedições com guias",
+    "description": "Atividades previstas no roteiro aproximam a viagem da natureza e da região."
+   },
+   {
+    "icon": "leisure",
+    "label": "Roteiros por diferentes rios",
+    "description": "Negro, Solimões e trajetos combinados oferecem perspectivas distintas."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "All inclusive a bordo",
+    "description": "Alimentação e bebidas acompanham a programação do cruzeiro."
+   },
+   {
+    "icon": "spa",
+    "label": "Paisagem durante a navegação",
+    "description": "Ambientes do navio permitem descansar e observar o destino entre os passeios."
+   }
+  ]
+ },
+ "arcobaleno": {
+  "description": [
+   "No Arcobaleno, as férias em Porto Seguro se dividem entre o resort all inclusive e o clube na praia de Taperapuã. A hospedagem fica de um lado da avenida e o clube de praia do outro, formando uma experiência que alterna ambientes de lazer e momentos à beira-mar. Essa configuração interessa especialmente a famílias e grupos que gostam de ter opções próximas durante as férias.",
+   "O clube de praia dá um ponto de apoio para passar parte do dia diante do mar, enquanto as piscinas e os espaços esportivos permitem mudar de cenário sem transformar o programa em uma excursão. O tênis é um dos elementos que acrescentam variedade ao lazer. A programação do resort e as áreas para crianças ajudam a reunir viajantes com idades e interesses diferentes.",
+   "O sistema all inclusive facilita a organização das refeições e dos encontros do grupo, deixando mais liberdade para escolher como aproveitar cada período. Porto Seguro também oferece passeios para quem deseja ampliar o roteiro além do hotel. Você pode combinar esses programas com dias dedicados ao resort e à praia, buscando uma viagem com movimento, convivência e uma base prática para conhecer esse trecho do litoral baiano."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Clube na praia de Taperapuã",
+    "description": "Uma estrutura à beira-mar complementa a hospedagem do outro lado da avenida."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Sistema all inclusive",
+    "description": "Refeições e bebidas fazem parte da proposta de férias."
+   },
+   {
+    "icon": "gym",
+    "label": "Tênis no resort",
+    "description": "Uma opção esportiva para variar os dias de lazer."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscinas e recreação",
+    "description": "Ambientes e atividades favorecem a convivência em família."
+   },
+   {
+    "icon": "leisure",
+    "label": "Base em Porto Seguro",
+    "description": "Combine o descanso com passeios pelo destino."
+   }
+  ]
+ },
+ "catussaba-resort-hotel": {
+  "description": [
+   "Jardins, piscinas e acesso direto à praia de Stella Maris permitem aproveitar Salvador com outro ritmo no Catussaba. Em Stella Maris, o resort oferece uma experiência diferente da rotina de um hotel urbano, com jardins, piscinas e o mar acompanhando os dias. A proposta combina com casais e famílias que desejam aproveitar o litoral sem abrir mão de conhecer a cidade.",
+   "Os ambientes externos têm papel importante nessa experiência. Você pode passar parte da manhã entre a piscina e a praia, reservar uma pausa nos jardins e voltar ao quarto para descansar antes de outro programa. As acomodações com varanda acrescentam um espaço para prolongar esses momentos, enquanto a estrutura de lazer permite que a hospedagem também seja aproveitada como destino.",
+   "A localização em Stella Maris favorece uma viagem em que praia e descanso ganham prioridade, deixando os passeios culturais de Salvador para períodos planejados. É possível organizar dias mais ativos e outros dedicados ao resort, sem precisar repetir a mesma agenda. O Catussaba interessa a quem procura essa combinação de cidade e litoral, com um cenário de jardins e mar que ajuda a desacelerar entre as descobertas da capital baiana."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Acesso direto à praia",
+    "description": "O mar de Stella Maris faz parte da experiência do resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "Jardins e áreas externas",
+    "description": "Ambientes que convidam a passar mais tempo ao ar livre."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas para alternar o programa",
+    "description": "Combine momentos de praia com lazer dentro do hotel."
+   },
+   {
+    "icon": "spa",
+    "label": "Acomodações com varanda",
+    "description": "Um espaço adicional para aproveitar as pausas da viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Salvador com ritmo de férias",
+    "description": "Uma base litorânea para combinar descanso e passeios pela cidade."
+   }
+  ]
+ },
+ "cana-brava-all-inclusive-resort": {
+  "description": [
+   "Praia, natureza e programação em família definem a experiência do Cana Brava, no litoral de Ilhéus. No litoral de Ilhéus, o resort reúne acesso ao mar, áreas verdes e uma proposta all inclusive que ajuda a organizar a estadia. A paisagem aproxima a viagem da natureza baiana, enquanto a estrutura de lazer permite preencher os dias com diferentes programas dentro do hotel.",
+   "A recreação e o entretenimento têm presença importante nessa experiência, criando oportunidades para crianças e adultos participarem das férias de maneiras diferentes. As piscinas oferecem outro cenário para os encontros, e a praia permite reservar períodos para caminhar ou simplesmente aproveitar o litoral. Essa alternância ajuda quem viaja com várias idades a equilibrar atividades em grupo com momentos de descanso.",
+   "A gastronomia participa da rotina do resort, com refeições e bebidas que acompanham os períodos de lazer e os encontros durante o dia. Você pode começar pela praia, mudar para a piscina e terminar aproveitando a programação, sem precisar montar um roteiro externo para cada ocasião. O Cana Brava faz sentido para famílias e amigos que valorizam uma viagem com entretenimento, natureza e liberdade para decidir o próximo programa depois de chegar."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia no litoral de Ilhéus",
+    "description": "Acesso ao mar para incluir caminhadas e descanso no roteiro."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "Sistema all inclusive",
+    "description": "Alimentação e bebidas acompanham a proposta de férias do resort."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação para a família",
+    "description": "A programação permite envolver diferentes idades na estadia."
+   },
+   {
+    "icon": "pool",
+    "label": "Entretenimento ao longo da viagem",
+    "description": "Atividades acrescentam movimento aos dias de praia e piscina."
+   },
+   {
+    "icon": "leisure",
+    "label": "Natureza baiana no cenário",
+    "description": "Áreas verdes aproximam a hospedagem da paisagem do destino."
+   }
+  ]
+ },
+ "clubmed-ba": {
+  "description": [
+   "Sobre as falésias do litoral baiano, o Club Med Trancoso combina paisagem, esportes e convivência. Instalado sobre as falésias do litoral baiano, o resort tem uma relação própria com o mar e com o verde, diferente de uma hospedagem no centro da vila. A proposta combina com casais, amigos e famílias que gostam de aproveitar o hotel como parte importante da viagem.",
+   "O sistema all inclusive reúne gastronomia, bebidas e uma programação que dá espaço aos esportes e à convivência. A presença dos G.O.s ajuda a criar esse ambiente de participação, seja nas atividades do dia ou no entretenimento. O acesso à praia permite mudar de cenário, enquanto as áreas do resort oferecem outras possibilidades para quem prefere ficar entre o lazer e os encontros à mesa.",
+   "O golfe na região de Terravista acrescenta interesse para quem pratica o esporte e deseja incluí-lo no roteiro, mediante contratação específica. Já os passeios pela vila de Trancoso podem complementar a estadia em períodos escolhidos. O principal atrativo está em reunir o cenário das falésias e o jeito Club Med de viver as férias, com programas disponíveis e espaço para decidir como aproveitar cada dia."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Cenário sobre as falésias",
+    "description": "A paisagem dá identidade à hospedagem no litoral de Trancoso."
+   },
+   {
+    "icon": "restaurant",
+    "label": "All inclusive Club Med",
+    "description": "Gastronomia, bebidas e programação reunidas na proposta da estadia."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes e atividades",
+    "description": "Opções para alternar descanso com dias mais ativos."
+   },
+   {
+    "icon": "leisure",
+    "label": "G.O.s e entretenimento",
+    "description": "A equipe participa da convivência e da programação do resort."
+   },
+   {
+    "icon": "gym",
+    "label": "Golfe em Terravista",
+    "description": "Uma possibilidade adicional para quem deseja incluir o esporte na viagem."
+   }
+  ]
+ },
+ "costa-do-sauipe-resorts": {
+  "description": [
+   "Na Costa do Sauípe, a escolha da viagem começa pelo hotel: o complexo reúne unidades com diferentes propostas de férias. No litoral norte da Bahia, a paisagem combina mar, coqueiros e áreas naturais, criando um cenário para viagens em família, encontros entre amigos e períodos de descanso a dois. A experiência começa pela escolha do hotel, pois as unidades têm propostas e categorias diferentes.",
+   "O sistema all inclusive e as estruturas de lazer ajudam a organizar os dias ao redor de refeições, piscinas e atividades. A Vila Nova da Praia acrescenta um ambiente de encontro e entretenimento ao destino, com uma atmosfera que remete à Bahia. Essa variedade permite alternar momentos no hotel escolhido com programas disponíveis no complexo, conforme as condições de acesso da hospedagem.",
+   "Para quem viaja em grupo, o interesse está em encontrar diferentes maneiras de aproveitar o mesmo lugar. É possível dedicar parte do dia ao mar e reservar outro período para a programação ou para uma refeição com todos. Sauípe faz sentido quando você deseja uma viagem com bastante estrutura e cenário litorâneo, escolhendo a categoria que melhor combina com o conforto, o estilo de férias e a companhia."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Complexo com diferentes hotéis",
+    "description": "A escolha da unidade permite ajustar a experiência ao perfil da viagem."
+   },
+   {
+    "icon": "beach",
+    "label": "Litoral norte da Bahia",
+    "description": "Praia e coqueiros compõem o cenário do destino."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "Proposta all inclusive",
+    "description": "Alimentação e bebidas integram a hospedagem conforme o hotel escolhido."
+   },
+   {
+    "icon": "spa",
+    "label": "Vila Nova da Praia",
+    "description": "Um espaço de encontro e entretenimento com identidade baiana."
+   },
+   {
+    "icon": "pool",
+    "label": "Variedade de lazer",
+    "description": "Piscinas e programação oferecem diferentes maneiras de aproveitar as férias."
+   }
+  ]
+ },
+ "jardim-atlantico": {
+  "description": [
+   "O Jardim Atlântico aproxima praia, jardins e a vida de Ilhéus em uma hospedagem para alternar descanso e passeios. O resort combina uma localização no litoral da cidade com jardins e espaços de lazer, oferecendo uma base para alternar descanso e passeios. Essa proposta interessa a casais, famílias e viajantes que gostam de conhecer o destino, mas também querem reservar dias para aproveitar o próprio hotel.",
+   "As áreas verdes ajudam a dar outro ritmo à estadia, enquanto as piscinas e os ambientes esportivos permitem variar o programa entre uma saída e outra. A proximidade da praia mantém o mar presente nas férias e favorece períodos dedicados ao litoral. Dentro do resort, os espaços para convivência tornam possível passar uma tarde mais livre, sem transformar cada intervalo em um novo passeio.",
+   "A gastronomia acrescenta referências locais à experiência, com sabores baianos e elementos ligados à região do cacau. Você pode combinar esses momentos com visitas pela cidade e retornar ao hotel para descansar. O Jardim Atlântico oferece essa relação equilibrada com Ilhéus: uma hospedagem de praia, com jardins e lazer, que funciona como base para descobrir a cultura e os sabores do destino."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia em Ilhéus",
+    "description": "Uma hospedagem para manter o litoral presente na viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Jardins como parte do ambiente",
+    "description": "Áreas verdes acrescentam espaços de descanso e convivência."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Sabores da Bahia",
+    "description": "A gastronomia aproxima a estadia das referências locais."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e áreas esportivas",
+    "description": "Opções para variar o lazer dentro do resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "Base para conhecer a cidade",
+    "description": "Combine os dias no hotel com passeios por Ilhéus."
+   }
+  ]
+ },
+ "grand-palladium-imbassai": {
+  "description": [
+   "A Reserva Imbassaí dá ao Grand Palladium um cenário de natureza para férias all inclusive no litoral baiano. Inserido na Reserva Imbassaí, o resort combina áreas verdes, piscinas e caminhos que conectam os ambientes da hospedagem ao litoral. A proposta interessa a famílias, casais e amigos que gostam de ter variedade de lazer e gastronomia dentro do próprio destino.",
+   "Os restaurantes com propostas diferentes e os bares ajudam a transformar as refeições em parte da experiência. Você pode alternar os ambientes ao longo da viagem, combinando esses encontros com períodos na piscina ou programas de entretenimento. A estrutura para crianças amplia as possibilidades para famílias, enquanto os adultos encontram espaços para aproveitar o dia conforme a disposição e o tipo de descanso que procuram.",
+   "O Zentropia Spa acrescenta uma possibilidade de bem-estar para quem deseja contratar uma pausa mais reservada. Já o entorno de Imbassaí aproxima a viagem da paisagem de rio, vegetação e mar que dá identidade ao destino. O Grand Palladium faz sentido para quem valoriza um resort com diferentes ambientes e uma rotina de férias organizada, mantendo espaço para escolher entre gastronomia, atividades e momentos dedicados apenas ao descanso."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Reserva Imbassaí",
+    "description": "A hospedagem acontece em um cenário de natureza no litoral baiano."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia variada",
+    "description": "Restaurantes com propostas diferentes ampliam a experiência all inclusive."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscinas e entretenimento",
+    "description": "Ambientes e programação permitem variar os dias de férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Estrutura para crianças",
+    "description": "Espaços e atividades favorecem viagens em família."
+   },
+   {
+    "icon": "spa",
+    "label": "Zentropia Spa",
+    "description": "Uma opção adicional para incluir cuidados e bem-estar na estadia."
+   }
+  ]
+ },
+ "iberostar-bahia": {
+  "description": [
+   "Praia, gastronomia e entretenimento se encontram no Iberostar Waves Bahia, anteriormente conhecido como Iberostar Bahia. O hotel reúne praia, piscinas e programação, formando uma experiência que combina especialmente com famílias e grupos que gostam de encontrar diferentes programas no mesmo lugar. A paisagem baiana acompanha os dias e dá espaço para alternar atividade e descanso.",
+   "A gastronomia ajuda a variar os encontros ao longo da estadia, com ambientes e propostas que vão além de repetir a mesma refeição todos os dias. Para as crianças, o Star Camp acrescenta atividades próprias à viagem, enquanto os adultos podem participar do entretenimento ou reservar períodos mais livres. Essa organização facilita a convivência entre pessoas que têm interesses e ritmos diferentes.",
+   "O mar e as áreas externas mantêm a viagem ligada ao destino, permitindo dedicar parte do tempo à praia e outra parte ao lazer do hotel. Você pode começar o dia ao ar livre, reunir a família para uma refeição e decidir depois o próximo programa. O Waves Bahia faz sentido para quem valoriza essa combinação de variedade, convivência e praticidade, com a proposta familiar da Iberostar como parte importante das férias."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "All inclusive em Praia do Forte",
+    "description": "Uma proposta que reúne refeições, bebidas e lazer no litoral baiano."
+   },
+   {
+    "icon": "spa",
+    "label": "Star Camp",
+    "description": "Atividades próprias para as crianças durante a estadia."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Restaurantes com diferentes propostas",
+    "description": "A gastronomia acrescenta variedade ao programa das férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Praia e piscinas",
+    "description": "Ambientes para alternar os dias entre mar e lazer aquático."
+   },
+   {
+    "icon": "kids",
+    "label": "Entretenimento em família",
+    "description": "Programação que favorece a convivência entre diferentes idades."
+   }
+  ]
+ },
+ "iberostar-praia-do-forte": {
+  "description": [
+   "No Iberostar Selection Praia do Forte, gastronomia e conforto dividem o protagonismo com a praia e o lazer. No litoral norte da Bahia, o resort combina acesso à praia, áreas de piscina e diferentes ambientes para aproveitar o dia. A proposta interessa a casais e famílias que desejam descansar, mas também valorizam a possibilidade de variar restaurantes e programas ao longo da viagem.",
+   "As refeições têm presença importante na experiência, com restaurantes de propostas distintas que ajudam a criar ocasiões para reunir o grupo. Entre esses encontros, as piscinas e o entretenimento oferecem alternativas para preencher os dias sem depender de passeios externos. As atividades infantis permitem incluir as crianças na rotina de férias, mantendo opções para quem prefere momentos mais tranquilos ou um programa a dois.",
+   "A localização na região de Praia do Forte também aproxima a estadia de um destino conhecido pela natureza e pela relação com a conservação marinha. Você pode dedicar o tempo ao resort ou planejar uma saída para conhecer os arredores. O Selection faz sentido para quem deseja combinar cenário de praia, variedade gastronômica e lazer, escolhendo uma experiência em que o hotel participa do prazer da viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Gastronomia com variedade",
+    "description": "Diferentes restaurantes tornam as refeições parte do programa."
+   },
+   {
+    "icon": "leisure",
+    "label": "Proposta Selection",
+    "description": "Uma experiência com foco em conforto e serviços da categoria."
+   },
+   {
+    "icon": "beach",
+    "label": "All inclusive à beira-mar",
+    "description": "Praia, alimentação e lazer reunidos na hospedagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Áreas de piscina",
+    "description": "Ambientes para alternar descanso e convivência durante o dia."
+   },
+   {
+    "icon": "kids",
+    "label": "Lazer para diferentes idades",
+    "description": "Programação que permite combinar viagens em família e momentos a dois."
+   }
+  ]
+ },
+ "la-torre-resort": {
+  "description": [
+   "O La Torre reúne dias de resort all inclusive e um clube de praia em Mutá, no litoral de Porto Seguro. O clube de praia, localizado do outro lado da avenida, acrescenta um ambiente próprio para passar tempo diante do mar. Essa combinação interessa a famílias, amigos e casais que gostam de alternar cenários sem organizar grandes deslocamentos.",
+   "As diferentes áreas de piscina e a programação de lazer ampliam as possibilidades dentro do hotel. As categorias de acomodação também permitem ajustar a hospedagem à companhia, incluindo opções para quem precisa de mais espaço em viagens com a família. A gastronomia participa dessa rotina, criando encontros durante o dia e deixando o roteiro aberto para decidir o próximo programa depois de uma refeição.",
+   "O interesse está em aproveitar o hotel como uma base de férias, com estrutura para o descanso e entretenimento quando surge vontade de fazer algo diferente. Você pode reservar uma manhã para o clube de praia e voltar para uma tarde de piscina, ou combinar a estadia com passeios em Porto Seguro. O La Torre reúne essas escolhas em uma proposta de convivência, com o litoral de Mutá como parte da experiência."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Clube na praia de Mutá",
+    "description": "Uma estrutura à beira-mar complementa o resort situado do outro lado da avenida."
+   },
+   {
+    "icon": "beach",
+    "label": "Sistema all inclusive",
+    "description": "Refeições e bebidas acompanham a rotina das férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Diferentes áreas de piscina",
+    "description": "Ambientes para variar os momentos de lazer e descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Acomodações para diferentes grupos",
+    "description": "Categorias permitem buscar mais espaço conforme a companhia."
+   },
+   {
+    "icon": "beach",
+    "label": "Programação de lazer",
+    "description": "Atividades ajudam a reunir família e amigos durante a estadia."
+   }
+  ]
+ },
+ "tivoli-bahia-ecoresort": {
+  "description": [
+   "Jardins tropicais, gastronomia e bem-estar dão personalidade ao descanso no Tivoli Ecoresort Praia do Forte. Os jardins e a arquitetura tropical ajudam a criar uma atmosfera em que o tempo pode ser aproveitado com mais calma. A proposta combina com viagens a dois e também com famílias que valorizam conforto e uma relação próxima com o destino.",
+   "A gastronomia participa da experiência, permitindo transformar as refeições em ocasiões para prolongar o encontro e apreciar a estadia. As piscinas oferecem outros espaços de descanso, enquanto o Anantara Spa acrescenta a possibilidade de contratar tratamentos e reservar um período dedicado a si. Para quem viaja com crianças, a estrutura de lazer permite equilibrar programas em família com os interesses dos adultos.",
+   "Praia do Forte amplia o roteiro com sua vila e as experiências ligadas à natureza e à conservação marinha. Você pode alternar esses passeios com dias mais livres no resort, escolhendo quanto tempo dedicar a cada ambiente. O Tivoli faz sentido para quem procura uma hospedagem em que paisagem, gastronomia e bem-estar tenham peso na decisão, com possibilidades de aproveitar o litoral baiano além da rotina de praia e piscina."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Jardins e arquitetura tropical",
+    "description": "Os ambientes aproximam o descanso da paisagem do litoral baiano."
+   },
+   {
+    "icon": "spa",
+    "label": "Anantara Spa",
+    "description": "Tratamentos permitem incluir uma experiência de bem-estar na viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Gastronomia na estadia",
+    "description": "As refeições ganham espaço entre os programas do resort."
+   },
+   {
+    "icon": "beach",
+    "label": "Praia do Forte no roteiro",
+    "description": "Combine a hospedagem com a vila e as atrações do destino."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer com espaço para descansar",
+    "description": "Piscinas e atividades permitem conciliar viagens a dois e em família."
+   }
+  ]
+ },
+ "toromba": {
+  "description": [
+   "Em Olivença, o Tororomba combina o litoral de Ilhéus com uma hospedagem cercada pelo verde. Em Olivença, o resort reúne acesso ao mar e áreas verdes, formando um cenário que combina com viagens em família e encontros entre amigos. O interesse está em passar alguns dias com alternativas de lazer próximas, sem precisar preencher todo o roteiro com passeios externos.",
+   "As piscinas e as atrações aquáticas acrescentam outro programa aos períodos de praia, permitindo variar os dias conforme a vontade do grupo. A recreação ajuda a envolver diferentes idades na experiência, enquanto os ambientes ao ar livre oferecem oportunidades para descansar ou simplesmente apreciar o entorno. Essa combinação favorece uma viagem em que atividades e pausas possam acontecer no mesmo lugar.",
+   "A gastronomia aproxima os encontros à mesa dos sabores da Bahia e amplia o prazer de aproveitar o próprio resort. Você pode reservar parte da estadia para conhecer Ilhéus e dedicar outros dias ao hotel, equilibrando as descobertas do destino com momentos mais livres. O Tororomba faz sentido para quem valoriza essa combinação de litoral, verde e convivência, buscando uma base para descansar e viver as férias com a companhia escolhida."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Praia em Olivença",
+    "description": "Acesso ao mar no litoral de Ilhéus para incluir descanso e caminhadas."
+   },
+   {
+    "icon": "leisure",
+    "label": "Natureza no entorno",
+    "description": "Áreas verdes ajudam a compor o ambiente da hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Lazer aquático",
+    "description": "Piscinas e atrações oferecem programas além da praia."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Sabores da Bahia",
+    "description": "A gastronomia acrescenta referências locais à estadia."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação e convivência",
+    "description": "A programação favorece dias de férias compartilhados em família."
+   }
+  ]
+ },
+ "transamerica-resort-comandatuba": {
+  "description": [
+   "A travessia até a ilha de Comandatuba já faz parte da mudança de ritmo proposta pelo resort. Instalado em uma ilha no litoral da Bahia, o resort tem acesso por travessia e uma paisagem em que praia, coqueiros e áreas verdes acompanham a estadia. A proposta interessa a casais, famílias e amigos que querem dedicar a viagem ao descanso e às experiências do próprio destino.",
+   "O sistema all inclusive ajuda a organizar os dias entre refeições, bebidas e lazer, permitindo aproveitar diferentes ambientes sem montar um roteiro externo a cada manhã. As acomodações incluem propostas distintas, como apartamentos e bangalôs, para ajustar a hospedagem à companhia. A estrutura esportiva e a programação oferecem movimento, enquanto a praia cria espaço para caminhadas e períodos tranquilos junto ao mar.",
+   "A condição de ilha dá personalidade à experiência e reforça a sensação de estar em outro cenário durante as férias. Você pode alternar atividades com momentos à mesa, reservar uma manhã para o litoral e passar a tarde nas áreas do resort. Em Comandatuba, natureza e estrutura permitem viver o destino sem a necessidade de mudar de lugar todos os dias."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Hospedagem em uma ilha",
+    "description": "A travessia faz parte da experiência de chegada ao destino."
+   },
+   {
+    "icon": "beach",
+    "label": "Praia e coqueirais",
+    "description": "O litoral de Comandatuba dá identidade aos dias de descanso."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "Sistema all inclusive",
+    "description": "Alimentação e bebidas integram a proposta de férias do resort."
+   },
+   {
+    "icon": "leisure",
+    "label": "Apartamentos e bangalôs",
+    "description": "Diferentes categorias permitem ajustar a hospedagem à viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Esportes e programação",
+    "description": "Opções para alternar atividades com momentos mais tranquilos."
+   }
+  ]
+ },
+ "ipioca-beach": {
+  "description": [
+   "O Ipioca Beach Residence & Resort combina acomodação com características de residência de férias e uma estrutura de lazer no litoral norte de Maceió. A proposta interessa a casais e famílias que desejam permanecer vários dias no destino, alternando praia, piscinas e momentos no apartamento. O Boulevard Luiz Vasconcelos acrescenta um caminho próprio à experiência, reunindo gastronomia, lojas e acesso à praia.",
+   "As unidades com varanda oferecem espaço para aproveitar as pausas entre um programa e outro. Nas áreas comuns, as piscinas e as hidromassagens permitem reservar parte do dia para o lazer aquático, enquanto as quadras de tênis e beach tennis acrescentam movimento à estadia. O minicinema e os ambientes de jogos ampliam as possibilidades para variar os encontros da família dentro do empreendimento.",
+   "A gastronomia pode ser aproveitada no restaurante Canoas, no bar Cascalho e nas opções do boulevard, conforme a reserva e a vontade da companhia. Você pode dedicar a manhã ao litoral, retornar para uma tarde de piscina e escolher outro ambiente para o jantar. O Residence combina espaço, lazer e liberdade para aproveitar a região de Ipioca no próprio ritmo."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Boulevard Luiz Vasconcelos",
+    "description": "Um passeio com gastronomia, lojas e acesso à praia complementa a hospedagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Apartamentos com varanda",
+    "description": "Um espaço adicional para as pausas da viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e hidromassagens",
+    "description": "Ambientes para dedicar parte dos dias ao lazer aquático."
+   },
+   {
+    "icon": "spa",
+    "label": "Tênis e beach tennis",
+    "description": "Opções esportivas para variar o programa dentro do empreendimento."
+   },
+   {
+    "icon": "kids",
+    "label": "Minicinema e jogos",
+    "description": "Outras possibilidades de convivência para a viagem em família."
+   }
+  ]
+ },
+ "japaratinga-louge-resort": {
+  "description": [
+   "No Japaratinga Lounge Resort, gastronomia e descanso à beira-mar têm lugar central nas férias. A proposta all inclusive premium reúne refeições, bebidas e ambientes que convidam a permanecer no resort, enquanto a praia dá o cenário da viagem. Essa combinação interessa especialmente a casais e amigos que desejam aproveitar a companhia e fazer do hotel parte importante das férias.",
+   "As experiências à mesa e os diferentes pontos de consumo ajudam a variar o programa ao longo da estadia. Você pode alternar uma refeição com momentos na piscina, aproveitar um bar e reservar outra parte do dia para o mar. Os espaços de lazer ampliam as possibilidades, permitindo escolher entre atividades e períodos mais livres, sem exigir que todos mantenham o mesmo ritmo.",
+   "Japaratinga acrescenta à viagem a paisagem da Costa dos Corais, com um litoral que muda de aparência conforme a maré. O resort permite aproveitar esse entorno com uma base dedicada ao conforto e à convivência. Para quem busca dias de praia com boa variedade gastronômica e liberdade para desacelerar, o interesse está nessa combinação de cenário, refeições e ambientes, aproveitando cada escolha como parte do prazer de estar no destino."
+  ],
+  "amenities": [
+   {
+    "icon": "restaurant",
+    "label": "All inclusive premium",
+    "description": "Gastronomia e bebidas têm papel central na experiência de hospedagem."
+   },
+   {
+    "icon": "beach",
+    "label": "Praia de Japaratinga",
+    "description": "O litoral da Costa dos Corais acompanha os dias de descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Diferentes pontos de consumo",
+    "description": "Ambientes para variar os encontros à mesa e os momentos de bar."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e convivência",
+    "description": "Espaços para aproveitar o resort com a companhia escolhida."
+   },
+   {
+    "icon": "leisure",
+    "label": "Descanso com liberdade de escolha",
+    "description": "Uma proposta para alternar lazer e períodos mais tranquilos."
+   }
+  ]
+ },
+ "jatiuca-hotel-resort": {
+  "description": [
+   "O Jatiúca permite viver Maceió com praia, jardins e espaço para descansar dentro da cidade. O hotel ocupa uma área de jardins à beira-mar, criando um ambiente diferente da rotina de uma hospedagem urbana convencional. A proposta combina com casais e famílias que querem alternar os passeios pela capital alagoana com dias dedicados ao próprio resort.",
+   "A paisagem interna, com vegetação e lago, ajuda a dar personalidade à experiência e oferece espaços para desacelerar entre uma atividade e outra. As piscinas e as áreas esportivas ampliam os programas dentro do hotel, enquanto o acesso à praia mantém o mar próximo. A recreação permite incluir as crianças nas férias, deixando opções para reunir a família ou aproveitar momentos em ritmos diferentes.",
+   "A localização em Maceió favorece uma viagem com liberdade para conhecer restaurantes, passear pela orla e explorar outros pontos do destino. Você pode organizar uma saída e voltar para uma tarde de piscina, ou reservar o dia inteiro para aproveitar os jardins e a praia. O Jatiúca faz sentido para quem procura essa combinação de cidade e resort, com espaço para descansar e uma base para descobrir o litoral alagoano."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "À beira-mar em Maceió",
+    "description": "Acesso à praia com a cidade participando do roteiro."
+   },
+   {
+    "icon": "leisure",
+    "label": "Jardins e lago",
+    "description": "A paisagem interna dá identidade aos ambientes do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e esporte",
+    "description": "Diferentes programas para aproveitar os dias dentro do hotel."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação para crianças",
+    "description": "Atividades favorecem a combinação de descanso e férias em família."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Liberdade para explorar a cidade",
+    "description": "Uma base para passeios pela orla e experiências gastronômicas em Maceió."
+   }
+  ]
+ },
+ "maceio-mar": {
+  "description": [
+   "À beira da praia de Ipioca, o Maceió Mar Resort combina all inclusive e variedade de ambientes gastronômicos. A proposta combina hospedagem à beira-mar, piscinas e refeições em um cenário do litoral norte de Maceió. É uma alternativa para famílias e casais que gostam de fazer do próprio resort a base dos dias de descanso.",
+   "A variedade de pontos de consumo acrescenta possibilidades ao programa, com ambientes que permitem alternar refeições, encontros no bar e momentos perto da água. Em vez de organizar uma saída para cada ocasião, você pode escolher como passar o dia entre a praia e a estrutura do hotel. As áreas infantis e a programação de lazer ajudam a envolver as crianças na experiência.",
+   "Para os adultos, o interesse está em aproveitar esses ambientes com tempo, seja em uma refeição a dois ou em uma tarde de convivência com a família. Ipioca dá o cenário litorâneo, enquanto a proposta all inclusive premium organiza parte importante da rotina de férias. O Maceió Mar Resort faz sentido para quem valoriza essa combinação de gastronomia, lazer e mar, buscando variedade sem precisar mudar de base durante a estadia."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia de Ipioca",
+    "description": "Uma hospedagem à beira-mar no litoral norte de Maceió."
+   },
+   {
+    "icon": "restaurant",
+    "label": "All inclusive premium",
+    "description": "Refeições e bebidas integram a proposta de férias do resort."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Variedade gastronômica",
+    "description": "Diferentes pontos de consumo permitem mudar o ambiente dos encontros."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer",
+    "description": "Opções para alternar os dias entre mar e estrutura do hotel."
+   },
+   {
+    "icon": "spa",
+    "label": "Espaços para crianças",
+    "description": "A estrutura infantil favorece a organização da viagem em família."
+   }
+  ]
+ },
+ "salinas-maceio-resort": {
+  "description": [
+   "No Salinas Maceió, a proposta é reunir a família em torno de praia, piscinas e dias de férias all inclusive. O resort reúne alimentação, bebidas e lazer na proposta all inclusive, permitindo concentrar a viagem nos momentos de convivência. A experiência interessa especialmente a quem gosta de alternar praia, piscina e atividades sem depender de um roteiro externo para aproveitar cada dia.",
+   "Os espaços do hotel aproximam esses programas e ajudam a criar uma dinâmica de férias em que cada pessoa pode encontrar o próprio ritmo. As crianças contam com recreação, enquanto os adultos podem acompanhar as atividades ou reservar períodos para descansar. Os diferentes ambientes de alimentação e bar acrescentam variedade aos encontros do grupo, que voltam a acontecer durante o dia.",
+   "Essa combinação funciona para famílias que desejam passar tempo juntas e, ao mesmo tempo, ter escolhas disponíveis quando surge vontade de mudar de programa. Você pode começar pela praia, aproveitar uma refeição e seguir para uma tarde de piscina ou entretenimento. O Salinas Maceió faz sentido para quem valoriza o jeito de viver as férias no resort, com praticidade, lazer e espaço para a companhia ser a parte principal da viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "All inclusive em Ipioca",
+    "description": "Alimentação e bebidas acompanham os dias de praia e lazer."
+   },
+   {
+    "icon": "spa",
+    "label": "Recreação infantil",
+    "description": "Atividades próprias para incluir as crianças na experiência de férias."
+   },
+   {
+    "icon": "pool",
+    "label": "Dinâmica prática de resort",
+    "description": "Praia, piscinas e refeições permitem organizar os dias com facilidade."
+   },
+   {
+    "icon": "spa",
+    "label": "Ambientes de alimentação e bar",
+    "description": "Diferentes espaços acrescentam variedade aos encontros do grupo."
+   },
+   {
+    "icon": "kids",
+    "label": "Convivência em família",
+    "description": "Uma proposta para alternar momentos compartilhados e programas por idade."
+   }
+  ]
+ },
+ "salinas-maragogi-resort": {
+  "description": [
+   "Praia, rio e áreas verdes dão ao Salinas Maragogi um cenário próprio para férias na Costa dos Corais. A propriedade reúne praia, áreas verdes e um rio que atravessa a paisagem do hotel, criando um cenário próprio para os dias de férias. A proposta all inclusive combina especialmente com famílias e grupos que desejam variar o lazer sem mudar de base.",
+   "As piscinas e a programação oferecem diferentes maneiras de aproveitar a estadia, permitindo alternar atividades com períodos mais tranquilos. Para as crianças, a recreação acrescenta programas próprios, enquanto os adultos podem acompanhar as brincadeiras ou reservar uma pausa para descansar. A gastronomia ajuda a reunir novamente o grupo, com ambientes e escolhas que fazem das refeições parte importante da experiência.",
+   "Maragogi amplia o interesse da viagem com seu litoral e os passeios ligados ao mar, que podem complementar os dias no resort. Você pode dedicar uma parte da estadia ao destino e manter outra parte livre para explorar o hotel. O Salinas faz sentido para quem valoriza essa combinação de cenário natural, variedade de lazer e alimentação organizada, buscando férias em que todos tenham motivos para aproveitar o tempo juntos."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia, rio e áreas verdes",
+    "description": "A paisagem dá uma identidade própria à hospedagem em Maragogi."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "Sistema all inclusive",
+    "description": "Alimentação e bebidas ajudam a organizar a rotina das férias."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação para diferentes idades",
+    "description": "A programação favorece viagens em família e em grupo."
+   },
+   {
+    "icon": "pool",
+    "label": "Variedade de lazer",
+    "description": "Piscinas e atividades permitem alternar programas ao longo da estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Costa dos Corais no roteiro",
+    "description": "Combine os dias de resort com passeios pelo destino."
+   }
+  ]
+ },
+ "pratagy-beach-resort": {
+  "description": [
+   "A paisagem de vegetação, rio e mar dá personalidade ao descanso no Pratagy, no litoral de Maceió. Na região do rio Meirim, o resort aproxima vegetação, água e mar, criando um cenário que convida a aproveitar mais tempo ao ar livre. A proposta all inclusive combina com famílias e grupos que desejam organizar as férias ao redor do próprio hotel.",
+   "As áreas de lazer e a programação permitem alternar momentos na piscina com atividades e períodos mais livres. A alimentação e as bebidas acompanham essa rotina, facilitando os encontros ao longo do dia e deixando espaço para decidir o programa conforme a vontade da companhia. O entorno natural acrescenta outra dimensão ao descanso, especialmente para quem gosta de paisagens que vão além da faixa de praia.",
+   "O Pratagy Acqua Park, junto ao complexo, pode ampliar o roteiro com atrações aquáticas, conforme as condições do ingresso ou da reserva. Você também pode combinar a hospedagem com passeios em Maceió e voltar para aproveitar a estrutura do resort. O Pratagy faz sentido para quem valoriza essa combinação de natureza, all inclusive e lazer, buscando uma viagem com possibilidades para descansar e se divertir no litoral alagoano."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Rio Meirim e mar",
+    "description": "O encontro desses elementos ajuda a definir a paisagem da hospedagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Vegetação no entorno",
+    "description": "A natureza acompanha os ambientes e os dias ao ar livre."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Sistema all inclusive",
+    "description": "Refeições e bebidas integram a proposta de férias."
+   },
+   {
+    "icon": "pool",
+    "label": "Lazer em família",
+    "description": "Piscinas e programação permitem variar os momentos de convivência."
+   },
+   {
+    "icon": "pool",
+    "label": "Pratagy Acqua Park",
+    "description": "Um parque aquático próximo amplia o roteiro conforme a contratação."
+   }
+  ]
+ },
+ "armacao-resort-porto-de-galinhas": {
+  "description": [
+   "Na praia de Merepe, o Armação reúne hospedagem à beira-mar e uma proposta que valoriza as férias em família. Na praia de Merepe, o resort reúne acesso ao mar, piscinas e espaços de lazer, permitindo dedicar parte da viagem ao próprio hotel. A proposta interessa especialmente a famílias que querem encontrar programas para as crianças e também aproveitar o destino.",
+   "A estrutura infantil e a recreação têm um papel importante nessa experiência, ajudando a transformar os dias de hospedagem em lembranças de férias. As áreas aquáticas permitem alternar brincadeiras e momentos de descanso, enquanto os ambientes do hotel favorecem encontros entre uma atividade e outra. Para os adultos, a praia acrescenta espaço para aproveitar o litoral e reservar períodos mais livres.",
+   "A vila de Porto de Galinhas e os passeios da região podem complementar a estadia, conforme o roteiro que você deseja montar. É possível dividir os dias entre descobertas pelo destino e tardes dedicadas ao resort, sem depender de uma saída para cada programa. O Armação faz sentido para quem valoriza essa combinação de localização, lazer infantil e convivência, buscando uma base para aproveitar o litoral pernambucano com a família."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia de Merepe",
+    "description": "Acesso ao mar para manter o litoral presente nas férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Lazer voltado às crianças",
+    "description": "Espaços e recreação dão identidade à proposta familiar do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e áreas aquáticas",
+    "description": "Ambientes para alternar brincadeiras e momentos de descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Porto de Galinhas no roteiro",
+    "description": "Combine a hospedagem com a vila e os passeios da região."
+   },
+   {
+    "icon": "kids",
+    "label": "Convivência em família",
+    "description": "Uma estrutura para reunir diferentes idades durante a estadia."
+   }
+  ]
+ },
+ "enotel-porto-de-galinhas": {
+  "description": [
+   "O lazer aquático é um dos principais motivos para escolher o Enotel Porto de Galinhas. À beira-mar, o resort reúne piscinas e atrações de parque aquático em uma proposta all inclusive, criando vários cenários para aproveitar o dia. Essa combinação interessa especialmente a famílias e grupos que gostam de ter bastante programação disponível dentro do próprio hotel.",
+   "As áreas de água permitem alternar momentos de brincadeira com períodos mais tranquilos, sem precisar repetir o mesmo programa durante toda a estadia. A recreação acrescenta atividades para diferentes idades, enquanto os ambientes de alimentação ajudam a reunir novamente a companhia entre uma atração e outra. Os restaurantes com propostas distintas também tornam possível dar mais variedade às refeições e aos encontros do grupo.",
+   "A praia mantém o litoral pernambucano presente na experiência e pode dividir o tempo com as atrações do resort. Você pode planejar uma saída para conhecer Porto de Galinhas e deixar outros dias inteiramente livres para aproveitar o hotel. O Enotel faz sentido para quem valoriza férias com estrutura de entretenimento, gastronomia e água, buscando uma estadia em que seja fácil encontrar o próximo programa sem organizar deslocamentos a cada manhã."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Parque aquático no resort",
+    "description": "Atrações e piscinas ampliam as possibilidades de lazer durante a estadia."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "All inclusive",
+    "description": "Alimentação e bebidas acompanham a proposta de férias do hotel."
+   },
+   {
+    "icon": "pool",
+    "label": "Hospedagem à beira-mar",
+    "description": "A praia permite alternar o programa com as áreas aquáticas."
+   },
+   {
+    "icon": "beach",
+    "label": "Restaurantes com diferentes propostas",
+    "description": "Mais variedade para transformar as refeições em encontros."
+   },
+   {
+    "icon": "kids",
+    "label": "Entretenimento para diferentes idades",
+    "description": "A programação favorece viagens em família e em grupo."
+   }
+  ]
+ },
+ "nannai": {
+  "description": [
+   "O NANNAI Muro Alto é uma escolha para quem deseja desacelerar à beira-mar, com privacidade, conforto e boa gastronomia. Entre jardins e arquitetura tropical, o resort cria um cenário convidativo para viagens a dois, comemorações especiais e dias dedicados ao prazer de estar junto. A proposta é aproveitar o tempo com liberdade, alternando momentos de descanso com as experiências do hotel.",
+   "Os bangalôs são uma das marcas do NANNAI, com opções de piscina privativa que tornam a própria acomodação parte importante da viagem. Varandas e ambientes acolhedores convidam a prolongar o descanso entre um passeio e outro. À mesa, a experiência ganha novos sabores: o TiaTê valoriza referências locais em um ambiente de cozinha aberta, enquanto o Salero reúne tapas e drinques à beira da praia.",
+   "A praia de Muro Alto, as piscinas e o SPA by L’Occitane oferecem diferentes maneiras de aproveitar a estadia. Você pode começar o dia com um mergulho, reservar uma pausa para cuidar de si e terminar com uma refeição sem pressa. Essa combinação de hospedagem, gastronomia e bem-estar faz do NANNAI um destino para quem valoriza os detalhes e quer aproveitar o resort no próprio ritmo."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Bangalôs com piscina privativa",
+    "description": "Opções de hospedagem para quem valoriza privacidade e quer aproveitar momentos de descanso na própria acomodação."
+   },
+   {
+    "icon": "pool",
+    "label": "À beira de Muro Alto",
+    "description": "Acesso à praia conhecida pela paisagem de arrecifes e piscinas naturais."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Gastronomia com identidade",
+    "description": "Sabores brasileiros e internacionais, com experiências como o restaurante TiaTê e o bar de tapas Salero."
+   },
+   {
+    "icon": "spa",
+    "label": "SPA by L’Occitane",
+    "description": "Tratamentos e terapias para incluir momentos de bem-estar na viagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Espaço para viver no seu ritmo",
+    "description": "Uma proposta que combina lazer de resort com ambientes e acomodações voltados ao descanso e à privacidade."
+   }
+  ]
+ },
+ "samoa-villa-resort": {
+  "description": [
+   "Arquitetura de inspiração polinésia e um parque aquático dão personalidade à hospedagem no Samoa Villa Resort. A inspiração polinésia dá identidade aos ambientes, enquanto a localização junto à praia aproxima os dias do cenário pernambucano. A proposta combina especialmente com famílias que gostam de encontrar atrações aquáticas e diferentes programas dentro do próprio resort.",
+   "O parque aquático é um dos principais elementos dessa experiência, criando outra possibilidade de lazer além do mar. Os ambientes de alimentação, incluindo o restaurante com vista para a praia e o bar de piscina, ajudam a alternar os encontros ao longo do dia. Assim, a estadia pode ser organizada entre brincadeiras, refeições e períodos mais livres, sem exigir um passeio externo para variar o programa.",
+   "As categorias de acomodação permitem ajustar a hospedagem ao tamanho e ao estilo da viagem, com características que devem ser escolhidas na reserva. Você pode dedicar alguns dias ao hotel e combinar outros com passeios pela região de Porto de Galinhas. O Samoa Villa faz sentido para quem procura cenário de praia, arquitetura com personalidade e diversão aquática, valorizando a experiência do resort tanto quanto as descobertas pelo destino."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Inspiração polinésia",
+    "description": "A arquitetura dá uma identidade própria aos ambientes da hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Parque aquático",
+    "description": "Atrações acrescentam diversão aos dias de férias em família."
+   },
+   {
+    "icon": "beach",
+    "label": "Praia de Muro Alto",
+    "description": "O mar participa da experiência e amplia os programas ao ar livre."
+   },
+   {
+    "icon": "beach",
+    "label": "Restaurante com vista para a praia",
+    "description": "Um ambiente para aproveitar as refeições junto à paisagem."
+   },
+   {
+    "icon": "spa",
+    "label": "Categorias para diferentes viagens",
+    "description": "Acomodações com características distintas permitem ajustar a estadia à companhia."
+   }
+  ]
+ },
+ "serrambi-resort": {
+  "description": [
+   "A posição em uma península faz do cenário de mar um dos principais atrativos do Serrambi. A posição do resort em uma península dá personalidade à paisagem e cria diferentes perspectivas para os dias de praia. A proposta interessa a casais, famílias e amigos que valorizam uma hospedagem ligada ao entorno e querem alternar descanso com experiências na água.",
+   "Os arrecifes e as mudanças da maré ajudam a definir como aproveitar o litoral, permitindo descobrir ambientes diferentes ao longo da estadia. As atividades náuticas e de mergulho disponíveis no destino acrescentam possibilidades para quem deseja explorar o mar além da caminhada na praia. Dentro do resort, as piscinas e as áreas de lazer oferecem outra maneira de passar o tempo entre esses programas.",
+   "A gastronomia e os espaços de convivência completam a experiência, favorecendo encontros depois de uma manhã na água ou de uma tarde mais livre. Você pode combinar os dias no hotel com passeios pela região, mantendo parte da viagem dedicada apenas ao cenário de Serrambi. O resort faz sentido para quem procura essa relação próxima com o litoral, com tempo para observar a paisagem e aproveitar o destino conforme a companhia."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Localização em uma península",
+    "description": "A posição do resort cria diferentes perspectivas do litoral."
+   },
+   {
+    "icon": "beach",
+    "label": "Arrecifes e marés",
+    "description": "A paisagem da praia muda e oferece novas maneiras de aproveitar o entorno."
+   },
+   {
+    "icon": "beach",
+    "label": "Atividades ligadas ao mar",
+    "description": "Opções náuticas e de mergulho podem complementar a estadia."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer",
+    "description": "Alternativas para variar o programa entre os períodos de praia."
+   },
+   {
+    "icon": "beach",
+    "label": "Descanso junto à paisagem",
+    "description": "Uma proposta para dar tempo ao litoral e à convivência."
+   }
+  ]
+ },
+ "summerville-all-inclusive-resort": {
+  "description": [
+   "Jardins, praia e gastronomia se encontram na proposta all inclusive premium do Summerville, em Muro Alto. O resort combina áreas verdes, praia e ambientes de piscina, criando diferentes cenários para passar os dias. Essa experiência interessa a famílias e grupos que gostam de ter programas disponíveis, mas também querem reservar tempo para descansar e aproveitar a companhia.",
+   "A gastronomia ajuda a organizar a estadia com variedade, permitindo alternar refeições e ambientes ao longo da viagem. As piscinas, as áreas esportivas e a programação de recreação ampliam as possibilidades, incluindo atividades para crianças e momentos de convivência para os adultos. Os jardins acrescentam outro ritmo ao resort, oferecendo uma paisagem para aproveitar os intervalos entre os programas e os encontros à mesa.",
+   "Você pode dedicar a manhã à praia, passar parte da tarde nas áreas de lazer e terminar o dia aproveitando o entretenimento ou uma refeição com a família. Porto de Galinhas também pode entrar no roteiro, complementando os períodos no hotel. O Summerville faz sentido para quem valoriza essa combinação de cenário tropical, alimentação e variedade de atividades, buscando férias em que todos encontrem uma forma de aproveitar o próprio resort."
+  ],
+  "amenities": [
+   {
+    "icon": "restaurant",
+    "label": "All inclusive premium",
+    "description": "Gastronomia e bebidas têm presença importante na proposta da estadia."
+   },
+   {
+    "icon": "spa",
+    "label": "Jardins e áreas verdes",
+    "description": "A paisagem tropical acompanha os ambientes e as pausas da viagem."
+   },
+   {
+    "icon": "beach",
+    "label": "Praia de Muro Alto",
+    "description": "O litoral pernambucano faz parte dos dias de férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e esportes",
+    "description": "Diferentes opções para alternar atividades e descanso."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação e entretenimento",
+    "description": "A programação favorece viagens em família e encontros entre grupos."
+   }
+  ]
+ },
+ "ocean-palace": {
+  "description": [
+   "Na Via Costeira, o Ocean Palace reúne mar, lazer aquático e gastronomia em uma proposta all inclusive. Na Via Costeira, o resort combina acesso à praia, áreas de piscina e diferentes ambientes gastronômicos, permitindo dedicar parte importante das férias ao hotel. A experiência interessa a famílias, casais e grupos que gostam de alternar lazer e refeições sem precisar organizar uma saída para cada ocasião.",
+   "As piscinas e as atrações aquáticas ajudam a variar o programa ao longo do dia, oferecendo alternativas para crianças e adultos aproveitarem a estadia. Os restaurantes acrescentam outros encontros à viagem e fazem da gastronomia parte do tempo de lazer. Assim, o roteiro pode ser construído entre momentos na água, períodos mais tranquilos e refeições com a companhia escolhida.",
+   "Natal amplia as possibilidades com passeios e paisagens que podem complementar os dias no resort. Você pode reservar uma parte da viagem para conhecer o destino e voltar para aproveitar os ambientes à beira-mar. O Ocean Palace faz sentido para quem procura essa combinação de localização, lazer aquático e alimentação organizada, mantendo liberdade para decidir quanto tempo dedicar à cidade e quanto tempo aproveitar o conforto do próprio hotel."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "À beira-mar na Via Costeira",
+    "description": "Uma localização para manter o litoral de Natal presente na estadia."
+   },
+   {
+    "icon": "all-inclusive",
+    "label": "Sistema all inclusive",
+    "description": "Alimentação e bebidas acompanham a proposta de férias do resort."
+   },
+   {
+    "icon": "pool",
+    "label": "Lazer aquático",
+    "description": "Piscinas e atrações permitem variar os momentos na água."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Diferentes ambientes gastronômicos",
+    "description": "As refeições acrescentam variedade aos encontros durante a viagem."
+   },
+   {
+    "icon": "leisure",
+    "label": "Base para conhecer Natal",
+    "description": "Combine os dias de resort com passeios pelo destino."
+   }
+  ]
+ },
+ "wish-natal": {
+  "description": [
+   "Entre o mar e o Parque das Dunas, o Wish Natal oferece uma hospedagem em que a paisagem participa do descanso. Na Via Costeira, o hotel está entre o mar e o cenário do Parque das Dunas, reunindo duas referências marcantes de Natal. A proposta combina com casais e famílias que valorizam a localização à beira-mar e desejam alternar o conforto do resort com descobertas pelo destino.",
+   "A arquitetura e os ambientes voltados para o litoral ajudam a aproximar a estadia desse cenário. As piscinas oferecem outros espaços para aproveitar o dia, enquanto a praia permite incluir caminhadas e períodos de contemplação no roteiro. As categorias de acomodação têm características diferentes, incluindo opções com vista para o mar, para quem deseja fazer da paisagem parte também dos momentos no quarto.",
+   "A gastronomia e os espaços de convivência completam a experiência, oferecendo pausas entre uma saída e outra. Você pode reservar um dia para conhecer Natal e deixar o seguinte livre para o hotel, ajustando o programa à companhia. No Wish, o cenário natural e o acesso à cidade formam uma base de praia com tempo para descansar e aproveitar a viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Entre o mar e as dunas",
+    "description": "A localização reúne duas paisagens que dão identidade a Natal."
+   },
+   {
+    "icon": "beach",
+    "label": "Hospedagem à beira-mar",
+    "description": "A praia participa dos dias de descanso e dos programas ao ar livre."
+   },
+   {
+    "icon": "beach",
+    "label": "Opções com vista para o mar",
+    "description": "Categorias permitem levar a paisagem para a experiência no quarto."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e convivência",
+    "description": "Ambientes para alternar descanso e encontros durante a estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Natal como parte da viagem",
+    "description": "Uma base para combinar resort e passeios pelo destino."
+   }
+  ]
+ },
+ "acqua-beach-park-resort": {
+  "description": [
+   "No Acqua Beach Park Resort, praia, piscinas e conexão com o parque fazem parte da mesma viagem. O hotel reúne acesso ao mar, lazer aquático e uma localização que facilita incluir o parque no roteiro. A proposta combina especialmente com famílias que gostam de passar parte das férias entre atrações de água e momentos mais livres no resort.",
+   "A piscina de borda infinita é um dos ambientes que dão identidade à hospedagem, aproximando o lazer da paisagem da praia. O Aqualink acrescenta uma conexão própria com o Aqua Park, conforme as condições de acesso e funcionamento. Esses elementos tornam a experiência diferente de apenas escolher um hotel próximo ao parque, pois o percurso e os espaços aquáticos também participam da viagem.",
+   "As categorias de acomodação permitem buscar a configuração adequada ao tamanho da família, enquanto os ambientes de alimentação e lazer ajudam a organizar os intervalos entre os programas. Você pode dedicar um dia ao parque e reservar outro para aproveitar a praia e as piscinas do resort. O Acqua faz sentido para quem quer reunir essas experiências na mesma base, com o universo do Beach Park ocupando um lugar importante nas férias."
+  ],
+  "amenities": [
+   {
+    "icon": "beach",
+    "label": "Praia de Porto das Dunas",
+    "description": "Acesso ao mar para combinar descanso e lazer no litoral cearense."
+   },
+   {
+    "icon": "pool",
+    "label": "Piscina de borda infinita",
+    "description": "Um ambiente que aproxima os momentos na água da paisagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Aqualink",
+    "description": "Uma conexão aquática com o Aqua Park, conforme as condições de acesso."
+   },
+   {
+    "icon": "leisure",
+    "label": "Beach Park no roteiro",
+    "description": "A localização favorece incluir o parque nos dias de férias."
+   },
+   {
+    "icon": "spa",
+    "label": "Acomodações para a família",
+    "description": "Categorias permitem ajustar a hospedagem ao tamanho do grupo."
+   }
+  ]
+ },
+ "suites-beach-park-resort": {
+  "description": [
+   "O Suítes Beach Park combina hospedagem à beira-mar com a proximidade das atrações do Aqua Park. A localização próxima ao Aqua Park facilita planejar os dias de atrações, enquanto a hospedagem à beira-mar mantém espaço para descansar. Essa proposta interessa especialmente a famílias que desejam uma base para aproveitar o destino com praticidade.",
+   "As suítes e os ambientes de lazer permitem prolongar a estadia além das visitas ao parque. As piscinas oferecem outro programa para os intervalos, e a recreação acrescenta atividades para as crianças, ajudando a variar os dias. Assim, a família pode reservar parte da viagem para as atrações aquáticas e manter períodos mais livres para aproveitar o próprio resort.",
+   "A gastronomia e os espaços de convivência ajudam a reunir todos depois de uma manhã de brincadeiras ou de um passeio pela região. Você pode começar pela praia, organizar um dia no parque e deixar o seguinte dedicado ao descanso, conforme a vontade da companhia. O Suítes faz sentido para quem valoriza essa proximidade com o universo do Beach Park, combinando lazer infantil, litoral e hospedagem em uma viagem de férias compartilhadas."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Próximo ao Aqua Park",
+    "description": "Uma localização para organizar os dias de atrações do Beach Park."
+   },
+   {
+    "icon": "beach",
+    "label": "Hospedagem à beira-mar",
+    "description": "A praia de Porto das Dunas amplia os programas da viagem."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação para crianças",
+    "description": "Atividades ajudam a variar as férias dentro do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Suítes para a estadia em família",
+    "description": "A hospedagem oferece uma base para aproveitar vários dias no destino."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e convivência",
+    "description": "Ambientes para alternar brincadeiras e momentos de descanso."
+   }
+  ]
+ },
+ "wellness-beach-park-resort": {
+  "description": [
+   "Espaço na acomodação e bem-estar são dois motivos para escolher o Wellness Beach Park Resort. Próximo ao Aqua Park, em Porto das Dunas, o hotel tem apartamentos com diferentes configurações, incluindo opções para famílias maiores e grupos. Essa proposta ajuda quem deseja aproveitar o Beach Park sem abrir mão de uma base onde cada pessoa encontre lugar para descansar.",
+   "Os ambientes de lazer permitem variar o programa entre os dias de parque, com piscinas e atividades para as crianças. O SPA L’Occitane acrescenta uma experiência própria para os adultos que desejam contratar uma pausa dedicada ao cuidado e ao relaxamento. A combinação desses espaços permite que a viagem tenha ritmos diferentes, equilibrando os programas compartilhados com períodos mais reservados.",
+   "A configuração dos apartamentos é um dos pontos que merecem atenção na escolha, especialmente quando mais de uma geração viaja junta. Você pode organizar um dia de atrações e deixar outro livre para aproveitar os ambientes do resort e os passeios pela região. O Wellness faz sentido para quem busca essa combinação de acomodação, lazer e bem-estar, usando o espaço da hospedagem como parte importante do conforto das férias."
+  ],
+  "amenities": [
+   {
+    "icon": "spa",
+    "label": "Apartamentos com diferentes configurações",
+    "description": "Opções para famílias maiores e grupos que precisam de mais espaço."
+   },
+   {
+    "icon": "spa",
+    "label": "SPA L’Occitane",
+    "description": "Uma experiência adicional de cuidado e relaxamento durante a estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Próximo ao Aqua Park",
+    "description": "A localização facilita incluir o Beach Park no roteiro."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer infantil",
+    "description": "Programas para aproveitar os intervalos entre os dias de parque."
+   },
+   {
+    "icon": "leisure",
+    "label": "Convivência com autonomia",
+    "description": "A proposta dos apartamentos permite conciliar encontros e momentos de descanso."
+   }
+  ]
+ },
+ "dom-pedro-laguna": {
+  "description": [
+   "A lagoa e as Water Villas dão ao Dom Pedro Laguna uma identidade própria no litoral cearense. Na região de Aquiraz, o resort combina a praia de Marambaia com uma lagoa que organiza parte da paisagem e da arquitetura. A proposta interessa a casais e famílias que valorizam o ambiente da hospedagem e desejam alternar descanso com lazer à beira-mar.",
+   "As Water Villas, distribuídas junto à lagoa, são um dos elementos que dão identidade ao hotel e tornam a escolha da acomodação parte importante da viagem. Outras categorias oferecem características próprias, incluindo opções voltadas para a praia e com piscina privativa. Essa variedade permite buscar uma estadia mais reservada ou uma configuração adequada à companhia, conforme o tipo de experiência desejada.",
+   "O golfe na região de Aquiraz Riviera acrescenta uma possibilidade para quem pratica o esporte e deseja incluí-lo no roteiro. As piscinas, a gastronomia e os espaços de lazer completam os dias de resort, deixando tempo para aproveitar o litoral sem pressa. O Dom Pedro Laguna faz sentido para quem procura essa combinação de paisagem, arquitetura e hospedagem, com ambientes que ajudam a transformar o descanso em parte da experiência do destino."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Lagoa no cenário do resort",
+    "description": "A água dá identidade à paisagem e à organização dos ambientes."
+   },
+   {
+    "icon": "leisure",
+    "label": "Water Villas",
+    "description": "Acomodações junto à lagoa criam uma experiência própria de hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Opções com piscina privativa",
+    "description": "Categorias específicas permitem buscar mais privacidade durante a estadia."
+   },
+   {
+    "icon": "beach",
+    "label": "Praia de Marambaia",
+    "description": "O litoral de Aquiraz participa dos dias de descanso."
+   },
+   {
+    "icon": "gym",
+    "label": "Golfe em Aquiraz Riviera",
+    "description": "Uma atividade adicional para quem deseja incluir o esporte na viagem."
+   }
+  ]
+ },
+ "rio-quente-resorts": {
+  "description": [
+   "No Rio Quente, nascentes termais e parques aquáticos transformam a água no centro das férias. O destino reúne diferentes hotéis e experiências em um complexo ligado às nascentes da região, criando uma proposta que combina descanso e diversão aquática. O interesse começa pela escolha da hospedagem, pois as unidades têm localizações, categorias e condições de acesso que influenciam o roteiro.",
+   "O Parque das Fontes é uma das experiências que dão identidade ao destino, com águas termais e ambientes para aproveitar a natureza. O Hot Park acrescenta outro ritmo à viagem, com atrações de lazer que permitem alternar períodos tranquilos e programas mais ativos. Essa combinação interessa especialmente a famílias e grupos que desejam ter várias maneiras de aproveitar a água durante a estadia.",
+   "Os hotéis oferecem bases diferentes para viver essas experiências, por isso vale ajustar a escolha ao tipo de conforto e à dinâmica de férias desejada. Você pode reservar dias para as atrações e deixar períodos mais livres para o descanso e os encontros à mesa. Rio Quente faz sentido para quem valoriza um destino em que a natureza das águas e a estrutura dos parques participam juntas das lembranças da viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Nascentes de águas quentes",
+    "description": "Um elemento natural que define a identidade do destino."
+   },
+   {
+    "icon": "pool",
+    "label": "Parque das Fontes",
+    "description": "Uma experiência termal para incluir no roteiro conforme a hospedagem."
+   },
+   {
+    "icon": "pool",
+    "label": "Hot Park",
+    "description": "Atrações aquáticas ampliam os programas de férias."
+   },
+   {
+    "icon": "leisure",
+    "label": "Diferentes hotéis",
+    "description": "A escolha da unidade permite ajustar conforto, localização e acessos."
+   },
+   {
+    "icon": "kids",
+    "label": "Descanso e diversão na água",
+    "description": "Uma combinação para viagens em família e encontros entre grupos."
+   }
+  ]
+ },
+ "taua-resort-alexania": {
+  "description": [
+   "O Aquapark Indoor é um dos principais motivos para aproveitar alguns dias no Tauá Alexânia. Em Goiás, no eixo entre Brasília e Goiânia, o hotel reúne lazer aquático, recreação e refeições em uma proposta voltada à convivência. A experiência combina especialmente com famílias e grupos que gostam de ter atividades disponíveis, deixando a agenda aberta para decidir o programa depois de chegar.",
+   "O Aquapark Indoor é um dos principais diferenciais, com atrações aquáticas em um ambiente coberto que amplia as formas de aproveitar a estadia. As piscinas externas acrescentam outros cenários para o lazer, enquanto a programação infantil ajuda a envolver as crianças na viagem. Essa variedade permite alternar brincadeiras em grupo com períodos mais tranquilos, conforme a vontade e a disposição de cada pessoa.",
+   "As refeições criam encontros durante o dia e ajudam a organizar a rotina das férias, fazendo da mesa parte da convivência. Você pode passar a manhã no parque aquático, reservar a tarde para outro programa e reunir novamente a companhia depois. O Tauá Alexânia faz sentido para quem valoriza essa combinação de estrutura, entretenimento e tempo compartilhado, buscando uma viagem com possibilidades para aproveitar o hotel em diferentes ritmos."
+  ],
+  "amenities": [
+   {
+    "icon": "pool",
+    "label": "Aquapark Indoor",
+    "description": "Um parque aquático coberto amplia o lazer dentro do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas externas",
+    "description": "Outros ambientes para variar os momentos na água."
+   },
+   {
+    "icon": "leisure",
+    "label": "Entre Brasília e Goiânia",
+    "description": "Uma localização que favorece escapadas a partir das duas cidades."
+   },
+   {
+    "icon": "kids",
+    "label": "Recreação infantil",
+    "description": "Atividades ajudam a incluir as crianças na experiência de férias."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Refeições e convivência",
+    "description": "A gastronomia organiza encontros ao longo da estadia."
+   }
+  ]
+ },
+ "malai-manso-resort": {
+  "description": [
+   "O Lago do Manso dá ao Malai uma paisagem própria para férias all inclusive no Mato Grosso. Às margens do Lago do Manso, no município de Chapada dos Guimarães, o resort combina a presença do lago com uma proposta all inclusive e diferentes ambientes de lazer. A experiência interessa a casais, famílias e amigos que querem dedicar alguns dias ao descanso e à convivência.",
+   "A relação com o lago é um dos diferenciais e acrescenta possibilidades náuticas ao roteiro, conforme contratação e condições de cada atividade. As piscinas e a programação permitem variar os dias no resort, enquanto a Vila Malai amplia os encontros gastronômicos com ambientes de propostas distintas. Essa combinação torna possível alternar um programa mais ativo com períodos dedicados apenas à paisagem e à companhia.",
+   "As categorias de hospedagem oferecem configurações diferentes, incluindo opções para quem procura mais espaço em viagens com a família ou amigos. Você pode escolher a acomodação conforme o jeito de aproveitar o destino e deixar tempo livre para o lazer. No Malai Manso, lago, gastronomia e estrutura fazem do cenário e do resort partes importantes da viagem."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Lago do Manso",
+    "description": "A paisagem de água dá identidade à hospedagem no Mato Grosso."
+   },
+   {
+    "icon": "beach",
+    "label": "Proposta all inclusive",
+    "description": "Alimentação e bebidas acompanham a rotina das férias."
+   },
+   {
+    "icon": "restaurant",
+    "label": "Vila Malai",
+    "description": "Diferentes ambientes acrescentam experiências gastronômicas à estadia."
+   },
+   {
+    "icon": "leisure",
+    "label": "Possibilidades náuticas",
+    "description": "Atividades no lago podem complementar o roteiro mediante contratação."
+   },
+   {
+    "icon": "spa",
+    "label": "Acomodações com configurações variadas",
+    "description": "Opções permitem buscar mais espaço conforme a companhia."
+   }
+  ]
+ },
+ "zagaia-eco-resort": {
+  "description": [
+   "No Zagaia, a viagem a Bonito pode combinar descobertas de natureza com tempo para descansar no resort. O resort reúne áreas verdes e estrutura de lazer, oferecendo uma base que pode ser aproveitada além dos intervalos de sono. A proposta combina com famílias e casais que querem alternar os passeios de natureza com períodos livres, sem preencher todos os dias com uma agenda de saídas.",
+   "As piscinas e os ambientes esportivos ajudam a variar o programa dentro do hotel, enquanto os espaços infantis acrescentam possibilidades para quem viaja com crianças. O minigolfe oferece outro encontro para a companhia, permitindo incluir uma atividade compartilhada entre os passeios. A paisagem da propriedade acompanha esses momentos e reforça a ligação da hospedagem com o ritmo de uma viagem voltada à natureza.",
+   "Bonito tem experiências que exigem planejamento próprio, e o resort permite equilibrar esse roteiro com dias de descanso. Você pode reservar uma manhã para um passeio e voltar para aproveitar a piscina, uma refeição ou uma tarde mais tranquila. O Zagaia faz sentido para quem valoriza essa combinação de destino e hospedagem, buscando conforto e lazer para prolongar o prazer da viagem depois de cada descoberta."
+  ],
+  "amenities": [
+   {
+    "icon": "leisure",
+    "label": "Áreas verdes",
+    "description": "A paisagem aproxima a hospedagem da proposta de natureza de Bonito."
+   },
+   {
+    "icon": "spa",
+    "label": "Base para os passeios",
+    "description": "Uma opção para alternar experiências no destino e dias de descanso."
+   },
+   {
+    "icon": "spa",
+    "label": "Piscinas e lazer",
+    "description": "Ambientes para aproveitar os intervalos entre as saídas."
+   },
+   {
+    "icon": "gym",
+    "label": "Minigolfe e esportes",
+    "description": "Atividades acrescentam programas de convivência dentro do resort."
+   },
+   {
+    "icon": "spa",
+    "label": "Espaços para crianças",
+    "description": "A estrutura infantil amplia as possibilidades das viagens em família."
+   }
+  ]
+ }
+}
