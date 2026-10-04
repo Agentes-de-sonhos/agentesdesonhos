@@ -16,7 +16,7 @@ describe("Experiência em destaque", () => {
   it("renderiza conteúdo e link configurado", () => {
     const cfg = resolveSiteProfile("destinoscomaju.com.br").featuredExperience!;
     render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
-    expect(screen.getByRole("heading", { level: 2 }).textContent).toContain("Xcaret com o olhar");
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toContain("Somos uma agência Expert Xcaret Oficial");
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
     // A montagem enviada já traz o selo Xperts e as fotos da Juliana, então não
     // há sobreposições renderizadas pelo código (evita duplicar e cortar).
