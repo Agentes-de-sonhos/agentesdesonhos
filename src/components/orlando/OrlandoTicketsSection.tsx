@@ -15,6 +15,7 @@ import disneyLogo from "@/assets/orlando/disney.asset.json";
 import universalLogo from "@/assets/orlando/universal.asset.json";
 import seaworldLogo from "@/assets/orlando/seaworld.asset.json";
 import buschLogo from "@/assets/orlando/busch-gardens.asset.json";
+import unitedParksLogo from "@/assets/orlando/united-parks.asset.json";
 import legolandLogo from "@/assets/orlando/legoland.asset.json";
 import kscLogo from "@/assets/orlando/ksc.asset.json";
 import iconLogo from "@/assets/orlando/icon.asset.json";
@@ -28,7 +29,7 @@ import {
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
 
 const CARD_LOGOS: Record<string, string> = {
-  disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url,
+  disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url, "united-parks": unitedParksLogo.url,
   legoland: legolandLogo.url, ksc: kscLogo.url, icon: iconLogo.url, cirque: cirqueLogo.url, "blue-man": blueManLogo.url, magic: magicLogo.url,
 };
 // Logotipos individuais de parques/experiências (id do catálogo -> url)
@@ -43,6 +44,7 @@ const experienceLogo = (id: string) => PARK_LOGOS[id] ?? (EXPERIENCE_LOGO_FALLBA
 const CARD_PARKS: Record<string, string[]> = {
   disney: ["magic-kingdom", "epcot", "hollywood-studios", "animal-kingdom", "typhoon-lagoon"],
   universal: ["universal-studios", "islands-of-adventure", "epic-universe", "volcano-bay"],
+  "united-parks": ["seaworld", "busch-gardens", "discovery-cove", "aquatica"],
 };
 const GROUP_ICONS: Record<string, typeof Castle> = {
   disney: Castle, universal: Clapperboard, "united-parks": Fish, legoland: Blocks, ksc: Rocket,
