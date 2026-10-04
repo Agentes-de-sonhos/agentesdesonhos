@@ -31,6 +31,19 @@ const CARD_LOGOS: Record<string, string> = {
   disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url,
   legoland: legolandLogo.url, ksc: kscLogo.url, icon: iconLogo.url, cirque: cirqueLogo.url, "blue-man": blueManLogo.url, magic: magicLogo.url,
 };
+// Logotipos individuais de parques/experiências (id do catálogo -> url)
+const PARK_LOGOS: Record<string, string> = Object.fromEntries(
+  Object.entries(import.meta.glob<{ url: string }>("@/assets/orlando/parks/*.asset.json", { eager: true, import: "default" }))
+    .map(([path, a]) => [path.split("/").pop()!.replace(/^park-/, "").replace(/\.asset\.json$/, ""), a.url]),
+);
+// Logotipo da experiência: próprio, ou da marca quando a experiência é a própria marca
+const EXPERIENCE_LOGO_FALLBACK: Record<string, string> = { "drawn-to-life": "cirque", "seaworld": "seaworld", "busch-gardens": "busch-gardens" };
+const experienceLogo = (id: string) => PARK_LOGOS[id] ?? (EXPERIENCE_LOGO_FALLBACK[id] ? CARD_LOGOS[EXPERIENCE_LOGO_FALLBACK[id]] : undefined);
+// Parques em destaque dentro de cada card da galeria
+const CARD_PARKS: Record<string, string[]> = {
+  disney: ["magic-kingdom", "epcot", "hollywood-studios", "animal-kingdom", "typhoon-lagoon"],
+  universal: ["universal-studios", "islands-of-adventure", "epic-universe", "volcano-bay"],
+};
 const GROUP_ICONS: Record<string, typeof Castle> = {
   disney: Castle, universal: Clapperboard, "united-parks": Fish, legoland: Blocks, ksc: Rocket,
   icon: FerrisWheel, cirque: Drama, "blue-man": Music, magic: Trophy,
@@ -245,12 +258,18 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
     const e = getExperience(id)!;
     const on = selected.includes(id);
     const Icon = GROUP_ICONS[e.group] ?? Castle;
+    const logo = experienceLogo(id);
     return (
       <button type="button" aria-pressed={on} onClick={() => toggle(id)}
         className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
           on ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50")}>
+        {logo ? (
+          <span className="mb-2 flex h-14 items-center justify-start pr-6">
+            <img src={logo} alt={`Logotipo ${e.name}`} loading="lazy" draggable={false} className="max-h-12 max-w-[70%] object-contain" />
+          </span>
+        ) : null}
         <span className="flex items-center gap-2">
-          <Icon className={cn("h-5 w-5 shrink-0", on ? "text-primary" : "text-muted-foreground")} aria-hidden />
+          {!logo && <Icon className={cn("h-5 w-5 shrink-0", on ? "text-primary" : "text-muted-foreground")} aria-hidden />}
           <span className="text-sm font-semibold text-foreground">{e.name}</span>
         </span>
         <span className="text-xs leading-relaxed text-muted-foreground">{e.description}</span>
@@ -322,6 +341,18 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                     </div>
                     <h3 className="mt-4 text-base font-semibold text-foreground">{c.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.description}</p>
+                    {(CARD_PARKS[c.id] ?? []).some((p) => PARK_LOGOS[p]) && (
+                      <div className="mt-auto pt-4">
+                        <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Parques</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          {CARD_PARKS[c.id].filter((p) => PARK_LOGOS[p]).map((p) => (
+                            <div key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
+                              <img src={PARK_LOGOS[p]} alt={`Logotipo ${getExperience(p)?.name ?? p}`} draggable={false} loading="lazy" className="max-h-9 max-w-full object-contain" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </article>
                 ))}
               </div>
