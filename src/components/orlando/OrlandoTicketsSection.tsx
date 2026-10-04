@@ -10,15 +10,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { cn } from "@/lib/utils";
+import { agencySiteHref } from "@/lib/agencyContextLink";
+import disneyLogo from "@/assets/orlando/disney.asset.json";
+import universalLogo from "@/assets/orlando/universal.asset.json";
+import seaworldLogo from "@/assets/orlando/seaworld.asset.json";
+import buschLogo from "@/assets/orlando/busch-gardens.asset.json";
+import legolandLogo from "@/assets/orlando/legoland.asset.json";
+import kscLogo from "@/assets/orlando/ksc.asset.json";
+import iconLogo from "@/assets/orlando/icon.asset.json";
+import cirqueLogo from "@/assets/orlando/cirque.asset.json";
+import blueManLogo from "@/assets/orlando/blue-man.asset.json";
+import magicLogo from "@/assets/orlando/magic.asset.json";
 import {
   ORLANDO_CARDS, ORLANDO_CATALOG, ORLANDO_CATALOG_VERSION, ORLANDO_GROUPS, ORLANDO_SECTION,
   type OrlandoCategory,
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
 
-const CARD_ICONS: Record<string, typeof Castle> = {
-  disney: Castle, universal: Clapperboard, seaworld: Fish, "busch-gardens": TreePine, legoland: Blocks,
-  ksc: Rocket, icon: FerrisWheel, cirque: Drama, "blue-man": Music, magic: Trophy,
+const CARD_LOGOS: Record<string, string> = {
+  disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url,
+  legoland: legolandLogo.url, ksc: kscLogo.url, icon: iconLogo.url, cirque: cirqueLogo.url, "blue-man": blueManLogo.url, magic: magicLogo.url,
 };
 const GROUP_ICONS: Record<string, typeof Castle> = {
   disney: Castle, universal: Clapperboard, "united-parks": Fish, legoland: Blocks, ksc: Rocket,
@@ -70,13 +81,13 @@ function Counter({ label, value, min, max, onChange }: { label: string; value: n
   );
 }
 
-export function OrlandoTicketsSection({ hostname, phone }: { hostname: string; phone?: string | null }) {
+export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }: { hostname: string; phone?: string | null; mode?: "home" | "page" }) {
   const sectionRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const { submit, state, error } = useAgencySiteRequest(hostname);
 
-  const [step, setStep] = useState<number | null>(null);
+  const [step, setStep] = useState<number | null>(mode_ === "page" ? 0 : null);
   const [stepError, setStepError] = useState<string | null>(null);
   const [mode, setMode] = useState<PeriodMode>("exact_dates");
   const [arrival, setArrival] = useState("");
@@ -216,6 +227,19 @@ export function OrlandoTicketsSection({ hostname, phone }: { hostname: string; p
   })();
 
   const scrollStrip = (dir: number) => stripRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  const dragRef = useRef({ down: false, x: 0, left: 0, moved: false });
+  const onDragStart = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse" || !stripRef.current) return;
+    dragRef.current = { down: true, x: e.clientX, left: stripRef.current.scrollLeft, moved: false };
+  };
+  const onDragMove = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (!d.down || !stripRef.current) return;
+    const dx = e.clientX - d.x;
+    if (Math.abs(dx) > 4) d.moved = true;
+    stripRef.current.scrollLeft = d.left - dx;
+  };
+  const onDragEnd = () => { dragRef.current.down = false; setTimeout(() => { dragRef.current.moved = false; }, 0); };
 
   const ExperienceCard = ({ id }: { id: string }) => {
     const e = getExperience(id)!;
@@ -280,19 +304,28 @@ export function OrlandoTicketsSection({ hostname, phone }: { hostname: string; p
         ) : step === null ? (
           <>
             <div className="relative mt-10">
-              <div ref={stripRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4 [scrollbar-width:thin]">
-                {ORLANDO_CARDS.map((c) => {
-                  const Icon = CARD_ICONS[c.id] ?? Castle;
-                  return (
-                    <article key={c.id} className="flex w-64 shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-5">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-6 w-6" aria-hidden /></span>
-                      <h3 className="mt-4 text-base font-semibold text-foreground">{c.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.description}</p>
-                    </article>
-                  );
-                })}
+              <div
+                ref={stripRef}
+                onPointerDown={onDragStart}
+                onPointerMove={onDragMove}
+                onPointerUp={onDragEnd}
+                onPointerLeave={onDragEnd}
+                onClickCapture={(e) => { if (dragRef.current.moved) { e.preventDefault(); e.stopPropagation(); } }}
+                className="flex cursor-grab select-none gap-4 overflow-x-auto pb-2 active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {ORLANDO_CARDS.map((c) => (
+                  <article key={c.id} className="flex w-64 shrink-0 flex-col rounded-2xl border border-border bg-card p-5">
+                    <div className="flex h-20 items-center justify-center rounded-xl bg-background px-4">
+                      {CARD_LOGOS[c.id] ? (
+                        <img src={CARD_LOGOS[c.id]} alt={`Logotipo ${c.title}`} draggable={false} loading="lazy" className="max-h-16 max-w-full object-contain" />
+                      ) : null}
+                    </div>
+                    <h3 className="mt-4 text-base font-semibold text-foreground">{c.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.description}</p>
+                  </article>
+                ))}
               </div>
-              <div className="mt-2 hidden justify-end gap-2 md:flex">
+              <div className="mt-4 flex justify-end gap-2">
                 <Button type="button" variant="outline" size="icon" aria-label="Anterior" onClick={() => scrollStrip(-1)}><ChevronLeft className="h-4 w-4" /></Button>
                 <Button type="button" variant="outline" size="icon" aria-label="Próximo" onClick={() => scrollStrip(1)}><ChevronRight className="h-4 w-4" /></Button>
               </div>
@@ -300,7 +333,7 @@ export function OrlandoTicketsSection({ hostname, phone }: { hostname: string; p
             <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border bg-card p-6 text-center md:p-8">
               <h3 className="text-xl font-semibold text-foreground">{ORLANDO_SECTION.cta_title}</h3>
               <p className="mt-2 text-muted-foreground">{ORLANDO_SECTION.cta_description}</p>
-              <Button size="lg" className="mt-5" onClick={() => go(0)}>{ORLANDO_SECTION.cta_label}</Button>
+              <Button asChild size="lg" className="mt-5"><a href={agencySiteHref("/ingressos-orlando")}>{ORLANDO_SECTION.cta_label}</a></Button>
             </div>
           </>
         ) : (
@@ -464,7 +497,11 @@ export function OrlandoTicketsSection({ hostname, phone }: { hostname: string; p
 
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
                   <div className="flex gap-2">
-                    <Button type="button" variant="outline" onClick={() => go(step === 0 ? null : step - 1)}>{step === 0 ? "Voltar a explorar as experiências" : "Voltar"}</Button>
+                    {step === 0 && mode_ === "page" ? (
+                      <Button asChild variant="outline"><a href={agencySiteHref("/#ingressos-orlando")}>Voltar a explorar as experiências</a></Button>
+                    ) : (
+                      <Button type="button" variant="outline" onClick={() => go(step === 0 ? null : step - 1)}>{step === 0 ? "Voltar a explorar as experiências" : "Voltar"}</Button>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     {step === 2 && selected.every((id) => { const c = getExperience(id)?.category; return c === "theme_park" || c === "day_experience"; }) && selected.length > 0 && (

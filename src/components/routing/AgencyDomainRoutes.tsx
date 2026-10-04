@@ -1,5 +1,6 @@
 import AgencyResortPage from "@/pages/whitelabel/AgencyResortPage";
 import { agencySiteHref } from "@/lib/agencyContextLink";
+import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useLocation, useParams } from "react-router-dom";
@@ -211,6 +212,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
             <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />
             <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
+            <Route path="/ingressos-orlando" element={<OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" />} />
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
             )}
