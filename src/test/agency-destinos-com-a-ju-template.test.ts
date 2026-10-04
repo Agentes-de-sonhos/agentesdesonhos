@@ -31,7 +31,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     const ju = resolveSections(profile.sections).map((s) => s.key);
     const limites = resolveSections(resolveSiteProfile(LIMITES).sections).map((s) => s.key);
     // Xcaret (modules) vem antes das Inspirações (destinations).
-    expect(ju).toEqual(["signature", "modules", "destinations", "authority", "about", "differentials", "concierge", "avaliacoes", "faq", "newsletter", "offers"]);
+    expect(ju).toEqual(["signature", "modules", "destinations", "resorts", "authority", "about", "differentials", "concierge", "avaliacoes", "faq", "newsletter", "offers"]);
     expect(limites).not.toContain("authority");
     expect(resolveProfileKey(JU_HOSTS[0])).toBe("editorialRose");
   });
