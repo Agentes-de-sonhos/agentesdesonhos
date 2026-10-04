@@ -1,5 +1,6 @@
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
+import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -1355,6 +1356,9 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
             </div>
           </section>
         );
+
+      case "orlando":
+        return <OrlandoTicketsSection key={key} hostname={hostname} phone={info.phone} />;
 
       case "avaliacoes":
         if (!googleReviews) return null;

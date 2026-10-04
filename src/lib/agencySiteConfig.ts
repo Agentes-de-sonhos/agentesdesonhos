@@ -26,7 +26,8 @@ export type AgencySectionKey =
   | "faq"
   | "newsletter"
   | "avaliacoes"
-  | "resorts";
+  | "resorts"
+  | "orlando";
 
 export interface AgencySectionConfig {
   key: AgencySectionKey;
@@ -57,6 +58,8 @@ export const DEFAULT_SECTIONS: AgencySectionConfig[] = [
   { key: "avaliacoes", label: "Avaliações do Google", enabled: false, order: 10.5 },
   // Vitrine de resorts do Brasil (mapa + lista) — opcional, off por padrão.
   { key: "resorts", label: "Resorts do Brasil", enabled: false, order: 3.5 },
+  // Ingressos de Orlando (galeria + solicitação em etapas) — opcional, off por padrão.
+  { key: "orlando", label: "Ingressos de Orlando", enabled: false, order: 4.2 },
   { key: "newsletter", label: "Newsletter", enabled: true, order: 11 },
 ];
 
