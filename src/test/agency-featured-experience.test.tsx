@@ -16,7 +16,7 @@ describe("Experiência em destaque", () => {
   it("renderiza conteúdo e link configurado", () => {
     const cfg = resolveSiteProfile("destinoscomaju.com.br").featuredExperience!;
     render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
-    expect(screen.getByRole("heading", { level: 2 }).textContent).toContain("Somos uma agência Expert Xcaret Oficial");
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toContain("Somos uma agência Xperts Xcaret Oficial");
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
     // A montagem enviada já traz o selo Xperts e as fotos da Juliana, então não
     // há sobreposições renderizadas pelo código (evita duplicar e cortar).
@@ -25,13 +25,13 @@ describe("Experiência em destaque", () => {
     const cover = screen.getByAltText(/Montagem com vista aérea do Parque Xcaret/);
     expect(cover.className).toContain("object-contain");
     expect(cover.className).not.toContain("scale-[1.08]");
-    expect(screen.getByRole("link", { name: /Conheça o Xcaret com a Ju/ }).getAttribute("href")).toContain("/xcaret");
+    expect(screen.getByRole("link", { name: /Saiba mais sobre este destino/ }).getAttribute("href")).toContain("/xcaret");
   });
 
   it("sem URL, botão fica inativo e não vira link", () => {
     const cfg = { ...resolveSiteProfile("destinoscomaju.com.br").featuredExperience!, ctaHref: null };
     render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
     expect(screen.queryByRole("link")).toBeNull();
-    expect(screen.getByRole("button", { name: /Conheça o Xcaret/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Saiba mais sobre este destino/ })).toBeDisabled();
   });
 });
