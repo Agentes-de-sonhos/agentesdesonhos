@@ -19,7 +19,7 @@ describe("Galeria editorial da página de ingressos", () => {
       "LEGOLAND Florida Resort", "Kennedy Space Center", "ICON Park",
       "Cirque du Soleil — Drawn to Life", "Blue Man Group Orlando", "Orlando Magic",
     ]);
-    const photos = within(gallery).getAllByRole("img");
+    const photos = within(gallery).getAllByRole("img", { hidden: true });
     expect(photos).toHaveLength(9);
     for (const photo of photos) {
       expect(photo.getAttribute("loading")).toBe("lazy");
@@ -32,7 +32,7 @@ describe("Galeria editorial da página de ingressos", () => {
 
   it("aceita www mas não outros tenants", () => {
     const { rerender } = render(<OrlandoEditorialGallery hostname="www.destinoscomaju.com.br" />);
-    expect(screen.getAllByRole("img")).toHaveLength(9);
+    expect(screen.getAllByRole("img", { hidden: true })).toHaveLength(9);
     for (const hostname of ["100limites.tur.br", "paraisoviagens.com", "casanovatur.demo.local", "localhost"]) {
       rerender(<OrlandoEditorialGallery hostname={hostname} />);
       expect(screen.queryByRole("region")).toBeNull();
