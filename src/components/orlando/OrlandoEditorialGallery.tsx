@@ -23,7 +23,8 @@ const PHOTOS = [
 ];
 
 /** Composed only by the public tickets route; never by the shared home/wizard.
- *  Visual model mirrors the Destinos com a Ju home banner (full-bleed slide, left scrim, kicker, dots). */
+ *  Visual model mirrors the Destinos com a Ju home banner (slide, left scrim, kicker, dots),
+ *  but inset to the same content column and side margin used by the rest of the page. */
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -43,47 +44,51 @@ export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
     <section
       aria-label="Parques e experiências em Orlando"
       aria-roledescription="carrossel"
-      className="relative isolate overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      className="mx-auto w-full max-w-6xl px-4 pb-4 pt-6 md:pt-10"
     >
-      <div className="absolute inset-0">
-        {PHOTOS.map((p, i) => (
-          <img
-            key={p.name}
-            src={p.src}
-            alt={p.alt}
-            width={p.width}
-            height={p.height}
-            loading={i === 0 ? "eager" : "lazy"}
-            decoding="async"
-            aria-hidden={i !== slide}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0"}`}
-          />
-        ))}
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]" />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent" />
-      </div>
+      <div
+        className="relative isolate overflow-hidden rounded-2xl border border-border/60 shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div className="absolute inset-0">
+          {PHOTOS.map((p, i) => (
+            <img
+              key={p.name}
+              src={p.src}
+              alt={p.alt}
+              width={p.width}
+              height={p.height}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+              aria-hidden={i !== slide}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0"}`}
+            />
+          ))}
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent" />
+        </div>
 
-      <div className="relative mx-auto flex min-h-[420px] max-w-6xl flex-col justify-end px-4 pb-10 pt-16 md:min-h-[500px] md:px-6 md:pb-14 lg:px-8">
-        <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
-          <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" /> Parques e experiências em Orlando
-        </p>
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
-          <div className="max-w-2xl">
-            <h2 id="orlando-editorial-title" className="text-3xl font-normal leading-[1.1] tracking-tight text-white md:text-[clamp(2.25rem,3.3vw,3rem)]" aria-live="polite">
-              {PHOTOS[slide].name}
-            </h2>
-            <p className="mt-4 text-base text-white/85 md:text-lg">Descubra algumas das experiências que podem fazer parte da sua viagem.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button type="button" aria-label="Experiência anterior" onClick={() => go(-1)} className={navBtn}><ChevronLeft className="h-4 w-4" /></button>
-            <div className="flex gap-2">
-              {PHOTOS.map((p, i) => (
-                <button key={p.name} type="button" aria-label={`Ver ${p.name}`} aria-current={i === slide} onClick={() => setSlide(i)} className={`h-1.5 rounded-full transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${i === slide ? "w-8 bg-white" : "w-4 bg-white/40"}`} />
-              ))}
+        <div className="relative flex min-h-[420px] flex-col justify-end px-5 pb-8 pt-14 md:min-h-[500px] md:px-10 md:pb-12 md:pt-16">
+          <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
+            <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" /> Parques e experiências em Orlando
+          </p>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+            <div className="max-w-2xl">
+              <h2 id="orlando-editorial-title" className="text-3xl font-normal leading-[1.1] tracking-tight text-white md:text-[clamp(2.25rem,3.3vw,3rem)]" aria-live="polite">
+                {PHOTOS[slide].name}
+              </h2>
+              <p className="mt-4 text-base text-white/85 md:text-lg">Descubra algumas das experiências que podem fazer parte da sua viagem.</p>
             </div>
-            <button type="button" aria-label="Próxima experiência" onClick={() => go(1)} className={navBtn}><ChevronRight className="h-4 w-4" /></button>
+            <div className="flex items-center gap-3">
+              <button type="button" aria-label="Experiência anterior" onClick={() => go(-1)} className={navBtn}><ChevronLeft className="h-4 w-4" /></button>
+              <div className="flex gap-2">
+                {PHOTOS.map((p, i) => (
+                  <button key={p.name} type="button" aria-label={`Ver ${p.name}`} aria-current={i === slide} onClick={() => setSlide(i)} className={`h-1.5 rounded-full transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${i === slide ? "w-8 bg-white" : "w-4 bg-white/40"}`} />
+                ))}
+              </div>
+              <button type="button" aria-label="Próxima experiência" onClick={() => go(1)} className={navBtn}><ChevronRight className="h-4 w-4" /></button>
+            </div>
           </div>
         </div>
       </div>
