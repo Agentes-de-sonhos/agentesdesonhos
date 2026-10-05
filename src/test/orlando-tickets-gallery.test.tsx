@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGallery";
@@ -7,6 +7,7 @@ const { submit } = vi.hoisted(() => ({ submit: vi.fn().mockResolvedValue({ succe
 vi.mock("@/hooks/useAgencySiteRequest", () => ({
   useAgencySiteRequest: () => ({ submit, state: "idle", error: null }),
 }));
+beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("Galeria editorial da página de ingressos", () => {
