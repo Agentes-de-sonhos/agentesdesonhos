@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Destinos com a Ju: galeria de nove fotografias oficiais apenas em /ingressos-orlando; preservar formulário e validar desktop/mobile, sem publicar.
+- [x] Destinos com a Ju: banner editorial de nove experiências oficiais em /ingressos-orlando, recuado na coluna do formulário (não de borda a borda); formulário preservado, validado em 1280/768/390, sem publicar.
 - [x] Criar e validar a prévia técnica isolada do briefing 16 para Drica Viagens, preservando fixtures, tenants e banco, sem publicar.
 - [x] Orçamentos: reorganizar exclusivamente o modal de Outros Serviços, tornar valor opcional e mover fornecedor para o final, sem publicar.
 - [x] Orçamentos: permitir escolher o ícone do cabeçalho de Outros Serviços, refletindo no editor, link público e PDF, sem publicar.
