@@ -30,7 +30,7 @@ export const prettyName = (name: string) =>
 export function BrazilResortsMap({
   onQuote,
   resortHref,
-  title = "Explore os resorts do Brasil",
+  title = "Explore os resorts do Brasil com a Ju",
 }: {
   onQuote?: (resort: BrazilResort, stateName: string) => void;
   /** Quando informado, cada card abre a página do resort. */

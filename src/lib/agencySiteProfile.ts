@@ -565,7 +565,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   },
   heroImage: "europa",
   heroPresentation: {
-    kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
+    kicker: "CONSULTORIA DE VIAGENS · SÃO PAULO",
     preserveTitleLineBreaks: true,
     titleWeight: "regular",
     actionsPlacement: "right",
@@ -669,7 +669,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     enabled: true,
     id: "experiencia-xcaret",
     kicker: "EXPERIÊNCIA E ESPECIALIZAÇÃO",
-    title: "Somos uma agência Expert Xcaret Oficial",
+    title: "Somos uma agência Xperts Xcaret Oficial",
     description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
     mainImage: {
       src: destinosXcaretCover.url,
@@ -680,7 +680,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     consultantImage: null,
     badge: null,
     highlights: ["Experiência vivida no destino", "Conhecimento dos parques e hotéis", "Planejamento personalizado", "Orientação antes, durante e depois da viagem"],
-    ctaLabel: "Conheça o Xcaret com a Ju",
+    ctaLabel: "Saiba mais sobre este destino",
     ctaHref: "/xcaret",
   },
   copy: {

@@ -5,7 +5,7 @@ export interface OrlandoExperience { id: string; name: string; group: string; ca
 export const ORLANDO_SECTION = {
   "title": "Parques e experiências em Orlando",
   "subtitle": "Explore as possibilidades e escolha o que você quer viver na sua viagem.",
-  "cta_title": "Gostou? Monte sua seleção de parques e atrações.",
+  "cta_title": "Quer montar a sua seleção de parques e atrações?",
   "cta_description": "Você escolhe as experiências, e nossa equipe prepara o orçamento.",
   "cta_label": "Solicitar meus ingressos"
 };

@@ -51,7 +51,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       expect(profile.footer?.cnpj).toBe("23.593.301/0001-71");
       expect(profile.seo?.canonical).toBe("https://www.destinoscomaju.com.br/");
       expect(profile.heroPresentation).toEqual({
-        kicker: "CONSULTORIA DE VIAGENS PERSONALIZADAS · SÃO PAULO",
+        kicker: "CONSULTORIA DE VIAGENS · SÃO PAULO",
         preserveTitleLineBreaks: true,
         actionsPlacement: "right",
         titleWeight: "regular",
