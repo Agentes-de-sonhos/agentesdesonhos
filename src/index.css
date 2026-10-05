@@ -511,6 +511,9 @@ img {
    Camada FINA sobre `.wl-editorial`: azul-marinho na base, rosé nos detalhes e
    vinho nas ações. O escopo da classe garante que nenhum outro tenant mude. */
 .wl-editorial.wl-rose {
+  --orlando-gallery-scrim: linear-gradient(to top, hsl(216 52% 8% / 0.88), hsl(216 52% 8% / 0.28) 45%, transparent 75%);
+  --orlando-gallery-caption: 0 0% 100%;
+  --orlando-gallery-shadow: 0 4px 16px hsl(216 52% 16% / 0.08);
   --background: 0 0% 100%;
   --foreground: 216 46% 18%;
 

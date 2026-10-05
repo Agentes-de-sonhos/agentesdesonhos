@@ -1,0 +1,50 @@
+{
+  "notice": "Official sources do not imply commercial licensing. Confirm agency usage permission with each rights holder before publication. Disney, SeaWorld and Magic public originals are smaller than requested high resolution; replace with licensed high-resolution files when supplied. No publication performed.",
+  "photos": [
+    {
+      "asset": "disney-castle.webp.asset.json",
+      "sourcePage": "https://disneyexperiences.com/disneyworld-press/asset/cinderella-castle-in-magic-kingdom-park/",
+      "sourceImage": "https://disneyexperiences.com/app/uploads/sites/8/2026/05/0430ZK_0495MS-601x400-bf06395.jpg"
+    },
+    {
+      "asset": "universal-epic-universe-alternative.webp.asset.json",
+      "sourcePage": "https://blog.discoveruniversal.com/guides-and-tips/guide-to-celestial-park-at-universal-epic-universe/",
+      "sourceImage": "https://blog.discoveruniversal.com/wp-content/uploads/2025/09/Celestial-Park-Chronos-Scope.jpg"
+    },
+    {
+      "asset": "seaworld-mako-sunset.webp.asset.json",
+      "sourcePage": "https://seaworld.com/orlando/roller-coasters/mako/",
+      "sourceImage": "https://seaworld.com/orlando/-/media/migrated-media/seaworld-orlando/images/rides/mako/750x422/750x422-swo-mako-sunset.png"
+    },
+    {
+      "asset": "legoland-miniland.webp.asset.json",
+      "sourcePage": "https://www.legoland.com/florida/photos/",
+      "sourceImage": null
+    },
+    {
+      "asset": "ksc-rocket-garden.webp.asset.json",
+      "sourcePage": "https://media.kennedyspacecenter.com/kennedy-space-center-visitor-complex-2026-press-kit/",
+      "sourceImage": null
+    },
+    {
+      "asset": "icon-park-wheel-alternative.webp.asset.json",
+      "sourcePage": "https://iconparkorlando.com/media-room/the-wheel-at-icon-park-now-open/",
+      "sourceImage": "https://iconparkorlando.com/bc/wp-content/uploads/The-Wheel-at-ICON-Park-now-open.jpg"
+    },
+    {
+      "asset": "drawn-to-life-scenic.webp.asset.json",
+      "sourcePage": "https://disneyexperiences.com/disneyworld-press/",
+      "sourceImage": null
+    },
+    {
+      "asset": "blue-man-group-performers-alternative.webp.asset.json",
+      "sourcePage": "https://www.blueman.com/",
+      "sourceImage": "https://www.blueman.com/-/media/bmg/images/hero/offers-hero/offers-main-image-desktop.jpg"
+    },
+    {
+      "asset": "magic-kia-center-guide.webp.asset.json",
+      "sourcePage": "https://magicweb.blob.core.windows.net/resources/communications/orlando-magic-media-guide-2024-25.pdf",
+      "sourceImage": null
+    }
+  ]
+}
