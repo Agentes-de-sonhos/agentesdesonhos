@@ -26,7 +26,7 @@ export function AgencyFeaturedExperienceSection({
     <section
       id={config.id ?? "experiencia-destaque"}
       aria-labelledby="featured-experience-title"
-      className="wl-soft-gradient bg-[hsl(var(--wl-sand))] py-16 md:py-24"
+      className="wl-soft-gradient scroll-mt-12 bg-[hsl(var(--wl-sand))] py-16 md:py-24"
       data-testid="featured-experience"
     >
       <div className={`${container} grid items-center gap-10 lg:grid-cols-[2fr_3fr] lg:gap-14`}>

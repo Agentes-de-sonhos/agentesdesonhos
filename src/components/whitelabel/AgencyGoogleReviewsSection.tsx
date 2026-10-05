@@ -96,7 +96,7 @@ export function AgencyGoogleReviewsSection({
   if (isError || (data && data.reviews.length === 0)) {
     if (!googleUrl) return null;
     return (
-      <section ref={ref} id="avaliacoes" aria-label="Avaliações no Google" className="bg-background">
+      <section ref={ref} id="avaliacoes" aria-label="Avaliações no Google" className="scroll-mt-32 bg-background md:scroll-mt-36">
         <div className={`${container} flex flex-col items-center gap-2 py-8 text-center text-sm text-muted-foreground`}>
           <p>{isError ? "As avaliações do Google estão indisponíveis no momento." : "Veja o que nossos clientes dizem no Google."}</p>
           <a href={googleUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-semibold text-[var(--brand-primary)] hover:underline">
@@ -108,7 +108,7 @@ export function AgencyGoogleReviewsSection({
   }
 
   return (
-    <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
+    <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
       <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
         <div className="flex w-full min-w-0 flex-col gap-6">
           <div className="min-w-0">

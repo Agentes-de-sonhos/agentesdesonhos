@@ -546,9 +546,9 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
       label: "Especialidades",
       to: "/#assinatura",
       children: [
-        { label: "Xcaret", to: "/#assinatura" },
+        { label: "Xcaret", to: "/#experiencia-xcaret" },
         { label: "Parques e Experiências", to: "/#ingressos-orlando" },
-        { label: "Resorts Brasil", to: "/#resorts-brasil" },
+        { label: "Resorts no Brasil", to: "/#resorts" },
         { label: "Cruzeiros", to: "/#autoridade" },
       ],
     },
