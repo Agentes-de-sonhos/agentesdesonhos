@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import disney from "@/assets/orlando/editorial/disney-castle.webp.asset.json";
 import universal from "@/assets/orlando/editorial/universal-epic-universe-alternative.webp.asset.json";
 import united from "@/assets/orlando/editorial/seaworld-mako-sunset.webp.asset.json";
@@ -20,25 +22,69 @@ const PHOTOS = [
   { name: "Orlando Magic", src: magic.url, alt: "Fachada iluminada do Kia Center, arena do Orlando Magic, ao entardecer e sem torcida", width: 691, height: 421 },
 ];
 
-/** Composed only by the public tickets route; never by the shared home/wizard. */
+/** Composed only by the public tickets route; never by the shared home/wizard.
+ *  Visual model mirrors the Destinos com a Ju home banner (full-bleed slide, left scrim, kicker, dots). */
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
-  if (!["destinoscomaju.com.br", "www.destinoscomaju.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""))) return null;
+  const [slide, setSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
+
+  useEffect(() => {
+    if (!allowed || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = window.setInterval(() => setSlide((s) => (s + 1) % PHOTOS.length), 7000);
+    return () => window.clearInterval(t);
+  }, [allowed, paused]);
+
+  if (!allowed) return null;
+  const go = (d: number) => setSlide((s) => (s + d + PHOTOS.length) % PHOTOS.length);
+  const navBtn = "grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white [&_svg]:text-white";
 
   return (
-    <section aria-labelledby="orlando-editorial-title" className="bg-background pt-12 md:pt-16">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="mx-auto mb-8 max-w-2xl text-center md:mb-10">
-          <h2 id="orlando-editorial-title" className="text-3xl font-semibold text-foreground md:text-4xl">Parques e experiências em Orlando</h2>
-          <p className="mt-3 text-muted-foreground">Descubra algumas das experiências que podem fazer parte da sua viagem.</p>
-        </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 md:gap-6">
-          {PHOTOS.map((photo) => (
-            <article key={photo.name} className="group relative isolate aspect-video overflow-hidden rounded-2xl border border-border shadow-sm">
-              <img src={photo.src} alt={photo.alt} width={photo.width} height={photo.height} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.025]" />
-              <div aria-hidden="true" className="absolute inset-0 bg-[image:var(--orlando-gallery-scrim)]" />
-              <h3 className="absolute inset-x-0 bottom-0 p-5 text-lg font-semibold leading-snug text-[hsl(var(--orlando-gallery-caption))] md:text-xl">{photo.name}</h3>
-            </article>
-          ))}
+    <section
+      aria-labelledby="orlando-editorial-title"
+      aria-roledescription="carrossel"
+      className="relative isolate overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <div className="absolute inset-0">
+        {PHOTOS.map((p, i) => (
+          <img
+            key={p.name}
+            src={p.src}
+            alt={p.alt}
+            width={p.width}
+            height={p.height}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+            aria-hidden={i !== slide}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0"}`}
+          />
+        ))}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]" />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent" />
+      </div>
+
+      <div className="relative mx-auto flex min-h-[420px] max-w-6xl flex-col justify-end px-4 pb-10 pt-16 md:min-h-[500px] md:px-6 md:pb-14 lg:px-8">
+        <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
+          <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" /> Parques e experiências em Orlando
+        </p>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
+          <div className="max-w-2xl">
+            <h2 id="orlando-editorial-title" className="text-3xl font-normal leading-[1.1] tracking-tight text-white md:text-[clamp(2.25rem,3.3vw,3rem)]" aria-live="polite">
+              {PHOTOS[slide].name}
+            </h2>
+            <p className="mt-4 text-base text-white/85 md:text-lg">Descubra algumas das experiências que podem fazer parte da sua viagem.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="button" aria-label="Experiência anterior" onClick={() => go(-1)} className={navBtn}><ChevronLeft className="h-4 w-4" /></button>
+            <div className="flex gap-2">
+              {PHOTOS.map((p, i) => (
+                <button key={p.name} type="button" aria-label={`Ver ${p.name}`} aria-current={i === slide} onClick={() => setSlide(i)} className={`h-1.5 rounded-full transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${i === slide ? "w-8 bg-white" : "w-4 bg-white/40"}`} />
+              ))}
+            </div>
+            <button type="button" aria-label="Próxima experiência" onClick={() => go(1)} className={navBtn}><ChevronRight className="h-4 w-4" /></button>
+          </div>
         </div>
       </div>
     </section>
