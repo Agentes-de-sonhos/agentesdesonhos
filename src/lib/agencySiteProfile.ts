@@ -542,11 +542,28 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
   compactSectionSpacing: true,
   nav: [
     { label: "Início", to: "/" },
-    { label: "Destinos", to: "/#destinos" },
-    { label: "Experiências", to: "/#campanhas" },
-    { label: "Cruzeiros", to: "/#autoridade" },
+    {
+      label: "Especialidades",
+      to: "/#assinatura",
+      children: [
+        { label: "Xcaret", to: "/#assinatura" },
+        { label: "Parques e Experiências", to: "/#ingressos-orlando" },
+        { label: "Resorts Brasil", to: "/#resorts-brasil" },
+        { label: "Cruzeiros", to: "/#autoridade" },
+      ],
+    },
+    { label: "Inspirações", to: "/#destinos" },
     { label: "Ofertas", to: "/ofertas" },
-    { label: "Sobre", to: "/#sobre" },
+    {
+      label: "Quem somos",
+      to: "/#sobre",
+      children: [
+        { label: "Sobre", to: "/#sobre" },
+        { label: "Avaliações", to: "/#avaliacoes" },
+        { label: "FAQ", to: "/#faq" },
+      ],
+    },
+    { label: "Área do Cliente", to: "/area-do-cliente" },
   ],
   sections: {
     dmc: { enabled: false }, testimonials: { enabled: false }, team: { enabled: false },
