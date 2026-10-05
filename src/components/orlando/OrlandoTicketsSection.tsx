@@ -52,7 +52,7 @@ const GROUP_ICONS: Record<string, typeof Castle> = {
 };
 const groupName = (id: string) => ORLANDO_GROUPS.find((g) => g.id === id)?.name ?? id;
 
-const STEPS = ["Sua viagem", "Seus parques", "Mais experiências", "Revisar e solicitar"];
+const STEPS = ["Sua viagem para Orlando começa aqui", "Seus parques", "Mais experiências", "Revisar e solicitar"];
 const PARK_GROUPS = ["disney", "universal", "united-parks", "legoland", "ksc"];
 const EXTRA_BLOCKS: { title: string; cats: OrlandoCategory[] }[] = [
   { title: "Quer incluir parques aquáticos?", cats: ["water_park"] },
