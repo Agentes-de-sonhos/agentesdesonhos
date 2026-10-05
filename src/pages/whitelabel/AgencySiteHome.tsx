@@ -826,7 +826,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         const copy = copyFor("destinations");
         if (editorial) {
           return (
-            <section key={key} id="destinos" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
+            <section key={key} id="destinos" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
                   title={copy.title ?? "Descubra o seu próximo destino"}
@@ -1347,7 +1347,7 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
 
       case "resorts":
         return (
-          <section key={key} id="resorts" className="bg-background py-14 md:py-20">
+          <section key={key} id="resorts" className="scroll-mt-24 bg-background py-14 md:py-20">
             <div className={container}>
               <AgencyResortsSection
                 allHref={agencySiteHref("/resorts-brasil")}
