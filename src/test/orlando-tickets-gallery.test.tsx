@@ -44,15 +44,15 @@ describe("Galeria editorial da página de ingressos", () => {
 
   it("preserva validação, seleção, navegação e payload das quatro etapas", async () => {
     render(<OrlandoTicketsSection hostname="destinoscomaju.com.br" mode="page" />);
-    fireEvent.click(screen.getByRole("button", { name: "Continuar", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Informe as datas de chegada e saída.");
-    fireEvent.click(screen.getByRole("button", { name: "Ainda não sei", exact: true }));
-    fireEvent.click(screen.getByRole("button", { name: "Continuar", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Ainda não sei" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 2 de 4")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Magic Kingdom/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Continuar", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 3 de 4")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Continuar", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 4 de 4")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Solicitar meu orçamento de ingressos" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Informe seu nome.");
