@@ -11,22 +11,25 @@ beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("Galeria editorial da página de ingressos", () => {
-  it("mostra nove fotos na ordem aprovada e não tem controles", () => {
+  it("mostra nove fotos na ordem aprovada no formato do banner principal", () => {
     render(<OrlandoEditorialGallery hostname="destinoscomaju.com.br" />);
     const gallery = screen.getByRole("region", { name: "Parques e experiências em Orlando" });
-    expect(within(gallery).getAllByRole("heading", { level: 3 }).map((node) => node.textContent)).toEqual([
+    const names = [
       "Walt Disney World Resort", "Universal Orlando Resort", "United Parks & Resorts",
       "LEGOLAND Florida Resort", "Kennedy Space Center", "ICON Park",
       "Cirque du Soleil — Drawn to Life", "Blue Man Group Orlando", "Orlando Magic",
-    ]);
+    ];
+    const dots = within(gallery).getAllByRole("button", { name: /^Ver / });
+    expect(dots.map((d) => d.getAttribute("aria-label"))).toEqual(names.map((n) => `Ver ${n}`));
     const photos = within(gallery).getAllByRole("img", { hidden: true });
     expect(photos).toHaveLength(9);
     for (const photo of photos) {
-      expect(photo.getAttribute("loading")).toBe("lazy");
       expect(photo.getAttribute("src")).toMatch(/^\/__l5e\/assets-v1\//);
       expect(photo.getAttribute("alt")?.length).toBeGreaterThan(20);
     }
-    expect(within(gallery).queryByRole("button")).toBeNull();
+    expect(within(gallery).getByRole("heading", { level: 2 }).textContent).toBe(names[0]);
+    fireEvent.click(within(gallery).getByRole("button", { name: "Próxima experiência" }));
+    expect(within(gallery).getByRole("heading", { level: 2 }).textContent).toBe(names[1]);
     expect(within(gallery).queryByRole("link")).toBeNull();
   });
 

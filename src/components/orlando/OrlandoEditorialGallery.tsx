@@ -41,7 +41,7 @@ export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
 
   return (
     <section
-      aria-labelledby="orlando-editorial-title"
+      aria-label="Parques e experiências em Orlando"
       aria-roledescription="carrossel"
       className="relative isolate overflow-hidden"
       onMouseEnter={() => setPaused(true)}
