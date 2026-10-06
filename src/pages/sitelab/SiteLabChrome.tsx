@@ -31,6 +31,7 @@ import {
   verifySitelabPassword,
 } from "@/lib/sitelabAccess";
 import sitelabLogo from "@/assets/sitelab/sitelab-base-logo.png.asset.json";
+import { useSiteLabPresentation } from "@/lib/sitelabPresentation";
 
 /** noindex/nofollow em todas as áreas do laboratório. */
 export function useNoIndex(title: string) {
@@ -66,10 +67,22 @@ export function useSiteLabModel(): SiteLabModel {
     refetchOnWindowFocus: false,
   });
 
+  // Identidade provisória do prospect (apresentação comercial, só no navegador).
+  const { identity } = useSiteLabPresentation(SITELAB_BASE.slug);
   const model = useMemo<SiteLabModel>(() => {
     const base = sitelabModelFromRecord(SITELAB_BASE, data);
-    return { ...base, logoUrl: base.logoUrl ?? sitelabLogo.url };
-  }, [data]);
+    return {
+      ...base,
+      name: identity.name ?? base.name,
+      logoUrl: identity.logoUrl ?? base.logoUrl ?? sitelabLogo.url,
+      palette: {
+        ...base.palette,
+        primary: identity.primary ?? base.palette.primary,
+        secondary: identity.secondary ?? base.palette.secondary,
+        tertiary: identity.tertiary ?? base.palette.tertiary,
+      },
+    };
+  }, [data, identity]);
 
   useAgencyBrandTheme({
     primary: model.palette.primary,
