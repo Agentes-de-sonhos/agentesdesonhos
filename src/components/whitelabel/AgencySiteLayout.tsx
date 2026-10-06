@@ -253,7 +253,15 @@ export function AgencyBrandBar({
   );
 }
 
-export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainInfo; noWhatsapp?: boolean }) {
+export function AgencyFooter({
+  info,
+  noWhatsapp = false,
+  navOverride,
+}: {
+  info: AgencyDomainInfo;
+  noWhatsapp?: boolean;
+  navOverride?: AgencySiteNavItem[];
+}) {
   const name = agencyDisplayName(info);
   /* Páginas de oferta: nenhum atalho para WhatsApp (contato só pelo formulário). */
   const wa = noWhatsapp ? null : agencyWhatsappNumber(info);
