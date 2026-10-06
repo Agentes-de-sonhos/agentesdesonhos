@@ -125,6 +125,6 @@ describe("tela Apresentação", () => {
     const saved = loadPresentation("sitelab-base");
     expect(saved.sections.hero).toBe(false);
     expect(saved.sections.requests).toBe(false);
-    expect(screen.getByTestId("sections-summary").textContent).toMatch(/de 17 blocos disponíveis/);
+    expect(screen.getByTestId("sections-summary").textContent).toMatch(/de 18 blocos disponíveis/);
   });
 });
