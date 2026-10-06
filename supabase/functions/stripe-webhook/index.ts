@@ -18,6 +18,27 @@ const PRICE_TO_PLAN: Record<string, string> = {
   "price_1ULqhuFkGdVt5nief5qbZjCE": "ads_essencial_gestao_equipe",
 };
 
+// Rótulo e preço exibidos no e-mail de ativação, por plano.
+const PLAN_LABELS: Record<string, string> = {
+  profissional: "Profissional",
+  premium: "Premium",
+  ads_essencial: "Estúdio de Viagens",
+  ads_gestao: "Gestão da Agência",
+  ads_gestao_equipe: "Gestão da Agência Equipe",
+  ads_essencial_gestao: "Essencial + Gestão",
+  ads_essencial_gestao_equipe: "Essencial + Gestão Equipe",
+};
+
+const PLAN_PRICES: Record<string, string> = {
+  profissional: "49",
+  premium: "98",
+  ads_essencial: "87",
+  ads_gestao: "87",
+  ads_gestao_equipe: "167",
+  ads_essencial_gestao: "167",
+  ads_essencial_gestao_equipe: "197",
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -170,7 +191,8 @@ Deno.serve(async (req) => {
     // Send activation email via Resend
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (resendApiKey) {
-      const planLabel = plan === "premium" ? "Premium" : "Profissional";
+      const planLabel = PLAN_LABELS[plan] ?? "Profissional";
+      const planPrice = PLAN_PRICES[plan] ?? "49";
       const emailRes = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
