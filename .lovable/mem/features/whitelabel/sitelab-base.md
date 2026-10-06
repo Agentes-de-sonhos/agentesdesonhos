@@ -62,3 +62,9 @@ ofertas/DMC/credenciais/equipe/depoimentos com conteúdo de exemplo e renderiza
 `SiteLabCatalogMap` + `SiteLabSectionTag` (chrome exclusiva do laboratório).
 Tenants reais nunca recebem `demo`, conteúdo fictício nem etiquetas. Novo bloco
 = registrar no catálogo, sem espalhar condicionais.
+
+## Apresentação comercial
+Home do laboratório NÃO mostra mais o Mapa do catálogo nem etiquetas entre seções.
+Gestão → Apresentação (`/sitelab-base/gestao/apresentacao`): liga/desliga todas
+as seções e temas de módulos, e define nome/logo/3 cores do prospect. Salvo só no
+navegador; nunca em perfis reais.
