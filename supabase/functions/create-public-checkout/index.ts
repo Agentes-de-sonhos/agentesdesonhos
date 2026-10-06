@@ -28,6 +28,18 @@ const RETURN_ORIGIN_ALLOWLIST = new Set([
 
 const DEFAULT_ORIGIN = "https://app.agentesdesonhos.com.br";
 
+// Origens externas não publicam a rota /planos: o cancelamento volta para a
+// página raiz com a âncora do plano. O app mantém a própria rota de planos.
+const CANCEL_URLS: Record<string, string> = {
+  "https://agentes-de-sonhos-gestao.nandonobre.chatgpt.site":
+    "https://agentes-de-sonhos-gestao.nandonobre.chatgpt.site/?checkout=cancelled#plano",
+  "https://agentes-de-sonhos-planos.nandonobre.chatgpt.site":
+    "https://agentes-de-sonhos-planos.nandonobre.chatgpt.site/?checkout=cancelled#planos",
+  "https://agentesdesonhos.com.br":
+    "https://agentesdesonhos.com.br/?checkout=cancelled",
+  [DEFAULT_ORIGIN]: `${DEFAULT_ORIGIN}/planos?checkout=cancelled`,
+};
+
 const SUCCESS_URL = `${DEFAULT_ORIGIN}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`;
 
 
@@ -72,7 +84,7 @@ Deno.serve(async (req) => {
       // O sucesso cai sempre no app (rota existente); o cancelamento volta
       // para a origem externa autorizada que iniciou o checkout.
       success_url: SUCCESS_URL,
-      cancel_url: `${origin}/planos?checkout=cancelled`,
+      cancel_url: CANCEL_URLS[origin],
       metadata: { plan },
     });
 
