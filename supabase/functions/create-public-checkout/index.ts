@@ -8,11 +8,27 @@ const corsHeaders = {
 const PRICE_IDS: Record<string, string> = {
   profissional: "price_1TToCFFkGdVt5nieNMQEBoo1",
   premium: "price_1UL3WmFkGdVt5nieiiPBhTvG",
+  ads_essencial: "price_1ULpgeFkGdVt5nie4zhdYYVm",
+  ads_gestao: "price_1ULq6OFkGdVt5nien9POsrh1",
+  ads_gestao_equipe: "price_1ULq7aFkGdVt5nieiHvSndPk",
+  ads_essencial_gestao: "price_1ULqgMFkGdVt5niedJ9BdITk",
+  ads_essencial_gestao_equipe: "price_1ULqhuFkGdVt5nief5qbZjCE",
 };
 
 const TRIAL_DAYS: Record<string, number> = {
   premium: 15,
 };
+
+// Allowlist estrita de origens externas autorizadas a iniciar o checkout.
+const RETURN_ORIGIN_ALLOWLIST = new Set([
+  "https://agentesdesonhos.com.br",
+  "https://agentes-de-sonhos-gestao.nandonobre.chatgpt.site",
+  "https://agentes-de-sonhos-planos.nandonobre.chatgpt.site",
+]);
+
+const DEFAULT_ORIGIN = "https://app.agentesdesonhos.com.br";
+
+const SUCCESS_URL = `${DEFAULT_ORIGIN}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`;
 
 
 Deno.serve(async (req) => {
@@ -43,7 +59,9 @@ Deno.serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const origin = req.headers.get("origin") || "https://agentesdesonhos.lovable.app";
+    const bodyOrigin = typeof body.return_origin === "string" ? body.return_origin : "";
+    const origin =
+      bodyOrigin && RETURN_ORIGIN_ALLOWLIST.has(bodyOrigin) ? bodyOrigin : DEFAULT_ORIGIN;
 
     const trialDays = TRIAL_DAYS[plan];
 
@@ -51,7 +69,9 @@ Deno.serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       ...(trialDays ? { subscription_data: { trial_period_days: trialDays } } : {}),
-      success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
+      // O sucesso cai sempre no app (rota existente); o cancelamento volta
+      // para a origem externa autorizada que iniciou o checkout.
+      success_url: SUCCESS_URL,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },
     });
