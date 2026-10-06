@@ -66,5 +66,5 @@ Tenants reais nunca recebem `demo`, conteúdo fictício nem etiquetas. Novo bloc
 ## Apresentação comercial
 Home do laboratório NÃO mostra mais o Mapa do catálogo nem etiquetas entre seções.
 Gestão → Apresentação (`/sitelab-base/gestao/apresentacao`): liga/desliga todas
-as seções e temas de módulos, e define nome/logo/3 cores do prospect. Salvo só no
+as seções (inclusive abertura/banners e Central de Solicitações) e temas de módulos; seções sem conteúdo no laboratório (Autoridade, Avaliações do Google) ficam indisponíveis; o menu do site só mostra links de seções visíveis, e define nome/logo/3 cores do prospect. Salvo só no
 navegador; nunca em perfis reais.

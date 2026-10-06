@@ -56,14 +56,21 @@ export function siteNavLinks(hostname?: string | null): AgencySiteNavItem[] {
   return NAV_LINKS.filter((l) => offersEnabled || l.to !== "/ofertas");
 }
 
-export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
+export function AgencyBrandBar({
+  info,
+  navOverride,
+}: {
+  info: AgencyDomainInfo;
+  /** Só o SiteLab passa: menu restrito às seções realmente na página. */
+  navOverride?: AgencySiteNavItem[];
+}) {
   const [open, setOpen] = useState(false);
   const name = agencyDisplayName(info);
   const editorial = isEditorialTheme(info.hostname);
   const logoUrl = resolveAgencyLogoUrl(info);
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
-  const navAll = siteNavLinks(info.hostname);
+  const navAll = navOverride ?? siteNavLinks(info.hostname);
 
   if (editorial) {
     const mainLinks = navAll.filter((l) => l.to !== "/area-do-cliente");
@@ -246,7 +253,15 @@ export function AgencyBrandBar({ info }: { info: AgencyDomainInfo }) {
   );
 }
 
-export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainInfo; noWhatsapp?: boolean }) {
+export function AgencyFooter({
+  info,
+  noWhatsapp = false,
+  navOverride,
+}: {
+  info: AgencyDomainInfo;
+  noWhatsapp?: boolean;
+  navOverride?: AgencySiteNavItem[];
+}) {
   const name = agencyDisplayName(info);
   /* Páginas de oferta: nenhum atalho para WhatsApp (contato só pelo formulário). */
   const wa = noWhatsapp ? null : agencyWhatsappNumber(info);
@@ -259,7 +274,7 @@ export function AgencyFooter({ info, noWhatsapp = false }: { info: AgencyDomainI
   const profile = resolveSiteProfile(info.hostname);
   const footer = profile.footer;
   const footerWhatsapp = noWhatsapp || footer?.whatsappHidden ? null : footer?.whatsapp?.replace(/\D/g, "") || wa;
-  const navAll = siteNavLinks(info.hostname);
+  const navAll = navOverride ?? siteNavLinks(info.hostname);
 
   if (luxury) {
     const navLinks = navAll.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
@@ -575,10 +590,13 @@ export function AgencySiteLayout({
   info,
   children,
   noWhatsapp = false,
+  navOverride,
 }: {
   info: AgencyDomainInfo;
   children: React.ReactNode;
   noWhatsapp?: boolean;
+  /** Exclusivo do SiteLab Base (apresentação comercial). */
+  navOverride?: AgencySiteNavItem[];
 }) {
   // Propaga o tema do tenant para o `body`, para que Dialog/Popover/Select/
   // Calendar renderizados em portal herdem os tokens da agência.
@@ -586,9 +604,9 @@ export function AgencySiteLayout({
   useAgencyBrowserTitle(info.hostname);
   return (
     <div className={`min-h-screen bg-background ${siteThemeRootClass(info.hostname)}`}>
-      <AgencyBrandBar info={info} />
+      <AgencyBrandBar info={info} navOverride={navOverride} />
       <main>{children}</main>
-      <AgencyFooter info={info} noWhatsapp={noWhatsapp} />
+      <AgencyFooter info={info} noWhatsapp={noWhatsapp} navOverride={navOverride} />
       {!noWhatsapp && <AgencyAssistLauncher info={info} />}
     </div>
   );

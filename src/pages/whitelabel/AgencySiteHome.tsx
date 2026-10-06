@@ -384,7 +384,8 @@ export default function AgencySiteHome({
    * este valor; tenants reais nunca o recebem e permanecem inalterados).
    */
   labPresentation?: {
-    sections?: Partial<Record<AgencySectionKey, boolean>>;
+    /** Inclui `hero` (abertura/banners) e `requests` (Central de Solicitações). */
+    sections?: Partial<Record<AgencySectionKey | "hero" | "requests", boolean>>;
     modules?: Record<string, boolean>;
   };
 }) {
@@ -440,6 +441,7 @@ export default function AgencySiteHome({
     // Apresentação do laboratório: só desliga/religa seções do próprio perfil demo.
     if (profile.demo && labPresentation?.sections) {
       for (const [key, on] of Object.entries(labPresentation.sections)) {
+        if (key === "hero" || key === "requests") continue;
         const k = key as AgencySectionKey;
         const cur = overrides[k];
         overrides[k] = typeof cur === "object" ? { ...cur, enabled: on } : { enabled: on };
@@ -521,6 +523,13 @@ export default function AgencySiteHome({
     };
   }, [editorial]);
   const halfPx = `${Math.round(quoteHalf)}px`;
+  // Apresentação do laboratório: abertura e Central podem ser ocultadas
+  // (somente no perfil demo; tenants reais sempre mostram as duas).
+  const labPick = profile.demo ? labPresentation?.sections : undefined;
+  const showHero = labPick?.hero !== false;
+  const showRequests = labPick?.requests !== false;
+  const topOverlap = showHero && showRequests ? halfPx : "0px";
+  const bottomOverlap = showRequests ? halfPx : "0px";
 
   const openRequest = useCallback((key: string) => {
     setService(key);
@@ -1553,6 +1562,7 @@ export default function AgencySiteHome({
         />
       )}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
+      {showHero && (
       <section
         id="topo"
         className={
@@ -1560,7 +1570,7 @@ export default function AgencySiteHome({
             ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
-        style={editorial ? { paddingBottom: `calc(${halfPx} + 1.5rem)` } : undefined}
+        style={editorial ? { paddingBottom: `calc(${topOverlap} + 1.5rem)` } : undefined}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -1710,7 +1720,10 @@ export default function AgencySiteHome({
           </div>
         </div>
       </section>
+      )}
 
+      {/* Oculta só visualmente: o modal de solicitação segue disponível. */}
+      <div hidden={!showRequests}>
       {editorial ? (
         /* 50/50 EXATO: o card sobe metade da própria altura e o fundo areia
            começa no eixo central dele, então a base da foto corta o card ao meio. */
@@ -1718,10 +1731,10 @@ export default function AgencySiteHome({
           id="cotacao"
           className="relative z-10"
           style={{
-            marginTop: `calc(-1 * ${halfPx})`,
+            marginTop: `calc(-1 * ${topOverlap})`,
             // A seção seguinte sobe até o eixo central do card: a metade
             // inferior da caixa fica sobre o fundo dessa seção (sem faixa vazia).
-            marginBottom: `calc(-1 * ${halfPx})`,
+            marginBottom: `calc(-1 * ${bottomOverlap})`,
           }}
         >
           <div ref={requestCenterRef} className={`relative ${container}`}>
@@ -1730,7 +1743,7 @@ export default function AgencySiteHome({
                 {profile.requestCenter.title}
               </h2>
             )}
-            {profile.heroPresentation?.actionsPlacement === "right" && slides.length > 1 && (
+            {showHero && profile.heroPresentation?.actionsPlacement === "right" && slides.length > 1 && (
               <div
                 data-hero-nav-placement="bottom-right"
                 className="absolute bottom-full right-4 mb-5 hidden items-center gap-3 md:right-6 md:mb-6 md:flex lg:right-8"
@@ -1774,6 +1787,7 @@ export default function AgencySiteHome({
           />
         </div>
       )}
+      </div>
 
       {/* Apresentação comercial: o laboratório não mostra mapa do catálogo nem
           etiquetas internas entre seções (só o conteúdo das próprias seções). */}
@@ -1800,7 +1814,7 @@ export default function AgencySiteHome({
           <div
             key={`${section.key}-offset`}
             className={surface}
-            style={{ paddingTop: halfPx }}
+            style={{ paddingTop: bottomOverlap }}
           >
             {tagged}
           </div>

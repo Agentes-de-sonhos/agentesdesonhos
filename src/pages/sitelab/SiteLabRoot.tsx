@@ -5,7 +5,13 @@ import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { fetchAgencyDomain } from "@/lib/agencyDomains";
 import { SITELAB_BASE, SITELAB_BASE_PATH, type SiteLabView } from "@/lib/sitelabModels";
 import { hasSitelabAccess, revokeSitelabAccess } from "@/lib/sitelabAccess";
-import { useSiteLabPresentation } from "@/lib/sitelabPresentation";
+import {
+  filterNavForSections,
+  sitelabEffectiveSections,
+  useSiteLabPresentation,
+} from "@/lib/sitelabPresentation";
+import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import {
   PasswordGate,
   SiteLabFallback,
@@ -64,6 +70,11 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
   }
 
   const info = sitelabTenantInfo(model, tenant.data ?? null);
+  // Menu da demonstração: só links para seções que realmente estão na página.
+  const navOverride = filterNavForSections(
+    siteNavLinks(info.hostname),
+    sitelabEffectiveSections(resolveSiteProfile(info.hostname), info.hostname, presentation),
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -73,7 +84,7 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
           /* Página real: login, sessão, navegação e dados são os do white label. */
           <AgencyClientArea info={info} basePath={`${SITELAB_BASE_PATH}/area-do-cliente`} />
         ) : (
-          <AgencySiteLayout info={info}>
+          <AgencySiteLayout info={info} navOverride={navOverride}>
             <AgencySiteHome
               info={info}
               labPresentation={{ sections: presentation.sections, modules: presentation.modules }}

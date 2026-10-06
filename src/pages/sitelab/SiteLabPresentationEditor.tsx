@@ -25,15 +25,18 @@ import {
   loadPresentation,
   resetPresentation,
   savePresentation,
+  sitelabEffectiveSections,
+  sitelabUnavailableReason,
   type SiteLabPresentation,
+  type SiteLabSectionKey,
 } from "@/lib/sitelabPresentation";
 
 const GROUPS: AgencyCatalogClass[] = ["recomendada", "opcional", "especializada", "alternativa"];
 
-/** Seções que dependem de integração externa e não aparecem no laboratório. */
-const NEEDS_INTEGRATION: Partial<Record<AgencySectionKey, string>> = {
-  avaliacoes: "Depende da integração com o Google; não aparece no laboratório.",
-};
+const OPENING: { key: SiteLabSectionKey; name: string; when: string }[] = [
+  { key: "hero", name: "Abertura e carrossel de banners", when: "Primeira dobra com a promessa principal." },
+  { key: "requests", name: "Central de Solicitações", when: "Cartão de pedido abaixo da abertura (o formulário dos botões continua funcionando)." },
+];
 
 const EXTRA_INFO: Partial<Record<AgencySectionKey, { classification: AgencyCatalogClass; when: string }>> = {
   resorts: { classification: "especializada", when: "Mapa e lista de resorts no Brasil." },
@@ -71,7 +74,12 @@ export default function SiteLabPresentationEditor() {
   const moduleName = (key: string, fallback: string) =>
     MODULE_CATALOG.find((m) => m.key === key)?.name ?? fallback;
 
-  const sectionOn = (k: AgencySectionKey) => draft.sections[k] ?? defaults[k] ?? false;
+  const sectionOn = (k: SiteLabSectionKey) =>
+    k === "hero" || k === "requests" ? draft.sections[k] !== false : draft.sections[k] ?? defaults[k] ?? false;
+  const unavailable = (k: AgencySectionKey) =>
+    sitelabUnavailableReason(k, labProfile, SITELAB_DEMO_HOSTNAME);
+  const effective = sitelabEffectiveSections(labProfile, SITELAB_DEMO_HOSTNAME, draft);
+  const availableCount = OPENING.length + rows.filter((r) => !unavailable(r.key)).length;
   const update = (patch: Partial<SiteLabPresentation>) => {
     setSaved("idle");
     setDraft((d) => ({ ...d, ...patch }));
@@ -171,9 +179,29 @@ export default function SiteLabPresentationEditor() {
       <section className="space-y-5 rounded-xl border p-5">
         <div>
           <h2 className="text-lg font-semibold">Seções da home</h2>
-          <p className="text-sm text-muted-foreground">
-            Abertura com banners, Central de Solicitações e rodapé aparecem sempre.
+          <p className="text-sm text-muted-foreground" data-testid="sections-summary">
+            {effective.size} de {availableCount} blocos disponíveis aparecem na home. O menu do site
+            mostra só links para blocos visíveis. O rodapé aparece sempre.
           </p>
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Abertura</h3>
+          <ul className="divide-y rounded-lg border">
+            {OPENING.map((r) => (
+              <li key={r.key} className="flex items-start justify-between gap-4 p-3">
+                <div>
+                  <Label htmlFor={`sec-${r.key}`} className="font-medium">{r.name}</Label>
+                  <p className="text-xs text-muted-foreground">{r.when}</p>
+                </div>
+                <Switch
+                  id={`sec-${r.key}`}
+                  data-testid={`sec-${r.key}`}
+                  checked={sectionOn(r.key)}
+                  onCheckedChange={(on) => update({ sections: { ...draft.sections, [r.key]: on } })}
+                />
+              </li>
+            ))}
+          </ul>
         </div>
         {GROUPS.map((group) => {
           const list = rows.filter((r) => r.classification === group);
@@ -184,20 +212,27 @@ export default function SiteLabPresentationEditor() {
                 {CATALOG_CLASS_LABEL[group]}
               </h3>
               <ul className="divide-y rounded-lg border">
-                {list.map((r) => (
-                  <li key={r.key} className="flex items-start justify-between gap-4 p-3">
-                    <div>
-                      <Label htmlFor={`sec-${r.key}`} className="font-medium">{r.name}</Label>
-                      <p className="text-xs text-muted-foreground">{NEEDS_INTEGRATION[r.key] ?? r.when}</p>
-                    </div>
-                    <Switch
-                      id={`sec-${r.key}`}
-                      data-testid={`sec-${r.key}`}
-                      checked={sectionOn(r.key)}
-                      onCheckedChange={(on) => update({ sections: { ...draft.sections, [r.key]: on } })}
-                    />
-                  </li>
-                ))}
+                {list.map((r) => {
+                  const reason = unavailable(r.key);
+                  return (
+                    <li key={r.key} className={`flex items-start justify-between gap-4 p-3 ${reason ? "opacity-60" : ""}`}>
+                      <div>
+                        <Label htmlFor={`sec-${r.key}`} className="font-medium">
+                          {r.name}
+                          {reason ? <span className="ml-2 text-xs font-normal">(indisponível)</span> : null}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">{reason ?? r.when}</p>
+                      </div>
+                      <Switch
+                        id={`sec-${r.key}`}
+                        data-testid={`sec-${r.key}`}
+                        disabled={!!reason}
+                        checked={reason ? false : sectionOn(r.key)}
+                        onCheckedChange={(on) => update({ sections: { ...draft.sections, [r.key]: on } })}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           );
