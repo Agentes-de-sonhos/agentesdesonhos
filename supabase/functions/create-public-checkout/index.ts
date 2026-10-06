@@ -59,7 +59,9 @@ Deno.serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const origin = req.headers.get("origin") || "https://agentesdesonhos.lovable.app";
+    const bodyOrigin = typeof body.return_origin === "string" ? body.return_origin : "";
+    const origin =
+      bodyOrigin && RETURN_ORIGIN_ALLOWLIST.has(bodyOrigin) ? bodyOrigin : DEFAULT_ORIGIN;
 
     const trialDays = TRIAL_DAYS[plan];
 
@@ -67,7 +69,9 @@ Deno.serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       ...(trialDays ? { subscription_data: { trial_period_days: trialDays } } : {}),
-      success_url: `${origin}/ativar-cartao?session_id={CHECKOUT_SESSION_ID}`,
+      // O sucesso cai sempre no app (rota existente); o cancelamento volta
+      // para a origem externa autorizada que iniciou o checkout.
+      success_url: SUCCESS_URL,
       cancel_url: `${origin}/planos?checkout=cancelled`,
       metadata: { plan },
     });
