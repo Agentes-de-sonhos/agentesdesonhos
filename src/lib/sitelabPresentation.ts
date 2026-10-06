@@ -188,7 +188,6 @@ const ANCHOR_SECTION: Record<string, SiteLabSectionKey> = {
   solicitacoes: "requests",
   resorts: "resorts",
   "ingressos-orlando": "orlando",
-  "experiencia-xcaret": "signature",
 };
 
 /** Seção exigida por um link de menu (null = link não depende de seção). */
