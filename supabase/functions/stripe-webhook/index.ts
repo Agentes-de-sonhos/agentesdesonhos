@@ -210,7 +210,7 @@ Deno.serve(async (req) => {
               <a href="${activationUrl}" style="background-color: #7c3aed; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold;">Criar minha conta</a>
             </p>
             <p style="font-size: 14px; color: #888;">Esse link é único e válido por 24 horas.</p>
-            <p style="font-size: 14px; color: #888;">Seu plano: <strong>${planLabel} (R$${plan === "premium" ? "98" : "49"}/mês)</strong></p>
+            <p style="font-size: 14px; color: #888;">Seu plano: <strong>${planLabel} (R$${planPrice}/mês)</strong></p>
           </div>`,
         }),
       });
