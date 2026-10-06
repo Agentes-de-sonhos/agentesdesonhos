@@ -24,6 +24,7 @@ const RETURN_ORIGIN_ALLOWLIST = new Set([
   "https://agentesdesonhos.com.br",
   "https://agentes-de-sonhos-gestao.nandonobre.chatgpt.site",
   "https://agentes-de-sonhos-planos.nandonobre.chatgpt.site",
+  "https://agentes-de-sonhos-solucoes.nandonobre.chatgpt.site",
 ]);
 
 const DEFAULT_ORIGIN = "https://app.agentesdesonhos.com.br";
@@ -36,7 +37,9 @@ const CANCEL_URLS: Record<string, string> = {
   "https://agentes-de-sonhos-planos.nandonobre.chatgpt.site":
     "https://agentes-de-sonhos-planos.nandonobre.chatgpt.site/?checkout=cancelled#planos",
   "https://agentesdesonhos.com.br":
-    "https://agentesdesonhos.com.br/?checkout=cancelled",
+    "https://agentesdesonhos.com.br/plano-completo/?checkout=cancelled",
+  "https://agentes-de-sonhos-solucoes.nandonobre.chatgpt.site":
+    "https://agentes-de-sonhos-solucoes.nandonobre.chatgpt.site/plano-completo/?checkout=cancelled",
   [DEFAULT_ORIGIN]: `${DEFAULT_ORIGIN}/planos?checkout=cancelled`,
 };
 
