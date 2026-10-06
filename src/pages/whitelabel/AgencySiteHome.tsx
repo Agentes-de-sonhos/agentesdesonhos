@@ -41,10 +41,6 @@ import {
   type AgencySectionKey, type AgencySectionOverride,
 } from "@/lib/agencySiteConfig";
 import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
-import {
-  SiteLabCatalogMap,
-  SiteLabSectionTag,
-} from "@/components/whitelabel/SiteLabCatalogChrome";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import { SEO } from "@/components/seo/SEO";
@@ -378,7 +374,20 @@ function useAgencyShowcasePublished(slug: string | null | undefined) {
   return !!data;
 }
 
-export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
+export default function AgencySiteHome({
+  info,
+  labPresentation,
+}: {
+  info: AgencyDomainInfo;
+  /**
+   * Seleção da apresentação comercial do SiteLab Base (só o laboratório passa
+   * este valor; tenants reais nunca o recebem e permanecem inalterados).
+   */
+  labPresentation?: {
+    sections?: Partial<Record<AgencySectionKey, boolean>>;
+    modules?: Record<string, boolean>;
+  };
+}) {
   const name = agencyDisplayName(info);
   // Tema global do tenant: variáveis aplicadas na raiz do documento para que
   // modais, selects, calendários e demais portals também usem a marca.
@@ -428,14 +437,26 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
     const overrides: Partial<Record<AgencySectionKey, AgencySectionOverride>> = {
       ...(profile.sections ?? {}),
     };
+    // Apresentação do laboratório: só desliga/religa seções do próprio perfil demo.
+    if (profile.demo && labPresentation?.sections) {
+      for (const [key, on] of Object.entries(labPresentation.sections)) {
+        const k = key as AgencySectionKey;
+        const cur = overrides[k];
+        overrides[k] = typeof cur === "object" ? { ...cur, enabled: on } : { enabled: on };
+      }
+    }
     const dmcOverride = overrides.dmc;
     overrides.dmc =
       typeof dmcOverride === "object"
         ? { ...dmcOverride, enabled: (dmcOverride.enabled ?? true) && !!dmc }
         : { enabled: !!dmc && dmcOverride !== false };
     return resolveSections(overrides);
-  }, [dmc, profile]);
-  const modules = useMemo(() => resolveModules(undefined, profile.modules), [profile]);
+  }, [dmc, profile, labPresentation?.sections]);
+  const modules = useMemo(() => {
+    const list = resolveModules(undefined, profile.modules);
+    const pick = profile.demo ? labPresentation?.modules : undefined;
+    return pick ? list.filter((m) => pick[m.key] !== false) : list;
+  }, [profile, labPresentation?.modules]);
   const destinations = useMemo(() => {
     const list = resolveDestinations(undefined, profile.destinations);
     if (!profile.randomizeDestinations || list.length < 2) return list;
@@ -1754,21 +1775,12 @@ export default function AgencySiteHome({ info }: { info: AgencyDomainInfo }) {
         </div>
       )}
 
-      {/* Mapa do catálogo: EXCLUSIVO do laboratório (nunca em tenants reais). */}
-      {lab && <SiteLabCatalogMap container={container} />}
-
+      {/* Apresentação comercial: o laboratório não mostra mapa do catálogo nem
+          etiquetas internas entre seções (só o conteúdo das próprias seções). */}
       {sections.map((section, index) => {
         const node = renderSection(section.key);
         if (!node) return null;
-        // Etiqueta interna do módulo: só no laboratório, para referência nas conversas.
-        const tagged = lab ? (
-          <div key={`${section.key}-lab`}>
-            <SiteLabSectionTag sectionKey={section.key} />
-            {node}
-          </div>
-        ) : (
-          node
-        );
+        const tagged = node;
         if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).

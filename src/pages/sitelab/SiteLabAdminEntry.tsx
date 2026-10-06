@@ -22,6 +22,11 @@ import {
   useSiteLabModel,
 } from "./SiteLabChrome";
 
+const SiteLabPresentationEditor = lazy(() => import("./SiteLabPresentationEditor"));
+
+/** Tela de apresentação comercial (exclusiva do laboratório, só navegador). */
+export const SITELAB_PRESENTATION_PATH = `${SITELAB_BASE_PATH}/gestao/apresentacao`;
+
 const AgencyAdminArea = lazy(
   () => import("@/components/whitelabel/admin/AgencyAdminArea"),
 );
@@ -31,6 +36,8 @@ export default function SiteLabAdminEntry() {
   const [granted, setGranted] = useState(() => hasSitelabAccess(SITELAB_BASE.slug));
 
   useNoIndex(`${model.name} — template base`);
+  const presentation =
+    window.location.pathname.replace(/\/+$/, "") === SITELAB_PRESENTATION_PATH;
 
   // Pré-aquece o tenant técnico pelo mesmo RPC das agências (o painel real
   // resolve o seu próprio contexto; aqui é apenas cache compartilhado).
@@ -58,13 +65,36 @@ export default function SiteLabAdminEntry() {
   return (
     <div className="min-h-screen bg-white">
       <SiteLabTopBar model={model} view="admin" onExit={exit} useAnchors />
+      {/* Navegação real (fora de router): Painel ↔ Apresentação. */}
+      <nav className="border-b bg-background" aria-label="Gestão do laboratório">
+        <div className="mx-auto flex max-w-6xl gap-1 px-4 py-2 text-sm">
+          <a
+            href={`${SITELAB_BASE_PATH}/gestao`}
+            aria-current={presentation ? undefined : "page"}
+            className={`rounded-md px-3 py-1.5 ${presentation ? "text-muted-foreground hover:bg-muted" : "bg-muted font-semibold"}`}
+          >
+            Painel
+          </a>
+          <a
+            href={SITELAB_PRESENTATION_PATH}
+            aria-current={presentation ? "page" : undefined}
+            className={`rounded-md px-3 py-1.5 ${presentation ? "bg-muted font-semibold" : "text-muted-foreground hover:bg-muted"}`}
+          >
+            Apresentação
+          </a>
+        </div>
+      </nav>
       <Suspense fallback={<SiteLabFallback />}>
-        <AgencyAdminArea
-          hostname={model.adminHostname}
-          basePath={SITELAB_BASE_PATH}
-          /* SiteLab vive dentro do router principal do App. */
-          hasOuterRouter
-        />
+        {presentation ? (
+          <SiteLabPresentationEditor />
+        ) : (
+          <AgencyAdminArea
+            hostname={model.adminHostname}
+            basePath={SITELAB_BASE_PATH}
+            /* SiteLab vive dentro do router principal do App. */
+            hasOuterRouter
+          />
+        )}
       </Suspense>
     </div>
   );

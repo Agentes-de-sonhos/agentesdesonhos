@@ -5,6 +5,7 @@ import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { fetchAgencyDomain } from "@/lib/agencyDomains";
 import { SITELAB_BASE, SITELAB_BASE_PATH, type SiteLabView } from "@/lib/sitelabModels";
 import { hasSitelabAccess, revokeSitelabAccess } from "@/lib/sitelabAccess";
+import { useSiteLabPresentation } from "@/lib/sitelabPresentation";
 import {
   PasswordGate,
   SiteLabFallback,
@@ -33,6 +34,7 @@ const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"
 export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
   const location = useLocation();
   const model = useSiteLabModel();
+  const presentation = useSiteLabPresentation(SITELAB_BASE.slug);
   const [granted, setGranted] = useState(() => hasSitelabAccess(SITELAB_BASE.slug));
 
   useNoIndex(`${model.name} — template base`);
@@ -72,7 +74,10 @@ export default function SiteLabRoot({ view = "site" }: { view?: SiteLabView }) {
           <AgencyClientArea info={info} basePath={`${SITELAB_BASE_PATH}/area-do-cliente`} />
         ) : (
           <AgencySiteLayout info={info}>
-            <AgencySiteHome info={info} />
+            <AgencySiteHome
+              info={info}
+              labPresentation={{ sections: presentation.sections, modules: presentation.modules }}
+            />
           </AgencySiteLayout>
         )}
       </Suspense>

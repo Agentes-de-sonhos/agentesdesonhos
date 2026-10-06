@@ -58,10 +58,10 @@ describe("catálogo mestre de seções", () => {
     for (const theme of MODULE_CATALOG) expect(keys).toContain(theme.key);
   });
 
-  it("etiquetas e mapa do catálogo são exclusivos do laboratório", () => {
+  it("a home não renderiza mais mapa do catálogo nem etiquetas (apresentação comercial)", () => {
     expect(home).toContain("const lab = !!profile.demo");
-    expect(home).toContain("{lab && <SiteLabCatalogMap");
-    expect(home).toContain("<SiteLabSectionTag sectionKey={section.key} />");
+    expect(home).not.toContain("<SiteLabCatalogMap");
+    expect(home).not.toContain("<SiteLabSectionTag");
     expect(home).toContain("if (!showcasePublished && !lab) return null;");
   });
 });
