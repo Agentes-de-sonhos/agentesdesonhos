@@ -165,6 +165,13 @@ const FaturaPublica = lazy(() => import("./pages/FaturaPublica"));
 const AdsBriefingPreview = lazy(() => import("./pages/adsPreview/AdsBriefingPreview"));
 const SiteLabRoot = lazy(() => import("./pages/sitelab/SiteLabRoot"));
 const SiteLabAdminEntry = lazy(() => import("./pages/sitelab/SiteLabAdminEntry"));
+/** Converte navegação SPA para /sitelab-base/gestao* em carregamento real. */
+function SiteLabAdminReload() {
+  useEffect(() => {
+    window.location.replace(window.location.href);
+  }, []);
+  return null;
+}
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -296,7 +303,11 @@ const App = () => {
             <Route path="/ads-briefing-preview/:jobId" element={<AdsBriefingPreview />} />
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
-            {/* /sitelab-base/gestao/* é montado fora deste router (ver topo). */}
+            {/* /sitelab-base/gestao/* é montado fora deste router (ver topo).
+                Ponte: uma navegação SPA até aqui vira carregamento real, que
+                cai na entrada do topo (sem loop: lá este router não monta). */}
+            <Route path="/sitelab-base/gestao/*" element={<SiteLabAdminReload />} />
+            <Route path="/sitelab-base/gestao" element={<SiteLabAdminReload />} />
 
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />
