@@ -92,4 +92,19 @@ describe("seção DMC da 100 Limites", () => {
     expect(dmcSource).toContain("text-card");
     expect(homeSource).toContain('dmc?.presentation?.surface === "light"');
   });
+
+  it("alterna branco real e degradê apenas na 100 Limites, na ordem solicitada", () => {
+    for (const host of ["100limites.tur.br", "www.100limites.tur.br"]) {
+      const profile = resolveSiteProfile(host);
+      expect(profile.alternateSurfaces).toBe(true);
+      const keys = resolveSections(profile.sections).map((section) => section.key)
+        .filter((key) => ["dmc", "destinations", "orlando", "highlights", "resorts", "about", "differentials", "concierge", "faq", "newsletter"].includes(key));
+      expect(keys).toEqual(["dmc", "destinations", "orlando", "highlights", "resorts", "about", "differentials", "concierge", "faq", "newsletter"]);
+    }
+    expect(homeSource).toContain('gradient ? "wl-alt-gradient" : "bg-card"');
+    expect(homeSource).toContain('key={`${section.key}-offset`} className="bg-card"');
+    for (const host of ["destinoscomaju.com.br", "paraisoviagens.com", "casanovatur.com.br"]) {
+      expect(resolveSiteProfile(host).alternateSurfaces).not.toBe(true);
+    }
+  });
 });

@@ -1816,13 +1816,13 @@ export default function AgencySiteHome({
           const gradient = rendered % 2 === 1;
           rendered += 1;
           tagged = (
-            <div key={`${section.key}-surface`} className={`wl-alt-surface ${gradient ? "wl-alt-gradient" : "bg-background"}`}>
+            <div key={`${section.key}-surface`} className={`wl-alt-surface ${gradient ? "wl-alt-gradient" : "bg-card"}`}>
               {node}
             </div>
           );
           if (index === 0 && editorial) {
             return (
-              <div key={`${section.key}-offset`} className={gradient ? "bg-background" : "bg-background"} style={{ paddingTop: bottomOverlap }}>
+              <div key={`${section.key}-offset`} className="bg-card" style={{ paddingTop: bottomOverlap }}>
                 {tagged}
               </div>
             );
