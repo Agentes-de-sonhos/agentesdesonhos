@@ -567,7 +567,7 @@ export default function AgencySiteHome({
     varenna: "object-[66%_center] md:object-[center_52%]",
     santoriniShip: "object-[64%_center] md:object-[center_58%]",
     airportTraveler: "object-[68%_center] md:object-[64%_28%]",
-    amandaRight: "object-[72%_center] sm:object-[68%_center] md:object-center",
+    amandaRight: "object-[74%_24%] sm:object-[72%_24%] md:object-[72%_24%]",
   }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`
