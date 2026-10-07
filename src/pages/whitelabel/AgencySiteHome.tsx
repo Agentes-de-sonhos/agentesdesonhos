@@ -1813,7 +1813,7 @@ export default function AgencySiteHome({
         let tagged = node;
         if (profile.alternateSurfaces) {
           // Alternância declarada no perfil: branco, degradê, branco, degradê…
-          const gradient = rendered % 2 === 1;
+          const gradient = rendered % 2 === 1 && section.key !== "newsletter";
           rendered += 1;
           tagged = (
             <div key={`${section.key}-surface`} className={`wl-alt-surface ${gradient ? "wl-alt-gradient" : "bg-card"}`}>

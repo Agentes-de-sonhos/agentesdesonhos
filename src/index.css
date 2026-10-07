@@ -238,9 +238,9 @@ img {
 
   /* Vermelho vivo do logotipo (#F40000). Usado em ícones, bordas, estados
      ativos e detalhes; CTAs principais usam grafite (--wl-ink). */
-  --primary: 0 100% 48%;
-  /* Padrão 100 Limites: botões vermelhos sempre com texto branco. */
-  --primary-foreground: 0 0% 100%;
+  --primary: 45 100% 50%;
+  /* Padrão 100 Limites: botões amarelos sempre com texto preto. */
+  --primary-foreground: 220 12% 8%;
 
   --secondary: 36 30% 93%;
   --secondary-foreground: 220 12% 13%;
@@ -251,11 +251,11 @@ img {
 
   --border: 34 18% 88%;
   --input: 34 18% 86%;
-  --ring: 0 100% 48%;
+  --ring: 45 100% 50%;
   --radius: 0.625rem;
 
   /* Vermelho de marca + superfícies neutras do preset */
-  --wl-red: 0 100% 48%;
+  --wl-red: 45 100% 50%;
   /* Grafite neutro para faixas escuras (antes azul-marinho) */
   --wl-navy: 220 10% 14%;
   --wl-ink: 220 12% 10%;

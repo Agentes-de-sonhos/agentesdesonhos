@@ -48,7 +48,7 @@ describe("seção DMC da 100 Limites", () => {
     ]);
     expect(profile.about?.images?.[0]?.src).toContain("amanda-larini-perfil.png");
     expect(profile.footer?.description).toContain("DMC em Portugal para agências parceiras.");
-    expect(profile.footer?.showLocation).toBe(false);
+    expect(profile.footer?.address).toBe("Lisboa, Portugal");
     expect(profile.navDensity).toBe("compact");
     expect(resolveSiteProfile("paraisoviagens.com").key).toBe("luxuryCurated");
     expect(resolveSiteProfile("destinoscomaju.com.br").key).toBe("editorialRose");
@@ -57,7 +57,7 @@ describe("seção DMC da 100 Limites", () => {
   it("mantém o menu do portfólio (com submenus) e oculta campanhas genéricas", () => {
     const links = siteNavLinks("100limites.tur.br");
     expect(links.map((l) => l.label)).toEqual([
-      "Quem somos", "Viagens", "DMC em Portugal", "Visto americano", "Área do cliente",
+      "Sobre", "Viagens", "DMC em Portugal", "Visto americano", "Área do cliente",
     ]);
     expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
       "/quem-somos/dmc", "/frota", "/passeios/lisboa", "/passeios/portugal", "/europa", "/pet-friendly",

@@ -250,7 +250,7 @@ const CLASSIC: AgencySiteProfile = { key: "classic" };
 const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
   nav: [
-    { label: "Quem somos", to: "/quem-somos/agencia" },
+    { label: "Sobre", to: "/#sobre" },
     { label: "Viagens", to: "/#destinos" },
     {
       label: "DMC em Portugal",
@@ -363,7 +363,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   ],
   footer: {
     description: "Viagens pelo Brasil e pelo mundo. DMC em Portugal para agências parceiras.\nAtendimento online com Amanda Larini.",
-    showLocation: false,
+    address: "Lisboa, Portugal",
   },
   copy: {
     destinations: {
