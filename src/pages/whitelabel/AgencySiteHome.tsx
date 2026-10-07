@@ -1502,10 +1502,10 @@ export default function AgencySiteHome({
           return (
             <section key={key} id="novidades" className="bg-background">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
-                <div className={`overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"}`}>
+                <div className={`wl-newsletter-card overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"}`}>
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
                     <div>
-                      <p className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
+                      <p className="wl-kicker inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                         <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
                        <h2 className={`mt-4 w-full break-words text-pretty text-3xl font-extrabold leading-[1.12] text-white md:leading-[1.08] ${copy.titleSingleLine ? "lg:whitespace-nowrap md:text-[clamp(1.75rem,2.35vw,2.35rem)]" : "md:text-[clamp(2.25rem,3.25vw,2.75rem)]"}`}>
