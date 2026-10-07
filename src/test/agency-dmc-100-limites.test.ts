@@ -46,7 +46,7 @@ describe("seção DMC da 100 Limites", () => {
       "100 Limites desde 2015",
       "Mais de 20 anos de experiência da Amanda no turismo",
     ]);
-    expect(profile.about?.media).toBe("hidden");
+    expect(profile.about?.images?.[0]?.src).toContain("amanda-larini-perfil.png");
     expect(profile.footer?.description).toContain("DMC em Portugal para agências parceiras.");
     expect(profile.footer?.showLocation).toBe(false);
     expect(profile.navDensity).toBe("compact");
