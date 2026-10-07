@@ -287,8 +287,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   },
   hero: [
     {
-      title: "Seu próximo destino, com uma viagem feita para você",
-      subtitle: "Viagens pelo Brasil e pelo mundo, com planejamento cuidadoso e o melhor equilíbrio entre experiência e investimento.",
+      title: "Sua agência de viagens para o Brasil e o mundo",
+      subtitle: "Atendimento personalizado com a Amanda Larini, do planejamento ao retorno, com o melhor equilíbrio entre experiência e investimento.",
       image: "brasil",
       order: 1,
       enabled: true,
@@ -311,7 +311,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     },
   ],
   heroPresentation: {
-    kicker: "VIAGENS PERSONALIZADAS · BRASIL E MUNDO",
+    kicker: "AGÊNCIA DE VIAGENS · BRASIL E MUNDO",
+    cta: { label: "Solicitar minha viagem", service: "pacotes" },
   },
   requestCenter: {
     notice: "Cada solicitação é analisada pela Amanda, considerando seu perfil, suas preferências e o investimento que você deseja fazer.",
@@ -364,6 +365,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     destinations: {
       title: "Descubra o seu próximo destino",
       subtitle: "Algumas inspirações para começar. Seu próximo destino pode estar aqui ou em qualquer outro lugar do mundo.",
+      note: "Estes são alguns dos destinos que atendemos. Sua próxima viagem pode ser para qualquer lugar.",
+      extraCta: { label: "Quero outro destino", service: "pacotes" },
     },
     highlights: {
       title: "Uma viagem para cada momento",
