@@ -396,7 +396,7 @@ export default function AgencySiteHome({
   // Paleta COMPLETA (primária/secundária/terciária) via fonte única.
   useAgencyBrandTheme(agencyBrandInput(info));
   const wa = agencyWhatsappNumber(info);
-  const location = (profile.key === "editorialDmc" && profile.footer?.address) || [info.city, info.state].filter(Boolean).join(" · ");
+  const rawLocation = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
@@ -404,6 +404,7 @@ export default function AgencySiteHome({
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  const location = (profile.key === "editorialDmc" && profile.footer?.address) || rawLocation;
   // Nota média e total de avaliações do Google (quando o host tem Place
   // configurado) para compor o aggregateRating dos dados estruturados.
   const reviewsForJsonLd = useAgencyGoogleReviews(hostname, googleReviews);
