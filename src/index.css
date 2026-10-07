@@ -1144,21 +1144,17 @@ body[data-booking-selection-bar] {
   color: inherit !important;
 }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground));
+  background-color: hsl(0 0% 7%) !important;
+  color: hsl(0 0% 100%);
 }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card h3,
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card p {
-  color: hsl(var(--primary-foreground)) !important;
-}
-.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card .wl-step-num {
-  background-color: hsl(var(--wl-accent-red)) !important;
   color: hsl(0 0% 100%) !important;
 }
 
-/* 100 Limites: contraste preto sobre amarelo, círculos pretos, WhatsApp oficial, novidades grafite. */
+/* 100 Limites: quadro "Como funciona" preto, círculos amarelos com número preto, WhatsApp oficial, novidades grafite. */
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) { --wl-whatsapp: 142 70% 49%; }
-.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card .wl-step-num { background-color: hsl(0 0% 7%) !important; color: hsl(0 0% 100%) !important; }
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card .wl-step-num { background-color: hsl(var(--primary)) !important; color: hsl(0 0% 7%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-active { background-color: hsl(0 0% 7%) !important; border-color: hsl(0 0% 7%) !important; color: hsl(0 0% 100%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-active svg { color: hsl(0 0% 100%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-idle:hover,
