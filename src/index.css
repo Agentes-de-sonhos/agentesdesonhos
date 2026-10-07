@@ -560,6 +560,17 @@ img {
   );
 }
 
+/* Alternância de fundos declarada no perfil (branco ↔ degradê suave).
+   As seções internas ficam transparentes para herdar o fundo do invólucro. */
+.wl-alt-surface > section {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.wl-alt-gradient {
+  background-color: hsl(var(--wl-sand));
+  background-image: linear-gradient(to bottom, hsl(0 0% 100%), hsl(var(--wl-sand)));
+}
+
 /* Carregamento com a marca: giro 3D suave do símbolo, com leve fade nas bordas
    da rotação. Respeita a preferência de movimento reduzido do sistema. */
 .wl-brand-spinner {

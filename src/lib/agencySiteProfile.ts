@@ -134,6 +134,8 @@ export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
   /** Reduz os vãos verticais entre as seções deste perfil. */
   compactSectionSpacing?: boolean;
+  /** Alterna o fundo das seções da home: branco, degradê suave, branco… */
+  alternateSurfaces?: boolean;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
   nav?: { label: string; to: string; children?: { label: string; to: string }[] }[];
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
@@ -266,6 +268,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     { label: "Área do cliente", to: "/area-do-cliente" },
   ],
   navDensity: "compact",
+  alternateSurfaces: true,
   sections: {
     dmc: { enabled: true, order: 1 },
     destinations: { order: 2 },
