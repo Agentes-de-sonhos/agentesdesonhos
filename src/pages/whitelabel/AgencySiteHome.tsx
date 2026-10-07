@@ -396,7 +396,7 @@ export default function AgencySiteHome({
   // Paleta COMPLETA (primária/secundária/terciária) via fonte única.
   useAgencyBrandTheme(agencyBrandInput(info));
   const wa = agencyWhatsappNumber(info);
-  const location = [info.city, info.state].filter(Boolean).join(" · ");
+  const rawLocation = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
@@ -404,6 +404,7 @@ export default function AgencySiteHome({
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  const location = (profile.key === "editorialDmc" && profile.footer?.address) || rawLocation;
   // Nota média e total de avaliações do Google (quando o host tem Place
   // configurado) para compor o aggregateRating dos dados estruturados.
   const reviewsForJsonLd = useAgencyGoogleReviews(hostname, googleReviews);
@@ -1216,7 +1217,7 @@ export default function AgencySiteHome({
                   )}
 
                 </div>
-                <div className="rounded-xl bg-[hsl(var(--wl-navy))] p-8 md:p-10">
+                <div className="wl-steps-card rounded-xl bg-[hsl(var(--wl-navy))] p-8 md:p-10">
                   <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-background/75">
                     Como funciona
                   </h3>
@@ -1228,7 +1229,7 @@ export default function AgencySiteHome({
                       "Reservado, tudo fica na sua Área do Cliente.",
                     ]).map((step, i) => (
                       <li key={step} className="flex gap-4">
-                        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-background/15 text-sm font-bold text-background">
+                        <span className="wl-step-num grid h-9 w-9 shrink-0 place-items-center rounded-full bg-background/15 text-sm font-bold text-background">
                           {i + 1}
                         </span>
                         <p className="pt-1.5 text-[15px] leading-relaxed text-background/90">{step}</p>
