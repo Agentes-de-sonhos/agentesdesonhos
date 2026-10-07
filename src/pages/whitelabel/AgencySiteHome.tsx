@@ -1853,7 +1853,7 @@ export default function AgencySiteHome({
             {tagged}
           </div>
         );
-      })}
+      }); })()}
 
       {profile.resortsMap?.enabled && profile.resortsMap.showOnHome && (
         <section id="resorts-brasil" className="bg-background py-16 md:py-24">
