@@ -353,7 +353,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     { q: "Vocês organizam viagens apenas para Portugal?", a: "Não. A 100 Limites planeja viagens para destinos no Brasil e no mundo, conforme o perfil e as preferências de cada cliente." },
     { q: "O atendimento pode ser feito online?", a: "Sim. O atendimento acontece por WhatsApp, e-mail e videochamada, permitindo organizar sua viagem de onde você estiver." },
     { q: "Posso contratar serviços separados?", a: "Sim. Você pode solicitar serviços como passagens, hospedagem, transfers, ingressos e seguro, ou planejar uma viagem completa." },
-    { q: "Sou agente de viagens. Como solicito serviços em Portugal?", a: "Acesse a seção ‘Sua DMC em Portugal’ e clique em ‘Solicitar cotação para minha agência’. Informe os dados da viagem e os serviços desejados." },
+    { q: "Sou agente de viagens. Como solicito serviços em Portugal?", a: "Acesse a seção ‘DMC em Portugal’ e clique em ‘Solicitar orçamento em Portugal’. Informe os dados da viagem e os serviços desejados." },
     { q: "A Amanda acompanha pessoalmente os passeios?", a: "O acompanhamento pode ser organizado conforme o roteiro, o serviço contratado e a disponibilidade. Essa condição é combinada na proposta." },
     { q: "Como acompanho a minha viagem depois de fechar?", a: "Os documentos disponibilizados pela agência ficam reunidos na Área do Cliente para consulta durante a sua viagem." },
   ],
