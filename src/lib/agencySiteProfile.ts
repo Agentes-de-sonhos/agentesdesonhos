@@ -266,14 +266,18 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   ],
   navDensity: "compact",
   sections: {
-    dmc: { enabled: true, order: 0 },
-    destinations: { order: 2 },
+    dmc: { enabled: false },
+    destinations: { order: 1 },
+    orlando: { enabled: true, order: 2 },
     highlights: { order: 3 },
+    resorts: { enabled: true, order: 4 },
     modules: { enabled: false },
     about: { order: 5 },
     differentials: { order: 6 },
     concierge: { order: 7 },
     faq: { order: 10 },
+    newsletter: { enabled: true, order: 11 },
+    offers: { order: 12 },
   },
   hero: [
     {
