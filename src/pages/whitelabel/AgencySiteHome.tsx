@@ -1,7 +1,7 @@
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
@@ -28,6 +28,7 @@ import {
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
+import { AgencyVisaConsultSection } from "@/components/whitelabel/AgencyVisaConsultSection";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import { AgencyGoogleReviewsSection } from "@/components/whitelabel/AgencyGoogleReviewsSection";
@@ -856,7 +857,8 @@ export default function AgencySiteHome({
         const copy = copyFor("destinations");
         if (editorial) {
           return (
-            <section key={key} id="destinos" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
+            <Fragment key={key}>
+            <section id="destinos" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
                   title={copy.title ?? "Descubra o seu próximo destino"}
@@ -905,8 +907,22 @@ export default function AgencySiteHome({
                     </button>
                   ))}
                 </div>
+                {(copy.note || copy.extraCta) && (
+                  <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    {copy.note && <p className="max-w-2xl text-[15px] leading-relaxed text-foreground/80">{copy.note}</p>}
+                    {copy.extraCta && (
+                      <Button size="lg" className="w-full shrink-0 sm:w-auto" onClick={() => openRequest(copy.extraCta!.service)}>
+                        {copy.extraCta.label} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </section>
+            {profile.visaConsult && (
+              <AgencyVisaConsultSection hostname={hostname ?? ""} content={profile.visaConsult} />
+            )}
+            </Fragment>
           );
         }
         return (

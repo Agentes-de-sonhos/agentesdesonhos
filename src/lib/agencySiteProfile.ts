@@ -76,6 +76,10 @@ export interface AgencySectionCopy {
   surface?: "navy";
   /** Mantém o título em uma única linha em telas largas. */
   titleSingleLine?: boolean;
+  /** Nota curta abaixo do conteúdo da seção. */
+  note?: string;
+  /** Botão extra ao final da seção (abre a solicitação do serviço indicado). */
+  extraCta?: { label: string; service: string };
 }
 
 
@@ -207,6 +211,8 @@ export interface AgencySiteProfile {
   featuredExperience?: AgencyFeaturedExperience;
   /** Mapa de Resorts do Brasil (opcional): página /resorts-brasil e/ou seção na home. Ausente = desligado. */
   resortsMap?: { enabled: boolean; showOnHome?: boolean };
+  /** Chamada compacta de consultoria de visto (opcional), logo após os destinos. */
+  visaConsult?: { kicker?: string; title: string; text: string; cta: string };
 }
 
 export interface AgencyFeaturedImage {
@@ -241,48 +247,48 @@ const CLASSIC: AgencySiteProfile = { key: "classic" };
 const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
   nav: [
-    { label: "Início", to: "/" },
+    { label: "Quem somos", to: "/quem-somos/agencia" },
+    { label: "Viagens", to: "/#destinos" },
     {
-      label: "Quem Somos",
-      to: "/quem-somos/agencia",
+      label: "DMC em Portugal",
+      to: "/quem-somos/dmc",
       children: [
         { label: "DMC em Portugal", to: "/quem-somos/dmc" },
-        { label: "A Agência", to: "/quem-somos/agencia" },
+        { label: "Frota", to: "/frota" },
+        { label: "Passeios em Lisboa", to: "/passeios/lisboa" },
+        { label: "Passeios em Portugal", to: "/passeios/portugal" },
+        { label: "Europa", to: "/europa" },
+        { label: "Pet Friendly", to: "/pet-friendly" },
       ],
     },
-    { label: "Frota", to: "/frota" },
-    {
-      label: "Passeios",
-      to: "/passeios/lisboa",
-      children: [
-        { label: "Lisboa", to: "/passeios/lisboa" },
-        { label: "Portugal", to: "/passeios/portugal" },
-      ],
-    },
-    { label: "Europa", to: "/europa" },
-    { label: "Pet Friendly", to: "/pet-friendly" },
-    { label: "Ofertas", to: "/ofertas" },
-    { label: "Dúvidas", to: "/#faq" },
+    { label: "Visto americano", to: "/#visto-americano" },
+    { label: "Área do cliente", to: "/area-do-cliente" },
   ],
   navDensity: "compact",
   sections: {
-    dmc: { enabled: false },
-    destinations: { order: 1 },
-    orlando: { enabled: true, order: 2 },
-    highlights: { order: 3 },
-    resorts: { enabled: true, order: 4 },
+    dmc: { enabled: true, order: 1 },
+    destinations: { order: 2 },
+    orlando: { enabled: true, order: 3 },
+    highlights: { order: 4 },
+    resorts: { enabled: true, order: 5 },
     modules: { enabled: false },
-    about: { order: 5 },
-    differentials: { order: 6 },
-    concierge: { order: 7 },
+    about: { order: 6 },
+    differentials: { order: 7 },
+    concierge: { order: 8 },
     faq: { order: 10 },
     newsletter: { enabled: true, order: 11 },
     offers: { order: 12 },
   },
+  visaConsult: {
+    kicker: "CONSULTORIA",
+    title: "Consultoria de visto americano",
+    text: "Orientação para organizar sua solicitação de visto para os Estados Unidos. Envie seus dados de contato e a Amanda retorna para entender o seu caso.",
+    cta: "Solicitar consultoria",
+  },
   hero: [
     {
-      title: "Seu próximo destino, com uma viagem feita para você",
-      subtitle: "Viagens pelo Brasil e pelo mundo, com planejamento cuidadoso e o melhor equilíbrio entre experiência e investimento.",
+      title: "Sua agência de viagens para o Brasil e o mundo",
+      subtitle: "Atendimento personalizado com a Amanda Larini, do planejamento ao retorno, com o melhor equilíbrio entre experiência e investimento.",
       image: "brasil",
       order: 1,
       enabled: true,
@@ -305,7 +311,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     },
   ],
   heroPresentation: {
-    kicker: "VIAGENS PERSONALIZADAS · BRASIL E MUNDO",
+    kicker: "AGÊNCIA DE VIAGENS · BRASIL E MUNDO",
+    cta: { label: "Solicitar minha viagem", service: "pacotes" },
   },
   requestCenter: {
     notice: "Cada solicitação é analisada pela Amanda, considerando seu perfil, suas preferências e o investimento que você deseja fazer.",
@@ -346,7 +353,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     { q: "Vocês organizam viagens apenas para Portugal?", a: "Não. A 100 Limites planeja viagens para destinos no Brasil e no mundo, conforme o perfil e as preferências de cada cliente." },
     { q: "O atendimento pode ser feito online?", a: "Sim. O atendimento acontece por WhatsApp, e-mail e videochamada, permitindo organizar sua viagem de onde você estiver." },
     { q: "Posso contratar serviços separados?", a: "Sim. Você pode solicitar serviços como passagens, hospedagem, transfers, ingressos e seguro, ou planejar uma viagem completa." },
-    { q: "Sou agente de viagens. Como solicito serviços em Portugal?", a: "Acesse a seção ‘Sua DMC em Portugal’ e clique em ‘Solicitar cotação para minha agência’. Informe os dados da viagem e os serviços desejados." },
+    { q: "Sou agente de viagens. Como solicito serviços em Portugal?", a: "Acesse a seção ‘DMC em Portugal’ e clique em ‘Solicitar orçamento em Portugal’. Informe os dados da viagem e os serviços desejados." },
     { q: "A Amanda acompanha pessoalmente os passeios?", a: "O acompanhamento pode ser organizado conforme o roteiro, o serviço contratado e a disponibilidade. Essa condição é combinada na proposta." },
     { q: "Como acompanho a minha viagem depois de fechar?", a: "Os documentos disponibilizados pela agência ficam reunidos na Área do Cliente para consulta durante a sua viagem." },
   ],
@@ -358,6 +365,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     destinations: {
       title: "Descubra o seu próximo destino",
       subtitle: "Algumas inspirações para começar. Seu próximo destino pode estar aqui ou em qualquer outro lugar do mundo.",
+      note: "Estes são alguns dos destinos que atendemos. Sua próxima viagem pode ser para qualquer lugar.",
+      extraCta: { label: "Quero outro destino", service: "pacotes" },
     },
     highlights: {
       title: "Uma viagem para cada momento",

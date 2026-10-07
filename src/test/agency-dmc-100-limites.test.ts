@@ -13,9 +13,9 @@ describe("seção DMC da 100 Limites", () => {
       const dmc = resolveDmc(hostname);
       expect(dmc?.presentation?.surface).toBe("light");
       expect(dmc?.presentation?.imageUrl).toContain("dmc-cristiane-portugal.jpg");
-      expect(dmc?.title).toBe("Sua DMC em Portugal");
-      expect(dmc?.kicker).toBe("PARA AGÊNCIAS DE VIAGENS");
-      expect(dmc?.cta).toBe("Solicitar cotação para minha agência");
+      expect(dmc?.title).toBe("DMC em Portugal");
+      expect(dmc?.kicker).toBe("TAMBÉM EM PORTUGAL · DMC");
+      expect(dmc?.cta).toBe("Solicitar orçamento em Portugal");
       expect(dmc?.services.map((service) => service.label)).toEqual([
         "Transfers privativos",
         "Passeios e experiências",
@@ -31,7 +31,7 @@ describe("seção DMC da 100 Limites", () => {
   it("usa um perfil editorial completo e isolado para passageiros e agências", () => {
     const profile = resolveSiteProfile("100limites.tur.br");
     expect(profile.key).toBe("editorialDmc");
-    expect(profile.heroPresentation?.kicker).toBe("VIAGENS PERSONALIZADAS · BRASIL E MUNDO");
+    expect(profile.heroPresentation?.kicker).toBe("AGÊNCIA DE VIAGENS · BRASIL E MUNDO");
     expect(profile.hero).toHaveLength(3);
     expect(profile.hero?.map((slide) => slide.image)).toEqual(["brasil", "parques", "amanda100Limites"]);
     expect(profile.hero?.[2]).toMatchObject({ focalPoint: "amandaRight", textWidth: "narrowLeft" });
@@ -57,22 +57,10 @@ describe("seção DMC da 100 Limites", () => {
   it("mantém o menu do portfólio (com submenus) e oculta campanhas genéricas", () => {
     const links = siteNavLinks("100limites.tur.br");
     expect(links.map((l) => l.label)).toEqual([
-      "Início",
-      "Quem Somos",
-      "Frota",
-      "Passeios",
-      "Europa",
-      "Pet Friendly",
-      "Ofertas",
-      "Dúvidas",
+      "Quem somos", "Viagens", "DMC em Portugal", "Visto americano", "Área do cliente",
     ]);
-    expect(links.find((l) => l.label === "Quem Somos")?.children).toEqual([
-      { label: "DMC em Portugal", to: "/quem-somos/dmc" },
-      { label: "A Agência", to: "/quem-somos/agencia" },
-    ]);
-    expect(links.find((l) => l.label === "Passeios")?.children).toEqual([
-      { label: "Lisboa", to: "/passeios/lisboa" },
-      { label: "Portugal", to: "/passeios/portugal" },
+    expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
+      "/quem-somos/dmc", "/frota", "/passeios/lisboa", "/passeios/portugal", "/europa", "/pet-friendly",
     ]);
     expect(resolveSections(resolveSiteProfile("100limites.tur.br").sections).map((section) => section.key))
       .not.toContain("modules");

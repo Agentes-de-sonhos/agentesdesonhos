@@ -384,18 +384,18 @@ export interface AgencyDmcConfig {
  */
 export const DMC_BY_HOSTNAME: Record<string, AgencyDmcConfig> = (() => {
   const cemLimites: AgencyDmcConfig = {
-    kicker: "PARA AGÊNCIAS DE VIAGENS",
-    title: "Sua DMC em Portugal",
-    text: "Uma parceira local para cuidar dos seus passageiros em Portugal. Com Amanda Larini em Lisboa, sua agência conta com apoio para organizar serviços e experiências sob medida, com atenção ao perfil de cada cliente e aos detalhes da operação.",
+    kicker: "TAMBÉM EM PORTUGAL · DMC",
+    title: "DMC em Portugal",
+    text: "Com a Amanda em Lisboa, a 100 Limites oferece serviços receptivos em Portugal para viajantes e agências parceiras: transfers, passeios, roteiros e apoio local, organizados sob medida para cada grupo.",
     services: [
       { key: "transfers", label: "Transfers privativos" },
       { key: "passeios", label: "Passeios e experiências" },
       { key: "roteiros", label: "Roteiros personalizados" },
       { key: "acompanhamento", label: "Acompanhamento local" },
     ],
-    cta: "Solicitar cotação para minha agência",
+    cta: "Solicitar orçamento em Portugal",
     whatsappMessage:
-      "Olá, Amanda! Sou agente de viagens e gostaria de solicitar uma cotação de serviços da DMC em Portugal para meus clientes.",
+      "Olá, Amanda! Gostaria de solicitar um orçamento de serviços da DMC em Portugal.",
     note: "Cuidamos dos seus passageiros em parceria com sua agência, respeitando o relacionamento que você construiu com eles.",
     presentation: {
       surface: "light",
