@@ -1167,3 +1167,7 @@ body[data-booking-selection-bar] {
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-cta { background-color: hsl(0 0% 7%) !important; border-color: hsl(0 0% 7%) !important; color: hsl(0 0% 100%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-cta:hover { filter: brightness(0.95); }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-cta svg { color: hsl(0 0% 100%) !important; }
+/* 100 Limites: logotipos de resorts maiores (card inalterado) e botões no formato padrão da página. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-resort-logo-box { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-resort-logo { max-height: 5rem !important; }
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-resorts-btn { border-radius: 0.75rem !important; }

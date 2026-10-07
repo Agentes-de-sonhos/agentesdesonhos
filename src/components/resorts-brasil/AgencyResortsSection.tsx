@@ -41,7 +41,7 @@ export function AgencyResortsSection({
             {BRAZIL_RESORTS.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
           </p>
         </div>
-        <Button asChild variant="outline" className="hidden rounded-full md:inline-flex">
+        <Button asChild variant="outline" className="wl-resorts-btn hidden rounded-full md:inline-flex">
           <a href={allHref}>Ver todos os resorts <ArrowRight className="ml-2 h-4 w-4" /></a>
         </Button>
       </div>
@@ -117,9 +117,9 @@ export function AgencyResortsSection({
               return (
                 <li key={r.slug} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
                   <a href={resortHref(r.slug)} className="absolute inset-0 z-10" aria-label={`Ver página do ${name}`} />
-                  <div className="flex h-24 items-center justify-center px-5">
+                  <div className="wl-resort-logo-box flex h-24 items-center justify-center px-5">
                     {logo ? (
-                      <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="max-h-14 w-full object-contain transition duration-300 group-hover:scale-105" />
+                      <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="wl-resort-logo max-h-14 w-full object-contain transition duration-300 group-hover:scale-105" />
                     ) : (
                       <span className="text-center font-display text-base text-foreground">{name}</span>
                     )}
@@ -135,7 +135,7 @@ export function AgencyResortsSection({
             })}
           </ul>
           <div className="mt-6 flex justify-center lg:justify-start">
-            <Button asChild className="rounded-full">
+            <Button asChild className="wl-resorts-btn rounded-full">
               <a href={allHref}>
                 {all.length > shown.length ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected]}` : "Ver todos os resorts"}
                 <ArrowRight className="ml-2 h-4 w-4" />
