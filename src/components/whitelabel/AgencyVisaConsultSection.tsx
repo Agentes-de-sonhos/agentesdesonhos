@@ -53,8 +53,7 @@ export function AgencyVisaConsultSection({
       consent_version: "v1",
       honeypot,
       details: { origem: "home_visto_americano", interesse: "visto_americano", request_id: requestId },
-      idempotency_key: requestId,
-    } as never);
+    });
   };
 
   return (
