@@ -42,7 +42,7 @@ const EXPERIENCE_LOGO_FALLBACK: Record<string, string> = { "drawn-to-life": "cir
 const experienceLogo = (id: string) => PARK_LOGOS[id] ?? (EXPERIENCE_LOGO_FALLBACK[id] ? CARD_LOGOS[EXPERIENCE_LOGO_FALLBACK[id]] : undefined);
 // Parques em destaque dentro de cada card da galeria
 const CARD_PARKS: Record<string, string[]> = {
-  disney: ["magic-kingdom", "epcot", "hollywood-studios", "animal-kingdom", "typhoon-lagoon"],
+  disney: ["magic-kingdom", "epcot", "hollywood-studios", "animal-kingdom", "typhoon-lagoon", "blizzard-beach"],
   universal: ["universal-studios", "islands-of-adventure", "epic-universe", "volcano-bay"],
   "united-parks": ["seaworld", "busch-gardens", "discovery-cove", "aquatica"],
 };
