@@ -290,7 +290,7 @@ export function AgencyQuickQuote({
                       ? `flex h-[46px] shrink-0 snap-start items-center gap-2 whitespace-nowrap rounded-lg border px-3.5 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                           selected
                             ? "wl-qq-tab-active border-primary bg-primary text-primary-foreground [&_svg]:text-primary-foreground hover:text-primary-foreground focus-visible:text-primary-foreground"
-                            : "border-transparent text-foreground/70 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+                            : "wl-qq-tab-idle border-transparent text-foreground/70 hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
                         }`
                       : `flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
                           selected
