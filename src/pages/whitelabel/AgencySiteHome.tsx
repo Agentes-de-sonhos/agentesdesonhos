@@ -1520,7 +1520,7 @@ export default function AgencySiteHome({
                     <div className="md:justify-self-end">
                       <Button
                         size="lg"
-                        className="h-12 w-full rounded-xl border border-[var(--brand-secondary)] bg-[var(--brand-secondary)] px-7 text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)] [&_svg]:text-[var(--brand-on-secondary)] md:w-auto"
+                        className="wl-newsletter-cta h-12 w-full rounded-xl border border-[var(--brand-secondary)] bg-[var(--brand-secondary)] px-7 text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)] [&_svg]:text-[var(--brand-on-secondary)] md:w-auto"
                         onClick={() => setInspirationOpen(true)}
                       >
                         {copy.cta ?? "Quero receber inspirações"}{" "}
