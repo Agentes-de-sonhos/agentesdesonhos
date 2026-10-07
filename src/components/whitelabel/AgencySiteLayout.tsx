@@ -391,11 +391,17 @@ export function AgencyFooter({
      * (arte transparente), no mesmo tamanho do cabeçalho. Outros tenants
      * mantêm exatamente o acabamento atual.
      */
-    const plainFooter = profile.key === "editorialRose";
-    const footerShellClass = plainFooter
+    // 100 Limites: mesmo acabamento limpo da Destinos com a Ju, sobre o degradê bege.
+    const sandPlainFooter = profile.key === "editorialDmc";
+    const plainFooter = profile.key === "editorialRose" || sandPlainFooter;
+    const footerShellClass = sandPlainFooter
+      ? "wl-alt-gradient border-t border-[hsl(var(--wl-ink)_/_0.1)] text-[hsl(var(--wl-ink))]"
+      : plainFooter
       ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-background text-[hsl(var(--wl-ink))]"
       : "wl-soft-gradient-footer bg-[var(--brand-tertiary,hsl(var(--wl-sand)))] text-[hsl(var(--wl-ink))]";
-    const footerBottomClass = plainFooter
+    const footerBottomClass = sandPlainFooter
+      ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-[hsl(var(--wl-sand))]"
+      : plainFooter
       ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-background"
       : "border-t border-[var(--brand-border,hsl(var(--wl-ink)_/_0.12))] bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]";
     const footerLogoClass = plainFooter
