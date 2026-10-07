@@ -1154,7 +1154,7 @@ body[data-booking-selection-bar] {
 
 /* 100 Limites: quadro "Como funciona" preto, círculos amarelos com número preto, WhatsApp oficial, novidades grafite. */
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) { --wl-whatsapp: 142 70% 49%; }
-.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card .wl-step-num { background-color: hsl(var(--primary)) !important; color: hsl(0 0% 7%) !important; }
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card .wl-step-num { background-color: hsl(0 0% 100%) !important; color: hsl(0 0% 7%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-active { background-color: hsl(0 0% 7%) !important; border-color: hsl(0 0% 7%) !important; color: hsl(0 0% 100%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-active svg { color: hsl(0 0% 100%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-idle:hover,
