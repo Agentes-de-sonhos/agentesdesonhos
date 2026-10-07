@@ -1050,7 +1050,9 @@ export default function AgencySiteHome({
                             width={900}
                             height={1100}
                             className={`w-full object-cover ${
-                              aboutCopy.images!.length === 1
+                              image.aspect === "square"
+                                ? "aspect-square"
+                                : aboutCopy.images!.length === 1
                                 ? "aspect-[4/5] md:aspect-[3/4]"
                                 : index === 0
                                   ? "aspect-[4/5]"

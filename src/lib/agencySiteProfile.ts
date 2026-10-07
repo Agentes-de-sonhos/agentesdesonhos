@@ -197,7 +197,7 @@ export interface AgencySiteProfile {
     title?: string;
     text?: string;
     image?: AgencyImageSlot;
-    images?: { src: string; alt: string; position?: string }[];
+    images?: { src: string; alt: string; position?: string; aspect?: "square" }[];
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
     badge?: { value: string; label?: string };
     /** Fatos institucionais confirmados, apresentados separadamente. */
@@ -339,7 +339,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     title: "Conheça Amanda Larini",
     text: "À frente da 100 Limites desde 2015, Amanda Larini reúne mais de 20 anos de experiência no turismo e acompanha de perto o planejamento de cada cliente.\n\nSeu trabalho começa pela escuta: entender os gostos, as expectativas e o investimento de quem vai viajar para organizar uma experiência que faça sentido do início ao fim.\n\nHoje, vivendo em Lisboa, Amanda continua atendendo passageiros com viagens pelo Brasil e pelo mundo. Em Portugal, também atua como parceira de agências brasileiras, oferecendo serviços receptivos e apoio local aos seus clientes.",
     facts: ["100 Limites desde 2015", "Mais de 20 anos de experiência da Amanda no turismo"],
-    images: [{ src: amandaLariniPerfil.url, alt: "Amanda Larini, fundadora e consultora da 100 Limites, sorrindo em seu escritório", position: "center 30%" }],
+    images: [{ src: amandaLariniPerfil.url, alt: "Amanda Larini, fundadora e consultora da 100 Limites, sorrindo em seu escritório", position: "center 30%", aspect: "square" }],
   },
   differentials: [
     { title: "Atendimento com a Amanda", text: "Seu planejamento é acompanhado por quem conhece suas preferências e participa das decisões com você.", icon: "consultivo" },
