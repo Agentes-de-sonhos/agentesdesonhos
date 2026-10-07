@@ -75,7 +75,7 @@ import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
-import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-100-limites.png.asset.json";
+import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
