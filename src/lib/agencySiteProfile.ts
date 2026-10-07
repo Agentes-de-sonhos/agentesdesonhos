@@ -277,6 +277,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     concierge: { order: 7 },
     faq: { order: 10 },
     newsletter: { enabled: true, order: 11 },
+    offers: { order: 12 },
   },
   hero: [
     {
