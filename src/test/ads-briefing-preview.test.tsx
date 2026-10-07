@@ -9,6 +9,8 @@ import {
   MUNDO_EM_CORES_PREVIEW_INFO,
   DRICA_VIAGENS_PREVIEW_HOST,
   DRICA_VIAGENS_PREVIEW_INFO,
+  VIAJAR_TIRISMO_PREVIEW_HOST,
+  VIAJAR_TIRISMO_PREVIEW_INFO,
   resolveAdsPreviewFixture,
 } from "@/lib/adsBriefingPreview";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
@@ -84,5 +86,69 @@ describe("prévia ADS ads-email-test-v1", () => {
     );
     expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
     expect(document.querySelector('[data-ads-preview="briefing-16-v1"]')).toBeInTheDocument();
+  });
+
+  describe("briefing-17-v1 (Viajar Tirismo)", () => {
+    it("resolve somente pelo job_id exato", () => {
+      expect(resolveAdsPreviewFixture("briefing-17-v1")?.profile.key).toBe("viajarTirismoBriefing17");
+      for (const id of ["briefing-17", "Briefing-17-v1", "briefing-17-v1 ", "briefing-17-v2", "briefing-17-v1/"]) {
+        expect(resolveAdsPreviewFixture(id)).toBeNull();
+      }
+    });
+    it("usa identidade local, host e user_id sintéticos, sem tenant real", () => {
+      const f = resolveAdsPreviewFixture("briefing-17-v1")!;
+      expect(f.info.agency_name).toBe("Viajar Tirismo");
+      expect(f.info.owner_name).toBe("Paula Gasparini");
+      expect(VIAJAR_TIRISMO_PREVIEW_INFO.user_id).toBe("00000000-0000-0000-0000-000000000017");
+      expect(VIAJAR_TIRISMO_PREVIEW_INFO.agency_slug).toBe("");
+      expect(VIAJAR_TIRISMO_PREVIEW_INFO.public_slug).toBeNull();
+      expect(VIAJAR_TIRISMO_PREVIEW_INFO.phone).toBeNull();
+      expect(VIAJAR_TIRISMO_PREVIEW_HOST.endsWith(".preview.local")).toBe(true);
+      expect(resolveSiteProfile(VIAJAR_TIRISMO_PREVIEW_HOST).key).toBe("viajarTirismoBriefing17");
+      expect(resolveSiteProfile("www.destinoscomaju.com.br").key).toBe("editorialRose");
+    });
+    it("mantém ações comerciais desativadas e seções sem conteúdo desligadas", () => {
+      const p = resolveAdsPreviewFixture("briefing-17-v1")!.profile;
+      expect(p.hideConciergeActions).toBe(true);
+      for (const k of ["offers", "dmc", "team", "testimonials", "avaliacoes", "newsletter", "authority", "credentials"] as const) {
+        expect(p.sections?.[k]).toEqual({ enabled: false });
+      }
+    });
+    it("em host de produção não renderiza", async () => {
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "agentedesonhoproject.lovable.app" }, writable: true });
+      const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+      render(
+        <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-17-v1"]}>
+          <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
+        </MemoryRouter>,
+      );
+      expect(await screen.findByText("Página não encontrada")).toBeInTheDocument();
+      expect(document.querySelector('[data-ads-preview="briefing-17-v1"]')).toBeNull();
+    });
+    it("no host técnico bloqueia backend, cliques e envios", async () => {
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
+      const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+      render(
+        <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-17-v1"]}>
+          <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
+        </MemoryRouter>,
+      );
+      expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
+      expect(document.querySelector('[data-ads-preview="briefing-17-v1"]')).toBeInTheDocument();
+      const backend = import.meta.env.VITE_SUPABASE_URL as string;
+      if (backend) await expect(window.fetch(`${backend}/rest/v1/profiles`)).rejects.toThrow(/backend desativado/);
+      expect(window.open("https://example.com")).toBeNull();
+      const form = document.createElement("form");
+      document.body.appendChild(form);
+      const ev = new Event("submit", { cancelable: true, bubbles: true });
+      form.dispatchEvent(ev);
+      expect(ev.defaultPrevented).toBe(true);
+      const a = document.createElement("a");
+      a.href = "https://wa.me/5527992419444";
+      document.body.appendChild(a);
+      const click = new MouseEvent("click", { cancelable: true, bubbles: true });
+      a.dispatchEvent(click);
+      expect(click.defaultPrevented).toBe(true);
+    });
   });
 });
