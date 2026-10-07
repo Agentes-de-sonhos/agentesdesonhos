@@ -348,6 +348,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     { title: "Acompanhamento durante a viagem", text: "Apoio para orientações e imprevistos, com continuidade no atendimento até o retorno.", icon: "acompanhamento" },
   ],
   conciergeWhatsappLabel: "Falar com a Amanda",
+  hideConciergeActions: true,
   conciergeSteps: [
     "Conte sua ideia, suas preferências e o investimento previsto.",
     "Receba uma proposta personalizada e ajuste os detalhes com a Amanda.",
