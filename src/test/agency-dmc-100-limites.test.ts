@@ -57,22 +57,10 @@ describe("seção DMC da 100 Limites", () => {
   it("mantém o menu do portfólio (com submenus) e oculta campanhas genéricas", () => {
     const links = siteNavLinks("100limites.tur.br");
     expect(links.map((l) => l.label)).toEqual([
-      "Início",
-      "Quem Somos",
-      "Frota",
-      "Passeios",
-      "Europa",
-      "Pet Friendly",
-      "Ofertas",
-      "Dúvidas",
+      "Quem somos", "Viagens", "DMC em Portugal", "Visto americano", "Área do cliente",
     ]);
-    expect(links.find((l) => l.label === "Quem Somos")?.children).toEqual([
-      { label: "DMC em Portugal", to: "/quem-somos/dmc" },
-      { label: "A Agência", to: "/quem-somos/agencia" },
-    ]);
-    expect(links.find((l) => l.label === "Passeios")?.children).toEqual([
-      { label: "Lisboa", to: "/passeios/lisboa" },
-      { label: "Portugal", to: "/passeios/portugal" },
+    expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
+      "/quem-somos/dmc", "/frota", "/passeios/lisboa", "/passeios/portugal", "/europa", "/pet-friendly",
     ]);
     expect(resolveSections(resolveSiteProfile("100limites.tur.br").sections).map((section) => section.key))
       .not.toContain("modules");
