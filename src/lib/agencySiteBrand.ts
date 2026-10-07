@@ -20,6 +20,7 @@ import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
 import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
+import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
@@ -36,6 +37,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "briefing-14-v1.preview.local": mundoEmCoresLogo.url,
   /** Briefing 16 — logo autorizado, limitado ao host sintético da prévia. */
   "briefing-16-v1.preview.local": dricaViagensLogo.url,
+  /** Briefing 17 — logo enviado, limitado ao host sintético da prévia. */
+  "briefing-17-v1.preview.local": viajarTirismoLogo.url,
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
@@ -64,6 +67,7 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "www.essyatur.com.br",
   "briefing-14-v1.preview.local",
   "briefing-16-v1.preview.local",
+  "briefing-17-v1.preview.local",
 ]);
 
 export interface AgencyHeaderBrandPreset {
@@ -148,6 +152,11 @@ const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
     logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
   },
   "briefing-16-v1.preview.local": {
+    logoOnly: true,
+    headerClassName: "h-24 md:h-[112px]",
+    logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
+  },
+  "briefing-17-v1.preview.local": {
     logoOnly: true,
     headerClassName: "h-24 md:h-[112px]",
     logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",

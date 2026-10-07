@@ -8,6 +8,7 @@ import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
+import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
 export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
@@ -430,6 +431,147 @@ export const DRICA_VIAGENS_PREVIEW_PROFILE: AgencySiteProfile = {
   },
 };
 
+export const VIAJAR_TIRISMO_PREVIEW_JOB_ID = "briefing-17-v1";
+export const VIAJAR_TIRISMO_PREVIEW_PATH = `/ads-briefing-preview/${VIAJAR_TIRISMO_PREVIEW_JOB_ID}`;
+/**
+ * Host sintético exclusivo. O cadastro real existe mas não tem domínio público
+ * ativo: a vinculação futura fica PENDENTE e nada da conta real é usado aqui.
+ */
+export const VIAJAR_TIRISMO_PREVIEW_HOST = "briefing-17-v1.preview.local";
+
+export const VIAJAR_TIRISMO_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-000000000017",
+  agency_slug: "",
+  public_slug: null,
+  hostname: VIAJAR_TIRISMO_PREVIEW_HOST,
+  is_primary: false,
+  agency_name: "Viajar Tirismo",
+  owner_name: "Paula Gasparini",
+  logo_url: viajarTirismoLogo.url,
+  cover_image_url: null,
+  primary_color: "#164f76",
+  secondary_color: "#00a1d8",
+  secondary_auto: false,
+  tertiary_color: null,
+  tertiary_auto: true,
+  on_secondary_color: null,
+  phone: null,
+  city: "Vila Velha",
+  state: "ES",
+  bio: null,
+  cnpj: null,
+  whatsapp_group_url: null,
+};
+
+export const VIAJAR_TIRISMO_PREVIEW_PROFILE: AgencySiteProfile = {
+  key: "viajarTirismoBriefing17",
+  compactSectionSpacing: true,
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Especialidades", to: "/#campanhas" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Atendimento", to: "/#atendimento" },
+    { label: "Dúvidas", to: "/#faq" },
+  ],
+  sections: {
+    dmc: { enabled: false },
+    offers: { enabled: false },
+    credentials: { enabled: false },
+    team: { enabled: false },
+    testimonials: { enabled: false },
+    avaliacoes: { enabled: false },
+    newsletter: { enabled: false },
+    authority: { enabled: false },
+    highlights: { enabled: false },
+    signature: { enabled: true, order: 1 },
+    destinations: { enabled: true, order: 2 },
+    modules: { enabled: true, order: 3 },
+    about: { enabled: true, order: 4 },
+    differentials: { enabled: true, order: 5 },
+    concierge: { enabled: true, order: 6 },
+    faq: { enabled: true, order: 7 },
+  },
+  heroImage: "cruzeiro",
+  heroPresentation: {
+    kicker: "CONSULTORIA DE VIAGENS · VILA VELHA, ES",
+    overlay: "strongLeft",
+  },
+  hero: [
+    { title: "Segurança e suporte antes, durante e depois da viagem", subtitle: "Consultoria completa com atendimento direto de Paula Gasparini, da inspiração ao pós-viagem.", image: "heroSantoriniShip", order: 1, enabled: true },
+    { title: "Cruzeiros planejados em cada detalhe", subtitle: "Navio, cabine, itinerário e serviços escolhidos com orientação próxima para viajar com tranquilidade.", image: "cruzeiro", order: 2, enabled: true },
+    { title: "Viagens sob medida pelo mundo", subtitle: "Europa, Caribe, Ásia, destinos exóticos, neve e resorts em roteiros feitos para o seu momento.", image: "europaCastelo", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "VIAJAR TIRISMO",
+    title: "Consultoria completa para diferentes viagens.",
+    text: "Planejamento detalhado e suporte em toda a jornada, para que cada viajante — de famílias multigeracionais a quem tem 60+ — viaje com segurança.",
+  },
+  destinations: [
+    { key: "europa", image: "europa", label: "Cultura", title: "Europa", text: "Cidades históricas, paisagens e gastronomia em roteiros no ritmo de cada viajante.", service: "pacotes", enabled: true, order: 1 },
+    { key: "cruzeiros", image: "cruzeiro", label: "No mar", title: "Cruzeiros", text: "Itinerários, navios e cabines avaliados com cuidado para cada perfil.", service: "cruzeiros", enabled: true, order: 2 },
+    { key: "caribe-mexico", image: "caribeMexico", label: "Sol e mar", title: "Caribe e México", text: "Praias, resorts e experiências combinados com conforto e praticidade.", service: "pacotes", enabled: true, order: 3 },
+    { key: "asia-oceania", image: "escandinavia", label: "Longas distâncias", title: "Ásia e Oceania", text: "Destinos distantes transformados em roteiros claros e bem conectados.", service: "pacotes", enabled: true, order: 4 },
+    { key: "america-do-sul", image: "brasil", label: "Perto de casa", title: "América do Sul", text: "Paisagens, cultura e neve a poucas horas, com logística bem planejada.", service: "pacotes", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação completa para escolher navio, cabine, itinerário e serviços.", service: "cruzeiros", image: "cruzeiroDisneyWish", enabled: true, order: 1 },
+    { key: "sob-medida", title: "Viagens sob medida", text: "Roteiros criados a partir das preferências, do ritmo e das necessidades de cada viajante.", service: "pacotes", image: "heroVarenna", enabled: true, order: 2 },
+    { key: "internacionais", title: "Destinos internacionais", text: "Planejamento detalhado para viagens pelo mundo, do embarque ao retorno.", service: "pacotes", image: "heroAirportTraveler", enabled: true, order: 3 },
+    { key: "exoticos", title: "Destinos exóticos", text: "Lugares surpreendentes com logística cuidadosa e suporte em toda a jornada.", service: "pacotes", image: "safari", enabled: true, order: 4 },
+    { key: "neve", title: "Neve", text: "Destinos de inverno escolhidos com atenção ao clima, ao conforto e às atividades.", service: "pacotes", image: "escandinavia", enabled: true, order: 5 },
+    { key: "resorts", title: "Resorts", text: "Hospedagens selecionadas para descansar com a família e aproveitar cada momento.", service: "hospedagem", image: "resort", enabled: true, order: 6 },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Paula Gasparini, atendimento direto em toda a jornada.",
+    text: "A paixão por viagens e a experiência organizando viagens de familiares e amigos levaram Paula Gasparini a se profissionalizar. Desde 2019, a Viajar Tirismo oferece consultoria completa, com planejamento detalhado e suporte antes, durante e depois da viagem. Em um cruzeiro no exterior, Paula intermediou a hospitalização e o desembarque de um viajante na Arábia Saudita, acompanhando o caso até o retorno para casa.",
+    badge: { value: "Desde 2019", label: "Viajar Tirismo" },
+    media: "hidden",
+    showLocation: true,
+    ownerName: "Paula Gasparini",
+  },
+  differentials: [
+    { title: "Atendimento direto", text: "A própria proprietária conduz cada atendimento, do primeiro contato ao retorno.", icon: "consultivo" },
+    { title: "Especialização", text: "Conhecimento em cruzeiros, viagens sob medida e destinos internacionais.", icon: "fornecedores" },
+    { title: "Planejamento detalhado", text: "Cada etapa é organizada com atenção ao perfil e às necessidades de quem viaja.", icon: "conferido" },
+    { title: "Suporte em toda a jornada", text: "Acompanhamento antes, durante e depois da viagem, inclusive em imprevistos.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa por WhatsApp, telefone, videochamada ou e-mail para entender a inspiração da viagem.",
+    "Planejamento detalhado de destinos, hospedagens e serviços conforme o perfil de cada viajante.",
+    "Apresentação das opções, ajustes e organização de todos os detalhes antes do embarque.",
+    "Acompanhamento durante a viagem e no pós-viagem, com suporte em toda a jornada.",
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "O atendimento é feito diretamente por Paula Gasparini, por WhatsApp, telefone, videochamada ou e-mail, da inspiração ao pós-viagem." },
+    { q: "A Viajar Tirismo atende pessoas 60+ e famílias?", a: "Sim. O planejamento atende públicos diversos, com atenção especial a viajantes 60+ e famílias multigeracionais." },
+    { q: "Quais são as especialidades?", a: "Cruzeiros, viagens sob medida e destinos internacionais, como Europa, Caribe e México, Ásia e Oceania e América do Sul, além de destinos exóticos, neve e resorts." },
+    { q: "Há suporte durante a viagem?", a: "Sim. O acompanhamento continua durante a viagem e após o retorno, com apoio em imprevistos." },
+  ],
+  copy: {
+    destinations: { title: "Destinos para a sua próxima viagem", subtitle: "Algumas das regiões que a Viajar Tirismo planeja com cuidado e detalhe." },
+    modules: { title: "Especialidades", subtitle: "Consultoria completa para diferentes estilos de viagem." },
+    differentials: { title: "Por que viajar com a Viajar Tirismo", subtitle: "Segurança e suporte em cada etapa da jornada." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da inspiração ao pós-viagem", subtitle: "Acompanhamento próximo, conduzido pela proprietária." },
+    faq: { title: "Dúvidas frequentes" },
+  },
+  footer: {
+    description: "Cruzeiros, viagens sob medida e destinos internacionais, com suporte antes, durante e depois da viagem.",
+    whatsapp: "+55 27 99241-9444",
+    phone: "+55 27 99241-9444",
+    email: "viajarturismoes@gmail.com",
+    instagram: "https://www.instagram.com/_viajarturismo",
+    instagramLabel: "@_viajarturismo",
+    showLocation: true,
+  },
+  seo: {
+    title: "Prévia para revisão — Viajar Tirismo",
+    description: "Prévia técnica revisável do site Viajar Tirismo.",
+  },
+};
+
 export interface AdsBriefingPreviewFixture {
   jobId: string;
   info: AgencyDomainInfo;
@@ -462,6 +604,14 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     profile: DRICA_VIAGENS_PREVIEW_PROFILE,
     notice: "Prévia para revisão — sem publicação · ações desativadas",
     documentTitle: "Prévia para revisão — Drica Viagens",
+    realAgency: true,
+  },
+  [VIAJAR_TIRISMO_PREVIEW_JOB_ID]: {
+    jobId: VIAJAR_TIRISMO_PREVIEW_JOB_ID,
+    info: VIAJAR_TIRISMO_PREVIEW_INFO,
+    profile: VIAJAR_TIRISMO_PREVIEW_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Viajar Tirismo",
     realAgency: true,
   },
 };
