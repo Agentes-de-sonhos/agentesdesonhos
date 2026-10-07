@@ -61,7 +61,7 @@ export function AgencyVisaConsultSection({
       <div className={`${siteContainer(true)} py-10 md:py-14`}>
         <div className="grid gap-6 rounded-2xl border border-border bg-card p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
           <div className="flex gap-4">
-            <Stamp className="mt-1 h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+            <Stamp className="mt-1 h-6 w-6 shrink-0 text-primary wl-accent-icon" aria-hidden="true" />
             <div>
               {content.kicker && <p className="text-[11px] font-bold tracking-[0.18em] text-muted-foreground">{content.kicker}</p>}
               <h2 id="visto-americano-title" className="mt-1 text-2xl font-extrabold leading-tight md:text-3xl">{content.title}</h2>

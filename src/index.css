@@ -1129,3 +1129,29 @@ body[data-booking-selection-bar] {
 .wl-editorial.wl-luxury [role="option"][data-state="checked"] svg {
   color: hsl(var(--wl-green-ink));
 }
+
+/* 100 Limites (tema editorial base): acentos vermelhos em ícones/kickers,
+   card "Como funciona" amarelo com números em círculos vermelhos. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) {
+  --wl-accent-red: 0 100% 46%;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-kicker,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-accent-icon {
+  color: hsl(var(--wl-accent-red)) !important;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-cta-primary .wl-accent-icon,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) button .wl-accent-icon {
+  color: inherit !important;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground));
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card h3,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card p {
+  color: hsl(var(--primary-foreground)) !important;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card .wl-step-num {
+  background-color: hsl(var(--wl-accent-red)) !important;
+  color: hsl(0 0% 100%) !important;
+}
