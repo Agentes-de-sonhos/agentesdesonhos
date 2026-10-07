@@ -1807,10 +1807,28 @@ export default function AgencySiteHome({
 
       {/* Apresentação comercial: o laboratório não mostra mapa do catálogo nem
           etiquetas internas entre seções (só o conteúdo das próprias seções). */}
-      {sections.map((section, index) => {
+      {(() => { let rendered = 0; return sections.map((section, index) => {
         const node = renderSection(section.key);
         if (!node) return null;
-        const tagged = node;
+        let tagged = node;
+        if (profile.alternateSurfaces) {
+          // Alternância declarada no perfil: branco, degradê, branco, degradê…
+          const gradient = rendered % 2 === 1;
+          rendered += 1;
+          tagged = (
+            <div key={`${section.key}-surface`} className={`wl-alt-surface ${gradient ? "wl-alt-gradient" : "bg-background"}`}>
+              {node}
+            </div>
+          );
+          if (index === 0 && editorial) {
+            return (
+              <div key={`${section.key}-offset`} className={gradient ? "bg-background" : "bg-background"} style={{ paddingTop: bottomOverlap }}>
+                {tagged}
+              </div>
+            );
+          }
+          return tagged;
+        }
         if (!editorial || index !== 0) return tagged;
         // Compensa a metade inferior do card na primeira seção após a cotação,
         // preservando a superfície da própria seção (sem nova faixa vazia).
