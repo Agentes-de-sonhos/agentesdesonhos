@@ -284,7 +284,7 @@ function CruiseItineraryTimeline({ stops, locale = "pt-BR" }: { stops: any[]; lo
                       <p className="text-[12.5px] text-primary/80 font-medium mt-0.5">{stop.subtitle}</p>
                     )}
                     {stop.description && (
-                      <p className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed">{stop.description}</p>
+                      <div className="text-[12.5px] text-muted-foreground mt-1 leading-relaxed"><FormattedText>{String(stop.description)}</FormattedText></div>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -2585,7 +2585,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                   {periodActs.map((act: any) => (
                                     <div key={act.id} className="border-l-2 border-primary/20 pl-3 py-1">
                                       <p className="text-sm font-medium">{act.title}</p>
-                                      {act.description && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{act.description}</p>}
+                                      {act.description && <div className="text-[13px] text-foreground/80 leading-relaxed break-words"><FormattedText>{String(act.description)}</FormattedText></div>}
                                       {act.start_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">⏰ {act.start_time}</p>}
                                       {act.location && (
                                         act.maps_url ? (
@@ -2601,7 +2601,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                                           <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📍 {act.location}</p>
                                         )
                                       )}
-                                      {act.notes && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{act.notes}</p>}
+                                      {act.notes && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(act.notes)}</FormattedText></div>}
                                       {Array.isArray(act.photo_urls) && act.photo_urls.length > 0 && (
                                         <div className="flex gap-1.5 flex-wrap mt-2">
                                           {act.photo_urls.map((p: string, pi: number) => {
