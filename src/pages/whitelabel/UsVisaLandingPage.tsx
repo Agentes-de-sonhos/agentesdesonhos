@@ -57,7 +57,6 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
     ? `https://wa.me/${wa}?text=${encodeURIComponent("Olá, Amanda! Gostaria de saber mais sobre a assessoria de visto americano.")}`
     : null;
   const { data, isLoading } = useUsVisaPublicInfo();
-  const photo = resolveSiteProfile(info.hostname).about?.images?.[0];
 
   const Cta = ({ className = "" }: { className?: string }) =>
     waHref ? (
@@ -104,7 +103,6 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
             height={1448}
             className="mx-auto h-auto w-full max-w-md rounded-2xl"
           />
-          {void photo}
         </div>
       </section>
 
