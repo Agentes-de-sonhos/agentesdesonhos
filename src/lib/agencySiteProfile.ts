@@ -290,6 +290,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     about: { order: 6 },
     differentials: { order: 7 },
     concierge: { order: 8 },
+    avaliacoes: { enabled: true, order: 9 },
     faq: { order: 10 },
     newsletter: { enabled: true, order: 11 },
     offers: { order: 12 },
@@ -391,6 +392,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
       subtitle: "Conte para a Amanda para onde você quer ir, com quem pretende viajar e o que espera dessa experiência. A partir disso, vocês constroem uma proposta alinhada ao seu perfil.",
       cta: "Solicitar atendimento",
     },
+    avaliacoes: { kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a 100 Limites", subtitle: "Avaliações reais de clientes que confiaram à Amanda Larini o planejamento das suas viagens." },
     faq: { title: "Perguntas frequentes" },
     newsletter: {
       kicker: "GRUPO DE NOVIDADES NO WHATSAPP",
