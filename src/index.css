@@ -1145,7 +1145,15 @@ body[data-booking-selection-bar] {
 }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card {
   background-color: hsl(0 0% 7%) !important;
+  background-image: linear-gradient(to right, hsl(0 0% 7%) 0%, hsl(0 0% 7% / 0.92) 40%, hsl(0 0% 7% / 0.65) 70%, hsl(0 0% 7% / 0.35) 100%), url("./assets/100limites-steps-planning.jpg") !important;
+  background-size: cover !important;
+  background-position: right center !important;
   color: hsl(0 0% 100%);
+}
+@media (max-width: 767px) {
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card {
+    background-image: linear-gradient(to bottom, hsl(0 0% 7% / 0.85) 0%, hsl(0 0% 7% / 0.9) 100%), url("./assets/100limites-steps-planning.jpg") !important;
+  }
 }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card h3,
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-steps-card p {
