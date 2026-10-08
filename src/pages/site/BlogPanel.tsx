@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -56,7 +56,7 @@ function BlogPanelInner({ agencyId }: { agencyId: string }) {
   };
 
   // Capas: URLs assinadas da mídia privada da agência.
-  useMemo(() => {
+  useEffect(() => {
     const paths = posts.map((p) => p.draft.cover_path).filter(Boolean) as string[];
     const missing = paths.filter((p) => !covers[p]);
     if (missing.length) signBlogPaths(missing).then((m) => setCovers((c) => ({ ...c, ...m })));
