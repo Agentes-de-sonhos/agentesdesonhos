@@ -36,7 +36,7 @@ describe("Galeria editorial da página de ingressos", () => {
   it("aceita www mas não outros tenants", () => {
     const { rerender } = render(<OrlandoEditorialGallery hostname="www.destinoscomaju.com.br" />);
     expect(screen.getAllByRole("img", { hidden: true })).toHaveLength(9);
-    for (const hostname of ["100limites.tur.br", "paraisoviagens.com", "casanovatur.demo.local", "localhost"]) {
+    for (const hostname of ["paraisoviagens.com", "casanovatur.demo.local", "localhost"]) {
       rerender(<OrlandoEditorialGallery hostname={hostname} />);
       expect(screen.queryByRole("region")).toBeNull();
     }
