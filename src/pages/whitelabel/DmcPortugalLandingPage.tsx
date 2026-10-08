@@ -317,7 +317,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Grupos */}
       <Section id="grupos" alt>
         <div className="grid items-center gap-8 md:grid-cols-2">
-          <img src={destinoGrupos} alt="Grupo de viajantes" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+          <img src={dmcGrupos} alt="Família brindando em uma quinta portuguesa" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
           <div>
             <H2 k="Grupos">Roteiros sob medida para cada grupo</H2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
@@ -340,14 +340,14 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
               do viajante: gastronomia, arte, cultura, compras e momentos de descanso.
             </p>
           </div>
-          <img src={destinoEuropa} alt="Cidade europeia" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+          <img src={dmcEuropa} alt="Casal de viajantes com malas em uma ponte europeia" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
         </div>
       </Section>
 
       {/* Pet friendly */}
       <Section id="pet-friendly" alt>
         <div className="grid items-center gap-8 md:grid-cols-2">
-          <img src={destinoVilla} alt="Paisagem de Portugal" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+          <img src={dmcPet} alt="Cão viajando ao lado da tutora em veículo privativo" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
           <div>
             <H2 k="Pet friendly">O pet também faz parte da família</H2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
