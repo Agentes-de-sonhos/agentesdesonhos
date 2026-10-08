@@ -218,6 +218,8 @@ export interface AgencySiteProfile {
   featuredExperience?: AgencyFeaturedExperience;
   /** Mapa de Resorts do Brasil (opcional): página /resorts-brasil e/ou seção na home. Ausente = desligado. */
   resortsMap?: { enabled: boolean; showOnHome?: boolean };
+  /** Textos e link do grupo de WhatsApp do pop-up "Receba novidades" (cadastro do banco tem prioridade). */
+  inspirationDialog?: { groupUrl?: string; title?: string; description?: string; submitLabel?: string; notice?: string };
   /** Chamada compacta de consultoria de visto (opcional), logo após os destinos. */
   visaConsult?: { kicker?: string; title: string; text: string; cta: string };
 }
@@ -390,6 +392,19 @@ const EDITORIAL_DMC: AgencySiteProfile = {
       cta: "Solicitar atendimento",
     },
     faq: { title: "Perguntas frequentes" },
+    newsletter: {
+      kicker: "GRUPO DE NOVIDADES NO WHATSAPP",
+      title: "Receba novidades e oportunidades",
+      subtitle: "Informe seu nome, WhatsApp e e-mail. Depois de enviar, você será direcionado para o grupo de WhatsApp da 100 Limites, onde a Amanda compartilha novidades e oportunidades de viagem.",
+      cta: "Quero entrar no grupo",
+    },
+  },
+  inspirationDialog: {
+    groupUrl: "https://chat.whatsapp.com/E3SJmv1Z8aj68oVNDkhaLx?s=sw&p=i&mlu=0",
+    title: "Entre no grupo de novidades",
+    description: "Preencha seus dados. Ao confirmar, você será direcionado automaticamente para o grupo de WhatsApp da 100 Limites.",
+    submitLabel: "Confirmar e entrar no grupo",
+    notice: "Ao confirmar, você autoriza o contato da agência e será levado ao grupo de WhatsApp.",
   },
 };
 

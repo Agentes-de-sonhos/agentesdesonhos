@@ -1890,7 +1890,11 @@ export default function AgencySiteHome({
         onOpenChange={setInspirationOpen}
         hostname={hostname}
         agencyName={name}
-        groupUrl={info.whatsapp_group_url}
+        groupUrl={info.whatsapp_group_url || profile.inspirationDialog?.groupUrl}
+        title={profile.inspirationDialog?.title}
+        description={profile.inspirationDialog?.description}
+        submitLabel={profile.inspirationDialog?.submitLabel}
+        notice={profile.inspirationDialog?.notice}
       />
     </>
   );

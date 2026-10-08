@@ -35,6 +35,8 @@ export function AgencyInspirationDialog({
   groupUrl,
   title,
   description,
+  submitLabel,
+  notice,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -43,6 +45,8 @@ export function AgencyInspirationDialog({
   groupUrl?: string | null;
   title?: string;
   description?: string;
+  submitLabel?: string;
+  notice?: string;
 }) {
   const { state, error, submit, reset } = useAgencySiteRequest(hostname);
   const [form, setForm] = useState<InspirationLeadForm>({ first_name: "", phone: "", email: "" });
@@ -193,7 +197,7 @@ export function AgencyInspirationDialog({
               className="w-full bg-[var(--brand-secondary)] text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)]"
             >
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
-              Confirmar
+              {submitLabel ?? "Confirmar"}
             </Button>
             {isDemo && (
               <p className="rounded-lg bg-[var(--brand-tertiary)] px-3 py-2 text-center text-[11px] text-[var(--brand-primary)]">
@@ -201,8 +205,8 @@ export function AgencyInspirationDialog({
               </p>
             )}
             <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-              Ao confirmar, você autoriza o contato da agência para envio de inspirações,
-              novidades e promoções de viagem.
+              {notice ??
+                "Ao confirmar, você autoriza o contato da agência para envio de inspirações, novidades e promoções de viagem."}
             </p>
           </form>
         )}
