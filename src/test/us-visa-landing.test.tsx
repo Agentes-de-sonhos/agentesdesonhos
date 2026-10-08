@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
+import { MemoryRouter } from "react-router-dom";
 
 vi.mock("@/hooks/useUsVisaPublicInfo", () => ({
   useUsVisaPublicInfo: () => ({
@@ -18,7 +19,7 @@ import UsVisaLandingPage from "@/pages/whitelabel/UsVisaLandingPage";
 
 describe("landing visto americano 100 Limites", () => {
   it("mostra dados da base, indisponível sem dado e CTA do WhatsApp da agência", () => {
-    render(<HelmetProvider><UsVisaLandingPage info={{ hostname: "100limites.tur.br", phone: "(11) 98888-7777" } as any} /></HelmetProvider>);
+    render(<MemoryRouter><HelmetProvider><UsVisaLandingPage info={{ hostname: "100limites.tur.br", phone: "(11) 98888-7777" } as any} /></HelmetProvider></MemoryRouter>);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Visto americano com orientação em cada etapa");
     expect(screen.getByText("US$ 185")).toBeTruthy();
     expect(screen.getByText("1 mês")).toBeTruthy();
@@ -29,7 +30,7 @@ describe("landing visto americano 100 Limites", () => {
     expect(document.body.textContent).not.toMatch(/Sem Limites/);
   });
   it("não mostra CTA quando a agência não tem WhatsApp", () => {
-    render(<HelmetProvider><UsVisaLandingPage info={{ hostname: "100limites.tur.br", phone: null } as any} /></HelmetProvider>);
+    render(<MemoryRouter><HelmetProvider><UsVisaLandingPage info={{ hostname: "100limites.tur.br", phone: null } as any} /></HelmetProvider></MemoryRouter>);
     expect(screen.queryByRole("link", { name: /Falar com a Amanda/ })).toBeNull();
   });
 });
