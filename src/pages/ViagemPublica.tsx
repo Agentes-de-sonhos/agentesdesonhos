@@ -629,13 +629,13 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       // Chip specific
       if (data.chip_operator) otherDetails.push(`${t('fldOperadora')}: ${data.chip_operator}`);
       if (data.chip_type) otherDetails.push(`${t('fldTipo')}: ${data.chip_type === 'esim' ? t('chipEsim') : t('chipFisico')}`);
-      if (data.chip_activation_instructions) otherDetails.push(`${t('fldAtivacao')}: ${data.chip_activation_instructions}`);
+      if (data.chip_activation_instructions) otherDetails.push(`${t('fldAtivacao')}: ${descriptionToPlainText(String(data.chip_activation_instructions))}`);
       // Guide specific
       if (data.guide_name) otherDetails.push(`${t('fldGuia')}: ${data.guide_name}`);
       if (data.guide_language) otherDetails.push(`${t('fldIdioma')}: ${data.guide_language}`);
-      if (data.guide_meeting_point) otherDetails.push(`${t('fldPontoEncontro')}: ${data.guide_meeting_point}`);
-      if (data.description) otherDetails.push(data.description);
-      if (data.agency_tips) otherDetails.push(`${t('fldDicas')}: ${data.agency_tips}`);
+      if (data.guide_meeting_point) otherDetails.push(`${t('fldPontoEncontro')}: ${descriptionToPlainText(String(data.guide_meeting_point))}`);
+      if (data.description) otherDetails.push(descriptionToPlainText(String(data.description)));
+      if (data.agency_tips) otherDetails.push(`${t('fldDicas')}: ${descriptionToPlainText(String(data.agency_tips))}`);
       if (data.agency_notes) otherDetails.push(`${t('fldObs')}: ${descriptionToPlainText(data.agency_notes)}`);
       return { title: data.service_name || t('fldServico'), details: otherDetails, dates: data.date ? formatDate(data.date) : undefined };
     }
@@ -915,7 +915,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionOrientacoesEmbarque")}</p>
             {data.recommended_arrival && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAntecedencia")}: {data.recommended_arrival}</p>}
             {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTerminal")}: {data.boarding_terminal}</p>}
-            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentosField")}: {data.required_documents}</p>}
+            {data.required_documents && <div className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentosField")}: <FormattedText>{String(data.required_documents)}</FormattedText></div>}
             {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldImigracao")}: {data.immigration_rules}</p>}
             {data.boarding_notes && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.boarding_notes)}</FormattedText></div>}
           </div>
@@ -1019,7 +1019,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             {data.checkin_time && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldHorario")}: {data.checkin_time}</p>}
             {data.early_checkin && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldEarlyCheckin")}: {data.early_checkin === 'sim' ? t('statusIncluso') : data.early_checkin === 'mediante_taxa' ? t('statusMedianteTaxa') : data.early_checkin === 'sob_consulta' ? t('statusSobConsulta') : t('statusNaoDisponivel')}</p>}
             {data.checkin_holder && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTitular")}: {data.checkin_holder}</p>}
-            {data.checkin_instructions && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.checkin_instructions}</p>}
+            {data.checkin_instructions && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.checkin_instructions)}</FormattedText></div>}
             {data.late_arrival_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldChegadaTardia")}: {data.late_arrival_policy}</p>}
           </div>
         )}
@@ -1243,7 +1243,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isCarRental && (data.required_documents || data.international_permit || data.traffic_rules) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secOrientacoes")}</p>
-            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentos")}: {data.required_documents}</p>}
+            {data.required_documents && <div className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentos")}: <FormattedText>{String(data.required_documents)}</FormattedText></div>}
             {data.minimum_age && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldIdadeMinima")}: {data.minimum_age}</p>}
             {data.international_permit && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldPidPermissao")}: {data.international_permit}</p>}
             {data.traffic_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words italic">{data.traffic_rules}</p>}
@@ -1263,7 +1263,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             {data.meeting_instructions && (
               <div className="mt-1 p-2 bg-primary/[0.06] border border-primary/15 rounded-xl">
                 <p className="text-xs font-medium text-primary">{t("secOndeEncontrarMotorista")}</p>
-                <p className="text-xs text-foreground">{data.meeting_instructions}</p>
+                <div className="text-xs text-foreground"><FormattedText>{String(data.meeting_instructions)}</FormattedText></div>
               </div>
             )}
           </div>
@@ -1364,7 +1364,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isTransfer && (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes) && (
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secOrientacoes")}</p>
-            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentos")}: {data.required_documents}</p>}
+            {data.required_documents && <div className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentos")}: <FormattedText>{String(data.required_documents)}</FormattedText></div>}
             {data.emergency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldEmergenciaSos")}: {data.emergency_contact}</p>}
             {data.agency_contact && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAgenciaEmoji")}: {data.agency_contact}</p>}
             {data.plan_b && (
@@ -1411,7 +1411,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isAttraction && data.usage_instructions && (
           <div className="mt-2 p-3 bg-primary/[0.06] border border-primary/15 rounded-2xl p-4">
             <p className="text-xs font-medium text-primary">{t("secInstrucoesImportantes")}</p>
-            <p className="text-xs text-foreground mt-1">{data.usage_instructions}</p>
+            <div className="text-xs text-foreground mt-1"><FormattedText>{String(data.usage_instructions)}</FormattedText></div>
           </div>
         )}
 
@@ -1451,10 +1451,10 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secRegrasPoliticas")}</p>
             {data.cancellation_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCancelamento")}: {data.cancellation_policy}</p>}
             {data.change_policy && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAlteracao")}: {data.change_policy}</p>}
-            {data.attraction_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{data.attraction_rules}</p>}
+            {data.attraction_rules && <div className="text-[13px] text-foreground/80 leading-relaxed break-words"><FormattedText>{String(data.attraction_rules)}</FormattedText></div>}
             {data.prohibited_items && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldProibido")}: {data.prohibited_items}</p>}
             {data.dress_code && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">👔 {t("fldDressCode")}: {data.dress_code}</p>}
-            {data.required_documents && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">📄 {t("fldDocumentos")}: {data.required_documents}</p>}
+            {data.required_documents && <div className="text-[13px] text-foreground/80 leading-relaxed break-words">📄 {t("fldDocumentos")}: <FormattedText>{String(data.required_documents)}</FormattedText></div>}
           </div>
         )}
 
@@ -1462,7 +1462,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isAttraction && data.agency_tips && (
           <div className="mt-2 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secDicasAgente")}</p>
-            <p className="text-xs text-foreground mt-1 whitespace-pre-line">{data.agency_tips}</p>
+            <div className="text-xs text-foreground mt-1"><FormattedText>{String(data.agency_tips)}</FormattedText></div>
           </div>
         )}
 
@@ -1566,10 +1566,10 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isInsurance && (data.how_to_activate || data.hospital_procedure || data.reimbursement_info) && (
           <div className="mt-2 p-3 bg-primary/[0.06] border border-primary/15 rounded-2xl p-4 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secComoAcionar")}</p>
-            {data.how_to_activate && <p className="text-xs text-foreground whitespace-pre-line">{data.how_to_activate}</p>}
-            {data.required_documents_claim && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">{t("fldDocumentosEmoji")}: {data.required_documents_claim}</p>}
+            {data.how_to_activate && <div className="text-xs text-foreground"><FormattedText>{String(data.how_to_activate)}</FormattedText></div>}
+            {data.required_documents_claim && <div className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">{t("fldDocumentosEmoji")}: <FormattedText>{String(data.required_documents_claim)}</FormattedText></div>}
             {data.hospital_procedure && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">🏥 {data.hospital_procedure}</p>}
-            {data.reimbursement_info && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">💰 {t("fldReembolso")}: {data.reimbursement_info}</p>}
+            {data.reimbursement_info && <div className="text-[13px] text-foreground/80 leading-relaxed break-words">💰 {t("fldReembolso")}: <FormattedText>{String(data.reimbursement_info)}</FormattedText></div>}
           </div>
         )}
 
@@ -1577,7 +1577,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isInsurance && data.agency_tips && (
           <div className="mt-2 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secOrientacoesAgente")}</p>
-            <p className="text-xs text-foreground mt-1 whitespace-pre-line">{data.agency_tips}</p>
+            <div className="text-xs text-foreground mt-1"><FormattedText>{String(data.agency_tips)}</FormattedText></div>
           </div>
         )}
 
@@ -1683,7 +1683,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
         {isOther && data.agency_tips && (
           <div className="mt-2 p-3 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secOrientacoesAgente")}</p>
-            <p className="text-xs text-foreground mt-1 whitespace-pre-line">{data.agency_tips}</p>
+            <div className="text-xs text-foreground mt-1"><FormattedText>{String(data.agency_tips)}</FormattedText></div>
           </div>
         )}
 
