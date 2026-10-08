@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { siteContainer } from "@/lib/agencySiteTheme";
 import { type AgencyDomainInfo, agencyWhatsappNumber } from "@/lib/agencyDomains";
-import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
+import amandaNy from "@/assets/whitelabel/100-limites/amanda-estatua-liberdade.jpg.asset.json";
 
 const FEES_URL = "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html";
 const WAITS_URL = "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/global-visa-wait-times.html";
@@ -56,7 +56,6 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
     ? `https://wa.me/${wa}?text=${encodeURIComponent("Olá, Amanda! Gostaria de saber mais sobre a assessoria de visto americano.")}`
     : null;
   const { data, isLoading } = useUsVisaPublicInfo();
-  const photo = resolveSiteProfile(info.hostname).about?.images?.[0];
 
   const Cta = ({ className = "" }: { className?: string }) =>
     waHref ? (
@@ -96,13 +95,13 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
             </p>
             <Cta className="mt-7 w-full sm:w-auto" />
           </div>
-          {photo?.src && (
-            <img
-              src={photo.src}
-              alt={photo.alt ?? "Amanda Larini, consultora da 100 Limites"}
-              className="mx-auto aspect-square w-full max-w-md rounded-2xl object-cover"
-            />
-          )}
+          <img
+            src={amandaNy.url}
+            alt="Amanda Larini, da 100 Limites, diante da Estátua da Liberdade em Nova York"
+            width={1086}
+            height={1448}
+            className="mx-auto h-auto w-full max-w-md rounded-2xl"
+          />
         </div>
       </section>
 
