@@ -98,7 +98,7 @@ describe("modal e CTA", () => {
   it("CTA editorial usa secundária dinâmica e o quadro usa a primária", () => {
     expect(home).toContain("bg-[var(--brand-primary)] px-8 py-12");
     expect(home).toContain("Quero receber inspirações");
-    expect(home).toContain("groupUrl={info.whatsapp_group_url}");
+    expect(home).toContain("groupUrl={info.whatsapp_group_url ||");
   });
 
   it("modal é acessível (labels e alertas)", () => {
