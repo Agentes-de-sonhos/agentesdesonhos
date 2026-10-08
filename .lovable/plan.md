@@ -1,41 +1,43 @@
-# Auditoria somente leitura dos 22 problemas do monitoramento
+# Módulo Site → Blog (white-label) — v1
 
-## Situação
-A lista exata dos 22 problemas do aviso de monitoramento do projeto não pode ser lida no modo de planejamento: a ferramenta que lê essa lista não fica disponível aqui. Tudo o que está abaixo vem de leituras já feitas nesta conversa. Nada foi alterado.
+## Achados da inspeção
+- Habilitação por agência já existe: `agency_entitlements` + `agency_has_entitlement(agency_id, key)` / `current_agency_entitlements`. O blog usará a chave `site_blog` (default: inexistente = desligado). Nenhum plano/cobrança novo.
+- Editor confiável já existe com Tiptap core (`PlaybookRichTextEditor`, `ResizableImageExtension`). Será reaproveitado numa versão restrita (sem HTML livre, sem iframe genérico; YouTube só por URL validada).
+- Rotas públicas white-label ficam em `src/components/routing/AgencyDomainRoutes.tsx`; o `/blog` atual de `App.tsx` é o blog do próprio app e não será tocado.
+- Leads: `submit-lead-form` (Edge Function) já grava no CRM da agência; será reaproveitado com origem `blog` + slug/URL.
+- Agendamento: há crons existentes (`google-calendar-cron`, `product-landing-lead-emails`); será criado um job dedicado e idempotente.
+- Projeto é SPA (sem SSR). SEO por artigo para robôs sociais exige proxy servidor: reaproveitar o padrão `public-og` (Edge Function) para servir metatags/OG e um sitemap por domínio. Limitação documentada abaixo.
 
-## O que já foi verificado (somente leitura)
-- **Registros do preview** (erros de build, de execução e do console): não há nenhum arquivo agora. Nada indica erro ativo de build ou de execução.
-- **Verificador automático do banco:** 539 avisos, de 6 tipos:
-  - 515 funções privilegiadas que podem ser chamadas por visitantes (218) ou por usuários logados (297);
-  - 15 tabelas protegidas, mas sem nenhuma regra de acesso;
-  - 6 funções sem caminho de busca fixo;
-  - 2 extensões instaladas na área pública;
-  - proteção contra senhas vazadas desligada.
-- **Varredura de segurança:**
-  - A última varredura do banco é de 03/10. Ela está marcada como desatualizada.
-  - Nenhum problema de dependências (varredura de 16/09) nem de integrações MCP.
-  - A varredura de conectores está incompleta.
-- Dois itens de nível "erro" já aparecem na varredura. Os dois merecem atenção imediata se fizerem parte dos 22:
-  - **quote-documents:** uma regra pública de leitura permite baixar documentos de orçamento sem ligação com o dono. **Pode vazar dados entre agências e clientes.**
-  - **tour-guides-gallery:** visitantes não logados podem apagar arquivos e enviar novos arquivos.
-- Avisos de nível médio, ligados a uploads e substituição de arquivos sem dono: supplier-logos, media-files e showcase-images.
-- A maioria dos itens restantes é informativa: tabelas de conteúdo compartilhado legíveis por qualquer usuário logado (trilhas, mentorias, quiz, frases mensais). Provavelmente são intencionais.
+## Etapas (entregues em sequência, todas em prévia, nada publicado)
 
-## Passos após aprovação (continua somente leitura)
-1. Ler a lista de monitoramento e obter exatamente os 22 itens: título, origem e recurso afetado.
-2. Para cada item, confirmar o estado real só com consultas de leitura:
-   - regras de acesso das tabelas e dos arquivos envolvidos;
-   - quem pode chamar as funções;
-   - uso no código, para saber se a regra é usada pelas páginas públicas (links de orçamento, galeria de guias);
-   - registros de funções e de erros.
-3. Cruzar os 22 itens com a varredura acima e marcar duplicados e causas comuns.
-4. Entregar o relatório na conversa, sem alterar nada, com:
-   - os 10 pontos pedidos para cada item;
-   - grupos de itens com a mesma causa e a quantidade de itens realmente distintos;
-   - classificação: corrigir imediatamente, próxima rodada, pode aguardar ou falso positivo;
-   - fases de correção em ordem segura, com complexidade baixa, média ou alta;
-   - destaque para riscos de vazamento entre agências, perda de dados, indisponibilidade ou cobrança indevida;
-   - lista das verificações realizadas.
+**Etapa 1 — Banco e segurança (requer sua aprovação)**
+Migração aditiva:
+- `site_blog_settings` (agency_id PK, convite padrão do CTA, fuso default `America/Sao_Paulo`, autor default).
+- `site_blog_categories` (agency_id, nome, slug único por agência).
+- `site_blog_posts` (agency_id, slug único por agência, status `draft|scheduled|published|unpublished`, campos de trabalho `draft_*` separados dos campos publicados `pub_*`, `scheduled_at`, `published_at`, `updated_published_at`, capa/alt, resumo, categoria, autor, destaque, SEO, CTA próprio).
+- `site_blog_post_revisions` (snapshot jsonb do rascunho; restaurar só reescreve o rascunho).
+- `site_blog_publish_log` (execuções/falhas do agendador).
+- Bucket privado `site-blog-media` com caminho `{agency_id}/{post_id}/...`; políticas de storage checam membro da agência + recurso ativo; leitura pública via função que só entrega mídia de post publicado.
+- RLS: escrita só para dono/membro da agência com permissão e `agency_has_entitlement(agency, 'site_blog')`; leitura anônima apenas via RPC `public_blog_list/public_blog_post(hostname, ...)` que resolve o tenant por `get_agency_domain` e devolve só campos `pub_*` de agência habilitada. Trigger valida que categoria pertence à mesma agência.
+- Funções `blog_publish_now`, `blog_schedule`, `blog_cancel_schedule`, `blog_unpublish`, `blog_run_scheduled()` (idempotente, `FOR UPDATE SKIP LOCKED`, respeita recurso desligado, registra falha) + pg_cron a cada 5 min.
 
-## Garantias
-Não haverá alteração de arquivos, banco, regras de acesso, migrações, publicação ou deploy. Também não haverá testes destrutivos nem a suíte completa de testes. Nenhum alerta será marcado como resolvido ou ignorado.
+**Etapa 2 — Painel do agente**
+- Menu "Site" expansível com "Blog", visível só com recurso + permissão. Rotas `/site/blog`, `/site/blog/novo`, `/site/blog/:id`.
+- Lista: busca, abas Publicados/Rascunhos/Agendados, ações editar/duplicar/visualizar/retirar do ar; categorias e configurações em menu secundário; estado vazio.
+- Editor contínuo com autosave (salvando/salvo/erro, aviso ao sair), rascunho criado antes do primeiro upload, imagens comprimidas no navegador, galeria, YouTube, histórico de versões, prévia desktop/mobile protegida, publicar/agendar (fuso explícito)/cancelar/retirar.
+- Admin: alternância "Blog do site" por agência na tela de entitlements existente.
+
+**Etapa 3 — Público e conversão**
+- `/blog` (destaque, cards, busca, categoria, paginação por `?pagina=`) e `/blog/:slug` (capa, autor, datas, mídia, WhatsApp/copiar link, relacionados) em `AgencyDomainRoutes`, com cabeçalho/rodapé da agência; link "Blog" no menu só se habilitado e com ≥1 publicado.
+- CTA final: formulário via `submit-lead-form` com origem Blog + artigo/URL; sucesso só após gravação; WhatsApp contextual registrado como clique (não lead).
+
+**Etapa 4 — SEO e validação**
+- Metatags client-side + JSON-LD BlogPosting; extensão do `public-og` para `/blog/:slug` e sitemap por domínio só com publicados. Rascunhos/prévias com `noindex` e nunca servidos pela API pública.
+- Testes: isolamento entre duas agências, anônimo vs rascunho/revisão/mídia alheia, recurso desligado, agendamento/fuso, autosave sem vazar ao publicado, slug, YouTube, gravação de lead (com dados de teste removidos depois).
+
+## Limitações conhecidas
+- Sem SSR: Google indexa via JS; previews sociais por artigo dependem do proxy `public-og` estar na frente do domínio (já é o padrão do app). SEO "completo" de conteúdo renderizado exigiria migração para TanStack Start.
+- Fora do escopo: IA, newsletter, comentários, tradução, colaboração simultânea, upload de vídeo.
+
+## Piloto
+Após as etapas, habilitar uma agência pela administração (ou inserindo `site_blog` em `agency_entitlements` com sua autorização). Nenhuma agência será habilitada automaticamente e nenhum artigo será publicado.
