@@ -222,10 +222,10 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
       <section className="wl-alt-gradient">
         <div className={`${siteContainer(true)} py-12 md:py-16`}>
           <h2 className="text-2xl font-extrabold md:text-3xl">Perguntas frequentes</h2>
-          <Accordion type="single" collapsible className="mt-6 rounded-xl border border-border/60 bg-card px-5">
+          <Accordion type="single" collapsible className="wl-visa-faq mt-6 rounded-xl border border-border/60 bg-card px-5">
             {FAQ.map((f, i) => (
               <AccordionItem key={f.q} value={`f${i}`} className={i === FAQ.length - 1 ? "border-b-0" : ""}>
-                <AccordionTrigger className="text-left text-[15px] font-semibold">{f.q}</AccordionTrigger>
+                <AccordionTrigger className="wl-visa-faq-q text-left text-[15px] font-semibold">{f.q}</AccordionTrigger>
                 <AccordionContent className="text-[15px] leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
               </AccordionItem>
             ))}

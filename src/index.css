@@ -262,6 +262,9 @@ img {
   --wl-sand: 36 32% 92%;
   /* Verde WhatsApp acessível com texto branco */
   --wl-whatsapp: 152 62% 30%;
+  /* Âmbar/dourado escuro derivado do amarelo da marca: usado em hovers de
+     texto, onde o amarelo puro ficaria claro demais sobre fundo claro. */
+  --wl-gold: 32 88% 33%;
 
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
 }
@@ -1250,6 +1253,23 @@ body[data-booking-selection-bar] {
 }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-row:hover {
   background-color: hsl(var(--muted));
+}
+
+/* Perguntas frequentes: sem sublinhado no hover; a pergunta e a setinha
+   assumem o âmbar/dourado escuro da marca. A regra acima do componente
+   compartilhado (hover:underline) é anulada por este seletor mais específico. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-faq .wl-visa-faq-q {
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-faq .wl-visa-faq-q:hover,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-faq .wl-visa-faq-q:focus-visible {
+  text-decoration: none;
+  color: hsl(var(--wl-gold));
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-faq .wl-visa-faq-q:hover svg,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-faq .wl-visa-faq-q:focus-visible svg {
+  color: hsl(var(--wl-gold));
 }
 
 @media (prefers-reduced-motion: no-preference) {
