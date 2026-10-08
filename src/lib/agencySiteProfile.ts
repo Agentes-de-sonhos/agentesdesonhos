@@ -288,12 +288,6 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     newsletter: { enabled: true, order: 11 },
     offers: { order: 12 },
   },
-  visaConsult: {
-    kicker: "CONSULTORIA",
-    title: "Consultoria de visto americano",
-    text: "Orientação para organizar sua solicitação de visto para os Estados Unidos. Envie seus dados de contato e a Amanda retorna para entender o seu caso.",
-    cta: "Solicitar consultoria",
-  },
   hero: [
     {
       title: "Sua agência de viagens para o Brasil e o mundo",
