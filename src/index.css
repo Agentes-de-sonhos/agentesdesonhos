@@ -1192,3 +1192,77 @@ body[data-booking-selection-bar] {
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-resort-logo-box { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-resort-logo { max-height: 5rem !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-resorts-btn { border-radius: 0.75rem !important; }
+
+/* ===== 100 Limites · micro-interações da landing de visto americano =====
+   Classes wl-visa-* usadas apenas em src/pages/whitelabel/UsVisaLandingPage.tsx.
+   Efeitos discretos de hover (troca de cor + leve movimento "vai e volta").
+   Cores vindas dos tokens do preset editorial; nenhum valor fixo. Os movimentos
+   são desativados quando a pessoa prefere menos animação. */
+
+@keyframes wl-visa-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+
+/* CTA do WhatsApp: amarelo da marca → verde oficial com texto branco. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta {
+  transition: background-color 0.28s ease, color 0.28s ease, box-shadow 0.28s ease, transform 0.2s ease;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:hover,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:focus-visible {
+  background-color: hsl(var(--wl-whatsapp));
+  color: hsl(var(--card));
+  box-shadow: 0 14px 28px -16px hsl(var(--wl-whatsapp) / 0.7);
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:active {
+  transform: scale(0.985);
+}
+
+/* Foto da Amanda: zoom suave que volta ao normal ao sair do mouse. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-photo {
+  transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.55s ease;
+}
+
+/* Cartões de benefícios, etapas e custos: sobem de leve e ganham borda da marca. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-benefit,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-step,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-card {
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-benefit:hover,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-step:hover,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-card:hover {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 16px 30px -24px hsl(var(--foreground) / 0.55);
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-benefit:hover svg {
+  color: hsl(var(--primary));
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-step:hover span:first-child {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Linha da tabela de esperas: o fundo muda ao passar o mouse. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-row {
+  transition: background-color 0.25s ease;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-row:hover {
+  background-color: hsl(var(--muted));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:hover {
+    animation: wl-visa-pop 0.5s ease;
+  }
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-photo:hover {
+    transform: scale(1.02) translateY(-4px);
+    box-shadow: 0 24px 44px -30px hsl(var(--foreground) / 0.5);
+  }
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-benefit:hover,
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-step:hover,
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-card:hover {
+    transform: translateY(-3px);
+  }
+}
