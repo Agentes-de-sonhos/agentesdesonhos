@@ -79,7 +79,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
       />
 
       {/* Hero */}
-      <section className="bg-background">
+      <section className="bg-card">
         <div className={`${siteContainer(true)} grid items-center gap-10 py-12 md:grid-cols-[1.1fr_0.9fr] md:py-20`}>
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Visto americano · B1/B2</p>
@@ -121,7 +121,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
       </section>
 
       {/* Etapas */}
-      <section className="bg-background">
+      <section className="bg-card">
         <div className={`${siteContainer(true)} py-12 md:py-16`}>
           <h2 className="text-2xl font-extrabold md:text-3xl">Como funciona</h2>
           <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -172,7 +172,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
       </section>
 
       {/* Locais e espera */}
-      <section className="bg-background">
+      <section className="bg-card">
         <div className={`${siteContainer(true)} py-12 md:py-16`}>
           <h2 className="text-2xl font-extrabold md:text-3xl">Locais de atendimento no Brasil</h2>
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-muted-foreground">
@@ -234,7 +234,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
       </section>
 
       {/* Encerramento */}
-      <section className="bg-background">
+      <section className="bg-card">
         <div className={`${siteContainer(true)} py-12 text-center md:py-16`}>
           <h2 className="text-2xl font-extrabold md:text-3xl">Vamos começar a planejar sua viagem?</h2>
           <Cta className="mt-6 w-full sm:w-auto" />
