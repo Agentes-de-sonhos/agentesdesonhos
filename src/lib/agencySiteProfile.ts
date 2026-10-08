@@ -255,8 +255,11 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
   resortsMap: { enabled: true },
   nav: [
+    { label: "Início", to: "/" },
+    { label: "Parques em Orlando", to: "/#ingressos-orlando" },
+    { label: "Resorts no Brasil", to: "/#resorts" },
+    { label: "Visto americano", to: "/visto-americano" },
     { label: "Sobre", to: "/#sobre" },
-    { label: "Viagens", to: "/#destinos" },
     {
       label: "DMC em Portugal",
       to: "/dmc-portugal",
@@ -272,8 +275,6 @@ const EDITORIAL_DMC: AgencySiteProfile = {
         { label: "Contato", to: "/dmc-portugal#contato" },
       ],
     },
-    { label: "Visto americano", to: "/visto-americano" },
-    { label: "Área do cliente", to: "/area-do-cliente" },
   ],
   navDensity: "compact",
   alternateSurfaces: true,
