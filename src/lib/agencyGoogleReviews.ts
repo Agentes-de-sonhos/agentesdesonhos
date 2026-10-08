@@ -20,9 +20,16 @@ const DESTINOS_COM_A_JU: GoogleReviewsHostConfig = {
   placeId: "ChIJhTnCndr3zpQRyRaMIZaR7Kw",
 };
 
+const CEM_LIMITES: GoogleReviewsHostConfig = {
+  label: "100 Limites Viagens e Turismo",
+  placeId: "ChIJja6jcMrwnUYR1bK8iqexXQg",
+};
+
 const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
   "destinoscomaju.com.br": DESTINOS_COM_A_JU,
   "www.destinoscomaju.com.br": DESTINOS_COM_A_JU,
+  "100limites.tur.br": CEM_LIMITES,
+  "www.100limites.tur.br": CEM_LIMITES,
 };
 
 export function resolveGoogleReviewsConfig(hostname: string | null | undefined) {

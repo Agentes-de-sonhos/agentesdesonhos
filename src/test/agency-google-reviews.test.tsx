@@ -45,10 +45,11 @@ describe("servidor google-place-reviews", () => {
 });
 
 describe("allowlist de avaliações do Google", () => {
-  it("ativa só os hosts da Destinos com a Ju", () => {
+  it("ativa só os hosts da Destinos com a Ju e da 100 Limites", () => {
     expect(isGoogleReviewsEnabled("destinoscomaju.com.br")).toBe(true);
     expect(isGoogleReviewsEnabled("www.destinoscomaju.com.br")).toBe(true);
-    expect(isGoogleReviewsEnabled("100limites.tur.br")).toBe(false);
+    expect(isGoogleReviewsEnabled("100limites.tur.br")).toBe(true);
+    expect(isGoogleReviewsEnabled("www.100limites.tur.br")).toBe(true);
     expect(isGoogleReviewsEnabled("paraisoviagens.com")).toBe(false);
   });
 });
