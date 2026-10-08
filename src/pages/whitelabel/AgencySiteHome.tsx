@@ -29,6 +29,7 @@ import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyVisaConsultSection } from "@/components/whitelabel/AgencyVisaConsultSection";
+import { UsVisaHomeTeaser } from "@/components/whitelabel/UsVisaHomeTeaser";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import { AgencyGoogleReviewsSection } from "@/components/whitelabel/AgencyGoogleReviewsSection";
@@ -1410,7 +1411,8 @@ export default function AgencySiteHome({
 
       case "resorts":
         return (
-          <section key={key} id="resorts" className="scroll-mt-24 bg-background py-14 md:py-20">
+          <Fragment key={key}>
+          <section id="resorts" className="scroll-mt-24 bg-background py-14 md:py-20">
             <div className={container}>
               <AgencyResortsSection
                 allHref={agencySiteHref("/resorts-brasil")}
@@ -1418,6 +1420,10 @@ export default function AgencySiteHome({
               />
             </div>
           </section>
+          {profile.key === "editorialDmc" && (
+            <UsVisaHomeTeaser whatsapp={agencyWhatsappNumber(info)} />
+          )}
+          </Fragment>
         );
 
       case "orlando":
