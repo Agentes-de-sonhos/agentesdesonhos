@@ -9,9 +9,15 @@ import { Loader2 } from "lucide-react";
 import { normalizeBrandHost } from "@/lib/agencySiteBrand";
 import destinosComAJuSymbol from "@/assets/whitelabel/simbolo-destinos-com-a-ju.png.asset.json";
 
+/** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
+const CEM_LIMITES_MARK =
+  "https://mlwwpckahhfsixplxwif.supabase.co/storage/v1/object/public/avatars/9433421c-2252-4030-acab-135c03ab009e/1776696708130.png";
+
 const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuSymbol.url,
   "www.destinoscomaju.com.br": destinosComAJuSymbol.url,
+  "100limites.tur.br": CEM_LIMITES_MARK,
+  "www.100limites.tur.br": CEM_LIMITES_MARK,
 };
 
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
