@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Award, Building2, Clock, ExternalLink, MessageCircle } from "lucide-react";
+import { ArrowRight, Award, Building2, Clock, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
 import { agencySiteHref } from "@/lib/agencyContextLink";
@@ -23,7 +23,7 @@ function formatDate(iso: string | null | undefined) {
 }
 
 /** Vitrine interativa da home: espera por consulado (dados oficiais) + CTA para /visto-americano. */
-export function UsVisaHomeTeaser({ whatsapp }: { whatsapp?: string | null }) {
+export function UsVisaHomeTeaser() {
   const { data, isLoading } = useUsVisaPublicInfo();
   const waits = data?.interview_wait_times ?? null;
   const [selected, setSelected] = useState(CITIES[0].key);
@@ -42,9 +42,7 @@ export function UsVisaHomeTeaser({ whatsapp }: { whatsapp?: string | null }) {
   const wait = waits?.[selected];
   const sourceDate = formatDate(data?.wait_times_source_updated_at);
   const fee = typeof data?.mrv_fee_usd === "number" ? data.mrv_fee_usd : null;
-  const waLink = whatsapp
-    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent("Olá, Amanda! Quero saber mais sobre a assessoria de visto americano.")}`
-    : null;
+
 
   return (
     <section id="visto-americano" className="scroll-mt-24 wl-soft-gradient bg-[hsl(var(--wl-sand))] py-14 md:py-20">
@@ -72,14 +70,8 @@ export function UsVisaHomeTeaser({ whatsapp }: { whatsapp?: string | null }) {
                   Conhecer a assessoria completa <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                 </a>
               </Button>
-              {waLink && (
-                <Button asChild size="lg" variant="outline">
-                  <a href={waLink} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar com a Amanda
-                  </a>
-                </Button>
-              )}
             </div>
+
           </div>
 
           <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm md:p-7">
