@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { siteContainer } from "@/lib/agencySiteTheme";
 import { type AgencyDomainInfo, agencyWhatsappNumber } from "@/lib/agencyDomains";
-import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
 import amandaNy from "@/assets/whitelabel/100-limites/amanda-estatua-liberdade.jpg.asset.json";
 
