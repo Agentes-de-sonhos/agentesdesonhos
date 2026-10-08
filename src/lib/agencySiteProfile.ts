@@ -1,3 +1,6 @@
+import momentFamily from "@/assets/100limites-moment-family.jpg";
+import momentHoneymoon from "@/assets/100limites-moment-honeymoon.jpg";
+import momentFriends from "@/assets/100limites-moment-friends.jpg";
 /**
  * Perfis editoriais dos sites White Label.
  *
@@ -331,9 +334,9 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     { key: "america-sul", image: "safari", label: "América do Sul", title: "América do Sul", text: "Cultura, gastronomia e grandes paisagens perto de casa.", service: "pacotes", enabled: true, order: 5 },
   ],
   highlights: [
-    { title: "Viagens em família", text: "Hospedagens, passeios e deslocamentos pensados para diferentes idades, com atenção ao conforto e ao ritmo da família.", service: "pacotes", cta: "Planejar em família" },
-    { title: "Lua de mel", text: "Uma viagem para celebrar a dois, com destinos e experiências escolhidos conforme os seus desejos.", service: "pacotes", cta: "Planejar nossa viagem" },
-    { title: "Entre amigos", text: "Preferências combinadas e logística organizada para aproveitar a viagem com quem faz parte da sua história.", service: "pacotes", cta: "Planejar com amigos" },
+    { title: "Viagens em família", text: "Hospedagens, passeios e deslocamentos pensados para diferentes idades, com atenção ao conforto e ao ritmo da família.", service: "pacotes", cta: "Planejar em família", image: momentFamily, imageAlt: "Família caminhando na praia ao pôr do sol" },
+    { title: "Lua de mel", text: "Uma viagem para celebrar a dois, com destinos e experiências escolhidos conforme os seus desejos.", service: "pacotes", cta: "Planejar nossa viagem", image: momentHoneymoon, imageAlt: "Casal em lua de mel observando o pôr do sol no mar" },
+    { title: "Entre amigos", text: "Preferências combinadas e logística organizada para aproveitar a viagem com quem faz parte da sua história.", service: "pacotes", cta: "Planejar com amigos", image: momentFriends, imageAlt: "Grupo de amigos passeando por uma cidade europeia" },
   ],
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",

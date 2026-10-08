@@ -612,8 +612,22 @@ export default function AgencySiteHome({
                       key={h.title}
                       className="group wl-curation-card relative flex h-full flex-col overflow-hidden rounded-xl border border-border/70 bg-card p-8 shadow-[0_1px_2px_hsl(220_12%_10%/0.05)] focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary motion-safe:transition-all motion-safe:duration-300 motion-safe:focus-within:-translate-y-1 motion-safe:focus-within:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)] motion-safe:md:hover:-translate-y-1 motion-safe:md:hover:shadow-[0_18px_40px_-18px_hsl(220_12%_10%/0.28)]"
                     >
-                      <Icon className="h-8 w-8 text-primary wl-accent-icon" aria-hidden="true" strokeWidth={1.6} />
-                      <h3 className={`mt-6 text-xl text-foreground ${AGENCY_CARD_TITLE_CLASS}`}>{h.title}</h3>
+                      {h.image ? (
+                        <>
+                          <div className="-mx-8 -mt-8 mb-6 aspect-[2/1] overflow-hidden">
+                            <img src={h.image} alt={h.imageAlt ?? h.title} loading="lazy" width={1200} height={600} className="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:md:group-hover:scale-[1.03]" />
+                          </div>
+                          <h3 className={`flex items-center gap-2.5 text-xl text-foreground ${AGENCY_CARD_TITLE_CLASS}`}>
+                            <Icon className="h-5 w-5 shrink-0 text-primary wl-accent-icon" aria-hidden="true" strokeWidth={1.8} />
+                            {h.title}
+                          </h3>
+                        </>
+                      ) : (
+                        <>
+                          <Icon className="h-8 w-8 text-primary wl-accent-icon" aria-hidden="true" strokeWidth={1.6} />
+                          <h3 className={`mt-6 text-xl text-foreground ${AGENCY_CARD_TITLE_CLASS}`}>{h.title}</h3>
+                        </>
+                      )}
                       <p className={`mt-3 flex-1 text-[15px] text-muted-foreground ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{h.text}</p>
                       <button
                         type="button"

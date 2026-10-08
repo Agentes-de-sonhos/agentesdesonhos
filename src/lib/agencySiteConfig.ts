@@ -151,6 +151,9 @@ export interface AgencyHighlight {
   text: string;
   service: string;
   cta: string;
+  /** Foto horizontal opcional exibida no topo do card editorial. */
+  image?: string;
+  imageAlt?: string;
 }
 
 /* ------------------------------- HERO / BANNERS ------------------------------ */
