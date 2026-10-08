@@ -215,7 +215,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
             <Route path="/ingressos-orlando" element={<><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></>} />
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
-              <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
+              <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap {...(resolveSiteProfile(info.hostname).key === "editorialDmc" ? { title: "Explore os resorts do Brasil com a 100 Limites" } : {})} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
             )}
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil/:slug" element={<AgencyResortPage info={info} />} />
