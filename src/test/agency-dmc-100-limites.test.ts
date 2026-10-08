@@ -12,7 +12,7 @@ describe("seção DMC da 100 Limites", () => {
     for (const hostname of ["100limites.tur.br", "www.100limites.tur.br"]) {
       const dmc = resolveDmc(hostname);
       expect(dmc?.presentation?.surface).toBe("light");
-      expect(dmc?.presentation?.imageUrl).toContain("dmc-cristiane-portugal.jpg");
+      expect(dmc?.presentation?.imageUrl).toContain("dmc-acolhimento-lisboa.jpg");
       expect(dmc?.title).toBe("DMC em Portugal");
       expect(dmc?.kicker).toBe("TAMBÉM EM PORTUGAL · DMC");
       expect(dmc?.cta).toBe("Solicitar orçamento em Portugal");

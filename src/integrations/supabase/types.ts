@@ -15947,6 +15947,45 @@ export type Database = {
           },
         ]
       }
+      us_visa_public_info: {
+        Row: {
+          additional_fees: Json | null
+          checked_at: string | null
+          fees_source_updated_at: string | null
+          fees_source_url: string | null
+          interview_wait_times: Json
+          key: string
+          mrv_fee_usd: number | null
+          updated_at: string
+          wait_times_source_updated_at: string | null
+          wait_times_source_url: string | null
+        }
+        Insert: {
+          additional_fees?: Json | null
+          checked_at?: string | null
+          fees_source_updated_at?: string | null
+          fees_source_url?: string | null
+          interview_wait_times?: Json
+          key: string
+          mrv_fee_usd?: number | null
+          updated_at?: string
+          wait_times_source_updated_at?: string | null
+          wait_times_source_url?: string | null
+        }
+        Update: {
+          additional_fees?: Json | null
+          checked_at?: string | null
+          fees_source_updated_at?: string | null
+          fees_source_url?: string | null
+          interview_wait_times?: Json
+          key?: string
+          mrv_fee_usd?: number | null
+          updated_at?: string
+          wait_times_source_updated_at?: string | null
+          wait_times_source_url?: string | null
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string

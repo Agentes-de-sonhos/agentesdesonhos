@@ -7,7 +7,7 @@
  * testimonials, team names): those only render when the profile provides them.
  */
 
-import dmcCristianePortugal from "@/assets/whitelabel/100-limites/dmc-cristiane-portugal.jpg.asset.json";
+import dmcAcolhimentoLisboa from "@/assets/whitelabel/100-limites/dmc-acolhimento-lisboa.jpg";
 
 export type AgencySectionKey =
   | "highlights"
@@ -402,7 +402,7 @@ export const DMC_BY_HOSTNAME: Record<string, AgencyDmcConfig> = (() => {
     note: "Cuidamos dos seus passageiros em parceria com sua agência, respeitando o relacionamento que você construiu com eles.",
     presentation: {
       surface: "light",
-      imageUrl: dmcCristianePortugal.url,
+      imageUrl: dmcAcolhimentoLisboa,
     },
   };
   return {
