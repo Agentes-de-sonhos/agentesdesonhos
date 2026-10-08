@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { siteContainer } from "@/lib/agencySiteTheme";
 import { type AgencyDomainInfo, agencyWhatsappNumber } from "@/lib/agencyDomains";
+import { cn } from "@/lib/utils";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
 import amandaNy from "@/assets/whitelabel/100-limites/amanda-estatua-liberdade.jpg.asset.json";
 
@@ -59,7 +60,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
 
   const Cta = ({ className = "" }: { className?: string }) =>
     waHref ? (
-      <Button asChild size="lg" className={className}>
+      <Button asChild size="lg" className={cn("wl-visa-cta", className)}>
         <a href={waHref} target="_blank" rel="noopener noreferrer">
           <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" /> Falar com a Amanda pelo WhatsApp
         </a>
@@ -100,7 +101,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
             alt="Amanda Larini, da 100 Limites, diante da Estátua da Liberdade em Nova York"
             width={1086}
             height={1448}
-            className="mx-auto h-auto w-full max-w-md rounded-2xl"
+            className="wl-visa-photo mx-auto h-auto w-full max-w-md rounded-2xl"
           />
         </div>
       </section>
@@ -111,7 +112,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
           <h2 className="text-2xl font-extrabold md:text-3xl">Por que contar com a assessoria</h2>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {BENEFITS.map((b) => (
-              <li key={b} className="flex gap-3 rounded-xl border border-border/60 bg-card p-4 text-[15px]">
+              <li key={b} className="wl-visa-benefit flex gap-3 rounded-xl border border-border/60 bg-card p-4 text-[15px]">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-foreground" aria-hidden="true" /> {b}
               </li>
             ))}
@@ -125,7 +126,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
           <h2 className="text-2xl font-extrabold md:text-3xl">Como funciona</h2>
           <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {STEPS.map((s, i) => (
-              <li key={s.t} className="rounded-xl border border-border/60 bg-card p-5">
+              <li key={s.t} className="wl-visa-step rounded-xl border border-border/60 bg-card p-5">
                 <span className="grid h-8 w-8 place-items-center rounded-full bg-foreground text-sm font-bold text-background">{i + 1}</span>
                 <p className="mt-3 font-semibold">{s.t}</p>
                 <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
@@ -140,7 +141,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
         <div className={`${siteContainer(true)} py-12 md:py-16`}>
           <h2 className="text-2xl font-extrabold md:text-3xl">Custos</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-border/60 bg-card p-5">
+            <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Taxa consular (MRV)</p>
               <p className="mt-1 text-2xl font-extrabold" aria-live="polite">
                 {isLoading ? "…" : data?.mrv_fee_usd != null ? `US$ ${data.mrv_fee_usd}` : "Indisponível"}
@@ -154,12 +155,12 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
                 Tabela oficial de taxas <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card p-5">
+            <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Assessoria 100 Limites</p>
               <p className="mt-1 text-2xl font-extrabold">Consulte a proposta</p>
               <p className="mt-1 text-sm text-muted-foreground">Valor apresentado conforme o seu caso.</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card p-5">
+            <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Custos adicionais</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Conforme o caso: entrega do passaporte, deslocamento, hospedagem e outras cobranças oficiais aplicáveis.
@@ -192,7 +193,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
               </thead>
               <tbody>
                 {CITIES.map((c) => (
-                  <tr key={c.key} className="border-t border-border/60">
+                  <tr key={c.key} className="wl-visa-row border-t border-border/60">
                     <td className="px-4 py-3 font-medium">{c.label}</td>
                     <td className="px-4 py-3 text-muted-foreground">{c.place}</td>
                     <td className="px-4 py-3">
