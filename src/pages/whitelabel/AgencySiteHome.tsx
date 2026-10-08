@@ -1421,7 +1421,7 @@ export default function AgencySiteHome({
             </div>
           </section>
           {profile.key === "editorialDmc" && (
-            <UsVisaHomeTeaser whatsapp={agencyWhatsappNumber(info)} />
+            <UsVisaHomeTeaser />
           )}
           </Fragment>
         );
