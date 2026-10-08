@@ -269,7 +269,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
         { label: "Pet Friendly", to: "/pet-friendly" },
       ],
     },
-    { label: "Visto americano", to: "/#visto-americano" },
+    { label: "Visto americano", to: "/visto-americano" },
     { label: "Área do cliente", to: "/area-do-cliente" },
   ],
   navDensity: "compact",

@@ -55,3 +55,4 @@
 - [x] 100 Limites: alternar fundo branco/degradê a partir da DMC em Portugal, sem publicar.
 - [x] 100 Limites: trocar a foto da seção DMC por acolhimento receptivo em Lisboa, sem publicar.
 - [x] Visto B1/B2: hook e componente opt-in lendo us_visa_public_info (tabela criada externamente), sem ativar em sites e sem publicar.
+- [x] 100 Limites: landing /visto-americano (B1/B2) lendo us_visa_public_info, sem publicar.
