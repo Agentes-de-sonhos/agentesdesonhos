@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
 import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
@@ -53,6 +54,14 @@ export const NAV_LINKS: AgencySiteNavItem[] = [
  * o link "/ofertas" também sai do menu (config declarativa, sem condicional
  * por agência). Nenhum tenant atual é afetado — o default mantém o link.
  */
+/** Link "Blog" só com o módulo ativo e ao menos um artigo publicado. */
+export function withBlogLink(nav: AgencySiteNavItem[], show: boolean): AgencySiteNavItem[] {
+  if (!show || nav.some((l) => l.to === "/blog")) return nav;
+  const i = nav.findIndex((l) => /area-do-cliente/.test(l.to));
+  const item = { label: "Blog", to: "/blog" } as AgencySiteNavItem;
+  return i >= 0 ? [...nav.slice(0, i), item, ...nav.slice(i)] : [...nav, item];
+}
+
 export function siteNavLinks(hostname?: string | null): AgencySiteNavItem[] {
   const profile = resolveSiteProfile(hostname);
   if (profile.nav?.length) return profile.nav;
@@ -74,7 +83,8 @@ export function AgencyBrandBar({
   const logoUrl = resolveAgencyLogoUrl(info);
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
-  const navAll = navOverride ?? siteNavLinks(info.hostname);
+  const blogStatus = usePublicBlogStatus(navOverride ? null : info.hostname).data;
+  const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
   if (editorial) {
     const mainLinks = navAll.filter((l) => l.to !== "/area-do-cliente");
@@ -279,7 +289,8 @@ export function AgencyFooter({
   const profile = resolveSiteProfile(info.hostname);
   const footer = profile.footer;
   const footerWhatsapp = noWhatsapp || footer?.whatsappHidden ? null : footer?.whatsapp?.replace(/\D/g, "") || wa;
-  const navAll = navOverride ?? siteNavLinks(info.hostname);
+  const blogStatus = usePublicBlogStatus(navOverride ? null : info.hostname).data;
+  const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
   if (luxury) {
     const navLinks = navAll.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
