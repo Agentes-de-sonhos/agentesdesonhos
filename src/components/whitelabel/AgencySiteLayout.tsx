@@ -26,6 +26,10 @@ import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
+import cadasturSeal from "@/assets/whitelabel/selo-cadastur.png.asset.json";
+
+/** Selo Cadastur: apenas sites autorizados (100 Limites). */
+const showCadastur = (hostname?: string | null) => /100limites/i.test(hostname ?? "");
 
 /** Item de menu do site: pode ter um submenu declarado pelo perfil. */
 export interface AgencySiteNavItem {
@@ -139,6 +143,13 @@ export function AgencyBrandBar({
           </nav>
 
           <div className="hidden items-center gap-5 md:flex">
+            {showCadastur(info.hostname) && (
+              <img
+                src={cadasturSeal.url}
+                alt="Somos certificados Cadastur"
+                className="h-7 w-auto object-contain"
+              />
+            )}
             <a
               href={agencySiteHref("/area-do-cliente")}
               className="whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -412,6 +423,7 @@ export function AgencyFooter({
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.75fr)_minmax(0,1.35fr)_minmax(0,0.75fr)] md:gap-10`}>
 
           <div>
+            <div className="flex flex-wrap items-center gap-4">
             {logoUrl ? (
               plainFooter ? (
                 <img src={logoUrl} alt={`Logo ${name}`} loading="lazy" className={footerLogoClass} />
@@ -430,6 +442,15 @@ export function AgencyFooter({
                 <BrandText>{name}</BrandText>
               </p>
             )}
+            {showCadastur(info.hostname) && (
+              <img
+                src={cadasturSeal.url}
+                alt="Somos certificados Cadastur"
+                loading="lazy"
+                className="h-11 w-auto object-contain"
+              />
+            )}
+            </div>
             <p className="mt-5 max-w-sm whitespace-pre-line text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
               {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
             </p>
