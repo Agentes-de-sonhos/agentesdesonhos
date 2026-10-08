@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Car, Check, Dog, Globe2, Mail, MapPin, MessageCircle, Plane, Route as RouteIcon, Users } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
@@ -8,11 +8,62 @@ import { siteContainer } from "@/lib/agencySiteTheme";
 import { type AgencyDomainInfo, agencyWhatsappNumber } from "@/lib/agencyDomains";
 import dmcAcolhimento from "@/assets/whitelabel/100-limites/dmc-acolhimento-lisboa.jpg";
 import amandaLisboa from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
-import destinoDouro from "@/assets/whitelabel/destino-douro.jpg";
-import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
-import destinoEuropa from "@/assets/whitelabel/destino-europa.jpg";
-import destinoGrupos from "@/assets/whitelabel/destino-grupos.jpg";
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
+import ptSintra from "@/assets/whitelabel/100-limites/pt-sintra.jpg";
+import ptFatima from "@/assets/whitelabel/100-limites/pt-fatima.jpg";
+import ptPorto from "@/assets/whitelabel/100-limites/pt-porto.jpg";
+import ptDouro from "@/assets/whitelabel/100-limites/pt-douro.jpg";
+import ptAlentejo from "@/assets/whitelabel/100-limites/pt-alentejo.jpg";
+import ptAldeias from "@/assets/whitelabel/100-limites/pt-aldeias.jpg";
+import dmcGrupos from "@/assets/whitelabel/100-limites/dmc-grupos.jpg";
+import dmcEuropa from "@/assets/whitelabel/100-limites/dmc-europa.jpg";
+import dmcPet from "@/assets/whitelabel/100-limites/dmc-pet.jpg";
+
+const PT_SLIDES = [
+  { src: ptSintra, label: "Sintra, Cascais e Cabo da Roca" },
+  { src: ptFatima, label: "Fátima e Centro de Portugal" },
+  { src: ptPorto, label: "Porto" },
+  { src: ptDouro, label: "Vale do Douro" },
+  { src: ptAlentejo, label: "Alentejo" },
+  { src: ptAldeias, label: "Aldeias Históricas" },
+];
+
+function PortugalDestinationsGallery() {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % PT_SLIDES.length), 4500);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="relative mt-6 aspect-[16/9] w-full overflow-hidden rounded-2xl md:aspect-[3/1]">
+      {PT_SLIDES.map((s, idx) => (
+        <img
+          key={s.label}
+          src={s.src}
+          alt={s.label}
+          loading={idx === 0 ? undefined : "lazy"}
+          width={1808}
+          height={768}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${idx === i ? "opacity-100" : "opacity-0"}`}
+        />
+      ))}
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-foreground/70 to-transparent p-4 md:p-5">
+        <span className="text-sm font-semibold text-background md:text-base">{PT_SLIDES[i].label}</span>
+        <div className="flex gap-1.5">
+          {PT_SLIDES.map((s, idx) => (
+            <button
+              key={s.label}
+              type="button"
+              aria-label={s.label}
+              onClick={() => setI(idx)}
+              className={`h-2 rounded-full transition-all ${idx === i ? "w-6 bg-primary" : "w-2 bg-background/70"}`}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /** Contatos confirmados no portfólio DMC (PDF da agência). */
 const PT_WHATSAPP = "351913980085";
@@ -249,7 +300,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Portugal */}
       <Section id="portugal">
         <H2 k="Passeios em Portugal">Saindo de Lisboa para todo o país</H2>
-        <img src={destinoDouro} alt="Vale do Douro" className="mt-6 aspect-[3/1] w-full rounded-2xl object-cover" />
+        <PortugalDestinationsGallery />
         <div className="mt-8 grid gap-8 lg:grid-cols-2">
           {REGIOES.map((r) => (
             <div key={r.id} id={r.id} className="scroll-mt-32">
