@@ -17,6 +17,7 @@ import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 export const AGENCY_ENTITLEMENTS = {
   vip_client_portal: "vip_client_portal",
   booking_requests: "booking_requests",
+  site_blog: "site_blog",
 } as const;
 
 export type AgencyEntitlementKey =
@@ -25,6 +26,7 @@ export type AgencyEntitlementKey =
 export const AGENCY_ENTITLEMENT_LABELS: Record<AgencyEntitlementKey, string> = {
   vip_client_portal: "Área do Cliente VIP / site integrado",
   booking_requests: "Pedidos de reserva pelo orçamento",
+  site_blog: "Blog do site",
 };
 
 export const AGENCY_ENTITLEMENT_DESCRIPTIONS: Record<AgencyEntitlementKey, string> = {
@@ -32,6 +34,8 @@ export const AGENCY_ENTITLEMENT_DESCRIPTIONS: Record<AgencyEntitlementKey, strin
     "Portal único do cliente com linha do tempo da viagem, exclusivo do pacote VIP com site administrado pela plataforma.",
   booking_requests:
     "Permite que o cliente selecione serviços no orçamento web e envie um pedido de reserva para análise da agência.",
+  site_blog:
+    "Módulo Site → Blog: artigos publicados no site white-label da agência.",
 };
 
 interface ActiveEntitlement {

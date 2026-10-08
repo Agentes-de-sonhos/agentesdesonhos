@@ -28,6 +28,8 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { prefix: '/dashboard-start', any: ['dashboard.view'] },
   { prefix: '/proximas-viagens', any: ['trips.view', 'agenda.view'] },
   { prefix: '/meus-projetos', any: ['quotes.view', 'itineraries.view', 'wallet.view'] },
+  // Site → Blog (módulo opcional por agência)
+  { prefix: '/site/blog', any: ['site.blog.manage'] },
 
   // Gestão de clientes
   { prefix: '/gestao-clientes/dashboard', any: ['dashboard.view', 'clients.view'] },

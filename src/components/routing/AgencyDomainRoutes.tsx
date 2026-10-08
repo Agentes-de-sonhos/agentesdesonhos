@@ -37,6 +37,8 @@ const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPag
 const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
 const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
 const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
+const AgencyBlogPage = lazy(() => import("@/pages/whitelabel/AgencyBlogPage"));
+const AgencyBlogPostPage = lazy(() => import("@/pages/whitelabel/AgencyBlogPostPage"));
 
 /** 100 Limites: URLs antigas do portfólio DMC apontam para âncoras da landing única. */
 const DMC_LEGACY_REDIRECTS: Record<string, string> = {
@@ -253,6 +255,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               .map((p) => (
               <Route key={p.path} path={p.path} element={<AgencyContentPage page={p} />} />
             ))}
+            {/* Blog do site (módulo opcional): o servidor só entrega conteúdo publicado de agência habilitada. */}
+            <Route path="/blog" element={<AgencyBlogPage info={info} />} />
+            <Route path="/blog/:slug" element={<AgencyBlogPostPage info={info} />} />
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
             <Route path="/termosdeuso" element={<TermosDeUso />} />
             <Route path="*" element={<LinkUnavailable />} />

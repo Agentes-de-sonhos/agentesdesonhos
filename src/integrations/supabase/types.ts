@@ -13474,6 +13474,182 @@ export type Database = {
           },
         ]
       }
+      site_blog_categories: {
+        Row: {
+          agency_id: string
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      site_blog_post_revisions: {
+        Row: {
+          agency_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          post_id: string
+          reason: string
+          snapshot: Json
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          post_id: string
+          reason?: string
+          snapshot: Json
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          post_id?: string
+          reason?: string
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "site_blog_post_revisions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "site_blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_blog_posts: {
+        Row: {
+          agency_id: string
+          created_at: string
+          created_by: string | null
+          draft: Json
+          draft_updated_at: string
+          id: string
+          published: Json | null
+          published_at: string | null
+          published_updated_at: string | null
+          schedule_timezone: string | null
+          scheduled: Json | null
+          scheduled_at: string | null
+          slug: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          created_by?: string | null
+          draft?: Json
+          draft_updated_at?: string
+          id?: string
+          published?: Json | null
+          published_at?: string | null
+          published_updated_at?: string | null
+          schedule_timezone?: string | null
+          scheduled?: Json | null
+          scheduled_at?: string | null
+          slug: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          created_by?: string | null
+          draft?: Json
+          draft_updated_at?: string
+          id?: string
+          published?: Json | null
+          published_at?: string | null
+          published_updated_at?: string | null
+          schedule_timezone?: string | null
+          scheduled?: Json | null
+          scheduled_at?: string | null
+          slug?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_blog_publish_log: {
+        Row: {
+          action: string
+          actor: string | null
+          agency_id: string | null
+          created_at: string
+          id: string
+          message: string | null
+          ok: boolean
+          post_id: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          agency_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          ok: boolean
+          post_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          agency_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          ok?: boolean
+          post_id?: string | null
+        }
+        Relationships: []
+      }
+      site_blog_settings: {
+        Row: {
+          agency_id: string
+          cta_text: string | null
+          cta_title: string | null
+          default_author_name: string | null
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          cta_text?: string | null
+          cta_title?: string | null
+          default_author_name?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          cta_text?: string | null
+          cta_title?: string | null
+          default_author_name?: string | null
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sitelab_templates: {
         Row: {
           admin_hostname: string | null
@@ -16790,6 +16966,40 @@ export type Database = {
         Args: { _a: string; _b: string }
         Returns: boolean
       }
+      blog_can_manage: { Args: { _agency_id: string }; Returns: boolean }
+      blog_media_path_ok: { Args: { _name: string }; Returns: boolean }
+      blog_post_action: {
+        Args: {
+          p_action: string
+          p_at?: string
+          p_post_id: string
+          p_timezone?: string
+        }
+        Returns: Json
+      }
+      blog_public_agency: { Args: { p_hostname: string }; Returns: string }
+      blog_public_categories: {
+        Args: { p_hostname: string }
+        Returns: {
+          id: string
+          name: string
+          slug: string
+        }[]
+      }
+      blog_public_posts: {
+        Args: { p_hostname: string }
+        Returns: {
+          content: Json
+          id: string
+          published_at: string
+          slug: string
+          updated_at: string
+        }[]
+      }
+      blog_public_settings: { Args: { p_hostname: string }; Returns: Json }
+      blog_restore_revision: { Args: { p_revision_id: string }; Returns: Json }
+      blog_run_scheduled: { Args: never; Returns: number }
+      blog_validate_snapshot: { Args: { _s: Json }; Returns: string }
       booking_request_file_link: {
         Args: { p_request_id: string }
         Returns: {

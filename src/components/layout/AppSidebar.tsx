@@ -14,6 +14,7 @@ import { useGamificationLite } from "@/hooks/useGamificationLite";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAgencyEntitlements } from "@/hooks/useAgencyEntitlements";
 import { canAccessRoute } from "@/lib/routePermissions";
 import { isMenuUpToReservasAgency, isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
@@ -24,6 +25,7 @@ import {
   APP_MORE_GROUP,
   APP_OTHER_ITEMS,
   APP_PROJECTS_GROUP,
+  APP_SITE_GROUP,
   type AppSidebarGroup,
   type AppSidebarItem,
 } from "@/lib/appSidebarMenu";
@@ -44,6 +46,7 @@ export function AppSidebar() {
   const { isAdmin } = useUserRole();
   const { hasFeature, plan, isPromotor } = useSubscription();
   const { can, isTeamMember } = usePermissions();
+  const { hasAgencyEntitlement } = useAgencyEntitlements();
   const { agencyId: menuAgencyId } = useTeamSession();
   const isUpToReservas = isMenuUpToReservasAgency(isAdmin, menuAgencyId);
   const { trackSectionVisit } = useGamificationLite();
@@ -107,6 +110,7 @@ export function AppSidebar() {
   const projectsGroup = useMemo(() => isAdsGestao ? { ...APP_PROJECTS_GROUP, items: [] } : filterGroup(APP_PROJECTS_GROUP), [filterGroup, isAdsGestao]);
   const moreGroup = useMemo(() => filterGroup(APP_MORE_GROUP), [filterGroup]);
   const managementItems = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted).filter((i) => !(isUpToReservas && i.key === "financeiro")), [isPermitted, isAdsEssencial, isUpToReservas]);
+  const siteGroup = useMemo(() => hasAgencyEntitlement("site_blog") ? filterGroup(APP_SITE_GROUP) : { ...APP_SITE_GROUP, items: [] }, [filterGroup, hasAgencyEntitlement]);
   const otherItems = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
 
   const isItemActive = (item: AppSidebarItem) => {
@@ -263,6 +267,7 @@ export function AppSidebar() {
             <div data-sidebar-expanded-navigation>
               {managementItems.length > 0 && <div className="px-3">{sectionLabel("GESTÃO")}</div>}
               <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{managementItems.map((item) => renderItem(item))}</nav>
+              {siteGroup.items.length > 0 && <nav className={cn("flex flex-col px-3", SIDEBAR_ROW_GAP_CLASS)}>{renderGroup(siteGroup)}</nav>}
               {!hideOthersSection && (
                 <>
                   <div className="px-3">{sectionLabel("OUTRAS")}</div>
