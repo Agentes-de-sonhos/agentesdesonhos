@@ -1162,7 +1162,17 @@ body[data-booking-selection-bar] {
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-tab-idle:hover svg { color: hsl(0 0% 7%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-submit { background-color: hsl(var(--primary)) !important; color: hsl(0 0% 7%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-qq-submit svg, .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-dmc-cta, .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-dmc-cta svg { color: hsl(0 0% 7%) !important; }
-.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-card { background-color: hsl(0 0% 7%) !important; }
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-card {
+  background-color: hsl(0 0% 7%) !important;
+  background-image: linear-gradient(to right, hsl(0 0% 7%) 0%, hsl(0 0% 7%) 35%, hsl(0 0% 7% / 0.6) 60%, hsl(0 0% 7% / 0.1) 100%), url("./assets/100limites-newsletter-wing.jpg") !important;
+  background-size: cover !important;
+  background-position: right center !important;
+}
+@media (max-width: 767px) {
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-card {
+    background-image: linear-gradient(to bottom, hsl(0 0% 7% / 0.75) 0%, hsl(0 0% 7% / 0.9) 100%), url("./assets/100limites-newsletter-wing.jpg") !important;
+  }
+}
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-card h2 { color: hsl(0 0% 100%) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-card p:not(:first-child) { color: hsl(0 0% 100% / 0.8) !important; }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-newsletter-card .wl-kicker,
