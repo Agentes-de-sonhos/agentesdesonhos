@@ -250,6 +250,7 @@ const CLASSIC: AgencySiteProfile = { key: "classic" };
 /** 100 Limites — consultoria global para passageiros e DMC em Portugal. */
 const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
+  resortsMap: { enabled: true },
   nav: [
     { label: "Sobre", to: "/#sobre" },
     { label: "Viagens", to: "/#destinos" },
