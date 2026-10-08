@@ -363,11 +363,22 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                 <Button type="button" variant="outline" size="icon" aria-label="Próximo" onClick={() => scrollStrip(1)}><ChevronRight className="h-4 w-4" /></Button>
               </div>
             </div>
+            {/100limites/i.test(hostname) ? (
+              <div className="mt-6 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 md:flex-row md:items-center md:justify-between md:p-8">
+                <div className="max-w-2xl">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Próximo passo</p>
+                  <h3 className="mt-1 text-xl font-semibold text-foreground md:text-2xl">Quantos dias você precisa para aproveitar Orlando?</h3>
+                  <p className="mt-2 text-muted-foreground">Conte quais parques e experiências você quer viver. Nossa equipe calcula o tempo ideal para o seu ritmo e envia o orçamento completo dos ingressos.</p>
+                </div>
+                <Button asChild size="lg" className="shrink-0"><a href={agencySiteHref("/ingressos-orlando")}>Calcular meus dias e solicitar ingressos</a></Button>
+              </div>
+            ) : (
             <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border bg-card p-6 text-center md:p-8">
               <h3 className="text-xl font-semibold text-foreground">{ORLANDO_SECTION.cta_title}</h3>
               <p className="mt-2 text-muted-foreground">{ORLANDO_SECTION.cta_description}</p>
               <Button asChild size="lg" className="mt-5"><a href={agencySiteHref("/ingressos-orlando")}>{ORLANDO_SECTION.cta_label}</a></Button>
             </div>
+            )}
           </>
         ) : (
           <div className="mt-8">
