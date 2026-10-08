@@ -302,6 +302,20 @@
       "when": 1790971039618,
       "tag": "0042_contract_template_render_config",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1791495666036,
+      "tag": "0043_site_blog_module",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791495728825,
+      "tag": "0044_site_blog_storage_and_leads",
+      "breakpoints": true
     }
   ]
 }

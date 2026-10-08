@@ -13,6 +13,8 @@ export const ALLOWED_SERVICE_KEYS = [
   "pacotes",
   // Captação editorial "Receba inspirações" (seção compartilhada do template).
   "inspiracoes",
+  // Convite ao final de artigos do Blog do site (módulo opcional site_blog).
+  "blog",
 ] as const;
 
 export function isAllowedServiceKey(key: string): boolean {
