@@ -5,6 +5,7 @@ import { MapPin, Sunrise, Sun, Moon, Sparkles, ChevronRight } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
+import { descriptionToPlainText } from "@/lib/richDescription";
 import type { PublicLocale } from "@/i18n/publicMaterials/locale";
 
 type Period = "morning" | "afternoon" | "evening";
@@ -169,7 +170,7 @@ export function NextActivityCard({
                 )}
                 {next.a.description && (
                   <p className="text-[12px] text-foreground/70 mt-1 leading-snug line-clamp-2">
-                    {next.a.description}
+                    {descriptionToPlainText(next.a.description)}
                   </p>
                 )}
               </div>
