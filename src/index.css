@@ -262,8 +262,6 @@ img {
   --wl-sand: 36 32% 92%;
   /* Verde WhatsApp acessível com texto branco */
   --wl-whatsapp: 152 62% 30%;
-  /* Variante profunda: fundo de botões que precisam manter o texto branco legível */
-  --wl-whatsapp-deep: 148 66% 22%;
 
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
 }
@@ -1213,7 +1211,7 @@ body[data-booking-selection-bar] {
 }
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:hover,
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:focus-visible {
-  background-color: hsl(var(--wl-whatsapp-deep, 148 66% 22%));
+  background-color: hsl(var(--wl-whatsapp));
   color: hsl(var(--card));
   box-shadow: 0 14px 28px -16px hsl(var(--wl-whatsapp) / 0.7);
 }
