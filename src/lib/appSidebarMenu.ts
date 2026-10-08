@@ -18,6 +18,8 @@ import {
   UserPlus,
   Users,
   Wallet,
+  Globe,
+  Newspaper as BlogIcon,
   type LucideIcon,
 } from "lucide-react";
 import type { Feature } from "@/types/subscription";
@@ -35,7 +37,7 @@ export interface AppSidebarItem {
 }
 
 export interface AppSidebarGroup {
-  key: "create" | "projects" | "more";
+  key: "create" | "projects" | "more" | "site";
   title: string;
   icon: LucideIcon;
   items: AppSidebarItem[];
@@ -104,3 +106,13 @@ export const APP_MORE_GROUP: AppSidebarGroup = {
 };
 
 export const APP_SIDEBAR_SECTION_ORDER = ["MEU TRABALHO", "GESTÃO", "OUTRAS"] as const;
+
+/** Site: grupo expansível (preparado para itens futuros). Só aparece com o recurso ativo na agência. */
+export const APP_SITE_GROUP: AppSidebarGroup = {
+  key: "site",
+  title: "Site",
+  icon: Globe,
+  items: [
+    { key: "site_blog", title: "Blog", url: "/site/blog", icon: BlogIcon, requiredPermission: "site.blog.manage" },
+  ],
+};
