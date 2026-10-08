@@ -35,6 +35,7 @@ const PoliticasPrivacidade = lazy(() => import("@/pages/PoliticasPrivacidade"));
 const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
+const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
 
 const Fallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -219,6 +220,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             )}
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil/:slug" element={<AgencyResortPage info={info} />} />
+            )}
+            {resolveSiteProfile(info.hostname).key === "editorialDmc" && (
+              <Route path="/visto-americano" element={<UsVisaLandingPage info={info} />} />
             )}
             {/* Páginas institucionais declaradas pelo perfil do hostname. */}
             {resolveContentPages(info.hostname).map((p) => (
