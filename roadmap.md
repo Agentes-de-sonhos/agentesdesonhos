@@ -53,3 +53,5 @@
 - [x] Atualizar exclusivamente o hero da Destinos com a Ju com as três fotos aprovadas, recortes responsivos e contraste; validar desktop/mobile, tipos e build; não publicar.
 - Textos 'Por que escolher' e 'Destaques' dos 78 resorts — aguardando documento do usuário
 - [x] 100 Limites: alternar fundo branco/degradê a partir da DMC em Portugal, sem publicar.
+- [x] 100 Limites: trocar a foto da seção DMC por acolhimento receptivo em Lisboa, sem publicar.
+- [x] Visto B1/B2: hook e componente opt-in lendo us_visa_public_info (tabela criada externamente), sem ativar em sites e sem publicar.
