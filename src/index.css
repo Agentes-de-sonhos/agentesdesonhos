@@ -1286,3 +1286,22 @@ body[data-booking-selection-bar] {
     transform: translateY(-3px);
   }
 }
+
+/* Blog do site: tipografia padronizada para leitura (público, prévia e editor). */
+.blog-prose { @apply text-[1.075rem] leading-[1.8] text-foreground; }
+.blog-prose > * + * { @apply mt-5; }
+.blog-prose h2 { @apply mt-10 font-display text-2xl font-semibold leading-snug; }
+.blog-prose h3 { @apply mt-8 font-display text-xl font-semibold; }
+.blog-prose a { @apply text-primary underline underline-offset-4; }
+.blog-prose ul { @apply list-disc pl-6; }
+.blog-prose ol { @apply list-decimal pl-6; }
+.blog-prose li + li { @apply mt-1.5; }
+.blog-prose blockquote { @apply border-l-4 border-primary pl-5 italic text-muted-foreground; }
+.blog-prose figure img { @apply w-full rounded-xl; }
+.blog-prose figcaption { @apply mt-2 text-center text-sm text-muted-foreground; }
+.blog-prose .blog-gallery { @apply grid grid-cols-2 gap-3 md:grid-cols-3; }
+.blog-prose .blog-gallery img { @apply aspect-square w-full rounded-lg object-cover; }
+.blog-prose .blog-video { @apply relative aspect-video w-full overflow-hidden rounded-xl bg-muted; }
+.blog-prose .blog-video iframe { @apply absolute inset-0 h-full w-full; }
+.blog-editor .ProseMirror-selectednode { @apply outline outline-2 outline-primary; }
+.blog-editor p.is-editor-empty:first-child::before { content: attr(data-placeholder); @apply pointer-events-none float-left h-0 text-muted-foreground; }

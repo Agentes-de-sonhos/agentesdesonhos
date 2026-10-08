@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AgencyBlogEntitlementToggle } from "@/components/admin/AgencyBlogEntitlementToggle";
 import {
   Dialog,
   DialogContent,
@@ -288,6 +289,10 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
                 />
               </div>
             </div>
+
+            <Separator />
+
+            <AgencyBlogEntitlementToggle agencyId={status.agency_id} />
 
             <Separator />
 
