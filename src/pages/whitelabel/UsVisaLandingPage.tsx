@@ -141,7 +141,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
         <div className={`${siteContainer(true)} py-12 md:py-16`}>
           <h2 className="text-2xl font-extrabold md:text-3xl">Custos</h2>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="rounded-xl border border-border/60 bg-card p-5">
+            <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Taxa consular (MRV)</p>
               <p className="mt-1 text-2xl font-extrabold" aria-live="polite">
                 {isLoading ? "…" : data?.mrv_fee_usd != null ? `US$ ${data.mrv_fee_usd}` : "Indisponível"}
@@ -155,12 +155,12 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
                 Tabela oficial de taxas <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               </a>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card p-5">
+            <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Assessoria 100 Limites</p>
               <p className="mt-1 text-2xl font-extrabold">Consulte a proposta</p>
               <p className="mt-1 text-sm text-muted-foreground">Valor apresentado conforme o seu caso.</p>
             </div>
-            <div className="rounded-xl border border-border/60 bg-card p-5">
+            <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Custos adicionais</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Conforme o caso: entrega do passaporte, deslocamento, hospedagem e outras cobranças oficiais aplicáveis.
