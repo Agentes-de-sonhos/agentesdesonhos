@@ -4,7 +4,7 @@ import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSectio
 import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGallery";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useLocation, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate, useLocation, useParams } from "react-router-dom";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 import { shouldRenderUnderConstruction, resolveConstructionVariant } from "@/lib/agencySiteStatus";
@@ -36,6 +36,22 @@ const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
 const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
+const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
+
+/** 100 Limites: URLs antigas do portfólio DMC apontam para âncoras da landing única. */
+const DMC_LEGACY_REDIRECTS: Record<string, string> = {
+  "/quem-somos/dmc": "sobre",
+  "/frota": "frota",
+  "/passeios/lisboa": "lisboa",
+  "/passeios/portugal": "portugal",
+  "/europa": "europa",
+  "/pet-friendly": "pet-friendly",
+};
+
+function DmcLegacyRedirect({ anchor }: { anchor: string }) {
+  const { search } = useLocation();
+  return <Navigate replace to={{ pathname: "/dmc-portugal", search, hash: `#${anchor}` }} />;
+}
 
 const Fallback = () => (
   <div className="min-h-[60vh] flex items-center justify-center">
@@ -224,8 +240,17 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {resolveSiteProfile(info.hostname).key === "editorialDmc" && (
               <Route path="/visto-americano" element={<UsVisaLandingPage info={info} />} />
             )}
+            {resolveSiteProfile(info.hostname).key === "editorialDmc" && (
+              <Route path="/dmc-portugal" element={<DmcPortugalLandingPage info={info} />} />
+            )}
+            {resolveSiteProfile(info.hostname).key === "editorialDmc" &&
+              Object.entries(DMC_LEGACY_REDIRECTS).map(([path, anchor]) => (
+                <Route key={path} path={path} element={<DmcLegacyRedirect anchor={anchor} />} />
+              ))}
             {/* Páginas institucionais declaradas pelo perfil do hostname. */}
-            {resolveContentPages(info.hostname).map((p) => (
+            {resolveContentPages(info.hostname)
+              .filter((p) => !(resolveSiteProfile(info.hostname).key === "editorialDmc" && p.path in DMC_LEGACY_REDIRECTS))
+              .map((p) => (
               <Route key={p.path} path={p.path} element={<AgencyContentPage page={p} />} />
             ))}
             <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />

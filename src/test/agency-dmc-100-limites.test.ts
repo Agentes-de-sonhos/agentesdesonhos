@@ -60,7 +60,8 @@ describe("seção DMC da 100 Limites", () => {
       "Sobre", "Viagens", "DMC em Portugal", "Visto americano", "Área do cliente",
     ]);
     expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
-      "/quem-somos/dmc", "/frota", "/passeios/lisboa", "/passeios/portugal", "/europa", "/pet-friendly",
+      "/dmc-portugal", "/dmc-portugal#servicos", "/dmc-portugal#frota", "/dmc-portugal#lisboa", "/dmc-portugal#portugal",
+      "/dmc-portugal#grupos", "/dmc-portugal#europa", "/dmc-portugal#pet-friendly", "/dmc-portugal#contato",
     ]);
     expect(resolveSections(resolveSiteProfile("100limites.tur.br").sections).map((section) => section.key))
       .not.toContain("modules");
