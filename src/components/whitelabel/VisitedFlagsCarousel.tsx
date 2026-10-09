@@ -47,6 +47,14 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
           );
         })}
       </ul>
+      <div className="mt-3 flex justify-end gap-2">
+        <button type="button" aria-label="Países anteriores" onClick={() => scroll(-1)} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button type="button" aria-label="Próximos países" onClick={() => scroll(1)} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
