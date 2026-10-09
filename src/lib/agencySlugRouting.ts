@@ -153,6 +153,9 @@ export function parseAgencySlugLocation(
 
 /** Prefixo de rotas em vigor na URL atual ("" em domínio próprio). */
 export function agencyRouteBasePath(hostname: string, pathname: string): string {
+  // Prévia técnica ADS: links internos permanecem dentro da própria prévia.
+  const ads = /^\/ads-briefing-preview\/[a-z0-9-]+/i.exec(pathname);
+  if (ads) return ads[0];
   return parseAgencySlugLocation(hostname, pathname)?.basePath ?? "";
 }
 

@@ -303,7 +303,7 @@ const App = () => {
             <Route path="/certificate-test" element={<CertificateTest />} />
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
             {/* Prévias técnicas ADS: fixtures locais isoladas; só no host id-preview, demais hosts = 404. */}
-            <Route path="/ads-briefing-preview/:jobId" element={<AdsBriefingPreview />} />
+            <Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} />
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
             {/* /sitelab-base/gestao/* é montado fora deste router (ver topo).

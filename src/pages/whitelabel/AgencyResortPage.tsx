@@ -21,8 +21,9 @@ function describe(req: HotelQuoteRequest) {
  * pedido de orçamento entra no CRM da agência dona do domínio (o servidor
  * resolve a agência pelo hostname) e dispara as notificações da fila.
  */
-export default function AgencyResortPage({ info }: { info: AgencyDomainInfo }) {
-  const { slug = "" } = useParams();
+export default function AgencyResortPage({ info, slug: slugProp }: { info: AgencyDomainInfo; slug?: string }) {
+  const params = useParams();
+  const slug = slugProp ?? params.slug ?? "";
   const hotel = useMemo(() => getResortPage(slug), [slug]);
   const { submit } = useAgencySiteRequest(info.hostname);
 
