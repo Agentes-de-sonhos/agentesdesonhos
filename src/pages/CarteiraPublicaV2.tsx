@@ -1,3 +1,4 @@
+import { buildSquareIcon } from "@/lib/squareIcon";
 import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
@@ -475,17 +476,36 @@ export default function CarteiraPublicaV2({
     // Tags adicionadas dinamicamente — removemos ao desmontar.
     const created: HTMLElement[] = [];
 
+    let cancelled = false;
     if (logo) {
-      // apple-touch-icon (iOS) e icon (Android shortcut sem manifest).
-      const rels = ["apple-touch-icon", "icon", "shortcut icon"];
-      rels.forEach((rel) => {
+      // Ícones de atalho precisam ser quadrados; logos horizontais são
+      // descartados pelo Chrome/Samsung. Começamos com o logo original e
+      // trocamos pela versão quadrada assim que ela é gerada.
+      const specs: Array<{ rel: string; sizes?: string }> = [
+        { rel: "apple-touch-icon", sizes: "180x180" },
+        { rel: "icon", sizes: "192x192" },
+        { rel: "icon", sizes: "512x512" },
+        { rel: "shortcut icon" },
+      ];
+      const iconLinks = specs.map(({ rel, sizes }) => {
         const link = document.createElement("link");
         link.setAttribute("rel", rel);
+        if (sizes) link.setAttribute("sizes", sizes);
         link.setAttribute("href", logo);
         link.setAttribute("data-wallet-icon", "1");
         document.head.appendChild(link);
         created.push(link);
+        return link;
       });
+      buildSquareIcon(logo)
+        .then((square) => {
+          if (cancelled) return;
+          iconLinks.forEach((l) => {
+            l.setAttribute("href", square);
+            if (l.getAttribute("rel") !== "apple-touch-icon") l.setAttribute("type", "image/png");
+          });
+        })
+        .catch(() => { /* mantém o logo original */ });
     }
 
     // Nome curto para iOS Home Screen.
@@ -519,6 +539,7 @@ export default function CarteiraPublicaV2({
     });
 
     return () => {
+      cancelled = true;
       document.title = previousTitle;
       created.forEach((el) => el.parentNode?.removeChild(el));
       detached.forEach(({ el, parent, next }) => {
