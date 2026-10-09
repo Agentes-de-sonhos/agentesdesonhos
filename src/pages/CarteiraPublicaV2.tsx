@@ -1,3 +1,4 @@
+import { buildSquareIcon } from "@/lib/squareIcon";
 import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
