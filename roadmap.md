@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Completar conteúdo e acabamento da prévia O Mundo em Cores briefing-14-v1; validar cartões, destinos conhecidos, depoimentos e bloqueios em desktop/mobile, sem publicar ou alterar dados reais.
+- [x] Completar conteúdo e acabamento da prévia O Mundo em Cores briefing-14-v1; validar cartões, destinos conhecidos, depoimentos e bloqueios em desktop/mobile, sem publicar ou alterar dados reais.
 - [x] Destinos com a Ju: banner editorial de nove experiências oficiais em /ingressos-orlando, recuado na coluna do formulário (não de borda a borda); formulário preservado, validado em 1280/768/390, sem publicar.
 - [x] Criar e validar a prévia técnica isolada do briefing 16 para Drica Viagens, preservando fixtures, tenants e banco, sem publicar.
 - [x] Orçamentos: reorganizar exclusivamente o modal de Outros Serviços, tornar valor opcional e mover fornecedor para o final, sem publicar.
