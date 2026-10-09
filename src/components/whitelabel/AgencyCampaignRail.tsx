@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { AGENCY_CARD_DESCRIPTION_CLASS, AGENCY_CARD_TITLE_CLASS } from "@/lib/agencySiteTypography";
 
 export interface AgencyCampaignItem {
@@ -19,9 +20,13 @@ export interface AgencyCampaignItem {
 export function AgencyCampaignRail({
   items,
   onSelect,
+  presentation,
+  ctaLabel = "Solicitar atendimento",
 }: {
   items: AgencyCampaignItem[];
   onSelect: (service: string) => void;
+  presentation?: "photoAbove";
+  ctaLabel?: string;
 }) {
   const railRef = useRef<HTMLDivElement | null>(null);
   const [atStart, setAtStart] = useState(true);
@@ -76,7 +81,18 @@ export function AgencyCampaignRail({
         onScroll={sync}
         className="wl-rail -mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 md:mx-0 md:px-0"
       >
-        {items.map((item) => (
+        {items.map((item) => presentation === "photoAbove" ? (
+          <article key={item.key} className="wl-campaign-card flex w-[82vw] shrink-0 snap-start flex-col overflow-hidden rounded-xl border border-border bg-card sm:w-[46vw] md:w-[calc((100%-2.5rem)/3)]">
+            <img src={item.imageSrc} alt={item.title} loading="lazy" width={900} height={450} className="aspect-[2/1] w-full object-cover" />
+            <div className="flex flex-1 flex-col p-6">
+              <h3 className={`text-xl text-card-foreground ${AGENCY_CARD_TITLE_CLASS}`}>{item.title}</h3>
+              <p className={`mt-3 text-sm text-muted-foreground ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{item.text}</p>
+              <Button variant="link" onClick={() => onSelect(item.service)} className="mt-auto h-auto justify-start self-start whitespace-normal px-0 pb-0 pt-6 text-left text-primary">
+                {ctaLabel}<ArrowRight className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" />
+              </Button>
+            </div>
+          </article>
+        ) : (
           <button
             key={item.key}
             type="button"
