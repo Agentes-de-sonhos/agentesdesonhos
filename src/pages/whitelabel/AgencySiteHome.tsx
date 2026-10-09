@@ -1,3 +1,5 @@
+import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
+import { PhotoDeck } from "@/components/whitelabel/PhotoDeck";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
