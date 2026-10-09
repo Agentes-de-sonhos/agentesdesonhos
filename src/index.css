@@ -1348,3 +1348,7 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-steps-card :is(p,li,span) { color: hsl(var(--muted-foreground)) !important; }
 .wl-mundo .wl-steps-card svg { color: hsl(var(--primary)) !important; }
 .wl-mundo #faq [data-state] { border-color: hsl(var(--border)); }
+.wl-mundo #rodape :is(p,a,span,li) { color: hsl(var(--muted-foreground)) !important; }
+.wl-mundo #rodape :is(h2,h3,h4) { color: hsl(var(--foreground)) !important; }
+.wl-mundo #rodape svg { color: hsl(var(--primary)) !important; }
+.wl-mundo #rodape a:hover { color: hsl(var(--primary)) !important; }
