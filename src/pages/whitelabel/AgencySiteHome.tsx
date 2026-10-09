@@ -380,8 +380,11 @@ function useAgencyShowcasePublished(slug: string | null | undefined) {
 export default function AgencySiteHome({
   info,
   labPresentation,
+  noindex = false,
 }: {
   info: AgencyDomainInfo;
+  /** Technical preview caller prevents indexing without changing real sites. */
+  noindex?: boolean;
   /**
    * Seleção da apresentação comercial do SiteLab Base (só o laboratório passa
    * este valor; tenants reais nunca o recebem e permanecem inalterados).
@@ -784,6 +787,8 @@ export default function AgencySiteHome({
                   editorial
                 />
                 <AgencyCampaignRail
+                  presentation={profile.campaignCardPresentation}
+                  ctaLabel={copy.cta}
                   items={modules.map((m) => ({
                     key: m.key,
                     title: m.title,
@@ -1053,6 +1058,14 @@ export default function AgencySiteHome({
                       </p>
                     )}
                   </div>
+                  {aboutCopy?.visitedDestinations && (
+                    <div className="mt-8 border-t border-border pt-6">
+                      <h3 className="text-base font-semibold text-foreground">{aboutCopy.visitedDestinations.title}</h3>
+                      <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm leading-relaxed text-muted-foreground">
+                        {aboutCopy.visitedDestinations.names.map((destination) => <li key={destination}>{destination}</li>)}
+                      </ul>
+                    </div>
+                  )}
                 </div>
                 {aboutCopy?.media !== "hidden" && <div className="grid gap-4">
                   {aboutCopy?.images?.length ? (
@@ -1599,6 +1612,7 @@ export default function AgencySiteHome({
         <SEO
           title={profile.seo.title}
           exactTitle
+          noindex={noindex}
           description={profile.seo.description}
           canonical={profile.seo.canonical ?? "/"}
           jsonLd={jsonLd}

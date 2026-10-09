@@ -1310,6 +1310,7 @@ body[data-booking-selection-bar] {
    Base branca, degradê azul muito suave alternado por seção, azul da marca só
    em ações/ícones. Escopo exclusivo `.wl-mundo`. */
 .wl-editorial.wl-mundo {
+  --wl-white: 0 0% 100%;
   --wl-sand: 200 45% 97%;
   --secondary: 200 45% 97%;
   --accent: 200 45% 96%;
@@ -1317,36 +1318,39 @@ body[data-booking-selection-bar] {
   --muted-foreground: 210 10% 38%;
   --border: 205 25% 90%;
   --radius: 0.75rem;
+  --shadow-mundo-card: 0 10px 30px -18px hsl(var(--primary) / 0.2);
   --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6FAFC 30%, #F0F7FA 65%, #FFFFFF 100%);
 }
-.wl-mundo main > section, .wl-mundo section[id] { background-color: #fff; background-image: none; }
-.wl-mundo #destinos,
-.wl-mundo #sobre,
-.wl-mundo #atendimento { background-image: var(--wl-mundo-gradient) !important; background-color: #fff !important; }
-.wl-mundo #campanhas,
-.wl-mundo #diferenciais,
-.wl-mundo #faq { background-image: none !important; background-color: #fff !important; }
-.wl-mundo section[id] > div { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+.wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
+.wl-mundo .wl-alt-gradient { background-image: var(--wl-mundo-gradient); }
+.wl-mundo .wl-alt-surface > section > div { padding-top: 4.5rem; padding-bottom: 4.5rem; }
+.wl-mundo #cotacao { background-color: hsl(var(--wl-white)); background-image: none; }
+.wl-mundo .wl-campaign-card { box-shadow: var(--shadow-mundo-card); }
+.wl-mundo :is(h1,h2,h3) { letter-spacing: 0 !important; }
+.wl-mundo .wl-cta-primary { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.wl-mundo .wl-cta-primary:hover { background-color: hsl(var(--primary) / 0.9); }
 @media (max-width: 767px) {
-  .wl-mundo section[id] > div { padding-top: 3rem; padding-bottom: 3rem; }
+  .wl-mundo .wl-alt-surface > section > div { padding-top: 3rem; padding-bottom: 3rem; }
+  .wl-mundo #sobre [class*="border-y-2"] { flex-wrap: wrap; }
 }
 .wl-mundo #rodape {
   background-image: var(--wl-mundo-gradient) !important;
-  background-color: #fff !important;
+  background-color: hsl(var(--wl-white)) !important;
   color: hsl(var(--foreground)) !important;
   border-top: 1px solid hsl(var(--border));
 }
 .wl-mundo #rodape > div:last-child { background: transparent !important; }
 .wl-mundo .wl-steps-card {
-  background: #fff !important;
+  background: hsl(var(--wl-white)) !important;
   border: 1px solid hsl(var(--border));
-  box-shadow: 0 10px 30px -18px hsl(var(--primary) / 0.35);
+  box-shadow: var(--shadow-mundo-card);
   color: hsl(var(--foreground));
 }
 .wl-mundo .wl-steps-card * { color: inherit; }
 .wl-mundo .wl-steps-card :is(h2,h3,h4) { color: hsl(var(--foreground)) !important; }
 .wl-mundo .wl-steps-card :is(p,li,span) { color: hsl(var(--muted-foreground)) !important; }
 .wl-mundo .wl-steps-card svg { color: hsl(var(--primary)) !important; }
+.wl-mundo .wl-steps-card .wl-step-num { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)) !important; }
 .wl-mundo #faq [data-state] { border-color: hsl(var(--border)); }
 .wl-mundo #rodape :is(p,a,span,li) { color: hsl(var(--muted-foreground)) !important; }
 .wl-mundo #rodape :is(h2,h3,h4) { color: hsl(var(--foreground)) !important; }

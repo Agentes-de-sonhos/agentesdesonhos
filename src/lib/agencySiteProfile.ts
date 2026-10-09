@@ -174,6 +174,8 @@ export interface AgencySiteProfile {
   /** Embaralha a ordem das inspirações a cada carregamento (padrão: ordem declarada). */
   randomizeDestinations?: boolean;
   modules?: AgencyModule[];
+  /** Optional photo-above/content-below campaign cards; absent preserves overlays. */
+  campaignCardPresentation?: "photoAbove";
   highlights?: AgencyHighlight[];
   differentials?: AgencyDifferential[];
   faq?: { q: string; a: string }[];
@@ -205,6 +207,8 @@ export interface AgencySiteProfile {
     badge?: { value: string; label?: string };
     /** Fatos institucionais confirmados, apresentados separadamente. */
     facts?: string[];
+    /** Personal travel repertoire, informational only; absent renders no strip. */
+    visitedDestinations?: { title: string; names: string[] };
     /** Oculta o painel de imagem quando não existe retrato real autorizado. */
     media?: "default" | "hidden";
     /** Exibe a cidade/UF do cadastro sob o texto institucional. */

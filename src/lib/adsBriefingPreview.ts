@@ -7,6 +7,8 @@ import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
+// Real personal photographs from https://omundoemcores.com.br/wp-content/uploads/2024/07/Vanessa.png
+import mundoEmCoresVanessa from "@/assets/ads-preview/mundo-em-cores-vanessa-oficial.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 
@@ -155,6 +157,8 @@ export const MUNDO_EM_CORES_PREVIEW_INFO: AgencyDomainInfo = {
 export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   key: "mundoEmCoresBriefing14",
   compactSectionSpacing: true,
+  alternateSurfaces: true,
+  campaignCardPresentation: "photoAbove",
   nav: [
     { label: "Início", to: "/" },
     { label: "Destinos", to: "/#destinos" },
@@ -167,7 +171,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     offers: { enabled: false },
     credentials: { enabled: false },
     team: { enabled: false },
-    testimonials: { enabled: false },
+    testimonials: { enabled: true, order: 7 },
     avaliacoes: { enabled: false },
     newsletter: { enabled: false },
     authority: { enabled: false },
@@ -178,37 +182,30 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     about: { enabled: true, order: 4 },
     differentials: { enabled: true, order: 5 },
     concierge: { enabled: true, order: 6 },
-    faq: { enabled: true, order: 7 },
+    faq: { enabled: true, order: 8 },
   },
   heroImage: "europa",
-  heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft" },
+  heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft", cta: { label: "Vamos planejar sua viagem", service: "pacotes" } },
   hero: [
     {
-      title: "O mundo ganha novas cores quando a viagem tem a sua medida",
-      subtitle: "Curadoria de roteiros, hotéis e serviços para viajar com conforto, segurança e tranquilidade.",
+      title: "Sua próxima viagem, com as suas cores.",
+      subtitle: "Roteiros personalizados, escolhas cuidadosas e acompanhamento antes, durante e depois da viagem. Conte o que você imagina — vamos planejar cada detalhe juntos.",
       image: "europa",
       order: 1,
       enabled: true,
     },
     {
-      title: "Memórias em família, do planejamento ao retorno",
-      subtitle: "Orlando, parques e experiências para diferentes gerações, com cada etapa organizada com cuidado.",
+      title: "Experiências dentro e fora do óbvio",
+      subtitle: "Meu repertório de viagens encontra as suas preferências: uma conversa próxima para escolher destinos, experiências e o ritmo que combina com você.",
       image: "parques",
       order: 2,
-      enabled: true,
-    },
-    {
-      title: "Cruzeiros e grandes destinos com curadoria especializada",
-      subtitle: "Mediterrâneo, Caribe, Europa, Estados Unidos e Canadá em roteiros pensados para o seu perfil.",
-      image: "cruzeiro",
-      order: 3,
       enabled: true,
     },
   ],
   signature: {
     kicker: "O MUNDO EM CORES",
-    title: "Planejamento completo para viajar com tranquilidade.",
-    text: "Sonhos ganham forma em roteiros personalizados, com escolhas cuidadosas e suporte antes, durante e depois da viagem.",
+    title: "Uma viagem com a sua personalidade.",
+    text: "Tudo começa com uma conversa sobre suas preferências, seu ritmo e o que você deseja viver. Juntos, planejamos roteiro, hospedagem e experiências, com orientação e suporte em cada etapa.",
   },
   destinations: [
     { key: "europa", image: "europa", label: "Europa", title: "Europa", text: "Cidades, paisagens e experiências combinadas em um roteiro com ritmo e personalidade.", service: "pacotes", enabled: true, order: 1 },
@@ -220,46 +217,48 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   modules: [
     { key: "personalizadas", title: "Viagens personalizadas", text: "Roteiros, hotéis e serviços selecionados a partir do perfil de quem viaja.", service: "pacotes", image: "europa", enabled: true, order: 1 },
     { key: "familias", title: "Famílias e várias gerações", text: "Conforto e experiências pensadas para diferentes idades viajarem bem juntas.", service: "pacotes", image: "parques", enabled: true, order: 2 },
-    { key: "grupos", title: "Grupos acompanhados", text: "Planejamento cuidadoso para grupos de amigos e saídas acompanhadas.", service: "pacotes", image: "grupos", enabled: true, order: 3 },
+    { key: "grupos", title: "Pequenos grupos", text: "Planejamento cuidadoso para compartilhar descobertas com amigos e pequenos grupos, respeitando o ritmo de quem viaja.", service: "pacotes", image: "grupos", enabled: true, order: 3 },
+    { key: "elas-viajam", title: "Elas Viajam", text: "Experiências de viagem para mulheres. Converse com a Vanessa sobre propostas e próximas saídas.", service: "pacotes", image: "litoral", enabled: true, order: 4 },
   ],
   about: {
-    kicker: "QUEM CUIDA DA SUA VIAGEM",
-    title: "Vanessa Figueiredo: experiência para transformar planos em boas memórias.",
-    text: "Sócia-proprietária e consultora de viagens, Vanessa reúne 30 anos de experiência no turismo, com atuação anterior em outras agências e criação de experiências personalizadas desde 2012. À frente do atendimento, ela combina conhecimento de destinos, escuta atenta e antecipação de riscos para planejar cada viagem com segurança.",
-    badge: { value: "Desde 2017", label: "O Mundo em Cores - Studio de Viagens" },
-    facts: ["30 anos de experiência no turismo", "Experiências personalizadas desde 2012"],
-    media: "hidden",
+    kicker: "CONHEÇA VANESSA FIGUEIREDO",
+    title: "29 anos colorindo vidas com viagens.",
+    text: "Olá, eu sou a Vanessa Figueiredo.\n\nViajar faz parte da minha vida e do meu trabalho. Cada destino que conheço traz novas descobertas, ideias e detalhes que ajudam a planejar viagens com mais personalidade.\n\nNa O Mundo em Cores, combino essa vivência com uma conversa próxima para entender o que você deseja e construir uma experiência que tenha a sua cara — dentro e fora do óbvio.",
+    badge: { value: "29 anos", label: "de experiência no turismo" },
+    images: [{ src: mundoEmCoresVanessa.url, alt: "Vanessa Figueiredo em fotografias pessoais de suas viagens, publicadas em seu site oficial", aspect: "square" }],
+    visitedDestinations: { title: "Destinos que já conheci", names: ["Brasil", "Estados Unidos", "Canadá", "México", "Itália", "Suíça", "Espanha", "Portugal", "Inglaterra", "Montenegro", "Croácia", "França", "Argentina", "Chile", "Paraguai", "Bahamas", "República Dominicana", "Colômbia", "Indonésia", "Vaticano"] },
     showLocation: true,
     ownerName: "Vanessa Figueiredo",
   },
   differentials: [
-    { title: "Curadoria completa", text: "Roteiros, hotéis e serviços escolhidos de acordo com o perfil e o momento de cada viagem.", icon: "consultivo" },
-    { title: "Atendimento responsável", text: "A consultora que entende o projeto acompanha as escolhas e orienta cada etapa.", icon: "conferido" },
-    { title: "Antecipação de riscos", text: "Detalhes e pontos de atenção são avaliados antes da viagem para decisões mais seguras.", icon: "fornecedores" },
-    { title: "Suporte em toda a jornada", text: "Acompanhamento antes, durante e depois, com orientação quando surgem imprevistos.", icon: "acompanhamento" },
+    { title: "Escolhas que combinam com você", text: "Roteiro, hotéis e experiências escolhidos conforme suas preferências.", icon: "consultivo" },
+    { title: "Conversa próxima, orientação clara", text: "Atendimento com a Vanessa e decisões explicadas para você escolher com confiança.", icon: "conferido" },
+    { title: "Atenção aos detalhes antes de embarcar", text: "Orientações sobre documentos, reservas e programação antes da partida.", icon: "fornecedores" },
+    { title: "Acompanhamento em cada etapa", text: "Suporte antes, durante e depois da viagem, conforme o serviço contratado.", icon: "acompanhamento" },
   ],
-  hideConciergeActions: true,
+  hideConciergeActions: false,
   conciergeSteps: [
     "Uma conversa para entender quem viaja, preferências, ritmo e prioridades.",
-    "Curadoria de destinos, roteiros, hotéis e serviços adequados ao perfil.",
+    "Escolha de destinos, roteiros, hotéis e serviços que combinam com você.",
     "Apresentação clara das opções e ajustes antes das reservas.",
     "Acompanhamento antes, durante e depois da viagem.",
   ],
   faq: [
     { q: "Como funciona o planejamento da viagem?", a: "O atendimento começa com uma conversa sobre o perfil dos viajantes e o que desejam viver. A partir daí, são selecionados roteiros, hotéis e serviços e as opções são apresentadas para revisão." },
-    { q: "Quais viagens são especialidades da agência?", a: "Viagens personalizadas, cruzeiros, viagens em família com parques e grupos acompanhados, com destaque para Europa, Orlando, Mediterrâneo, Caribe e Xcaret." },
+    { q: "Quais viagens são especialidades da agência?", a: "Viagens personalizadas, famílias e várias gerações, pequenos grupos e experiências para mulheres com o Elas Viajam. Também planejamos cruzeiros, parques e roteiros com destaque para Europa, Orlando, Mediterrâneo, Caribe e Xcaret." },
     { q: "A agência atende famílias de várias gerações?", a: "Sim. O planejamento considera as necessidades de crianças, adultos e pessoas mais velhas para equilibrar ritmo, conforto e experiências." },
-    { q: "Há suporte durante a viagem?", a: "Sim. O acompanhamento acontece antes, durante e depois da viagem, com orientação da consultora responsável quando necessário." },
+    { q: "Há suporte durante a viagem?", a: "O suporte antes, durante e depois da viagem é combinado conforme o serviço contratado. Converse com a Vanessa para entender como funciona na sua viagem." },
   ],
   copy: {
     destinations: { title: "Destinos que inspiram novas histórias", subtitle: "Prioridades escolhidas para casais, famílias de várias gerações e grupos de amigos." },
-    modules: { title: "Cada viagem começa por quem vai vivê-la", subtitle: "Especialidades com planejamento personalizado e cuidado em cada escolha." },
-    differentials: { title: "Cuidado que acompanha cada etapa", subtitle: "Conhecimento, antecipação e suporte para viajar com mais tranquilidade." },
-    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Um processo próximo e profissional, conduzido pela consultora responsável." },
+    modules: { title: "Cada viagem começa por quem vai vivê-la", subtitle: "Especialidades com planejamento personalizado e cuidado em cada escolha.", cta: "Conversar com a Vanessa" },
+    differentials: { title: "Cuidado que acompanha cada etapa", subtitle: "Escolhas cuidadosas, orientação clara e suporte para viajar com mais tranquilidade." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Você conversa com a Vanessa, conhece as opções e ajusta os detalhes antes de reservar.", cta: "Conversar com a Vanessa" },
+    testimonials: { title: "Histórias de quem já viajou com a Vanessa" },
     faq: { title: "Dúvidas frequentes" },
   },
   footer: {
-    description: "Viagens personalizadas, cruzeiros e experiências em família com planejamento completo e atendimento próximo.\nVinculação de domínio pendente.",
+    description: "Viagens personalizadas, cruzeiros, experiências em família e pequenos grupos. Planejamento cuidadoso e uma conversa próxima com a Vanessa, do primeiro contato ao retorno.",
     whatsapp: "(11) 99995-4734",
     phone: "(11) 99995-4734",
     email: "contato@omundoemcores.com.br",
@@ -267,6 +266,11 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     instagramLabel: "@omundoemcoresviagens",
     showLocation: true,
   },
+  testimonials: [
+    { key: "thais-rosa", author: "Thaís Rosa", quote: "competência, carinho, personalização, amor, dedicação" },
+    { key: "lucia-quintas", author: "Lucia Quintas", quote: "sempre priorizando nossos desejos e conforto" },
+    { key: "raquel-macario", author: "Raquel Macario", quote: "minhas viagens sejam leves, agradáveis, com excelentes escolhas" },
+  ],
   seo: {
     title: "Prévia para revisão — O Mundo em Cores - Studio de Viagens",
     description: "Prévia técnica revisável do site O Mundo em Cores - Studio de Viagens.",
