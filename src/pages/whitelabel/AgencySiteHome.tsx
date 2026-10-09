@@ -380,8 +380,11 @@ function useAgencyShowcasePublished(slug: string | null | undefined) {
 export default function AgencySiteHome({
   info,
   labPresentation,
+  noindex = false,
 }: {
   info: AgencyDomainInfo;
+  /** Technical preview caller prevents indexing without changing real sites. */
+  noindex?: boolean;
   /**
    * Seleção da apresentação comercial do SiteLab Base (só o laboratório passa
    * este valor; tenants reais nunca o recebem e permanecem inalterados).
@@ -1609,6 +1612,7 @@ export default function AgencySiteHome({
         <SEO
           title={profile.seo.title}
           exactTitle
+          noindex={noindex}
           description={profile.seo.description}
           canonical={profile.seo.canonical ?? "/"}
           jsonLd={jsonLd}

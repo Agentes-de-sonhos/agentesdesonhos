@@ -100,7 +100,7 @@ export default function AdsBriefingPreview() {
       </div>
       <Suspense fallback={null}>
         <AgencySiteLayout info={fixture.info} noWhatsapp>
-          <AgencySiteHome info={fixture.info} />
+          <AgencySiteHome info={fixture.info} noindex />
         </AgencySiteLayout>
       </Suspense>
     </div>
