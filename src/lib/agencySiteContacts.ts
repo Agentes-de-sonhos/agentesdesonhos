@@ -60,6 +60,7 @@ export function withSiteContacts<T extends { hostname: string; phone: string | n
 /** Hosts alternativos que redirecionam para o hostname canônico do tenant. */
 const CANONICAL_REDIRECTS: Record<string, string> = {
   "essyatur.com.br": "www.essyatur.com.br",
+  "omundoemcores.com.br": "www.omundoemcores.com.br",
 };
 
 export function canonicalRedirectHost(hostname?: string | null): string | null {

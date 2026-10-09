@@ -7,8 +7,10 @@ const BROWSER_TITLE_BY_HOSTNAME: Record<string, string> = {
   "www.destinoscomaju.com.br": "Destinos com a Ju",
   "paraisoviagens.com": "Paraiso Viagens",
   "www.paraisoviagens.com": "Paraiso Viagens",
-  "essyatur.com.br": "Essya Tur Viagens",
+"essyatur.com.br": "Essya Tur Viagens",
   "www.essyatur.com.br": "Essya Tur Viagens",
+  "omundoemcores.com.br": "O Mundo em Cores",
+  "www.omundoemcores.com.br": "O Mundo em Cores",
 };
 
 function normalizeHostname(hostname?: string | null): string {
