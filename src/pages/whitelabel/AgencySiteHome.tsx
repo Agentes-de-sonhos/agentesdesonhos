@@ -1630,7 +1630,9 @@ export default function AgencySiteHome({
         id="topo"
         className={
           editorial
-            ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
+            ? profile.key === "mundoEmCoresBriefing14"
+              ? "relative overflow-hidden pb-14 md:h-[500px] md:pb-16"
+              : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
         style={editorial ? { paddingBottom: `calc(${topOverlap} + 1.5rem)` } : undefined}
