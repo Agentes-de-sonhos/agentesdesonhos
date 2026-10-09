@@ -539,6 +539,7 @@ export default function CarteiraPublicaV2({
     });
 
     return () => {
+      cancelled = true;
       document.title = previousTitle;
       created.forEach((el) => el.parentNode?.removeChild(el));
       detached.forEach(({ el, parent, next }) => {
