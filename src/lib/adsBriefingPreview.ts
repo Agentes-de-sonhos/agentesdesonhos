@@ -184,7 +184,8 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     faq: { enabled: true, order: 6 },
   },
   heroImage: "europa",
-  heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft" },
+  heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft", actionsPlacement: "right" },
+  requestCenter: { title: "Por onde você quer começar?", titlePlacement: "above-card" },
   hero: [
     {
       title: "Sua próxima viagem, com as suas cores.",
