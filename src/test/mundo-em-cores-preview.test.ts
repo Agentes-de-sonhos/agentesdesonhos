@@ -37,6 +37,9 @@ describe("O Mundo em Cores approved isolated presentation", () => {
     expect(profile.about?.visitedDestinations?.title).toBe("Destinos que já conheci");
     expect(profile.modules?.find(m => m.key === "elas-viajam")?.text).toBe("Experiências de viagem para mulheres. Converse com a Vanessa sobre propostas e próximas saídas.");
     expect(profile.hero?.[0].title).toBe("Sua próxima viagem, com as suas cores.");
-    expect(profile.heroPresentation?.cta?.label).toBe("Vamos planejar sua viagem");
+    expect(profile.heroPresentation?.cta).toBeUndefined();
+    expect(profile.hero?.[1].title).toBe("Uma viagem com a sua personalidade.");
+    expect(profile.sections?.newsletter).toEqual({ enabled: true, order: 7 });
+    expect(profile.socialStrip?.links[0].network).toBe("instagram");
   });
 });
