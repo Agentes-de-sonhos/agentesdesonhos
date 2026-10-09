@@ -18,10 +18,11 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 vi.mock("@/pages/NotFound", () => ({ default: () => <p>Página não encontrada</p> }));
 
 describe("prévia ADS ads-email-test-v1", () => {
-  it("só aceita o host técnico id-preview (e localhost de dev)", () => {
+  it("aceita os mesmos hosts técnicos do sistema (e localhost de dev)", () => {
     expect(isTechnicalPreviewHost("id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app")).toBe(true);
-    for (const h of ["agentedesonhoproject.lovable.app", "app.agentesdesonhos.com.br", "www.destinoscomaju.com.br",
-      "preview--x.lovable.app", "id-preview--x.lovable.app.evil.com", "vitrine.tur.br"]) {
+    expect(isTechnicalPreviewHost("preview--x.lovableproject.com")).toBe(true);
+    for (const h of ["www.destinoscomaju.com.br", "id-preview--x.lovable.app.evil.com",
+      "vitrine.tur.br", "app.agentesdesonhos.com.br"]) {
       expect(isTechnicalPreviewHost(h)).toBe(false);
     }
   });

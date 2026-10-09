@@ -15,11 +15,12 @@ export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
 /** Host sintético: nunca corresponde a um domínio ou tenant real. */
 export const ADS_PREVIEW_HOST = "ads-email-test-v1.demo.local";
 
-export function isTechnicalPreviewHost(hostname: string): boolean {
-  const h = (hostname || "").toLowerCase();
-  if (h === "localhost" || h === "127.0.0.1") return true;
-  return h.startsWith("id-preview--") && h.endsWith(".lovable.app");
-}
+/**
+ * Hosts técnicos da prévia: mesma verificação usada pelo restante do sistema
+ * (agencyDomains.ts) — localhost e hosts técnicos do Lovable. Prévia ADS só
+ * existe nesses hosts; domínios reais de agências nunca a servem.
+ */
+export { isTechnicalPreviewHost } from "@/lib/agencyDomains";
 
 export const ADS_PREVIEW_INFO: AgencyDomainInfo = {
   user_id: "00000000-0000-0000-0000-00000000ad50",
