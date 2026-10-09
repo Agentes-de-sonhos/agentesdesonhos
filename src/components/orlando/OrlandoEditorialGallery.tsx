@@ -28,7 +28,7 @@ const PHOTOS = [
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
-  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
+  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local"].includes(hostname.toLowerCase().replace(/\.$/, ""));
 
   useEffect(() => {
     if (!allowed || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
