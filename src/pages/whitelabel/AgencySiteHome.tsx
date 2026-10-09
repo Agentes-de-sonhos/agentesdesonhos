@@ -1023,7 +1023,7 @@ export default function AgencySiteHome({
                     </p>
                   )}
                   {aboutCopy?.badge && (
-                    <div className="mt-8 inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6">
+                    <div className={`${compactSpacing ? "mt-5" : "mt-8"} inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6`}>
                       <span className="text-4xl font-extrabold uppercase leading-none tracking-tight text-primary md:text-5xl">
                         {aboutCopy.badge.value}
                       </span>
@@ -1034,7 +1034,7 @@ export default function AgencySiteHome({
                       )}
                     </div>
                   )}
-                  <p className="mt-8 whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                  <p className={`${compactSpacing ? "mt-5" : "mt-8"} whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base`}>
                     {bio}
                   </p>
                   {!!aboutCopy?.facts?.length && (

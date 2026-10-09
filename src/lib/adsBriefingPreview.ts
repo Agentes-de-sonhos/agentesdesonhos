@@ -221,8 +221,8 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   ],
   about: {
     kicker: "CONHEÇA VANESSA FIGUEIREDO",
-    title: "29 anos colorindo vidas com viagens.",
-    text: "Olá, eu sou a Vanessa Figueiredo.\n\nViajar faz parte da minha vida e do meu trabalho. Cada destino que conheço traz novas descobertas, ideias e detalhes que ajudam a planejar viagens com mais personalidade.\n\nNa O Mundo em Cores, combino essa vivência com uma conversa próxima para entender o que você deseja e construir uma experiência que tenha a sua cara — dentro e fora do óbvio.",
+    title: "Viagens planejadas para o seu jeito de viver o mundo.",
+    text: "Olá, eu sou a Vanessa Figueiredo.\n\nViajar faz parte da minha vida e do meu trabalho. Cada destino que conheço traz novas descobertas, ideias e detalhes que ajudam a planejar viagens com mais personalidade.\n\nNa O Mundo em Cores, combino essa vivência com uma conversa próxima para entender o que você deseja e construir uma experiência que tenha a sua cara.",
     badge: { value: "29 anos", label: "de experiência no turismo" },
     images: [{ src: mundoEmCoresVanessa.url, alt: "Vanessa Figueiredo em fotografias pessoais de suas viagens, publicadas em seu site oficial", aspect: "square" }],
     visitedDestinations: { title: "Destinos que já conheci", names: ["Brasil", "Estados Unidos", "Canadá", "México", "Itália", "Suíça", "Espanha", "Portugal", "Inglaterra", "Montenegro"], presentation: "flags" },
