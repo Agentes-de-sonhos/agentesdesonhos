@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ChevronDown, MessageCircle, Play } from "lucide-react";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
@@ -269,14 +269,45 @@ const XCARET_JSON_LD: Record<string, unknown>[] = [
 ];
 
 
-export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) {
+/**
+ * Reescrita textual opcional (somente prévias técnicas): troca menções da
+ * agência original no conteúdo renderizado, sem alterar a página da Ju.
+ */
+function useTextRewrite(ref: React.RefObject<HTMLElement>, rules?: [string, string][]) {
+  useEffect(() => {
+    const root = ref.current;
+    if (!root || !rules?.length) return;
+    const apply = (v: string) => rules.reduce((acc, [from, to]) => acc.split(from).join(to), v);
+    const run = () => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+        const next = apply(n.nodeValue ?? "");
+        if (next !== n.nodeValue) n.nodeValue = next;
+      }
+      root.querySelectorAll<HTMLElement>("[alt],[aria-label]").forEach((el) => {
+        for (const attr of ["alt", "aria-label"]) {
+          const v = el.getAttribute(attr);
+          if (v) { const next = apply(v); if (next !== v) el.setAttribute(attr, next); }
+        }
+      });
+    };
+    run();
+    const mo = new MutationObserver(run);
+    mo.observe(root, { subtree: true, childList: true, characterData: true });
+    return () => mo.disconnect();
+  }, [ref, rules]);
+}
+
+export default function XcaretLandingPage({ info, slots = XCARET_MEDIA_SLOTS, textRewrites, noindex = false }: { info: AgencyDomainInfo; slots?: Slots; textRewrites?: [string, string][]; noindex?: boolean }) {
   useAgencySiteThemeOnBody(info.hostname);
+  const rootRef = useRef<HTMLDivElement>(null);
+  useTextRewrite(rootRef, textRewrites);
   return (
-    <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
-      <SEO exactTitle title="Xcaret com a Ju | Parques, Hotéis e Viagem Personalizada" description="Descubra parques, hotéis e experiências Xcaret na Riviera Maya com uma viagem personalizada pela Destinos com a Ju." canonical="https://www.destinoscomaju.com.br/xcaret" image={XCARET_IMAGES.xcaret.src} jsonLd={XCARET_JSON_LD} />
+    <div ref={rootRef} className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
+      {!noindex && <SEO exactTitle title="Xcaret com a Ju | Parques, Hotéis e Viagem Personalizada" description="Descubra parques, hotéis e experiências Xcaret na Riviera Maya com uma viagem personalizada pela Destinos com a Ju." canonical="https://www.destinoscomaju.com.br/xcaret" image={XCARET_IMAGES.xcaret.src} jsonLd={XCARET_JSON_LD} />}
       <XcaretHeader info={info} />
       <main>
-        <Hero />
+        <Hero slots={slots} />
 
         <XcaretBookingBar hostname={info.hostname} agencyName={info.agency_name ?? "Destinos com a Ju"} />
 
@@ -291,7 +322,7 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
         </div></section>
 
 
-        <Specialist />
+        <Specialist slots={slots} />
 
         <section id="parques" className="scroll-mt-24 bg-secondary pb-16 pt-6 md:pb-24 md:pt-8"><div className={contentWidth}>
           <SectionIntro title="Qual dessas experiências tem a sua cara?"><p>Um mergulho em águas cristalinas, uma aventura sobre a selva ou uma noite de festa mexicana. Descubra outras formas de aproveitar o universo Xcaret e escolha suas favoritas com a ajuda da Ju.</p></SectionIntro>
@@ -320,7 +351,7 @@ export default function XcaretLandingPage({ info }: { info: AgencyDomainInfo }) 
 
         <section id="duvidas" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} max-w-4xl`}><SectionIntro title="Pensando em conhecer o Xcaret? Tire suas primeiras dúvidas."/><Accordion type="single" collapsible className="mt-10 rounded-md border border-border bg-card px-5 md:px-7">{XCARET_FAQ.map(([q,a],index)=><AccordionItem value={`faq-${index}`} key={q}><AccordionTrigger className="min-h-14 text-left text-base hover:no-underline">{q}</AccordionTrigger><AccordionContent className="pr-8 text-[15px] leading-7 text-muted-foreground">{a}</AccordionContent></AccordionItem>)}</Accordion></div></section>
 
-        <Closing />
+        <Closing slots={slots} />
       </main>
       <AgencyFooter info={info} />
       <a href={agencySiteHref("/#destinos")} className="sr-only">Voltar aos destinos</a>
