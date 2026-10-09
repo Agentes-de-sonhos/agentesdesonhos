@@ -1324,7 +1324,7 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
 .wl-mundo .wl-alt-gradient { background-image: var(--wl-mundo-gradient); }
 .wl-mundo .wl-alt-surface > section > div { padding-top: 4.5rem; padding-bottom: 4.5rem; }
-.wl-mundo #cotacao { background-color: hsl(var(--wl-white)); background-image: none; }
+.wl-mundo #cotacao { background-color: transparent; background-image: none; }
 .wl-mundo .wl-campaign-card { box-shadow: var(--shadow-mundo-card); }
 .wl-mundo :is(h1,h2,h3) { letter-spacing: 0 !important; }
 .wl-mundo .wl-cta-primary { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
