@@ -21,6 +21,7 @@ import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
 const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
+const MundoEmCoresComingSoon = lazy(() => import("@/pages/whitelabel/MundoEmCoresComingSoon"));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -107,6 +108,20 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
       return (
         <Suspense fallback={<Spinner />}>
           <EssyaTurComingSoon />
+        </Suspense>
+      );
+    }
+  }
+
+  /**
+   * Variante estática de "site em construção" (O Mundo em Cores): mesma lógica
+   * da Essya Tur — sem depender de cadastro da agência no banco, apenas na home.
+   */
+  if (host && resolveConstructionVariant(host) === "mundoEmCores") {
+    if (browserPath === "/" || browserPath === "") {
+      return (
+        <Suspense fallback={<Spinner />}>
+          <MundoEmCoresComingSoon />
         </Suspense>
       );
     }
