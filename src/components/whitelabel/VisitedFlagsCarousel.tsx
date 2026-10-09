@@ -31,17 +31,7 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
 
   return (
     <div className="mt-8 w-full min-w-0 overflow-hidden border-t border-border pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
-      <div className="flex items-center justify-between gap-4">
-        <h3 className="text-base font-semibold text-foreground">{title}</h3>
-        <div className="flex gap-2">
-          <button type="button" aria-label="Países anteriores" onClick={() => scroll(-1)} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button type="button" aria-label="Próximos países" onClick={() => scroll(1)} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+      <h3 className="text-base font-semibold text-foreground">{title}</h3>
       <ul ref={track} className="mt-4 flex snap-x gap-3 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {names.map((n) => {
           const code = FLAG_CODES[n];
@@ -57,6 +47,14 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
           );
         })}
       </ul>
+      <div className="mt-3 flex justify-end gap-2">
+        <button type="button" aria-label="Países anteriores" onClick={() => scroll(-1)} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button type="button" aria-label="Próximos países" onClick={() => scroll(1)} className="grid h-9 w-9 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
