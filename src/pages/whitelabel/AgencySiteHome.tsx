@@ -999,7 +999,7 @@ export default function AgencySiteHome({
           return (
             <section key={key} id="sobre" className="bg-background">
               <div className={`${container} grid items-center gap-10 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
-                <div>
+                <div className="min-w-0">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
@@ -1023,7 +1023,7 @@ export default function AgencySiteHome({
                     </p>
                   )}
                   {aboutCopy?.badge && (
-                    <div className="mt-8 inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6">
+                    <div className={`${compactSpacing ? "mt-5" : "mt-8"} inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6`}>
                       <span className="text-4xl font-extrabold uppercase leading-none tracking-tight text-primary md:text-5xl">
                         {aboutCopy.badge.value}
                       </span>
@@ -1034,7 +1034,7 @@ export default function AgencySiteHome({
                       )}
                     </div>
                   )}
-                  <p className="mt-8 whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base">
+                  <p className={`${compactSpacing ? "mt-5" : "mt-8"} whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base`}>
                     {bio}
                   </p>
                   {!!aboutCopy?.facts?.length && (
