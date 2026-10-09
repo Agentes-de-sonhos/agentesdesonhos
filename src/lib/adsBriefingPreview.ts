@@ -641,3 +641,20 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
 export function resolveAdsPreviewFixture(jobId?: string): AdsBriefingPreviewFixture | null {
   return jobId ? ADS_PREVIEW_FIXTURES[jobId] ?? null : null;
 }
+
+/**
+ * Landing Xcaret na prévia O Mundo em Cores: sem fotos ou selos da Juliana
+ * (fotos oficiais dos parques como temporárias) e sem alegações de visita
+ * ou certificação que a Vanessa não confirmou.
+ */
+export const MUNDO_EM_CORES_XCARET_REWRITES: [string, string][] = [
+  ["Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.", "Um universo de parques e hotéis para planejar com cuidado."],
+  ["Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.", "Sou a Vanessa Figueiredo, da O Mundo em Cores, e organizo cada etapa da sua viagem à Riviera Maya."],
+  ["Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.", "Ajudo você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar."],
+  ["Destinos com a Ju", "O Mundo em Cores"],
+  ["Juliana", "Vanessa"],
+  ["Oi, Ju!", "Oi, Vanessa!"],
+  ["à Ju", "à Vanessa"],
+  ["a Ju", "a Vanessa"],
+  ["A Ju", "A Vanessa"],
+];
