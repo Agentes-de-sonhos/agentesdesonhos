@@ -9,6 +9,12 @@ const FLAG_CODES: Record<string, string> = {
   Colômbia: "co", Indonésia: "id", Vaticano: "va",
 };
 
+/** Compact display labels so every card keeps the same height. */
+const SHORT_LABELS: Record<string, string> = {
+  "Estados Unidos": "EUA",
+  "República Dominicana": "Rep. Dominicana",
+};
+
 export function VisitedFlagsCarousel({ title, names }: { title: string; names: string[] }) {
   const track = useRef<HTMLUListElement>(null);
   const [paused, setPaused] = useState(false);
@@ -41,7 +47,7 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
                 {code ? (
                   <img src={`https://flagcdn.com/w160/${code}.png`} alt={`Bandeira: ${n}`} loading="lazy" width={64} height={44} className="h-11 w-16 rounded-md object-cover ring-1 ring-border transition duration-300 group-hover:scale-105" />
                 ) : <span className="h-11 w-16 rounded-md bg-muted" aria-hidden="true" />}
-                <span className="text-center text-[11px] font-semibold leading-tight text-muted-foreground group-hover:text-foreground">{n}</span>
+                <span className="flex h-7 items-center text-center text-[11px] font-semibold leading-tight text-muted-foreground group-hover:text-foreground">{SHORT_LABELS[n] ?? n}</span>
               </div>
             </li>
           );
