@@ -12,4 +12,5 @@ type: design
 - Somente foto pessoal real da Vanessa, com origem confirmada; nunca gerar pessoas fictícias ou galeria pessoal de banco.
 - Depoimentos exatos: Thaís Rosa “competência, carinho, personalização, amor, dedicação”; Lucia Quintas “sempre priorizando nossos desejos e conforto”; Raquel Macario “minhas viagens sejam leves, agradáveis, com excelentes escolhas”. Título “Histórias de quem já viajou com a Vanessa”. Sem estrelas, Google ou fotos inventadas.
 - Instagram https://www.instagram.com/omundoemcoresviagens/. Retirar pendência de domínio do texto de marketing; manter aviso técnico da prévia.
+- Página "em construção" ativa (pedido do Fernando, 09/10/2026) para omundoemcores.com.br / www: variante estática `mundoEmCores` em `agencySiteStatus.ts` + `MundoEmCoresComingSoon.tsx`, padrão EssyaTur (sem cadastro no banco, só na home, noindex). Domínio sem www redireciona para www. Nada publicado ainda.
 - Não vincular domínio público, publicar, alterar banco/conta real ou perfis de outras agências nesta etapa.
