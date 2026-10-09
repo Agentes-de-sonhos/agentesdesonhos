@@ -1,6 +1,7 @@
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
+import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
