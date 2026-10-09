@@ -1319,7 +1319,7 @@ body[data-booking-selection-bar] {
   --border: 205 25% 90%;
   --radius: 0.75rem;
   --shadow-mundo-card: 0 10px 30px -18px hsl(var(--primary) / 0.2);
-  --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6FAFC 30%, #F0F7FA 65%, #FFFFFF 100%);
+  --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F1F6FA 100%);
 }
 .wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
 .wl-mundo .wl-alt-gradient { background-image: var(--wl-mundo-gradient); }
