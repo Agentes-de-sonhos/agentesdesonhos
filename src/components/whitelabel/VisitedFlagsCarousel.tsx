@@ -16,7 +16,8 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
   const scroll = (dir: 1 | -1) => {
     const el = track.current;
     if (!el) return;
-    const step = el.clientWidth * 0.8;
+    const first = el.firstElementChild as HTMLElement | null;
+    const step = first ? first.offsetWidth + 12 : 100;
     const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
     if (dir === 1 && atEnd) el.scrollTo({ left: 0, behavior: "smooth" });
     else el.scrollBy({ left: dir * step, behavior: "smooth" });
