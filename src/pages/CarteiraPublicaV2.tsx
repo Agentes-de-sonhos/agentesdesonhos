@@ -479,31 +479,35 @@ export default function CarteiraPublicaV2({
     let cancelled = false;
     if (logo) {
       // Ícones de atalho precisam ser quadrados; logos horizontais são
-      // descartados pelo Chrome/Samsung. Começamos com o logo original e
-      // trocamos pela versão quadrada assim que ela é gerada.
+      // descartados pelo Chrome. O Samsung Internet, porém, ignora ícones
+      // em data URL — só aceita URLs HTTP(S) reais. Estratégia: manter
+      // links com a URL real do logo (Samsung/fallback) e, quando a versão
+      // quadrada estiver pronta, ADICIONAR links extras com ela (Chrome
+      // prefere o ícone quadrado de maior resolução).
       const specs: Array<{ rel: string; sizes?: string }> = [
         { rel: "apple-touch-icon", sizes: "180x180" },
+        { rel: "apple-touch-icon-precomposed", sizes: "180x180" },
         { rel: "icon", sizes: "192x192" },
         { rel: "icon", sizes: "512x512" },
         { rel: "shortcut icon" },
       ];
-      const iconLinks = specs.map(({ rel, sizes }) => {
+      const addIconLink = (rel: string, href: string, sizes?: string) => {
         const link = document.createElement("link");
         link.setAttribute("rel", rel);
         if (sizes) link.setAttribute("sizes", sizes);
-        link.setAttribute("href", logo);
+        link.setAttribute("href", href);
         link.setAttribute("data-wallet-icon", "1");
         document.head.appendChild(link);
         created.push(link);
         return link;
-      });
+      };
+      specs.forEach(({ rel, sizes }) => addIconLink(rel, logo, sizes));
       buildSquareIcon(logo)
         .then((square) => {
           if (cancelled) return;
-          iconLinks.forEach((l) => {
-            l.setAttribute("href", square);
-            if (l.getAttribute("rel") !== "apple-touch-icon") l.setAttribute("type", "image/png");
-          });
+          addIconLink("icon", square, "512x512").setAttribute("type", "image/png");
+          addIconLink("icon", square, "192x192").setAttribute("type", "image/png");
+          addIconLink("apple-touch-icon", square, "180x180");
         })
         .catch(() => { /* mantém o logo original */ });
     }
@@ -529,7 +533,7 @@ export default function CarteiraPublicaV2({
     // "Adicionar à tela inicial" crie um atalho simples com logo/nome da agência.
     const detached: Array<{ el: Element; parent: Node; next: Node | null }> = [];
     const selector = logo
-      ? 'link[rel="manifest"]:not([data-wallet-icon]), link[rel~="icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon"]:not([data-wallet-icon])'
+      ? 'link[rel="manifest"]:not([data-wallet-icon]), link[rel~="icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon-precomposed"]:not([data-wallet-icon])'
       : 'link[rel="manifest"]:not([data-wallet-icon])';
     document.head.querySelectorAll(selector).forEach((el) => {
       if (el.parentNode) {
