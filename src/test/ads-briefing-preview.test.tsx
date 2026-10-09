@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   isTechnicalPreviewHost,
   ADS_PREVIEW_HOST,
@@ -17,11 +18,18 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 vi.mock("@/pages/NotFound", () => ({ default: () => <p>Página não encontrada</p> }));
 
+/** O layout consulta o status do blog (React Query): envolve com um client de teste. */
+const renderPreview = (ui: React.ReactNode) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+};
+
 describe("prévia ADS ads-email-test-v1", () => {
-  it("só aceita o host técnico id-preview (e localhost de dev)", () => {
+  it("aceita os mesmos hosts técnicos do sistema (e localhost de dev)", () => {
     expect(isTechnicalPreviewHost("id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app")).toBe(true);
-    for (const h of ["agentedesonhoproject.lovable.app", "app.agentesdesonhos.com.br", "www.destinoscomaju.com.br",
-      "preview--x.lovable.app", "id-preview--x.lovable.app.evil.com", "vitrine.tur.br"]) {
+    expect(isTechnicalPreviewHost("preview--x.lovableproject.com")).toBe(true);
+    for (const h of ["www.destinoscomaju.com.br", "id-preview--x.lovable.app.evil.com",
+      "vitrine.tur.br", "app.agentesdesonhos.com.br"]) {
       expect(isTechnicalPreviewHost(h)).toBe(false);
     }
   });
@@ -61,14 +69,14 @@ describe("prévia ADS ads-email-test-v1", () => {
   it("em host de produção a rota mostra página não encontrada", async () => {
     Object.defineProperty(window, "location", { value: { ...window.location, hostname: "agentedesonhoproject.lovable.app" }, writable: true });
     const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
-    render(<MemoryRouter><Page /></MemoryRouter>);
+    renderPreview(<MemoryRouter><Page /></MemoryRouter>);
     expect(await screen.findByText("Página não encontrada")).toBeInTheDocument();
     expect(screen.queryByText(/Agência Teste ADS/)).toBeNull();
   });
   it("renderiza o aviso real apenas para o briefing-14 no host técnico", async () => {
     Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
     const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
-    render(
+    renderPreview(
       <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-14-v1"]}>
         <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
       </MemoryRouter>,
@@ -79,7 +87,7 @@ describe("prévia ADS ads-email-test-v1", () => {
   it("renderiza o briefing-16 somente pela rota técnica", async () => {
     Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
     const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
-    render(
+    renderPreview(
       <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-16-v1"]}>
         <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
       </MemoryRouter>,
@@ -115,9 +123,9 @@ describe("prévia ADS ads-email-test-v1", () => {
       }
     });
     it("em host de produção não renderiza", async () => {
-      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "agentedesonhoproject.lovable.app" }, writable: true });
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "www.destinoscomaju.com.br" }, writable: true });
       const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
-      render(
+      renderPreview(
         <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-17-v1"]}>
           <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
         </MemoryRouter>,
@@ -128,7 +136,7 @@ describe("prévia ADS ads-email-test-v1", () => {
     it("no host técnico bloqueia backend, cliques e envios", async () => {
       Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
       const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
-      render(
+      renderPreview(
         <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-17-v1"]}>
           <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
         </MemoryRouter>,
