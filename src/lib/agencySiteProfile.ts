@@ -209,8 +209,6 @@ export interface AgencySiteProfile {
     facts?: string[];
     /** Personal travel repertoire, informational only; absent renders no strip. */
     visitedDestinations?: { title: string; names: string[]; presentation?: "list" | "flags" };
-    /** Opt-in interactive card-deck presentation for `images`; default keeps the static grid. */
-    imagePresentation?: "grid" | "deck";
     /** Oculta o painel de imagem quando não existe retrato real autorizado. */
     media?: "default" | "hidden";
     /** Exibe a cidade/UF do cadastro sob o texto institucional. */

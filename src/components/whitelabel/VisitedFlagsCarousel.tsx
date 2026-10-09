@@ -29,7 +29,7 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
   }, [paused]);
 
   return (
-    <div className="mt-8 border-t border-border pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+    <div className="mt-8 w-full min-w-0 overflow-hidden border-t border-border pt-6" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-base font-semibold text-foreground">{title}</h3>
         <div className="flex gap-2">
