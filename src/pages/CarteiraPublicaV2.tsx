@@ -503,47 +503,27 @@ export default function CarteiraPublicaV2({
     document.head.appendChild(appCapable);
     created.push(appCapable);
 
-    // Manifest dinâmico só na carteira: habilita o prompt nativo "Instalar app"
-    // do Android com nome/logo da agência e start_url apontando para a carteira.
-    let manifestUrl: string | null = null;
-    try {
-      const startUrl = window.location.pathname + "?source=pwa";
-      const manifest = {
-        name: agencyName,
-        short_name: agencyName.length > 12 ? agencyName.slice(0, 12) : agencyName,
-        id: window.location.pathname,
-        start_url: startUrl,
-        scope: window.location.pathname,
-        display: "standalone",
-        orientation: "portrait",
-        background_color: "#ffffff",
-        theme_color: "#0f766e",
-        icons: logo
-          ? [
-              { src: logo, sizes: "192x192", type: "image/png", purpose: "any" },
-              { src: logo, sizes: "512x512", type: "image/png", purpose: "any" },
-            ]
-          : [
-              { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-              { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-            ],
-      };
-      const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
-      manifestUrl = URL.createObjectURL(blob);
-      const manifestLink = document.createElement("link");
-      manifestLink.setAttribute("rel", "manifest");
-      manifestLink.setAttribute("href", manifestUrl);
-      manifestLink.setAttribute("data-wallet-icon", "1");
-      document.head.appendChild(manifestLink);
-      created.push(manifestLink);
-    } catch {}
+    // Sem manifest de app: no Android, um manifest instalável faz o Chrome
+    // gerar um WebAPK, que antivírus de fábrica sinalizam como "aviso de
+    // risco". Retiramos o manifest e os ícones genéricos da página para que
+    // "Adicionar à tela inicial" crie um atalho simples com logo/nome da agência.
+    const detached: Array<{ el: Element; parent: Node; next: Node | null }> = [];
+    const selector = logo
+      ? 'link[rel="manifest"]:not([data-wallet-icon]), link[rel~="icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon"]:not([data-wallet-icon])'
+      : 'link[rel="manifest"]:not([data-wallet-icon])';
+    document.head.querySelectorAll(selector).forEach((el) => {
+      if (el.parentNode) {
+        detached.push({ el, parent: el.parentNode, next: el.nextSibling });
+        el.parentNode.removeChild(el);
+      }
+    });
 
     return () => {
       document.title = previousTitle;
       created.forEach((el) => el.parentNode?.removeChild(el));
-      if (manifestUrl) {
-        try { URL.revokeObjectURL(manifestUrl); } catch {}
-      }
+      detached.forEach(({ el, parent, next }) => {
+        try { parent.insertBefore(el, next); } catch {}
+      });
     };
   }, [branding]);
 
