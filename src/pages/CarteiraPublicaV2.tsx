@@ -533,7 +533,7 @@ export default function CarteiraPublicaV2({
     // "Adicionar à tela inicial" crie um atalho simples com logo/nome da agência.
     const detached: Array<{ el: Element; parent: Node; next: Node | null }> = [];
     const selector = logo
-      ? 'link[rel="manifest"]:not([data-wallet-icon]), link[rel~="icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon"]:not([data-wallet-icon])'
+      ? 'link[rel="manifest"]:not([data-wallet-icon]), link[rel~="icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon"]:not([data-wallet-icon]), link[rel="apple-touch-icon-precomposed"]:not([data-wallet-icon])'
       : 'link[rel="manifest"]:not([data-wallet-icon])';
     document.head.querySelectorAll(selector).forEach((el) => {
       if (el.parentNode) {
