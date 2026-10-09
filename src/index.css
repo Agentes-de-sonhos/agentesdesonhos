@@ -1326,6 +1326,17 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-alt-surface > section > div { padding-top: 4.5rem; padding-bottom: 4.5rem; }
 .wl-mundo #cotacao { background-color: transparent; background-image: none; }
 .wl-mundo .wl-campaign-card { box-shadow: var(--shadow-mundo-card); }
+.wl-mundo .wl-newsletter-card {
+  background-color: hsl(var(--primary));
+  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 38%, hsl(var(--primary) / 0.65) 58%, hsl(var(--primary) / 0.05) 100%), url("./assets/mundo-newsletter-signpost.jpg");
+  background-size: cover;
+  background-position: right center;
+}
+@media (max-width: 767px) {
+  .wl-mundo .wl-newsletter-card {
+    background-image: linear-gradient(to bottom, hsl(var(--primary) / 0.82) 0%, hsl(var(--primary) / 0.94) 100%), url("./assets/mundo-newsletter-signpost.jpg");
+  }
+}
 .wl-mundo :is(h1,h2,h3) { letter-spacing: 0 !important; }
 .wl-mundo .wl-cta-primary { background-color: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 .wl-mundo .wl-cta-primary:hover { background-color: hsl(var(--primary) / 0.9); }
