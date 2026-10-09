@@ -257,11 +257,11 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
   resortsMap: { enabled: true },
   nav: [
-    { label: "Início", to: "/" },
+    { label: "Sobre", to: "/#sobre" },
     { label: "Parques em Orlando", to: "/#ingressos-orlando" },
     { label: "Resorts no Brasil", to: "/#resorts" },
     { label: "Visto americano", to: "/visto-americano" },
-    { label: "Sobre", to: "/#sobre" },
+    { label: "Blog", to: "/blog" },
     {
       label: "DMC em Portugal",
       to: "/dmc-portugal",
