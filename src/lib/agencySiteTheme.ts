@@ -87,7 +87,11 @@ export function siteThemeRootClass(hostname?: string | null): string {
   if (theme === "luxuryEditorial") return `${EDITORIAL_ROOT_CLASS} ${LUXURY_ROOT_CLASS}`;
   if (theme === "roseEditorial") return `${EDITORIAL_ROOT_CLASS} ${ROSE_ROOT_CLASS}`;
   if (theme === "faeEditorial") return `${EDITORIAL_ROOT_CLASS} ${FAE_ROOT_CLASS}`;
-  if (theme === "siteBaseEditorial") return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}`;
+  if (theme === "siteBaseEditorial") {
+    // O Mundo em Cores: acabamento claro próprio, só no host da prévia.
+    const extra = normalizeHost(hostname) === "briefing-14-v1.preview.local" ? " wl-mundo" : "";
+    return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
+  }
   if (theme === "casaNovaEditorial") return `${EDITORIAL_ROOT_CLASS} ${CASA_NOVA_ROOT_CLASS}`;
   if (theme === "essyaEditorial") return `${EDITORIAL_ROOT_CLASS} ${ESSYA_ROOT_CLASS}`;
   if (theme === "travelEditorial") return EDITORIAL_ROOT_CLASS;
