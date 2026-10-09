@@ -5,6 +5,24 @@
  */
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+import { XCARET_IMAGES } from "@/components/landing/xcaret/content";
+
+type XcaretMediaSlots = {
+  portraitJuliana: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
+  trainingPhoto: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
+  julianaExtra: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
+  expertBadge: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
+  julianaAtDestination: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
+};
+
+/** Fotos temporárias (acervo oficial Xcaret) no lugar das fotos da Juliana. */
+export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
+  portraitJuliana: XCARET_IMAGES.xcaret,
+  trainingPhoto: XCARET_IMAGES.xelHa,
+  julianaExtra: XCARET_IMAGES.xplor,
+  expertBadge: null,
+  julianaAtDestination: XCARET_IMAGES.hotelMexico,
+};
 import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 // Real personal photographs from https://omundoemcores.com.br/wp-content/uploads/2024/07/Vanessa.png
@@ -177,7 +195,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     highlights: { enabled: false },
     signature: { enabled: false },
     destinations: { enabled: true, order: 1 },
-    modules: { enabled: false },
+    modules: { enabled: true, order: 1.5 },
+    orlando: { enabled: true, order: 2.5 },
+    resorts: { enabled: true, order: 2.7 },
     about: { enabled: true, order: 2 },
     differentials: { enabled: true, order: 3 },
     concierge: { enabled: true, order: 4 },
@@ -186,6 +206,20 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   heroImage: "europa",
   heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft", actionsPlacement: "right" },
   requestCenter: { title: "Por onde você quer começar?", titlePlacement: "above-card" },
+  resortsMap: { enabled: true },
+  featuredExperience: {
+    enabled: true,
+    id: "experiencia-xcaret",
+    kicker: "RIVIERA MAYA · MÉXICO",
+    title: "Parques e hotéis Xcaret",
+    description: "Natureza, cultura mexicana e aventura em parques e hotéis no Caribe mexicano. A Vanessa ajuda você a escolher os parques, hotéis e experiências que combinam com a sua viagem.",
+    mainImage: { src: XCARET_IMAGES.xcaret.src, alt: XCARET_IMAGES.xcaret.alt, position: "center" },
+    consultantImage: null,
+    badge: null,
+    highlights: ["Parques e passeios", "Hotéis Xcaret", "Planejamento personalizado"],
+    ctaLabel: "Saiba mais sobre este destino",
+    ctaHref: "/xcaret",
+  },
   hero: [
     {
       title: "Sua próxima viagem, com as suas cores.",
@@ -601,6 +635,12 @@ export interface AdsBriefingPreviewFixture {
   notice: string;
   documentTitle: string;
   realAgency: boolean;
+  /** Páginas internas opcionais da prévia (off por padrão). */
+  pages?: {
+    xcaret?: { slots: XcaretMediaSlots; textRewrites?: [string, string][] };
+    resorts?: { title?: string };
+    orlandoTickets?: boolean;
+  };
 }
 
 const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
@@ -619,6 +659,11 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     notice: "Prévia para revisão — sem publicação · ações desativadas",
     documentTitle: "Prévia para revisão — O Mundo em Cores",
     realAgency: true,
+    pages: {
+      xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: MUNDO_EM_CORES_XCARET_REWRITES },
+      resorts: { title: "Explore os resorts do Brasil com a O Mundo em Cores" },
+      orlandoTickets: true,
+    },
   },
   [DRICA_VIAGENS_PREVIEW_JOB_ID]: {
     jobId: DRICA_VIAGENS_PREVIEW_JOB_ID,

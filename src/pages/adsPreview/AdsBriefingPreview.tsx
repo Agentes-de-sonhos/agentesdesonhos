@@ -128,7 +128,7 @@ export default function AdsBriefingPreview() {
     } else if (subPath === "resorts-brasil") {
       body = <div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap title={pages.resorts?.title} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>;
     } else if (resortSlug) {
-      body = <AgencyResortPage info={info} />;
+      body = <AgencyResortPage info={info} slug={resortSlug} />;
     }
     return <AgencySiteLayout info={info} noWhatsapp>{body}</AgencySiteLayout>;
   }
