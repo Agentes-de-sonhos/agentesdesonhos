@@ -198,6 +198,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     concierge: { enabled: true, order: 7 },
     testimonials: { enabled: true, order: 8 },
     faq: { enabled: true, order: 9 },
+    newsletter: { enabled: true, order: 10 },
   },
   heroImage: "europa",
   heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft", actionsPlacement: "right" },
