@@ -123,7 +123,7 @@ describe("prévia ADS ads-email-test-v1", () => {
       }
     });
     it("em host de produção não renderiza", async () => {
-      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "agentedesonhoproject.lovable.app" }, writable: true });
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "www.destinoscomaju.com.br" }, writable: true });
       const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
       renderPreview(
         <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-17-v1"]}>
