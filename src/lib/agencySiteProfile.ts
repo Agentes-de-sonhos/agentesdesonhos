@@ -222,6 +222,8 @@ export interface AgencySiteProfile {
   inspirationDialog?: { groupUrl?: string; title?: string; description?: string; submitLabel?: string; notice?: string };
   /** Chamada compacta de consultoria de visto (opcional), logo após os destinos. */
   visaConsult?: { kicker?: string; title: string; text: string; cta: string };
+  /** Faixa opcional de redes sociais logo após "Receba novidades". */
+  socialStrip?: { title: string; links: { network: "instagram" | "facebook" | "tiktok" | "youtube"; url: string }[] };
 }
 
 export interface AgencyFeaturedImage {
@@ -400,6 +402,15 @@ const EDITORIAL_DMC: AgencySiteProfile = {
     description: "Preencha seus dados. Ao confirmar, você será direcionado automaticamente para o grupo de WhatsApp da 100 Limites.",
     submitLabel: "Confirmar e entrar no grupo",
     notice: "Ao confirmar, você autoriza o contato da agência e será levado ao grupo de WhatsApp.",
+  },
+  socialStrip: {
+    title: "Siga-nos nas redes",
+    links: [
+      { network: "instagram", url: "https://www.instagram.com/100limitesviagens/" },
+      { network: "facebook", url: "https://www.facebook.com/share/1A2wzfAxVm/" },
+      { network: "tiktok", url: "https://www.tiktok.com/@amandalarini100limites" },
+      { network: "youtube", url: "https://www.youtube.com/@amandalarini" },
+    ],
   },
 };
 

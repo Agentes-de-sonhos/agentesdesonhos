@@ -1522,7 +1522,8 @@ export default function AgencySiteHome({
         const copy = copyFor("newsletter");
         if (editorial) {
           return (
-            <section key={key} id="novidades" className="bg-background">
+            <Fragment key={key}>
+            <section id="novidades" className="bg-background">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <div className={`wl-newsletter-card overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"}`}>
                   <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
@@ -1553,6 +1554,8 @@ export default function AgencySiteHome({
                 </div>
               </div>
             </section>
+            {profile.socialStrip && <SocialStrip strip={profile.socialStrip} />}
+            </Fragment>
           );
         }
         return (
