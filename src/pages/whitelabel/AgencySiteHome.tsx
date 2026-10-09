@@ -1,5 +1,4 @@
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
-import { PhotoDeck } from "@/components/whitelabel/PhotoDeck";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
@@ -1072,9 +1071,7 @@ export default function AgencySiteHome({
                   )}
                 </div>
                 {aboutCopy?.media !== "hidden" && <div className="grid gap-4">
-                  {aboutCopy?.imagePresentation === "deck" && aboutCopy.images?.length ? (
-                    <PhotoDeck photos={aboutCopy.images} />
-                  ) : aboutCopy?.images?.length ? (
+                  {aboutCopy?.images?.length ? (
                     <div className={`grid gap-4 ${aboutCopy.images.length > 1 ? "sm:grid-cols-[1.05fr_0.95fr] md:grid-cols-1 lg:grid-cols-[1.05fr_0.95fr]" : "grid-cols-1"}`}>
                       {aboutCopy.images.slice(0, 2).map((image, index) => (
                         <figure key={image.src} className="overflow-hidden rounded-xl bg-muted">
