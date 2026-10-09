@@ -16,7 +16,7 @@ export type AgencySiteStatus = "live" | "under_construction";
  * acabamentos exclusivos de um domínio, fáceis de remover quando o site
  * completo entrar no ar.
  */
-export type AgencyConstructionVariant = "default" | "destinosComAJu" | "essyaTur";
+export type AgencyConstructionVariant = "default" | "destinosComAJu" | "essyaTur" | "mundoEmCores";
 
 export interface AgencySiteStatusConfig {
   status: AgencySiteStatus;
@@ -28,6 +28,8 @@ export interface AgencySiteStatusConfig {
 const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
   "faeviagens.com.br": { status: "under_construction" },
   "www.faeviagens.com.br": { status: "under_construction" },
+  "omundoemcores.com.br": { status: "under_construction", variant: "mundoEmCores" },
+  "www.omundoemcores.com.br": { status: "under_construction", variant: "mundoEmCores" },
 };
 
 /** Variante da página temporária configurada para o hostname. */
