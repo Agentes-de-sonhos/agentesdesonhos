@@ -174,6 +174,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   nav: [
     { label: "Início", to: "/" },
     { label: "Destinos", to: "/#destinos" },
+    { label: "Xcaret", to: "/xcaret" },
+    { label: "Ingressos", to: "/ingressos-orlando" },
+    { label: "Resorts", to: "/resorts-brasil" },
     { label: "Sobre", to: "/#sobre" },
     { label: "Atendimento", to: "/#atendimento" },
   ],
