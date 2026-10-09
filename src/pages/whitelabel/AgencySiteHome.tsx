@@ -1059,9 +1059,7 @@ export default function AgencySiteHome({
                       </p>
                     )}
                   </div>
-                  {aboutCopy?.visitedDestinations?.presentation === "flags" ? (
-                    <VisitedFlagsCarousel title={aboutCopy.visitedDestinations.title} names={aboutCopy.visitedDestinations.names} />
-                  ) : aboutCopy?.visitedDestinations && (
+                  {aboutCopy?.visitedDestinations?.presentation === "flags" ? null : aboutCopy?.visitedDestinations && (
                     <div className="mt-8 border-t border-border pt-6">
                       <h3 className="text-base font-semibold text-foreground">{aboutCopy.visitedDestinations.title}</h3>
                       <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm leading-relaxed text-muted-foreground">
@@ -1110,6 +1108,11 @@ export default function AgencySiteHome({
                   )}
                 </div>}
               </div>
+              {aboutCopy?.visitedDestinations?.presentation === "flags" && (
+                <div className={`${container} -mt-4 pb-14 md:-mt-8 md:pb-20`}>
+                  <VisitedFlagsCarousel title={aboutCopy.visitedDestinations.title} names={aboutCopy.visitedDestinations.names} />
+                </div>
+              )}
             </section>
           );
         }
