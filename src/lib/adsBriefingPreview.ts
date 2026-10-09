@@ -5,15 +5,9 @@
  */
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
-import { XCARET_IMAGES } from "@/components/landing/xcaret/content";
+import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
 
-type XcaretMediaSlots = {
-  portraitJuliana: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
-  trainingPhoto: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
-  julianaExtra: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
-  expertBadge: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
-  julianaAtDestination: (typeof XCARET_IMAGES)[keyof typeof XCARET_IMAGES] | null;
-};
+type XcaretMediaSlots = Record<"portraitJuliana" | "trainingPhoto" | "julianaExtra" | "expertBadge" | "julianaAtDestination", XcaretImage | null>;
 
 /** Fotos temporárias (acervo oficial Xcaret) no lugar das fotos da Juliana. */
 export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
