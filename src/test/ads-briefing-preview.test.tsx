@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   isTechnicalPreviewHost,
   ADS_PREVIEW_HOST,
@@ -16,6 +17,12 @@ import {
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 vi.mock("@/pages/NotFound", () => ({ default: () => <p>Página não encontrada</p> }));
+
+/** O layout consulta o status do blog (React Query): envolve com um client de teste. */
+const renderPreview = (ui: React.ReactNode) => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+};
 
 describe("prévia ADS ads-email-test-v1", () => {
   it("aceita os mesmos hosts técnicos do sistema (e localhost de dev)", () => {
