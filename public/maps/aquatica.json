@@ -1,0 +1,539 @@
+{
+  "id": "aquatica",
+  "name": "Aquatica Orlando",
+  "width": 800,
+  "height": 648,
+  "image": "/__l5e/assets-v1/c0618b40-e551-4a4b-a255-342e89a97172/aquatica-original.jpg",
+  "source": "mapa-aquatica-orlando.jpg",
+  "sourceDescription": "imagem original fornecida — preservada integralmente",
+  "sourceRaster": [
+    800,
+    648
+  ],
+  "sourceSha256": "2b3d4403145dc3205779b601d1438b9a50027ddd09257fdf1aa961f7506946d9",
+  "markerDiameter": 15,
+  "markerFontSize": 9,
+  "markerBorderWidth": 1.3,
+  "markerOutlineWidth": 1.5,
+  "markerHaloWidth": 3,
+  "points": [
+    [
+      "attraction-kare-kare-curl",
+      "Kare Kare Curl",
+      "Atração aquática",
+      14.0,
+      27.93209877,
+      "Atração aquática identificado no mapa fornecido como Kare Kare Curl. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-cutback-cove",
+      "Cutback Cove",
+      "Atração aquática",
+      23.25,
+      29.47530864,
+      "Atração aquática identificado no mapa fornecido como Cutback Cove. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-big-surf-shores",
+      "Big Surf Shores",
+      "Atração aquática",
+      29.875,
+      24.69135802,
+      "Atração aquática identificado no mapa fornecido como Big Surf Shores. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-ihus-breakaway-falls",
+      "Ihu’s Breakaway Falls",
+      "Atração aquática",
+      30.5,
+      18.67283951,
+      "Atração aquática identificado no mapa fornecido como Ihu’s Breakaway Falls. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-walkabout-waters",
+      "Walkabout Waters",
+      "Atração aquática",
+      69.625,
+      41.66666667,
+      "Atração aquática identificado no mapa fornecido como Walkabout Waters. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-roas-rapids",
+      "Roa’s Rapids",
+      "Atração aquática",
+      51.0,
+      43.36419753,
+      "Atração aquática identificado no mapa fornecido como Roa’s Rapids. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-loggerhead-lane",
+      "Loggerhead Lane",
+      "Atração aquática",
+      41.25,
+      55.40123457,
+      "Atração aquática identificado no mapa fornecido como Loggerhead Lane. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-omaka-rocka",
+      "Omaka Rocka",
+      "Atração aquática",
+      17.0,
+      41.2037037,
+      "Atração aquática identificado no mapa fornecido como Omaka Rocka. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-whanau-way",
+      "Whanau Way",
+      "Atração aquática",
+      14.875,
+      46.91358025,
+      "Atração aquática identificado no mapa fornecido como Whanau Way. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-reel-plunge",
+      "Reel Plunge",
+      "Atração aquática",
+      25.875,
+      61.57407407,
+      "Atração aquática identificado no mapa fornecido como Reel Plunge. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-tassies-underwater-twist",
+      "Tassie’s Underwater Twist",
+      "Atração aquática",
+      44.0,
+      63.58024691,
+      "Atração aquática identificado no mapa fornecido como Tassie’s Underwater Twist. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-taumata-racer",
+      "Taumata Racer",
+      "Atração aquática",
+      71.875,
+      28.85802469,
+      "Atração aquática identificado no mapa fornecido como Taumata Racer. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-walhalla-wave",
+      "Walhalla Wave",
+      "Atração aquática",
+      79.75,
+      37.5,
+      "Atração aquática identificado no mapa fornecido como Walhalla Wave. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-ray-rush",
+      "Ray Rush",
+      "Atração aquática",
+      85.125,
+      35.49382716,
+      "Atração aquática identificado no mapa fornecido como Ray Rush. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-riptide-race",
+      "Riptide Race",
+      "Atração aquática",
+      81.5,
+      65.58641975,
+      "Atração aquática identificado no mapa fornecido como Riptide Race. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-tugas-kid-cove",
+      "Tuga’s Kid Cove",
+      "Atração aquática",
+      45.875,
+      19.29012346,
+      "Atração aquática identificado no mapa fornecido como Tuga’s Kid Cove. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-commerson-dolphin-exhibit",
+      "Commerson Dolphin Exhibit",
+      "Encontro com animais",
+      30.125,
+      53.54938272,
+      "Encontro com animais identificado no mapa fornecido como Commerson Dolphin Exhibit. A imagem não informa horários, preços ou restrições.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "restaurant-waterstone-grill",
+      "Waterstone Grill",
+      "Restaurante",
+      26.875,
+      45.0617284,
+      "Restaurante identificado no mapa fornecido como Waterstone Grill. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-fijis-frozen-bar",
+      "Fiji’s Frozen Bar",
+      "Bar",
+      41.125,
+      38.42592593,
+      "Bar identificado no mapa fornecido como Fiji’s Frozen Bar. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-mango-market",
+      "Mango Market",
+      "Restaurante",
+      40.25,
+      44.59876543,
+      "Restaurante identificado no mapa fornecido como Mango Market. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-papas-pizza",
+      "Papa’s Pizza",
+      "Alimentação",
+      43.875,
+      30.24691358,
+      "Alimentação identificado no mapa fornecido como Papa’s Pizza. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-walkabout-plaza",
+      "Walkabout Plaza",
+      "Alimentação",
+      70.125,
+      49.69135802,
+      "Alimentação identificado no mapa fornecido como Walkabout Plaza. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-kookaburra-wings",
+      "Kookaburra Wings",
+      "Alimentação",
+      66.875,
+      67.12962963,
+      "Alimentação identificado no mapa fornecido como Kookaburra Wings. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-mango-minis",
+      "Mango Minis",
+      "Alimentação",
+      54.75,
+      22.5308642,
+      "Alimentação identificado no mapa fornecido como Mango Minis. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-sandys-spot",
+      "Sandy’s Spot",
+      "Alimentação",
+      58.75,
+      23.45679012,
+      "Alimentação identificado no mapa fornecido como Sandy’s Spot. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-trader-tugas-tiki-bar",
+      "Trader Tuga’s Tiki Bar",
+      "Bar",
+      47.75,
+      24.38271605,
+      "Bar identificado no mapa fornecido como Trader Tuga’s Tiki Bar. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-motus-bar",
+      "Motu’s Bar",
+      "Bar",
+      34.625,
+      39.66049383,
+      "Bar identificado no mapa fornecido como Motu’s Bar. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "shop-kiwi-traders",
+      "Kiwi Traders",
+      "Loja",
+      37.625,
+      48.14814815,
+      "Loja identificado no mapa fornecido como Kiwi Traders. A imagem não informa horários, preços ou restrições.",
+      "Compras",
+      "Compras",
+      ""
+    ],
+    [
+      "shop-adaptations",
+      "Adaptations",
+      "Loja",
+      72.625,
+      53.24074074,
+      "Loja identificado no mapa fornecido como Adaptations. A imagem não informa horários, preços ou restrições.",
+      "Compras",
+      "Compras",
+      ""
+    ],
+    [
+      "shop-fish-grotto",
+      "Fish Grotto",
+      "Loja",
+      42.0,
+      58.48765432,
+      "Loja identificado no mapa fornecido como Fish Grotto. A imagem não informa horários, preços ou restrições.",
+      "Compras",
+      "Compras",
+      ""
+    ]
+  ],
+  "anchors": [
+    [
+      "attraction-kare-kare-curl",
+      14.0,
+      27.93209877,
+      ""
+    ],
+    [
+      "attraction-cutback-cove",
+      23.25,
+      29.47530864,
+      ""
+    ],
+    [
+      "attraction-big-surf-shores",
+      29.875,
+      24.69135802,
+      ""
+    ],
+    [
+      "attraction-ihus-breakaway-falls",
+      30.5,
+      18.67283951,
+      ""
+    ],
+    [
+      "attraction-walkabout-waters",
+      69.625,
+      41.66666667,
+      ""
+    ],
+    [
+      "attraction-roas-rapids",
+      51.0,
+      43.36419753,
+      ""
+    ],
+    [
+      "attraction-loggerhead-lane",
+      41.25,
+      55.40123457,
+      ""
+    ],
+    [
+      "attraction-omaka-rocka",
+      17.0,
+      41.2037037,
+      ""
+    ],
+    [
+      "attraction-whanau-way",
+      14.875,
+      46.91358025,
+      ""
+    ],
+    [
+      "attraction-reel-plunge",
+      25.875,
+      61.57407407,
+      ""
+    ],
+    [
+      "attraction-tassies-underwater-twist",
+      44.0,
+      63.58024691,
+      ""
+    ],
+    [
+      "attraction-taumata-racer",
+      71.875,
+      28.85802469,
+      ""
+    ],
+    [
+      "attraction-walhalla-wave",
+      79.75,
+      37.5,
+      ""
+    ],
+    [
+      "attraction-ray-rush",
+      85.125,
+      35.49382716,
+      ""
+    ],
+    [
+      "attraction-riptide-race",
+      81.5,
+      65.58641975,
+      ""
+    ],
+    [
+      "attraction-tugas-kid-cove",
+      45.875,
+      19.29012346,
+      ""
+    ],
+    [
+      "attraction-commerson-dolphin-exhibit",
+      30.125,
+      53.54938272,
+      ""
+    ],
+    [
+      "restaurant-waterstone-grill",
+      26.875,
+      45.0617284,
+      ""
+    ],
+    [
+      "restaurant-fijis-frozen-bar",
+      41.125,
+      38.42592593,
+      ""
+    ],
+    [
+      "restaurant-mango-market",
+      40.25,
+      44.59876543,
+      ""
+    ],
+    [
+      "restaurant-papas-pizza",
+      43.875,
+      30.24691358,
+      ""
+    ],
+    [
+      "restaurant-walkabout-plaza",
+      70.125,
+      49.69135802,
+      ""
+    ],
+    [
+      "restaurant-kookaburra-wings",
+      66.875,
+      67.12962963,
+      ""
+    ],
+    [
+      "restaurant-mango-minis",
+      54.75,
+      22.5308642,
+      ""
+    ],
+    [
+      "restaurant-sandys-spot",
+      58.75,
+      23.45679012,
+      ""
+    ],
+    [
+      "restaurant-trader-tugas-tiki-bar",
+      47.75,
+      24.38271605,
+      ""
+    ],
+    [
+      "restaurant-motus-bar",
+      34.625,
+      39.66049383,
+      ""
+    ],
+    [
+      "shop-kiwi-traders",
+      37.625,
+      48.14814815,
+      ""
+    ],
+    [
+      "shop-adaptations",
+      72.625,
+      53.24074074,
+      ""
+    ],
+    [
+      "shop-fish-grotto",
+      42.0,
+      58.48765432,
+      ""
+    ]
+  ],
+  "limitations": [
+    "Mapa em baixa resolução mantido inteiro, sem ganho artificial de detalhe.",
+    "Cabanas Beach Front / River Front / Roa’s Rapids / Walkabout e filas Quick Queue excluídas como infraestrutura.",
+    "Símbolos genéricos de bebidas sem nomes e serviços não recebem nomes comerciais inventados.",
+    "Nenhuma atração chamada Kata’s Kookaburra Cove é legível nesta fonte; não incluída com base em conhecimento externo."
+  ]
+}

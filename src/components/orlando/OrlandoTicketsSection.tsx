@@ -27,7 +27,7 @@ import {
   type OrlandoCategory,
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
-import { DisneyParkMapTrigger, isDisneyMapId } from "./DisneyParkMapDialog";
+import { DisneyParkMapTrigger, isParkMapId } from "./DisneyParkMapDialog";
 
 const CARD_LOGOS: Record<string, string> = {
   disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url, "united-parks": unitedParksLogo.url,
@@ -264,7 +264,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
     const Icon = GROUP_ICONS[e.group] ?? Castle;
     const logo = experienceLogo(id);
     const selectionName = id === "magic-kingdom" ? "Magic Kingdom" : e.name;
-    if (isDisneyMapId(id)) {
+    if (isParkMapId(id)) {
       return (
         <article className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
           on ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50")}>
@@ -367,7 +367,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                         <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Parques</p>
                         <div className="grid grid-cols-2 gap-2">
                           {CARD_PARKS[c.id].filter((p) => PARK_LOGOS[p]).map((p) => (
-                             isDisneyMapId(p) ? (
+                             isParkMapId(p) ? (
                                <DisneyParkMapTrigger park={p} key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
                                 <img src={PARK_LOGOS[p]} alt={`Logotipo ${getExperience(p)?.name ?? p}`} draggable={false} loading="lazy" className="max-h-9 max-w-full object-contain" />
                                </DisneyParkMapTrigger>

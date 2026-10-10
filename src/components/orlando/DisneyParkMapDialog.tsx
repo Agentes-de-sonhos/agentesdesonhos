@@ -14,20 +14,34 @@ export const DISNEY_MAPS = {
   "blizzard-beach": { name: "Disney's Blizzard Beach", count: 25 },
 } as const;
 export type DisneyMapId = keyof typeof DISNEY_MAPS;
+export const UNITED_MAPS = {
+  seaworld: { name: "SeaWorld Orlando", count: 69 },
+  "busch-gardens": { name: "Busch Gardens Tampa Bay", count: 65 },
+  aquatica: { name: "Aquatica Orlando", count: 30 },
+  "discovery-cove": { name: "Discovery Cove", count: 17 },
+} as const;
+export type UnitedMapId = keyof typeof UNITED_MAPS;
+export type ParkMapId = DisneyMapId | UnitedMapId;
+export function isUnitedMapId(id: string): id is UnitedMapId {
+  return Object.prototype.hasOwnProperty.call(UNITED_MAPS, id);
+}
+export function isParkMapId(id: string): id is ParkMapId {
+  return isDisneyMapId(id) || isUnitedMapId(id);
+}
 export function isDisneyMapId(id: string): id is DisneyMapId {
   return Object.prototype.hasOwnProperty.call(DISNEY_MAPS, id);
 }
 
 /** Each same-origin document and image are mounted only when its own logo opens. */
-export function DisneyParkMapTrigger({ park, children, className }: { park: DisneyMapId; children: ReactNode; className?: string }) {
+export function DisneyParkMapTrigger({ park, children, className }: { park: ParkMapId; children: ReactNode; className?: string }) {
   if (park === "magic-kingdom") return <MagicKingdomMapTrigger className={className}>{children}</MagicKingdomMapTrigger>;
   return <ParkMapTrigger park={park} className={className}>{children}</ParkMapTrigger>;
 }
 
-function ParkMapTrigger({ park, children, className }: { park: Exclude<DisneyMapId, "magic-kingdom">; children: ReactNode; className?: string }) {
+function ParkMapTrigger({ park, children, className }: { park: Exclude<ParkMapId, "magic-kingdom">; children: ReactNode; className?: string }) {
   const [open, setOpen] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
-  const { name, count } = DISNEY_MAPS[park];
+  const { name, count } = { ...DISNEY_MAPS, ...UNITED_MAPS }[park];
   useEffect(() => {
     if (!open) return;
     const closeFromMap = (event: MessageEvent) => {
