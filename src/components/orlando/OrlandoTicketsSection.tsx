@@ -263,6 +263,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
     const on = selected.includes(id);
     const Icon = GROUP_ICONS[e.group] ?? Castle;
     const logo = experienceLogo(id);
+    const selectionName = id === "magic-kingdom" ? "Magic Kingdom" : e.name;
     if (isDisneyMapId(id)) {
       return (
         <article className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
@@ -273,7 +274,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
           <span className="text-sm font-semibold text-foreground">{e.name}</span>
           <span className="text-xs leading-relaxed text-muted-foreground">{e.description}</span>
           <Button type="button" variant="outline" aria-pressed={on} onClick={() => toggle(id)} className="mt-auto w-full">
-            {on && <Check aria-hidden="true" />} {on ? `Remover ${e.name}` : `Selecionar ${e.name}`}
+            {on && <Check aria-hidden="true" />} {on ? `Remover ${selectionName}` : `Selecionar ${selectionName}`}
           </Button>
           {on && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3 w-3" /></span>}
         </article>
