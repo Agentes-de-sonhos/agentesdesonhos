@@ -7,14 +7,14 @@ import { DISNEY_MAPS } from "@/components/orlando/DisneyParkMapDialog";
 vi.mock("@/hooks/useAgencySiteRequest", () => ({ useAgencySiteRequest: () => ({ submit: vi.fn(), state: "idle", error: null }) }));
 beforeAll(() => { Element.prototype.scrollIntoView = vi.fn(); });
 afterEach(cleanup);
-const parks = ["epcot", "animal-kingdom", "hollywood-studios"] as const;
+const parks = ["epcot", "animal-kingdom", "hollywood-studios", "typhoon-lagoon", "blizzard-beach"] as const;
 describe("Complete PDF-sourced Disney maps", () => {
   it.each(parks)("has every unique numbered point and native image provenance (%s)", (park) => {
     const config = JSON.parse(readFileSync(`public/maps/${park}.json`, "utf8"));
     expect(config.points).toHaveLength(DISNEY_MAPS[park].count);
     expect(config.points.map((p: unknown[]) => p[0])).toEqual(Array.from({ length: config.points.length }, (_, i) => i + 1));
     expect(config.height).toBe(2700);
-    expect(config.width).toBe(park === "animal-kingdom" ? 2520 : 2325);
+    expect(config.width).toBe(({ epcot: 2325, "animal-kingdom": 2520, "hollywood-studios": 2325, "typhoon-lagoon": 2873, "blizzard-beach": 2986 })[park]);
     expect(config.sourceRaster).toEqual([5925, 2700]);
     expect(config.colorProfile).toContain("sRGB");
     expect(config.image).toMatch(/^\/__l5e\/assets-v1\//);
@@ -25,11 +25,25 @@ describe("Complete PDF-sourced Disney maps", () => {
       expect(["Atrações", "Restaurantes", "Compras"]).toContain(p[7]);
       expect(p[5].length).toBeGreaterThan(10);
     }
-    const expected = park === "epcot" ? [24,51,13] : park === "animal-kingdom" ? [19,29,8] : [21,26,18];
+    const expected = ({ epcot: [24,51,13], "animal-kingdom": [19,29,8], "hollywood-studios": [21,26,18], "typhoon-lagoon": [12,13,1], "blizzard-beach": [12,11,2] })[park];
     expect(["Atrações", "Restaurantes", "Compras"].map(cat => config.points.filter((p: unknown[]) => p[7] === cat).length)).toEqual(expected);
     expect(config.points[park === "animal-kingdom" ? 3 : 0][7]).toBe("Atrações");
     const html = readFileSync(`public/maps/${park}.html`, "utf8");
     expect(html).not.toContain("<footer"); expect(html).not.toContain("<header"); expect(html).not.toContain("chatgpt.site");
+  });
+  it.each(["typhoon-lagoon", "blizzard-beach"])("keeps repeated river anchors and unique legend entries (%s)", park => {
+    const config = JSON.parse(readFileSync(`public/maps/${park}.json`, "utf8"));
+    expect(config.anchors).toHaveLength(park === "typhoon-lagoon" ? 30 : 31);
+    expect(config.anchors.filter((a: number[]) => a[0] === 2)).toHaveLength(park === "typhoon-lagoon" ? 5 : 7);
+    expect(new Set(config.anchors.map((a: number[]) => `${a[1]},${a[2]}`)).size).toBe(config.anchors.length);
+    expect([...new Set(config.anchors.map((a: number[]) => a[0]))].sort((a, b) => Number(a) - Number(b))).toEqual(config.points.map((p: unknown[]) => p[0]));
+    for (const a of config.anchors) {
+      expect(a[1]).toBeGreaterThan(0); expect(a[1]).toBeLessThan(100);
+      expect(a[2]).toBeGreaterThan(0); expect(a[2]).toBeLessThan(100);
+    }
+    const html = readFileSync(`public/maps/${park}.html`, "utf8");
+    const embedded = JSON.parse(html.match(/id="park-config">(.*?)<\/script>/)![1]);
+    expect(embedded).toEqual(config);
   });
   it("shares the final natural-height frame, immediate wheel and native proportional markers", () => {
     const css = readFileSync("public/maps/disney-park-map.css", "utf8");
