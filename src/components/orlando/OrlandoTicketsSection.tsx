@@ -45,7 +45,11 @@ const experienceLogo = (id: string) => PARK_LOGOS[id] ?? (EXPERIENCE_LOGO_FALLBA
 const CARD_PARKS: Record<string, string[]> = {
   disney: ["magic-kingdom", "epcot", "hollywood-studios", "animal-kingdom", "typhoon-lagoon", "blizzard-beach"],
   universal: ["universal-studios", "islands-of-adventure", "epic-universe", "volcano-bay"],
-  "united-parks": ["seaworld", "busch-gardens", "discovery-cove", "aquatica"],
+"united-parks": ["seaworld", "busch-gardens", "discovery-cove", "aquatica"],
+};
+// Cards da galeria que abrem mapa próprio e ganham botão "Explore" (alinhado à linha entre as duas fileiras de parques)
+const STRIP_EXPLORE_MAPS: Record<string, "legoland-florida" | "kennedy-space-center" | "icon-park"> = {
+  legoland: "legoland-florida", ksc: "kennedy-space-center", icon: "icon-park",
 };
 const GROUP_ICONS: Record<string, typeof Castle> = {
   disney: Castle, universal: Clapperboard, "united-parks": Fish, legoland: Blocks, ksc: Rocket,
@@ -355,7 +359,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                 className="flex cursor-grab select-none gap-4 overflow-x-auto pb-2 active:cursor-grabbing [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
                 {ORLANDO_CARDS.map((c) => (
-                  <article key={c.id} className="flex w-64 shrink-0 flex-col rounded-2xl border border-border bg-card p-5">
+                  <article key={c.id} className="relative flex w-64 shrink-0 flex-col rounded-2xl border border-border bg-card p-5">
                     <div className="flex h-20 items-center justify-center rounded-xl bg-background px-4">
                       {isParkMapId(c.id === "legoland" ? "legoland-florida" : c.id === "ksc" ? "kennedy-space-center" : c.id === "icon" ? "icon-park" : c.id) ? (
                         <DisneyParkMapTrigger park={c.id === "legoland" ? "legoland-florida" : c.id === "ksc" ? "kennedy-space-center" : "icon-park"} className="h-full w-full">
@@ -382,6 +386,11 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                           ))}
                         </div>
                       </div>
+                    )}
+                    {STRIP_EXPLORE_MAPS[c.id] && (
+                      <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} className="absolute inset-x-0 bottom-[52px] mx-auto flex h-10 w-fit items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
+                        Explore
+                      </DisneyParkMapTrigger>
                     )}
                   </article>
                 ))}
