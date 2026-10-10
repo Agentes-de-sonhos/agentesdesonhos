@@ -1,0 +1,860 @@
+{
+  "id": "kennedy-space-center",
+  "name": "Kennedy Space Center Visitor Complex",
+  "width": 4800,
+  "height": 2698,
+  "image": "/__l5e/assets-v1/1629a55c-f738-4453-92b2-8e1d87cb55f6/kennedy-space-center-map.png",
+  "source": "PARKMAP.pdf",
+  "sourceDescription": "fonte autorizada; mapa e referências originais preservados",
+  "sourceSha256": "5e1ad18c284c9f01b4e7af70b4583dcf2e6b42d65fdb7c66e6de91099fd1aee9",
+  "colorProfile": "sRGB",
+  "points": [
+    [
+      "attraction-1",
+      "Heroes & Legends featuring the U.S. Astronaut Hall of Fame presented by Boeing",
+      "Experiência",
+      33.552083333333336,
+      49.03632320237213,
+      "Heroes & Legends featuring the U.S. Astronaut Hall of Fame presented by Boeing: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "1"
+    ],
+    [
+      "attraction-2",
+      "Rocket Garden",
+      "Experiência",
+      39.1875,
+      44.996293550778354,
+      "Rocket Garden: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "2"
+    ],
+    [
+      "attraction-3",
+      "Gateway: The Deep Space Launch Complex",
+      "Experiência",
+      41.90625,
+      30.55967383246849,
+      "Gateway: The Deep Space Launch Complex: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "3"
+    ],
+    [
+      "attraction-4",
+      "Spaceport KSC",
+      "Experiência",
+      50.10416666666667,
+      27.260934025203852,
+      "Spaceport KSC: simulador. O guia exige altura mínima de 44 polegadas (111,76 cm).",
+      "Atrações",
+      "Atrações",
+      "4"
+    ],
+    [
+      "attraction-5",
+      "Universe Theater",
+      "Experiência",
+      48.041666666666664,
+      46.497405485544846,
+      "Universe Theater: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "5"
+    ],
+    [
+      "attraction-6",
+      "Astronaut Training Experience (ATX)",
+      "Experiência",
+      53.104166666666664,
+      48.99925871015567,
+      "Astronaut Training Experience (ATX): ingresso vendido separadamente e reserva antecipada obrigatória, conforme o guia.",
+      "Atrações",
+      "Atrações",
+      "6"
+    ],
+    [
+      "attraction-7",
+      "Mars Rover Vehicle Navigator",
+      "Experiência",
+      57.75,
+      51.056338028169016,
+      "Mars Rover Vehicle Navigator: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "7"
+    ],
+    [
+      "attraction-8",
+      "Chat With an Astronaut",
+      "Experiência",
+      60.333333333333336,
+      52.26093402520385,
+      "Chat With an Astronaut: ingresso vendido separadamente e reserva antecipada obrigatória, conforme o guia.",
+      "Atrações",
+      "Atrações",
+      "8"
+    ],
+    [
+      "attraction-9",
+      "Spaceperson Appearances",
+      "Experiência",
+      56.208333333333336,
+      39.529280948851,
+      "Spaceperson Appearances: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "9"
+    ],
+    [
+      "attraction-10",
+      "Journey To Mars",
+      "Experiência",
+      53.104166666666664,
+      38.17642698295033,
+      "Journey To Mars: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "10"
+    ],
+    [
+      "attraction-11",
+      "HYPERDECK VR",
+      "Experiência",
+      55.50000000000001,
+      31.208302446256486,
+      "HYPERDECK VR: o guia exige reserva.",
+      "Atrações",
+      "Atrações",
+      "11"
+    ],
+    [
+      "attraction-12",
+      "IMAX",
+      "Experiência",
+      58.8125,
+      31.18977020014826,
+      "IMAX: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "12"
+    ],
+    [
+      "attraction-13",
+      "Planet Play",
+      "Experiência",
+      62.83333333333333,
+      31.208302446256486,
+      "Planet Play: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "13"
+    ],
+    [
+      "attraction-14",
+      "Space Mirror Memorial",
+      "Experiência",
+      73.51041666666667,
+      23.591549295774648,
+      "Space Mirror Memorial: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "14"
+    ],
+    [
+      "attraction-15",
+      "T-38 Talon Jet",
+      "Experiência",
+      76.41666666666667,
+      30.80059303187546,
+      "T-38 Talon Jet: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "15"
+    ],
+    [
+      "attraction-16",
+      "Space Shuttle Atlantis",
+      "Experiência",
+      83.5,
+      38.19495922905856,
+      "Space Shuttle Atlantis: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "16"
+    ],
+    [
+      "attraction-17",
+      "Shuttle Launch Experience",
+      "Experiência",
+      91.83333333333333,
+      39.6590066716086,
+      "Shuttle Launch Experience: simulador. O guia exige altura mínima de 44 polegadas (111,76 cm).",
+      "Atrações",
+      "Atrações",
+      "17"
+    ],
+    [
+      "attraction-18",
+      "Kennedy Space Center Bus Tour",
+      "Experiência",
+      61.33333333333333,
+      49.94440326167531,
+      "Kennedy Space Center Bus Tour: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "18"
+    ],
+    [
+      "attraction-19",
+      "The Gantry at LC-39",
+      "Parada do passeio de ônibus",
+      90.76041666666667,
+      71.51593773165308,
+      "The Gantry at LC-39: parada 1 do Kennedy Space Center Bus Tour, localizada no minimapa do passeio. O itinerário está sujeito às operações do KSC.",
+      "Atrações",
+      "Atrações",
+      "19"
+    ],
+    [
+      "attraction-20",
+      "Apollo/Saturn V Center",
+      "Parada do passeio de ônibus",
+      85.33333333333334,
+      62.4351371386212,
+      "Apollo/Saturn V Center: parada 2 do Kennedy Space Center Bus Tour, localizada no minimapa do passeio. O itinerário está sujeito às operações do KSC.",
+      "Atrações",
+      "Atrações",
+      "20"
+    ],
+    [
+      "restaurant-21",
+      "Space Bowl Bistro",
+      "Alimentação",
+      48.302083333333336,
+      27.260934025203852,
+      "Space Bowl Bistro: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "21"
+    ],
+    [
+      "restaurant-22",
+      "Starbucks",
+      "Alimentação",
+      45.520833333333336,
+      44.866567828020756,
+      "Starbucks: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "22"
+    ],
+    [
+      "restaurant-23",
+      "Milky Way Ice Cream Shop",
+      "Alimentação",
+      50.072916666666664,
+      47.55374351371386,
+      "Milky Way Ice Cream Shop: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "23"
+    ],
+    [
+      "restaurant-24",
+      "Red Rock Grill",
+      "Alimentação",
+      53.61458333333333,
+      41.93847294292068,
+      "Red Rock Grill: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "24"
+    ],
+    [
+      "restaurant-25",
+      "IMAX Snax",
+      "Alimentação",
+      58.8125,
+      33.74722016308376,
+      "IMAX Snax: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "25"
+    ],
+    [
+      "restaurant-26",
+      "Planet Play Lounge",
+      "Alimentação",
+      62.84375,
+      33.74722016308376,
+      "Planet Play Lounge: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "26"
+    ],
+    [
+      "restaurant-27",
+      "Orbit Cafe",
+      "Alimentação",
+      66.71875,
+      37.37954040029652,
+      "Orbit Cafe: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "27"
+    ],
+    [
+      "restaurant-28",
+      "Space Dots",
+      "Alimentação",
+      75.63541666666667,
+      38.82505559673832,
+      "Space Dots: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "28"
+    ],
+    [
+      "restaurant-29",
+      "Moon Rock Cafe",
+      "Alimentação",
+      85.94791666666667,
+      63.47294292068199,
+      "Moon Rock Cafe: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "29"
+    ],
+    [
+      "shop-30",
+      "Space Shop",
+      "Loja",
+      62.0625,
+      42.32765011119348,
+      "Space Shop: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "30"
+    ],
+    [
+      "shop-31",
+      "Shuttle Express",
+      "Loja",
+      85.70833333333333,
+      41.141586360266864,
+      "Shuttle Express: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "31"
+    ],
+    [
+      "shop-32",
+      "Gantry Gifts",
+      "Loja",
+      91.36458333333334,
+      71.47887323943662,
+      "Gantry Gifts: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "32"
+    ],
+    [
+      "shop-33",
+      "Right Stuff Gift Shop",
+      "Loja",
+      85.34375,
+      63.47294292068199,
+      "Right Stuff Gift Shop: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "33"
+    ]
+  ],
+  "anchors": [
+    [
+      "attraction-1",
+      33.552083333333336,
+      49.03632320237213,
+      "1"
+    ],
+    [
+      "attraction-2",
+      39.1875,
+      44.996293550778354,
+      "2"
+    ],
+    [
+      "attraction-3",
+      41.90625,
+      30.55967383246849,
+      "3"
+    ],
+    [
+      "attraction-4",
+      50.10416666666667,
+      27.260934025203852,
+      "4"
+    ],
+    [
+      "attraction-5",
+      48.041666666666664,
+      46.497405485544846,
+      "5"
+    ],
+    [
+      "attraction-6",
+      53.104166666666664,
+      48.99925871015567,
+      "6"
+    ],
+    [
+      "attraction-7",
+      57.75,
+      51.056338028169016,
+      "7"
+    ],
+    [
+      "attraction-8",
+      60.333333333333336,
+      52.26093402520385,
+      "8"
+    ],
+    [
+      "attraction-9",
+      56.208333333333336,
+      39.529280948851,
+      "9"
+    ],
+    [
+      "attraction-10",
+      53.104166666666664,
+      38.17642698295033,
+      "10"
+    ],
+    [
+      "attraction-11",
+      55.50000000000001,
+      31.208302446256486,
+      "11"
+    ],
+    [
+      "attraction-12",
+      58.8125,
+      31.18977020014826,
+      "12"
+    ],
+    [
+      "attraction-13",
+      62.83333333333333,
+      31.208302446256486,
+      "13"
+    ],
+    [
+      "attraction-14",
+      73.51041666666667,
+      23.591549295774648,
+      "14"
+    ],
+    [
+      "attraction-15",
+      76.41666666666667,
+      30.80059303187546,
+      "15"
+    ],
+    [
+      "attraction-16",
+      83.5,
+      38.19495922905856,
+      "16"
+    ],
+    [
+      "attraction-17",
+      91.83333333333333,
+      39.6590066716086,
+      "17"
+    ],
+    [
+      "attraction-18",
+      61.33333333333333,
+      49.94440326167531,
+      "18"
+    ],
+    [
+      "attraction-19",
+      90.76041666666667,
+      71.51593773165308,
+      "19",
+      31
+    ],
+    [
+      "attraction-20",
+      85.33333333333334,
+      62.4351371386212,
+      "20",
+      31
+    ],
+    [
+      "restaurant-21",
+      48.302083333333336,
+      27.260934025203852,
+      "21"
+    ],
+    [
+      "restaurant-22",
+      45.520833333333336,
+      44.866567828020756,
+      "22"
+    ],
+    [
+      "restaurant-23",
+      50.072916666666664,
+      47.55374351371386,
+      "23"
+    ],
+    [
+      "restaurant-24",
+      53.61458333333333,
+      41.93847294292068,
+      "24"
+    ],
+    [
+      "restaurant-25",
+      58.8125,
+      33.74722016308376,
+      "25"
+    ],
+    [
+      "restaurant-26",
+      62.84375,
+      33.74722016308376,
+      "26"
+    ],
+    [
+      "restaurant-27",
+      66.71875,
+      37.37954040029652,
+      "27"
+    ],
+    [
+      "restaurant-28",
+      75.63541666666667,
+      38.82505559673832,
+      "28"
+    ],
+    [
+      "restaurant-29",
+      85.94791666666667,
+      63.47294292068199,
+      "29",
+      31
+    ],
+    [
+      "shop-30",
+      62.0625,
+      42.32765011119348,
+      "30"
+    ],
+    [
+      "shop-31",
+      85.70833333333333,
+      41.141586360266864,
+      "31"
+    ],
+    [
+      "shop-32",
+      91.36458333333334,
+      71.47887323943662,
+      "32",
+      31
+    ],
+    [
+      "shop-33",
+      85.34375,
+      63.47294292068199,
+      "33",
+      31
+    ]
+  ],
+  "sourceRaster": [
+    4800,
+    2698
+  ],
+  "markerDiameter": 61,
+  "markerFontSize": 33,
+  "markerBorderWidth": 4,
+  "markerOutlineWidth": 6,
+  "markerHaloWidth": 12,
+  "limitations": [
+    "Página integral preservada para manter main visitor complex e inset Bus Tour na mesma imagem.",
+    "19/20/29/32/33 localizados apenas no inset; horários/NEW/certificação não tratados como informação atual."
+  ],
+  "sourceAnchors": [
+    {
+      "ref": "1",
+      "centerPx": [
+        1610.5,
+        1323.0
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "2",
+      "centerPx": [
+        1881.0,
+        1214.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "3",
+      "centerPx": [
+        2011.5,
+        824.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "4",
+      "centerPx": [
+        2405.0,
+        735.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "5",
+      "centerPx": [
+        2306.0,
+        1254.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "6",
+      "centerPx": [
+        2549.0,
+        1322.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "7",
+      "centerPx": [
+        2772.0,
+        1377.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "8",
+      "centerPx": [
+        2896.0,
+        1410.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "9",
+      "centerPx": [
+        2698.0,
+        1066.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "10",
+      "centerPx": [
+        2549.0,
+        1030.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "11",
+      "centerPx": [
+        2664.0,
+        842.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "12",
+      "centerPx": [
+        2823.0,
+        841.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "13",
+      "centerPx": [
+        3016.0,
+        842.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "14",
+      "centerPx": [
+        3528.5,
+        636.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "15",
+      "centerPx": [
+        3668.0,
+        831.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "16",
+      "centerPx": [
+        4008.0,
+        1030.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "17",
+      "centerPx": [
+        4408.0,
+        1070.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "18",
+      "centerPx": [
+        2944.0,
+        1347.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "19",
+      "centerPx": [
+        4356.5,
+        1929.5
+      ],
+      "diameterPx": 28
+    },
+    {
+      "ref": "20",
+      "centerPx": [
+        4096.0,
+        1684.5
+      ],
+      "diameterPx": 29
+    },
+    {
+      "ref": "21",
+      "centerPx": [
+        2318.5,
+        735.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "22",
+      "centerPx": [
+        2185.0,
+        1210.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "23",
+      "centerPx": [
+        2403.5,
+        1283.0
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "24",
+      "centerPx": [
+        2573.5,
+        1131.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "25",
+      "centerPx": [
+        2823.0,
+        910.5
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "26",
+      "centerPx": [
+        3016.5,
+        910.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "27",
+      "centerPx": [
+        3202.5,
+        1008.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "28",
+      "centerPx": [
+        3630.5,
+        1047.5
+      ],
+      "diameterPx": 56
+    },
+    {
+      "ref": "29",
+      "centerPx": [
+        4125.5,
+        1712.5
+      ],
+      "diameterPx": 28
+    },
+    {
+      "ref": "30",
+      "centerPx": [
+        2979.0,
+        1142.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "31",
+      "centerPx": [
+        4114.0,
+        1110.0
+      ],
+      "diameterPx": 55
+    },
+    {
+      "ref": "32",
+      "centerPx": [
+        4385.5,
+        1928.5
+      ],
+      "diameterPx": 28
+    },
+    {
+      "ref": "33",
+      "centerPx": [
+        4096.5,
+        1712.5
+      ],
+      "diameterPx": 28
+    }
+  ]
+}

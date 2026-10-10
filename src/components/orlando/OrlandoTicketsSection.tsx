@@ -264,11 +264,12 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
     const Icon = GROUP_ICONS[e.group] ?? Castle;
     const logo = experienceLogo(id);
     const selectionName = id === "magic-kingdom" ? "Magic Kingdom" : e.name;
-    if (isParkMapId(id)) {
+    const mapId = e.group === "icon" ? "icon-park" : id;
+    if (isParkMapId(mapId)) {
       return (
         <article className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
           on ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50")}>
-          <DisneyParkMapTrigger park={id} className="mb-2 flex h-14 w-full justify-start px-0 pr-6">
+          <DisneyParkMapTrigger park={mapId} className="mb-2 flex h-14 w-full justify-start px-0 pr-6">
             {logo ? <img src={logo} alt={`Logotipo ${e.name}`} loading="lazy" draggable={false} className="max-h-12 max-w-[70%] object-contain" /> : <Icon aria-hidden="true" />}
           </DisneyParkMapTrigger>
           <span className="text-sm font-semibold text-foreground">{e.name}</span>
@@ -356,7 +357,11 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                 {ORLANDO_CARDS.map((c) => (
                   <article key={c.id} className="flex w-64 shrink-0 flex-col rounded-2xl border border-border bg-card p-5">
                     <div className="flex h-20 items-center justify-center rounded-xl bg-background px-4">
-                      {CARD_LOGOS[c.id] ? (
+                      {isParkMapId(c.id === "legoland" ? "legoland-florida" : c.id === "ksc" ? "kennedy-space-center" : c.id === "icon" ? "icon-park" : c.id) ? (
+                        <DisneyParkMapTrigger park={c.id === "legoland" ? "legoland-florida" : c.id === "ksc" ? "kennedy-space-center" : "icon-park"} className="h-full w-full">
+                          <img src={CARD_LOGOS[c.id]} alt={`Logotipo ${c.title}`} draggable={false} loading="lazy" className="max-h-16 max-w-full object-contain" />
+                        </DisneyParkMapTrigger>
+                      ) : CARD_LOGOS[c.id] ? (
                         <img src={CARD_LOGOS[c.id]} alt={`Logotipo ${c.title}`} draggable={false} loading="lazy" className="max-h-16 max-w-full object-contain" />
                       ) : null}
                     </div>

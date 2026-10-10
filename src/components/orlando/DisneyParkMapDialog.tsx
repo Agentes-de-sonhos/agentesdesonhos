@@ -28,7 +28,13 @@ export const UNIVERSAL_MAPS = {
   "volcano-bay": { name: "Universal Volcano Bay", count: 27 },
 } as const;
 export type UniversalMapId = keyof typeof UNIVERSAL_MAPS;
-export type ParkMapId = DisneyMapId | UnitedMapId | UniversalMapId;
+export const FINAL_PARK_MAPS = {
+  "legoland-florida": { name: "LEGOLAND Florida Theme Park", count: 87 },
+  "kennedy-space-center": { name: "Kennedy Space Center Visitor Complex", count: 33 },
+  "icon-park": { name: "ICON Park", count: 38 },
+} as const;
+export type FinalParkMapId = keyof typeof FINAL_PARK_MAPS;
+export type ParkMapId = DisneyMapId | UnitedMapId | UniversalMapId | FinalParkMapId;
 export function isUniversalMapId(id: string): id is UniversalMapId {
   return Object.prototype.hasOwnProperty.call(UNIVERSAL_MAPS, id);
 }
@@ -36,7 +42,7 @@ export function isUnitedMapId(id: string): id is UnitedMapId {
   return Object.prototype.hasOwnProperty.call(UNITED_MAPS, id);
 }
 export function isParkMapId(id: string): id is ParkMapId {
-  return isDisneyMapId(id) || isUnitedMapId(id) || isUniversalMapId(id);
+  return isDisneyMapId(id) || isUnitedMapId(id) || isUniversalMapId(id) || Object.prototype.hasOwnProperty.call(FINAL_PARK_MAPS, id);
 }
 export function isDisneyMapId(id: string): id is DisneyMapId {
   return Object.prototype.hasOwnProperty.call(DISNEY_MAPS, id);
@@ -51,7 +57,7 @@ export function DisneyParkMapTrigger({ park, children, className }: { park: Park
 function ParkMapTrigger({ park, children, className }: { park: Exclude<ParkMapId, "magic-kingdom">; children: ReactNode; className?: string }) {
   const [open, setOpen] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
-  const { name, count } = { ...DISNEY_MAPS, ...UNITED_MAPS, ...UNIVERSAL_MAPS }[park];
+  const { name, count } = { ...DISNEY_MAPS, ...UNITED_MAPS, ...UNIVERSAL_MAPS, ...FINAL_PARK_MAPS }[park];
   useEffect(() => {
     if (!open) return;
     const closeFromMap = (event: MessageEvent) => {
