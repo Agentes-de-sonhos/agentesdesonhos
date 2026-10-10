@@ -62,17 +62,6 @@
       ""
     ],
     [
-      "attraction-katas-kookaburra-cove",
-      "Kata’s Kookaburra Cove — referência com leitura limitada",
-      "Atração aquática",
-      54.5,
-      21.14197531,
-      "Nome de atração com leitura reduzida na imagem original; pino na área da piscina infantil indicada.",
-      "Atrações",
-      "Atrações",
-      ""
-    ],
-    [
       "attraction-walkabout-waters",
       "Walkabout Waters",
       "Atração aquática",
@@ -385,12 +374,6 @@
       ""
     ],
     [
-      "attraction-katas-kookaburra-cove",
-      54.5,
-      21.14197531,
-      ""
-    ],
-    [
       "attraction-walkabout-waters",
       69.625,
       41.66666667,
@@ -550,6 +533,7 @@
   "limitations": [
     "Mapa em baixa resolução mantido inteiro, sem ganho artificial de detalhe.",
     "Cabanas Beach Front / River Front / Roa’s Rapids / Walkabout e filas Quick Queue excluídas como infraestrutura.",
-    "Símbolos genéricos de bebidas sem nomes e serviços não recebem nomes comerciais inventados."
+    "Símbolos genéricos de bebidas sem nomes e serviços não recebem nomes comerciais inventados.",
+    "Nenhuma atração chamada Kata’s Kookaburra Cove é legível nesta fonte; não incluída com base em conhecimento externo."
   ]
 }

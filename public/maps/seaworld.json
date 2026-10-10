@@ -764,6 +764,17 @@
       "Atrações",
       "Atrações",
       ""
+    ],
+    [
+      "attraction-seaquest",
+      "SeaQuest — Legends of the Deep",
+      "Experiência apresentada no guia",
+      75.5,
+      72.62210797,
+      "Nome e chamada promocional presentes na fonte. A imagem não comprova disponibilidade ou status atual; a expressão coming soon do desenho não é tratada como informação atual.",
+      "Atrações",
+      "Atrações",
+      ""
     ]
   ],
   "anchors": [
@@ -1197,6 +1208,12 @@
       "attraction-pelican-preserve",
       28.25,
       63.88174807,
+      ""
+    ],
+    [
+      "attraction-seaquest",
+      75.5,
+      72.62210797,
       ""
     ]
   ],
