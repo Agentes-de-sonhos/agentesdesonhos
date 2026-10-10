@@ -37,7 +37,7 @@ view.addEventListener('pointerup',endPointer);view.addEventListener('pointercanc
 const RATIO=2755/2700,mainEl=document.querySelector('main'),hintEl=document.querySelector('.map-hint'),stackEl=document.querySelector('.sidebar-stack');let sizing=0;
 function sizeViewport(){sizing=0;const root=document.documentElement,cs=getComputedStyle(mainEl),padX=parseFloat(cs.paddingLeft)+parseFloat(cs.paddingRight),padY=parseFloat(cs.paddingTop)+parseFloat(cs.paddingBottom),mobile=matchMedia('(max-width:850px)').matches,hintH=hintEl.offsetHeight+parseFloat(getComputedStyle(hintEl).marginTop);
 let availW,availH;if(mobile){availW=mainEl.clientWidth-padX;availH=Math.max(220,root.clientHeight*.72-hintH);}else{const gap=parseFloat(cs.columnGap)||0;availW=mainEl.clientWidth-padX-gap-stackEl.offsetWidth;availH=mainEl.clientHeight-padY-hintH;root.style.setProperty('--sidebar-height',Math.max(1,mainEl.clientHeight-padY)+'px');}
-const frameW=Math.max(1,Math.floor(Math.min(availW,availH*RATIO))),frameH=Math.max(1,Math.floor(frameW/RATIO));
+const border=2,innerW=Math.max(1,Math.floor(Math.min(availW-border,(Math.floor(availH)-border)*RATIO))),frameW=innerW+border,frameH=Math.ceil(innerW/RATIO)+border;
 root.style.setProperty('--map-frame-width',frameW+'px');root.style.setProperty('--map-view-height',frameH+'px');showSelected()}
 function queueSize(){if(!sizing)sizing=requestAnimationFrame(sizeViewport)}
 new ResizeObserver(queueSize).observe(document.documentElement);window.addEventListener('resize',queueSize);window.addEventListener('orientationchange',queueSize);sizeViewport();
