@@ -45,7 +45,7 @@ export function UsVisaHomeTeaser() {
 
 
   return (
-    <section id="visto-americano" className="scroll-mt-24 wl-soft-gradient bg-[hsl(var(--wl-sand))] py-14 md:py-20">
+    <section id="visto-americano" className="scroll-mt-24 bg-card py-14 md:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
           <div>
