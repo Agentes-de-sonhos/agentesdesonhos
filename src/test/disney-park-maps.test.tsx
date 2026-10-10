@@ -56,4 +56,19 @@ describe("Complete PDF-sourced Disney maps", () => {
     fireEvent(window, new MessageEvent("message", { data, origin: window.location.origin, source: frame.contentWindow }));
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
+  it.each(parks)("keeps quote selection independent from the logo popup (%s)", async park => {
+    render(<OrlandoTicketsSection hostname="briefing-14-v1.preview.local" mode="page" />);
+    fireEvent.click(screen.getByRole("button", { name: "Ainda não sei" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    const select = screen.getAllByRole("button", { name: /^Selecionar / }).find(el => el.closest("article")?.querySelector(`[aria-label="Abrir mapa interativo do ${DISNEY_MAPS[park].name}"]`));
+    expect(select).toBeDefined();
+    if (!select) return;
+    expect(select).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(screen.getByRole("button", { name: `Abrir mapa interativo do ${DISNEY_MAPS[park].name}` }));
+    fireEvent.click(screen.getByRole("button", { name: `Fechar mapa do ${DISNEY_MAPS[park].name}` }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    expect(select).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(select);
+    expect(select).toHaveAttribute("aria-pressed", "true");
+  });
 });
