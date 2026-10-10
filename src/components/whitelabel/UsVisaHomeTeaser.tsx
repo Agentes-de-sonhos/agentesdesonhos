@@ -3,6 +3,7 @@ import { ArrowRight, Award, Building2, Clock, ExternalLink } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
 import { agencySiteHref } from "@/lib/agencyContextLink";
+import visaPassportImg from "@/assets/whitelabel/visto-passaporte-eua.jpg";
 
 const CITIES = [
   { key: "Sao Paulo", label: "São Paulo", place: "Consulado-Geral" },
@@ -49,6 +50,14 @@ export function UsVisaHomeTeaser() {
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
           <div>
+            <img
+              src={visaPassportImg}
+              alt="Passaporte brasileiro com bandeira dos Estados Unidos e miniatura da Estátua da Liberdade"
+              width={1024}
+              height={768}
+              loading="lazy"
+              className="mb-6 aspect-[16/9] w-full max-w-sm rounded-2xl object-cover shadow-sm"
+            />
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
               Visto americano
             </p>
