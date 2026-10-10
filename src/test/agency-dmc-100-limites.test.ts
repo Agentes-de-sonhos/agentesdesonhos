@@ -32,9 +32,9 @@ describe("seção DMC da 100 Limites", () => {
     const profile = resolveSiteProfile("100limites.tur.br");
     expect(profile.key).toBe("editorialDmc");
     expect(profile.heroPresentation?.kicker).toBe("AGÊNCIA DE VIAGENS · BRASIL E MUNDO");
-    expect(profile.hero).toHaveLength(3);
-    expect(profile.hero?.map((slide) => slide.image)).toEqual(["brasil", "parques", "amanda100Limites"]);
-    expect(profile.hero?.[2]).toMatchObject({ focalPoint: "amandaRight", textWidth: "narrowLeft" });
+    expect(profile.hero).toHaveLength(2);
+    expect(profile.hero?.map((slide) => slide.image)).toEqual(["amanda100Limites", "brasil"]);
+    expect(profile.hero?.[0]).toMatchObject({ focalPoint: "amandaRight", textWidth: "narrowLeft" });
     expect(profile.requestCenter?.notice).toContain("Cada solicitação é analisada pela Amanda");
     expect(profile.destinations?.map((destination) => destination.title)).toEqual([
       "Brasil e Nordeste", "Europa e Portugal", "Orlando e parques", "Caribe e México", "América do Sul",
@@ -57,7 +57,7 @@ describe("seção DMC da 100 Limites", () => {
   it("mantém o menu do portfólio (com submenus) e oculta campanhas genéricas", () => {
     const links = siteNavLinks("100limites.tur.br");
     expect(links.map((l) => l.label)).toEqual([
-      "Sobre", "Viagens", "DMC em Portugal", "Visto americano", "Área do cliente",
+      "Sobre", "DMC em Portugal", "Visto americano", "Parques em Orlando", "Resorts no Brasil", "Blog",
     ]);
     expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
       "/dmc-portugal", "/dmc-portugal#servicos", "/dmc-portugal#frota", "/dmc-portugal#lisboa", "/dmc-portugal#portugal",
@@ -73,7 +73,7 @@ describe("seção DMC da 100 Limites", () => {
     const profile = resolveSiteProfile("100limites.tur.br");
     const images = { brasil: "/brasil.jpg", parques: "/parques.jpg", amanda100Limites: "/amanda.png" };
     expect(resolveHeroSlides("100 Limites", null, profile.hero, "/fallback.jpg", images).map((slide) => slide.image))
-      .toEqual(["/brasil.jpg", "/parques.jpg", "/amanda.png"]);
+      .toEqual(["/amanda.png", "/brasil.jpg"]);
     expect(resolveHeroSlides("Outra", null, undefined, "/fallback.jpg").every((slide) => slide.image === "/fallback.jpg"))
       .toBe(true);
   });
