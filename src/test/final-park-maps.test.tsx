@@ -36,6 +36,9 @@ describe("Complete final group of source-grounded maps", () => {
     expect(points.find(p => p[8] === "42")?.[5]).toContain("Zane");
     expect(points.find(p => p[8] === "61")?.[1]).toContain("Masters of Flight");
     expect(points.find(p => p[8] === "62")?.[1]).toBe("Battle of Bricksburg");
+    expect(points.find(p => p[8] === "33")?.[5]).toContain("36 polegadas");
+    expect(points.find(p => p[8] === "33")?.[5]).toContain("77 polegadas");
+    expect(points.find(p => p[8] === "36")?.[5]).toContain("6 a 13 anos");
     expect(points.filter(p => p[0].includes("hotel")).every(p => p[8] === "" && p[7] === "Restaurantes")).toBe(true);
   });
   it("keeps Kennedy complete and bus-tour points at their native inset centers", () => {
@@ -67,5 +70,15 @@ describe("Complete final group of source-grounded maps", () => {
   it("exposes seventeen separate map logos", () => {
     render(<OrlandoTicketsSection hostname="briefing-14-v1.preview.local" />);
     for (const {name} of Object.values({...DISNEY_MAPS,...UNITED_MAPS,...UNIVERSAL_MAPS,...FINAL_PARK_MAPS})) expect(screen.getByRole("button",{name:`Abrir mapa interativo do ${name}`})).toBeInTheDocument();
+  });
+  it("keeps marker sizing opt-in and all previous park sources independent", () => {
+    const js = readFileSync("public/maps/disney-park-map.js", "utf8");
+    expect(js).toContain("if(a[4])");
+    expect(js).toContain("a[4]/config.markerDiameter");
+    expect(js).toContain("{passive:false}");
+    expect(js).toContain("getBoundingClientRect().width/config.width");
+    for (const park of Object.keys({...DISNEY_MAPS,...UNITED_MAPS,...UNIVERSAL_MAPS})) {
+      expect(readFileSync(`public/maps/${park}.html`, "utf8")).not.toContain('"id":"icon-park"');
+    }
   });
 });
