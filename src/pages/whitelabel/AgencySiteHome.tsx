@@ -1864,8 +1864,12 @@ export default function AgencySiteHome({
         let tagged = node;
         if (profile.alternateSurfaces) {
           // Alternância declarada no perfil: branco, degradê, branco, degradê…
-          const gradient = rendered % 2 === 1 && section.key !== "newsletter";
+          // 100 Limites começa em degradê e conta o Visto americano (dentro de
+          // "orlando") como uma superfície branca própria.
+          const startGradient = profile.key === "editorialDmc";
+          const gradient = (rendered % 2 === (startGradient ? 0 : 1)) && section.key !== "newsletter";
           rendered += 1;
+          if (startGradient && section.key === "orlando") rendered += 1;
           tagged = (
             <div key={`${section.key}-surface`} className={`wl-alt-surface ${gradient ? "wl-alt-gradient" : "bg-card"}`}>
               {node}
@@ -1873,7 +1877,8 @@ export default function AgencySiteHome({
           );
           if (index === 0 && editorial) {
             return (
-              <div key={`${section.key}-offset`} className="bg-card" style={{ paddingTop: bottomOverlap }}>
+              <div key={`${section.key}-offset`} className={gradient ? "wl-alt-gradient" : "bg-card"} style={{ paddingTop: bottomOverlap }}>
+
                 {tagged}
               </div>
             );
