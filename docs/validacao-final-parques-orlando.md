@@ -51,7 +51,7 @@ Imagem termina sempre dentro do frame (1 px de borda). Quando o documento excede
 
 ## Verificações
 
-- Testes automatizados: datasets/contagens/categorias, centros Kennedy, refs omitidas, múltiplas âncoras, assets, HTML/config sincronizados, lazy mount, mensagem origin/source, 17 logos e regressões Disney/United/Universal/galeria.
+- 63 testes automatizados aprovados em seis arquivos: datasets/contagens/categorias, centros Kennedy, refs omitidas, múltiplas âncoras, assets, HTML/config sincronizados, lazy mount, mensagem origin/source, 17 logos e regressões Disney/United/Universal/galeria.
 - Browser local: 12 combinações mapa/tela a 100/200%; 632 escolhas de itens (158 × 4) verificando detalhe, tooltip e destaque de todas as âncoras; busca, categorias combinadas, hover, desseleção em área livre, pan, pinch por PointerEvents, reset e resize.
 - Wheel sobre o mapa altera zoom sem deslocar scroll, inclusive no limite 100%; fora do mapa rola documento. Motor preserva limite 500% e listener não passivo. Console dos mapas sem erros.
 - Galeria técnica: 17 logos abrem os respectivos documentos, sem selecionar orçamento. X e Esc fecham; foco retorna ao logo nas quatro telas. Screenshots e medições durante validação em `/tmp/browser/final-parks` (evidência local, não assets publicados).
