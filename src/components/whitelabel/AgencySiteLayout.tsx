@@ -153,13 +153,13 @@ export function AgencyBrandBar({
           </nav>
 
           <div className="hidden items-center gap-5 md:flex">
-            {showCadastur(info.hostname) && <CadasturSeal className="h-7 w-auto object-contain" />}
             <a
               href={agencySiteHref("/area-do-cliente")}
               className="whitespace-nowrap text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               Área do Cliente
             </a>
+            {showCadastur(info.hostname) && <CadasturSeal className="h-7 w-auto object-contain" />}
           </div>
 
           <button
