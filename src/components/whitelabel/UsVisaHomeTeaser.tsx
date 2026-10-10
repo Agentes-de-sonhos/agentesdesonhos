@@ -48,16 +48,16 @@ export function UsVisaHomeTeaser() {
   return (
     <section id="visto-americano" className="scroll-mt-24 bg-card py-14 md:py-20">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="grid gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-center">
+        <div className="grid gap-8 md:grid-cols-2 md:items-center md:gap-12">
+          <img
+            src={visaPassportImg}
+            alt="Passaporte brasileiro com bandeira dos Estados Unidos e miniatura da Estátua da Liberdade"
+            width={1024}
+            height={768}
+            loading="lazy"
+            className="aspect-[4/3] w-full rounded-2xl object-cover shadow-md"
+          />
           <div>
-            <img
-              src={visaPassportImg}
-              alt="Passaporte brasileiro com bandeira dos Estados Unidos e miniatura da Estátua da Liberdade"
-              width={1024}
-              height={768}
-              loading="lazy"
-              className="mb-6 aspect-[16/9] w-full max-w-sm rounded-2xl object-cover shadow-sm"
-            />
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
               Visto americano
             </p>
@@ -80,10 +80,11 @@ export function UsVisaHomeTeaser() {
                 </a>
               </Button>
             </div>
-
           </div>
+        </div>
 
-          <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm md:p-7">
+        <div className="mt-10 md:mt-12">
+          <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm md:p-8">
             <div role="tablist" aria-label="Escolha a cidade" className="flex flex-wrap gap-2">
               {CITIES.map((c) => {
                 const active = c.key === selected;
