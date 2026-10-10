@@ -1,5 +1,5 @@
 # Architecture rules
-- Magic Kingdom maps are mounted on demand in an accessible same-origin iframe; image URLs use CDN pointers and Escape validates origin and source. Fit is measured from the actual viewport and intrinsic image ratio, with zoom relative to contain and resize preserving navigation center. Why: preserves the approved map and quote behavior while preventing initial clipping at any dialog size.
+- Magic Kingdom maps mount on demand in an accessible same-origin iframe; image URLs use CDN pointers and Escape validates origin and source. Keep the approved width-based map and natural sidebar flow; measure the iframe content height for its original desktop/mobile viewport proportions. Why: preserves the approved presentation and quote behavior without a height-driven contain redesign.
 - The Orlando editorial photo gallery is composed at the public tickets route only for an explicit hostname allowlist (Destinos com a Ju, 100 Limites), outside the shared wizard; its photographs use CDN pointers with official-source provenance. Why: preserves all wizard behavior, home rendering and other tenants.
 
 - White-label hero visual variants must be declared in the tenant profile and resolved by the shared home renderer with safe defaults, preserving tenant isolation.

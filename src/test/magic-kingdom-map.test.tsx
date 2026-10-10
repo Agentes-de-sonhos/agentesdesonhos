@@ -21,14 +21,13 @@ describe("Magic Kingdom approved map", () => {
     expect(html).toContain("location.origin");
   });
 
-  it("fits against both measured viewport dimensions and observes changes", () => {
+  it("preserves width-based approved layout and measures the iframe height", () => {
     const html = readFileSync("public/maps/magic-kingdom.html", "utf8");
-    expect(html).toContain("baseWidth=Math.min(width,height*ratio);baseHeight=baseWidth/ratio");
-    expect(html).toContain("new ResizeObserver(fit).observe(view)");
-    expect(html).toContain("image.addEventListener('load',fit)");
-    expect(html).toContain("offsetX=Math.max(0,(view.clientWidth-width)/2)");
-    expect(html).toContain("offsetY=Math.max(0,(view.clientHeight-height)/2)");
-    expect(html).not.toContain("map.style.width=scale*100+'%'");
+    expect(html).toContain("new ResizeObserver(sizeViewport)");
+    expect(html).toContain("map.style.width=scale*100+'%'");
+    expect(html).toContain("map.style.setProperty('--marker-zoom',String(scale))");
+    expect(html).not.toContain("baseWidth=Math.min");
+    expect(html).not.toContain(".map-stage");
   });
 
   it.each(["www.destinoscomaju.com.br", "www.100limites.tur.br", "briefing-14-v1.preview.local"])("lazy mounts and closes without touching quote selection (%s)", async (hostname) => {
