@@ -25,7 +25,9 @@ describe("Magic Kingdom approved map", () => {
     const html = readFileSync("public/maps/magic-kingdom.html", "utf8");
     expect(html).toContain("new ResizeObserver(queueSize)");
     expect(html).toContain("map.style.width=scale*100+'%'");
-    expect(html).toContain("map.style.setProperty('--marker-zoom',String(scale))");
+    expect(html).toContain("map.querySelector('img').getBoundingClientRect().width/938");
+    expect(html).toContain("scale(var(--marker-image-scale,1))");
+    expect(html).not.toContain("--marker-zoom");
     expect(html).toContain("grid-template-columns:minmax(0,1fr) 340px");
     expect(html).toContain("height:auto;max-height:none;overflow:visible");
     expect(html).toContain("view.classList.toggle('zoomed',scale>1)");
