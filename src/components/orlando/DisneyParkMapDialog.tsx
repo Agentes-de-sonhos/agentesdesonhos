@@ -49,12 +49,12 @@ export function isDisneyMapId(id: string): id is DisneyMapId {
 }
 
 /** Each same-origin document and image are mounted only when its own logo opens. */
-export function DisneyParkMapTrigger({ park, children, className }: { park: ParkMapId; children: ReactNode; className?: string }) {
-  if (park === "magic-kingdom") return <MagicKingdomMapTrigger className={className}>{children}</MagicKingdomMapTrigger>;
-  return <ParkMapTrigger park={park} className={className}>{children}</ParkMapTrigger>;
+export function DisneyParkMapTrigger({ park, children, className, ariaLabel }: { park: ParkMapId; children: ReactNode; className?: string; ariaLabel?: string }) {
+  if (park === "magic-kingdom") return <MagicKingdomMapTrigger className={className} ariaLabel={ariaLabel}>{children}</MagicKingdomMapTrigger>;
+  return <ParkMapTrigger park={park} className={className} ariaLabel={ariaLabel}>{children}</ParkMapTrigger>;
 }
 
-function ParkMapTrigger({ park, children, className }: { park: Exclude<ParkMapId, "magic-kingdom">; children: ReactNode; className?: string }) {
+function ParkMapTrigger({ park, children, className, ariaLabel }: { park: Exclude<ParkMapId, "magic-kingdom">; children: ReactNode; className?: string; ariaLabel?: string }) {
   const [open, setOpen] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   const { name, count } = { ...DISNEY_MAPS, ...UNITED_MAPS, ...UNIVERSAL_MAPS, ...FINAL_PARK_MAPS }[park];
@@ -68,7 +68,7 @@ function ParkMapTrigger({ park, children, className }: { park: Exclude<ParkMapId
     return () => window.removeEventListener("message", closeFromMap);
   }, [open, park]);
   return <Dialog open={open} onOpenChange={setOpen}>
-    <DialogTrigger asChild><Button type="button" variant="ghost" className={className} aria-label={`Abrir mapa interativo do ${name}`}>{children}</Button></DialogTrigger>
+    <DialogTrigger asChild><Button type="button" variant="ghost" className={className} aria-label={ariaLabel ?? `Abrir mapa interativo do ${name}`}>{children}</Button></DialogTrigger>
     <DialogContent hideClose className={styles.content} data-preview-interactive>
       <DialogTitle className="sr-only">Mapa interativo do {name}</DialogTitle>
       <DialogDescription className="sr-only">Mapa com {count} pontos do guia fornecido, busca e filtros de atrações, restaurantes e compras.</DialogDescription>
