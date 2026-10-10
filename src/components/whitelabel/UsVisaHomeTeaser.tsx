@@ -110,36 +110,40 @@ export function UsVisaHomeTeaser() {
               })}
             </div>
 
-            <div key={selected} className="mt-6 animate-fade-in">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 className="h-4 w-4" aria-hidden="true" /> {city.place} em {city.label}
-              </div>
-              <div className="mt-3 flex items-end gap-3">
-                <Clock className="mb-1.5 h-7 w-7 text-[var(--brand-primary)] wl-accent-icon" aria-hidden="true" />
-                <p className="text-4xl font-semibold text-foreground md:text-5xl">
-                  {isLoading ? "…" : wait?.display_pt || "Indisponível"}
+            <div key={selected} className="mt-6 grid animate-fade-in gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-10">
+              <div className="md:order-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Building2 className="h-4 w-4" aria-hidden="true" /> {city.place} em {city.label}
+                </div>
+                <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                  Tempo até a próxima entrevista disponível, não prazo de emissão do visto. A coleta de foto e digitais no CASV, quando aplicável, é agendada à parte.
+                </p>
+                <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                  {sourceDate && <span>Fonte oficial atualizada em {sourceDate}</span>}
+                  <a
+                    href={data?.wait_times_source_url || OFFICIAL_WAIT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
+                  >
+                    travel.state.gov <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
                 </p>
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">de espera para a próxima entrevista</p>
-              {fastest === selected && (
-                <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
-                  <Award className="h-3.5 w-3.5" aria-hidden="true" /> Menor espera entre as 5 cidades no momento
-                </p>
-              )}
-              <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-                Tempo até a próxima entrevista disponível, não prazo de emissão do visto. A coleta de foto e digitais no CASV, quando aplicável, é agendada à parte.
-              </p>
-              <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                {sourceDate && <span>Fonte oficial atualizada em {sourceDate}</span>}
-                <a
-                  href={data?.wait_times_source_url || OFFICIAL_WAIT_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
-                >
-                  travel.state.gov <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-              </p>
+              <div className="order-first md:order-2 md:text-right">
+                <div className="flex items-end gap-3 md:justify-end">
+                  <Clock className="mb-1.5 h-7 w-7 text-[var(--brand-primary)] wl-accent-icon" aria-hidden="true" />
+                  <p className="text-4xl font-semibold text-foreground md:text-5xl">
+                    {isLoading ? "…" : wait?.display_pt || "Indisponível"}
+                  </p>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">de espera para a próxima entrevista</p>
+                {fastest === selected && (
+                  <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
+                    <Award className="h-3.5 w-3.5" aria-hidden="true" /> Menor espera entre as 5 cidades no momento
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
