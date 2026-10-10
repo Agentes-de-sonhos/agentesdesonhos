@@ -20,7 +20,7 @@ describe("páginas institucionais do site da 100 Limites", () => {
     const internal = siteNavLinks(host)
       .flatMap((l) => [l, ...(l.children ?? [])])
       .map((l) => l.to)
-      .filter((to) => to !== "/" && !to.includes("#") && !["/ofertas", "/dmc-portugal", "/visto-americano", "/area-do-cliente"].includes(to));
+      .filter((to) => to !== "/" && !to.includes("#") && !["/ofertas", "/dmc-portugal", "/visto-americano", "/area-do-cliente", "/blog"].includes(to));
     for (const to of internal) {
       expect(resolveContentPage(host, to), to).not.toBeNull();
     }

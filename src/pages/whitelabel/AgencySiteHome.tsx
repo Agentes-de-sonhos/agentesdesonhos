@@ -1446,7 +1446,11 @@ export default function AgencySiteHome({
           <Fragment key={key}>
             <OrlandoTicketsSection hostname={hostname} phone={info.phone} />
             {profile.key === "editorialDmc" && (
-              <UsVisaHomeTeaser />
+              // O Visto americano é uma seção à parte: superfície branca própria
+              // (o invólucro pai traz o degradê da seção Orlando).
+              <div className="wl-alt-surface bg-card">
+                <UsVisaHomeTeaser />
+              </div>
             )}
           </Fragment>
         );
