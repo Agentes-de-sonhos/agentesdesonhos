@@ -19,6 +19,12 @@ describe("Source-grounded United Parks maps", () => {
     const ids = new Set(c.points.map((p: unknown[]) => p[0]));
     expect(new Set(c.anchors.map((a: unknown[]) => a[0]))).toEqual(ids);
     expect(new Set(c.anchors.map((a: unknown[]) => `${a[1]},${a[2]}`)).size).toBe(c.anchors.length);
+    expect(c.anchors).toHaveLength(({ seaworld: 73, "busch-gardens": 67, aquatica: 30, "discovery-cove": 17 })[park]);
+    expect(c.markerDiameter).toBeGreaterThan(0);
+    if (park === "seaworld") {
+      expect(c.anchors.filter((a: unknown[]) => a[0] === "shop-1-2").map((a: unknown[]) => a[3])).toEqual(["2", "1"]);
+      expect(c.points.find((p: unknown[]) => p[0] === "attraction-seaquest")[5]).toMatch(/não comprova disponibilidade/);
+    }
     for (const a of c.anchors) {
       expect(a[1]).toBeGreaterThan(0); expect(a[1]).toBeLessThan(100);
       expect(a[2]).toBeGreaterThan(0); expect(a[2]).toBeLessThan(100);
@@ -37,6 +43,8 @@ describe("Source-grounded United Parks maps", () => {
     expect(embedded).not.toBeNull();
     if (embedded) expect(JSON.parse(embedded[1])).toEqual(c);
     expect(html).not.toMatch(/<footer|<header|chatgpt\.site|Protótipo/);
+    expect(html).toContain('/maps/disney-park-map.js');
+    expect(html).toContain('/maps/disney-park-map.css');
   });
   it.each(parks)("opens the correct lazy map, closes securely and restores focus (%s)", async park => {
     const { name } = UNITED_MAPS[park];

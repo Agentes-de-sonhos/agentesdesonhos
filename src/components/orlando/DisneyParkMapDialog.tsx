@@ -15,9 +15,9 @@ export const DISNEY_MAPS = {
 } as const;
 export type DisneyMapId = keyof typeof DISNEY_MAPS;
 export const UNITED_MAPS = {
-  seaworld: { name: "SeaWorld Orlando", count: 68 },
+  seaworld: { name: "SeaWorld Orlando", count: 69 },
   "busch-gardens": { name: "Busch Gardens Tampa Bay", count: 65 },
-  aquatica: { name: "Aquatica Orlando", count: 31 },
+  aquatica: { name: "Aquatica Orlando", count: 30 },
   "discovery-cove": { name: "Discovery Cove", count: 17 },
 } as const;
 export type UnitedMapId = keyof typeof UNITED_MAPS;
