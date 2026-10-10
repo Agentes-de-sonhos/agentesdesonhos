@@ -94,6 +94,26 @@ describe("seção DMC da 100 Limites", () => {
     expect(homeSource).toContain('dmc?.presentation?.surface === "light"');
   });
 
+  it("posiciona a seção do visto após Orlando e antes de 'Uma viagem para cada momento'", () => {
+    const orlandoCase = homeSource.slice(
+      homeSource.indexOf('case "orlando"'),
+      homeSource.indexOf('case "avaliacoes"'),
+    );
+    expect(orlandoCase).toContain("<UsVisaHomeTeaser />");
+    expect(orlandoCase).toContain('profile.key === "editorialDmc"');
+    const resortsCase = homeSource.slice(
+      homeSource.indexOf('case "resorts"'),
+      homeSource.indexOf('case "orlando"'),
+    );
+    expect(resortsCase).not.toContain("<UsVisaHomeTeaser />");
+    const profile = resolveSiteProfile("100limites.tur.br");
+    const orders = resolveSections(profile.sections);
+    expect(orders.find((section) => section.key === "orlando")?.order).toBeLessThan(
+      orders.find((section) => section.key === "highlights")?.order ?? 0,
+    );
+  });
+
+
   it("alterna branco real e degradê apenas na 100 Limites, na ordem solicitada", () => {
     for (const host of ["100limites.tur.br", "www.100limites.tur.br"]) {
       const profile = resolveSiteProfile(host);

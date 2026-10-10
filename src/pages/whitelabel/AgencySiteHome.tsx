@@ -1431,7 +1431,6 @@ export default function AgencySiteHome({
 
       case "resorts":
         return (
-          <Fragment key={key}>
           <section id="resorts" className="scroll-mt-24 bg-background py-14 md:py-20">
             <div className={container}>
               <AgencyResortsSection
@@ -1440,14 +1439,17 @@ export default function AgencySiteHome({
               />
             </div>
           </section>
-          {profile.key === "editorialDmc" && (
-            <UsVisaHomeTeaser />
-          )}
-          </Fragment>
         );
 
       case "orlando":
-        return <OrlandoTicketsSection key={key} hostname={hostname} phone={info.phone} />;
+        return (
+          <Fragment key={key}>
+            <OrlandoTicketsSection hostname={hostname} phone={info.phone} />
+            {profile.key === "editorialDmc" && (
+              <UsVisaHomeTeaser />
+            )}
+          </Fragment>
+        );
 
       case "avaliacoes":
         if (!googleReviews) return null;
