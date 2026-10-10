@@ -36,6 +36,16 @@ describe("Magic Kingdom approved map", () => {
     expect(html).not.toContain(".map-stage");
   });
 
+  it("clips all map corners and consumes wheel immediately, including at zoom limits", () => {
+    const html = readFileSync("public/maps/magic-kingdom.html", "utf8");
+    expect(html).toContain("border-radius:18px;clip-path:inset(0 round 18px)");
+    expect(html).toContain("document.querySelector('.map-frame').addEventListener('wheel',e=>{e.preventDefault();zoom(");
+    expect(html).toContain("{passive:false}");
+    expect(html).not.toContain("if(scale===1&&!e.ctrlKey");
+    expect(html).not.toContain("Selecione as categorias acima do mapa");
+    expect(html).toContain("Selecione os filtros no bloco “O que você quer ver no mapa?”.");
+  });
+
   it.each(["www.destinoscomaju.com.br", "www.100limites.tur.br", "briefing-14-v1.preview.local"])("lazy mounts and closes without touching quote selection (%s)", async (hostname) => {
     const { container } = render(<OrlandoTicketsSection hostname={hostname} />);
     expect(container.querySelector("iframe")).toBeNull();
