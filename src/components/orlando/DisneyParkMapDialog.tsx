@@ -13,7 +13,7 @@ export const DISNEY_MAPS = {
 } as const;
 export type DisneyMapId = keyof typeof DISNEY_MAPS;
 export function isDisneyMapId(id: string): id is DisneyMapId {
-  return Object.hasOwn(DISNEY_MAPS, id);
+  return Object.prototype.hasOwnProperty.call(DISNEY_MAPS, id);
 }
 
 /** Each same-origin document and image are mounted only when its own logo opens. */

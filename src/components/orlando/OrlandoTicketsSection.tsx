@@ -27,7 +27,7 @@ import {
   type OrlandoCategory,
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
-import { MagicKingdomMapTrigger } from "./MagicKingdomMapDialog";
+import { DisneyParkMapTrigger, isDisneyMapId } from "./DisneyParkMapDialog";
 
 const CARD_LOGOS: Record<string, string> = {
   disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url, "united-parks": unitedParksLogo.url,
@@ -263,17 +263,17 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
     const on = selected.includes(id);
     const Icon = GROUP_ICONS[e.group] ?? Castle;
     const logo = experienceLogo(id);
-    if (id === "magic-kingdom") {
+    if (isDisneyMapId(id)) {
       return (
         <article className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
           on ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50")}>
-          <MagicKingdomMapTrigger className="mb-2 flex h-14 w-full justify-start px-0 pr-6">
-            {logo ? <img src={logo} alt={`Logotipo ${e.name}`} loading="lazy" draggable={false} className="max-h-12 max-w-[70%] object-contain" /> : <Castle aria-hidden="true" />}
-          </MagicKingdomMapTrigger>
+          <DisneyParkMapTrigger park={id} className="mb-2 flex h-14 w-full justify-start px-0 pr-6">
+            {logo ? <img src={logo} alt={`Logotipo ${e.name}`} loading="lazy" draggable={false} className="max-h-12 max-w-[70%] object-contain" /> : <Icon aria-hidden="true" />}
+          </DisneyParkMapTrigger>
           <span className="text-sm font-semibold text-foreground">{e.name}</span>
           <span className="text-xs leading-relaxed text-muted-foreground">{e.description}</span>
           <Button type="button" variant="outline" aria-pressed={on} onClick={() => toggle(id)} className="mt-auto w-full">
-            {on && <Check aria-hidden="true" />} {on ? "Remover Magic Kingdom" : "Selecionar Magic Kingdom"}
+            {on && <Check aria-hidden="true" />} {on ? `Remover ${e.name}` : `Selecionar ${e.name}`}
           </Button>
           {on && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3 w-3" /></span>}
         </article>
@@ -366,10 +366,10 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                         <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Parques</p>
                         <div className="grid grid-cols-2 gap-2">
                           {CARD_PARKS[c.id].filter((p) => PARK_LOGOS[p]).map((p) => (
-                            p === "magic-kingdom" ? (
-                              <MagicKingdomMapTrigger key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
+                             isDisneyMapId(p) ? (
+                               <DisneyParkMapTrigger park={p} key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
                                 <img src={PARK_LOGOS[p]} alt={`Logotipo ${getExperience(p)?.name ?? p}`} draggable={false} loading="lazy" className="max-h-9 max-w-full object-contain" />
-                              </MagicKingdomMapTrigger>
+                               </DisneyParkMapTrigger>
                             ) : <div key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
                               <img src={PARK_LOGOS[p]} alt={`Logotipo ${getExperience(p)?.name ?? p}`} draggable={false} loading="lazy" className="max-h-9 max-w-full object-contain" />
                             </div>
