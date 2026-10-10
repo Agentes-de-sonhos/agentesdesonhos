@@ -1,0 +1,28 @@
+.content.content {
+  --map-background: #000;
+  --map-controls: #fffef7;
+  --map-foreground: #183d3a;
+  width: calc(100vw - 32px);
+  max-width: 1800px;
+  height: calc(100dvh - 32px);
+  padding: 44px 0 0;
+  gap: 0;
+  overflow: hidden;
+  background: var(--map-background);
+  border: 0;
+  color: var(--map-foreground);
+  z-index: 200;
+}
+.frame { width: 100%; height: 100%; min-height: 0; border: 0; background: var(--map-background); }
+.close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  z-index: 2;
+  background: var(--map-controls);
+  color: var(--map-foreground);
+}
+.close:hover { background: var(--map-controls); }
+@media (max-width: 850px) {
+  .content.content { width: calc(100vw - 8px); height: calc(100dvh - 8px); border-radius: 0; }
+}

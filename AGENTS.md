@@ -1,4 +1,5 @@
 # Architecture rules
+- Magic Kingdom maps are mounted on demand by the shared Orlando tickets component in an accessible dialog with a same-origin static HTML iframe; image URLs use CDN pointers and Escape messages validate both origin and source. Why: preserves the approved map experience and tenant-independent quote behavior without loading the map on page entry.
 - The Orlando editorial photo gallery is composed at the public tickets route only for an explicit hostname allowlist (Destinos com a Ju, 100 Limites), outside the shared wizard; its photographs use CDN pointers with official-source provenance. Why: preserves all wizard behavior, home rendering and other tenants.
 
 - White-label hero visual variants must be declared in the tenant profile and resolved by the shared home renderer with safe defaults, preserving tenant isolation.
