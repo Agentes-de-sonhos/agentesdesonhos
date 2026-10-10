@@ -10,6 +10,8 @@ export const DISNEY_MAPS = {
   epcot: { name: "EPCOT", count: 88 },
   "animal-kingdom": { name: "Disney's Animal Kingdom", count: 56 },
   "hollywood-studios": { name: "Disney's Hollywood Studios", count: 65 },
+  "typhoon-lagoon": { name: "Disney's Typhoon Lagoon", count: 26 },
+  "blizzard-beach": { name: "Disney's Blizzard Beach", count: 25 },
 } as const;
 export type DisneyMapId = keyof typeof DISNEY_MAPS;
 export function isDisneyMapId(id: string): id is DisneyMapId {
