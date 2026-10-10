@@ -27,6 +27,7 @@ import {
   type OrlandoCategory,
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
+import { MagicKingdomMapTrigger } from "./MagicKingdomMapDialog";
 
 const CARD_LOGOS: Record<string, string> = {
   disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url, "united-parks": unitedParksLogo.url,
@@ -35,7 +36,7 @@ const CARD_LOGOS: Record<string, string> = {
 // Logotipos individuais de parques/experiências (id do catálogo -> url)
 const PARK_LOGOS: Record<string, string> = Object.fromEntries(
   Object.entries(import.meta.glob<{ url: string }>("@/assets/orlando/parks/*.asset.json", { eager: true, import: "default" }))
-    .map(([path, a]) => [path.split("/").pop()!.replace(/^park-/, "").replace(/\.asset\.json$/, ""), a.url]),
+    .map(([path, a]) => [(path.split("/").pop() ?? "").replace(/^park-/, "").replace(/\.asset\.json$/, ""), a.url]),
 );
 // Logotipo da experiência: próprio, ou da marca quando a experiência é a própria marca
 const EXPERIENCE_LOGO_FALLBACK: Record<string, string> = { "drawn-to-life": "cirque", "seaworld": "seaworld", "busch-gardens": "busch-gardens" };
@@ -257,10 +258,27 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   const onDragEnd = () => { dragRef.current.down = false; setTimeout(() => { dragRef.current.moved = false; }, 0); };
 
   const ExperienceCard = ({ id }: { id: string }) => {
-    const e = getExperience(id)!;
+    const e = getExperience(id);
+    if (!e) return null;
     const on = selected.includes(id);
     const Icon = GROUP_ICONS[e.group] ?? Castle;
     const logo = experienceLogo(id);
+    if (id === "magic-kingdom") {
+      return (
+        <article className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
+          on ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50")}>
+          <MagicKingdomMapTrigger className="mb-2 flex h-14 w-full justify-start px-0 pr-6">
+            {logo ? <img src={logo} alt={`Logotipo ${e.name}`} loading="lazy" draggable={false} className="max-h-12 max-w-[70%] object-contain" /> : <Castle aria-hidden="true" />}
+          </MagicKingdomMapTrigger>
+          <span className="text-sm font-semibold text-foreground">{e.name}</span>
+          <span className="text-xs leading-relaxed text-muted-foreground">{e.description}</span>
+          <Button type="button" variant="outline" aria-pressed={on} onClick={() => toggle(id)} className="mt-auto w-full">
+            {on && <Check aria-hidden="true" />} {on ? "Remover Magic Kingdom" : "Selecionar Magic Kingdom"}
+          </Button>
+          {on && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3 w-3" /></span>}
+        </article>
+      );
+    }
     return (
       <button type="button" aria-pressed={on} onClick={() => toggle(id)}
         className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
@@ -348,7 +366,11 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                         <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Parques</p>
                         <div className="grid grid-cols-2 gap-2">
                           {CARD_PARKS[c.id].filter((p) => PARK_LOGOS[p]).map((p) => (
-                            <div key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
+                            p === "magic-kingdom" ? (
+                              <MagicKingdomMapTrigger key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
+                                <img src={PARK_LOGOS[p]} alt={`Logotipo ${getExperience(p)?.name ?? p}`} draggable={false} loading="lazy" className="max-h-9 max-w-full object-contain" />
+                              </MagicKingdomMapTrigger>
+                            ) : <div key={p} className="flex h-12 items-center justify-center rounded-lg border border-border bg-background px-2">
                               <img src={PARK_LOGOS[p]} alt={`Logotipo ${getExperience(p)?.name ?? p}`} draggable={false} loading="lazy" className="max-h-9 max-w-full object-contain" />
                             </div>
                           ))}

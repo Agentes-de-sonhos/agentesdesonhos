@@ -49,7 +49,7 @@ describe("Galeria editorial da página de ingressos", () => {
     fireEvent.click(screen.getByRole("button", { name: "Ainda não sei" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 2 de 4")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Magic Kingdom/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Selecionar Magic Kingdom" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 3 de 4")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
