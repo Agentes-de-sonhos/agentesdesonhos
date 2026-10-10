@@ -388,7 +388,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                       </div>
                     )}
                     {STRIP_EXPLORE_MAPS[c.id] && (
-                      <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} className="absolute inset-x-0 bottom-[52px] mx-auto flex h-10 w-fit items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
+                      <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} ariaLabel={`Explorar o mapa de ${c.title}`} className="absolute inset-x-0 bottom-[52px] mx-auto flex h-10 w-fit items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
                         Explore
                       </DisneyParkMapTrigger>
                     )}
