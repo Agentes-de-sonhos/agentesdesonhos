@@ -21,12 +21,15 @@ describe("Magic Kingdom approved map", () => {
     expect(html).toContain("location.origin");
   });
 
-  it("preserves width-based approved layout and measures the iframe height", () => {
+  it("sizes the frame from the real iframe space, not from the sidebar or vh", () => {
     const html = readFileSync("public/maps/magic-kingdom.html", "utf8");
-    expect(html).toContain("new ResizeObserver(sizeViewport)");
+    expect(html).toContain("new ResizeObserver(queueSize)");
     expect(html).toContain("map.style.width=scale*100+'%'");
     expect(html).toContain("map.style.setProperty('--marker-zoom',String(scale))");
-    expect(html).not.toContain("baseWidth=Math.min");
+    expect(html).toContain("availH=mainEl.clientHeight-padY-hintH");
+    expect(html).toContain("--map-frame-width");
+    expect(html).toContain("grid-template-columns:var(--map-frame-width,minmax(0,1fr)) 340px");
+    expect(html).not.toContain("height-104");
     expect(html).not.toContain(".map-stage");
   });
 
