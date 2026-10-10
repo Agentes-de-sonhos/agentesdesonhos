@@ -45,7 +45,7 @@ Playwright: 1920×1080, 1366×768, 1024×600 e 390×844, cada um dos quatro parq
 
 Razão diâmetro/largura constante **55/3475 = 1,58273%**. Zoom aplicado uma única vez, fonte/borda/realce acompanhando a mesma escala. Medidas também verificadas dentro dos 16 popups/telas reais, sem cortar o fundo da imagem a 100%. Desktop alto exige scroll vertical, mobile imagem e painéis compartilham a mesma rolagem.
 
-- Wheel sobre mapa altera imediatamente percentual sem mudar scroll da página; fora do mapa rola documento. Drag real e pinça por eventos reais CDP verificados nas 16 combinações, reset retorna imagem inteira a 100%.
+- Wheel sobre mapa altera imediatamente percentual sem mudar scroll da página, inclusive nos limites 100%/500%; fora do mapa rola documento. Drag real e pinça por eventos reais CDP verificados nas 16 combinações, reset retorna imagem inteira a 100%. Hover abre tooltip; resize de 1920 para 1366 a 200% preserva razão dos marcadores e reset revela imagem inteira.
 - Todas **196 entradas da lista** clicadas: detalhe com nome correto, tooltip visível e quantidade correta de âncoras amarelas. Busca, filtros combináveis, Compras vazio e desseleção em área livre conferidos.
 - **14 logos** abrem seus próprios documentos, incluindo regressão dos dez existentes. Iframe é lazy mount. Fechamento X alinhado à borda direita do modal (gap <2 px), posição fixa durante scroll; Escape dentro do iframe fecha, desbloqueia scroll e devolve foco ao logo nas 16 combinações Universal/tela.
 - Sem erros JavaScript nas páginas dos quatro mapas durante as verificações. Screenshots e medições temporárias: `/tmp/browser/universal/` (`measurements.json`, `dialogs.json`, screenshots por parque/tela e modal).
