@@ -19,7 +19,7 @@
 .close {
   position: absolute;
   top: 4px;
-  right: 8px;
+  right: 0;
   z-index: 2;
   background: var(--map-controls);
   color: var(--map-foreground);
