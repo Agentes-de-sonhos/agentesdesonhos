@@ -1,0 +1,436 @@
+{
+  "id": "typhoon-lagoon",
+  "name": "Disney's Typhoon Lagoon",
+  "width": 2873,
+  "height": 2700,
+  "markerDiameter": 58,
+  "points": [
+    [
+      1,
+      "Typhoon Lagoon Surf Pool",
+      "Typhoon Lagoon",
+      31.674208144796378,
+      49.111111111111114,
+      "Aproveite ondas de cerca de 1,8 metro e ondas menores nesta piscina de ondas.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      2,
+      "Castaway Creek",
+      "Typhoon Lagoon",
+      46.293073442394714,
+      30.444444444444446,
+      "Flutue nas águas tranquilas de um rio que percorre todo o parque. Os números repetidos indicam diferentes acessos à mesma atração.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      3,
+      "Ketchakiddee Creek",
+      "Typhoon Lagoon",
+      15.454229028889662,
+      77.85185185185185,
+      "Área com escorregadores, passeios de boia e jatos de água para crianças de até 122 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      4,
+      "Keelhaul Falls",
+      "Typhoon Lagoon",
+      16.49843369300383,
+      63.77777777777778,
+      "Desça Mount Mayday em uma boia individual, em um percurso rápido e cheio de paisagens. O guia sinaliza cuidados físicos para esta atração. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      5,
+      "Mayday Falls",
+      "Typhoon Lagoon",
+      20.466411416637662,
+      60.66666666666667,
+      "Enfrente corredeiras e solavancos no toboágua de boia individual descrito no guia como o mais alto e longo do parque. O guia sinaliza cuidados físicos para esta atração. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      6,
+      "Gangplank Falls",
+      "Typhoon Lagoon",
+      15.17577445179255,
+      54.148148148148145,
+      "Percorra corredeiras em uma boia para várias pessoas. Bebês não podem participar. O guia sinaliza cuidados físicos para esta atração. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      7,
+      "Humunga Kowabunga",
+      "Typhoon Lagoon",
+      13.505046989209884,
+      36.2962962962963,
+      "Desça Mount Mayday em um toboágua no escuro com uma queda equivalente a cinco andares. Altura mínima: 122 cm. O guia sinaliza cuidados físicos para esta atração. As alturas são medidas sem calçados. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      8,
+      "Storm Slides",
+      "Typhoon Lagoon",
+      21.44100243647755,
+      24.37037037037037,
+      "Escolha entre três toboáguas que descem a montanha e terminam com um grande mergulho. O guia sinaliza cuidados físicos para esta atração. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      9,
+      "Bay Slides",
+      "Typhoon Lagoon",
+      35.50295857988166,
+      65.62962962962963,
+      "Toboáguas infantis para crianças de até 152 cm. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      10,
+      "Mountain Trail",
+      "Typhoon Lagoon",
+      13.296206056387053,
+      42.074074074074076,
+      "Explore as trilhas de vegetação na base de Mount Mayday. É necessário conseguir caminhar, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      11,
+      "Miss Adventure Falls",
+      "Typhoon Lagoon",
+      59.24121127741038,
+      25.555555555555554,
+      "Embarque em uma boia para várias pessoas para ver os artefatos coletados pela Captain Mary Oceaneer. Bebês não podem participar. O guia sinaliza cuidados físicos para esta atração.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      12,
+      "Crush ‘n’ Gusher",
+      "Typhoon Lagoon",
+      74.90428123912287,
+      24.74074074074074,
+      "Escolha entre três percursos de boia para várias pessoas, com movimentos semelhantes aos de uma montanha-russa. Altura mínima: 122 cm. O guia sinaliza cuidados físicos para esta atração. As alturas são medidas sem calçados.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      13,
+      "Leaning Palms",
+      "Typhoon Lagoon",
+      63.00034806822137,
+      75.1111111111111,
+      "Opções adequadas a alergias alimentares e assentos disponíveis, conforme o guia. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      14,
+      "Happy Landings",
+      "Typhoon Lagoon",
+      57.70971110337626,
+      73.11111111111111,
+      "Ponto de alimentação com assentos disponíveis. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      15,
+      "Lowtide Lou’s",
+      "Typhoon Lagoon",
+      28.402366863905325,
+      61.03703703703703,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      16,
+      "Fred’s Scuba Stop",
+      "Typhoon Lagoon",
+      36.89523146536721,
+      15.777777777777777,
+      "Bar com serviço completo. O guia informa funcionamento sazonal. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      17,
+      "Typhoon Tilly’s",
+      "Typhoon Lagoon",
+      45.04002784545771,
+      23.185185185185187,
+      "Ponto de alimentação com assentos disponíveis. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      18,
+      "Snack Shack",
+      "Typhoon Lagoon",
+      46.293073442394714,
+      25.62962962962963,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      19,
+      "Let’s Go Slurpin’",
+      "Typhoon Lagoon",
+      59.93734772015314,
+      42.44444444444444,
+      "Bar com serviço completo. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      20,
+      "Joffrey’s Coffee & Tea Company",
+      "Typhoon Lagoon",
+      61.74730247128437,
+      43.55555555555555,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      21,
+      "Surf Doggies",
+      "Typhoon Lagoon",
+      60.006961364427426,
+      44.51851851851852,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      22,
+      "High ‘N Dry",
+      "Typhoon Lagoon",
+      65.85450748346676,
+      48.22222222222222,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      23,
+      "Arctic Dots Ice Cream",
+      "Typhoon Lagoon",
+      66.82909850330665,
+      54.888888888888886,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      24,
+      "Mini Donuts by Joffrey’s Coffee",
+      "Typhoon Lagoon",
+      69.1959624086321,
+      53.85185185185185,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      25,
+      "Tropical Amity Outpost",
+      "Typhoon Lagoon",
+      71.63243995823181,
+      38.88888888888889,
+      "Ponto de alimentação indicado na legenda do guia fornecido. Não leve alimentos ou bebidas às piscinas ou atrações, conforme orientação do guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      26,
+      "Singapore Sal’s",
+      "Typhoon Lagoon",
+      75.53080403759137,
+      52.888888888888886,
+      "Loja com aluguel de toalhas, guarda-sóis e Beachcomber Shack, conforme o guia.",
+      "Compras",
+      "Compras"
+    ]
+  ],
+  "anchors": [
+    [
+      1,
+      31.674208144796378,
+      49.111111111111114
+    ],
+    [
+      2,
+      46.293073442394714,
+      30.444444444444446
+    ],
+    [
+      2,
+      34.80682213713888,
+      32.592592592592595
+    ],
+    [
+      2,
+      63.20918900104421,
+      46.666666666666664
+    ],
+    [
+      2,
+      26.31395753567699,
+      69.55555555555556
+    ],
+    [
+      2,
+      55.13400626522799,
+      73.62962962962963
+    ],
+    [
+      3,
+      15.454229028889662,
+      77.85185185185185
+    ],
+    [
+      4,
+      16.49843369300383,
+      63.77777777777778
+    ],
+    [
+      5,
+      20.466411416637662,
+      60.66666666666667
+    ],
+    [
+      6,
+      15.17577445179255,
+      54.148148148148145
+    ],
+    [
+      7,
+      13.505046989209884,
+      36.2962962962963
+    ],
+    [
+      8,
+      21.44100243647755,
+      24.37037037037037
+    ],
+    [
+      9,
+      35.50295857988166,
+      65.62962962962963
+    ],
+    [
+      10,
+      13.296206056387053,
+      42.074074074074076
+    ],
+    [
+      11,
+      59.24121127741038,
+      25.555555555555554
+    ],
+    [
+      12,
+      74.90428123912287,
+      24.74074074074074
+    ],
+    [
+      13,
+      63.00034806822137,
+      75.1111111111111
+    ],
+    [
+      14,
+      57.70971110337626,
+      73.11111111111111
+    ],
+    [
+      15,
+      28.402366863905325,
+      61.03703703703703
+    ],
+    [
+      16,
+      36.89523146536721,
+      15.777777777777777
+    ],
+    [
+      17,
+      45.04002784545771,
+      23.185185185185187
+    ],
+    [
+      18,
+      46.293073442394714,
+      25.62962962962963
+    ],
+    [
+      19,
+      59.93734772015314,
+      42.44444444444444
+    ],
+    [
+      20,
+      61.74730247128437,
+      43.55555555555555
+    ],
+    [
+      21,
+      60.006961364427426,
+      44.51851851851852
+    ],
+    [
+      22,
+      65.85450748346676,
+      48.22222222222222
+    ],
+    [
+      23,
+      66.82909850330665,
+      54.888888888888886
+    ],
+    [
+      24,
+      69.1959624086321,
+      53.85185185185185
+    ],
+    [
+      25,
+      71.63243995823181,
+      38.88888888888889
+    ],
+    [
+      26,
+      75.53080403759137,
+      52.888888888888886
+    ]
+  ],
+  "source": "typhoon-lagoon-blizzard-beach.pdf",
+  "sourcePage": 1,
+  "sourceRaster": [
+    5925,
+    2700
+  ],
+  "crop": [
+    0,
+    0,
+    2873,
+    2700
+  ],
+  "colorProfile": "U.S. Web Coated (SWOP) v2 → sRGB via LittleCMS",
+  "sourceSha256": "3ff0e6dee2c421ef3257e58538fa9e02930457ea871e5be79b8f48e74215ad79",
+  "image": "/__l5e/assets-v1/00989fa7-113c-4c1b-ad1e-b1735609a477/typhoon-lagoon-srgb.png"
+}
