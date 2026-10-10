@@ -5,7 +5,7 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle, Dia
 import styles from "./MagicKingdomMapDialog.module.css";
 
 /** The static approved document (and its full-resolution image) load only on open. */
-export function MagicKingdomMapTrigger({ children, className }: { children: ReactNode; className?: string }) {
+export function MagicKingdomMapTrigger({ children, className, ariaLabel }: { children: ReactNode; className?: string; ariaLabel?: string }) {
   const [open, setOpen] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
 
@@ -22,7 +22,7 @@ export function MagicKingdomMapTrigger({ children, className }: { children: Reac
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="ghost" className={className} aria-label="Abrir mapa interativo do Magic Kingdom">
+        <Button type="button" variant="ghost" className={className} aria-label={ariaLabel ?? "Abrir mapa interativo do Magic Kingdom"}>
           {children}
         </Button>
       </DialogTrigger>
