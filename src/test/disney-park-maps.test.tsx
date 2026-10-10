@@ -69,6 +69,6 @@ describe("Complete PDF-sourced Disney maps", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     expect(select).toHaveAttribute("aria-pressed", "false");
     fireEvent.click(select);
-    expect(screen.getByRole("button", { name: `Remover ${DISNEY_MAPS[park].name}` })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getAllByRole("button", { name: /^Remover / }).find(el => el.closest("article")?.querySelector(`[aria-label="Abrir mapa interativo do ${DISNEY_MAPS[park].name}"]`))).toHaveAttribute("aria-pressed", "true");
   });
 });
