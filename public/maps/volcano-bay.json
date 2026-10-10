@@ -1,0 +1,784 @@
+{
+  "id": "volcano-bay",
+  "name": "Universal Volcano Bay",
+  "width": 3475,
+  "height": 3240,
+  "image": "/__l5e/assets-v1/c3a76ec3-4d0b-4c27-8354-7c08f1b3e762/volcano-bay-map.png",
+  "source": "uvb-park-map.pdf",
+  "sourcePage": 1,
+  "sourcePagePt": [
+    1224,
+    792
+  ],
+  "cropPt": [
+    27.0,
+    27.0,
+    722.0,
+    675.0
+  ],
+  "renderDpi": 360,
+  "colorProfile": "MuPDF ICC-managed sRGB rendering; lossless PNG",
+  "sourceSha256": "945f401a5d36147dbd95b08306bb8165b7db2f88adf0f65c97d184062571df73",
+  "sourceDescription": "recorte do mapa vetorial do PDF fornecido, sem legenda lateral ou QR",
+  "markerDiameter": 55,
+  "markerFontSize": 30,
+  "markerBorderWidth": 5,
+  "markerOutlineWidth": 7,
+  "markerHaloWidth": 14,
+  "points": [
+    [
+      "attraction-1",
+      "Meet Vol: the Spirit of Krakatau",
+      "Atração aquática",
+      52.19222912685476,
+      47.84444644127363,
+      "Encontre Vol, o espírito de Krakatau.",
+      "Atrações",
+      "Atrações",
+      "1"
+    ],
+    [
+      "attraction-2",
+      "Kala and Tai Nui Serpentine Body Slides",
+      "Atração aquática",
+      50.76258817165018,
+      56.75554157775126,
+      "Kala and Tai Nui Serpentine Body Slides está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm. Limite de peso indicado no guia: 113 kg.",
+      "Atrações",
+      "Atrações",
+      "2"
+    ],
+    [
+      "attraction-3",
+      "Ohyah of Ohyah and Ohno Drop Slides",
+      "Atração aquática",
+      45.74604281418615,
+      59.062500941900566,
+      "Ohyah of Ohyah and Ohno Drop Slides está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm.",
+      "Atrações",
+      "Atrações",
+      "3"
+    ],
+    [
+      "attraction-4",
+      "Ohno of Ohyah and Ohno Drop Slides",
+      "Atração aquática",
+      45.74604281418615,
+      57.15277871967833,
+      "Ohno of Ohyah and Ohno Drop Slides está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm.",
+      "Atrações",
+      "Atrações",
+      "4"
+    ],
+    [
+      "attraction-5",
+      "Puka Uli Lagoon",
+      "Atração aquática",
+      41.56318060785746,
+      62.66665046597705,
+      "Puka Uli Lagoon está identificado como atração ou experiência na legenda do guia fornecido. Crianças com menos de 122 cm devem usar colete salva-vidas aprovado pela Guarda Costeira dos Estados Unidos, conforme a legenda.",
+      "Atrações",
+      "Atrações",
+      "5"
+    ],
+    [
+      "attraction-6",
+      "Maku of Maku Puihi Round Raft Rides",
+      "Atração aquática",
+      20.552517458689298,
+      30.416662899064427,
+      "Maku of Maku Puihi Round Raft Rides está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Limite de peso indicado para a boia: 476 kg. Crianças entre 107 e 122 cm devem entrar com acompanhante, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações",
+      "6"
+    ],
+    [
+      "attraction-7",
+      "Puihi of Maku Puihi Round Raft Rides",
+      "Atração aquática",
+      19.220864275376574,
+      29.166647828655478,
+      "Puihi of Maku Puihi Round Raft Rides está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Limite de peso indicado para a boia: 386 kg. Crianças entre 107 e 122 cm devem entrar com acompanhante, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações",
+      "7"
+    ],
+    [
+      "attraction-8",
+      "TeAwa The Fearless River",
+      "Atração aquática",
+      25.847497295132644,
+      24.888874572000386,
+      "TeAwa The Fearless River está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Crianças entre 107 e 122 cm devem entrar com acompanhante, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações",
+      "8"
+    ],
+    [
+      "attraction-9",
+      "Hammerhead Beach",
+      "Atração aquática",
+      29.473380768041817,
+      26.666655363859952,
+      "Hammerhead Beach está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "9"
+    ],
+    [
+      "attraction-10",
+      "Taniwha Tubes",
+      "Atração aquática",
+      40.28775661111735,
+      25.833318262924383,
+      "Taniwha Tubes está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Limite de peso: 136 kg para uma pessoa ou 204 kg para duas pessoas. Crianças entre 107 e 122 cm devem entrar com acompanhante, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações",
+      "10"
+    ],
+    [
+      "attraction-11",
+      "Punga Racers",
+      "Atração aquática",
+      44.19453353332959,
+      41.8055404851466,
+      "Punga Racers está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Limite de peso indicado no guia: 136 kg.",
+      "Atrações",
+      "Atrações",
+      "11"
+    ],
+    [
+      "attraction-12",
+      "Krakatau Aqua Coaster",
+      "Atração aquática",
+      47.11870591417491,
+      27.743040485146604,
+      "Krakatau Aqua Coaster está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Limite de peso indicado para a boia: 317 kg. Crianças entre 107 e 122 cm devem entrar com acompanhante, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações",
+      "12"
+    ],
+    [
+      "attraction-13",
+      "Runamukka Reef",
+      "Atração aquática",
+      58.241019489096225,
+      31.266652801890434,
+      "Runamukka Reef está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "13"
+    ],
+    [
+      "attraction-14",
+      "Tot Tiki Reef",
+      "Atração aquática",
+      61.35022938680306,
+      31.84443344304591,
+      "Tot Tiki Reef está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "14"
+    ],
+    [
+      "attraction-15",
+      "Kopiko Wai Winding River",
+      "Atração aquática",
+      67.53237497892312,
+      24.55553596402392,
+      "Rio sinuoso Kopiko Wai, com dois pontos de acesso identificados no mapa. Crianças com menos de 122 cm devem usar colete salva-vidas aprovado pela Guarda Costeira dos Estados Unidos, conforme a legenda.",
+      "Atrações",
+      "Atrações",
+      "15"
+    ],
+    [
+      "attraction-16",
+      "Honu of Honu ika Moana",
+      "Atração aquática",
+      80.8057518828687,
+      21.145818262924383,
+      "Honu of Honu ika Moana está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm. Limite de peso indicado para a boia: 317 kg.",
+      "Atrações",
+      "Atrações",
+      "16"
+    ],
+    [
+      "attraction-17",
+      "ika Moana of Honu ika Moana",
+      "Atração aquática",
+      80.8057518828687,
+      19.311099582248264,
+      "ika Moana of Honu ika Moana está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm. Limite de peso indicado para a boia: 340 kg. Crianças entre 107 e 122 cm devem entrar com acompanhante, conforme o símbolo da legenda.",
+      "Atrações",
+      "Atrações",
+      "17"
+    ],
+    [
+      "attraction-18",
+      "Ko’okiri Body Plunge",
+      "Atração aquática",
+      64.74818826579362,
+      43.13331886574074,
+      "Ko’okiri Body Plunge está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm. Limite de peso indicado no guia: 136 kg.",
+      "Atrações",
+      "Atrações",
+      "18"
+    ],
+    [
+      "attraction-19",
+      "The Reef",
+      "Atração aquática",
+      66.30215651697392,
+      45.066668663495854,
+      "The Reef está identificado como atração ou experiência na legenda do guia fornecido. Crianças com menos de 122 cm devem usar colete salva-vidas aprovado pela Guarda Costeira dos Estados Unidos, conforme a legenda.",
+      "Atrações",
+      "Atrações",
+      "19"
+    ],
+    [
+      "attraction-20",
+      "Waturi Beach",
+      "Atração aquática",
+      61.38129584223246,
+      54.399984854239,
+      "Praia Waturi Beach. Crianças com menos de 122 cm devem usar colete salva-vidas aprovado pela Guarda Costeira dos Estados Unidos, conforme a legenda.",
+      "Atrações",
+      "Atrações",
+      "20"
+    ],
+    [
+      "restaurant-A",
+      "Bambu",
+      "Alimentação",
+      31.597123180361958,
+      46.86666888955199,
+      "Bambu está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "A"
+    ],
+    [
+      "restaurant-B",
+      "The Feasting Frog",
+      "Alimentação",
+      36.32116523578013,
+      35.155552993586035,
+      "The Feasting Frog está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "B"
+    ],
+    [
+      "restaurant-C",
+      "Kunuku Boat Bar",
+      "Alimentação",
+      38.34893315816097,
+      33.0208295657311,
+      "Kunuku Boat Bar está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "C"
+    ],
+    [
+      "restaurant-D",
+      "Whakawaiwai Eats",
+      "Alimentação",
+      49.98561063258768,
+      20.64442575713735,
+      "Whakawaiwai Eats está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "D"
+    ],
+    [
+      "restaurant-E",
+      "Dancing Dragons Boat Bar",
+      "Alimentação",
+      76.70331996121853,
+      49.53206851158613,
+      "Dancing Dragons Boat Bar está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "E"
+    ],
+    [
+      "restaurant-F",
+      "Kohola Reef Restaurant and Social Club",
+      "Alimentação",
+      78.21585895346223,
+      61.48887445897232,
+      "Kohola Reef Restaurant and Social Club está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "F"
+    ],
+    [
+      "restaurant-G",
+      "Koka Poroka Ice Cream Kona",
+      "Alimentação",
+      72.0647446886241,
+      80.24442696277006,
+      "Koka Poroka Ice Cream Kona está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "G"
+    ]
+  ],
+  "anchors": [
+    [
+      "attraction-17",
+      80.8057518828687,
+      19.311099582248264,
+      "17"
+    ],
+    [
+      "restaurant-D",
+      49.98561063258768,
+      20.64442575713735,
+      "D"
+    ],
+    [
+      "attraction-16",
+      80.8057518828687,
+      21.145818262924383,
+      "16"
+    ],
+    [
+      "attraction-15",
+      67.53237497892312,
+      24.55553596402392,
+      "15"
+    ],
+    [
+      "attraction-8",
+      25.847497295132644,
+      24.888874572000386,
+      "8"
+    ],
+    [
+      "attraction-10",
+      40.28775661111735,
+      25.833318262924383,
+      "10"
+    ],
+    [
+      "attraction-9",
+      29.473380768041817,
+      26.666655363859952,
+      "9"
+    ],
+    [
+      "attraction-12",
+      47.11870591417491,
+      27.743040485146604,
+      "12"
+    ],
+    [
+      "attraction-7",
+      19.220864275376574,
+      29.166647828655478,
+      "7"
+    ],
+    [
+      "attraction-6",
+      20.552517458689298,
+      30.416662899064427,
+      "6"
+    ],
+    [
+      "attraction-13",
+      58.241019489096225,
+      31.266652801890434,
+      "13"
+    ],
+    [
+      "attraction-14",
+      61.35022938680306,
+      31.84443344304591,
+      "14"
+    ],
+    [
+      "restaurant-C",
+      38.34893315816097,
+      33.0208295657311,
+      "C"
+    ],
+    [
+      "restaurant-B",
+      36.32116523578013,
+      35.155552993586035,
+      "B"
+    ],
+    [
+      "attraction-15",
+      63.442878997583186,
+      39.42222124264564,
+      "15"
+    ],
+    [
+      "attraction-11",
+      44.19453353332959,
+      41.8055404851466,
+      "11"
+    ],
+    [
+      "attraction-18",
+      64.74818826579362,
+      43.13331886574074,
+      "18"
+    ],
+    [
+      "attraction-19",
+      66.30215651697392,
+      45.066668663495854,
+      "19"
+    ],
+    [
+      "restaurant-A",
+      31.597123180361958,
+      46.86666888955199,
+      "A"
+    ],
+    [
+      "attraction-1",
+      52.19222912685476,
+      47.84444644127363,
+      "1"
+    ],
+    [
+      "restaurant-E",
+      76.70331996121853,
+      49.53206851158613,
+      "E"
+    ],
+    [
+      "attraction-20",
+      61.38129584223246,
+      54.399984854239,
+      "20"
+    ],
+    [
+      "attraction-2",
+      50.76258817165018,
+      56.75554157775126,
+      "2"
+    ],
+    [
+      "attraction-4",
+      45.74604281418615,
+      57.15277871967833,
+      "4"
+    ],
+    [
+      "attraction-3",
+      45.74604281418615,
+      59.062500941900566,
+      "3"
+    ],
+    [
+      "restaurant-F",
+      78.21585895346223,
+      61.48887445897232,
+      "F"
+    ],
+    [
+      "attraction-5",
+      41.56318060785746,
+      62.66665046597705,
+      "5"
+    ],
+    [
+      "restaurant-G",
+      72.0647446886241,
+      80.24442696277006,
+      "G"
+    ]
+  ],
+  "sourceAnchors": [
+    {
+      "ref": "G",
+      "centerPt": [
+        527.8499755859375,
+        546.98388671875
+      ],
+      "diameterPt": 10.0,
+      "x": 72.0647446886241,
+      "y": 80.24442696277006
+    },
+    {
+      "ref": "1",
+      "centerPt": [
+        389.7359924316406,
+        337.0320129394531
+      ],
+      "diameterPt": 10.0,
+      "x": 52.19222912685476,
+      "y": 47.84444644127363
+    },
+    {
+      "ref": "2",
+      "centerPt": [
+        379.79998779296875,
+        394.7759094238281
+      ],
+      "diameterPt": 10.0,
+      "x": 50.76258817165018,
+      "y": 56.75554157775126
+    },
+    {
+      "ref": "3",
+      "centerPt": [
+        344.93499755859375,
+        409.7250061035156
+      ],
+      "diameterPt": 10.0,
+      "x": 45.74604281418615,
+      "y": 59.062500941900566
+    },
+    {
+      "ref": "4",
+      "centerPt": [
+        344.93499755859375,
+        397.3500061035156
+      ],
+      "diameterPt": 10.0,
+      "x": 45.74604281418615,
+      "y": 57.15277871967833
+    },
+    {
+      "ref": "5",
+      "centerPt": [
+        315.8641052246094,
+        433.07989501953125
+      ],
+      "diameterPt": 10.0,
+      "x": 41.56318060785746,
+      "y": 62.66665046597705
+    },
+    {
+      "ref": "A",
+      "centerPt": [
+        246.60000610351562,
+        330.6960144042969
+      ],
+      "diameterPt": 10.0,
+      "x": 31.597123180361958,
+      "y": 46.86666888955199
+    },
+    {
+      "ref": "B",
+      "centerPt": [
+        279.4320983886719,
+        254.8079833984375
+      ],
+      "diameterPt": 10.0,
+      "x": 36.32116523578013,
+      "y": 35.155552993586035
+    },
+    {
+      "ref": "C",
+      "centerPt": [
+        293.52508544921875,
+        240.9749755859375
+      ],
+      "diameterPt": 10.0,
+      "x": 38.34893315816097,
+      "y": 33.0208295657311
+    },
+    {
+      "ref": "6",
+      "centerPt": [
+        169.83999633789062,
+        224.0999755859375
+      ],
+      "diameterPt": 10.0,
+      "x": 20.552517458689298,
+      "y": 30.416662899064427
+    },
+    {
+      "ref": "7",
+      "centerPt": [
+        160.5850067138672,
+        215.9998779296875
+      ],
+      "diameterPt": 10.0,
+      "x": 19.220864275376574,
+      "y": 29.166647828655478
+    },
+    {
+      "ref": "8",
+      "centerPt": [
+        206.64010620117188,
+        188.2799072265625
+      ],
+      "diameterPt": 10.0,
+      "x": 25.847497295132644,
+      "y": 24.888874572000386
+    },
+    {
+      "ref": "9",
+      "centerPt": [
+        231.83999633789062,
+        199.7999267578125
+      ],
+      "diameterPt": 10.0,
+      "x": 29.473380768041817,
+      "y": 26.666655363859952
+    },
+    {
+      "ref": "10",
+      "centerPt": [
+        306.9999084472656,
+        194.39990234375
+      ],
+      "diameterPt": 10.0,
+      "x": 40.28775661111735,
+      "y": 25.833318262924383
+    },
+    {
+      "ref": "11",
+      "centerPt": [
+        334.1520080566406,
+        297.89990234375
+      ],
+      "diameterPt": 10.0,
+      "x": 44.19453353332959,
+      "y": 41.8055404851466
+    },
+    {
+      "ref": "12",
+      "centerPt": [
+        354.4750061035156,
+        206.77490234375
+      ],
+      "diameterPt": 10.0,
+      "x": 47.11870591417491,
+      "y": 27.743040485146604
+    },
+    {
+      "ref": "D",
+      "centerPt": [
+        374.3999938964844,
+        160.77587890625
+      ],
+      "diameterPt": 10.0,
+      "x": 49.98561063258768,
+      "y": 20.64442575713735
+    },
+    {
+      "ref": "13",
+      "centerPt": [
+        431.77508544921875,
+        229.60791015625
+      ],
+      "diameterPt": 10.0,
+      "x": 58.241019489096225,
+      "y": 31.266652801890434
+    },
+    {
+      "ref": "14",
+      "centerPt": [
+        453.38409423828125,
+        233.3519287109375
+      ],
+      "diameterPt": 10.0,
+      "x": 61.35022938680306,
+      "y": 31.84443344304591
+    },
+    {
+      "ref": "15",
+      "centerPt": [
+        496.3500061035156,
+        186.119873046875
+      ],
+      "diameterPt": 10.0,
+      "x": 67.53237497892312,
+      "y": 24.55553596402392
+    },
+    {
+      "ref": "15",
+      "centerPt": [
+        467.9280090332031,
+        282.45599365234375
+      ],
+      "diameterPt": 10.0,
+      "x": 63.442878997583186,
+      "y": 39.42222124264564
+    },
+    {
+      "ref": "16",
+      "centerPt": [
+        588.5999755859375,
+        164.02490234375
+      ],
+      "diameterPt": 10.0,
+      "x": 80.8057518828687,
+      "y": 21.145818262924383
+    },
+    {
+      "ref": "17",
+      "centerPt": [
+        588.5999755859375,
+        152.13592529296875
+      ],
+      "diameterPt": 10.0,
+      "x": 80.8057518828687,
+      "y": 19.311099582248264
+    },
+    {
+      "ref": "18",
+      "centerPt": [
+        476.9999084472656,
+        306.50390625
+      ],
+      "diameterPt": 10.0,
+      "x": 64.74818826579362,
+      "y": 43.13331886574074
+    },
+    {
+      "ref": "19",
+      "centerPt": [
+        487.79998779296875,
+        319.0320129394531
+      ],
+      "diameterPt": 10.0,
+      "x": 66.30215651697392,
+      "y": 45.066668663495854
+    },
+    {
+      "ref": "20",
+      "centerPt": [
+        453.6000061035156,
+        379.51190185546875
+      ],
+      "diameterPt": 10.0,
+      "x": 61.38129584223246,
+      "y": 54.399984854239
+    },
+    {
+      "ref": "F",
+      "centerPt": [
+        570.6002197265625,
+        425.4479064941406
+      ],
+      "diameterPt": 10.0,
+      "x": 78.21585895346223,
+      "y": 61.48887445897232
+    },
+    {
+      "ref": "E",
+      "centerPt": [
+        560.0880737304688,
+        347.9678039550781
+      ],
+      "diameterPt": 10.0,
+      "x": 76.70331996121853,
+      "y": 49.53206851158613
+    }
+  ],
+  "limitations": [
+    "O guia não possui lista própria de compras com localização; nenhuma loja foi inventada.",
+    "Informações descrevem exclusivamente o PDF fornecido, sem garantia de status atual.",
+    "Símbolos de acessibilidade/serviços/Express e preços não viram atrações ou marcadores."
+  ]
+}

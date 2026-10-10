@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Concluir Universal Studios Florida, Islands of Adventure, Epic Universe e Volcano Bay dos PDFs: crops vetoriais em alta resolução, todas referências/âncoras, 14 logos, testes e quatro telas/gestos; preservar dez mapas e orçamento, sem publicar.
 - [x] Integrar SeaWorld, Busch Gardens, Aquatica e Discovery Cove: fontes nativas, 181 itens/187 âncoras, referências heterogêneas e leituras limitadas documentadas, dez logos e orçamento independente; validar quatro telas/100–200%, gestos e regressão Disney, sem publicar.
 - [x] Implementar Typhoon Lagoon e Blizzard Beach completos: 51 itens únicos/61 âncoras verificadas no PDF, crops sRGB nativos 2873×2700 e 2986×2700, motor com múltiplos acessos por item, seis popups corretos, 30 testes e quatro telas/100–200%/pinça real; parques anteriores e orçamento preservados, sem publicar.
 - [x] Implementar EPCOT, Animal Kingdom e Hollywood Studios completos dos PDFs: 209 pontos, crops sRGB nativos, legendas/coordenadas verificadas, popups compartilhados, testes e quatro telas/100–200%/pinça real; Magic Kingdom preservado, sem publicar.

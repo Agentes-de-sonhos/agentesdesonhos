@@ -1,0 +1,1416 @@
+{
+  "id": "islands-of-adventure",
+  "name": "Universal Islands of Adventure",
+  "width": 3475,
+  "height": 3240,
+  "image": "/__l5e/assets-v1/cf0d4401-a482-4564-b3cf-3f0bd06564c1/islands-of-adventure-map.png",
+  "source": "islands-of-adventure-park-map-english.pdf",
+  "sourcePage": 1,
+  "sourcePagePt": [
+    1224,
+    792
+  ],
+  "cropPt": [
+    27.0,
+    27.0,
+    722.0,
+    675.0
+  ],
+  "renderDpi": 360,
+  "colorProfile": "MuPDF ICC-managed sRGB rendering; lossless PNG",
+  "sourceSha256": "fa88554b21131538ab01e8ff7f0a231180fd21b79554e9df131ca9d4437f0a3f",
+  "sourceDescription": "recorte do mapa vetorial do PDF fornecido, sem legenda lateral ou QR",
+  "markerDiameter": 55,
+  "markerFontSize": 30,
+  "markerBorderWidth": 5,
+  "markerOutlineWidth": 7,
+  "markerHaloWidth": 14,
+  "points": [
+    [
+      "attraction-1",
+      "The Incredible Hulk Coaster®",
+      "Atração / experiência",
+      49.384761233981564,
+      77.03797140239197,
+      "The Incredible Hulk Coaster® está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 138 cm.",
+      "Atrações",
+      "Atrações",
+      "1"
+    ],
+    [
+      "attraction-2",
+      "Storm Force Accelatron®",
+      "Atração / experiência",
+      46.41151044008543,
+      77.5222024799865,
+      "Storm Force Accelatron® está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "2"
+    ],
+    [
+      "attraction-3",
+      "Doctor Doom’s Fearfall®",
+      "Atração / experiência",
+      41.37411652709083,
+      71.5444305796682,
+      "Doctor Doom’s Fearfall® está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 133 cm.",
+      "Atrações",
+      "Atrações",
+      "3"
+    ],
+    [
+      "attraction-4",
+      "The Amazing Adventures of Spider-Man®",
+      "Atração / experiência",
+      41.63569827731565,
+      66.07776217990451,
+      "The Amazing Adventures of Spider-Man® está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 102 cm.",
+      "Atrações",
+      "Atrações",
+      "4"
+    ],
+    [
+      "attraction-5",
+      "Meet the Marvel Super Heroes",
+      "Atração / experiência",
+      44.708633971728865,
+      66.35416760856722,
+      "Encontro com os super-heróis Marvel.",
+      "Atrações",
+      "Atrações",
+      "5"
+    ],
+    [
+      "attraction-6",
+      "Classic Comic Strip Characters",
+      "Atração / experiência",
+      34.72576772566322,
+      59.06020270453559,
+      "Personagens clássicos das tirinhas.",
+      "Atrações",
+      "Atrações",
+      "6"
+    ],
+    [
+      "attraction-7",
+      "Me Ship, The Olive®",
+      "Atração / experiência",
+      45.98561238899506,
+      50.6333198076413,
+      "Me Ship, The Olive® está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "7"
+    ],
+    [
+      "attraction-8",
+      "Popeye & Bluto’s Bilge-Rat Barges®",
+      "Atração / experiência",
+      40.13469009948291,
+      47.87130944522811,
+      "Popeye & Bluto’s Bilge-Rat Barges® está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm.",
+      "Atrações",
+      "Atrações",
+      "8"
+    ],
+    [
+      "attraction-9",
+      "Dudley Do-Right’s Ripsaw Falls®",
+      "Atração / experiência",
+      28.450086854344647,
+      47.75688265576775,
+      "Dudley Do-Right’s Ripsaw Falls® está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 112 cm.",
+      "Atrações",
+      "Atrações",
+      "9"
+    ],
+    [
+      "attraction-10",
+      "Skull Island: Reign of Kong",
+      "Atração / experiência",
+      27.867640214000673,
+      31.42735987533758,
+      "Skull Island: Reign of Kong está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 92 cm.",
+      "Atrações",
+      "Atrações",
+      "10"
+    ],
+    [
+      "attraction-11",
+      "Camp Jurassic",
+      "Atração / experiência",
+      35.16087813343076,
+      30.93749623239776,
+      "Camp Jurassic está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "11"
+    ],
+    [
+      "attraction-12",
+      "Pteranodon Flyers",
+      "Atração / experiência",
+      36.8391385524393,
+      30.24442696277006,
+      "Pteranodon Flyers está identificado como atração ou experiência na legenda do guia fornecido. Faixa de altura indicada no guia: 92–143 cm.",
+      "Atrações",
+      "Atrações",
+      "12"
+    ],
+    [
+      "attraction-13",
+      "Jurassic Park River Adventure",
+      "Atração / experiência",
+      41.89209862578687,
+      28.111097547743057,
+      "Jurassic Park River Adventure está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 107 cm.",
+      "Atrações",
+      "Atrações",
+      "13"
+    ],
+    [
+      "attraction-14",
+      "Raptor Encounter",
+      "Atração / experiência",
+      45.60345327253822,
+      25.977758713710454,
+      "Encontro com um raptor.",
+      "Atrações",
+      "Atrações",
+      "14"
+    ],
+    [
+      "attraction-15",
+      "Jurassic Park Discovery Center",
+      "Atração / experiência",
+      53.275971995840834,
+      33.273164725597994,
+      "Jurassic Park Discovery Center está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "15"
+    ],
+    [
+      "attraction-16",
+      "Jurassic World VelociCoaster",
+      "Atração / experiência",
+      51.96431770599146,
+      38.92361205301167,
+      "Jurassic World VelociCoaster está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 130 cm.",
+      "Atrações",
+      "Atrações",
+      "16"
+    ],
+    [
+      "attraction-17",
+      "Harry Potter and the Forbidden Journey™",
+      "Atração / experiência",
+      61.225897699808904,
+      25.111106589988424,
+      "Harry Potter and the Forbidden Journey™ está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm.",
+      "Atrações",
+      "Atrações",
+      "17"
+    ],
+    [
+      "attraction-18",
+      "Flight of the Hippogriff™",
+      "Atração / experiência",
+      63.959710649449185,
+      23.932704219111688,
+      "Flight of the Hippogriff™ está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 92 cm.",
+      "Atrações",
+      "Atrações",
+      "18"
+    ],
+    [
+      "attraction-19",
+      "Frog Choir / Triwizard Spirit Rally",
+      "Atração / experiência",
+      66.44604140906026,
+      25.2907270266686,
+      "Apresentações Frog Choir e Triwizard Spirit Rally.",
+      "Atrações",
+      "Atrações",
+      "19"
+    ],
+    [
+      "attraction-20",
+      "Ollivanders™",
+      "Atração / experiência",
+      68.27699071211781,
+      29.696231418185764,
+      "Ollivanders™ está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "20"
+    ],
+    [
+      "attraction-21",
+      "Hagrid’s Magical Creatures Motorbike Adventure",
+      "Atração / experiência",
+      72.19064396919964,
+      31.75094039351852,
+      "Hagrid’s Magical Creatures Motorbike Adventure está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 122 cm.",
+      "Atrações",
+      "Atrações",
+      "21"
+    ],
+    [
+      "attraction-22",
+      "Hogwarts™ Express – Hogsmeade™ Station",
+      "Atração / experiência",
+      74.95251552664118,
+      37.466647301191166,
+      "Hogwarts™ Express – Hogsmeade™ Station está identificado como atração ou experiência na legenda do guia fornecido. Requer ingresso Park-to-Park (Parque a Parque) ou Passe Anual/Sazonal. Aplicam-se restrições adicionais, conforme o guia.",
+      "Atrações",
+      "Atrações",
+      "22"
+    ],
+    [
+      "attraction-23",
+      "The High in the Sky Seuss Trolley Train Ride!™",
+      "Atração / experiência",
+      72.00001229485163,
+      61.88367207845052,
+      "The High in the Sky Seuss Trolley Train Ride!™ está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 92 cm.",
+      "Atrações",
+      "Atrações",
+      "23"
+    ],
+    [
+      "attraction-24",
+      "Caro-Seuss-el™",
+      "Atração / experiência",
+      69.49641824626237,
+      66.30495330433787,
+      "Caro-Seuss-el™ está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "24"
+    ],
+    [
+      "attraction-25",
+      "Oh! The Stories You’ll Hear!™",
+      "Atração / experiência",
+      72.47769362634891,
+      65.37131321283034,
+      "Oh! The Stories You’ll Hear!™ está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "25"
+    ],
+    [
+      "attraction-26",
+      "Dr. Seuss Character Zone",
+      "Atração / experiência",
+      71.70937078462231,
+      69.16760574152441,
+      "Área de personagens de Dr. Seuss.",
+      "Atrações",
+      "Atrações",
+      "26"
+    ],
+    [
+      "attraction-27",
+      "One Fish, Two Fish, Red Fish, Blue Fish™",
+      "Atração / experiência",
+      72.00001229485163,
+      71.37776127567997,
+      "One Fish, Two Fish, Red Fish, Blue Fish™ está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "27"
+    ],
+    [
+      "attraction-28",
+      "The Cat in the Hat™",
+      "Atração / experiência",
+      69.96042814186151,
+      74.46178860134549,
+      "The Cat in the Hat™ está identificado como atração ou experiência na legenda do guia fornecido. Altura mínima indicada no guia: 92 cm.",
+      "Atrações",
+      "Atrações",
+      "28"
+    ],
+    [
+      "attraction-29",
+      "If I Ran The Zoo™",
+      "Atração / experiência",
+      66.3850369899393,
+      69.35555728865258,
+      "If I Ran The Zoo™ está identificado como atração ou experiência na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "29"
+    ],
+    [
+      "restaurant-A",
+      "Croissant Moon Bakery",
+      "Alimentação",
+      60.44893333380171,
+      75.98242112147955,
+      "Croissant Moon Bakery está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "A"
+    ],
+    [
+      "restaurant-B",
+      "Confisco Grille",
+      "Alimentação",
+      58.13237251995279,
+      71.20465879087095,
+      "Confisco Grille está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "B"
+    ],
+    [
+      "restaurant-C",
+      "Backwater Bar",
+      "Alimentação",
+      59.830230054237866,
+      70.42344175739052,
+      "Backwater Bar está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "C"
+    ],
+    [
+      "restaurant-D",
+      "Starbucks®",
+      "Alimentação",
+      56.1162583604991,
+      72.79512381847994,
+      "Starbucks® está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "D"
+    ],
+    [
+      "restaurant-E",
+      "Cinnabon®",
+      "Alimentação",
+      54.562285718300366,
+      71.85554033444251,
+      "Cinnabon® está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "E"
+    ],
+    [
+      "restaurant-F",
+      "Cafe 4™",
+      "Alimentação",
+      46.91008423729766,
+      71.18887253749517,
+      "Cafe 4™ está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "F"
+    ],
+    [
+      "restaurant-G",
+      "Auntie Anne’s Pretzels",
+      "Alimentação",
+      41.17985787151529,
+      64.0777634985653,
+      "Auntie Anne’s Pretzels está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "G"
+    ],
+    [
+      "restaurant-H",
+      "Captain America Diner®",
+      "Alimentação",
+      43.43828599229991,
+      60.2444307303723,
+      "Captain America Diner® está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "H"
+    ],
+    [
+      "restaurant-I",
+      "Comic Strip Cafe",
+      "Alimentação",
+      29.87740935181542,
+      52.03205155737606,
+      "Comic Strip Cafe está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "I"
+    ],
+    [
+      "restaurant-J",
+      "Blondie’s",
+      "Alimentação",
+      34.12087859009667,
+      48.08887434594425,
+      "Blondie’s está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "J"
+    ],
+    [
+      "restaurant-K",
+      "Wimpy’s",
+      "Alimentação",
+      39.750230089366006,
+      50.36540090301891,
+      "Wimpy’s está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "K"
+    ],
+    [
+      "restaurant-L",
+      "Pizza Predattoria",
+      "Alimentação",
+      48.214115719143436,
+      25.34044995720004,
+      "Pizza Predattoria está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "L"
+    ],
+    [
+      "restaurant-M",
+      "The Burger Digs",
+      "Alimentação",
+      51.67424263714029,
+      32.73859848210841,
+      "The Burger Digs está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "M"
+    ],
+    [
+      "restaurant-N",
+      "The Watering Hole",
+      "Alimentação",
+      59.485469241794064,
+      31.606509361738038,
+      "The Watering Hole está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "N"
+    ],
+    [
+      "restaurant-O",
+      "Hog’s Head™",
+      "Alimentação",
+      66.99566957761915,
+      33.571916745032794,
+      "Hog’s Head™ está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "O"
+    ],
+    [
+      "restaurant-P",
+      "Three Broomsticks™",
+      "Alimentação",
+      67.86762484543615,
+      35.044427565586425,
+      "Three Broomsticks™ está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "P"
+    ],
+    [
+      "restaurant-Q",
+      "Fire Eater’s Grill",
+      "Alimentação",
+      68.99568187247077,
+      42.44442692509404,
+      "Fire Eater’s Grill está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "Q"
+    ],
+    [
+      "restaurant-R",
+      "Mythos Restaurant",
+      "Alimentação",
+      64.37525028805081,
+      47.133316228419176,
+      "Mythos Restaurant está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "R"
+    ],
+    [
+      "restaurant-S",
+      "Moose Juice, Goose Juice",
+      "Alimentação",
+      66.30215651697392,
+      58.888889830789445,
+      "Moose Juice, Goose Juice está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "S"
+    ],
+    [
+      "restaurant-T",
+      "Hop On Pop™ Ice Cream Shop",
+      "Alimentação",
+      68.86331023072168,
+      64.36052675600405,
+      "Hop On Pop™ Ice Cream Shop está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "T"
+    ],
+    [
+      "restaurant-U",
+      "Circus McGurkus Cafe Stoo-pendous™",
+      "Alimentação",
+      73.39857801258994,
+      67.13828569577063,
+      "Circus McGurkus Cafe Stoo-pendous™ está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "U"
+    ],
+    [
+      "restaurant-V",
+      "Green Eggs & Ham™ Cafe",
+      "Alimentação",
+      65.52517897791142,
+      65.19384030942564,
+      "Green Eggs & Ham™ Cafe está identificado como ponto de alimentação na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "V"
+    ]
+  ],
+  "anchors": [
+    [
+      "attraction-18",
+      63.959710649449185,
+      23.932704219111688,
+      "18"
+    ],
+    [
+      "attraction-17",
+      61.225897699808904,
+      25.111106589988424,
+      "17"
+    ],
+    [
+      "attraction-19",
+      66.44604140906026,
+      25.2907270266686,
+      "19"
+    ],
+    [
+      "restaurant-L",
+      48.214115719143436,
+      25.34044995720004,
+      "L"
+    ],
+    [
+      "attraction-14",
+      45.60345327253822,
+      25.977758713710454,
+      "14"
+    ],
+    [
+      "attraction-13",
+      41.89209862578687,
+      28.111097547743057,
+      "13"
+    ],
+    [
+      "attraction-20",
+      68.27699071211781,
+      29.696231418185764,
+      "20"
+    ],
+    [
+      "attraction-12",
+      36.8391385524393,
+      30.24442696277006,
+      "12"
+    ],
+    [
+      "attraction-11",
+      35.16087813343076,
+      30.93749623239776,
+      "11"
+    ],
+    [
+      "attraction-10",
+      27.867640214000673,
+      31.42735987533758,
+      "10"
+    ],
+    [
+      "restaurant-N",
+      59.485469241794064,
+      31.606509361738038,
+      "N"
+    ],
+    [
+      "attraction-21",
+      72.19064396919964,
+      31.75094039351852,
+      "21"
+    ],
+    [
+      "restaurant-M",
+      51.67424263714029,
+      32.73859848210841,
+      "M"
+    ],
+    [
+      "attraction-15",
+      53.275971995840834,
+      33.273164725597994,
+      "15"
+    ],
+    [
+      "restaurant-O",
+      66.99566957761915,
+      33.571916745032794,
+      "O"
+    ],
+    [
+      "restaurant-P",
+      67.86762484543615,
+      35.044427565586425,
+      "P"
+    ],
+    [
+      "attraction-22",
+      74.95251552664118,
+      37.466647301191166,
+      "22"
+    ],
+    [
+      "attraction-16",
+      51.96431770599146,
+      38.92361205301167,
+      "16"
+    ],
+    [
+      "restaurant-Q",
+      68.99568187247077,
+      42.44442692509404,
+      "Q"
+    ],
+    [
+      "restaurant-R",
+      64.37525028805081,
+      47.133316228419176,
+      "R"
+    ],
+    [
+      "attraction-9",
+      28.450086854344647,
+      47.75688265576775,
+      "9"
+    ],
+    [
+      "attraction-8",
+      40.13469009948291,
+      47.87130944522811,
+      "8"
+    ],
+    [
+      "restaurant-J",
+      34.12087859009667,
+      48.08887434594425,
+      "J"
+    ],
+    [
+      "restaurant-K",
+      39.750230089366006,
+      50.36540090301891,
+      "K"
+    ],
+    [
+      "attraction-7",
+      45.98561238899506,
+      50.6333198076413,
+      "7"
+    ],
+    [
+      "restaurant-I",
+      29.87740935181542,
+      52.03205155737606,
+      "I"
+    ],
+    [
+      "restaurant-S",
+      66.30215651697392,
+      58.888889830789445,
+      "S"
+    ],
+    [
+      "attraction-6",
+      34.72576772566322,
+      59.06020270453559,
+      "6"
+    ],
+    [
+      "restaurant-H",
+      43.43828599229991,
+      60.2444307303723,
+      "H"
+    ],
+    [
+      "attraction-23",
+      72.00001229485163,
+      61.88367207845052,
+      "23"
+    ],
+    [
+      "restaurant-G",
+      41.17985787151529,
+      64.0777634985653,
+      "G"
+    ],
+    [
+      "restaurant-T",
+      68.86331023072168,
+      64.36052675600405,
+      "T"
+    ],
+    [
+      "restaurant-V",
+      65.52517897791142,
+      65.19384030942564,
+      "V"
+    ],
+    [
+      "attraction-25",
+      72.47769362634891,
+      65.37131321283034,
+      "25"
+    ],
+    [
+      "attraction-4",
+      41.63569827731565,
+      66.07776217990451,
+      "4"
+    ],
+    [
+      "attraction-24",
+      69.49641824626237,
+      66.30495330433787,
+      "24"
+    ],
+    [
+      "attraction-5",
+      44.708633971728865,
+      66.35416760856722,
+      "5"
+    ],
+    [
+      "restaurant-U",
+      73.39857801258994,
+      67.13828569577063,
+      "U"
+    ],
+    [
+      "attraction-26",
+      71.70937078462231,
+      69.16760574152441,
+      "26"
+    ],
+    [
+      "attraction-29",
+      66.3850369899393,
+      69.35555728865258,
+      "29"
+    ],
+    [
+      "restaurant-C",
+      59.830230054237866,
+      70.42344175739052,
+      "C"
+    ],
+    [
+      "restaurant-F",
+      46.91008423729766,
+      71.18887253749517,
+      "F"
+    ],
+    [
+      "restaurant-B",
+      58.13237251995279,
+      71.20465879087095,
+      "B"
+    ],
+    [
+      "attraction-27",
+      72.00001229485163,
+      71.37776127567997,
+      "27"
+    ],
+    [
+      "attraction-3",
+      41.37411652709083,
+      71.5444305796682,
+      "3"
+    ],
+    [
+      "restaurant-E",
+      54.562285718300366,
+      71.85554033444251,
+      "E"
+    ],
+    [
+      "restaurant-D",
+      56.1162583604991,
+      72.79512381847994,
+      "D"
+    ],
+    [
+      "attraction-28",
+      69.96042814186151,
+      74.46178860134549,
+      "28"
+    ],
+    [
+      "restaurant-A",
+      60.44893333380171,
+      75.98242112147955,
+      "A"
+    ],
+    [
+      "attraction-1",
+      49.384761233981564,
+      77.03797140239197,
+      "1"
+    ],
+    [
+      "attraction-2",
+      46.41151044008543,
+      77.5222024799865,
+      "2"
+    ]
+  ],
+  "sourceAnchors": [
+    {
+      "ref": "B",
+      "centerPt": [
+        431.0199890136719,
+        488.40618896484375
+      ],
+      "diameterPt": 10.0,
+      "x": 58.13237251995279,
+      "y": 71.20465879087095
+    },
+    {
+      "ref": "A",
+      "centerPt": [
+        447.1200866699219,
+        519.3660888671875
+      ],
+      "diameterPt": 10.0,
+      "x": 60.44893333380171,
+      "y": 75.98242112147955
+    },
+    {
+      "ref": "C",
+      "centerPt": [
+        442.8200988769531,
+        483.3439025878906
+      ],
+      "diameterPt": 10.0,
+      "x": 59.830230054237866,
+      "y": 70.42344175739052
+    },
+    {
+      "ref": "D",
+      "centerPt": [
+        417.00799560546875,
+        498.71240234375
+      ],
+      "diameterPt": 10.0,
+      "x": 56.1162583604991,
+      "y": 72.79512381847994
+    },
+    {
+      "ref": "E",
+      "centerPt": [
+        406.2078857421875,
+        492.6239013671875
+      ],
+      "diameterPt": 10.0,
+      "x": 54.562285718300366,
+      "y": 71.85554033444251
+    },
+    {
+      "ref": "F",
+      "centerPt": [
+        353.02508544921875,
+        488.30389404296875
+      ],
+      "diameterPt": 10.0,
+      "x": 46.91008423729766,
+      "y": 71.18887253749517
+    },
+    {
+      "ref": "1",
+      "centerPt": [
+        370.2240905761719,
+        526.2060546875
+      ],
+      "diameterPt": 10.0,
+      "x": 49.384761233981564,
+      "y": 77.03797140239197
+    },
+    {
+      "ref": "2",
+      "centerPt": [
+        349.55999755859375,
+        529.3438720703125
+      ],
+      "diameterPt": 10.0,
+      "x": 46.41151044008543,
+      "y": 77.5222024799865
+    },
+    {
+      "ref": "3",
+      "centerPt": [
+        314.55010986328125,
+        490.60791015625
+      ],
+      "diameterPt": 10.0,
+      "x": 41.37411652709083,
+      "y": 71.5444305796682
+    },
+    {
+      "ref": "4",
+      "centerPt": [
+        316.36810302734375,
+        455.18389892578125
+      ],
+      "diameterPt": 10.0,
+      "x": 41.63569827731565,
+      "y": 66.07776217990451
+    },
+    {
+      "ref": "5",
+      "centerPt": [
+        337.7250061035156,
+        456.9750061035156
+      ],
+      "diameterPt": 10.0,
+      "x": 44.708633971728865,
+      "y": 66.35416760856722
+    },
+    {
+      "ref": "G",
+      "centerPt": [
+        313.20001220703125,
+        442.2239074707031
+      ],
+      "diameterPt": 10.0,
+      "x": 41.17985787151529,
+      "y": 64.0777634985653
+    },
+    {
+      "ref": "H",
+      "centerPt": [
+        328.8960876464844,
+        417.3839111328125
+      ],
+      "diameterPt": 10.0,
+      "x": 43.43828599229991,
+      "y": 60.2444307303723
+    },
+    {
+      "ref": "6",
+      "centerPt": [
+        268.3440856933594,
+        409.7101135253906
+      ],
+      "diameterPt": 10.0,
+      "x": 34.72576772566322,
+      "y": 59.06020270453559
+    },
+    {
+      "ref": "7",
+      "centerPt": [
+        346.6000061035156,
+        355.1039123535156
+      ],
+      "diameterPt": 10.0,
+      "x": 45.98561238899506,
+      "y": 50.6333198076413
+    },
+    {
+      "ref": "K",
+      "centerPt": [
+        303.26409912109375,
+        353.3677978515625
+      ],
+      "diameterPt": 10.0,
+      "x": 39.750230089366006,
+      "y": 50.36540090301891
+    },
+    {
+      "ref": "I",
+      "centerPt": [
+        234.6479949951172,
+        364.1676940917969
+      ],
+      "diameterPt": 10.0,
+      "x": 29.87740935181542,
+      "y": 52.03205155737606
+    },
+    {
+      "ref": "J",
+      "centerPt": [
+        264.1401062011719,
+        338.61590576171875
+      ],
+      "diameterPt": 10.0,
+      "x": 34.12087859009667,
+      "y": 48.08887434594425
+    },
+    {
+      "ref": "8",
+      "centerPt": [
+        305.93609619140625,
+        337.2060852050781
+      ],
+      "diameterPt": 10.0,
+      "x": 40.13469009948291,
+      "y": 47.87130944522811
+    },
+    {
+      "ref": "9",
+      "centerPt": [
+        224.7281036376953,
+        336.464599609375
+      ],
+      "diameterPt": 10.0,
+      "x": 28.450086854344647,
+      "y": 47.75688265576775
+    },
+    {
+      "ref": "10",
+      "centerPt": [
+        220.6800994873047,
+        230.6492919921875
+      ],
+      "diameterPt": 10.0,
+      "x": 27.867640214000673,
+      "y": 31.42735987533758
+    },
+    {
+      "ref": "11",
+      "centerPt": [
+        271.36810302734375,
+        227.4749755859375
+      ],
+      "diameterPt": 10.0,
+      "x": 35.16087813343076,
+      "y": 30.93749623239776
+    },
+    {
+      "ref": "12",
+      "centerPt": [
+        283.0320129394531,
+        222.98388671875
+      ],
+      "diameterPt": 10.0,
+      "x": 36.8391385524393,
+      "y": 30.24442696277006
+    },
+    {
+      "ref": "13",
+      "centerPt": [
+        318.15008544921875,
+        209.159912109375
+      ],
+      "diameterPt": 10.0,
+      "x": 41.89209862578687,
+      "y": 28.111097547743057
+    },
+    {
+      "ref": "14",
+      "centerPt": [
+        343.9440002441406,
+        195.33587646484375
+      ],
+      "diameterPt": 10.0,
+      "x": 45.60345327253822,
+      "y": 25.977758713710454
+    },
+    {
+      "ref": "L",
+      "centerPt": [
+        362.0881042480469,
+        191.20611572265625
+      ],
+      "diameterPt": 10.0,
+      "x": 48.214115719143436,
+      "y": 25.34044995720004
+    },
+    {
+      "ref": "M",
+      "centerPt": [
+        386.135986328125,
+        239.1461181640625
+      ],
+      "diameterPt": 10.0,
+      "x": 51.67424263714029,
+      "y": 32.73859848210841
+    },
+    {
+      "ref": "15",
+      "centerPt": [
+        397.26800537109375,
+        242.610107421875
+      ],
+      "diameterPt": 10.0,
+      "x": 53.275971995840834,
+      "y": 33.273164725597994
+    },
+    {
+      "ref": "16",
+      "centerPt": [
+        388.1520080566406,
+        279.2250061035156
+      ],
+      "diameterPt": 10.0,
+      "x": 51.96431770599146,
+      "y": 38.92361205301167
+    },
+    {
+      "ref": "N",
+      "centerPt": [
+        440.42401123046875,
+        231.8101806640625
+      ],
+      "diameterPt": 10.0,
+      "x": 59.485469241794064,
+      "y": 31.606509361738038
+    },
+    {
+      "ref": "O",
+      "centerPt": [
+        492.6199035644531,
+        244.5460205078125
+      ],
+      "diameterPt": 10.0,
+      "x": 66.99566957761915,
+      "y": 33.571916745032794
+    },
+    {
+      "ref": "P",
+      "centerPt": [
+        498.67999267578125,
+        254.087890625
+      ],
+      "diameterPt": 10.0,
+      "x": 67.86762484543615,
+      "y": 35.044427565586425
+    },
+    {
+      "ref": "17",
+      "centerPt": [
+        452.5199890136719,
+        189.719970703125
+      ],
+      "diameterPt": 10.0,
+      "x": 61.225897699808904,
+      "y": 25.111106589988424
+    },
+    {
+      "ref": "18",
+      "centerPt": [
+        471.5199890136719,
+        182.08392333984375
+      ],
+      "diameterPt": 10.0,
+      "x": 63.959710649449185,
+      "y": 23.932704219111688
+    },
+    {
+      "ref": "19",
+      "centerPt": [
+        488.79998779296875,
+        190.8839111328125
+      ],
+      "diameterPt": 10.0,
+      "x": 66.44604140906026,
+      "y": 25.2907270266686
+    },
+    {
+      "ref": "20",
+      "centerPt": [
+        501.52508544921875,
+        219.43157958984375
+      ],
+      "diameterPt": 10.0,
+      "x": 68.27699071211781,
+      "y": 29.696231418185764
+    },
+    {
+      "ref": "21",
+      "centerPt": [
+        528.7249755859375,
+        232.74609375
+      ],
+      "diameterPt": 10.0,
+      "x": 72.19064396919964,
+      "y": 31.75094039351852
+    },
+    {
+      "ref": "22",
+      "centerPt": [
+        547.9199829101562,
+        269.78387451171875
+      ],
+      "diameterPt": 10.0,
+      "x": 74.95251552664118,
+      "y": 37.466647301191166
+    },
+    {
+      "ref": "Q",
+      "centerPt": [
+        506.5199890136719,
+        302.0398864746094
+      ],
+      "diameterPt": 10.0,
+      "x": 68.99568187247077,
+      "y": 42.44442692509404
+    },
+    {
+      "ref": "R",
+      "centerPt": [
+        474.4079895019531,
+        332.42388916015625
+      ],
+      "diameterPt": 10.0,
+      "x": 64.37525028805081,
+      "y": 47.133316228419176
+    },
+    {
+      "ref": "S",
+      "centerPt": [
+        487.79998779296875,
+        408.6000061035156
+      ],
+      "diameterPt": 10.0,
+      "x": 66.30215651697392,
+      "y": 58.888889830789445
+    },
+    {
+      "ref": "T",
+      "centerPt": [
+        505.6000061035156,
+        444.05621337890625
+      ],
+      "diameterPt": 10.0,
+      "x": 68.86331023072168,
+      "y": 64.36052675600405
+    },
+    {
+      "ref": "U",
+      "centerPt": [
+        537.1201171875,
+        462.05609130859375
+      ],
+      "diameterPt": 10.0,
+      "x": 73.39857801258994,
+      "y": 67.13828569577063
+    },
+    {
+      "ref": "V",
+      "centerPt": [
+        482.3999938964844,
+        449.4560852050781
+      ],
+      "diameterPt": 10.0,
+      "x": 65.52517897791142,
+      "y": 65.19384030942564
+    },
+    {
+      "ref": "23",
+      "centerPt": [
+        527.4000854492188,
+        428.0061950683594
+      ],
+      "diameterPt": 10.0,
+      "x": 72.00001229485163,
+      "y": 61.88367207845052
+    },
+    {
+      "ref": "24",
+      "centerPt": [
+        510.00010681152344,
+        456.6560974121094
+      ],
+      "diameterPt": 10.000030517578125,
+      "x": 69.49641824626237,
+      "y": 66.30495330433787
+    },
+    {
+      "ref": "25",
+      "centerPt": [
+        530.719970703125,
+        450.6061096191406
+      ],
+      "diameterPt": 10.0,
+      "x": 72.47769362634891,
+      "y": 65.37131321283034
+    },
+    {
+      "ref": "26",
+      "centerPt": [
+        525.380126953125,
+        475.2060852050781
+      ],
+      "diameterPt": 10.0,
+      "x": 71.70937078462231,
+      "y": 69.16760574152441
+    },
+    {
+      "ref": "27",
+      "centerPt": [
+        527.4000854492188,
+        489.52789306640625
+      ],
+      "diameterPt": 10.0,
+      "x": 72.00001229485163,
+      "y": 71.37776127567997
+    },
+    {
+      "ref": "28",
+      "centerPt": [
+        513.2249755859375,
+        509.51239013671875
+      ],
+      "diameterPt": 10.0,
+      "x": 69.96042814186151,
+      "y": 74.46178860134549
+    },
+    {
+      "ref": "29",
+      "centerPt": [
+        488.3760070800781,
+        476.42401123046875
+      ],
+      "diameterPt": 10.0,
+      "x": 66.3850369899393,
+      "y": 69.35555728865258
+    }
+  ],
+  "limitations": [
+    "O guia não possui lista própria de compras com localização; nenhuma loja foi inventada.",
+    "Informações descrevem exclusivamente o PDF fornecido, sem garantia de status atual.",
+    "Símbolos de acessibilidade/serviços/Express e preços não viram atrações ou marcadores."
+  ]
+}
