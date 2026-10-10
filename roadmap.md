@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Aplicar complemento visual Magic Kingdom: mapa preenchendo frame, controles sobre imagem e lista contida; comparar original nas quatro telas, sem publicar.
 - [x] Restaurar layout original aprovado do mapa Magic Kingdom, comparar quatro telas e preservar gestos sem publicar.
 - [x] Integrar o mapa Magic Kingdom aprovado (84 pontos, PNG original) aos ingressos white-label; validar modal, gestos e orçamento, sem publicar.
 - [x] Completar conteúdo e acabamento da prévia O Mundo em Cores briefing-14-v1; validar cartões, destinos conhecidos, depoimentos e bloqueios em desktop/mobile, sem publicar ou alterar dados reais.
