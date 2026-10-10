@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Implementar EPCOT, Animal Kingdom e Hollywood Studios completos dos PDFs: 209 pontos, crops sRGB nativos, legendas/coordenadas verificadas, popups compartilhados, testes e quatro telas/100–200%/pinça real; Magic Kingdom preservado, sem publicar.
 - [x] Magic Kingdom final: mapa grande pela largura, imagem inteira e rolagem vertical única; quatro telas, zoom/drag/reset e fechamento validados, dez testes aprovados, sem publicar.
 - [x] Corrigir altura real do popup Magic Kingdom: frame pela altura útil, mapa inteiro a 100%, sidebar contida; validar telas e zoom do navegador, sem publicar.
 - [x] Aplicar complemento visual Magic Kingdom: mapa preenchendo frame, controles sobre imagem e lista contida; comparar original nas quatro telas, sem publicar.

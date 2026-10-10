@@ -1,0 +1,904 @@
+{
+  "name": "EPCOT",
+  "width": 2325,
+  "height": 2700,
+  "source": "EPCOT-guidemap_0726_PG-DIGITAL.pdf",
+  "edition": "julho de 2026",
+  "id": "epcot",
+  "markerDiameter": 58,
+  "points": [
+    [
+      1,
+      "Spaceship Earth",
+      "World Celebration",
+      43.87096774,
+      87.48148148,
+      "Explore a história das inovações, da Idade da Pedra à Era Digital.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      2,
+      "Conheça Mickey & Friends",
+      "World Celebration",
+      49.97849462,
+      73.18518519,
+      "Conheça Mickey & Friends.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      3,
+      "Disney & Pixar Short Film Festival",
+      "World Celebration",
+      58.23655914,
+      58.81481481,
+      "Assista a curtas-metragens populares neste cinema em 4D.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      4,
+      "Journey Into Imagination With Figment",
+      "World Celebration",
+      66.66666667,
+      63.55555556,
+      "Conheça o Imagination Institute.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      5,
+      "GEO-82",
+      "World Celebration",
+      48.08602151,
+      82.59259259,
+      "Ponto de alimentação em World Celebration, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      6,
+      "Connections Café",
+      "World Celebration",
+      40.17204301,
+      78.0,
+      "Ponto de alimentação em World Celebration, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      7,
+      "Connections Eatery",
+      "World Celebration",
+      34.49462366,
+      78.07407407,
+      "Ponto de alimentação em World Celebration, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      8,
+      "Festival Favorites",
+      "World Celebration",
+      48.51612903,
+      71.33333333,
+      "Ponto de alimentação em World Celebration, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      9,
+      "Pin Traders – Camera Center",
+      "World Celebration",
+      46.53763441,
+      88.14814815,
+      "Loja em World Celebration, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      10,
+      "Gateway Gifts",
+      "World Celebration",
+      40.94623656,
+      88.59259259,
+      "Loja em World Celebration, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      11,
+      "Club Cool Apresentado por Coca-Cola",
+      "World Celebration",
+      35.61290323,
+      72.0,
+      "Loja em World Celebration, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      12,
+      "Creations Shop",
+      "World Celebration",
+      40.77419355,
+      67.85185185,
+      "Loja em World Celebration, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      13,
+      "Guardians of the Galaxy: Cosmic Rewind",
+      "World Discovery",
+      28.7311828,
+      82.0,
+      "Embarque em um Nova Cruiser acima da Terra nesta montanha-russa no escuro, com alta velocidade, curvas acentuadas, descidas e paradas abruptas. Altura mínima: 107 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      14,
+      "Mission: SPACE",
+      "World Discovery",
+      17.6344086,
+      73.48148148,
+      "Experimente a sensação de um voo espacial em um simulador. Missão Verde: treinamento menos intenso, sem girar, altura mínima de 102 cm. Missão Laranja: treinamento mais intenso, com giros e forças gravitacionais, altura mínima de 112 cm; pode causar náusea, dor de cabeça, tontura e desorientação. Gestantes não devem participar.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      15,
+      "Test Track Apresentado por General Motors",
+      "World Discovery",
+      25.29032258,
+      65.33333333,
+      "Descubra o futuro do transporte na emocionante estrada para o amanhã. Altura mínima: 102 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      16,
+      "Play Zone",
+      "World Discovery",
+      37.16129032,
+      66.37037037,
+      "Área Play Zone indicada entre as atrações de World Discovery.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      17,
+      "Refreshment Station Apresentado por Coca-Cola",
+      "World Discovery",
+      33.5483871,
+      64.88888889,
+      "O guia informa abertura em temporada.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      18,
+      "Joffrey’s Coffee & Tea Company",
+      "World Discovery",
+      30.96774194,
+      77.48148148,
+      "Ponto de alimentação em World Discovery, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      19,
+      "Space 220 Restaurant",
+      "World Discovery",
+      20.30107527,
+      70.37037037,
+      "O mesmo ponto inclui Space 220 Lounge.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      20,
+      "Treasures of Xandar",
+      "World Discovery",
+      26.06451613,
+      82.74074074,
+      "Loja em World Discovery, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      21,
+      "Journey of Water, Inspired by Moana",
+      "World Nature",
+      54.4516129,
+      79.25925926,
+      "Passeie por uma trilha interativa ao ar livre e explore as maravilhas da água.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      22,
+      "Awesome Planet",
+      "World Nature",
+      72.34408602,
+      76.22222222,
+      "Explore na tela a história da Terra.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      23,
+      "Soarin’",
+      "World Nature",
+      72.94623656,
+      70.81481481,
+      "Plane alto no céu durante um voo de asa-delta. Altura mínima: 102 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      24,
+      "Living with the Land",
+      "World Nature",
+      75.35483871,
+      74.37037037,
+      "Viaje pelas estufas para conhecer técnicas inovadoras de cultivo de alimentos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      25,
+      "The Seas with Nemo & Friends Attraction",
+      "World Nature",
+      56.68817204,
+      83.62962963,
+      "Embarque em um “clamobile” para reviver cenas de Finding Nemo.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      26,
+      "Turtle Talk With Crush",
+      "World Nature",
+      58.92473118,
+      87.11111111,
+      "Uma conversa envolvente com Crush, Dory e alguns de seus amigos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      27,
+      "SeaBase Aquarium",
+      "World Nature",
+      61.50537634,
+      88.59259259,
+      "Conheça milhares de peixes vivos, tubarões e tartarugas marinhas no aquário.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      28,
+      "Sunshine Seasons",
+      "World Nature",
+      69.41935484,
+      72.88888889,
+      "Ponto de alimentação em World Nature, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      29,
+      "Chip ‘n’ Dale’s Harvest Feast at Garden Grill Restaurant",
+      "World Nature",
+      75.61290323,
+      71.62962963,
+      "Ponto de alimentação em World Nature, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      30,
+      "Coral Reef Restaurant",
+      "World Nature",
+      53.59139785,
+      84.37037037,
+      "Ponto de alimentação em World Nature, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      31,
+      "Gran Fiesta Tour Starring The Three Caballeros",
+      "World Showcase",
+      21.76344086,
+      52.22222222,
+      "Descubra os pontos turísticos do México e três amigos pássaros neste passeio de barco.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      32,
+      "Conheça Anna e Elsa no Royal Sommerhus",
+      "World Showcase",
+      18.23655914,
+      46.96296296,
+      "Conheça Anna e Elsa no Royal Sommerhus.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      33,
+      "Frozen Ever After",
+      "World Showcase",
+      11.1827957,
+      42.22222222,
+      "Navegue pelo mundo fantástico de Frozen.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      34,
+      "Reflections of China",
+      "World Showcase",
+      14.4516129,
+      31.77777778,
+      "Viaje pela China antiga e moderna neste filme Circle-Vision 360.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      35,
+      "America Gardens Theatre",
+      "World Showcase",
+      43.87096774,
+      16.74074074,
+      "Teatro America Gardens Theatre indicado no mapa.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      36,
+      "The American Adventure",
+      "World Showcase",
+      44.38709677,
+      10.59259259,
+      "Explore o passado e o futuro da América em filme, música e Audio-Animatronics.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      37,
+      "Palais du Cinéma",
+      "World Showcase",
+      78.02150538,
+      18.14814815,
+      "Inclui Beauty and the Beast Sing-Along, para cantar junto com uma reviravolta no conto, e Impressions de France, uma representação cinematográfica da França.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      38,
+      "Remy’s Ratatouille Adventure",
+      "World Showcase",
+      77.93548387,
+      11.77777778,
+      "Junte-se ao Remy em uma aventura pelo mundo da culinária de Ratatouille.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      39,
+      "Canada Far and Wide in Circle-Vision 360",
+      "World Showcase",
+      75.69892473,
+      55.03703704,
+      "Explore o Canadá no filme EPCOT Circle-Vision 360.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      40,
+      "Swirled Showcase",
+      "World Showcase",
+      53.93548387,
+      52.88888889,
+      "Ponto de alimentação em World Showcase, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      41,
+      "Joffrey’s Coffee & Tea Company",
+      "World Showcase",
+      37.33333333,
+      50.59259259,
+      "Ponto de alimentação em World Showcase, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      42,
+      "Choza de Margarita",
+      "Mexico",
+      28.55913978,
+      50.88888889,
+      "Ponto de alimentação em Mexico, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      43,
+      "La Cantina de San Angel",
+      "Mexico",
+      30.53763441,
+      45.62962963,
+      "Ponto de alimentação em Mexico, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      44,
+      "La Hacienda de San Angel",
+      "Mexico",
+      27.61290323,
+      44.88888889,
+      "Ponto de alimentação em Mexico, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      45,
+      "La Cava del Tequila",
+      "Mexico",
+      21.16129032,
+      48.59259259,
+      "Ponto de alimentação em Mexico, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      46,
+      "San Angel Inn Restaurante",
+      "Mexico",
+      19.2688172,
+      50.37037037,
+      "Ponto de alimentação em Mexico, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      47,
+      "Kringla Bakeri Og Kafe",
+      "Norway",
+      18.06451613,
+      42.22222222,
+      "Ponto de alimentação em Norway, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      48,
+      "Princess Storybook Dining at Akershus Royal Banquet Hall",
+      "Norway",
+      14.88172043,
+      40.07407407,
+      "O guia orienta fazer o check-in de reservas pelo celular.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      49,
+      "Nine Dragons Restaurant",
+      "China",
+      17.97849462,
+      36.51851852,
+      "Ponto de alimentação em China, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      50,
+      "Lotus Blossom Café",
+      "China",
+      14.88172043,
+      36.66666667,
+      "Ponto de alimentação em China, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      51,
+      "Joy of Tea",
+      "China",
+      21.41935484,
+      31.25925926,
+      "Ponto de alimentação em China, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      52,
+      "Refreshment Outpost Apresentado por Coca-Cola",
+      "Outpost",
+      12.55913978,
+      28.2962963,
+      "Ponto de alimentação em Outpost, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      53,
+      "Biergarten Restaurant",
+      "Germany",
+      10.66666667,
+      14.96296296,
+      "Ponto de alimentação em Germany, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      54,
+      "Sommerfest",
+      "Germany",
+      13.07526882,
+      13.18518519,
+      "Ponto de alimentação em Germany, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      55,
+      "Tutto Italia Ristorante",
+      "Italy",
+      26.58064516,
+      11.18518519,
+      "Ponto de alimentação em Italy, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      56,
+      "Tutto Gusto Wine Cellar",
+      "Italy",
+      26.66666667,
+      8.74074074,
+      "Ponto de alimentação em Italy, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      57,
+      "Via Napoli Ristorante e Pizzeria",
+      "Italy",
+      29.59139785,
+      4.66666667,
+      "Ponto de alimentação em Italy, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      58,
+      "Gelateria Toscana",
+      "Italy",
+      34.06451613,
+      12.81481481,
+      "Ponto de alimentação em Italy, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      59,
+      "Joffrey’s Coffee & Tea Company",
+      "The American Adventure",
+      36.8172043,
+      12.2962963,
+      "Ponto de alimentação em The American Adventure, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      60,
+      "Fife & Drum Tavern",
+      "The American Adventure",
+      41.03225806,
+      12.51851852,
+      "Ponto de alimentação em The American Adventure, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      61,
+      "Regal Eagle Smokehouse: Craft Drafts & Barbecue Apresentado por Coca-Cola",
+      "The American Adventure",
+      38.19354839,
+      8.88888889,
+      "Ponto de alimentação em The American Adventure, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      62,
+      "Funnel Cake",
+      "The American Adventure",
+      48.77419355,
+      12.81481481,
+      "Ponto de alimentação em The American Adventure, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      63,
+      "Kabuki Cafe",
+      "Japan",
+      51.2688172,
+      12.66666667,
+      "Ponto de alimentação em Japan, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      64,
+      "Katsura Grill",
+      "Japan",
+      53.59139785,
+      8.37037037,
+      "Ponto de alimentação em Japan, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      65,
+      "Teppan Edo",
+      "Japan",
+      60.04301075,
+      7.92592593,
+      "O guia orienta fazer o check-in de reservas pelo celular.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      66,
+      "Shiki-Sai: Sushi Izakaya",
+      "Japan",
+      59.87096774,
+      10.14814815,
+      "O guia orienta fazer o check-in de reservas pelo celular.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      67,
+      "Takumi-Tei",
+      "Japan",
+      61.24731183,
+      12.14814815,
+      "Ponto de alimentação em Japan, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      68,
+      "Spice Road Table",
+      "Morocco",
+      63.31182796,
+      19.62962963,
+      "O mesmo ponto inclui Spice Road Table Bar.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      69,
+      "Les Vins des Chefs de France",
+      "France",
+      69.50537634,
+      25.03703704,
+      "Ponto de alimentação em France, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      70,
+      "Chefs de France",
+      "France",
+      71.74193548,
+      21.03703704,
+      "Ponto de alimentação em France, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      71,
+      "Monsieur Paul",
+      "France",
+      72.86021505,
+      19.11111111,
+      "Ponto de alimentação em France, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      72,
+      "L’Artisan des Glaces",
+      "France",
+      73.6344086,
+      17.11111111,
+      "Ponto de alimentação em France, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      73,
+      "Les Halles Boulangerie-Patisserie",
+      "France",
+      76.12903226,
+      16.59259259,
+      "Ponto de alimentação em France, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      74,
+      "La Crêperie de Paris",
+      "France",
+      83.69892473,
+      16.14814815,
+      "Ponto de alimentação em France, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      75,
+      "Yorkshire County Fish Shop",
+      "United Kingdom",
+      66.23655914,
+      36.81481481,
+      "Ponto de alimentação em United Kingdom, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      76,
+      "Rose & Crown Dining Room",
+      "United Kingdom",
+      63.39784946,
+      40.22222222,
+      "Ponto de alimentação em United Kingdom, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      77,
+      "Rose & Crown Pub",
+      "United Kingdom",
+      66.15053763,
+      39.92592593,
+      "Ponto de alimentação em United Kingdom, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      78,
+      "Joffrey’s Coffee & Tea Company",
+      "Canada",
+      65.29032258,
+      46.96296296,
+      "Ponto de alimentação em Canada, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      79,
+      "Le Cellier Steakhouse",
+      "Canada",
+      66.75268817,
+      52.51851852,
+      "Ponto de alimentação em Canada, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      80,
+      "La Poutinerie Apresentado por Air Canada",
+      "Canada",
+      56.34408602,
+      52.2962963,
+      "Ponto de alimentação em Canada, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      81,
+      "Port of Entry Apresentado por Pandora Jewelry",
+      "World Showcase",
+      47.13978495,
+      50.59259259,
+      "Loja em World Showcase, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      82,
+      "Disney Traders",
+      "World Showcase",
+      40.77419355,
+      50.59259259,
+      "Loja em World Showcase, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      83,
+      "Karamell-Küche Apresentado por Werther’s Original Caramel",
+      "Germany",
+      13.33333333,
+      20.37037037,
+      "Loja em Germany, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      84,
+      "Art of Disney",
+      "The American Adventure",
+      48.0,
+      10.07407407,
+      "Loja em The American Adventure, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      85,
+      "La Signature Apresentado por Guerlain",
+      "France",
+      78.27956989,
+      20.37037037,
+      "Loja em France, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      86,
+      "World Traveler",
+      "International Gateway",
+      76.8172043,
+      33.85185185,
+      "Loja em International Gateway, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      87,
+      "The Tea Caddy Apresentado por Twinings Tea",
+      "United Kingdom",
+      73.20430108,
+      39.40740741,
+      "Loja em United Kingdom, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      88,
+      "Northwest Mercantile",
+      "Canada",
+      67.95698925,
+      48.81481481,
+      "Loja em Canada, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ]
+  ],
+  "sourceRaster": [
+    5925,
+    2700
+  ],
+  "crop": [
+    0,
+    0,
+    2325,
+    2700
+  ],
+  "colorProfile": "U.S. Web Coated (SWOP) v2 → sRGB via LittleCMS",
+  "sourceSha256": "1ba0309078e5b287e8179d30132fd77d65115f419e508fc85a25577dd47eb08d",
+  "image": "/__l5e/assets-v1/29f8a390-3f6c-4437-bda7-c30591389c6a/epcot-0726-srgb.png"
+}

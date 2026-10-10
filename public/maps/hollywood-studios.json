@@ -1,0 +1,674 @@
+{
+  "name": "Disney's Hollywood Studios",
+  "width": 2325,
+  "height": 2700,
+  "source": "DHS_052626_PG-KM.pdf",
+  "edition": "maio de 2026",
+  "id": "hollywood-studios",
+  "markerDiameter": 58,
+  "points": [
+    [
+      1,
+      "Mickey & Minnie’s Runaway Railway",
+      "Hollywood Boulevard",
+      45.93548387,
+      52.44444444,
+      "Voe por um universo de desenho animado.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      2,
+      "The Trolley Car Café",
+      "Hollywood Boulevard",
+      47.39784946,
+      69.25925926,
+      "Ponto de alimentação em Hollywood Boulevard, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      3,
+      "The Hollywood Brown Derby",
+      "Hollywood Boulevard",
+      49.97849462,
+      62.59259259,
+      "Inclui The Hollywood Brown Derby Lounge, com lista de atendimento sem reserva.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      4,
+      "Oscar’s Super Service",
+      "Hollywood Boulevard",
+      49.37634409,
+      78.66666667,
+      "Loja em Hollywood Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      5,
+      "Sid Cahuenga’s One-of-a-Kind",
+      "Hollywood Boulevard",
+      41.80645161,
+      77.62962963,
+      "Loja em Hollywood Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      6,
+      "Mickey’s of Hollywood",
+      "Hollywood Boulevard",
+      42.75268817,
+      73.11111111,
+      "Loja em Hollywood Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      7,
+      "Celebrity 5 & 10",
+      "Hollywood Boulevard",
+      47.56989247,
+      73.11111111,
+      "Loja em Hollywood Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      8,
+      "Keystone Clothiers",
+      "Hollywood Boulevard",
+      43.1827957,
+      66.22222222,
+      "Loja em Hollywood Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      9,
+      "For the First Time in Forever: A “Frozen” Sing-Along Celebration",
+      "Echo Lake",
+      36.90322581,
+      58.14814815,
+      "Show ao vivo com músicas de Frozen.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      10,
+      "Vacation Fun",
+      "Echo Lake",
+      24.60215054,
+      59.18518519,
+      "Uma curta-metragem animada original com Mickey & Minnie.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      11,
+      "Encontre o Olaf no Celebrity Spotlight",
+      "Echo Lake",
+      21.84946237,
+      57.62962963,
+      "Encontre o Olaf no Celebrity Spotlight.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      12,
+      "Indiana Jones Epic Stunt Spectacular!",
+      "Echo Lake",
+      23.65591398,
+      66.22222222,
+      "Acrobacias e a magia dos filmes em um espetáculo de 30 minutos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      13,
+      "Star Tours—The Adventures Continue",
+      "Echo Lake",
+      10.75268817,
+      53.92592593,
+      "Simulador altamente turbulento de viagens pelo espaço, com curvas acentuadas e descidas repentinas. Altura mínima: 102 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      14,
+      "Dockside Diner",
+      "Echo Lake",
+      38.27956989,
+      62.44444444,
+      "Ponto de alimentação em Echo Lake, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      15,
+      "Hollywood & Vine",
+      "Echo Lake",
+      39.48387097,
+      71.25925926,
+      "Jantar com os personagens, conforme o guia.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      16,
+      "50’s Prime Time Café Apresentado por Coca-Cola",
+      "Echo Lake",
+      33.97849462,
+      71.18518519,
+      "O mesmo ponto inclui Tune-In Lounge.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      17,
+      "Dinosaur Gertie’s Ice Cream of Extinction",
+      "Echo Lake",
+      30.53763441,
+      66.96296296,
+      "Ponto de alimentação em Echo Lake, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      18,
+      "Epic Eats",
+      "Echo Lake",
+      25.6344086,
+      62.44444444,
+      "Ponto de alimentação em Echo Lake, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      19,
+      "Oasis Canteen",
+      "Echo Lake",
+      20.21505376,
+      62.44444444,
+      "Ponto de alimentação em Echo Lake, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      20,
+      "Backlot Express Apresentado por Coca-Cola",
+      "Echo Lake",
+      13.24731183,
+      62.44444444,
+      "Ponto de alimentação em Echo Lake, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      21,
+      "“Frozen” Fractal Gifts",
+      "Echo Lake",
+      27.87096774,
+      59.33333333,
+      "Loja em Echo Lake, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      22,
+      "Tatooine Traders",
+      "Echo Lake",
+      13.24731183,
+      49.11111111,
+      "Loja em Echo Lake, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      23,
+      "Encontre o Mickey e a Minnie no Red Carpet Dreams",
+      "Commissary Lane",
+      26.40860215,
+      53.48148148,
+      "Encontre o Mickey e a Minnie no Red Carpet Dreams.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      24,
+      "ABC Commissary",
+      "Commissary Lane",
+      32.86021505,
+      49.92592593,
+      "Ponto de alimentação em Commissary Lane, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      25,
+      "Sci-Fi Dine-In Theater Restaurant",
+      "Commissary Lane",
+      24.94623656,
+      48.07407407,
+      "Ponto de alimentação em Commissary Lane, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      26,
+      "BaseLine Tap House",
+      "Grand Avenue",
+      21.24731183,
+      48.07407407,
+      "Ponto de alimentação em Grand Avenue, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      27,
+      "Ice Cold Hydraulics Apresentado por Coca-Cola",
+      "Grand Avenue",
+      16.25806452,
+      45.92592593,
+      "Ponto de alimentação em Grand Avenue, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      28,
+      "Star Wars: Rise of the Resistance",
+      "Star Wars: Galaxy’s Edge",
+      21.33333333,
+      31.48148148,
+      "Missão com movimentos rápidos, paradas repentinas, curvas apertadas e uma queda rápida enquanto você evita ser capturado pela First Order. Altura mínima: 102 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      29,
+      "Millennium Falcon: Smugglers Run",
+      "Star Wars: Galaxy’s Edge",
+      22.70967742,
+      11.03703704,
+      "Voo com turbulências pesadas, curvas apertadas e quedas repentinas. Altura mínima: 97 cm. Fale com um Cast Member para obter ajuda.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      30,
+      "Kat Saka’s Kettle",
+      "Star Wars: Galaxy’s Edge",
+      25.20430108,
+      16.14814815,
+      "Ponto de alimentação em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      31,
+      "Ronto Roasters",
+      "Star Wars: Galaxy’s Edge",
+      28.04301075,
+      16.14814815,
+      "Ponto de alimentação em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      32,
+      "Docking Bay 7 Food and Cargo",
+      "Star Wars: Galaxy’s Edge",
+      24.68817204,
+      13.48148148,
+      "Ponto de alimentação em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      33,
+      "Oga’s Cantina",
+      "Star Wars: Galaxy’s Edge",
+      29.59139785,
+      8.51851852,
+      "Ponto de alimentação em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      34,
+      "Milk Stand",
+      "Star Wars: Galaxy’s Edge",
+      34.23655914,
+      9.40740741,
+      "Ponto de alimentação em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      35,
+      "Resistance Supply",
+      "Star Wars: Galaxy’s Edge",
+      20.04301075,
+      28.66666667,
+      "Loja em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      36,
+      "Comerciantes do The Market",
+      "Star Wars: Galaxy’s Edge",
+      24.60215054,
+      18.51851852,
+      "Inclui Creature Stall, Toydarian Toymaker, Black Spire Outfitters e Jewels of Bith.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      37,
+      "Dok-Ondar’s Den of Antiquities",
+      "Star Wars: Galaxy’s Edge",
+      28.21505376,
+      13.48148148,
+      "Loja em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      38,
+      "Savi’s Workshop - Handbuilt Lightsabers",
+      "Star Wars: Galaxy’s Edge",
+      32.17204301,
+      13.55555556,
+      "O símbolo do guia indica que pode ser necessária reserva para esta experiência.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      39,
+      "Droid Depot",
+      "Star Wars: Galaxy’s Edge",
+      34.15053763,
+      15.03703704,
+      "Personalize, monte e ative um Droid. O guia informa que pode haver oportunidades limitadas de subida disponíveis no mesmo dia; pode ser necessária reserva.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      40,
+      "First Order Cargo",
+      "Star Wars: Galaxy’s Edge",
+      35.35483871,
+      6.51851852,
+      "Loja em Star Wars: Galaxy’s Edge, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      41,
+      "Alien Swirling Saucers",
+      "Toy Story Land",
+      47.82795699,
+      16.51851852,
+      "Dê uma volta com os alienígenas de Toy Story. Altura mínima: 81 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      42,
+      "Slinky Dog Dash",
+      "Toy Story Land",
+      64.68817204,
+      19.85185185,
+      "Montanha-russa para toda a família. Altura mínima: 97 cm. Gestantes não devem participar.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      43,
+      "Toy Story Mania!",
+      "Toy Story Land",
+      53.33333333,
+      31.48148148,
+      "Jogo de tiros em 4D, no estilo Midway.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      44,
+      "Woody’s Lunch Box",
+      "Toy Story Land",
+      49.37634409,
+      23.85185185,
+      "Ponto de alimentação em Toy Story Land, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      45,
+      "Roundup Rodeo BBQ",
+      "Toy Story Land",
+      63.56989247,
+      34.2962963,
+      "Ponto de alimentação em Toy Story Land, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      46,
+      "Jessie’s Trading Post",
+      "Toy Story Land",
+      40.86021505,
+      33.55555556,
+      "Loja em Toy Story Land, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      47,
+      "Conheça a Edna Mode na Edna Mode Experience",
+      "Pixar Plaza",
+      39.05376344,
+      41.77777778,
+      "Conheça a Edna Mode na Edna Mode Experience.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      48,
+      "Market",
+      "Pixar Plaza",
+      47.74193548,
+      46.81481481,
+      "Ponto de alimentação em Pixar Plaza, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      49,
+      "Joffrey’s Coffee & Tea Company",
+      "Pixar Plaza",
+      49.6344086,
+      48.59259259,
+      "Ponto de alimentação em Pixar Plaza, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      50,
+      "Walt Disney Presents",
+      "Animation Courtyard",
+      52.38709677,
+      45.85185185,
+      "Explore a história da Disney em uma galeria multimídia e veja um filme da Disney em datas selecionadas.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      51,
+      "The Little Mermaid – A Musical Adventure",
+      "Animation Courtyard",
+      57.6344086,
+      53.40740741,
+      "Reviva The Little Mermaid neste musical ao vivo. Duração indicada: 18 minutos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      52,
+      "Disney Jr. Mickey Mouse Clubhouse Live!",
+      "Animation Courtyard",
+      61.16129032,
+      62.22222222,
+      "Junte-se a Mickey Mouse e Minnie Mouse em uma celebração musical. Duração indicada: 20 minutos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      53,
+      "In Character",
+      "Animation Courtyard",
+      60.98924731,
+      53.40740741,
+      "Loja em Animation Courtyard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      54,
+      "Beauty and the Beast—Live on Stage",
+      "Sunset Boulevard",
+      60.7311828,
+      80.74074074,
+      "Recontagem de Beauty and the Beast no estilo da Broadway. Duração indicada: 25 minutos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      55,
+      "Fantasmic!",
+      "Sunset Boulevard",
+      64.86021505,
+      81.62962963,
+      "Espetáculo noturno ao ar livre com música e fogos de artifício. Duração indicada: 30 minutos; o guia informa abertura do teatro 90 minutos antes do espetáculo. O símbolo do guia indica que pode assustar crianças.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      56,
+      "The Twilight Zone Tower of Terror",
+      "Sunset Boulevard",
+      70.27956989,
+      85.48148148,
+      "Quedas de alta velocidade no reino misterioso de Twilight Zone. Altura mínima: 102 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      57,
+      "Rock ‘n’ Roller Coaster Starring The Muppet",
+      "Sunset Boulevard",
+      82.66666667,
+      78.37037037,
+      "Montanha-russa de alta velocidade com música alta, curvas acentuadas, manobras invertidas, descidas e paradas repentinas. Altura mínima: 122 cm.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      58,
+      "Disney Villains: Unfairly Ever After",
+      "Sunset Boulevard",
+      88.77419355,
+      80.59259259,
+      "Show com vilões icônicos da Disney. Duração indicada: 18 minutos.",
+      "Atrações",
+      "Atrações"
+    ],
+    [
+      59,
+      "Sunshine Day Bar",
+      "Sunset Boulevard",
+      58.23655914,
+      70.96296296,
+      "Ponto de alimentação em Sunset Boulevard, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      60,
+      "Sunset Ranch Market",
+      "Sunset Boulevard",
+      64.51612903,
+      73.85185185,
+      "Inclui Anaheim Produce Apresentado por Cuties, Rosie’s All-American Café, Catalina Eddie’s, Fairfax Fare e Hollywood Scoops.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      61,
+      "Joffrey’s Coffee & Tea Company",
+      "Sunset Boulevard",
+      68.90322581,
+      89.40740741,
+      "Ponto de alimentação em Sunset Boulevard, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      62,
+      "Lanches",
+      "Sunset Boulevard",
+      76.12903226,
+      75.62962963,
+      "Ponto de alimentação em Sunset Boulevard, indicado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes"
+    ],
+    [
+      63,
+      "Beverly Sunset Boutique",
+      "Sunset Boulevard",
+      53.50537634,
+      66.51851852,
+      "Loja em Sunset Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      64,
+      "Legends of Hollywood Apresentado por Pandora Jewelry",
+      "Sunset Boulevard",
+      51.09677419,
+      69.77777778,
+      "Loja em Sunset Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ],
+    [
+      65,
+      "Sunset Ranch Pins and Souvenirs",
+      "Sunset Boulevard",
+      60.12903226,
+      72.66666667,
+      "Loja em Sunset Boulevard, indicado na legenda do guia fornecido.",
+      "Compras",
+      "Compras"
+    ]
+  ],
+  "sourceRaster": [
+    5925,
+    2700
+  ],
+  "crop": [
+    0,
+    0,
+    2325,
+    2700
+  ],
+  "colorProfile": "sRGB IEC61966-2.1 → sRGB via LittleCMS",
+  "sourceSha256": "a38be73cd6e8cc24cbe4980cf3d28b88f58ed0472875d116d512125c7a0e3a47",
+  "image": "/__l5e/assets-v1/90111349-8285-4637-99cb-5ee8d8b5f045/hollywood-studios-0526-srgb.png"
+}
