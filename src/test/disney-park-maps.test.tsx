@@ -74,6 +74,9 @@ describe("Complete PDF-sourced Disney maps", () => {
     render(<OrlandoTicketsSection hostname="briefing-14-v1.preview.local" mode="page" />);
     fireEvent.click(screen.getByRole("button", { name: "Ainda não sei" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    if (park === "typhoon-lagoon" || park === "blizzard-beach") {
+      fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    }
     const select = screen.getAllByRole("button", { name: /^Selecionar / }).find(el => el.closest("article")?.querySelector(`[aria-label="Abrir mapa interativo do ${DISNEY_MAPS[park].name}"]`));
     expect(select).toBeDefined();
     if (!select) return;
