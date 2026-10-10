@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowRight, Award, Building2, Clock, ExternalLink } from "lucide-react";
+import { ArrowRight, Award, Building2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
 import { agencySiteHref } from "@/lib/agencyContextLink";
@@ -39,7 +39,7 @@ export function UsVisaHomeTeaser() {
     return best?.key ?? null;
   }, [waits]);
 
-  const city = CITIES.find((c) => c.key === selected)!;
+  const city = CITIES.find((c) => c.key === selected) ?? CITIES[0];
   const wait = waits?.[selected];
   const sourceDate = formatDate(data?.wait_times_source_updated_at);
   const fee = typeof data?.mrv_fee_usd === "number" ? data.mrv_fee_usd : null;
@@ -48,14 +48,14 @@ export function UsVisaHomeTeaser() {
   return (
     <section id="visto-americano" className="scroll-mt-24 bg-card py-14 md:py-20">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="grid gap-8 md:grid-cols-2 md:items-center md:gap-12">
+        <div className="grid gap-8 md:grid-cols-[1.08fr_1fr] md:items-center md:gap-10">
           <img
             src={visaPassportImg}
             alt="Passaporte brasileiro com bandeira dos Estados Unidos e miniatura da Estátua da Liberdade"
             width={1024}
             height={768}
             loading="lazy"
-            className="aspect-[4/3] w-full rounded-2xl object-cover shadow-md"
+            className="aspect-[1.46/1] w-full rounded-2xl object-cover"
           />
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
@@ -65,15 +65,15 @@ export function UsVisaHomeTeaser() {
               Quanto tempo falta para a sua entrevista?
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-foreground/75">
-              Escolha a cidade e veja a espera oficial para a próxima entrevista de visto de turismo e negócios (B1/B2).
-              A Amanda orienta cada etapa: formulário, taxa, agendamento e preparação.
+              Escolha a cidade e consulte a espera para a próxima entrevista de visto de turismo e negócios (B1/B2).
+              A Amanda orienta você em cada etapa.
             </p>
             {fee !== null && (
               <p className="mt-4 text-sm text-foreground/75">
-                Taxa consular oficial: <strong className="text-foreground">US$ {fee}</strong> por pessoa.
+                Taxa consular: <strong className="text-foreground">US$ {fee}</strong> por pessoa.
               </p>
             )}
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg">
                 <a href={agencySiteHref("/visto-americano")}>
                   Conhecer a assessoria completa <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
@@ -83,68 +83,64 @@ export function UsVisaHomeTeaser() {
           </div>
         </div>
 
-        <div className="mt-10 md:mt-12">
-          <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm md:p-8">
-            <div role="tablist" aria-label="Escolha a cidade" className="flex flex-wrap gap-2">
+        <div className="mt-6">
+          <div className="rounded-xl border border-border/60 bg-card p-5 md:px-7 md:py-5">
+            <h3 className="text-2xl font-semibold leading-tight text-foreground md:text-3xl">Consulte o tempo de espera</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Selecione o consulado</p>
+            <div role="tablist" aria-label="Escolha a cidade" className="mt-4 flex flex-wrap gap-2">
               {CITIES.map((c) => {
                 const active = c.key === selected;
                 return (
-                  <button
+                  <Button
                     key={c.key}
                     type="button"
                     role="tab"
                     aria-selected={active}
                     onClick={() => setSelected(c.key)}
-                    className={`relative rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
+                    variant="outline"
+                    className={`h-9 rounded-full border px-5 text-xs font-medium transition-colors ${
                       active
                         ? "border-foreground bg-foreground text-background"
                         : "border-border bg-background text-foreground hover:border-foreground/40"
                     }`}
                   >
                     {c.label}
-                    {fastest === c.key && (
-                      <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-[var(--brand-primary)]" aria-hidden="true" />
-                    )}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
 
-            <div key={selected} className="mt-6 grid animate-fade-in gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-10">
-              <div className="md:order-1">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Building2 className="h-4 w-4" aria-hidden="true" /> {city.place} em {city.label}
+            <div key={selected} className="mt-4 grid gap-5 md:grid-cols-2 md:items-center md:gap-6">
+              <div className="flex gap-5 md:border-r md:border-border/60 md:pr-6">
+                <Building2 className="mt-1 h-8 w-8 shrink-0 text-foreground" aria-hidden="true" />
+                <div className="min-w-0">
+                  <h4 className="text-2xl font-semibold leading-tight text-foreground">{city.label}</h4>
+                  <p className="mt-1 text-sm text-muted-foreground">{city.place}</p>
+                  <p className="mt-2 text-sm leading-snug text-muted-foreground">
+                    Tempo até a próxima entrevista disponível. Não corresponde ao prazo de emissão do visto.
+                  </p>
                 </div>
-                <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-                  Tempo até a próxima entrevista disponível, não prazo de emissão do visto. A coleta de foto e digitais no CASV, quando aplicável, é agendada à parte.
-                </p>
-                <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {sourceDate && <span>Fonte oficial atualizada em {sourceDate}</span>}
-                  <a
-                    href={data?.wait_times_source_url || OFFICIAL_WAIT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
-                  >
-                    travel.state.gov <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                  </a>
-                </p>
               </div>
-              <div className="order-first md:order-2 md:text-right">
-                <div className="flex items-end gap-3 md:justify-end">
-                  <Clock className="mb-1.5 h-7 w-7 text-[var(--brand-primary)] wl-accent-icon" aria-hidden="true" />
-                  <p className="text-4xl font-semibold text-foreground md:text-5xl">
+              <div className="flex gap-3 rounded-2xl bg-primary/10 px-5 py-4 md:px-6" aria-live="polite">
+                <Clock className="mt-0.5 h-6 w-6 shrink-0 text-[var(--brand-primary)] wl-accent-icon" aria-hidden="true" />
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">Próxima entrevista</p>
+                  <p className="mt-1 text-3xl font-semibold leading-tight text-foreground md:text-4xl">
                     {isLoading ? "…" : wait?.display_pt || "Indisponível"}
                   </p>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">de espera para a próxima entrevista</p>
                 {fastest === selected && (
-                  <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
-                    <Award className="h-3.5 w-3.5" aria-hidden="true" /> Menor espera entre as 5 cidades no momento
+                  <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">
+                    <Award className="h-3.5 w-3.5 shrink-0" aria-hidden="true" /> Menor espera entre as 5 cidades
                   </p>
                 )}
+                </div>
               </div>
             </div>
+            <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-border/60 pt-3 text-xs text-muted-foreground">
+              Fonte:
+              <a href={data?.wait_times_source_url || OFFICIAL_WAIT_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">travel.state.gov</a>
+              {sourceDate && <span>· Atualizado em {sourceDate}.</span>}
+            </p>
           </div>
         </div>
       </div>
