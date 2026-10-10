@@ -1,0 +1,1531 @@
+{
+  "id": "legoland-florida",
+  "name": "LEGOLAND Florida",
+  "width": 5130,
+  "height": 7290,
+  "image": "/__l5e/assets-v1/5689b719-8dd2-42e6-9c9a-d9d3b6ff80fb/legoland-florida-map.png",
+  "source": "mapa-legoland-florida.pdf",
+  "sourceDescription": "fonte autorizada; mapa e referências originais preservados",
+  "sourceSha256": "6971a7a0c42f02355458d7f5157d2e8569b1fd0ffdec2f9626f1fc0a7ce011ba",
+  "colorProfile": "sRGB",
+  "points": [
+    [
+      "shop-5",
+      "The LEGO® Shop",
+      "Loja",
+      51.90125701487878,
+      73.93323105549126,
+      "The LEGO® Shop: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "5"
+    ],
+    [
+      "attraction-6",
+      "The LEGOLAND® Story",
+      "Experiência",
+      55.66388700905367,
+      71.72658828714421,
+      "The LEGOLAND® Story: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "6"
+    ],
+    [
+      "shop-7",
+      "LEGO® Factory Experience",
+      "Loja",
+      53.36680272866411,
+      67.4468433186514,
+      "LEGO® Factory Experience: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "7"
+    ],
+    [
+      "attraction-8",
+      "Rebuild The World™",
+      "Experiência",
+      49.49747572633026,
+      65.88101108378343,
+      "Rebuild The World™: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "8"
+    ],
+    [
+      "attraction-9",
+      "The Grand Carousel",
+      "Experiência",
+      52.486739428187434,
+      62.91139118628901,
+      "The Grand Carousel: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "9"
+    ],
+    [
+      "attraction-10",
+      "The Dream Creation Station",
+      "Experiência",
+      54.343516924227885,
+      61.1587444875793,
+      "The Dream Creation Station: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "10"
+    ],
+    [
+      "attraction-11",
+      "Imagination Theater",
+      "Experiência",
+      57.13953683715582,
+      57.79304493928969,
+      "Imagination Theater: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "11"
+    ],
+    [
+      "attraction-12",
+      "Mia’s Riding Adventure",
+      "Experiência",
+      44.203602454350936,
+      59.901248633616255,
+      "Mia’s Riding Adventure: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "12"
+    ],
+    [
+      "shop-13",
+      "Heartlake Mall",
+      "Loja",
+      50.93962611743117,
+      59.738128201624654,
+      "Heartlake Mall: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "13"
+    ],
+    [
+      "attraction-14",
+      "Heartlake Hall",
+      "Experiência",
+      44.846681591130604,
+      54.37407568158436,
+      "Heartlake Hall: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "14"
+    ],
+    [
+      "attraction-15",
+      "Daytona International Speedway®",
+      "MINILAND USA",
+      56.75809982924434,
+      53.07248213654192,
+      "Daytona International Speedway®: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "15"
+    ],
+    [
+      "attraction-16",
+      "Kennedy Space Center™",
+      "MINILAND USA",
+      57.86596227575232,
+      53.07248213654192,
+      "Kennedy Space Center™: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "16"
+    ],
+    [
+      "attraction-17",
+      "Florida",
+      "MINILAND USA",
+      59.00611505638553,
+      53.07248213654192,
+      "Florida: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "17"
+    ],
+    [
+      "attraction-18",
+      "Pirates’ Shores",
+      "MINILAND USA",
+      66.87926651209186,
+      51.71684443051269,
+      "Pirates’ Shores: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "18"
+    ],
+    [
+      "attraction-19",
+      "California",
+      "MINILAND USA",
+      66.39123511360867,
+      50.624583052019034,
+      "California: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "19"
+    ],
+    [
+      "attraction-20",
+      "Washington, D.C.",
+      "MINILAND USA",
+      63.9757658305921,
+      50.55416237997257,
+      "Washington, D.C.: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "20"
+    ],
+    [
+      "attraction-21",
+      "New York",
+      "MINILAND USA",
+      62.65204357124908,
+      46.99265635716735,
+      "New York: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "21"
+    ],
+    [
+      "attraction-22",
+      "Las Vegas",
+      "MINILAND USA",
+      57.85240485654239,
+      47.390372821823554,
+      "Las Vegas: miniland usa identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "22"
+    ],
+    [
+      "attraction-23",
+      "Special Event Stadium",
+      "Experiência",
+      51.897327802334615,
+      41.94805883085777,
+      "Special Event Stadium: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "23"
+    ],
+    [
+      "attraction-24",
+      "Pirates' Cove Stadium",
+      "Experiência",
+      46.15791127463298,
+      33.68048166868945,
+      "Pirates' Cove Stadium: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "24"
+    ],
+    [
+      "attraction-25",
+      "Cypress Gardens",
+      "Experiência",
+      45.52692762824759,
+      28.667649215468,
+      "Cypress Gardens: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "25"
+    ],
+    [
+      "attraction-26",
+      "The Great LEGO® Race",
+      "Experiência",
+      55.86686757108157,
+      41.61473487466778,
+      "The Great LEGO® Race: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "26"
+    ],
+    [
+      "attraction-27",
+      "The Great LEGO® Race VR Experience (Fee)",
+      "Experiência",
+      60.31594081231725,
+      39.3442856693137,
+      "Experiência de realidade virtual The Great LEGO® Race VR Experience; o guia indica cobrança adicional (Fee).",
+      "Atrações",
+      "Atrações",
+      "27"
+    ],
+    [
+      "attraction-28",
+      "LEGO® Ferrari Build & Race",
+      "Experiência",
+      57.279932568644924,
+      38.506333255636996,
+      "LEGO® Ferrari Build & Race: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "28"
+    ],
+    [
+      "attraction-29",
+      "Kids Power Tower",
+      "Experiência",
+      53.49074395311738,
+      34.38772340206779,
+      "Kids Power Tower: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 38 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "29"
+    ],
+    [
+      "attraction-30",
+      "AQUAZONE® Wave Racers",
+      "Experiência",
+      58.48491884346826,
+      35.066654744298695,
+      "AQUAZONE® Wave Racers: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "30"
+    ],
+    [
+      "attraction-31",
+      "Technicycle",
+      "Experiência",
+      58.18344026978253,
+      32.98294779041013,
+      "Technicycle: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 36 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "31"
+    ],
+    [
+      "attraction-32",
+      "Imagination Zone",
+      "Experiência",
+      48.39559335690028,
+      31.565090226538384,
+      "Imagination Zone reúne Building Zone, Creation Zone, LEGO® City Space e Wheels Zone, conforme a legenda.",
+      "Atrações",
+      "Atrações",
+      "32"
+    ],
+    [
+      "attraction-33",
+      "Galacticoaster",
+      "Experiência",
+      70.38916872258771,
+      20.82434697406282,
+      "Galacticoaster: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 36 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original. Altura máxima indicada: 77 polegadas.",
+      "Atrações",
+      "Atrações",
+      "33"
+    ],
+    [
+      "shop-34",
+      "Orbital Outpost",
+      "Loja",
+      74.01346723471003,
+      21.01414202989701,
+      "Orbital Outpost: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "34"
+    ],
+    [
+      "attraction-35",
+      "Junior Astronaut Training Zone",
+      "Experiência",
+      66.95328502394767,
+      21.59568399395308,
+      "Junior Astronaut Training Zone: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "35"
+    ],
+    [
+      "attraction-36",
+      "Driving School",
+      "Experiência",
+      68.08952941299647,
+      25.75816443591124,
+      "Driving School : experiência identificado na legenda do guia fornecido. Faixa etária indicada: 6 a 13 anos.",
+      "Atrações",
+      "Atrações",
+      "36"
+    ],
+    [
+      "shop-37",
+      "Driving School Store",
+      "Loja",
+      63.28738028543037,
+      25.326171163341797,
+      "Driving School Store: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "37"
+    ],
+    [
+      "attraction-38",
+      "Jr. Driving School",
+      "Experiência",
+      65.74618988334552,
+      29.80734470613372,
+      "Jr. Driving School: experiência identificado na legenda do guia fornecido. Faixa etária indicada: 3 a 5 anos.",
+      "Atrações",
+      "Atrações",
+      "38"
+    ],
+    [
+      "attraction-39",
+      "Rescue Academy",
+      "Experiência",
+      63.287877014041186,
+      29.96853947475941,
+      "Rescue Academy: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 34 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "39"
+    ],
+    [
+      "attraction-40",
+      "Coast Guard Academy",
+      "Experiência",
+      65.75347424482973,
+      32.0212338294512,
+      "Coast Guard Academy: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 34 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "40"
+    ],
+    [
+      "attraction-41",
+      "LEGO® City Stage",
+      "Experiência",
+      80.2175599929185,
+      30.473820983300648,
+      "LEGO® City Stage: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "41"
+    ],
+    [
+      "attraction-42",
+      "LEGO® NINJAGO® World",
+      "Experiência",
+      81.67313246699105,
+      37.289782865547835,
+      "Área LEGO® NINJAGO® World: LEGO® NINJAGO® The Ride, Zane’s Temple Build, Cole’s Rock Climb e Kai’s Spinners. Uma referência de grupo no guia, sem números adicionais inventados.",
+      "Atrações",
+      "Atrações",
+      "42"
+    ],
+    [
+      "shop-43",
+      "Wu’s Warehouse",
+      "Loja",
+      78.73284709848623,
+      37.28515708724494,
+      "Wu’s Warehouse: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "43"
+    ],
+    [
+      "attraction-44",
+      "Coastersaurus",
+      "Experiência",
+      72.38755848905032,
+      42.39011160140175,
+      "Coastersaurus: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 42 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "44"
+    ],
+    [
+      "attraction-45",
+      "Safari Trek",
+      "Experiência",
+      69.41190128437957,
+      43.96179617841221,
+      "Safari Trek: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 34 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "45"
+    ],
+    [
+      "attraction-46",
+      "Beetle Bounce",
+      "Experiência",
+      73.73268766942313,
+      46.73547982842507,
+      "Beetle Bounce: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 36 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "46"
+    ],
+    [
+      "attraction-47",
+      "Pharaoh's Revenge",
+      "Experiência",
+      71.4241607844481,
+      48.313950275688015,
+      "Pharaoh's Revenge: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "47"
+    ],
+    [
+      "attraction-48",
+      "The Lost Kingdom Adventure",
+      "Experiência",
+      74.29773877238671,
+      50.710735556520056,
+      "The Lost Kingdom Adventure: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 30 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "48"
+    ],
+    [
+      "attraction-49",
+      "Royal Joust",
+      "Experiência",
+      77.26969579507036,
+      57.93073405617712,
+      "Royal Joust: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 36 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original. Faixa etária indicada: 4 a 12 anos.",
+      "Atrações",
+      "Atrações",
+      "49"
+    ],
+    [
+      "attraction-50",
+      "Kingdoms Stage",
+      "Experiência",
+      73.135483055784,
+      61.094645014842676,
+      "Kingdoms Stage: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "50"
+    ],
+    [
+      "attraction-51",
+      "The Dragon",
+      "Experiência",
+      83.23178058944019,
+      64.10635740178112,
+      "The Dragon: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 40 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "51"
+    ],
+    [
+      "shop-52",
+      "The King’s Market",
+      "Loja",
+      80.9188456098471,
+      64.11052269536609,
+      "The King’s Market: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "52"
+    ],
+    [
+      "attraction-53",
+      "Merlin’s Challenge",
+      "Experiência",
+      72.55108928122715,
+      64.05769672576946,
+      "Merlin’s Challenge: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 36 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "53"
+    ],
+    [
+      "attraction-54",
+      "DUPLO® Valley Schoolhouse",
+      "Experiência",
+      65.01576979490284,
+      61.72320246859997,
+      "DUPLO® Valley Schoolhouse: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "54"
+    ],
+    [
+      "attraction-55",
+      "DUPLO® Tractor",
+      "Experiência",
+      61.49772064030519,
+      64.49325666179055,
+      "DUPLO® Tractor: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "55"
+    ],
+    [
+      "attraction-56",
+      "DUPLO® Train",
+      "Experiência",
+      66.91768713164747,
+      64.51478641546639,
+      "DUPLO® Train: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "56"
+    ],
+    [
+      "attraction-57",
+      "DUPLO® Tot Spot",
+      "Experiência",
+      68.60603198670503,
+      66.09781984766161,
+      "DUPLO® Tot Spot: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "57"
+    ],
+    [
+      "attraction-58",
+      "DUPLO® Splash & Play",
+      "Experiência",
+      67.51872280187774,
+      67.7538819698967,
+      "DUPLO® Splash & Play: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "58"
+    ],
+    [
+      "attraction-59",
+      "Unikitty's Disco Drop",
+      "Experiência",
+      76.89089115135386,
+      69.70896193683555,
+      "Unikitty's Disco Drop: experiência identificado na legenda do guia fornecido. Altura mínima indicada no guia: 40 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "59"
+    ],
+    [
+      "attraction-60",
+      "Benny's Play-Ship",
+      "Experiência",
+      73.36395144694963,
+      73.91682105463391,
+      "Benny's Play-Ship: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "60"
+    ],
+    [
+      "attraction-61",
+      "THE LEGO® MOVIE™ Masters of Flight",
+      "Experiência",
+      77.84568682516296,
+      74.22236522365827,
+      "THE LEGO® MOVIE™ Masters of Flight: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "61"
+    ],
+    [
+      "attraction-62",
+      "Battle of Bricksburg",
+      "Experiência",
+      72.55538137335526,
+      76.09927581661523,
+      "Battle of Bricksburg: experiência identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "62"
+    ],
+    [
+      "shop-W3",
+      "Surf Shop",
+      "Loja",
+      68.15683762697216,
+      15.359065784511907,
+      "Surf Shop: loja identificado na legenda do guia fornecido.",
+      "Compras",
+      "Compras",
+      "W3"
+    ],
+    [
+      "attraction-W5",
+      "Build-a-Raft River",
+      "Parque aquático",
+      64.62236370956688,
+      11.018026113837182,
+      "Build-a-Raft River: parque aquático identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "W5"
+    ],
+    [
+      "attraction-W6",
+      "DUPLO® Splash Safari",
+      "Parque aquático",
+      68.39885748850207,
+      11.039200038412798,
+      "DUPLO® Splash Safari: parque aquático identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "W6"
+    ],
+    [
+      "attraction-W7",
+      "Creative Cove",
+      "Parque aquático",
+      65.3751574064556,
+      8.279992615080992,
+      "Creative Cove reúne Build-a-Boat e Imagination Station, conforme a legenda.",
+      "Atrações",
+      "Atrações",
+      "W7"
+    ],
+    [
+      "attraction-W8",
+      "LEGO® Wave Pool",
+      "Parque aquático",
+      55.17271759449622,
+      8.939297627683203,
+      "LEGO® Wave Pool: parque aquático identificado na legenda do guia fornecido.",
+      "Atrações",
+      "Atrações",
+      "W8"
+    ],
+    [
+      "attraction-W10",
+      "Joker Soaker",
+      "Parque aquático",
+      56.71907837627924,
+      13.444227995695893,
+      "Joker Soaker: parque aquático identificado na legenda do guia fornecido. Altura mínima indicada no guia: 36 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "W10"
+    ],
+    [
+      "attraction-W11",
+      "Twin Chasers",
+      "Parque aquático",
+      48.829125893278665,
+      13.841509092982415,
+      "Twin Chasers: parque aquático identificado na legenda do guia fornecido. Altura mínima indicada no guia: 42 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "W11"
+    ],
+    [
+      "attraction-W12",
+      "Splash Out",
+      "Parque aquático",
+      41.74641837850649,
+      11.097304837366845,
+      "Splash Out: parque aquático identificado na legenda do guia fornecido. Altura mínima indicada no guia: 48 polegadas. Consulte também os requisitos de acompanhante e transferência na legenda original.",
+      "Atrações",
+      "Atrações",
+      "W12"
+    ],
+    [
+      "restaurant-A",
+      "LEGOLAND® Coffee Co.",
+      "Alimentação",
+      54.39566747951693,
+      70.39692401231889,
+      "LEGOLAND® Coffee Co.: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "A"
+    ],
+    [
+      "restaurant-B",
+      "Pepper and Roni’s Pizza Stop",
+      "Alimentação",
+      55.360144899602524,
+      69.41029154878258,
+      "Pepper and Roni’s Pizza Stop: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "B"
+    ],
+    [
+      "restaurant-C",
+      "Coca-Cola® Freestyle Station",
+      "Alimentação",
+      70.0515033208836,
+      67.92943967549725,
+      "Coca-Cola® Freestyle Station: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "C"
+    ],
+    [
+      "restaurant-D",
+      "Granny’s Apple Fries",
+      "Alimentação",
+      53.83484303137944,
+      64.87062388813871,
+      "Granny’s Apple Fries: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "D"
+    ],
+    [
+      "restaurant-E",
+      "Fun Town Treats",
+      "Alimentação",
+      59.968900029886996,
+      60.00676242739412,
+      "Fun Town Treats: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "E"
+    ],
+    [
+      "restaurant-F",
+      "Fun Town Pizza & Pasta Buffet",
+      "Alimentação",
+      54.377309341876824,
+      56.64955672903807,
+      "Fun Town Pizza & Pasta Buffet: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "F"
+    ],
+    [
+      "restaurant-G",
+      "Funnel Cake Factory",
+      "Alimentação",
+      60.42432877984892,
+      38.382508914984136,
+      "Funnel Cake Factory: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "G"
+    ],
+    [
+      "restaurant-H",
+      "Beach-N-Bricks Grill",
+      "Alimentação",
+      67.44196187218263,
+      13.495448024838714,
+      "Beach-N-Bricks Grill: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "H"
+    ],
+    [
+      "restaurant-I",
+      "Beach Bar",
+      "Alimentação",
+      68.7453063607913,
+      13.495448024838714,
+      "Beach Bar: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "I"
+    ],
+    [
+      "restaurant-J",
+      "Beach Street Bites",
+      "Alimentação",
+      60.89334469324896,
+      5.259980252740806,
+      "Beach Street Bites: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "J"
+    ],
+    [
+      "restaurant-K",
+      "Kick'n Chicken Co.",
+      "Alimentação",
+      61.30082872178819,
+      24.87049223137163,
+      "Kick'n Chicken Co.: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "K"
+    ],
+    [
+      "restaurant-L",
+      "Firehouse Ice Cream",
+      "Alimentação",
+      60.382728502299585,
+      26.911954945170503,
+      "Firehouse Ice Cream : alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "L"
+    ],
+    [
+      "restaurant-M",
+      "Traffic Snack Cart",
+      "Alimentação",
+      63.356282790037156,
+      30.90996699078093,
+      "Traffic Snack Cart: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "M"
+    ],
+    [
+      "restaurant-N",
+      "The Burger Kitchen",
+      "Alimentação",
+      67.68285442746405,
+      35.7837717817644,
+      "The Burger Kitchen: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "N"
+    ],
+    [
+      "restaurant-O",
+      "The Grove",
+      "Alimentação",
+      69.04248094465764,
+      38.83123034148876,
+      "The Grove: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "O"
+    ],
+    [
+      "restaurant-P",
+      "Loop & Kernel",
+      "Alimentação",
+      71.26048424555313,
+      46.31734714586548,
+      "Loop & Kernel: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "P"
+    ],
+    [
+      "restaurant-Q",
+      "Kingdom Cones",
+      "Alimentação",
+      73.97212275752315,
+      57.06387576088821,
+      "Kingdom Cones: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "Q"
+    ],
+    [
+      "restaurant-R",
+      "Dragon's Den",
+      "Alimentação",
+      75.62934622662341,
+      62.08144702047967,
+      "Dragon's Den: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "R"
+    ],
+    [
+      "restaurant-S",
+      "Taco Everyday",
+      "Alimentação",
+      69.96137830946181,
+      77.22470883969909,
+      "Taco Everyday: alimentação identificado na legenda do guia fornecido.",
+      "Restaurantes",
+      "Restaurantes",
+      "S"
+    ],
+    [
+      "restaurant-hotel-1",
+      "Smuggler’s Bar / Shipwreck Restaurant",
+      "Alimentação no hotel",
+      35.04868297316642,
+      89.55566908596965,
+      "Alimentação no LEGOLAND® Pirate Island Hotel: Smuggler’s Bar e Shipwreck Restaurant. O guia exige reserva para Shipwreck Restaurant.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-hotel-2",
+      "Bricks Family Restaurant / Skyline Lounge",
+      "Alimentação no hotel",
+      44.20876010351943,
+      83.75477564514748,
+      "Alimentação no LEGOLAND® Hotel: Bricks Family Restaurant e Skyline Lounge. O guia recomenda reserva para Skyline Lounge.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ]
+  ],
+  "anchors": [
+    [
+      "shop-5",
+      51.90125701487878,
+      73.93323105549126,
+      "5"
+    ],
+    [
+      "attraction-6",
+      55.66388700905367,
+      71.72658828714421,
+      "6"
+    ],
+    [
+      "shop-7",
+      53.36680272866411,
+      67.4468433186514,
+      "7"
+    ],
+    [
+      "attraction-8",
+      49.49747572633026,
+      65.88101108378343,
+      "8"
+    ],
+    [
+      "attraction-9",
+      52.486739428187434,
+      62.91139118628901,
+      "9"
+    ],
+    [
+      "attraction-10",
+      54.343516924227885,
+      61.1587444875793,
+      "10"
+    ],
+    [
+      "attraction-11",
+      57.13953683715582,
+      57.79304493928969,
+      "11"
+    ],
+    [
+      "attraction-12",
+      44.203602454350936,
+      59.901248633616255,
+      "12"
+    ],
+    [
+      "shop-13",
+      50.93962611743117,
+      59.738128201624654,
+      "13"
+    ],
+    [
+      "attraction-14",
+      44.846681591130604,
+      54.37407568158436,
+      "14"
+    ],
+    [
+      "attraction-15",
+      56.75809982924434,
+      53.07248213654192,
+      "15"
+    ],
+    [
+      "attraction-16",
+      57.86596227575232,
+      53.07248213654192,
+      "16"
+    ],
+    [
+      "attraction-17",
+      59.00611505638553,
+      53.07248213654192,
+      "17"
+    ],
+    [
+      "attraction-18",
+      66.87926651209186,
+      51.71684443051269,
+      "18"
+    ],
+    [
+      "attraction-19",
+      66.39123511360867,
+      50.624583052019034,
+      "19"
+    ],
+    [
+      "attraction-20",
+      63.9757658305921,
+      50.55416237997257,
+      "20"
+    ],
+    [
+      "attraction-21",
+      62.65204357124908,
+      46.99265635716735,
+      "21"
+    ],
+    [
+      "attraction-22",
+      57.85240485654239,
+      47.390372821823554,
+      "22"
+    ],
+    [
+      "attraction-23",
+      51.897327802334615,
+      41.94805883085777,
+      "23"
+    ],
+    [
+      "attraction-24",
+      46.15791127463298,
+      33.68048166868945,
+      "24"
+    ],
+    [
+      "attraction-25",
+      45.52692762824759,
+      28.667649215468,
+      "25"
+    ],
+    [
+      "attraction-26",
+      55.86686757108157,
+      41.61473487466778,
+      "26"
+    ],
+    [
+      "attraction-27",
+      60.31594081231725,
+      39.3442856693137,
+      "27"
+    ],
+    [
+      "attraction-28",
+      57.279932568644924,
+      38.506333255636996,
+      "28"
+    ],
+    [
+      "attraction-29",
+      53.49074395311738,
+      34.38772340206779,
+      "29"
+    ],
+    [
+      "attraction-30",
+      58.48491884346826,
+      35.066654744298695,
+      "30"
+    ],
+    [
+      "attraction-31",
+      58.18344026978253,
+      32.98294779041013,
+      "31"
+    ],
+    [
+      "attraction-32",
+      48.39559335690028,
+      31.565090226538384,
+      "32"
+    ],
+    [
+      "attraction-33",
+      70.38916872258771,
+      20.82434697406282,
+      "33"
+    ],
+    [
+      "shop-34",
+      74.01346723471003,
+      21.01414202989701,
+      "34"
+    ],
+    [
+      "attraction-35",
+      66.95328502394767,
+      21.59568399395308,
+      "35"
+    ],
+    [
+      "attraction-36",
+      68.08952941299647,
+      25.75816443591124,
+      "36"
+    ],
+    [
+      "shop-37",
+      63.28738028543037,
+      25.326171163341797,
+      "37"
+    ],
+    [
+      "attraction-38",
+      65.74618988334552,
+      29.80734470613372,
+      "38"
+    ],
+    [
+      "attraction-39",
+      63.287877014041186,
+      29.96853947475941,
+      "39"
+    ],
+    [
+      "attraction-40",
+      65.75347424482973,
+      32.0212338294512,
+      "40"
+    ],
+    [
+      "attraction-41",
+      80.2175599929185,
+      30.473820983300648,
+      "41"
+    ],
+    [
+      "attraction-42",
+      81.67313246699105,
+      37.289782865547835,
+      "42"
+    ],
+    [
+      "shop-43",
+      78.73284709848623,
+      37.28515708724494,
+      "43"
+    ],
+    [
+      "attraction-44",
+      72.38755848905032,
+      42.39011160140175,
+      "44"
+    ],
+    [
+      "attraction-45",
+      69.41190128437957,
+      43.96179617841221,
+      "45"
+    ],
+    [
+      "attraction-46",
+      73.73268766942313,
+      46.73547982842507,
+      "46"
+    ],
+    [
+      "attraction-47",
+      71.4241607844481,
+      48.313950275688015,
+      "47"
+    ],
+    [
+      "attraction-48",
+      74.29773877238671,
+      50.710735556520056,
+      "48"
+    ],
+    [
+      "attraction-49",
+      77.26969579507036,
+      57.93073405617712,
+      "49"
+    ],
+    [
+      "attraction-50",
+      73.135483055784,
+      61.094645014842676,
+      "50"
+    ],
+    [
+      "attraction-51",
+      83.23178058944019,
+      64.10635740178112,
+      "51"
+    ],
+    [
+      "shop-52",
+      80.9188456098471,
+      64.11052269536609,
+      "52"
+    ],
+    [
+      "attraction-53",
+      72.55108928122715,
+      64.05769672576946,
+      "53"
+    ],
+    [
+      "attraction-54",
+      65.01576979490284,
+      61.72320246859997,
+      "54"
+    ],
+    [
+      "attraction-55",
+      61.49772064030519,
+      64.49325666179055,
+      "55"
+    ],
+    [
+      "attraction-56",
+      66.91768713164747,
+      64.51478641546639,
+      "56"
+    ],
+    [
+      "attraction-57",
+      68.60603198670503,
+      66.09781984766161,
+      "57"
+    ],
+    [
+      "attraction-58",
+      67.51872280187774,
+      67.7538819698967,
+      "58"
+    ],
+    [
+      "attraction-59",
+      76.89089115135386,
+      69.70896193683555,
+      "59"
+    ],
+    [
+      "attraction-60",
+      73.36395144694963,
+      73.91682105463391,
+      "60"
+    ],
+    [
+      "attraction-61",
+      77.84568682516296,
+      74.22236522365827,
+      "61"
+    ],
+    [
+      "attraction-62",
+      72.55538137335526,
+      76.09927581661523,
+      "62"
+    ],
+    [
+      "shop-W3",
+      68.15683762697216,
+      15.359065784511907,
+      "W3"
+    ],
+    [
+      "attraction-W5",
+      64.62236370956688,
+      11.018026113837182,
+      "W5"
+    ],
+    [
+      "attraction-W6",
+      68.39885748850207,
+      11.039200038412798,
+      "W6"
+    ],
+    [
+      "attraction-W7",
+      65.3751574064556,
+      8.279992615080992,
+      "W7"
+    ],
+    [
+      "attraction-W8",
+      55.17271759449622,
+      8.939297627683203,
+      "W8"
+    ],
+    [
+      "attraction-W10",
+      56.71907837627924,
+      13.444227995695893,
+      "W10"
+    ],
+    [
+      "attraction-W11",
+      48.829125893278665,
+      13.841509092982415,
+      "W11"
+    ],
+    [
+      "attraction-W12",
+      41.74641837850649,
+      11.097304837366845,
+      "W12"
+    ],
+    [
+      "restaurant-A",
+      54.39566747951693,
+      70.39692401231889,
+      "A"
+    ],
+    [
+      "restaurant-B",
+      55.360144899602524,
+      69.41029154878258,
+      "B"
+    ],
+    [
+      "restaurant-C",
+      70.0515033208836,
+      67.92943967549725,
+      "C"
+    ],
+    [
+      "restaurant-C",
+      76.50910018712689,
+      53.52675449701003,
+      "C"
+    ],
+    [
+      "restaurant-C",
+      79.56646776106389,
+      31.872153995131917,
+      "C"
+    ],
+    [
+      "restaurant-C",
+      50.860937761749206,
+      69.6918528364519,
+      "C"
+    ],
+    [
+      "restaurant-D",
+      53.83484303137944,
+      64.87062388813871,
+      "D"
+    ],
+    [
+      "restaurant-E",
+      59.968900029886996,
+      60.00676242739412,
+      "E"
+    ],
+    [
+      "restaurant-F",
+      54.377309341876824,
+      56.64955672903807,
+      "F"
+    ],
+    [
+      "restaurant-G",
+      60.42432877984892,
+      38.382508914984136,
+      "G"
+    ],
+    [
+      "restaurant-H",
+      67.44196187218263,
+      13.495448024838714,
+      "H"
+    ],
+    [
+      "restaurant-I",
+      68.7453063607913,
+      13.495448024838714,
+      "I"
+    ],
+    [
+      "restaurant-J",
+      60.89334469324896,
+      5.259980252740806,
+      "J"
+    ],
+    [
+      "restaurant-K",
+      61.30082872178819,
+      24.87049223137163,
+      "K"
+    ],
+    [
+      "restaurant-L",
+      60.382728502299585,
+      26.911954945170503,
+      "L"
+    ],
+    [
+      "restaurant-M",
+      63.356282790037156,
+      30.90996699078093,
+      "M"
+    ],
+    [
+      "restaurant-N",
+      67.68285442746405,
+      35.7837717817644,
+      "N"
+    ],
+    [
+      "restaurant-O",
+      69.04248094465764,
+      38.83123034148876,
+      "O"
+    ],
+    [
+      "restaurant-P",
+      71.26048424555313,
+      46.31734714586548,
+      "P"
+    ],
+    [
+      "restaurant-Q",
+      73.97212275752315,
+      57.06387576088821,
+      "Q"
+    ],
+    [
+      "restaurant-R",
+      75.62934622662341,
+      62.08144702047967,
+      "R"
+    ],
+    [
+      "restaurant-S",
+      69.96137830946181,
+      77.22470883969909,
+      "S"
+    ],
+    [
+      "restaurant-hotel-1",
+      35.04868297316642,
+      89.55566908596965,
+      ""
+    ],
+    [
+      "restaurant-hotel-2",
+      44.20876010351943,
+      83.75477564514748,
+      ""
+    ]
+  ],
+  "renderDpi": 360,
+  "cropPt": [
+    0,
+    0,
+    1026,
+    1458
+  ],
+  "markerDiameter": 57,
+  "markerFontSize": 32,
+  "markerBorderWidth": 4,
+  "markerOutlineWidth": 6,
+  "markerHaloWidth": 12,
+  "limitations": [
+    "Página integral: desenho alcança ambos lados e hotéis/acessos abaixo; crop retangular menor cortava parte do parque.",
+    "Hotéis 1/2 não são atrações: alimentação agrupada no local confirmado sem atribuir referências numéricas falsas aos restaurantes.",
+    "Serviços 3/4/W1/W2/W4/W9 omitidos. Compras inclui Driving School Store 37.",
+    "Grupos 32/42/W7 preservados como única entrada. Restrições de acompanhante/acessibilidade não inferidas de ícones; consultar o guia original.",
+    "Alturas mínimas transcritas somente quando símbolo individual e valor foram confirmados visualmente; valores de acompanhante não tratados como altura mínima. Legenda original de restrições integralmente preservada na imagem."
+  ]
+}

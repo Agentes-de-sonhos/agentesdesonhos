@@ -88,7 +88,7 @@ describe("Complete source-grounded Universal maps", () => {
     fireEvent.click(selection);
     expect(screen.getAllByRole("button", { name: /^Remover / }).find(el => el.closest("article")?.querySelector(`[aria-label="Abrir mapa interativo do ${name}"]`))).toHaveAttribute("aria-pressed", "true");
   });
-  it("does not enable future groups", () => {
-    for (const id of ["legoland","ksc","icon-park"]) expect(isParkMapId(id)).toBe(false);
+  it("does not confuse group IDs with individual parks", () => {
+    for (const id of ["legoland","ksc","universal"]) expect(isParkMapId(id)).toBe(false);
   });
 });
