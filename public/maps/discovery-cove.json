@@ -1,0 +1,324 @@
+{
+  "id": "discovery-cove",
+  "name": "Discovery Cove",
+  "width": 1569,
+  "height": 618,
+  "image": "/__l5e/assets-v1/25c81c9e-9192-462a-b6cd-ed16f57c1c19/discovery-cove-map-native.png",
+  "source": "mapa-discovery-cove.png",
+  "sourceDescription": "imagem original fornecida — recorte sem redimensionamento",
+  "sourceRaster": [
+    2008,
+    1143
+  ],
+  "sourceSha256": "bbf822ea83767d29d3f4efc18bc0dc487266d305071fc5e39313ff1579e69381",
+  "markerDiameter": 24,
+  "markerFontSize": 14,
+  "markerBorderWidth": 1.3,
+  "markerOutlineWidth": 1.5,
+  "markerHaloWidth": 3,
+  "points": [
+    [
+      "attraction-flamingo-point",
+      "Flamingo Point",
+      "Experiência / animais",
+      14.59528362,
+      23.46278317,
+      "Observe os flamingos e sua plumagem, conforme a descrição do guia.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-the-grand-reef",
+      "The Grand Reef",
+      "Experiência / animais",
+      19.31166348,
+      48.22006472,
+      "Explore lagoas tropicais, cardumes coloridos e raias, conforme a descrição da imagem.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-shark-programs",
+      "Shark Programs",
+      "Experiência / animais",
+      5.09878904,
+      60.67961165,
+      "Experiência com tubarões identificada como Shark Programs no mapa; não há restrições ou preços legíveis na fonte.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-seaventure",
+      "SeaVenture",
+      "Experiência / animais",
+      12.36456342,
+      71.03559871,
+      "Experiência identificada como SeaVenture no mapa fornecido.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-dolphin-lagoon",
+      "Dolphin Lagoon",
+      "Experiência / animais",
+      41.49139579,
+      75.40453074,
+      "O guia descreve uma interação aquática com golfinhos; não informa aqui condições de participação.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-serenity-bay",
+      "Serenity Bay",
+      "Experiência / animais",
+      66.34799235,
+      70.38834951,
+      "Área de águas tranquilas descrita junto ao rio na imagem fornecida.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-wind-away-river",
+      "Wind-Away River",
+      "Experiência / animais",
+      80.05098789,
+      85.7605178,
+      "Rio que percorre áreas de vegetação tropical, praias de areia e cascatas, conforme o guia.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-freshwater-oasis",
+      "Freshwater Oasis",
+      "Experiência / animais",
+      74.50605481,
+      47.24919094,
+      "Área de água doce onde o guia situa o encontro com lontras, sem horários ou condições adicionais.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-explorers-aviary",
+      "Explorer’s Aviary",
+      "Experiência / animais",
+      87.9541109,
+      67.15210356,
+      "Aviário com aves coloridas que voam livremente, conforme a descrição do guia.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-reef-animal-encounters",
+      "Reef Animal Encounters",
+      "Experiência / animais",
+      27.0235819,
+      40.29126214,
+      "Encontro com animais identificado nesta área do mapa. O texto das cartas cita tatus e animais exóticos e sua conservação.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "attraction-island-animal-encounters",
+      "Island Animal Encounters",
+      "Experiência / animais",
+      70.42702358,
+      57.1197411,
+      "Encontro com animais identificado nesta área do mapa. O texto das cartas cita tatus e animais exóticos e sua conservação.",
+      "Atrações",
+      "Atrações",
+      ""
+    ],
+    [
+      "restaurant-laguna-grill",
+      "Laguna Grill",
+      "Alimentação / bar",
+      57.68005099,
+      21.5210356,
+      "Alimentação / bar identificado no mapa fornecido como Laguna Grill. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-hibiscus-hideaway-bar-and-pizza",
+      "Hibiscus Hideaway Bar & Pizza",
+      "Alimentação / bar",
+      42.06500956,
+      24.27184466,
+      "Alimentação / bar identificado no mapa fornecido como Hibiscus Hideaway Bar & Pizza. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-blue-bamboo-bar",
+      "Blue Bamboo Bar",
+      "Alimentação / bar",
+      71.95666029,
+      74.75728155,
+      "Alimentação / bar identificado no mapa fornecido como Blue Bamboo Bar. A imagem não informa horários, preços ou restrições.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "restaurant-ponto-de-bebidas-próximo-ao-flamingo-point",
+      "Ponto de bebidas próximo ao Flamingo Point",
+      "Ponto de bebidas",
+      20.33142129,
+      30.09708738,
+      "Ícone de bebidas sem nome próprio junto ao Flamingo Point, conforme a legenda. Horários impressos omitidos.",
+      "Restaurantes",
+      "Restaurantes",
+      ""
+    ],
+    [
+      "shop-loja-próxima-ao-hibiscus-hideaway",
+      "Loja próxima ao Hibiscus Hideaway",
+      "Loja",
+      51.81644359,
+      37.54045307,
+      "Ícone de compras sem nome próprio, junto à área de Hibiscus Hideaway no mapa.",
+      "Compras",
+      "Compras",
+      ""
+    ],
+    [
+      "shop-loja-próxima-ao-guest-services",
+      "Loja próxima ao Guest Services",
+      "Loja",
+      66.15678776,
+      38.83495146,
+      "Ícone de compras sem nome próprio próximo ao Guest Services, conforme o mapa.",
+      "Compras",
+      "Compras",
+      ""
+    ]
+  ],
+  "anchors": [
+    [
+      "attraction-flamingo-point",
+      14.59528362,
+      23.46278317,
+      ""
+    ],
+    [
+      "attraction-the-grand-reef",
+      19.31166348,
+      48.22006472,
+      ""
+    ],
+    [
+      "attraction-shark-programs",
+      5.09878904,
+      60.67961165,
+      ""
+    ],
+    [
+      "attraction-seaventure",
+      12.36456342,
+      71.03559871,
+      ""
+    ],
+    [
+      "attraction-dolphin-lagoon",
+      41.49139579,
+      75.40453074,
+      ""
+    ],
+    [
+      "attraction-serenity-bay",
+      66.34799235,
+      70.38834951,
+      ""
+    ],
+    [
+      "attraction-wind-away-river",
+      80.05098789,
+      85.7605178,
+      ""
+    ],
+    [
+      "attraction-freshwater-oasis",
+      74.50605481,
+      47.24919094,
+      ""
+    ],
+    [
+      "attraction-explorers-aviary",
+      87.9541109,
+      67.15210356,
+      ""
+    ],
+    [
+      "attraction-reef-animal-encounters",
+      27.0235819,
+      40.29126214,
+      ""
+    ],
+    [
+      "attraction-island-animal-encounters",
+      70.42702358,
+      57.1197411,
+      ""
+    ],
+    [
+      "restaurant-laguna-grill",
+      57.68005099,
+      21.5210356,
+      ""
+    ],
+    [
+      "restaurant-hibiscus-hideaway-bar-and-pizza",
+      42.06500956,
+      24.27184466,
+      ""
+    ],
+    [
+      "restaurant-blue-bamboo-bar",
+      71.95666029,
+      74.75728155,
+      ""
+    ],
+    [
+      "restaurant-ponto-de-bebidas-próximo-ao-flamingo-point",
+      20.33142129,
+      30.09708738,
+      ""
+    ],
+    [
+      "shop-loja-próxima-ao-hibiscus-hideaway",
+      51.81644359,
+      37.54045307,
+      ""
+    ],
+    [
+      "shop-loja-próxima-ao-guest-services",
+      66.15678776,
+      38.83495146,
+      ""
+    ]
+  ],
+  "limitations": [
+    "Monkey Island e Otter são títulos das cartas inferiores: Monkey Island não tem posição própria identificada no desenho; Otter corresponde à área Freshwater Oasis descrita pela carta. Não foi inventada uma posição separada.",
+    "Cabanas Sand Dollar, Seahorse e Starfish e serviços genéricos excluídos.",
+    "Horários antigos/variáveis de alimentação omitidos.",
+    "Dois ícones shopping sem nomes próprios recebem apenas descrição geográfica."
+  ],
+  "crop": [
+    45,
+    40,
+    1614,
+    658
+  ]
+}
