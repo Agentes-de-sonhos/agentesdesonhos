@@ -49,4 +49,4 @@ Marcadores definidos com diâmetro nativo de 58 px, incluindo cobertura da borda
 
 ## Testes
 
-`src/test/disney-park-maps.test.tsx`, `src/test/magic-kingdom-map.test.tsx`, `src/test/orlando-tickets-gallery.test.tsx`.
+22 testes aprovados em `src/test/disney-park-maps.test.tsx`, `src/test/magic-kingdom-map.test.tsx`, `src/test/orlando-tickets-gallery.test.tsx`; compilação automática sem erros.
