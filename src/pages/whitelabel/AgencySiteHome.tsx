@@ -72,6 +72,10 @@ import norwegianLuna from "@/assets/whitelabel/destinos-com-a-ju/norwegian-luna.
 import destinosStorefrontFront from "@/assets/whitelabel/destinos-com-a-ju/storefront-front-v2.png.asset.json";
 import destinoEuropaCastelo from "@/assets/whitelabel/destino-europa-neuschwanstein-2.jpg.asset.json";
 import destinoCaribeMexico from "@/assets/whitelabel/destinos-com-a-ju/destino-caribe-mexico.jpg.asset.json";
+import slPortugal from "@/assets/whitelabel/100-limites/destino-portugal-torre-belem.jpg.asset.json";
+import slNoronha from "@/assets/whitelabel/100-limites/destino-fernando-noronha.jpg.asset.json";
+import slCancun from "@/assets/whitelabel/100-limites/destino-cancun.jpg.asset.json";
+import slMendoza from "@/assets/whitelabel/100-limites/destino-mendoza.jpg.asset.json";
 import destinoOrlandoMk from "@/assets/whitelabel/destinos-com-a-ju/destino-orlando-mk.avif.asset.json";
 import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
@@ -104,6 +108,10 @@ const DESTINATION_IMAGES: Record<string, string> = {
   europaCastelo: destinoEuropaCastelo.url,
   caribeMexico: destinoCaribeMexico.url,
   orlandoMagicKingdom: destinoOrlandoMk.url,
+  portugalBelem: slPortugal.url,
+  fernandoNoronha: slNoronha.url,
+  cancun: slCancun.url,
+  mendoza: slMendoza.url,
   cruzeiroDisneyWish: destinoCruzeiroWish.url,
   nordesteResort: destinoNordesteResort.url,
   heroVarenna: heroVarenna.url,

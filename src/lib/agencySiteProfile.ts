@@ -323,11 +323,11 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   },
   randomizeDestinations: true,
   destinations: [
-    { key: "brasil-nordeste", image: "brasil", label: "Brasil", title: "Brasil e Nordeste", text: "Praias, natureza e cultura em diferentes regiões do país.", service: "pacotes", enabled: true, order: 1 },
-    { key: "europa-portugal", image: "europa", label: "Europa", title: "Europa e Portugal", text: "Cidades, paisagens e experiências com deslocamentos bem planejados.", service: "pacotes", enabled: true, order: 2 },
-    { key: "orlando-parques", image: "parques", label: "Família", title: "Orlando e parques", text: "Parques, ingressos, hospedagem e deslocamentos organizados no seu ritmo.", service: "ingressos", enabled: true, order: 3 },
-    { key: "caribe-mexico", image: "litoral", label: "Caribe", title: "Caribe e México", text: "Praias, resorts e experiências escolhidas para o seu perfil.", service: "pacotes", enabled: true, order: 4 },
-    { key: "america-sul", image: "safari", label: "América do Sul", title: "América do Sul", text: "Cultura, gastronomia e grandes paisagens perto de casa.", service: "pacotes", enabled: true, order: 5 },
+    { key: "brasil-nordeste", image: "fernandoNoronha", label: "Brasil", title: "Brasil e Nordeste", text: "Praias, natureza e cultura em diferentes regiões do país.", service: "pacotes", enabled: true, order: 1 },
+    { key: "europa-portugal", image: "portugalBelem", label: "Europa", title: "Europa e Portugal", text: "Cidades, paisagens e experiências com deslocamentos bem planejados.", service: "pacotes", enabled: true, order: 2 },
+    { key: "orlando-parques", image: "orlandoMagicKingdom", label: "Família", title: "Orlando e parques", text: "Parques, ingressos, hospedagem e deslocamentos organizados no seu ritmo.", service: "ingressos", enabled: true, order: 3 },
+    { key: "caribe-mexico", image: "cancun", label: "Caribe", title: "Caribe e México", text: "Praias, resorts e experiências escolhidas para o seu perfil.", service: "pacotes", enabled: true, order: 4 },
+    { key: "america-sul", image: "mendoza", label: "América do Sul", title: "América do Sul", text: "Cultura, gastronomia e grandes paisagens perto de casa.", service: "pacotes", enabled: true, order: 5 },
   ],
   highlights: [
     { title: "Viagens em família", text: "Hospedagens, passeios e deslocamentos pensados para diferentes idades, com atenção ao conforto e ao ritmo da família.", service: "pacotes", cta: "Planejar em família", image: momentFamily, imageAlt: "Família caminhando na praia ao pôr do sol" },

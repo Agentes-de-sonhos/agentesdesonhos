@@ -101,7 +101,7 @@ export function resolveSections(
  */
 export type AgencyImageSlot =
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
-  | "caribeMexico" | "orlandoMagicKingdom" | "cruzeiroDisneyWish" | "nordesteResort"
+  | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort"
   | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
