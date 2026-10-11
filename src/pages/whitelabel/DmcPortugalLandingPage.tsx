@@ -18,6 +18,7 @@ import ptAldeias from "@/assets/whitelabel/100-limites/pt-aldeias.jpg";
 import dmcGrupos from "@/assets/whitelabel/100-limites/dmc-grupos.jpg";
 import dmcEuropa from "@/assets/whitelabel/100-limites/dmc-europa.jpg";
 import dmcPet from "@/assets/whitelabel/100-limites/dmc-pet.jpg";
+import { DmcRequestButton, DmcRequestCartProvider, useDmcCart } from "@/components/whitelabel/DmcRequestCart";
 
 const PT_SLIDES = [
   { src: ptSintra, label: "Sintra, Cascais e Cabo da Roca" },
@@ -162,6 +163,7 @@ function TourList({ tours, prefix }: { tours: Tour[]; prefix: string }) {
           <AccordionContent>
             <p className="text-sm leading-relaxed text-muted-foreground">{tour.d}</p>
             {tour.note && <p className="mt-2 text-xs font-semibold text-foreground">{tour.note}</p>}
+            <DmcRequestButton kind="passeio" title={tour.t} className="mt-3" />
           </AccordionContent>
         </AccordionItem>
       ))}
@@ -169,10 +171,19 @@ function TourList({ tours, prefix }: { tours: Tour[]; prefix: string }) {
   );
 }
 
+function CartCta() {
+  const cart = useDmcCart();
+  if (!cart) return null;
+  return (
+    <Button size="lg" onClick={() => (cart.items.length ? cart.openCart() : document.getElementById("frota")?.scrollIntoView({ behavior: "smooth" }))}>
+      {cart.items.length ? `Finalizar solicitação (${cart.items.length})` : "Montar minha solicitação"}
+    </Button>
+  );
+}
+
 export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInfo }) {
   const location = useLocation();
   const br = agencyWhatsappNumber(info);
-  const quoteHref = br ? wa(br, "Olá, Amanda! Sou de uma agência de viagens e gostaria de solicitar um orçamento de DMC em Portugal.") : null;
   const talkHref = br ? wa(br, "Olá, Amanda! Gostaria de falar sobre os serviços de DMC em Portugal.") : null;
   const netHref = br ? wa(br, "Olá, Amanda! Sou de uma agência de viagens e gostaria de receber o tarifário NET atualizado da DMC em Portugal.") : null;
 
@@ -196,9 +207,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
   );
   const Ctas = ({ className = "" }: { className?: string }) => (
     <div className={`flex flex-col gap-3 sm:flex-row ${className}`}>
-      {quoteHref && (
-        <Button asChild size="lg"><a href={quoteHref} target="_blank" rel="noopener noreferrer">Solicitar orçamento</a></Button>
-      )}
+      <CartCta />
       {talkHref && (
         <Button asChild size="lg" variant="outline">
           <a href={talkHref} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />Falar com a Amanda</a>
@@ -208,7 +217,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
   );
 
   return (
-    <>
+    <DmcRequestCartProvider hostname={info.hostname} whatsapp={br}>
       <SEO
         title="DMC em Portugal para agências | 100 Limites"
         description="Receptivo em Portugal para agências brasileiras: transfers privativos, passeios em Lisboa e Portugal, grupos, acompanhamento na Europa e pet friendly."
@@ -253,10 +262,11 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
             { i: Globe2, t: "Acompanhamento na Europa", d: "Companhia e apoio logístico personalizado para quem viaja pela Europa." },
             { i: Dog, t: "Pet friendly", d: "Transporte adaptado para viajantes com seus animais, sob consulta." },
           ].map(({ i: Icon, t, d }) => (
-            <div key={t} className="rounded-xl border border-border/60 bg-card p-5">
+            <div key={t} className="flex flex-col rounded-xl border border-border/60 bg-card p-5">
               <Icon className="h-5 w-5" aria-hidden="true" />
               <p className="mt-3 font-semibold">{t}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{d}</p>
+              <p className="mb-4 mt-1 text-sm leading-relaxed text-muted-foreground">{d}</p>
+              <DmcRequestButton kind={t === "Transfers privativos" ? "veiculo" : t === "Passeios privados" || t === "Roteiros sob medida" ? "passeio" : "especial"} title={t} className="mt-auto self-start" />
             </div>
           ))}
         </div>
@@ -266,17 +276,19 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Frota */}
       <Section id="frota">
         <H2 k="Frota">Veículos conforme o tamanho do grupo</H2>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { t: "Carros executivos", c: "Até 4 passageiros", d: "Modelos premium como Mercedes-Benz V-Class e Jeep Compass, para traslados privados, executivos ou casais." },
             { t: "Minivan Mercedes V-Class", c: "Até 8 pessoas", d: "Mais espaço para famílias e pequenos grupos, com conforto e praticidade." },
-            { t: "Mini-ônibus e ônibus", c: "20 e 43 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
+            { t: "Mini-ônibus", c: "20 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
+            { t: "Ônibus de turismo", c: "43 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
           ].map((v) => (
-            <div key={v.t} className="rounded-xl border border-border/60 bg-card p-5">
+            <div key={v.t} className="flex flex-col rounded-xl border border-border/60 bg-card p-5 [&>button]:mt-auto [&>button]:self-start">
               <Car className="h-5 w-5" aria-hidden="true" />
               <p className="mt-3 font-semibold">{v.t}</p>
               <p className="text-sm font-semibold text-foreground/80">{v.c}</p>
               <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{v.d}</p>
+              <DmcRequestButton kind="veiculo" title={`${v.t} (${v.c.toLowerCase()})`} className="mt-4" />
             </div>
           ))}
         </div>
@@ -450,6 +462,6 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
           <Ctas className="mt-7 justify-center" />
         </div>
       </Section>
-    </>
+    </DmcRequestCartProvider>
   );
 }
