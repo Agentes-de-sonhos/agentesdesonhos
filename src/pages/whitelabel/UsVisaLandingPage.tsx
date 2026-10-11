@@ -95,7 +95,7 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
               solicitar seu visto americano de turismo e negócios — B1/B2. Conte com a Amanda para esclarecer suas
               dúvidas e se preparar com mais tranquilidade.
             </p>
-            <Cta className="mt-7 w-full sm:w-auto" />
+            <UsVisaProposalDialog hostname={info.hostname} whatsapp={wa} label="Solicitar uma proposta" className="mt-7 w-full sm:w-auto" />
           </div>
           <img
             src={amandaNy.url}
