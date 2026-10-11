@@ -366,6 +366,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   footer: {
     description: "Viagens pelo Brasil e pelo mundo. DMC em Portugal para agências parceiras.\nAtendimento online com Amanda Larini.",
     address: "Lisboa, Portugal",
+    legalName: "100LIMITES VIAGENS & TURISMO LTDA",
+    cnpj: "21.911.559/0001-43",
   },
   copy: {
     destinations: {
