@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 const src = readFileSync("src/components/whitelabel/AgencySiteLayout.tsx", "utf8");
 
-const start = src.indexOf('<footer id="rodape" className="bg-[var(--brand-tertiary');
+const start = src.indexOf("const footerShellClass = sandPlainFooter");
 const end = src.indexOf('<footer id="rodape" className="border-t', start);
 
 describe("rodapé editorial compartilhado", () => {
