@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Car, Check, Dog, Globe2, Mail, MapPin, MessageCircle, Plane, Route as RouteIcon, Users } from "lucide-react";
+import { Car, Check, Dog, Globe2, MapPin, MessageCircle, Plane, Route as RouteIcon, Users } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -265,8 +265,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
             <div key={t} className="flex flex-col rounded-xl border border-border/60 bg-card p-5">
               <Icon className="h-5 w-5" aria-hidden="true" />
               <p className="mt-3 font-semibold">{t}</p>
-              <p className="mb-4 mt-1 text-sm leading-relaxed text-muted-foreground">{d}</p>
-              <DmcRequestButton kind={t === "Transfers privativos" ? "veiculo" : t === "Passeios privados" || t === "Roteiros sob medida" ? "passeio" : "especial"} title={t} className="mt-auto self-start" />
+              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{d}</p>
             </div>
           ))}
         </div>
@@ -276,22 +275,30 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Frota */}
       <Section id="frota">
         <H2 k="Frota">Veículos conforme o tamanho do grupo</H2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Accordion type="multiple" className="mt-6 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { t: "Carros executivos", c: "Até 4 passageiros", d: "Modelos premium como Mercedes-Benz V-Class e Jeep Compass, para traslados privados, executivos ou casais." },
             { t: "Minivan Mercedes V-Class", c: "Até 8 pessoas", d: "Mais espaço para famílias e pequenos grupos, com conforto e praticidade." },
             { t: "Mini-ônibus", c: "20 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
             { t: "Ônibus de turismo", c: "43 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
           ].map((v) => (
-            <div key={v.t} className="flex flex-col rounded-xl border border-border/60 bg-card p-5 [&>button]:mt-auto [&>button]:self-start">
-              <Car className="h-5 w-5" aria-hidden="true" />
-              <p className="mt-3 font-semibold">{v.t}</p>
-              <p className="text-sm font-semibold text-foreground/80">{v.c}</p>
-              <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{v.d}</p>
-              <DmcRequestButton kind="veiculo" title={`${v.t} (${v.c.toLowerCase()})`} className="mt-4" />
-            </div>
+            <AccordionItem key={v.t} value={v.t} className="rounded-xl border border-border/60 bg-card px-5">
+              <AccordionTrigger className="text-left">
+                <span className="flex items-center gap-3">
+                  <Car className="h-5 w-5 shrink-0" aria-hidden="true" />
+                  <span>
+                    <span className="block font-semibold">{v.t}</span>
+                    <span className="block text-xs font-normal text-muted-foreground">{v.c}</span>
+                  </span>
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <p className="text-sm leading-relaxed text-muted-foreground">{v.d}</p>
+                <DmcRequestButton kind="veiculo" title={`${v.t} (${v.c.toLowerCase()})`} className="mt-3" />
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
         <p className="mt-5 text-sm text-muted-foreground">
           A capacidade de cada veículo é diferente das faixas de tarifa (até 3 e de 4 a 7 pessoas, com 1 mala de 23 kg e 1 mala de
           mão por pessoa). O modelo é definido conforme o número de pessoas e as bagagens, e a disponibilidade é confirmada na proposta.
@@ -337,6 +344,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
               operador. Da escolha dos passeios à curadoria de experiências, a agência conta com suporte em cada etapa, da van ao
               ônibus de turismo de 43 lugares.
             </p>
+            <DmcRequestButton kind="especial" title="Grupos" className="mt-5" />
           </div>
         </div>
       </Section>
@@ -351,6 +359,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
               profissional com experiência em roteiros e logística europeia. O roteiro é criado sob medida, conforme os interesses
               do viajante: gastronomia, arte, cultura, compras e momentos de descanso.
             </p>
+            <DmcRequestButton kind="especial" title="Acompanhamento na Europa" className="mt-5" />
           </div>
           <img src={dmcEuropa} alt="Casal de viajantes com malas em uma ponte europeia" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
         </div>
@@ -370,6 +379,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
               Porte, quantidade de animais e condições de transporte devem ser confirmados com antecedência. A documentação do pet é
               de responsabilidade do tutor.
             </p>
+            <DmcRequestButton kind="especial" title="Pet friendly" className="mt-5" />
           </div>
         </div>
       </Section>
@@ -450,15 +460,6 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       <Section id="contato">
         <div className="text-center">
           <H2 k="Contato">Vamos receber seus clientes em Portugal?</H2>
-          <div className="mt-5 flex flex-col items-center gap-2 text-sm">
-            <a className="font-medium hover:underline" href={wa(PT_WHATSAPP, "Olá, Amanda! Gostaria de falar sobre a DMC em Portugal.")} target="_blank" rel="noopener noreferrer">
-              Portugal: (+351) 913 980 085
-            </a>
-            {br && <a className="font-medium hover:underline" href={talkHref!} target="_blank" rel="noopener noreferrer">Brasil: (48) 99608-6615</a>}
-            <a className="inline-flex items-center gap-1 font-medium hover:underline" href={`mailto:${CONTACT_EMAIL}`}>
-              <Mail className="h-4 w-4" aria-hidden="true" />{CONTACT_EMAIL}
-            </a>
-          </div>
           <Ctas className="mt-7 justify-center" />
         </div>
       </Section>

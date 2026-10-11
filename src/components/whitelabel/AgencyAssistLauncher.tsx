@@ -81,6 +81,8 @@ export function AgencyAssistLauncher({ info }: { info: AgencyDomainInfo }) {
   );
 
   if (!config || !waHref) return null;
+  // A landing DMC tem o próprio botão flutuante do carrinho.
+  if (location.pathname.replace(/\/$/, "").endsWith("/dmc-portugal")) return null;
   const submitting = state === "submitting";
 
   return (
