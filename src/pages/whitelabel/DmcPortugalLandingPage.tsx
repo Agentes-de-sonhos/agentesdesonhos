@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Car, Check, Dog, Globe2, Mail, MapPin, MessageCircle, Plane, Route as RouteIcon, Users } from "lucide-react";
+import { Car, Check, Dog, Globe2, MapPin, MessageCircle, Plane, Route as RouteIcon, Users } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
