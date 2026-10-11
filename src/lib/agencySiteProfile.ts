@@ -321,6 +321,7 @@ const EDITORIAL_DMC: AgencySiteProfile = {
   requestCenter: {
     notice: "Cada solicitação é analisada pela Amanda, considerando seu perfil, suas preferências e o investimento que você deseja fazer.",
   },
+  randomizeDestinations: true,
   destinations: [
     { key: "brasil-nordeste", image: "brasil", label: "Brasil", title: "Brasil e Nordeste", text: "Praias, natureza e cultura em diferentes regiões do país.", service: "pacotes", enabled: true, order: 1 },
     { key: "europa-portugal", image: "europa", label: "Europa", title: "Europa e Portugal", text: "Cidades, paisagens e experiências com deslocamentos bem planejados.", service: "pacotes", enabled: true, order: 2 },
