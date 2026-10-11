@@ -275,26 +275,38 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Frota */}
       <Section id="frota">
         <H2 k="Frota">Veículos conforme o tamanho do grupo</H2>
-        <Accordion type="multiple" className="mt-6 grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 4 colunas só a partir de 1280px: abaixo disso o título da Minivan
+            (204px em Manrope 600) não caberia numa coluna de ~250px. A coluna
+            central é mais larga justamente para o nome do veículo não quebrar. */}
+        <Accordion
+          type="multiple"
+          className="mt-6 grid auto-rows-fr items-start gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]"
+        >
           {[
             { t: "Carros executivos", c: "Até 4 passageiros", d: "Modelos premium como Mercedes-Benz V-Class e Jeep Compass, para traslados privados, executivos ou casais." },
             { t: "Minivan Mercedes V-Class", c: "Até 8 pessoas", d: "Mais espaço para famílias e pequenos grupos, com conforto e praticidade." },
             { t: "Mini-ônibus", c: "20 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
             { t: "Ônibus de turismo", c: "43 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
           ].map((v) => (
-            <AccordionItem key={v.t} value={v.t} className="rounded-xl border border-border/60 bg-card px-5">
+            <AccordionItem
+              key={v.t}
+              value={v.t}
+              className="flex flex-col rounded-xl border border-border/60 bg-card px-5 data-[state=open]:self-stretch [&>div:last-child]:flex-1"
+            >
               <AccordionTrigger className="text-left">
                 <span className="flex items-center gap-3">
                   <Car className="h-5 w-5 shrink-0" aria-hidden="true" />
                   <span>
-                    <span className="block font-semibold">{v.t}</span>
+                    <span className="block min-[360px]:whitespace-nowrap font-semibold">{v.t}</span>
                     <span className="block text-xs font-normal text-muted-foreground">{v.c}</span>
                   </span>
                 </span>
               </AccordionTrigger>
-              <AccordionContent>
+              <AccordionContent className="flex h-full flex-col">
                 <p className="text-sm leading-relaxed text-muted-foreground">{v.d}</p>
-                <DmcRequestButton kind="veiculo" title={`${v.t} (${v.c.toLowerCase()})`} className="mt-3" />
+                <div className="mt-auto pt-3">
+                  <DmcRequestButton kind="veiculo" title={`${v.t} (${v.c.toLowerCase()})`} />
+                </div>
               </AccordionContent>
             </AccordionItem>
           ))}
