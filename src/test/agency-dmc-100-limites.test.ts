@@ -60,8 +60,10 @@ describe("seção DMC da 100 Limites", () => {
       "Sobre", "DMC em Portugal", "Visto americano", "Parques em Orlando", "Resorts no Brasil", "Blog",
     ]);
     expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
-      "/dmc-portugal", "/dmc-portugal#servicos", "/dmc-portugal#frota", "/dmc-portugal#lisboa", "/dmc-portugal#portugal",
-      "/dmc-portugal#grupos", "/dmc-portugal#europa", "/dmc-portugal#pet-friendly", "/dmc-portugal#contato",
+      "/dmc-portugal", "/dmc-portugal#lisboa", "/dmc-portugal#portugal", "/dmc-portugal#grupos",
+    ]);
+    expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.label)).toEqual([
+      "Visão geral", "Passeios em Lisboa", "Passeios em Portugal", "Grupos",
     ]);
     expect(resolveSections(resolveSiteProfile("100limites.tur.br").sections).map((section) => section.key))
       .not.toContain("modules");
