@@ -6,6 +6,7 @@ import { siteContainer } from "@/lib/agencySiteTheme";
 import { type AgencyDomainInfo, agencyWhatsappNumber } from "@/lib/agencyDomains";
 import { cn } from "@/lib/utils";
 import { useUsVisaPublicInfo } from "@/hooks/useUsVisaPublicInfo";
+import { UsVisaProposalDialog } from "@/components/whitelabel/UsVisaProposalDialog";
 import amandaNy from "@/assets/whitelabel/100-limites/amanda-estatua-liberdade.jpg.asset.json";
 
 const FEES_URL = "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees/fees-visa-services.html";
@@ -157,8 +158,8 @@ export default function UsVisaLandingPage({ info }: { info: AgencyDomainInfo }) 
             </div>
             <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Assessoria 100 Limites</p>
-              <p className="mt-1 text-2xl font-extrabold">Consulte a proposta</p>
-              <p className="mt-1 text-sm text-muted-foreground">Valor apresentado conforme o seu caso.</p>
+              <UsVisaProposalDialog hostname={info.hostname} whatsapp={wa} className="mt-3 w-full sm:w-auto" />
+              <p className="mt-2 text-sm text-muted-foreground">Valor apresentado conforme o seu caso.</p>
             </div>
             <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Custos adicionais</p>
