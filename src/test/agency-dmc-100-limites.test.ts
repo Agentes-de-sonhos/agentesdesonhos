@@ -6,6 +6,7 @@ import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
 
 const dmcSource = readFileSync("src/components/whitelabel/AgencyDmcSection.tsx", "utf8");
 const homeSource = readFileSync("src/pages/whitelabel/AgencySiteHome.tsx", "utf8");
+const landingSource = readFileSync("src/pages/whitelabel/DmcPortugalLandingPage.tsx", "utf8");
 
 describe("seção DMC da 100 Limites", () => {
   it("usa apresentação clara e a nova foto somente nos hosts configurados", () => {
@@ -94,6 +95,19 @@ describe("seção DMC da 100 Limites", () => {
     expect(dmcSource).toContain("{!lightSurface && (");
     expect(dmcSource).toContain("text-card");
     expect(homeSource).toContain('dmc?.presentation?.surface === "light"');
+  });
+
+  it("mantém o título da frota em uma linha e os cards abertos com a mesma altura", () => {
+    // Quatro colunas só a partir de 1280px; a coluna da Minivan é mais larga
+    // para o nome do veículo caber inteiro (204px em Manrope 600).
+    expect(landingSource).toContain("md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]");
+    // Linhas de altura única: o card com menos texto acompanha o maior.
+    expect(landingSource).toContain("auto-rows-fr");
+    // Card aberto ocupa a altura da linha; fechado permanece compacto.
+    expect(landingSource).toContain("data-[state=open]:self-stretch");
+    expect(landingSource).toContain("[&>div:last-child]:flex-1");
+    // Nome do veículo nunca quebra em duas linhas (a partir de 360px).
+    expect(landingSource).toContain("min-[360px]:whitespace-nowrap font-semibold");
   });
 
   it("posiciona a seção do visto após Orlando e antes de 'Uma viagem para cada momento'", () => {
