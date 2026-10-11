@@ -16,9 +16,10 @@ const CONSULADOS = ["Brasília", "São Paulo", "Rio de Janeiro", "Recife", "Port
  * Envia pela mesma Edge Function segura da Central de Solicitações: o tenant
  * é resolvido no servidor pelo hostname e o lead chega ao CRM + e-mail da agência.
  */
-export function UsVisaProposalDialog({ hostname, whatsapp, className = "" }: {
+export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a proposta", className = "" }: {
   hostname: string;
   whatsapp: string | null;
+  label?: string;
   className?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -71,8 +72,8 @@ export function UsVisaProposalDialog({ hostname, whatsapp, className = "" }: {
 
   return (
     <>
-      <Button type="button" size="lg" onClick={() => setOpen(true)} className={cn("wl-visa-cta", className)}>
-        Consulte a proposta
+      <Button type="button" size="lg" onClick={() => setOpen(true)} className={cn("wl-visa-proposal", className)}>
+        {label}
       </Button>
       <Dialog open={open} onOpenChange={close}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
@@ -96,7 +97,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, className = "" }: {
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>Consulte a proposta</DialogTitle>
+                <DialogTitle>{label}</DialogTitle>
                 <DialogDescription>
                   Conte rapidamente quem viaja e a Amanda retorna com a proposta da assessoria B1/B2. Nada é cobrado agora.
                 </DialogDescription>
@@ -142,7 +143,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, className = "" }: {
                   Autorizo a 100 Limites a usar meus dados para retornar com a proposta, conforme a privacidade do site.
                 </label>
                 {(formError || error) && <p className="text-sm font-medium text-destructive sm:col-span-2" role="alert">{formError ?? error}</p>}
-                <Button type="submit" size="lg" disabled={state === "submitting"} className="wl-visa-cta sm:col-span-2">
+                <Button type="submit" size="lg" disabled={state === "submitting"} className="wl-visa-proposal sm:col-span-2">
                   {state === "submitting" ? "Enviando…" : "Enviar solicitação"}
                 </Button>
               </form>

@@ -1222,6 +1222,19 @@ body[data-booking-selection-bar] {
   transform: scale(0.985);
 }
 
+/* Botão "Solicitar/Consulte a proposta": abre o pop-up, não o WhatsApp.
+   Por isso permanece amarelo da marca ao passar o mouse — sem a troca para o verde. */
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-proposal {
+  transition: background-color 0.28s ease, box-shadow 0.28s ease, transform 0.2s ease;
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-proposal:hover,
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-proposal:focus-visible {
+  box-shadow: 0 14px 28px -16px hsl(var(--primary) / 0.7);
+}
+.wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-proposal:active {
+  transform: scale(0.985);
+}
+
 /* Foto da Amanda: zoom suave que volta ao normal ao sair do mouse. */
 .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-photo {
   transition: transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.55s ease;
@@ -1273,7 +1286,8 @@ body[data-booking-selection-bar] {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:hover {
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-cta:hover,
+  .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-proposal:hover {
     animation: wl-visa-pop 0.5s ease;
   }
   .wl-editorial:not(.wl-luxury):not(.wl-rose):not(.wl-fae):not(.wl-site-base):not(.wl-casanova):not(.wl-essya) .wl-visa-photo:hover {
