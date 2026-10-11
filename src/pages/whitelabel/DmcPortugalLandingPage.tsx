@@ -280,7 +280,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
             central é mais larga justamente para o nome do veículo não quebrar. */}
         <Accordion
           type="multiple"
-          className="mt-6 grid items-start gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]"
+          className="mt-6 grid auto-rows-fr items-start gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]"
         >
           {[
             { t: "Carros executivos", c: "Até 4 passageiros", d: "Modelos premium como Mercedes-Benz V-Class e Jeep Compass, para traslados privados, executivos ou casais." },
