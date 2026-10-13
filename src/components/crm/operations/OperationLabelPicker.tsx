@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Check, Plus, Search, Tag as TagIcon, X } from "lucide-react";
+import { Check, Pencil, Plus, Search, Tag as TagIcon, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import {
 } from "@/hooks/useOperationLabels";
 import { LABEL_COLOR_PRESETS } from "@/types/opportunity-extras";
 import { cn } from "@/lib/utils";
+import { LabelsEditList, scrollableListProps } from "@/components/crm/LabelsEditList";
 
 interface OperationLabelPickerProps {
   operationId: string;
@@ -31,7 +32,8 @@ function textColorFor(hex: string) {
 }
 
 export function OperationLabelPicker({ operationId, open, onOpenChange }: OperationLabelPickerProps) {
-  const { labels, createLabel } = useOperationLabels();
+  const { labels, createLabel, updateLabel, deleteLabel } = useOperationLabels();
+  const [editMode, setEditMode] = useState(false);
   const { byOperation, assignLabel, unassignLabel } = useOperationLabelAssignments();
   const [search, setSearch] = useState("");
   const [creatingColor, setCreatingColor] = useState(LABEL_COLOR_PRESETS[0].color);
@@ -81,11 +83,20 @@ export function OperationLabelPicker({ operationId, open, onOpenChange }: Operat
         <DialogHeader className="px-4 pt-4 pb-2">
           <DialogTitle className="flex items-center gap-2 text-base">
             <TagIcon className="h-4 w-4" />
-            Etiquetas
+            {editMode ? "Editar etiquetas" : "Etiquetas"}
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="ml-auto mr-6 h-7 gap-1 text-xs"
+              onClick={() => setEditMode((v) => !v)}
+            >
+              {editMode ? "Concluir" : <><Pencil className="h-3.5 w-3.5" /> Editar</>}
+            </Button>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="px-4 pb-2">
+        {!editMode && <div className="px-4 pb-2">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
@@ -112,9 +123,14 @@ export function OperationLabelPicker({ operationId, open, onOpenChange }: Operat
               </button>
             )}
           </div>
-        </div>
+        </div>}
 
-        <div className="max-h-72 overflow-y-auto px-2 pb-2">
+        {editMode ? (
+          <div className="max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y px-2 pb-3" {...scrollableListProps}>
+            <LabelsEditList labels={labels} onUpdate={updateLabel} onDelete={deleteLabel} entityPlural="operações" />
+          </div>
+        ) : (<>
+        <div className="max-h-[60vh] overflow-y-auto overscroll-contain touch-pan-y px-2 pb-2" {...scrollableListProps}>
           {filtered.length === 0 && labels.length === 0 && !search && (
             <div className="text-center py-8 px-4">
               <TagIcon className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
@@ -175,6 +191,7 @@ export function OperationLabelPicker({ operationId, open, onOpenChange }: Operat
             </Button>
           </div>
         )}
+        </>)}
       </DialogContent>
     </Dialog>
   );
