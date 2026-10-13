@@ -72,7 +72,7 @@ const CONTACT_EMAIL = "amanda@100limitesviagens.tur.br";
 
 export const DMC_ANCHORS = [
   { id: "servicos", label: "Serviços" },
-  { id: "frota", label: "Frota" },
+  { id: "frota", label: "Estrutura" },
   { id: "lisboa", label: "Lisboa" },
   { id: "portugal", label: "Portugal" },
   { id: "grupos", label: "Grupos" },
@@ -86,8 +86,8 @@ type Tour = { t: string; meta?: string; d: string; note?: string };
 
 const LISBOA: Tour[] = [
   { t: "City Walk Lisboa", meta: "Cerca de 6 h · a pé · até 6 pessoas", d: "Centro histórico a pé pelo Chiado, Bairro Alto e Alfama, com mirantes e jardins. Pausas para provar delícias portuguesas podem ser feitas ao longo do caminho.", note: "Grupos acima de 6 pessoas: consulte." },
-  { t: "City Tour com veículo executivo", meta: "Cerca de 6 h · panorâmico", d: "Indicado para quem tem dificuldade de locomoção ou prefere um passeio panorâmico, com paradas estratégicas para fotos. Centro histórico, Chiado, Bairro Alto, Alfama, Torre de Belém, Padrão dos Descobrimentos e Jerónimos." },
-  { t: "Tour de compras em Lisboa", meta: "Cerca de 6 h", d: "Lojas escolhidas conforme o interesse do grupo: roupas, vinhos, azeites, outlets, brechós, eletrônicos, perfumaria e maquiagem." },
+  { t: "Acompanhamento panorâmico em Lisboa", meta: "Dia completo ou meio dia", d: "Indicado para quem tem dificuldade de locomoção ou prefere uma visita panorâmica, com paradas estratégicas para fotos. Centro histórico, Chiado, Bairro Alto, Alfama, Torre de Belém, Padrão dos Descobrimentos e Jerónimos." },
+  { t: "Assessoria e acompanhamento para compras em Lisboa", meta: "Dia completo ou meio dia", d: "Lojas escolhidas conforme o interesse do grupo: roupas, vinhos, azeites, outlets, brechós, eletrônicos, perfumaria e maquiagem." },
 ];
 
 const REGIOES: { id: string; title: string; tours: Tour[] }[] = [
@@ -115,8 +115,8 @@ const REGIOES: { id: string; title: string; tours: Tour[] }[] = [
     id: "porto", title: "Porto e Douro",
     tours: [
       { t: "Porto — dia inteiro saindo de Lisboa", meta: "Cerca de 10 h", d: "Centro histórico e Sé, Estação de São Bento, Torre dos Clérigos e Livraria Lello por fora, Ribeira e Vila Nova de Gaia. Almoço, caves com prova e cruzeiro no Douro podem ser incluídos conforme a proposta." },
-      { t: "Porto com 1 pernoite (2 dias)", meta: "Carro à disposição por 2 diárias", d: "Tempo para conhecer o Porto com calma e retorno a Lisboa ao fim do segundo dia.", note: "Hospedagem não incluída." },
-      { t: "Porto e Douro com 1 pernoite (2 dias)", meta: "Carro à disposição por 2 diárias", d: "Porto no primeiro dia e visita a uma quinta do Douro no segundo, com retorno a Lisboa.", note: "Hospedagem não incluída; visita e prova na quinta conforme a proposta." },
+      { t: "Porto com 1 pernoite (2 dias)", meta: "Acompanhamento por 2 dias", d: "Tempo para conhecer o Porto com calma e retorno a Lisboa ao fim do segundo dia.", note: "Hospedagem não incluída." },
+      { t: "Porto e Douro com 1 pernoite (2 dias)", meta: "Acompanhamento por 2 dias", d: "Porto no primeiro dia e visita a uma quinta do Douro no segundo, com retorno a Lisboa.", note: "Hospedagem não incluída; visita e prova na quinta conforme a proposta." },
     ],
   },
   {
@@ -136,13 +136,12 @@ const REGIOES: { id: string; title: string; tours: Tour[] }[] = [
 ];
 
 const FAQ = [
-  { q: "Os passeios saem de Lisboa?", a: "Sim. Os principais tours do portfólio têm saída de Lisboa. Outros pontos de partida podem ser cotados." },
-  { q: "Posso personalizar ou combinar passeios?", a: "Sim. As combinações de passeios de dia inteiro podem ser ajustadas conforme o perfil do cliente." },
-  { q: "Vocês atendem grupos?", a: "Sim. Para grupos maiores trabalhamos com parceiros de mini-ônibus (20 lugares) e ônibus de turismo (43 lugares), sob solicitação." },
-  { q: "Como funcionam capacidade e bagagens?", a: "A capacidade dos veículos é diferente das faixas de tarifa. As tarifas consideram faixas de até 3 e de 4 a 7 pessoas, com 1 mala de 23 kg e 1 mala de mão por pessoa. Bagagem extra ou volumes especiais devem ser informados na cotação." },
-  { q: "O que está incluído em cada passeio?", a: "Somente o que constar na proposta. Ingressos, refeições, provas, barcos e experiências citados nos roteiros não estão incluídos, salvo indicação expressa." },
-  { q: "Quais são as condições para viajar com pets?", a: "O transporte de pets é sob consulta. Porte, quantidade de animais, caixa de transporte e documentação devem ser confirmados com antecedência. A documentação do animal é de responsabilidade do tutor." },
-  { q: "Vocês atendem passageiros diretos ou apenas agências?", a: "Nosso foco como DMC é representar agências de viagens. Agências recebem o tarifário NET e o suporte operacional." },
+  { q: "O acompanhamento começa em Lisboa?", a: "Sim. Os itinerários sugeridos têm Lisboa como base. Outros pontos de início podem ser combinados." },
+  { q: "Posso personalizar o itinerário?", a: "Sim. Os itinerários de dia completo podem ser ajustadas conforme o perfil do cliente." },
+  { q: "Vocês atendem grupos?", a: "Sim. Quando necessário, podemos auxiliar na articulação com empresas parceiras para serviços de transporte, contratados separadamente." },
+    { q: "O que está incluído em cada serviço?", a: "Somente o que constar na proposta. Ingressos, refeições, provas, barcos e experiências citados nos roteiros não estão incluídos, salvo indicação expressa." },
+  { q: "Quais são as condições para viajar com pets?", a: "O acompanhamento com pets é sob consulta. Porte, quantidade de animais, caixa de transporte e documentação devem ser confirmados com antecedência. A documentação do animal é de responsabilidade do tutor." },
+  { q: "Vocês atendem passageiros diretos ou apenas agências?", a: "Nosso foco é o apoio operacional e a assistência a clientes internacionais de agências de viagens. Agências recebem o tarifário NET e o suporte operacional." },
 ];
 
 function wa(number: string, text: string) {
@@ -220,7 +219,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
     <DmcRequestCartProvider hostname={info.hostname} whatsapp={br}>
       <SEO
         title="DMC em Portugal para agências | 100 Limites"
-        description="Receptivo em Portugal para agências brasileiras: transfers privativos, passeios em Lisboa e Portugal, grupos, acompanhamento na Europa e pet friendly."
+        description="Serviços de assistência e acompanhamento turístico personalizado em Portugal para clientes de agências brasileiras: concierge, consultoria de itinerários, grupos, Europa e pet friendly."
       />
 
       {/* Hero */}
@@ -232,12 +231,12 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
               Sua operação receptiva em Portugal, com o cuidado da sua marca
             </h1>
             <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-              A 100 Limites recebe, transporta e acompanha em Portugal os passageiros de agências brasileiras, para que cada
+              A 100 Limites oferece concierge, assistência e acompanhamento personalizado em Portugal aos passageiros de agências brasileiras, para que cada
               cliente receba o mesmo cuidado e dedicação que o agente oferece.
             </p>
             <Ctas className="mt-7" />
           </div>
-          <img src={dmcAcolhimento} alt="Motorista recebendo passageiros com malas em uma rua de Lisboa" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+          <img src={dmcAcolhimento} alt="Acolhimento de visitantes em uma rua de Lisboa" className="aspect-[4/3] w-full rounded-2xl object-cover" />
         </div>
         <nav aria-label="Seções da página" className="border-y border-border/60">
           <div className={`${siteContainer(true)} flex gap-2 overflow-x-auto py-3`}>
@@ -255,12 +254,12 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
         <H2 k="Serviços">O que operamos para a sua agência</H2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { i: Plane, t: "Transfers privativos", d: "Recepção no desembarque com placa indicativa e contato com o cliente. No transfer out, contato na véspera para organizar o horário de recolha." },
-            { i: RouteIcon, t: "Passeios privados", d: "Lisboa, arredores e principais regiões de Portugal, com saída de Lisboa." },
-            { i: MapPin, t: "Roteiros sob medida", d: "Combinações de passeios ajustadas ao perfil e ao ritmo de cada cliente." },
+            { i: Plane, t: "Acolhimento e suporte na chegada", d: "Recepção no desembarque com placa indicativa, orientação inicial e assistência na chegada e na partida." },
+            { i: RouteIcon, t: "Acompanhamento personalizado", d: "Assistência e companhia em Lisboa, arredores e principais regiões de Portugal, por dia completo." },
+            { i: MapPin, t: "Consultoria de itinerários", d: "Planeamento de itinerários ajustados ao perfil e ao ritmo de cada cliente." },
             { i: Users, t: "Grupos", d: "Familiares, corporativos, escolares, religiosos e de lazer, com suporte à agência." },
             { i: Globe2, t: "Acompanhamento na Europa", d: "Companhia e apoio logístico personalizado para quem viaja pela Europa." },
-            { i: Dog, t: "Pet friendly", d: "Transporte adaptado para viajantes com seus animais, sob consulta." },
+            { i: Dog, t: "Pet friendly", d: "Acompanhamento para quem viaja com seus animais, sob consulta." },
           ].map(({ i: Icon, t, d }) => (
             <div key={t} className="flex flex-col rounded-xl border border-border/60 bg-card p-5">
               <Icon className="h-5 w-5" aria-hidden="true" />
@@ -269,12 +268,12 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
             </div>
           ))}
         </div>
-        <p className="mt-6 text-sm text-muted-foreground">Transfers com saída de Lisboa para o aeroporto, hotéis, Porto, Coimbra, Algarve e demais regiões de Portugal, sob cotação.</p>
+        <p className="mt-6 text-sm text-muted-foreground">Quando necessário, podemos auxiliar na articulação com empresas parceiras para serviços de transporte, contratados separadamente.</p>
       </Section>
 
       {/* Frota */}
       <Section id="frota">
-        <H2 k="Frota">Veículos conforme o tamanho do grupo</H2>
+        <H2 k="Estrutura">Estrutura de apoio ao atendimento</H2>
         {/* 4 colunas só a partir de 1280px: abaixo disso o título da Minivan
             (204px em Manrope 600) não caberia numa coluna de ~250px. A coluna
             central é mais larga justamente para o nome do veículo não quebrar. */}
@@ -283,10 +282,10 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
           className="mt-6 grid auto-rows-fr items-start gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]"
         >
           {[
-            { t: "Carros executivos", c: "Até 4 passageiros", d: "Modelos premium como Mercedes-Benz V-Class e Jeep Compass, para traslados privados, executivos ou casais." },
-            { t: "Minivan Mercedes V-Class", c: "Até 8 pessoas", d: "Mais espaço para famílias e pequenos grupos, com conforto e praticidade." },
-            { t: "Mini-ônibus", c: "20 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
-            { t: "Ônibus de turismo", c: "43 lugares", d: "Por meio de parceiros, sob solicitação, para grupos maiores." },
+            { t: "Carros executivos", c: "Até 4 passageiros", d: "Veículos premium como Mercedes-Benz V-Class e Jeep Compass, usados como apoio durante o acompanhamento de casais e executivos." },
+            { t: "Minivan Mercedes V-Class", c: "Até 8 pessoas", d: "Mais conforto para famílias e pequenos grupos durante o acompanhamento." },
+            { t: "Mini-ônibus", c: "20 lugares", d: "Articulação com empresas parceiras, contratadas separadamente, para grupos maiores." },
+            { t: "Ônibus de turismo", c: "43 lugares", d: "Articulação com empresas parceiras, contratadas separadamente, para grupos maiores." },
           ].map((v) => (
             <AccordionItem
               key={v.t}
@@ -305,15 +304,15 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
               <AccordionContent className="flex h-full flex-col">
                 <p className="text-sm leading-relaxed text-muted-foreground">{v.d}</p>
                 <div className="mt-auto pt-3">
-                  <DmcRequestButton kind="veiculo" title={`${v.t} (${v.c.toLowerCase()})`} />
+                  <DmcRequestButton kind="veiculo" title={`Acompanhamento com apoio de ${v.t} (${v.c.toLowerCase()})`} />
                 </div>
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
         <p className="mt-5 text-sm text-muted-foreground">
-          A capacidade de cada veículo é diferente das faixas de tarifa (até 3 e de 4 a 7 pessoas, com 1 mala de 23 kg e 1 mala de
-          mão por pessoa). O modelo é definido conforme o número de pessoas e as bagagens, e a disponibilidade é confirmada na proposta.
+          Os veículos são ferramenta de apoio ao serviço de assistência e acompanhamento, não um serviço de transporte. A estrutura
+          é definida conforme o número de pessoas e confirmada na proposta.
         </p>
       </Section>
 
@@ -321,7 +320,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       <Section id="lisboa" alt>
         <div className="grid gap-8 md:grid-cols-[0.8fr_1.2fr]">
           <div>
-            <H2 k="Passeios em Lisboa">Lisboa a pé, de carro ou às compras</H2>
+            <H2 k="Acompanhamento em Lisboa">Itinerários sugeridos em Lisboa</H2>
             <img src={destinoGastronomia} alt="Gastronomia portuguesa" className="mt-6 hidden aspect-[4/3] w-full rounded-2xl object-cover md:block" />
           </div>
           <TourList tours={LISBOA} prefix="lx" />
@@ -330,7 +329,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
 
       {/* Portugal */}
       <Section id="portugal">
-        <H2 k="Passeios em Portugal">Saindo de Lisboa para todo o país</H2>
+        <H2 k="Acompanhamento por Portugal">Itinerários com base em Lisboa</H2>
         <PortugalDestinationsGallery />
         <div className="mt-8 grid gap-8 lg:grid-cols-2">
           {REGIOES.map((r) => (
@@ -341,7 +340,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
           ))}
         </div>
         <p className="mt-6 text-sm text-muted-foreground">
-          Refeições, ingressos, provas, barcos e experiências citados nos roteiros só estão incluídos quando constarem na proposta.
+          Refeições, ingressos, provas, barcos e experiências citados nos itinerários só estão incluídos quando constarem na proposta.
         </p>
       </Section>
 
@@ -353,8 +352,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
             <H2 k="Grupos">Roteiros sob medida para cada grupo</H2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
               Grupos familiares, corporativos, escolares, religiosos e de lazer, com roteiros criados em parceria com cada agência ou
-              operador. Da escolha dos passeios à curadoria de experiências, a agência conta com suporte em cada etapa, da van ao
-              ônibus de turismo de 43 lugares.
+              operador. Da consultoria de itinerário à curadoria de experiências, a agência conta com apoio local em cada etapa.
             </p>
             <DmcRequestButton kind="especial" title="Grupos" className="mt-5" />
           </div>
@@ -380,15 +378,14 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Pet friendly */}
       <Section id="pet-friendly" alt>
         <div className="grid items-center gap-8 md:grid-cols-2">
-          <img src={dmcPet} alt="Cão viajando ao lado da tutora em veículo privativo" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
+          <img src={dmcPet} alt="Cão acompanhando a tutora em viagem" loading="lazy" className="aspect-[4/3] w-full rounded-2xl object-cover" />
           <div>
             <H2 k="Pet friendly">O pet também faz parte da família</H2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-              Transporte e acompanhamento para quem chega ou se desloca pela Europa com seus animais, seja em mudança ou lazer.
-              Veículos climatizados e adaptados, sob consulta.
+              Assistência e acompanhamento para quem chega a Portugal ou viaja pela Europa com seus animais, seja em mudança ou lazer, sob consulta.
             </p>
             <p className="mt-3 text-sm text-muted-foreground">
-              Porte, quantidade de animais e condições de transporte devem ser confirmados com antecedência. A documentação do pet é
+              Porte, quantidade de animais e condições da viagem devem ser confirmados com antecedência. A documentação do pet é
               de responsabilidade do tutor.
             </p>
             <DmcRequestButton kind="especial" title="Pet friendly" className="mt-5" />
@@ -401,10 +398,10 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
         <H2 k="Como funciona">Da cotação à operação</H2>
         <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { t: "Briefing", d: "A agência envia datas, número de passageiros, bagagens e interesses." },
+            { t: "Briefing", d: "A agência envia datas, número de passageiros e interesses." },
             { t: "Proposta", d: "Enviamos a proposta com o que está incluído." },
             { t: "Confirmação", d: "A agência confirma e alinhamos os detalhes operacionais." },
-            { t: "Operação e suporte", d: "Recebemos e acompanhamos os passageiros, com suporte à agência." },
+            { t: "Operação e suporte", d: "Prestamos assistência e acompanhamento aos passageiros, com suporte à agência." },
           ].map((s, i) => (
             <li key={s.t} className="rounded-xl border border-border/60 bg-card p-5">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-foreground text-sm font-bold text-background">{i + 1}</span>
