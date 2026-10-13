@@ -121,7 +121,7 @@ export function UsVisaHomeTeaser() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3 rounded-2xl bg-primary/10 px-5 py-4 md:px-6" aria-live="polite">
+              <div className="flex w-fit max-w-full gap-3 justify-self-start rounded-2xl bg-primary/10 px-5 py-4 md:px-6" aria-live="polite">
                 <Clock className="mt-0.5 h-6 w-6 shrink-0 text-[var(--brand-primary)] wl-accent-icon" aria-hidden="true" />
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Próxima entrevista</p>
