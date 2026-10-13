@@ -203,7 +203,7 @@ export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
     </>
   );
   return (
-    <section id="especialista" className="scroll-mt-24 bg-secondary pb-8 pt-16 md:pb-10 md:pt-24"><div className={contentWidth}>
+    <section id="especialista" className="scroll-mt-24 bg-background pb-8 pt-16 md:pb-10 md:pt-24"><div className={contentWidth}>
       {media.length === 0 ? (
         <div className="mx-auto max-w-3xl">{intro}<div className="mt-6">{text}</div></div>
       ) : (
@@ -312,7 +312,9 @@ export default function XcaretLandingPage({ info, slots = XCARET_MEDIA_SLOTS, te
         <XcaretBookingBar hostname={info.hostname} agencyName={info.agency_name ?? "Destinos com a Ju"} />
 
 
-        <section id="destino" className="scroll-mt-24 pb-16 pt-4 md:pb-24 md:pt-8"><div className={contentWidth}>
+        <Specialist slots={slots} />
+
+        <section id="destino" className="scroll-mt-24 wl-alt-gradient py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="Xcaret: um México inteiro para descobrir, sentir e se encantar.">
             <p>Na Riviera Maya, perto de Playa del Carmen, o universo Xcaret reúne parques, hotéis à beira-mar e experiências que unem natureza, aventura e cultura mexicana.</p>
             <p>Nade por rios subterrâneos, aproveite as águas do Caribe e encerre o dia com o Xcaret México Espectacular, um espetáculo de música, dança e tradições. Entre uma descoberta e outra, tempo para curtir o seu hotel no seu ritmo.</p>
@@ -322,34 +324,32 @@ export default function XcaretLandingPage({ info, slots = XCARET_MEDIA_SLOTS, te
         </div></section>
 
 
-        <Specialist slots={slots} />
-
-        <section id="parques" className="scroll-mt-24 bg-secondary pb-16 pt-6 md:pb-24 md:pt-8"><div className={contentWidth}>
+        <section id="parques" className="scroll-mt-24 bg-background py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="Qual dessas experiências tem a sua cara?"><p>Um mergulho em águas cristalinas, uma aventura sobre a selva ou uma noite de festa mexicana. Descubra outras formas de aproveitar o universo Xcaret e escolha suas favoritas com a ajuda da Ju.</p></SectionIntro>
           <Carousel opts={{ align: "start" }} className="mx-auto mt-10 max-w-[1120px]" aria-label="Outras experiências Xcaret"><CarouselContent>{XCARET_EXPERIENCES.map((item) => <CarouselItem key={item.title} className="basis-[88%] sm:basis-1/2 lg:basis-1/3"><article className="h-full overflow-hidden rounded-md bg-card shadow-sm"><Photo image={item.image} className="aspect-[4/3] w-full object-cover"/><div className="p-5"><h3 className="text-xl font-semibold">{item.title}</h3><p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">{item.text}</p></div></article></CarouselItem>)}</CarouselContent><CarouselPrevious aria-label="Experiência anterior" className="-left-2 top-[35%] h-11 w-11 md:-left-5"/><CarouselNext aria-label="Próxima experiência" className="-right-2 top-[35%] h-11 w-11 md:-right-5"/></Carousel>
           <div className="mx-auto mt-8 max-w-3xl text-center"><p className={body}>Você não precisa fazer tudo. A Ju ajuda a combinar suas experiências favoritas com tempo para aproveitar o hotel e descansar.</p></div>
         </div></section>
 
-        <section id="passeios" className="scroll-mt-24 py-16 md:py-24"><div className={contentWidth}>
+        <section id="passeios" className="scroll-mt-24 wl-alt-gradient py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="Seu próximo encantamento pode estar em um cenote. Ou em uma antiga cidade maia."><p>O universo Xcaret também convida você a explorar outras paisagens e histórias da região. Entre águas cercadas de vegetação e construções que atravessaram séculos, descubra passeios que podem tornar sua viagem ainda mais especial.</p></SectionIntro>
           <div className="mt-10 grid gap-6 md:grid-cols-2">{[["Xenotes: conexão com a natureza", "Conheça cenotes, piscinas naturais formadas na rocha, em um passeio que combina água, vegetação e atividades como caiaque, natação e rapel assistido.", XCARET_IMAGES.xenotes], ["Cultura maia: histórias para descobrir", "Explore sítios arqueológicos como Chichén Itzá ou Tulum em passeios guiados. Uma oportunidade de conhecer outra dimensão do México e enriquecer a sua viagem.", XCARET_IMAGES.chichen]].map(([title,text,image]) => <article key={title as string} className="overflow-hidden rounded-md border border-border"><Photo image={image as XcaretImage} className="aspect-[16/9] w-full object-cover"/><div className="p-6"><h3 className="text-2xl font-semibold">{title as string}</h3><p className="mt-3 text-pretty leading-7 text-muted-foreground">{text as string}</p></div></article>)}</div>
           <p className="mx-auto mt-8 max-w-3xl text-pretty text-center text-base leading-7 text-foreground">Conte à Ju o que mais desperta sua curiosidade. Ela ajuda a escolher os passeios e verificar como encaixá-los no seu roteiro.</p>
         </div></section>
 
-        <section id="hoteis" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={contentWidth}>
+        <section id="hoteis" className="scroll-mt-24 bg-background py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="O hotel também faz parte da descoberta."><p>Imagine voltar de um dia de aventuras e encontrar piscinas, boa gastronomia e paisagens do Caribe esperando por você. Os três hotéis do Xcaret oferecem diferentes formas de viver o destino, com conforto e personalidade mexicana.</p></SectionIntro>
           <div className="mt-10 grid gap-5 lg:grid-cols-3">{hotels.map(([name, label, text, image]) => <article key={name} className="overflow-hidden rounded-md bg-card shadow-sm"><Photo image={image} className="aspect-[4/3] w-full object-cover"/><div className="p-5"><p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{label}</p><h3 className="mt-2 text-2xl font-semibold">{name}</h3><p className="mt-3 text-pretty text-sm leading-6 text-muted-foreground">{text}</p></div></article>)}</div>
           <div className="mt-8 rounded-md bg-foreground px-6 py-7 text-background md:px-9"><p className="text-sm font-bold uppercase tracking-[0.16em] text-background/70">Muito além da hospedagem</p><p className="mt-3 max-w-4xl text-pretty text-lg leading-7">Nos Hotéis Xcaret, a estadia combina alimentação, acesso a parques e experiências e transporte, conforme o hotel e as condições da reserva. A Ju explica o que está incluído e ajuda você a aproveitar essa combinação.</p></div>
           <div className="mx-auto mt-8 max-w-3xl text-center"><p className={body}>Qual deles combina com a sua viagem? Conte à Ju com quem você vai viajar e o que mais valoriza na hospedagem.</p></div>
         </div></section>
 
-        <section id="roteiro" className="scroll-mt-24 py-16 md:py-24"><div className={contentWidth}>
+        <section id="roteiro" className="scroll-mt-24 wl-alt-gradient py-16 md:py-24"><div className={contentWidth}>
           <SectionIntro title="Dias de descoberta. Tempo para aproveitar. Uma viagem com a sua cara."><p>Como combinar tantos lugares incríveis? Uma estadia de 6 noites pode ser o ponto de partida para conhecer alguns dos principais parques e ainda aproveitar o hotel. Veja uma ideia de como essa viagem pode acontecer.</p></SectionIntro>
           <div className="mt-10 grid items-start gap-8 lg:grid-cols-[0.85fr_1.15fr]"><Photo image={XCARET_IMAGES.xelHa} className="aspect-[4/5] w-full rounded-md object-cover lg:sticky lg:top-28"/><div><p className="mb-4 text-sm font-bold uppercase tracking-[0.16em] text-primary">Roteiro sugerido · 7 dias / 6 noites</p><ol className="divide-y divide-border border-y border-border">{itinerary.map(([day,title,text]) => <li key={day} className="grid gap-2 py-4 sm:grid-cols-[72px_1fr]"><span className="text-sm font-bold text-primary">{day}</span><div><h3 className="font-semibold">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{text}</p></div></li>)}</ol><p className="mt-5 text-sm leading-6 text-muted-foreground">Uma inspiração para a sua viagem. A programação será ajustada às suas datas, ao perfil dos viajantes e à disponibilidade das experiências.</p></div></div>
-          <div className="mt-8 rounded-md bg-secondary p-6 md:p-8"><h3 className="text-2xl font-semibold">Quer estender a viagem em Cancún?</h3><p className="mt-3 max-w-3xl text-pretty leading-7 text-muted-foreground">A Ju também pode combinar sua estadia no Xcaret com alguns dias em Cancún, organizando os hotéis e deslocamentos para você aproveitar os dois destinos.</p></div>
+          <div className="mt-8 rounded-md bg-card p-6 md:p-8"><h3 className="text-2xl font-semibold">Quer estender a viagem em Cancún?</h3><p className="mt-3 max-w-3xl text-pretty leading-7 text-muted-foreground">A Ju também pode combinar sua estadia no Xcaret com alguns dias em Cancún, organizando os hotéis e deslocamentos para você aproveitar os dois destinos.</p></div>
         </div></section>
 
-        <section id="duvidas" className="scroll-mt-24 bg-secondary py-16 md:py-24"><div className={`${contentWidth} max-w-4xl`}><SectionIntro title="Pensando em conhecer o Xcaret? Tire suas primeiras dúvidas."/><Accordion type="single" collapsible className="mt-10 rounded-md border border-border bg-card px-5 md:px-7">{XCARET_FAQ.map(([q,a],index)=><AccordionItem value={`faq-${index}`} key={q}><AccordionTrigger className="min-h-14 text-left text-base hover:no-underline">{q}</AccordionTrigger><AccordionContent className="pr-8 text-[15px] leading-7 text-muted-foreground">{a}</AccordionContent></AccordionItem>)}</Accordion></div></section>
+        <section id="duvidas" className="scroll-mt-24 bg-background py-16 md:py-24"><div className={`${contentWidth} max-w-4xl`}><SectionIntro title="Pensando em conhecer o Xcaret? Tire suas primeiras dúvidas."/><Accordion type="single" collapsible className="mt-10 rounded-md border border-border bg-card px-5 md:px-7">{XCARET_FAQ.map(([q,a],index)=><AccordionItem value={`faq-${index}`} key={q}><AccordionTrigger className="min-h-14 text-left text-base hover:no-underline">{q}</AccordionTrigger><AccordionContent className="pr-8 text-[15px] leading-7 text-muted-foreground">{a}</AccordionContent></AccordionItem>)}</Accordion></div></section>
 
         <Closing slots={slots} />
       </main>
