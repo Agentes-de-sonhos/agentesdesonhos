@@ -29,10 +29,10 @@ import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
-import { CadasturSeal } from "@/components/whitelabel/CadasturSeal";
+import { CadasturSeal, cadasturCertificateFor } from "@/components/whitelabel/CadasturSeal";
 
 /** Selo Cadastur: apenas sites autorizados (100 Limites). */
-const showCadastur = (hostname?: string | null) => /100limites/i.test(hostname ?? "");
+const showCadastur = (hostname?: string | null) => cadasturCertificateFor(hostname) !== null;
 
 /** Item de menu do site: pode ter um submenu declarado pelo perfil. */
 export interface AgencySiteNavItem {
@@ -161,7 +161,7 @@ export function AgencyBrandBar({
             >
               Área do Cliente
             </a>
-            {showCadastur(info.hostname) && <CadasturSeal className="h-7 w-auto object-contain" />}
+            {showCadastur(info.hostname) && <CadasturSeal hostname={info.hostname} className="h-7 w-auto object-contain" />}
           </div>
 
           <button
@@ -450,7 +450,7 @@ export function AgencyFooter({
                 <BrandText>{name}</BrandText>
               </p>
             )}
-            {showCadastur(info.hostname) && <CadasturSeal lazy className="h-11 w-auto object-contain" />}
+            {showCadastur(info.hostname) && <CadasturSeal lazy hostname={info.hostname} className="h-11 w-auto object-contain" />}
             </div>
             <p className="mt-5 max-w-sm whitespace-pre-line text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
               {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
