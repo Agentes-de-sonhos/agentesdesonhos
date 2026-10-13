@@ -21,7 +21,7 @@ describe("landing Xcaret da Destinos com a Ju", () => {
     expect(XCARET_EXPERIENCES).toHaveLength(5);
     expect(XCARET_FAQ).toHaveLength(7);
     expect(Object.values(XCARET_MEDIA_SLOTS).every((slot) => slot?.src)).toBe(true);
-    expect((source.match(/<section id=/g) ?? []).length).toBe(9); expect(source).toContain("<Specialist />");
+    expect((source.match(/<section id=/g) ?? []).length).toBe(9); expect(source).toContain("<Specialist slots={slots} />"); expect(source.indexOf("<Specialist slots={slots} />")).toBeLessThan(source.indexOf('<section id="destino"')); expect(source).toContain('id="destino" className="scroll-mt-24 wl-alt-gradient');
     expect(source).toContain("Hotel Xcaret México");
     expect(source).toContain("Hotel Xcaret Arte");
     expect(source).toContain("La Casa de la Playa");
