@@ -1,71 +1,8 @@
-# Roadmap
-- [x] Concluir LEGOLAND Florida, Kennedy Space Center e ICON Park: 158 itens/161 âncoras, PNGs 5130×7290/4800×2698/1512×1460; 17 logos, quatro telas/100–200%, gestos e fechamento acessível; preservar 14 mapas e orçamento, sem publicar. Evidências e limitações em docs/validacao-final-parques-orlando.md.
-- [x] Concluir Universal Studios Florida, Islands of Adventure, Epic Universe e Volcano Bay dos PDFs: 196 itens/198 âncoras, crops sRGB 3475×3240 a 360 dpi, 14 logos, 52 testes e quatro telas/gestos; preservar dez mapas e orçamento, sem publicar. Evidências em docs/validacao-universal-parks.md.
-- [x] Integrar SeaWorld, Busch Gardens, Aquatica e Discovery Cove: fontes nativas, 181 itens/187 âncoras, referências heterogêneas e leituras limitadas documentadas, dez logos e orçamento independente; validar quatro telas/100–200%, gestos e regressão Disney, sem publicar.
-- [x] Implementar Typhoon Lagoon e Blizzard Beach completos: 51 itens únicos/61 âncoras verificadas no PDF, crops sRGB nativos 2873×2700 e 2986×2700, motor com múltiplos acessos por item, seis popups corretos, 30 testes e quatro telas/100–200%/pinça real; parques anteriores e orçamento preservados, sem publicar.
-- [x] Implementar EPCOT, Animal Kingdom e Hollywood Studios completos dos PDFs: 209 pontos, crops sRGB nativos, legendas/coordenadas verificadas, popups compartilhados, testes e quatro telas/100–200%/pinça real; Magic Kingdom preservado, sem publicar.
-- [x] Magic Kingdom final: mapa grande pela largura, imagem inteira e rolagem vertical única; quatro telas, zoom/drag/reset e fechamento validados, dez testes aprovados, sem publicar.
-- [x] Corrigir altura real do popup Magic Kingdom: frame pela altura útil, mapa inteiro a 100%, sidebar contida; validar telas e zoom do navegador, sem publicar.
-- [x] Aplicar complemento visual Magic Kingdom: mapa preenchendo frame, controles sobre imagem e lista contida; comparar original nas quatro telas, sem publicar.
-- [x] Restaurar layout original aprovado do mapa Magic Kingdom, comparar quatro telas e preservar gestos sem publicar.
-- [x] Integrar o mapa Magic Kingdom aprovado (84 pontos, PNG original) aos ingressos white-label; validar modal, gestos e orçamento, sem publicar.
-- [x] Completar conteúdo e acabamento da prévia O Mundo em Cores briefing-14-v1; validar cartões, destinos conhecidos, depoimentos e bloqueios em desktop/mobile, sem publicar ou alterar dados reais.
-- [x] Destinos com a Ju: banner editorial de nove experiências oficiais em /ingressos-orlando, recuado na coluna do formulário (não de borda a borda); formulário preservado, validado em 1280/768/390, sem publicar.
-- [x] Criar e validar a prévia técnica isolada do briefing 16 para Drica Viagens, preservando fixtures, tenants e banco, sem publicar.
-- [x] Orçamentos: reorganizar exclusivamente o modal de Outros Serviços, tornar valor opcional e mover fornecedor para o final, sem publicar.
-- [x] Orçamentos: permitir escolher o ícone do cabeçalho de Outros Serviços, refletindo no editor, link público e PDF, sem publicar.
-- [x] Roteiros: editar data inicial com deslocamento em cascata e confirmação antes de descartar atividades, gerenciar nomes dos viajantes após a criação e unificar o botão Importar (arquivo ou orçamento), sem publicar.
-- [x] Site da 100 Limites: menu com submenus e páginas Quem Somos (DMC/Agência), Frota, Passeios (Lisboa/Portugal), Europa e Pet Friendly, sem publicar.
-- [x] Criar e validar a prévia técnica isolada do briefing 14 para O Mundo em Cores, preservando a fixture ADS existente, tenants e banco, sem publicar.
-- [x] Criar páginas neutras nas raízes dos seis domínios públicos, preservando todos os links completos, sem publicar.
-- [x] Reorganizar o editor de orçamento conforme escopo aprovado, validar testes, tipos e build, sem publicar.
-- [x] Mover a adição de atividades para Manhã, Tarde e Noite, validar fluxos e acessibilidade, sem publicar.
-- [x] Notícias do Trade: restaurar coleta de Mercado & Eventos e Brasilturis com fonte pública alternativa.
-- [x] Comunidade Fase 1 (somente Agentes de Sonhos, sem banco, sem publicar):
-  - [x] Barra inferior mobile com 5 itens (Início, Minha Rede, Publicação, Gestão, Menu).
-  - [x] Cabeçalho mobile compacto (avatar, campo Pesquisar, Chat) no dashboard e na Comunidade.
-  - [x] Card de publicação compartilhado: cabeçalho com agência, texto com 3 linhas + "mais", contadores de curtidas/comentários.
-  - [x] Grade de fotos 1/2/3/4/+N.
-  - [x] Galeria em tela cheia com swipe, setas, teclado, indicador e fechar.
-  - [x] Responsividade, testes (truncamento, grade, galeria, barra mobile), typecheck e build.
-- [x] Ajustes visuais pós-Fase 5 e Comunidade opcional no painel SiteLab/white-label:
-  - [x] Integrar busca/chat e membros online ao cabeçalho da Comunidade no dashboard.
-  - [x] Unificar cabeçalho dos posts e ampliar o uso da largura mobile.
-  - [x] Refinar compositor fullscreen branco no mobile e modal no desktop.
-  - [x] Adicionar opt-in por agência, desligado por padrão, com SiteLab como referência.
-  - [x] Validar isolamento, testes específicos, suíte completa, tipos e build sem publicar.
-- [x] Compactar o cabeçalho mobile da página inicial, ampliar os quatro atalhos e remover o suporte flutuante global, sem publicar.
-- [x] Tornar os quatro formulários rápidos do dashboard fullscreen e seguros com teclado no mobile, preservando desktop e regras atuais.
-- [x] Calendários de intervalo: um mês no mobile com setas e swipe (Fase 1 compartilhada + Fase 2 formulários locais).
-- [x] Refinar UX/UI mobile da página inicial e dos quatro fluxos rápidos, preservando toda a lógica e sem publicar.
-- [x] Seletor editável de ícones na etapa "Incluso" do orçamento (editor, web público e PDF), sem migration e sem publicar.
-- [x] Remover o bloco de acesso por código da Área do Cliente compartilhada em SiteLab Base e todos os sites, sem publicar.
-- [x] Fase 1A — fluxo unificado de conversão file → operação + venda atrás do entitlement unified_workflow_v2 (OFF por padrão, nenhuma agência ativada), sem publicar/deployar. Pontos pendentes para fase futura: vínculo de carteira/roteiro e diagnóstico de duplicidades legadas.
-- [x] Fase 1A — rodada corretiva 2 (migration 0018, sem ativar entitlement e sem publicar):
-  - [x] Lock da oportunidade antes das checagens (concorrência entre dois files da mesma oportunidade).
-  - [x] Retorno estruturado de erro da RPC tratado como falha no hook e no diálogo.
-  - [x] Recebimento do cliente no V2 calculado só pela linhagem do file/operação.
-  - [x] Atalhos persistidos de operação e venda no processo já convertido.
-  - [x] Testes comportamentais reais (entitlement, duplo clique, erro estruturado) + suíte, tipos, build.
-  - Não executado: teste concorrente real de banco (exigiria dados persistentes); funil segue coberto por teste estrutural.
-- [x] Evolução editorial exclusiva da Destinos com a Ju: conteúdo aprovado, testes focados, typecheck, build e conferência visual, sem publicar.
-- [x] Correção final declarativa da Destinos com a Ju: hero, menu, WhatsApp e resolução por hostname; teste focado e typecheck, sem publicar.
-- [x] Padronizar tipografia e largura dos sites white label, corrigir newsletter e validar desktop/mobile, sem publicar.
-- [x] Restaurar a Central compacta da Destinos com a Ju com título externo e CTA “Solicitar”, sem alterar outros tenants.
-- [x] Atualizar e ampliar o logotipo da Destinos com a Ju somente no cabeçalho.
-- [x] Ajustar a quebra do título e mover CTA/navegação do banner à direita somente na Destinos com a Ju.
-- [x] Clarear a seção “Sua DMC em Portugal” e substituir sua foto somente na 100 Limites.
-- [x] Substituir a foto da seção de cruzeiros da Destinos com a Ju pelo vídeo enviado, com reprodução automática ao entrar na tela.
-- [x] Personalizar integralmente o perfil editorial da 100 Limites para passageiros e agências, sem alterar outros tenants.
-- [x] Criar a landing page Xcaret exclusiva da Destinos com a Ju, com rota protegida, conteúdo, imagens oficiais locais, navegação e responsividade, sem publicar.
-- [x] Aplicar fotos reais da Juliana, selo Xperts e fachadas da loja nas páginas da Destinos com a Ju, sem publicar.
-- [x] Ajustar selo retangular, enquadramento da Juliana e recorte lateral da seção Xcaret, sem publicar.
-
-- [x] Atualizar exclusivamente o hero da Destinos com a Ju com as três fotos aprovadas, recortes responsivos e contraste; validar desktop/mobile, tipos e build; não publicar.
-- Textos 'Por que escolher' e 'Destaques' dos 78 resorts — aguardando documento do usuário
-- [x] 100 Limites: alternar fundo branco/degradê a partir da DMC em Portugal, sem publicar.
-- [x] 100 Limites: trocar a foto da seção DMC por acolhimento receptivo em Lisboa, sem publicar.
-- [x] Visto B1/B2: hook e componente opt-in lendo us_visa_public_info (tabela criada externamente), sem ativar em sites e sem publicar.
-- [x] 100 Limites: landing /visto-americano (B1/B2) lendo us_visa_public_info, sem publicar.
-- [x] 100 Limites: micro-interações de hover na landing /visto-americano (CTA do WhatsApp com verde profundo + texto branco e "pop", foto da Amanda com zoom que vai e volta, cartões de benefícios/etapas/custos com elevação e borda da marca, número da etapa preenchido, linhas da tabela de esperas com fundo), tudo em tokens semânticos, sem exagero, com respeito a prefers-reduced-motion, sem publicar.
-- [x] 100 Limites: perguntas frequentes da landing /visto-americano sem sublinhado no hover; pergunta e setinha assumem o âmbar/dourado escuro da marca (token --wl-gold), sem publicar.
+# Adaptação da página Portugal — 100 Limites
+- [ ] Confirmar identidade, domínio e fontes efetivas.
+- [ ] Adequar toda a página e solicitação para assistência; retirar ofertas de transporte/frota/tours.
+- [ ] Validar conteúdo, isolamento, CTAs e verificações automatizadas, sem publicação.
+## Página Portugal — 100 Limites
+- [x] Confirmar Amanda Larini, domínio ativo e conteúdo estático específico.
+- [ ] Adequar página e solicitação para assistência, sem frota/transporte/tours fechados.
+- [ ] Validar CTAs, conteúdo e isolamento, sem publicar.

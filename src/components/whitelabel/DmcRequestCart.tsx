@@ -16,7 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { flyToCart } from "@/lib/bookingCartFly";
 
-export type DmcKind = "veiculo" | "passeio" | "especial";
+export type DmcKind = "assistencia";
 
 export interface DmcItem {
   id: string;
@@ -33,7 +33,21 @@ interface Ctx {
 }
 
 const DmcCartContext = createContext<Ctx | null>(null);
-const STORAGE_KEY = "dmc-portugal-cart:v1";
+// A new, tenant-scoped draft excludes old transport/tour offers without deleting them.
+export const dmcStorageKey = (hostname: string) => `dmc-portugal-assistance:v2:${hostname.trim().toLowerCase().replace(/^www\./, "")}`;
+const ITEM_FIELDS = new Set(["data", "data_fim", "local", "interesses", "adultos", "criancas", "idades", "obs"]);
+
+export function readAssistanceDraft(hostname: string): DmcItem[] {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(dmcStorageKey(hostname)) || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw.filter((item): item is DmcItem =>
+      item && item.kind === "assistencia" && typeof item.id === "string" && typeof item.title === "string" &&
+      item.values && typeof item.values === "object" && !Array.isArray(item.values) &&
+      Object.entries(item.values).every(([key, value]) => ITEM_FIELDS.has(key) && typeof value === "string"),
+    );
+  } catch { return []; }
+}
 
 export function useDmcCart() {
   return useContext(DmcCartContext);
@@ -47,40 +61,19 @@ const PAX: FieldDef[] = [
   { name: "idades", label: "Idades das crianças", type: "text" },
 ];
 
-function fieldsFor(kind: DmcKind, values: Record<string, string>): FieldDef[] {
-  if (kind === "veiculo") {
-    const t = values.trajeto || "Ida e volta (in/out)";
-    const out: FieldDef[] = [
-      { name: "trajeto", label: "Traslado", type: "select", options: ["Ida e volta (in/out)", "Somente chegada (in)", "Somente saída (out)", "Veículo à disposição"], required: true },
-    ];
-    if (t !== "Somente saída (out)") out.push({ name: "data_chegada", label: t === "Veículo à disposição" ? "Data inicial" : "Data de chegada", type: "date", required: true }, { name: "hora_chegada", label: "Horário / voo de chegada", type: "text" });
-    if (t !== "Somente chegada (in)") out.push({ name: "data_saida", label: t === "Veículo à disposição" ? "Data final" : "Data de saída", type: "date", required: t === "Somente saída (out)" }, { name: "hora_saida", label: "Horário / voo de saída", type: "text" });
-    out.push(
-      { name: "origem", label: "Origem", type: "text" },
-      { name: "destino", label: "Destino (hotel, cidade)", type: "text" },
-      ...PAX,
-      { name: "malas", label: "Malas (23 kg)", type: "number", min: 0 },
-    );
-    return out;
-  }
-  if (kind === "passeio") {
-    return [
-      { name: "data", label: "Data preferencial", type: "date", required: true },
-      { name: "partida", label: "Local de partida", type: "text" },
-      ...PAX,
-    ];
-  }
+function fieldsFor(): FieldDef[] {
   return [
     { name: "data", label: "Data ou início do período", type: "date", required: true },
     { name: "data_fim", label: "Fim do período", type: "date" },
     ...PAX,
+    { name: "local", label: "Cidade ou locais de interesse", type: "text" },
+    { name: "interesses", label: "Assistência desejada", type: "text" },
   ];
 }
 
 const LABELS: Record<string, string> = {
-  trajeto: "Traslado", data_chegada: "Chegada", hora_chegada: "Horário/voo chegada", data_saida: "Saída", hora_saida: "Horário/voo saída",
-  origem: "Origem", destino: "Destino", adultos: "Adultos", criancas: "Crianças", idades: "Idades", malas: "Malas",
-  data: "Data", data_fim: "Até", partida: "Partida", obs: "Obs.",
+  adultos: "Adultos", criancas: "Crianças", idades: "Idades das crianças",
+  data: "Início", data_fim: "Fim do período", local: "Locais de interesse", interesses: "Assistência desejada", obs: "Observações",
 };
 
 function fmt(name: string, v: string) {
@@ -93,14 +86,14 @@ function fmt(name: string, v: string) {
 
 export function describeItem(item: DmcItem): string {
   const parts = Object.entries(item.values)
-    .filter(([, v]) => v && v !== "0")
+    .filter(([key, v]) => ITEM_FIELDS.has(key) && v && v !== "0")
     .map(([k, v]) => `${LABELS[k] ?? k}: ${fmt(k, v)}`);
   return `${item.title} — ${parts.join("; ")}`;
 }
 
 export function DmcRequestCartProvider({ hostname, whatsapp, children }: { hostname: string; whatsapp: string | null; children: React.ReactNode }) {
   const [items, setItems] = useState<DmcItem[]>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+    return readAssistanceDraft(hostname);
   });
   const [editing, setEditing] = useState<{ kind: DmcKind; title: string; values: Record<string, string>; id?: string } | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -109,12 +102,12 @@ export function DmcRequestCartProvider({ hostname, whatsapp, children }: { hostn
   const cartBtn = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
-  }, [items]);
+    try { localStorage.setItem(dmcStorageKey(hostname), JSON.stringify(items)); } catch { /* ignore */ }
+  }, [items, hostname]);
 
   const open = useCallback((kind: DmcKind, title: string, origin?: HTMLElement | null) => {
     originRef.current = origin ?? null;
-    setEditing({ kind, title, values: { adultos: "2", criancas: "0", ...(kind === "veiculo" ? { trajeto: "Ida e volta (in/out)" } : {}) } });
+    setEditing({ kind, title, values: { adultos: "2", criancas: "0" } });
   }, []);
 
   const save = (values: Record<string, string>) => {
@@ -142,7 +135,7 @@ export function DmcRequestCartProvider({ hostname, whatsapp, children }: { hostn
   return (
     <DmcCartContext.Provider value={value}>
       {children}
-      <button
+      <Button
         ref={cartBtn}
         type="button"
         onClick={() => setCartOpen(true)}
@@ -152,7 +145,7 @@ export function DmcRequestCartProvider({ hostname, whatsapp, children }: { hostn
         <ShoppingBag className="h-5 w-5" aria-hidden="true" />
         {items.length ? "Finalizar solicitação" : "Minha solicitação"}
         <span className="grid h-6 min-w-6 place-items-center rounded-full bg-background px-1.5 text-xs font-bold text-foreground">{items.length}</span>
-      </button>
+      </Button>
 
       <ItemDialog editing={editing} onClose={() => setEditing(null)} onSave={save} />
       <CartDialog
@@ -174,12 +167,14 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
   const [error, setError] = useState<string | null>(null);
   useEffect(() => { if (editing) { setValues(editing.values); setError(null); } }, [editing]);
   if (!editing) return null;
-  const fields = fieldsFor(editing.kind, values);
+  const fields = fieldsFor();
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const missing = fields.find((f) => f.required && !values[f.name]?.trim());
     if (missing) return setError(`Informe: ${missing.label}.`);
-    if (values.data_chegada && values.data_saida && values.data_saida < values.data_chegada) return setError("A data de saída deve ser posterior à chegada.");
+    if (values.data && values.data_fim && values.data_fim < values.data) return setError("O fim do período deve ser igual ou posterior ao início.");
+    if (!Number.isInteger(Number(values.adultos)) || Number(values.adultos) < 1) return setError("Informe ao menos um adulto.");
+    if (!Number.isInteger(Number(values.criancas || "0")) || Number(values.criancas || "0") < 0) return setError("Informe um número válido de crianças.");
     const allowed = new Set([...fields.map((f) => f.name), "obs"]);
     onSave(Object.fromEntries(Object.entries(values).filter(([k]) => allowed.has(k))));
   };
@@ -192,7 +187,7 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
         </DialogHeader>
         <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
           {fields.map((f) => (
-            <div key={f.name} className={f.type === "select" || f.name === "idades" || f.name === "destino" || f.name === "origem" ? "sm:col-span-2" : ""}>
+            <div key={f.name} className={f.type === "select" || f.name === "idades" || f.name === "local" || f.name === "interesses" ? "sm:col-span-2" : ""}>
               <Label htmlFor={`dmc-${f.name}`} className="text-xs">{f.label}{f.required ? " *" : ""}</Label>
               {f.type === "select" ? (
                 <select
@@ -201,7 +196,7 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
                   className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  {f.options!.map((o) => <option key={o}>{o}</option>)}
+                  {f.options?.map((o) => <option key={o}>{o}</option>)}
                 </select>
               ) : (
                 <Input
@@ -248,7 +243,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
     if (digits && (digits.length < 10 || digits.length > 15)) return setFormError("Informe um WhatsApp válido com código do país/DDD.");
     if (!c.consent) return setFormError("É necessário aceitar o uso dos seus dados para contato.");
     const lines = items.map(describeItem);
-    const details: Record<string, string> = { origem_pagina: "DMC Portugal", total_itens: String(items.length) };
+    const details: Record<string, string> = { origem_pagina: "Assistência personalizada em Portugal", total_itens: String(items.length) };
     if (c.agency.trim()) details.agencia = c.agency.trim();
     lines.slice(0, 35).forEach((l, i) => { details[`item_${i + 1}`] = l.slice(0, 400); });
     const adults = Math.max(...items.map((i) => Number(i.values.adultos) || 0));
@@ -257,12 +252,12 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
     details.criancas = String(kids);
     const res = await submit({
       service_key: "pacotes",
-      service_label: "DMC Portugal",
+      service_label: "Assistência personalizada em Portugal",
       lead_name: c.name.trim(),
       lead_phone: c.phone.trim(),
       lead_email: c.email.trim(),
       destination: "Portugal",
-      summary: ["Solicitação DMC Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
+      summary: ["Solicitação de assistência personalizada em Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
       notes: [c.agency.trim() && `Agência: ${c.agency.trim()}`, c.notes.trim()].filter(Boolean).join("\n").slice(0, 2000),
       consent: true,
       consent_version: "v1",
@@ -272,7 +267,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
   };
 
   const waText = sent
-    ? `Olá, Amanda! Acabei de enviar uma solicitação de DMC em Portugal pelo site:\n\n${sent.map((l) => `• ${l}`).join("\n")}\n\nNome: ${c.name}${c.agency ? `\nAgência: ${c.agency}` : ""}`
+    ? `Olá, Amanda! Acabei de enviar uma solicitação de assistência personalizada em Portugal pelo site:\n\n${sent.map((l) => `• ${l}`).join("\n")}\n\nNome: ${c.name}${c.agency ? `\nAgência: ${c.agency}` : ""}`
     : "";
 
   const close = (o: boolean) => {
@@ -304,7 +299,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
             </DialogHeader>
             {items.length === 0 ? (
               <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                Nenhum serviço adicionado. Clique em “Solicitar” nos veículos e passeios da página.
+                Nenhuma assistência adicionada.
               </p>
             ) : (
               <ul className="space-y-2">
@@ -354,11 +349,11 @@ export function DmcRequestButton({ kind, title, className = "" }: { kind: DmcKin
       type="button"
       size="sm"
       variant={n ? "secondary" : "default"}
-      className={className}
+      className={`h-auto min-h-9 whitespace-normal text-left ${className}`}
       onClick={(e) => cart.open(kind, title, e.currentTarget)}
-      aria-label={`Solicitar ${title}`}
+      aria-label={`Solicitar assistência personalizada: ${title}`}
     >
-      {n ? <><Check className="mr-1.5 h-4 w-4" />Adicionado ({n}) · +</> : <><Plus className="mr-1.5 h-4 w-4" />Solicitar</>}
+      {n ? <><Check className="mr-1.5 h-4 w-4" />Adicionado ({n}) · +</> : <><Plus className="mr-1.5 h-4 w-4 shrink-0" /><span>Solicitar assistência personalizada</span></>}
     </Button>
   );
 }
