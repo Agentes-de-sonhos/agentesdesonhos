@@ -269,8 +269,8 @@ const EDITORIAL_DMC: AgencySiteProfile = {
       to: "/dmc-portugal",
       children: [
         { label: "Visão geral", to: "/dmc-portugal" },
-        { label: "Acompanhamento em Lisboa", to: "/dmc-portugal#lisboa" },
-        { label: "Acompanhamento em Portugal", to: "/dmc-portugal#portugal" },
+        { label: "Passeios em Lisboa", to: "/dmc-portugal#lisboa" },
+        { label: "Passeios em Portugal", to: "/dmc-portugal#portugal" },
         { label: "Grupos", to: "/dmc-portugal#grupos" },
       ],
     },
