@@ -702,6 +702,15 @@ export default function AgencySiteHome({
         if (!authority) return null;
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
+            {authority.sectionLabel ? (
+              <div className={`${container} pt-14 md:pt-20`}>
+                <div className="flex items-center justify-center gap-4 md:gap-6">
+                  <span className="h-px w-12 bg-background/30 md:w-24" aria-hidden="true" />
+                  <h2 className="text-center text-2xl font-extrabold uppercase tracking-[0.28em] text-background md:text-4xl">{authority.sectionLabel}</h2>
+                  <span className="h-px w-12 bg-background/30 md:w-24" aria-hidden="true" />
+                </div>
+              </div>
+            ) : null}
             <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
               {authority.videos?.length ? (
                 <AuthorityVideoGallery
@@ -731,6 +740,18 @@ export default function AgencySiteHome({
                 </Button>
               </div>
             </div>
+            {authority.companies?.items.length ? (
+              <div className={`${container} pb-16 md:pb-24`}>
+                <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
+                <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 md:gap-5">
+                  {authority.companies.items.map((c) => (
+                    <li key={c.name} className="flex aspect-[3/2] items-center justify-center overflow-hidden rounded-2xl bg-background p-3 shadow-lg ring-1 ring-background/10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                      <img src={c.logo} alt={`Logotipo da ${c.name}`} loading="lazy" decoding="async" className="h-full w-full object-contain" />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </section>
         );
       }
