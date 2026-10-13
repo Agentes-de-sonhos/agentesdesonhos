@@ -6,7 +6,7 @@ import DmcPortugalLandingPage, { DMC_SERVICES } from "@/pages/whitelabel/DmcPort
 import { describeItem, dmcStorageKey, readAssistanceDraft } from "@/components/whitelabel/DmcRequestCart";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
-const { submit } = vi.hoisted(() => ({ submit: vi.fn(async () => ({ success: true })) }));
+const { submit } = vi.hoisted(() => ({ submit: vi.fn(async (_payload: Record<string, unknown>) => ({ success: true })) }));
 vi.mock("@/hooks/useAgencySiteRequest", () => ({ useAgencySiteRequest: () => ({ state: "idle", error: null, submit, reset: vi.fn() }) }));
 vi.mock("@/lib/bookingCartFly", () => ({ flyToCart: vi.fn() }));
 const info: AgencyDomainInfo = {
@@ -45,7 +45,7 @@ describe("100 Limites — assistência em Portugal", () => {
 
   it("abre popup, adiciona, revisa e envia o novo conteúdo pelo fluxo existente", async () => {
     renderPage();
-    fireEvent.click(screen.getAllByRole("button", { name: "Solicitar assistência personalizada", exact: true })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /^Solicitar assistência personalizada$/ })[0]);
     expect(screen.queryByLabelText(/Traslado/)).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText(/Data ou início/), { target: { value: "2026-11-20" } });
     fireEvent.change(screen.getByLabelText("Cidade ou locais de interesse"), { target: { value: "Lisboa e Sintra" } });
