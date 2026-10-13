@@ -103,7 +103,7 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   const total = XCARET_HERO_SLIDES.length;
   const slide = XCARET_HERO_SLIDES[current] ?? XCARET_HERO_SLIDES[0];
   return (
-    <section id="inicio" className="relative isolate flex min-h-[640px] flex-col bg-foreground text-background lg:min-h-[min(760px,calc(100vh-76px))]">
+    <section id="inicio" className="relative isolate flex min-h-[640px] flex-col bg-foreground text-background lg:h-[500px] lg:min-h-0">
       <Carousel setApi={setApi} opts={{ loop: true }} aria-label="Destaques dos parques Xcaret" className="absolute inset-0 -z-10 [&>div]:h-full">
         <CarouselContent className="ml-0 h-full">
           {XCARET_HERO_SLIDES.map((item, index) => (
@@ -115,13 +115,16 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
       </Carousel>
       <div className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/20" aria-hidden />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-1/2 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden />
-      <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-52 pt-14 md:pb-56 lg:pb-64`}>
+      <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-52 pt-14 md:pb-56 lg:items-start lg:pb-0 lg:pt-14`}>
         <div className="pointer-events-auto max-w-3xl text-background lg:max-w-5xl">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-background/80">Riviera Maya • México</p>
-          <h1 className="mt-5 text-4xl font-semibold leading-[1.08] md:text-6xl">
-            <span className="block">Xcaret. Um destino</span>
-            <span className="block lg:whitespace-nowrap">inteiro para se apaixonar.</span>
-          </h1>
+          <div className="mt-5 flex items-center gap-8">
+            <h1 className="text-4xl font-semibold leading-[1.08] md:text-6xl">
+              <span className="block">Xcaret. Um destino</span>
+              <span className="block lg:whitespace-nowrap">inteiro para se apaixonar.</span>
+            </h1>
+            <div className="hidden shrink-0 lg:block"><HeroVideoButton /></div>
+          </div>
 
           <p className="mt-5 max-w-xl text-[16px] leading-7 text-background/90 md:text-lg">Parques surpreendentes, hotéis à beira-mar e experiências mexicanas em uma viagem planejada para você pela Destinos com a Ju.</p>
         </div>
@@ -135,13 +138,10 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           />
         </div>
       )}
-      <div className="pointer-events-auto absolute right-[29%] top-[24%] z-10 hidden lg:block">
-        <HeroVideoButton />
-      </div>
       <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
         <div className="pointer-events-auto"><HeroVideoButton /></div>
       </div>
-      <div className="absolute inset-x-0 bottom-28 z-10 md:bottom-32 lg:bottom-56">
+      <div className="absolute inset-x-0 bottom-28 z-10 md:bottom-32 lg:bottom-[128px]">
         <div className={`${contentWidth} flex flex-col gap-3 lg:items-end`}>
           <p className="max-w-xl text-sm font-medium text-background lg:text-right" aria-live="polite"><strong>{slide.name}</strong> · {slide.caption} <span className="ml-2 text-xs text-background/75">{String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}</span></p>
 
