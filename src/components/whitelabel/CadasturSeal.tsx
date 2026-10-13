@@ -2,11 +2,21 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import cadasturSeal from "@/assets/whitelabel/selo-cadastur.png.asset.json";
-import certificate from "@/assets/whitelabel/certificado-cadastur-100-limites.jpg.asset.json";
+import certLimites from "@/assets/whitelabel/certificado-cadastur-100-limites.jpg.asset.json";
+import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.jpg.asset.json";
+
+/** Certificado por agência autorizada (hostname). */
+export function cadasturCertificateFor(hostname?: string | null) {
+  const h = hostname ?? "";
+  if (/(^|\.)destinoscomaju\.com\.br$/i.test(h)) return { url: certJu.url, agency: "Destinos com a Ju" };
+  if (/100limites/i.test(h)) return { url: certLimites.url, agency: "100 Limites" };
+  return null;
+}
 
 /** Selo Cadastur clicável que abre o certificado em pop-up (fundo preto 75%). */
-export function CadasturSeal({ className, lazy }: { className: string; lazy?: boolean }) {
+export function CadasturSeal({ className, lazy, hostname }: { className: string; lazy?: boolean; hostname?: string | null }) {
   const [open, setOpen] = useState(false);
+  const certificate = cadasturCertificateFor(hostname) ?? { url: certLimites.url, agency: "100 Limites" };
 
   useEffect(() => {
     if (!open) return;
@@ -51,7 +61,7 @@ export function CadasturSeal({ className, lazy }: { className: string; lazy?: bo
               </button>
               <img
                 src={certificate.url}
-                alt="Certificado Cadastur da 100 Limites"
+                alt={`Certificado Cadastur da ${certificate.agency}`}
                 className="max-h-[80vh] w-full rounded-lg object-contain shadow-2xl"
               />
             </div>
