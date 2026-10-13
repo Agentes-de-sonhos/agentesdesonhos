@@ -102,7 +102,7 @@ export function resolveSections(
 export type AgencyImageSlot =
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort"
-  | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler"
+  | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler" | "heroJuMagicKingdom"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites";
@@ -165,7 +165,7 @@ export interface AgencyHeroSlide {
   /** Imagem editorial opcional por slide; ausente preserva o fallback atual. */
   image?: AgencyImageSlot;
   /** Recorte responsivo opcional da foto, resolvido pela apresentação. */
-  focalPoint?: "varenna" | "santoriniShip" | "airportTraveler" | "amandaRight";
+  focalPoint?: "varenna" | "santoriniShip" | "airportTraveler" | "juMagicKingdom" | "amandaRight";
   /** Limita a largura do texto quando o assunto principal ocupa a direita. */
   textWidth?: "narrowLeft";
   order: number;
