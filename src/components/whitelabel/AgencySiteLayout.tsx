@@ -457,7 +457,7 @@ export function AgencyFooter({
             </p>
             {(footer?.address || (footer?.showLocation !== false && location)) && (
               <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)_/_0.75)]">
-                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {footer?.address ?? location}
+                <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {legalPreview ? "Atendimento online em Lisboa, Portugal" : footer?.address ?? location}
               </p>
             )}
           </div>

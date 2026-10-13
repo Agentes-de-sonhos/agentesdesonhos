@@ -3,18 +3,19 @@
  * exclusivos da 100 Limites.
  *
  * Proteção contra ativação acidental em produção:
- * - só ativa quando o NAVEGADOR está num host técnico de prévia
- *   (`isTechnicalPreviewHost`: *.lovable.app, *.lovableproject.com, localhost)
- *   E o tenant resolvido é 100limites.tur.br / www.100limites.tur.br;
- * - em qualquer domínio real (inclusive 100limites.tur.br publicado) a função
- *   devolve null — não existe query parameter, flag ou storage que a ligue;
+ * - só ativa quando o NAVEGADOR está em um host da allowlist estrita própria
+ *   (`LIMITES100_LEGAL_PREVIEW_BROWSER_HOSTS`: o id-preview verificado deste
+ *   projeto e localhost para testes) E o tenant é 100limites.tur.br / www;
+ * - comparação por igualdade exata: qualquer outro *.lovable.app (inclusive o
+ *   publicado), prefixos/sufixos enganosos e domínios reais retornam false,
+ *   mesmo com `?__agency_host`; não há query parameter, flag ou storage que ligue;
  * - outros tenants nunca recebem estes textos.
  *
  * Os textos são dados estruturados (sem HTML cru) e não contêm marcadores
  * dinâmicos: campos não confirmados foram omitidos do corpo jurídico e
  * listados em `LIMITES100_LEGAL_PENDING`.
  */
-import { isTechnicalPreviewHost, normalizeHostname } from "@/lib/agencyDomains";
+import { normalizeHostname } from "@/lib/agencyDomains";
 
 export type LegalPreviewSection = { heading: string; paragraphs?: string[]; items?: string[] };
 export type LegalPreviewDocument = {
@@ -51,12 +52,20 @@ export const LIMITES100_LEGAL_PENDING: string[] = [
   "Mecanismos de transferência internacional de dados: não confirmados — a cláusula descreve apenas o envio necessário a fornecedores e autoridades do destino, sem declarar mecanismo.",
   "Cookies: o site carrega o Google Tag Manager (GTM-5LBKQWFT) antes de qualquer escolha do visitante e o conteúdo desse contêiner é desconhecido. Não há painel de Configurações de Cookies; a Política não afirma bloqueio prévio e o link de preferências não foi criado.",
   "Encarregado (DPO): não há encarregado divulgado — o canal de privacidade é o e-mail, sem atribuir cargo a Amanda Larini.",
-  "Pagamento online: o site público não processa pagamentos; confirmar se faturas/links enviados pela agência usam algum meio de pagamento integrado.",
+  "Pagamentos: processamento direto ou integrado (no site, em faturas ou links) ainda precisa de confirmação; a cláusula descreve apenas condições informadas na proposta e canais oficiais.",
+  "Dados de documentos de passageiros (CPF, passaporte, vistos, nascimento etc.): fluxo específico da agência não confirmado — lista detalhada omitida.",
   "Dados sensíveis (saúde, mobilidade, acessibilidade) e uso de inteligência artificial sobre dados de clientes: não confirmados — cláusulas específicas omitidas.",
   "Cadastur: número e validade transcritos do certificado já existente no projeto (impresso: 07/10/2026 a 07/10/2028); não houve consulta externa oficial.",
-  "Exclusão de conta ou de dados por autoatendimento não está implementada: os pedidos de titulares são atendidos pelo e-mail de privacidade.",
+  "Disponibilidade de exclusão por autoatendimento: a confirmar; o canal divulgado nesta prévia é o e-mail.",
   "Revisão jurídica e aprovação final do texto pela agência antes da ativação em produção.",
 ];
+
+/** Allowlist estrita (igualdade exata) — independente do helper global de prévia. */
+export const LIMITES100_LEGAL_PREVIEW_BROWSER_HOSTS = [
+  "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app",
+  "localhost",
+  "127.0.0.1",
+] as const;
 
 export function isLimites100Host(agencyHostname: string): boolean {
   return (LIMITES100_LEGAL_HOSTS as readonly string[]).includes(normalizeHostname(agencyHostname));
@@ -69,7 +78,8 @@ export function isLimites100Host(agencyHostname: string): boolean {
 export function isLimites100LegalPreviewActive(agencyHostname: string, browserHostname?: string): boolean {
   const browser =
     browserHostname ?? (typeof window === "undefined" ? "" : window.location.hostname);
-  return isTechnicalPreviewHost(browser) && isLimites100Host(agencyHostname);
+  const host = normalizeHostname(browser);
+  return (LIMITES100_LEGAL_PREVIEW_BROWSER_HOSTS as readonly string[]).includes(host) && isLimites100Host(agencyHostname);
 }
 
 const D = LIMITES100_LEGAL_DATA;
@@ -108,7 +118,6 @@ export const LIMITES100_PRIVACY: LegalPreviewDocument = {
         "Dados de navegação e dispositivo: endereço IP, data e hora de acesso, páginas visitadas, identificadores do navegador e do dispositivo, registros de segurança e informações coletadas por cookies ou tecnologias semelhantes.",
         "Dados das comunicações: conteúdo e histórico das mensagens trocadas por formulário, e-mail, telefone, WhatsApp, Área do Cliente ou outros canais oficiais.",
         "Dados de conta: identificadores de acesso, registros de autenticação, preferências e atividades realizadas na Área do Cliente. Dados de acesso são protegidos e não devem ser compartilhados pelo usuário.",
-        "Dados necessários à reserva, emissão ou assessoria documental: nome completo conforme documento, CPF, data de nascimento, nacionalidade, gênero quando exigido pelo fornecedor ou pela autoridade, número e validade de documentos, passaporte, vistos, dados de programa de fidelidade e informações dos acompanhantes.",
       ],
     },
     {
@@ -271,7 +280,7 @@ export const LIMITES100_TERMS: LegalPreviewDocument = {
     {
       heading: "10. Pagamentos",
       paragraphs: [
-        "O site público não processa pagamentos diretamente. Eventuais instruções de pagamento serão enviadas pela agência por canais oficiais, vinculadas à proposta ou contratação específica.",
+        "As formas, prazos e condições de pagamento serão informados na proposta ou na contratação específica. O usuário deverá utilizar somente as instruções recebidas pelos canais oficiais da agência e conferir o favorecido antes de efetuar qualquer pagamento.",
       ],
     },
     {
