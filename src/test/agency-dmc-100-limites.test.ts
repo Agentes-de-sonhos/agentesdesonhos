@@ -97,17 +97,13 @@ describe("seção DMC da 100 Limites", () => {
     expect(homeSource).toContain('dmc?.presentation?.surface === "light"');
   });
 
-  it("mantém o título da frota em uma linha e os cards abertos com a mesma altura", () => {
-    // Quatro colunas só a partir de 1280px; a coluna da Minivan é mais larga
-    // para o nome do veículo caber inteiro (204px em Manrope 600).
-    expect(landingSource).toContain("md:grid-cols-2 xl:grid-cols-[1fr_1.35fr_1fr_1fr]");
-    // Linhas de altura única: o card com menos texto acompanha o maior.
-    expect(landingSource).toContain("auto-rows-fr");
-    // Card aberto ocupa a altura da linha; fechado permanece compacto.
-    expect(landingSource).toContain("data-[state=open]:self-stretch");
-    expect(landingSource).toContain("[&>div:last-child]:flex-1");
-    // Nome do veículo nunca quebra em duas linhas (a partir de 360px).
-    expect(landingSource).toContain("min-[360px]:whitespace-nowrap font-semibold");
+  it("oferece só assistência e acompanhamento, sem frota, transfer ou tour fechado", () => {
+    expect(landingSource).toContain("Assistência e acompanhamento personalizado em Portugal");
+    expect(landingSource).toContain("Solicitar assistência personalizada");
+    expect(landingSource).toContain("Sua estadia, com apoio em cada detalhe");
+    for (const banned of ['id="frota"', "Transfers privativos", "Minivan", "Ônibus", "veículo executivo", 'kind="veiculo"', "reserve seu passeio", "Carro à disposição"]) {
+      expect(landingSource).not.toContain(banned);
+    }
   });
 
   it("posiciona a seção do visto após Orlando e antes de 'Uma viagem para cada momento'", () => {
