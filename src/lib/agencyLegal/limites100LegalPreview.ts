@@ -53,7 +53,7 @@ export const LIMITES100_LEGAL_PENDING: string[] = [
   "Cookies: o site carrega o Google Tag Manager (GTM-5LBKQWFT) antes de qualquer escolha do visitante e o conteúdo desse contêiner é desconhecido. Não há painel de Configurações de Cookies; a Política não afirma bloqueio prévio e o link de preferências não foi criado.",
   "Encarregado (DPO): não há encarregado divulgado — o canal de privacidade é o e-mail, sem atribuir cargo a Amanda Larini.",
   "Pagamentos: processamento direto ou integrado (no site, em faturas ou links) ainda precisa de confirmação; a cláusula descreve apenas condições informadas na proposta e canais oficiais.",
-  "Dados de documentos de passageiros (CPF, passaporte, vistos, nascimento etc.): fluxo específico da agência não confirmado — lista detalhada omitida.",
+  "Dados detalhados de documentos de passageiros: fluxo específico da agência não confirmado — lista detalhada omitida.",
   "Dados sensíveis (saúde, mobilidade, acessibilidade) e uso de inteligência artificial sobre dados de clientes: não confirmados — cláusulas específicas omitidas.",
   "Cadastur: número e validade transcritos do certificado já existente no projeto (impresso: 07/10/2026 a 07/10/2028); não houve consulta externa oficial.",
   "Disponibilidade de exclusão por autoatendimento: a confirmar; o canal divulgado nesta prévia é o e-mail.",
