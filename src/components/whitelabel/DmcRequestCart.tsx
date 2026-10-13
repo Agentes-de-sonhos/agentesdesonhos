@@ -51,13 +51,13 @@ function fieldsFor(kind: DmcKind, values: Record<string, string>): FieldDef[] {
   if (kind === "veiculo") {
     const t = values.trajeto || "Ida e volta (in/out)";
     const out: FieldDef[] = [
-      { name: "trajeto", label: "Traslado", type: "select", options: ["Ida e volta (in/out)", "Somente chegada (in)", "Somente saída (out)", "Veículo à disposição"], required: true },
+      { name: "trajeto", label: "Momento da assistência", type: "select", options: ["Ida e volta (in/out)", "Somente chegada (in)", "Somente saída (out)", "Acompanhamento por período"], required: true },
     ];
-    if (t !== "Somente saída (out)") out.push({ name: "data_chegada", label: t === "Veículo à disposição" ? "Data inicial" : "Data de chegada", type: "date", required: true }, { name: "hora_chegada", label: "Horário / voo de chegada", type: "text" });
-    if (t !== "Somente chegada (in)") out.push({ name: "data_saida", label: t === "Veículo à disposição" ? "Data final" : "Data de saída", type: "date", required: t === "Somente saída (out)" }, { name: "hora_saida", label: "Horário / voo de saída", type: "text" });
+    if (t !== "Somente saída (out)") out.push({ name: "data_chegada", label: t === "Acompanhamento por período" ? "Data inicial" : "Data de chegada", type: "date", required: true }, { name: "hora_chegada", label: "Horário / voo de chegada", type: "text" });
+    if (t !== "Somente chegada (in)") out.push({ name: "data_saida", label: t === "Acompanhamento por período" ? "Data final" : "Data de saída", type: "date", required: t === "Somente saída (out)" }, { name: "hora_saida", label: "Horário / voo de saída", type: "text" });
     out.push(
-      { name: "origem", label: "Origem", type: "text" },
-      { name: "destino", label: "Destino (hotel, cidade)", type: "text" },
+      { name: "origem", label: "Local de início", type: "text" },
+      { name: "destino", label: "Hospedagem / regiões de interesse", type: "text" },
       ...PAX,
       { name: "malas", label: "Malas (23 kg)", type: "number", min: 0 },
     );
@@ -78,7 +78,7 @@ function fieldsFor(kind: DmcKind, values: Record<string, string>): FieldDef[] {
 }
 
 const LABELS: Record<string, string> = {
-  trajeto: "Traslado", data_chegada: "Chegada", hora_chegada: "Horário/voo chegada", data_saida: "Saída", hora_saida: "Horário/voo saída",
+  trajeto: "Momento da assistência", data_chegada: "Chegada", hora_chegada: "Horário/voo chegada", data_saida: "Saída", hora_saida: "Horário/voo saída",
   origem: "Origem", destino: "Destino", adultos: "Adultos", criancas: "Crianças", idades: "Idades", malas: "Malas",
   data: "Data", data_fim: "Até", partida: "Partida", obs: "Obs.",
 };
@@ -248,7 +248,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
     if (digits && (digits.length < 10 || digits.length > 15)) return setFormError("Informe um WhatsApp válido com código do país/DDD.");
     if (!c.consent) return setFormError("É necessário aceitar o uso dos seus dados para contato.");
     const lines = items.map(describeItem);
-    const details: Record<string, string> = { origem_pagina: "DMC Portugal", total_itens: String(items.length) };
+    const details: Record<string, string> = { origem_pagina: "Assistência personalizada em Portugal", total_itens: String(items.length) };
     if (c.agency.trim()) details.agencia = c.agency.trim();
     lines.slice(0, 35).forEach((l, i) => { details[`item_${i + 1}`] = l.slice(0, 400); });
     const adults = Math.max(...items.map((i) => Number(i.values.adultos) || 0));
@@ -257,12 +257,12 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
     details.criancas = String(kids);
     const res = await submit({
       service_key: "pacotes",
-      service_label: "DMC Portugal",
+      service_label: "Assistência personalizada em Portugal",
       lead_name: c.name.trim(),
       lead_phone: c.phone.trim(),
       lead_email: c.email.trim(),
       destination: "Portugal",
-      summary: ["Solicitação DMC Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
+      summary: ["Solicitação de assistência e acompanhamento em Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
       notes: [c.agency.trim() && `Agência: ${c.agency.trim()}`, c.notes.trim()].filter(Boolean).join("\n").slice(0, 2000),
       consent: true,
       consent_version: "v1",
