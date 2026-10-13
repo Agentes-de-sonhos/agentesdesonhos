@@ -43,7 +43,7 @@ const AgencyBlogPostPage = lazy(() => import("@/pages/whitelabel/AgencyBlogPostP
 /** 100 Limites: URLs antigas do portfólio DMC apontam para âncoras da landing única. */
 const DMC_LEGACY_REDIRECTS: Record<string, string> = {
   "/quem-somos/dmc": "sobre",
-  "/frota": "servicos",
+  "/frota": "frota",
   "/passeios/lisboa": "lisboa",
   "/passeios/portugal": "portugal",
   "/europa": "europa",
