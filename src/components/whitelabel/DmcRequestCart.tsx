@@ -66,7 +66,7 @@ function fieldsFor(kind: DmcKind, values: Record<string, string>): FieldDef[] {
   if (kind === "passeio") {
     return [
       { name: "data", label: "Data preferencial", type: "date", required: true },
-      { name: "partida", label: "Local de partida", type: "text" },
+      { name: "partida", label: "Local de interesse ou hospedagem", type: "text" },
       ...PAX,
     ];
   }
@@ -248,7 +248,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
     if (digits && (digits.length < 10 || digits.length > 15)) return setFormError("Informe um WhatsApp válido com código do país/DDD.");
     if (!c.consent) return setFormError("É necessário aceitar o uso dos seus dados para contato.");
     const lines = items.map(describeItem);
-    const details: Record<string, string> = { origem_pagina: "DMC Portugal", total_itens: String(items.length) };
+    const details: Record<string, string> = { origem_pagina: "Assistência em Portugal", total_itens: String(items.length) };
     if (c.agency.trim()) details.agencia = c.agency.trim();
     lines.slice(0, 35).forEach((l, i) => { details[`item_${i + 1}`] = l.slice(0, 400); });
     const adults = Math.max(...items.map((i) => Number(i.values.adultos) || 0));
@@ -257,12 +257,12 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
     details.criancas = String(kids);
     const res = await submit({
       service_key: "pacotes",
-      service_label: "DMC Portugal",
+      service_label: "Assistência personalizada em Portugal",
       lead_name: c.name.trim(),
       lead_phone: c.phone.trim(),
       lead_email: c.email.trim(),
       destination: "Portugal",
-      summary: ["Solicitação DMC Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
+      summary: ["Solicitação de assistência em Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
       notes: [c.agency.trim() && `Agência: ${c.agency.trim()}`, c.notes.trim()].filter(Boolean).join("\n").slice(0, 2000),
       consent: true,
       consent_version: "v1",
@@ -272,7 +272,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
   };
 
   const waText = sent
-    ? `Olá, Amanda! Acabei de enviar uma solicitação de DMC em Portugal pelo site:\n\n${sent.map((l) => `• ${l}`).join("\n")}\n\nNome: ${c.name}${c.agency ? `\nAgência: ${c.agency}` : ""}`
+    ? `Olá, Amanda! Acabei de enviar uma solicitação de assistência personalizada em Portugal pelo site:\n\n${sent.map((l) => `• ${l}`).join("\n")}\n\nNome: ${c.name}${c.agency ? `\nAgência: ${c.agency}` : ""}`
     : "";
 
   const close = (o: boolean) => {
@@ -304,7 +304,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
             </DialogHeader>
             {items.length === 0 ? (
               <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                Nenhum serviço adicionado. Clique em “Solicitar” nos veículos e passeios da página.
+                Nenhum serviço adicionado. Clique em “Solicitar” nos serviços e locais da página.
               </p>
             ) : (
               <ul className="space-y-2">
