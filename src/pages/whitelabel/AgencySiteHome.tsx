@@ -82,6 +82,7 @@ import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
+import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
@@ -117,6 +118,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroVarenna: heroVarenna.url,
   heroSantoriniShip: heroSantoriniShip.url,
   heroAirportTraveler: heroAirportTraveler.url,
+  heroJuMagicKingdom: heroJuMagicKingdom.url,
   parques: destinoParques,
   safari: destinoSafari,
   douro: destinoDouro,
@@ -582,6 +584,7 @@ export default function AgencySiteHome({
     varenna: "object-[66%_center] md:object-[center_52%]",
     santoriniShip: "object-[64%_center] md:object-[center_58%]",
     airportTraveler: "object-[68%_center] md:object-[64%_28%]",
+    juMagicKingdom: "object-[74%_center] md:object-[70%_30%]",
     amandaRight: "object-[74%_24%] sm:object-[72%_24%] md:object-[72%_24%]",
   }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
