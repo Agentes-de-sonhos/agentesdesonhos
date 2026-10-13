@@ -20,6 +20,23 @@ describe("100 Limites — prévia jurídica isolada", () => {
     expect(isLimites100LegalPreviewActive("www.100limites.tur.br", PREVIEW)).toBe(true);
     expect(isLimites100LegalPreviewActive("www.100limites.tur.br", "localhost")).toBe(true);
   });
+  it("allowlist estrita: rejeita .lovable.app publicado e hosts enganosos", () => {
+    for (const h of [
+      "agentedesonhoproject.lovable.app",
+      "lovable.app",
+      "preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app",
+      "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app.evil.com",
+      "x.id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app",
+      "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9-evil.lovable.app",
+      "evil.lovableproject.com",
+      "localhost.evil.com",
+      "100limites.tur.br.lovable.app",
+    ]) {
+      expect(isLimites100LegalPreviewActive("100limites.tur.br", h)).toBe(false);
+      expect(isLimites100LegalPreviewActive("www.100limites.tur.br", h)).toBe(false);
+    }
+    expect(isLimites100LegalPreviewActive("100limites.tur.br.evil.com", PREVIEW)).toBe(false);
+  });
   it("nunca ativa em produção, outro tenant ou domínio da plataforma", () => {
     expect(isLimites100LegalPreviewActive("100limites.tur.br", "100limites.tur.br")).toBe(false);
     expect(isLimites100LegalPreviewActive("www.100limites.tur.br", "www.100limites.tur.br")).toBe(false);
@@ -37,6 +54,8 @@ describe("100 Limites — prévia jurídica isolada", () => {
     expect(all).not.toMatch(/encarregad[oa] (pelo tratamento )?é|DPO é|Configurações de Cookies disponível|ficam desativados até/i);
     expect(all).not.toMatch(/transporte próprio|frota própria/i);
     expect(all).toContain("contratados separadamente");
+    expect(all).not.toMatch(/não processa pagamentos|CPF|passaporte, vistos, dados de programa|saúde, mobilidade, alimentação/);
+    expect(all).toContain("Disponibilidade de exclusão por autoatendimento: a confirmar; o canal divulgado nesta prévia é o e-mail.");
   });
   it("rotas e rodapé usam o mesmo guard e mantêm o fallback da plataforma", () => {
     const routes = readFileSync("src/components/routing/AgencyDomainRoutes.tsx", "utf8");
@@ -44,5 +63,6 @@ describe("100 Limites — prévia jurídica isolada", () => {
     expect(routes).toContain('isLimites100LegalPreviewActive(info.hostname) ? <Limites100LegalPreviewPage kind="terms" /> : <TermosDeUso />');
     const layout = readFileSync("src/components/whitelabel/AgencySiteLayout.tsx", "utf8");
     expect(layout).toContain("{legalPreview && <Limites100LegalFooterPreview />}");
+    expect(layout).toContain('{legalPreview ? "Atendimento online em Lisboa, Portugal" : footer?.address ?? location}');
   });
 });
