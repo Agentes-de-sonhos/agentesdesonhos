@@ -66,7 +66,7 @@ function fieldsFor(kind: DmcKind, values: Record<string, string>): FieldDef[] {
   if (kind === "passeio") {
     return [
       { name: "data", label: "Data preferencial", type: "date", required: true },
-      { name: "partida", label: "Local de partida", type: "text" },
+      { name: "partida", label: "Local de encontro ou hospedagem", type: "text" },
       ...PAX,
     ];
   }
@@ -80,7 +80,7 @@ function fieldsFor(kind: DmcKind, values: Record<string, string>): FieldDef[] {
 const LABELS: Record<string, string> = {
   trajeto: "Traslado", data_chegada: "Chegada", hora_chegada: "Horário/voo chegada", data_saida: "Saída", hora_saida: "Horário/voo saída",
   origem: "Origem", destino: "Destino", adultos: "Adultos", criancas: "Crianças", idades: "Idades", malas: "Malas",
-  data: "Data", data_fim: "Até", partida: "Partida", obs: "Obs.",
+  data: "Data", data_fim: "Até", partida: "Encontro", obs: "Obs.",
 };
 
 function fmt(name: string, v: string) {
@@ -188,7 +188,7 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{editing.title}</DialogTitle>
-          <DialogDescription>Informe os dados básicos. A Amanda confirma valores e disponibilidade na proposta.</DialogDescription>
+          <DialogDescription>Conte os dados básicos da sua estadia. A Amanda confirma valores e disponibilidade na proposta.</DialogDescription>
         </DialogHeader>
         <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
           {fields.map((f) => (
@@ -262,7 +262,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
       lead_phone: c.phone.trim(),
       lead_email: c.email.trim(),
       destination: "Portugal",
-      summary: ["Solicitação DMC Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
+      summary: ["Solicitação de assistência e acompanhamento em Portugal", ...lines.map((l, i) => `${i + 1}. ${l}`)].join(" | ").slice(0, 2000),
       notes: [c.agency.trim() && `Agência: ${c.agency.trim()}`, c.notes.trim()].filter(Boolean).join("\n").slice(0, 2000),
       consent: true,
       consent_version: "v1",
@@ -272,7 +272,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
   };
 
   const waText = sent
-    ? `Olá, Amanda! Acabei de enviar uma solicitação de DMC em Portugal pelo site:\n\n${sent.map((l) => `• ${l}`).join("\n")}\n\nNome: ${c.name}${c.agency ? `\nAgência: ${c.agency}` : ""}`
+    ? `Olá, Amanda! Acabei de enviar uma solicitação de assistência e acompanhamento em Portugal pelo site:\n\n${sent.map((l) => `• ${l}`).join("\n")}\n\nNome: ${c.name}${c.agency ? `\nAgência: ${c.agency}` : ""}`
     : "";
 
   const close = (o: boolean) => {
@@ -304,7 +304,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
             </DialogHeader>
             {items.length === 0 ? (
               <p className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-                Nenhum serviço adicionado. Clique em “Solicitar” nos veículos e passeios da página.
+                Nenhum serviço adicionado. Clique em “Solicitar assistência” nos serviços e locais da página.
               </p>
             ) : (
               <ul className="space-y-2">
@@ -356,9 +356,9 @@ export function DmcRequestButton({ kind, title, className = "" }: { kind: DmcKin
       variant={n ? "secondary" : "default"}
       className={className}
       onClick={(e) => cart.open(kind, title, e.currentTarget)}
-      aria-label={`Solicitar ${title}`}
+      aria-label={`Solicitar assistência: ${title}`}
     >
-      {n ? <><Check className="mr-1.5 h-4 w-4" />Adicionado ({n}) · +</> : <><Plus className="mr-1.5 h-4 w-4" />Solicitar</>}
+      {n ? <><Check className="mr-1.5 h-4 w-4" />Adicionado ({n}) · +</> : <><Plus className="mr-1.5 h-4 w-4" />Solicitar assistência</>}
     </Button>
   );
 }
