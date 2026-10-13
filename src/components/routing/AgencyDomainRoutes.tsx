@@ -33,6 +33,8 @@ const CarteiraPublicaV2 = lazy(() => import("@/pages/CarteiraPublicaV2"));
 const FaturaPublica = lazy(() => import("@/pages/FaturaPublica"));
 const PoliticasPrivacidade = lazy(() => import("@/pages/PoliticasPrivacidade"));
 const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
+const Limites100LegalPreviewPage = lazy(() => import("@/pages/whitelabel/Limites100LegalPreviewPage"));
+import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
 const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
@@ -258,8 +260,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {/* Blog do site (módulo opcional): o servidor só entrega conteúdo publicado de agência habilitada. */}
             <Route path="/blog" element={<AgencyBlogPage info={info} />} />
             <Route path="/blog/:slug" element={<AgencyBlogPostPage info={info} />} />
-            <Route path="/politicasdeprivacidade" element={<PoliticasPrivacidade />} />
-            <Route path="/termosdeuso" element={<TermosDeUso />} />
+            {/* 100 Limites: rascunho jurídico só em host técnico de prévia; produção mantém o texto atual. */}
+            <Route path="/politicasdeprivacidade" element={isLimites100LegalPreviewActive(info.hostname) ? <Limites100LegalPreviewPage kind="privacy" /> : <PoliticasPrivacidade />} />
+            <Route path="/termosdeuso" element={isLimites100LegalPreviewActive(info.hostname) ? <Limites100LegalPreviewPage kind="terms" /> : <TermosDeUso />} />
             <Route path="*" element={<LinkUnavailable />} />
           </Route>
         </Routes>

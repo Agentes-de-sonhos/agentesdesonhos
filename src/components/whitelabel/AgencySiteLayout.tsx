@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
+import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
 import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -409,6 +411,7 @@ export function AgencyFooter({
      */
     // 100 Limites: mesmo acabamento limpo da Destinos com a Ju, sobre o degradê bege.
     const sandPlainFooter = profile.key === "editorialDmc";
+    const legalPreview = isLimites100LegalPreviewActive(info.hostname);
     const plainFooter = profile.key === "editorialRose" || sandPlainFooter;
     const footerShellClass = sandPlainFooter
       ? "wl-alt-gradient border-t border-[hsl(var(--wl-ink)_/_0.1)] text-[hsl(var(--wl-ink))]"
@@ -548,9 +551,10 @@ export function AgencyFooter({
             </ul>
           </div>
         </div>
+        {legalPreview && <Limites100LegalFooterPreview />}
         <div className={footerBottomClass}>
           <div className={`${siteContainer(true)} py-6 text-xs text-[hsl(var(--wl-ink)_/_0.65)]`}>
-            © {new Date().getFullYear()} <BrandText>{name}</BrandText>. Todos os direitos reservados.
+            © {new Date().getFullYear()} <BrandText>{legalPreview ? LIMITES100_LEGAL_DATA.tradeName : name}</BrandText>. Todos os direitos reservados.
           </div>
         </div>
       </footer>
