@@ -16,7 +16,7 @@ export type AgencySiteStatus = "live" | "under_construction";
  * acabamentos exclusivos de um domínio, fáceis de remover quando o site
  * completo entrar no ar.
  */
-export type AgencyConstructionVariant = "default" | "destinosComAJu" | "essyaTur" | "mundoEmCores";
+export type AgencyConstructionVariant = "default" | "destinosComAJu" | "essyaTur" | "mundoEmCores" | "bardelliViagens";
 
 export interface AgencySiteStatusConfig {
   status: AgencySiteStatus;
@@ -30,6 +30,8 @@ const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
   "www.faeviagens.com.br": { status: "under_construction" },
   "omundoemcores.com.br": { status: "under_construction", variant: "mundoEmCores" },
   "www.omundoemcores.com.br": { status: "under_construction", variant: "mundoEmCores" },
+  "bardelliviagens.com.br": { status: "under_construction", variant: "bardelliViagens" },
+  "www.bardelliviagens.com.br": { status: "under_construction", variant: "bardelliViagens" },
 };
 
 /** Variante da página temporária configurada para o hostname. */
