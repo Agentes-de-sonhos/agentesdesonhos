@@ -53,7 +53,7 @@ export function OpportunityLabelsManager({ compact }: OpportunityLabelsManagerPr
 
   return (
     <div className={cn("space-y-2", compact ? "p-1" : "p-2")}>
-      <div className="space-y-1.5 max-h-64 overflow-y-auto">
+      <div className="space-y-1.5 max-h-64 overflow-y-auto overscroll-contain touch-pan-y" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
         {labels.map((label) => {
           const isEditing = editingId === label.id;
           return (
@@ -101,7 +101,7 @@ export function OpportunityLabelsManager({ compact }: OpportunityLabelsManagerPr
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                    className="h-7 w-7 "
                     onClick={() => startEdit(label)}
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -109,7 +109,7 @@ export function OpportunityLabelsManager({ compact }: OpportunityLabelsManagerPr
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="h-7 w-7 opacity-0 group-hover:opacity-100 text-destructive"
+                    className="h-7 w-7  text-destructive"
                     onClick={() => setDeletingLabel(label)}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
