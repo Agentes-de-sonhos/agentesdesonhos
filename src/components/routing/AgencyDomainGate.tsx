@@ -22,6 +22,7 @@ import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 const AgencyDomainRoutes = lazy(() => import("@/components/routing/AgencyDomainRoutes"));
 const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingSoon"));
 const MundoEmCoresComingSoon = lazy(() => import("@/pages/whitelabel/MundoEmCoresComingSoon"));
+const BardelliViagensComingSoon = lazy(() => import("@/pages/whitelabel/BardelliViagensComingSoon"));
 
 const Spinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -122,6 +123,17 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
       return (
         <Suspense fallback={<Spinner />}>
           <MundoEmCoresComingSoon />
+        </Suspense>
+      );
+    }
+  }
+
+  /** Variante estática Bardelli Viagens: mesma lógica, apenas na home. */
+  if (host && resolveConstructionVariant(host) === "bardelliViagens") {
+    if (browserPath === "/" || browserPath === "") {
+      return (
+        <Suspense fallback={<Spinner />}>
+          <BardelliViagensComingSoon />
         </Suspense>
       );
     }
