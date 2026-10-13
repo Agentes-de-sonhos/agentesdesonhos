@@ -72,7 +72,6 @@ const CONTACT_EMAIL = "amanda@100limitesviagens.tur.br";
 
 export const DMC_ANCHORS = [
   { id: "servicos", label: "Serviços" },
-  { id: "frota", label: "Frota" },
   { id: "lisboa", label: "Lisboa" },
   { id: "portugal", label: "Portugal" },
   { id: "grupos", label: "Grupos" },
@@ -84,65 +83,67 @@ export const DMC_ANCHORS = [
 
 type Tour = { t: string; meta?: string; d: string; note?: string };
 
+/** Locais onde a 100 Limites oferece acompanhamento — não são tours fechados nem transporte. */
 const LISBOA: Tour[] = [
-  { t: "City Walk Lisboa", meta: "Cerca de 6 h · a pé · até 6 pessoas", d: "Centro histórico a pé pelo Chiado, Bairro Alto e Alfama, com mirantes e jardins. Pausas para provar delícias portuguesas podem ser feitas ao longo do caminho.", note: "Grupos acima de 6 pessoas: consulte." },
-  { t: "City Tour com veículo executivo", meta: "Cerca de 6 h · panorâmico", d: "Indicado para quem tem dificuldade de locomoção ou prefere um passeio panorâmico, com paradas estratégicas para fotos. Centro histórico, Chiado, Bairro Alto, Alfama, Torre de Belém, Padrão dos Descobrimentos e Jerónimos." },
-  { t: "Tour de compras em Lisboa", meta: "Cerca de 6 h", d: "Lojas escolhidas conforme o interesse do grupo: roupas, vinhos, azeites, outlets, brechós, eletrônicos, perfumaria e maquiagem." },
+  { t: "Acompanhamento a pé pelo centro histórico", meta: "Programação de cerca de 6 h · até 6 pessoas", d: "Apoio durante a visita ao Chiado, Bairro Alto e Alfama, com mirantes e jardins, no ritmo escolhido pelo cliente. Pausas para provar delícias portuguesas podem entrar na programação.", note: "Grupos acima de 6 pessoas: consulte." },
+  { t: "Acompanhamento em Belém e arredores", meta: "Programação de cerca de 6 h", d: "Assistência na organização da visita à Torre de Belém, ao Padrão dos Descobrimentos e aos Jerónimos, com orientações práticas e atenção a quem precisa de um ritmo mais tranquilo." },
+  { t: "Acompanhamento em compras", meta: "Programação de cerca de 6 h", d: "Apoio e recomendações de lojas conforme o interesse do cliente: roupas, vinhos, azeites, outlets, brechós, eletrônicos, perfumaria e maquiagem." },
 ];
 
 const REGIOES: { id: string; title: string; tours: Tour[] }[] = [
   {
     id: "arredores", title: "Arredores de Lisboa: Sintra, Cascais e Cabo da Roca",
     tours: [
-      { t: "Cabo da Roca, Sintra, Cascais e Estoril", meta: "8 a 9 h", d: "Ponto mais ocidental do continente, centro histórico de Sintra, retorno pela costa com Boca do Inferno, baía de Cascais e passeio marítimo do Estoril. Visitas a palácios como Pena e Quinta da Regaleira podem ser combinadas. Horário de almoço ajustado ao ritmo do grupo." },
-      { t: "Sintra com Palácio da Pena e Quinta da Regaleira", meta: "8 a 9 h", d: "Dia dedicado aos dois principais conjuntos de Sintra.", note: "Ingressos não incluídos." },
-      { t: "Cascais — meio dia", meta: "Cerca de 6 h", d: "Passeio pela baía e pelo centro histórico de Cascais." },
-      { t: "Sintra — meio dia", meta: "Cerca de 6 h", d: "Centro histórico de Sintra e seus arredores." },
+      { t: "Cabo da Roca, Sintra, Cascais e Estoril", meta: "Programação de dia completo", d: "Acompanhamento em visitas ao ponto mais ocidental do continente, ao centro histórico de Sintra, à Boca do Inferno, à baía de Cascais e ao passeio marítimo do Estoril. Palácios como Pena e Quinta da Regaleira podem ser incluídos na programação." },
+      { t: "Sintra: Palácio da Pena e Quinta da Regaleira", meta: "Programação de dia completo", d: "Apoio na organização do dia dedicado aos dois principais conjuntos de Sintra.", note: "Ingressos não incluídos." },
+      { t: "Cascais", meta: "Programação de meio dia", d: "Acompanhamento pela baía e pelo centro histórico de Cascais." },
+      { t: "Sintra", meta: "Programação de meio dia", d: "Acompanhamento pelo centro histórico de Sintra e seus arredores." },
     ],
   },
   {
     id: "fatima", title: "Fátima e Centro de Portugal",
     tours: [
-      { t: "Passeio a Fátima", meta: "Cerca de 8 h", d: "Aljustrel e a Casa dos Pastorinhos, Santuário, Capela das Aparições, Basílica de Nossa Senhora do Rosário e Basílica da Santíssima Trindade, com tempo para as lojinhas da região." },
-      { t: "Fátima com Procissão das Velas", meta: "Cerca de 11 h · saída à tarde, retorno à noite", d: "Aljustrel, Santuário e tempo livre durante a tarde, seguido da Procissão das Velas no recinto do Santuário.", note: "A programação e os horários da procissão são definidos pelo Santuário e devem ser confirmados para a data da viagem." },
-      { t: "Fátima, Batalha, Nazaré e Óbidos", meta: "Cerca de 9 h", d: "Fátima e Aljustrel, Mosteiro da Batalha (Patrimônio da UNESCO), falésias e ondas da Nazaré e a vila medieval de Óbidos." },
-      { t: "Batalha, Fátima e Tomar", meta: "Cerca de 9 h", d: "Mosteiro da Batalha, Fátima com Aljustrel e Tomar, cidade do Convento de Cristo, antiga sede dos Templários.", note: "Ingresso no Convento não incluído." },
-      { t: "Nazaré e Óbidos", meta: "Cerca de 9 h", d: "Vila de pescadores e falésias da Nazaré, estrada pelo Arelho e São Martinho do Porto e a vila medieval de Óbidos." },
-      { t: "Óbidos, Nazaré e Alcobaça", meta: "Cerca de 9 h", d: "Mosteiro de Alcobaça (Patrimônio da UNESCO), ligado à história de D. Pedro e D. Inês de Castro, seguido de Nazaré e Óbidos." },
+      { t: "Fátima", meta: "Programação de dia completo", d: "Acompanhamento em Aljustrel e na Casa dos Pastorinhos, no Santuário, na Capela das Aparições e nas Basílicas de Nossa Senhora do Rosário e da Santíssima Trindade, com tempo para as lojinhas da região." },
+      { t: "Fátima com Procissão das Velas", meta: "Programação da tarde à noite", d: "Apoio durante a visita a Aljustrel e ao Santuário, com tempo livre à tarde e participação na Procissão das Velas.", note: "A programação e os horários da procissão são definidos pelo Santuário e devem ser confirmados para a data da viagem." },
+      { t: "Fátima, Batalha, Nazaré e Óbidos", meta: "Programação de dia completo", d: "Acompanhamento em Fátima e Aljustrel, no Mosteiro da Batalha (Patrimônio da UNESCO), nas falésias da Nazaré e na vila medieval de Óbidos." },
+      { t: "Batalha, Fátima e Tomar", meta: "Programação de dia completo", d: "Mosteiro da Batalha, Fátima com Aljustrel e Tomar, cidade do Convento de Cristo, antiga sede dos Templários.", note: "Ingresso no Convento não incluído." },
+      { t: "Nazaré e Óbidos", meta: "Programação de dia completo", d: "Acompanhamento na vila de pescadores da Nazaré, em São Martinho do Porto e na vila medieval de Óbidos." },
+      { t: "Óbidos, Nazaré e Alcobaça", meta: "Programação de dia completo", d: "Mosteiro de Alcobaça (Patrimônio da UNESCO), ligado à história de D. Pedro e D. Inês de Castro, seguido de Nazaré e Óbidos." },
     ],
   },
   {
     id: "porto", title: "Porto e Douro",
     tours: [
-      { t: "Porto — dia inteiro saindo de Lisboa", meta: "Cerca de 10 h", d: "Centro histórico e Sé, Estação de São Bento, Torre dos Clérigos e Livraria Lello por fora, Ribeira e Vila Nova de Gaia. Almoço, caves com prova e cruzeiro no Douro podem ser incluídos conforme a proposta." },
-      { t: "Porto com 1 pernoite (2 dias)", meta: "Carro à disposição por 2 diárias", d: "Tempo para conhecer o Porto com calma e retorno a Lisboa ao fim do segundo dia.", note: "Hospedagem não incluída." },
-      { t: "Porto e Douro com 1 pernoite (2 dias)", meta: "Carro à disposição por 2 diárias", d: "Porto no primeiro dia e visita a uma quinta do Douro no segundo, com retorno a Lisboa.", note: "Hospedagem não incluída; visita e prova na quinta conforme a proposta." },
+      { t: "Porto", meta: "Programação de dia completo", d: "Acompanhamento no centro histórico e na Sé, na Estação de São Bento, na Torre dos Clérigos, na Livraria Lello (por fora), na Ribeira e em Vila Nova de Gaia. Almoço, caves com prova e cruzeiro no Douro podem entrar na programação." },
+      { t: "Porto em 2 dias", meta: "Acompanhamento por 2 dias", d: "Tempo para conhecer o Porto com calma, com apoio na organização da agenda.", note: "Hospedagem não incluída." },
+      { t: "Porto e Douro em 2 dias", meta: "Acompanhamento por 2 dias", d: "Porto no primeiro dia e visita a uma quinta do Douro no segundo.", note: "Hospedagem não incluída; visita e prova na quinta conforme a proposta." },
     ],
   },
   {
     id: "alentejo", title: "Alentejo",
     tours: [
-      { t: "Évora", meta: "Cerca de 6 h · a pé", d: "Cidade Patrimônio da UNESCO: Sé, Templo Romano, muralhas, Aqueduto da Água de Prata e Capela dos Ossos." },
-      { t: "Évora e Monsaraz", meta: "Cerca de 8 h", d: "Évora a pé e a vila medieval de Monsaraz, com muralhas, castelo e vista para o Guadiana e o Alqueva." },
-      { t: "Évora e Adega Cartuxa", meta: "Cerca de 8 h", d: "Évora a pé e visita a uma das vinícolas mais conhecidas de Portugal, com programas de visita com ou sem prova.", note: "A experiência na vinícola tem custo à parte, conforme o programa escolhido." },
+      { t: "Évora", meta: "Programação de cerca de 6 h · a pé", d: "Acompanhamento na cidade Patrimônio da UNESCO: Sé, Templo Romano, muralhas, Aqueduto da Água de Prata e Capela dos Ossos." },
+      { t: "Évora e Monsaraz", meta: "Programação de dia completo", d: "Évora a pé e a vila medieval de Monsaraz, com muralhas, castelo e vista para o Guadiana e o Alqueva." },
+      { t: "Évora e Adega Cartuxa", meta: "Programação de dia completo", d: "Évora a pé e visita a uma das vinícolas mais conhecidas de Portugal, com programas com ou sem prova.", note: "A experiência na vinícola tem custo à parte, conforme o programa escolhido." },
     ],
   },
   {
     id: "aldeias", title: "Aldeias Históricas de Portugal",
     tours: [
-      { t: "Monsanto, Sortelha, Marialva e Belmonte", meta: "Roteiro sob medida", d: "Muralhas, castelos e vilarejos de pedra para quem já conhece o essencial de Portugal e busca vivências mais autênticas. Custos definidos conforme o estilo e o ritmo da viagem.", note: "Recomendado para viajantes com boa mobilidade: há ladeiras e pisos irregulares." },
+      { t: "Monsanto, Sortelha, Marialva e Belmonte", meta: "Programação sob medida", d: "Muralhas, castelos e vilarejos de pedra para quem já conhece o essencial de Portugal e busca vivências mais autênticas, com planejamento conforme o estilo e o ritmo da viagem.", note: "Recomendado para viajantes com boa mobilidade: há ladeiras e pisos irregulares." },
     ],
   },
 ];
 
+const PARTNERS_NOTE = "Quando necessário, podemos auxiliar na articulação com empresas parceiras para serviços de transporte, contratados separadamente.";
+
 const FAQ = [
-  { q: "Os passeios saem de Lisboa?", a: "Sim. Os principais tours do portfólio têm saída de Lisboa. Outros pontos de partida podem ser cotados." },
-  { q: "Posso personalizar ou combinar passeios?", a: "Sim. As combinações de passeios de dia inteiro podem ser ajustadas conforme o perfil do cliente." },
-  { q: "Vocês atendem grupos?", a: "Sim. Para grupos maiores trabalhamos com parceiros de mini-ônibus (20 lugares) e ônibus de turismo (43 lugares), sob solicitação." },
-  { q: "Como funcionam capacidade e bagagens?", a: "A capacidade dos veículos é diferente das faixas de tarifa. As tarifas consideram faixas de até 3 e de 4 a 7 pessoas, com 1 mala de 23 kg e 1 mala de mão por pessoa. Bagagem extra ou volumes especiais devem ser informados na cotação." },
-  { q: "O que está incluído em cada passeio?", a: "Somente o que constar na proposta. Ingressos, refeições, provas, barcos e experiências citados nos roteiros não estão incluídos, salvo indicação expressa." },
-  { q: "Quais são as condições para viajar com pets?", a: "O transporte de pets é sob consulta. Porte, quantidade de animais, caixa de transporte e documentação devem ser confirmados com antecedência. A documentação do animal é de responsabilidade do tutor." },
-  { q: "Vocês atendem passageiros diretos ou apenas agências?", a: "Nosso foco como DMC é representar agências de viagens. Agências recebem o tarifário NET e o suporte operacional." },
+  { q: "Que tipo de serviço a 100 Limites oferece em Portugal?", a: "Assistência, acompanhamento personalizado e apoio ao visitante: concierge turístico, organização da agenda, recomendações e consultoria de itinerários." },
+  { q: "Posso escolher os lugares e o ritmo da programação?", a: "Sim. A programação é organizada conforme os seus interesses, o seu ritmo e as suas necessidades." },
+  { q: "Vocês oferecem transporte?", a: `Não oferecemos transporte de passageiros. ${PARTNERS_NOTE}` },
+  { q: "O que está incluído?", a: "Somente o que constar na proposta. Ingressos, refeições, provas, barcos e experiências citados na programação não estão incluídos, salvo indicação expressa." },
+  { q: "Vocês atendem grupos?", a: "Sim. Grupos familiares, corporativos, escolares, religiosos e de lazer podem solicitar assistência e acompanhamento personalizados." },
+  { q: "Vocês atendem passageiros diretos ou apenas agências?", a: "Atendemos viajantes e também agências de viagens, com apoio local e representação para clientes internacionais durante a estadia em Portugal." },
 ];
 
 function wa(number: string, text: string) {
