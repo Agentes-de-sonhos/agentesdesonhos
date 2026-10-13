@@ -89,6 +89,10 @@ export interface AgencySectionCopy {
 
 
 export interface AgencyAuthorityContent {
+  /** Cabeçalho decorativo opcional que abre a seção (ex.: "Cruzeiros"). */
+  sectionLabel?: string;
+  /** Galeria opcional de companhias, exibida após o conteúdo. */
+  companies?: { title: string; items: { name: string; logo: string }[] };
   kicker: string;
   title: string;
   paragraphs: string[];
@@ -665,6 +669,17 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     { key: "viagens-em-familia", title: "Viagens em família", text: "Planejamento pensado para diferentes idades, equilibrando diversão, conforto, segurança e o ritmo de toda a família.", service: "pacotes", image: "parques", enabled: true, order: 6 },
   ],
   authority: {
+    sectionLabel: "Cruzeiros",
+    companies: {
+      title: "Aqui você encontra as principais companhias marítimas",
+      items: [
+        { name: "Disney Cruise Line", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/Disney%20Cruise%20Lines.jpg.webp?itok=S4CUbtvJ" },
+        { name: "MSC Cruzeiros", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/MSC%20Cruises.jpg.webp?itok=yN8zIFPZ" },
+        { name: "Norwegian Cruise Line", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/Norwegian%20Cruise%20Line.jpg.webp?itok=kVaPcjWS" },
+        { name: "Royal Caribbean", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/Royal%20Caribbean.jpg.webp?itok=rz8i-L54" },
+        { name: "Costa Cruzeiros", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/Costa%20Cruises.jpg.webp?itok=p7jzHzdd" },
+      ],
+    },
     kicker: "EXPERIÊNCIA QUE FAZ DIFERENÇA",
     title: "Cruzeiros orientados por quem realmente conhece essa forma de viajar",
     paragraphs: [
