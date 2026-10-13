@@ -80,7 +80,7 @@ export function OpportunityLabelPicker({ opportunityId, trigger }: OpportunityLa
                 className="h-8 text-xs"
               />
             )}
-            <div className="max-h-64 overflow-y-auto overscroll-contain touch-pan-y" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()} data-x=" space-y-1">
+            <div className="max-h-64 overflow-y-auto overscroll-contain touch-pan-y space-y-1" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
               {filtered.map((label) => {
                 const applied = appliedIds.has(label.id);
                 return (
