@@ -231,7 +231,19 @@ export function Specialist({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
 export function Closing({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
   return (
     <section id="contato" className="scroll-mt-24 bg-foreground py-16 text-background md:py-24"><div className={`${contentWidth} text-center`}><div className="mx-auto max-w-3xl">
-      {slots.julianaAtDestination && <Photo image={slots.julianaAtDestination} className="mx-auto mb-8 aspect-[16/9] w-full max-w-2xl rounded-md object-cover" />}
+      {slots.julianaAtDestination && (
+        <div className="relative mx-auto mb-8 w-full max-w-2xl">
+          <Photo image={slots.julianaAtDestination} className="aspect-[16/9] w-full rounded-md object-cover" />
+          {slots.expertBadge && (
+            <img
+              src={slots.expertBadge.src}
+              alt={slots.expertBadge.alt}
+              loading="lazy"
+              className="absolute bottom-3 right-3 w-20 rounded-lg bg-background/95 object-contain p-1.5 shadow-lg sm:bottom-4 sm:right-4 sm:w-28"
+            />
+          )}
+        </div>
+      )}
       <h2 className="text-balance text-3xl font-semibold leading-tight md:text-5xl">Seu próximo destino pode ser Xcaret. Vamos planejar juntos?</h2>
       <div className="mt-6 space-y-4 text-pretty text-[16px] leading-7 text-background/80 md:text-[17px]"><p>Você já imaginou quais dessas experiências gostaria de viver? Agora, vamos combinar suas favoritas com a hospedagem e o ritmo que fazem sentido para você.</p><p>Conte quando pretende viajar, com quem e o que espera dessas férias. Eu ajudo você a transformar essa ideia em uma proposta personalizada.</p></div>
       <p className="mt-6 font-semibold">Juliana<br/><span className="font-normal text-background/70">Destinos com a Ju</span></p>
