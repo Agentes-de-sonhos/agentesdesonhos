@@ -46,6 +46,7 @@ import { useAuth } from "@/hooks/useAuth";
 import type { Sale, SaleFormData, SaleProductFormData, ProductType } from "@/types/financial";
 import { PRODUCT_TYPES } from "@/types/financial";
 import { isInMonth } from "@/utils/monthFilter";
+import { saleFinancialGap, SALE_GAP_MESSAGE } from "@/lib/saleFinancialStatus";
 import { toast } from "sonner";
 
 export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
@@ -452,6 +453,14 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
                           {products.length > 0 && (
                             <div className="text-sm text-primary">Comissão: {formatCurrency(totalCommission)}</div>
                           )}
+                          {(() => {
+                            const gap = saleFinancialGap(products.length, totalCommission);
+                            return gap ? (
+                              <div className="mt-1 max-w-[260px] text-xs text-destructive" data-testid="sale-financial-gap">
+                                {SALE_GAP_MESSAGE[gap]}
+                              </div>
+                            ) : null;
+                          })()}
                         </div>
                         <div className="flex items-center gap-1 flex-wrap justify-end">
                           <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">{products.length} produto(s)</span>

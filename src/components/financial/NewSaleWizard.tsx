@@ -455,10 +455,18 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       } as any);
       if (!sale?.id) throw new Error("Falha ao criar venda");
 
-      for (const p of products) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _tempId, ...payload } = p;
-        await createSaleProduct({ saleId: sale.id, ...payload } as any);
+      try {
+        for (const p of products) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { _tempId, ...payload } = p;
+          await createSaleProduct({ saleId: sale.id, ...payload } as any);
+        }
+      } catch (productError) {
+        // Compensação: sem todos os serviços a venda não pode ficar órfã (sem
+        // Entrada/Comissão). Remover a venda leva junto, por cascata, os serviços
+        // e entradas automáticas já gravados, permitindo repetir sem duplicar.
+        await supabase.from("sales").delete().eq("id", sale.id);
+        throw productError;
       }
 
       await syncSellerExpense(sale.id, totals.sale);

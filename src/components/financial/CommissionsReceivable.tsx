@@ -21,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { isInMonth } from "@/utils/monthFilter";
+import { commissionInMonth } from "@/lib/saleFinancialStatus";
 
 const fmt = (v: number) => v.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
 
@@ -158,10 +159,7 @@ export function CommissionsReceivable({ viewMonth, viewYear }: { viewMonth?: num
   const month = viewMonth || now.getMonth() + 1;
   const year = viewYear || now.getFullYear();
   const commissions = useMemo(() => {
-    return allCommissions.filter(c =>
-      isInMonth(c.expected_date, month, year) ||
-      isInMonth(c.received_date, month, year)
-    );
+    return allCommissions.filter(c => commissionInMonth(c, month, year));
   }, [allCommissions, month, year]);
 
   const { showExport, setShowExport, agencyName } = useFinancialExport("Comissões");
