@@ -17,7 +17,16 @@ export interface AgencySiteContacts {
   phone?: string;
 }
 
+const BARDELLI_CONTACTS: AgencySiteContacts = {
+  email: "barbara@bardelliviagens.com.br",
+  instagram: "https://www.instagram.com/bardelliviagens/",
+  instagramLabel: "@bardelliviagens",
+  phone: "(11) 97576-7319",
+};
+
 const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
+  "bardelliviagens.com.br": BARDELLI_CONTACTS,
+  "www.bardelliviagens.com.br": BARDELLI_CONTACTS,
   "destinoscomaju.com.br": {
     email: "contato@destinoscomaju.com.br",
     instagram: "https://instagram.com/destinoscomaju",

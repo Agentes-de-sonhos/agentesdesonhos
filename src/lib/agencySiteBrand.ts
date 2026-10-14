@@ -21,6 +21,8 @@ import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json"
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
+import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
+import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
@@ -39,6 +41,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "briefing-16-v1.preview.local": dricaViagensLogo.url,
   /** Briefing 17 — logo enviado, limitado ao host sintético da prévia. */
   "briefing-17-v1.preview.local": viajarTirismoLogo.url,
+  "bardelliviagens.com.br": bardelliLogo.url,
+  "www.bardelliviagens.com.br": bardelliLogo.url,
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
@@ -52,6 +56,8 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
   /** Bússola dourada oficial da Essya Tur (aba do navegador). */
   "essyatur.com.br": essyaFavicon.url,
   "www.essyatur.com.br": essyaFavicon.url,
+  "bardelliviagens.com.br": bardelliFavicon.url,
+  "www.bardelliviagens.com.br": bardelliFavicon.url,
 };
 
 /**
@@ -68,6 +74,8 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "briefing-14-v1.preview.local",
   "briefing-16-v1.preview.local",
   "briefing-17-v1.preview.local",
+  "bardelliviagens.com.br",
+  "www.bardelliviagens.com.br",
 ]);
 
 export interface AgencyHeaderBrandPreset {

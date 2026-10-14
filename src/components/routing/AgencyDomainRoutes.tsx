@@ -76,6 +76,14 @@ function LinkUnavailable() {
   );
 }
 
+function PreviewAdminRedirect() {
+  if (typeof window !== "undefined") {
+    const { pathname, search } = window.location;
+    window.location.replace(pathname.replace(/\/preview\/gestao/, "/gestao") + search);
+  }
+  return <Fallback />;
+}
+
 /** Public code pages: the agency slug always comes from the DOMAIN. */
 function CodePage({
   info,
@@ -192,6 +200,8 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
 
           {/* Preview protegido por senha: tela isolada, sem o chrome do site. */}
           <Route path="/preview" element={<AgencyPreviewGate info={info} />} />
+          {/* Atalho da prévia para o painel: /preview/gestao → /gestao (mesmo tenant). */}
+          <Route path="/preview/gestao/*" element={<PreviewAdminRedirect />} />
 
           {/*
             Rotas públicas de ferramentas/documentos: renderizadas FORA do

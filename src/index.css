@@ -695,6 +695,31 @@ img {
   line-height: 1.14;
 }
 
+/* Bardelli Viagens: vermelho #C00808, preto e branco (escopo exclusivo). */
+.wl-editorial.wl-site-base.wl-bardelli {
+  --foreground: 0 0% 9%;
+  --card-foreground: 0 0% 9%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 0 92% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 0 0% 97%;
+  --secondary-foreground: 0 0% 9%;
+  --accent: 0 40% 96%;
+  --accent-foreground: 0 0% 9%;
+  --ring: 0 92% 39%;
+  --wl-red: 0 92% 39%;
+  --wl-navy: 0 0% 9%;
+  --wl-ink: 0 0% 7%;
+  --wl-sand: 0 20% 98%;
+}
+.wl-editorial.wl-site-base.wl-bardelli h1,
+.wl-editorial.wl-site-base.wl-bardelli h2,
+.wl-editorial.wl-site-base.wl-bardelli h3 {
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
 /* ===== Acabamento "faeEditorial" (Faé Viagens) ================================
    Camada FINA sobre `.wl-editorial`: mesmo layout e comportamento, identidade
    derivada do logotipo (roxo profundo, dourado quente nos detalhes, superfícies
