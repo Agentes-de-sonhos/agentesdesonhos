@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, cleanup } from "@testing-library/react";
-import { isPublicUpdateContext, useAppVersion } from "@/hooks/useAppVersion";
+import { isPublicUpdateContext, resolveUpdatePrompt, useAppVersion } from "@/hooks/useAppVersion";
 
 const ORIGINAL_LOCATION_DESCRIPTOR = Object.getOwnPropertyDescriptor(window, "location");
 
