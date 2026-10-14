@@ -1440,7 +1440,7 @@ const BARDELLI_CURATED: AgencySiteProfile = buildGoldStandardProfile("bardelliCu
     instagram: "https://www.instagram.com/bardelliviagens/",
     instagramLabel: "@bardelliviagens",
     address: "Rua Cabiúna, 42 — Apto 93 A — Vila Mascote — São Paulo/SP",
-    legalName: "Bardelli Viagens",
+    legalName: "JP Serviços de Informação e Asse em Turismo Ltda",
     cnpj: "09.475.657/0001-80",
   },
 });
