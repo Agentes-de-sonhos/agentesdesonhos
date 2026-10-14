@@ -1,26 +1,25 @@
 import { useEffect, useRef, useState } from "react";
 import { agencyHostFromLocation } from "@/lib/agencyDomains";
-
-const VERSION_URL = "/version.json";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Master switch for the "new version available" prompt. Enabled, but the
- * prompt only fires when the manual release key in vite.config.ts
- * (BUILD_ID) changes — routine deploys keep the same key and stay silent.
+ * prompt never fires automatically: it only shows while the platform has
+ * activated the single-row flag in `app_update_prompt` (turned on from the
+ * chat after a release), and each user sees it at most once per release.
  */
 export const APP_UPDATE_PROMPT_ENABLED = true;
 const POLL_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 const DISMISS_KEY = "appUpdateDismissed";
-const DISMISS_DURATION_MS = 60 * 60 * 1000; // 60 minutes
 
-type DismissRecord = { version: string; until: number };
+type DismissRecord = { version: string };
 
 function readDismiss(): DismissRecord | null {
   try {
     const raw = localStorage.getItem(DISMISS_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as DismissRecord;
-    if (!parsed || typeof parsed.version !== "string" || typeof parsed.until !== "number") return null;
+    if (!parsed || typeof parsed.version !== "string") return null;
     return parsed;
   } catch {
     return null;
@@ -29,11 +28,29 @@ function readDismiss(): DismissRecord | null {
 
 export function dismissAppUpdate(version: string) {
   try {
-    const record: DismissRecord = { version, until: Date.now() + DISMISS_DURATION_MS };
+    const record: DismissRecord = { version };
     localStorage.setItem(DISMISS_KEY, JSON.stringify(record));
   } catch {
     /* noop */
   }
+}
+
+/**
+ * Pure rule for the update prompt: the flag must be active, must point at a
+ * version different from the running bundle, and the user must not have
+ * closed it for that version yet — one-time display per release.
+ */
+export function resolveUpdatePrompt(options: {
+  flagActive: boolean;
+  flagVersion: string | null;
+  currentVersion: string;
+  dismissedVersion: string | null;
+}): { prompt: boolean; targetVersion: string | null } {
+  const { flagActive, flagVersion, currentVersion, dismissedVersion } = options;
+  if (!flagActive || !flagVersion) return { prompt: false, targetVersion: null };
+  if (flagVersion === currentVersion) return { prompt: false, targetVersion: null };
+  if (dismissedVersion === flagVersion) return { prompt: false, targetVersion: flagVersion };
+  return { prompt: true, targetVersion: flagVersion };
 }
 
 /**
@@ -136,26 +153,26 @@ export function isAgencyAdminUpdateContext(): boolean {
   return internal === "/gestao" || internal.startsWith("/gestao/");
 }
 
-async function fetchRemoteVersion(): Promise<string | null> {
+type UpdatePromptFlag = { version: string; is_active: boolean } | null;
+
+async function fetchUpdatePromptFlag(): Promise<UpdatePromptFlag> {
   try {
-    const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, {
-      cache: "no-store",
-      credentials: "omit",
-      headers: { "Cache-Control": "no-cache" },
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { version?: string };
-    return typeof data.version === "string" ? data.version : null;
+    const { data, error } = await supabase
+      .from("app_update_prompt")
+      .select("version,is_active")
+      .eq("id", 1)
+      .maybeSingle();
+    if (error || !data) return null;
+    return { version: data.version, is_active: data.is_active };
   } catch {
     return null;
   }
 }
 
 /**
- * Compares the version baked into the current bundle (__APP_VERSION__)
- * against the freshly-fetched /version.json. Returns whether an update
- * is available. Runs at mount, on tab visibility change and on a slow
- * periodic poll.
+ * Reads the manual update flag (`app_update_prompt`). Returns whether the
+ * update prompt should show. Runs at mount, on tab visibility change and
+ * on a slow periodic poll.
  */
 export function useAppVersion(): { updateAvailable: boolean; remoteVersion: string | null } {
   const currentVersion = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
@@ -180,13 +197,17 @@ export function useAppVersion(): { updateAvailable: boolean; remoteVersion: stri
 
     const check = async () => {
       if (stopRef.current) return;
-      const remote = await fetchRemoteVersion();
-      if (!remote) return;
-      if (remote === currentVersion) return;
-      setRemoteVersion(remote);
+      const flag = await fetchUpdatePromptFlag();
+      if (stopRef.current) return;
       const dismissed = readDismiss();
-      if (dismissed && dismissed.version === remote && dismissed.until > Date.now()) return;
-      setUpdateAvailable(true);
+      const decision = resolveUpdatePrompt({
+        flagActive: flag?.is_active ?? false,
+        flagVersion: flag?.version ?? null,
+        currentVersion,
+        dismissedVersion: dismissed?.version ?? null,
+      });
+      setRemoteVersion(decision.targetVersion);
+      setUpdateAvailable(decision.prompt);
     };
 
     check();
