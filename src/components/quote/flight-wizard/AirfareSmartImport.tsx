@@ -331,7 +331,7 @@ export function parsedAirfareToFlightData(
 interface Props {
   quoteId?: string;
   onCancel: () => void;
-  onConfirm: (data: Partial<FlightData>, raw: ParsedAirfare) => void;
+  onConfirm: (data: Partial<FlightData>, raw: ParsedAirfare, file?: File | null) => void;
   /** Início da viagem: fornece o ano quando o documento traz só dia/mês. */
   tripStartDate?: Date;
 }
@@ -542,7 +542,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm, tripStartDate
           }}
           onConfirm={() => {
             const mapped = parsedAirfareToFlightData(parsed, { tripStartDate });
-            onConfirm(mapped, parsed);
+            onConfirm(mapped, parsed, uploadFile);
           }}
           isAdmin={isAdmin}
           onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}

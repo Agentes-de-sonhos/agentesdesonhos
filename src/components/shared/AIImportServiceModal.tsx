@@ -60,6 +60,8 @@ export interface AIImportResult {
   service_data: Record<string, any>;
   /** Resultado bruto do extrator de passagens (somente para voos). */
   raw_airfare?: any;
+  /** Arquivo enviado, para anexar automaticamente em Documentos. */
+  file?: File | null;
 }
 
 interface AIImportServiceModalProps {
@@ -223,7 +225,7 @@ export function AIImportServiceModal({
         }
 
         const flightData = parsedAirfareToFlightData(parsed) as Record<string, any>;
-        await onImport({ service_type: "flight", service_data: flightData, raw_airfare: parsed });
+        await onImport({ service_type: "flight", service_data: flightData, raw_airfare: parsed, file: inputMode === "file" ? file : null });
         toast({
           title: `Passagem aérea importada — ${voos.length} voo(s)`,
           description: "Abra o serviço para revisar os segmentos.",
@@ -278,7 +280,7 @@ export function AIImportServiceModal({
 
     setSaving(true);
     try {
-      await onImport({ service_type: serviceType, service_data: finalData });
+      await onImport({ service_type: serviceType, service_data: finalData, file: inputMode === "file" ? file : null });
       toast({ title: "Serviço importado", description: "Revise e ajuste o que precisar." });
       handleClose(false);
     } catch (err: any) {

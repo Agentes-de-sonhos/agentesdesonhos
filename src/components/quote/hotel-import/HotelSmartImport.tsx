@@ -234,7 +234,7 @@ export function parsedHotelToHotelData(p: ParsedHotel): Partial<HotelData> {
 interface Props {
   quoteId?: string;
   onCancel: () => void;
-  onConfirm: (data: Partial<HotelData>, raw: ParsedHotel) => void;
+  onConfirm: (data: Partial<HotelData>, raw: ParsedHotel, file?: File | null) => void;
   /**
    * Quando informado, permite adicionar TODAS as hospedagens confirmadas de um
    * documento com vários hotéis. Sem esta prop, o comportamento segue singular.
@@ -421,7 +421,7 @@ export function HotelSmartImport({ quoteId, onCancel, onConfirm, onConfirmMany }
         void onConfirmMany(items);
         return;
       }
-      onConfirm(items[0].data, items[0].raw);
+      onConfirm(items[0].data, items[0].raw, uploadFile);
     };
 
     return (

@@ -269,7 +269,7 @@ export function parsedCarToCarData(p: ParsedCarRental): Partial<CarRentalData> {
 interface Props {
   quoteId?: string;
   onCancel: () => void;
-  onConfirm: (data: Partial<CarRentalData>, raw: ParsedCarRental) => void;
+  onConfirm: (data: Partial<CarRentalData>, raw: ParsedCarRental, file?: File | null) => void;
 }
 
 export function CarRentalSmartImport({ quoteId, onCancel, onConfirm }: Props) {
@@ -447,7 +447,7 @@ export function CarRentalSmartImport({ quoteId, onCancel, onConfirm }: Props) {
           }}
           onConfirm={() => {
             const mapped = parsedCarToCarData(parsed);
-            onConfirm(mapped, parsed);
+            onConfirm(mapped, parsed, uploadFile);
           }}
           isAdmin={isAdmin}
           onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}

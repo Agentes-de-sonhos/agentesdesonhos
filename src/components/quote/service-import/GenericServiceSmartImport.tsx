@@ -55,7 +55,7 @@ interface Props {
   /** Map parsed data → form initialData (service_data + amount). */
   mapToInitialData: (parsed: Record<string, any>) => { service_data: Record<string, any>; amount: number };
   onCancel: () => void;
-  onConfirm: (initialData: { service_data: Record<string, any>; amount: number }, raw: Record<string, any>) => void;
+  onConfirm: (initialData: { service_data: Record<string, any>; amount: number }, raw: Record<string, any>, file?: File | null) => void;
   /**
    * Quando informado, permite adicionar TODOS os serviços confirmados de um
    * documento com vários itens. Sem esta prop, o comportamento segue singular.
@@ -256,7 +256,7 @@ export function GenericServiceSmartImport({
       const single = canAddMany || total === 1
         ? items[0]
         : { initialData: mapToInitialData(current), raw: current };
-      onConfirm(single.initialData, single.raw);
+      onConfirm(single.initialData, single.raw, uploadFile);
     };
 
     return (

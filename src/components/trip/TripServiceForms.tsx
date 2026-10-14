@@ -901,10 +901,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
       >
         <AirfareSmartImport
           onCancel={() => setAiImportOpen(false)}
-          onConfirm={(_mapped, raw) => {
+          onConfirm={(_mapped, raw, file) => {
             const legacy = normalizeParsedAirfareToLegacy(raw);
             handleFlightImport(legacy);
             applyFullAirfareFields(raw);
+            if (file) setFiles((prev) => (prev.some((p) => p.name === file.name && p.size === file.size) ? prev : [...prev, file]));
             setAiImportOpen(false);
           }}
         />
@@ -1885,7 +1886,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
       >
         <HotelSmartImport
           onCancel={() => setAiImportOpen(false)}
-          onConfirm={(mapped, raw) => { applyHotelImport(mapped, raw); setAiImportOpen(false); }}
+          onConfirm={(mapped, raw, file) => { applyHotelImport(mapped, raw); if (file) setFiles((prev) => (prev.some((p) => p.name === file.name && p.size === file.size) ? prev : [...prev, file])); setAiImportOpen(false); }}
         />
       </ImportDialogShell>
     )}
@@ -2526,6 +2527,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         open={aiImportOpen}
         onOpenChange={setAiImportOpen}
         onApply={(mapped) => applyCarImport(mapped)}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
@@ -3217,6 +3219,7 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
         title="Importar transfer com IA"
         description="Envie voucher/PDF, imagem ou cole o texto. A IA identifica trajeto, horário, veículo e valores. Você poderá revisar antes de salvar."
         onApply={applyTransferImport}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
@@ -3970,6 +3973,7 @@ function AttractionForm({ onSubmit, onCancel, isLoading, defaultValues, isEditin
         title="Importar ingresso/atração com IA"
         description="Envie voucher, PDF, imagem ou texto. A IA identifica atração, data, quantidade e valores. Você poderá revisar antes de salvar."
         onApply={applyAttractionImport}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
@@ -4594,6 +4598,7 @@ function InsuranceForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing
         title="Importar seguro viagem com IA"
         description="Envie apólice/voucher (PDF, imagem ou texto). A IA identifica plano, cobertura, vigência e valores."
         onApply={applyInsuranceImport}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
@@ -5314,6 +5319,7 @@ function CruiseForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
         title="Importar cruzeiro com IA"
         description="Envie o voucher (PDF, imagem ou texto). A IA identifica navio, rota, datas, cabine e valores."
         onApply={applyCruiseImport}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
@@ -6100,6 +6106,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         title="Importar serviço com IA"
         description="Envie voucher/PDF, imagem ou texto. A IA identifica o serviço, datas e valores."
         onApply={applyOtherImport}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
@@ -6535,6 +6542,7 @@ function TrainForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, im
         title="Importar bilhete de trem com IA"
         description="Envie voucher/PDF, imagem ou texto. A IA identifica trajeto, horários, classe e valores."
         onApply={applyTrainImport}
+        onFile={(f) => setFiles((prev) => (prev.some((p) => p.name === f.name && p.size === f.size) ? prev : [...prev, f]))}
       />
     )}
     </>
