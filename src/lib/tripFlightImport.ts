@@ -152,3 +152,22 @@ export function parsedAirfareToTripFlightData(raw: any): TripFlightData {
     notes: boardingNotes,
   };
 }
+
+/** Sobrepõe localizador, passageiros, bilhetes, bagagem, check-in e embarque do documento + arquivo enviado. */
+export function mergeFullAirfareDefaults(base: any, raw: any, file?: File | null) {
+  const out: any = { ...base };
+  if (raw && typeof raw === "object") {
+    const full: any = parsedAirfareToTripFlightData(raw);
+    for (const [k, v] of Object.entries(full)) {
+      if (k === "segments") continue;
+      if (Array.isArray(v) ? v.length > 0 : !!v) out[k] = v;
+    }
+    out.segments = (base.segments || []).map((s: any) => {
+      const m = full.segments.find((f: any) => f.flight_number && f.flight_number.replace(/\s/g, "") === (s.flight_number || "").replace(/\s/g, ""));
+      return m ? { ...s, terminal: s.terminal || m.terminal, gate: s.gate || m.gate } : s;
+    });
+  }
+  if (file) out.__importedFiles = [file];
+  return out;
+}
+

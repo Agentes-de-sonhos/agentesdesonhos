@@ -45,7 +45,7 @@ interface FlightImportResult extends FlightSegment {
 }
 
 interface FlightAutoImportProps {
-  onImport: (data: FlightImportResult) => void;
+  onImport: (data: FlightImportResult, raw?: any, file?: File | null) => void;
 }
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -148,6 +148,8 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [result, setResult] = useState<FlightImportResult | null>(null);
+  const [rawResult, setRawResult] = useState<any>(null);
+  const [resultFile, setResultFile] = useState<File | null>(null);
 
   const handleFlightLookup = async () => {
     if (!flightNumber.trim()) {
@@ -302,6 +304,8 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     setResult(null);
     try {
       const raw = await callItineraryParser({ text: pasteText });
+      setRawResult(raw); setResultFile(null);
+      setRawResult(raw); setResultFile(uploadFile);
       const normalized = normalizeRich(raw);
       setResult(normalized);
       toast({
@@ -368,7 +372,9 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
 
   const handleApply = () => {
     if (result) {
-      onImport(result);
+      onImport(result, rawResult, resultFile);
+      setRawResult(null);
+      setResultFile(null);
       setResult(null);
       setFlightNumber("");
       setFlightDate("");

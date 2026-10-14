@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { AirfareSmartImport } from "@/components/quote/flight-wizard/AirfareSmartImport";
 import { normalizeParsedAirfareToLegacy } from "@/components/trip/FlightAutoImport";
-import { parsedAirfareToTripFlightData } from "@/lib/tripFlightImport";
+import { parsedAirfareToTripFlightData, mergeFullAirfareDefaults } from "@/lib/tripFlightImport";
 import { normalizeServiceItemFields } from "@/lib/serviceImportFieldAliases";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -195,7 +195,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 
 
 function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean; wizardMode?: boolean }) {
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>(() => (Array.isArray(defaultValues?.__importedFiles) ? defaultValues.__importedFiles : []));
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
   );
@@ -6698,8 +6698,8 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
               <FlightAutoImport
-                onImport={(data) => {
-                  setImportedDefaults(mapFlightImportToDefaults(data));
+                onImport={(data, raw, file) => {
+                  setImportedDefaults(mergeFullAirfareDefaults(mapFlightImportToDefaults(data), raw, file));
                   setMode("manual");
                 }}
               />
