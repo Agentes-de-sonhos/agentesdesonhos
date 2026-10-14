@@ -52,12 +52,12 @@ describe("landing Xcaret renderizada", () => {
   });
 
 
-  it("mostra o selo somente no canto superior do hero, não no fechamento", () => {
+  it("mantém o selo no hero e no canto da foto do fechamento aprovado", () => {
     const hero = render(<Hero slots={full} />);
     expect(hero.getByAltText("fixture badge")).toBeTruthy();
     hero.unmount();
     const closing = render(<Closing slots={full} />);
-    expect(closing.queryByAltText("fixture badge")).toBeNull();
+    expect(closing.getByAltText("fixture badge").className).toContain("absolute bottom-3 right-3");
   });
 
   it("imagens corrigidas apontam para os assets e fontes oficiais corretas", () => {
