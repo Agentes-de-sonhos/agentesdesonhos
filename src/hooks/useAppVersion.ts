@@ -197,13 +197,17 @@ export function useAppVersion(): { updateAvailable: boolean; remoteVersion: stri
 
     const check = async () => {
       if (stopRef.current) return;
-      const remote = await fetchRemoteVersion();
-      if (!remote) return;
-      if (remote === currentVersion) return;
-      setRemoteVersion(remote);
+      const flag = await fetchUpdatePromptFlag();
+      if (stopRef.current) return;
       const dismissed = readDismiss();
-      if (dismissed && dismissed.version === remote && dismissed.until > Date.now()) return;
-      setUpdateAvailable(true);
+      const decision = resolveUpdatePrompt({
+        flagActive: flag?.is_active ?? false,
+        flagVersion: flag?.version ?? null,
+        currentVersion,
+        dismissedVersion: dismissed?.version ?? null,
+      });
+      setRemoteVersion(decision.targetVersion);
+      setUpdateAvailable(decision.prompt);
     };
 
     check();
