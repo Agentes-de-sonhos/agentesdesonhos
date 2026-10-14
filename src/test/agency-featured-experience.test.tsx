@@ -22,7 +22,7 @@ describe("Experiência em destaque", () => {
     // há sobreposições renderizadas pelo código (evita duplicar e cortar).
     expect(screen.queryByAltText(/Selo Xperts Xcaret 2026/)).toBeNull();
     expect(screen.queryByAltText(/Juliana ao lado do letreiro Xplor/)).toBeNull();
-    const cover = screen.getByAltText(/Montagem com vista aérea do Parque Xcaret/);
+    const cover = screen.getByAltText(/Montagem com Juliana no letreiro do Parque Xcaret/);
     expect(cover.className).toContain("object-contain");
     expect(cover.className).not.toContain("scale-[1.08]");
     expect(screen.getByRole("link", { name: /Saiba mais sobre este destino/ }).getAttribute("href")).toContain("/xcaret");

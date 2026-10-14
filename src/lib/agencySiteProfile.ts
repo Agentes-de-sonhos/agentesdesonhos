@@ -15,7 +15,7 @@ import momentFriends from "@/assets/100limites-moment-friends.jpg";
 import xcaretPanorama from "@/assets/whitelabel/xcaret/xcaret-panorama.webp.asset.json";
 import julianaXcaretAtXplor from "@/assets/whitelabel/xcaret/juliana-xplor-sign.webp.asset.json";
 import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
-import destinosXcaretCover from "@/assets/whitelabel/destinos-xcaret-capa-v2.png.asset.json";
+import destinosXcaretCover from "@/assets/whitelabel/destinos-xcaret-capa-v3.png.asset.json";
 import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
 import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import amandaLariniPerfil from "@/assets/whitelabel/100-limites/amanda-larini-perfil.png.asset.json";
@@ -752,7 +752,7 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     description: "Juliana conheceu de perto o universo Xcaret e recebeu o selo de Expert. Agora, transforma essa experiência em orientação personalizada para ajudar você a escolher os parques, hotéis e experiências que realmente combinam com a sua viagem.",
     mainImage: {
       src: destinosXcaretCover.url,
-      alt: "Montagem com vista aérea do Parque Xcaret, o selo Xperts Xcaret 2026 e Juliana nos parques Xcaret, Xplor e Xenses",
+      alt: "Montagem com Juliana no letreiro do Parque Xcaret, o selo Xperts Xcaret 2026 e fotos da vista aérea do parque, da caverna do Xplor e das asas do Xenses",
       position: "center",
       fit: "contain",
     },
