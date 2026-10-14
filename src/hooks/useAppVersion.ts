@@ -136,26 +136,26 @@ export function isAgencyAdminUpdateContext(): boolean {
   return internal === "/gestao" || internal.startsWith("/gestao/");
 }
 
-async function fetchRemoteVersion(): Promise<string | null> {
+type UpdatePromptFlag = { version: string; is_active: boolean } | null;
+
+async function fetchUpdatePromptFlag(): Promise<UpdatePromptFlag> {
   try {
-    const res = await fetch(`${VERSION_URL}?t=${Date.now()}`, {
-      cache: "no-store",
-      credentials: "omit",
-      headers: { "Cache-Control": "no-cache" },
-    });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { version?: string };
-    return typeof data.version === "string" ? data.version : null;
+    const { data, error } = await supabase
+      .from("app_update_prompt")
+      .select("version,is_active")
+      .eq("id", 1)
+      .maybeSingle();
+    if (error || !data) return null;
+    return { version: data.version, is_active: data.is_active };
   } catch {
     return null;
   }
 }
 
 /**
- * Compares the version baked into the current bundle (__APP_VERSION__)
- * against the freshly-fetched /version.json. Returns whether an update
- * is available. Runs at mount, on tab visibility change and on a slow
- * periodic poll.
+ * Reads the manual update flag (`app_update_prompt`). Returns whether the
+ * update prompt should show. Runs at mount, on tab visibility change and
+ * on a slow periodic poll.
  */
 export function useAppVersion(): { updateAvailable: boolean; remoteVersion: string | null } {
   const currentVersion = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
