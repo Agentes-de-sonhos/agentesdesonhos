@@ -197,28 +197,28 @@ const SCHEMAS: Record<ImportType, unknown> = {
   flight: FLIGHT_SCHEMA,
   hotel: HOTEL_SCHEMA,
   car_rental: makeSchema([
-    "rental_company","reservation_code","reservation_status","pickup_location","pickup_address","pickup_city","pickup_country","pickup_date","pickup_time","pickup_terminal","pickup_instructions","pickup_phone","dropoff_location","dropoff_address","dropoff_city","dropoff_country","dropoff_date","dropoff_time","dropoff_instructions","car_type","car_model","transmission","fuel_type","doors","passenger_capacity","luggage_capacity","plate","basic_insurance","full_insurance","deductible","deposit_amount","deposit_method","payment_method","fuel_policy","required_documents","minimum_age","notes",
+    "rental_company","reservation_code","reservation_status","pickup_location","pickup_address","pickup_city","pickup_country","pickup_date","pickup_time","pickup_terminal","pickup_instructions","pickup_phone","dropoff_location","dropoff_address","dropoff_city","dropoff_country","dropoff_date","dropoff_time","dropoff_instructions","car_type","car_model","transmission","fuel_type","doors","passenger_capacity","luggage_capacity","plate","basic_insurance","full_insurance","deductible","deposit_amount","deposit_method","payment_method","fuel_policy","required_documents","minimum_age","notes","pickup_maps_url","dropoff_late_policy","car_notes","third_party_protection","theft_protection","damage_protection","insurance_coverage","insurance_notes","card_in_driver_name","payment_status","additional_driver_fee","fuel_rules","fuel_penalty","fuel_notes","international_permit","traffic_rules","emergency_contact",
   ], { drivers: ["name","document","age","notes"] }),
   transfer: makeSchema([
-    "transfer_type","transfer_mode","transfer_status","city","date","time","origin_location","destination_location","company_name","reservation_code","flight_number","arrival_time","arrival_airport","arrival_terminal","hotel_departure_time","departure_flight_time","departure_airport","pickup_address","destination_address","driver_name","driver_phone","driver_language","vehicle_plate","vehicle_type","vehicle_capacity","adults_count","children_count","location","notes",
-  ], { passengers: ["name","age","passenger_type","notes"] }),
+    "transfer_type","transfer_mode","transfer_status","city","date","time","origin_location","destination_location","company_name","reservation_code","flight_number","arrival_time","arrival_airport","arrival_terminal","hotel_departure_time","departure_flight_time","departure_airport","pickup_address","destination_address","driver_name","driver_phone","driver_language","vehicle_plate","vehicle_type","vehicle_capacity","adults_count","children_count","location","notes","driver_wait_time","reception_type","meeting_instructions","recommended_departure","boarding_point","departure_alert","pickup_maps_url","destination_maps_url","location_notes","luggage_capacity","air_conditioning","accessibility","vehicle_notes","required_documents","emergency_contact","plan_b",
+  ], { passengers: ["name","age","passenger_type","needs_child_seat","notes"] }),
   attraction: makeSchema([
-    "name","attraction_type","city","country","date","status","entry_time","usage_window","duration","access_type","ticket_code","confirmation_code","order_number","address","venue_name","maps_url","entry_point","cancellation_policy","attraction_rules","required_documents","attraction_contact","agency_notes","notes",
+    "name","attraction_type","city","country","date","status","entry_time","usage_window","duration","access_type","ticket_code","confirmation_code","order_number","address","venue_name","maps_url","entry_point","cancellation_policy","attraction_rules","required_documents","attraction_contact","agency_notes","notes","quantity","requires_reservation","usage_instructions","change_policy","prohibited_items","dress_code","operator_contact","emergency_contact",
   ], { passengers: ["name","ticket_type","document","notes"] }),
   insurance: makeSchema([
-    "provider","plan_name","policy_number","destination_covered","coverage_type","start_date","end_date","status","medical_assistance","hospital_expenses","lost_baggage","trip_cancellation","dental_assistance","medical_repatriation","covid_coverage","coverage","emergency_phone","emergency_whatsapp","emergency_email","emergency_24h","insurer_website","how_to_activate","notes",
-  ], { insured_persons: ["name","birth_date","document","notes"] }),
+    "provider","plan_name","policy_number","destination_covered","coverage_type","start_date","end_date","status","medical_assistance","hospital_expenses","lost_baggage","trip_cancellation","dental_assistance","medical_repatriation","covid_coverage","coverage","emergency_phone","emergency_whatsapp","emergency_email","emergency_24h","insurer_website","how_to_activate","notes","trip_interruption","emergency_languages","required_documents_claim","hospital_procedure","reimbursement_info","trip_purpose","special_activities","coverage_observations",
+  ], { insured_persons: ["name","birth_date","document","coverage_type","notes"] }),
   cruise: makeSchema([
-    "cruise_company","ship_name","route","embarkation_port","disembarkation_port","start_date","end_date","booking_number","cabin_type","cabin_number","cabin_category","deck","occupancy","meal_plan","checkin_url","boarding_terminal","port_address","recommended_arrival","required_documents","baggage_policy","dress_code",
+    "cruise_company","ship_name","route","embarkation_port","disembarkation_port","start_date","end_date","booking_number","cabin_type","cabin_number","cabin_category","deck","occupancy","meal_plan","checkin_url","boarding_terminal","port_address","recommended_arrival","required_documents","baggage_policy","dress_code","checkin_status","checkin_deadline","port_maps_url","company_rules","boarding_notes","onboard_currency","onboard_language","voltage","ship_website",
   ], {
-    passengers: ["name","document","notes"],
-    itinerary: ["date","port","arrival_time","departure_time","stop_type"],
+    passengers: ["name","birth_date","document","notes"],
+    itinerary: ["date","port","arrival_time","departure_time","stop_type","notes"],
   }),
   train: makeSchema([
-    "origin_city","origin_station","destination_city","destination_station","travel_date","departure_time","arrival_time","train_company","train_number","travel_class","coach","seat","platform","boarding_notes",
+    "origin_city","origin_station","destination_city","destination_station","travel_date","departure_time","arrival_time","train_company","train_number","travel_class","coach","seat","platform","boarding_notes","origin_maps_url","destination_maps_url",
   ], { passengers: ["name","notes"] }),
   other: makeSchema([
-    "service_name","other_service_type","custom_type_name","city","country","date","time","duration","status","location_name","address","maps_url","meeting_point","contact_name","contact_company","contact_phone","contact_whatsapp","contact_email","reservation_code","description","notes",
+    "service_name","other_service_type","custom_type_name","city","country","date","time","duration","status","location_name","address","maps_url","meeting_point","contact_name","contact_company","contact_phone","contact_whatsapp","contact_email","reservation_code","description","notes","how_to_arrive","contact_language","chip_operator","chip_type","chip_activation_instructions","chip_activation_url","chip_support","guide_name","guide_language","guide_tour_time","guide_tour_duration","guide_meeting_point","emergency_contact",
   ]),
 };
 
@@ -240,6 +240,11 @@ function makeSchema(stringFields: string[], arrayFields: Record<string, string[]
     required: ["extracted"],
   };
 }
+
+const COMPLETE_FIELDS_RULE = `
+REGRA GERAL — PREENCHIMENTO COMPLETO:
+- Percorra TODOS os campos do schema e preencha cada um que tenha evidência no documento (códigos de reserva/localizador/confirmação/apólice, nomes de passageiros/hóspedes/segurados, números de bilhete/ingresso, contatos, endereços, horários, políticas e regras).
+- Campos sem evidência ficam vazios. Nunca invente.`;
 
 const SYSTEM_PROMPTS: Record<ImportType, string> = {
   flight: `Você é um assistente especialista em ler vouchers, e-mails e confirmações de PASSAGENS AÉREAS.
