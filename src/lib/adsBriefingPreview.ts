@@ -655,11 +655,8 @@ export const BARDELLI_PRESENTATION_INFO: AgencyDomainInfo = {
 };
 export const BARDELLI_PRESENTATION_PROFILE = buildGoldStandardProfile("bardelliPresentation", {
   navDensity: "compact",
-  about: { title: "Bardelli Viagens" },
   footer: { description: "Consultoria de viagem e roteiros personalizados.", whatsapp: "(11) 97576-7319", phone: "(11) 97576-7319", email: "barbara@bardelliviagens.com.br", instagram: "https://www.instagram.com/bardelliviagens/", instagramLabel: "@bardelliviagens", address: "Rua Cabiúna, 42 — Apto 93 A — Vila Mascote — São Paulo/SP", legalName: "JP Serviços de Informação e Asse em Turismo Ltda", cnpj: "09.475.657/0001-80" },
-});
-// Preserve the complete baseline About while setting the real identity.
-BARDELLI_PRESENTATION_PROFILE.about = buildGoldStandardProfile("bardelliPresentation", {}, "Bardelli Viagens").about;
+}, "Bardelli Viagens");
 if (BARDELLI_PRESENTATION_PROFILE.about) {
   BARDELLI_PRESENTATION_PROFILE.about.title = "Uma viagem com a sua identidade, planejada com cuidado";
   BARDELLI_PRESENTATION_PROFILE.about.ownerName = "Bárbara Bardelli";

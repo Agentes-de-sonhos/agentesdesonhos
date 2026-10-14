@@ -138,7 +138,7 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           />
         </div>
       )}
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
+      <div data-xcaret-mobile-play className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
         <div className="pointer-events-auto"><HeroVideoButton /></div>
       </div>
       <div className="absolute inset-x-0 bottom-28 z-10 md:bottom-32 lg:bottom-[128px]">

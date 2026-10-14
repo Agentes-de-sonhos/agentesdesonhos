@@ -70,12 +70,14 @@ export function AgencyGoogleReviewsSection({
   container,
   copy,
   compactSpacing = false,
+  illustrative = false,
 }: {
   hostname: string;
   container: string;
   copy?: { kicker?: string; title?: string; subtitle?: string };
   /** Reduz o vão superior da seção e o afastamento da atribuição do Google. */
   compactSpacing?: boolean;
+  illustrative?: boolean;
 }) {
   const ref = useRef<HTMLElement | null>(null);
   const [near, setNear] = useState(false);
@@ -88,8 +90,17 @@ export function AgencyGoogleReviewsSection({
     return () => io.disconnect();
   }, [near]);
 
-  const { data, isError } = useAgencyGoogleReviews(hostname, near);
-  const fallback = googleReviewsFallbackUrl(hostname);
+  const live = useAgencyGoogleReviews(hostname, near && !illustrative);
+  const data = illustrative ? {
+    rating: null, total: null, url: null, attributions: [],
+    reviews: ["Uma viagem pensada para o nosso ritmo, com escolhas claras e atenção aos detalhes do planejamento.", "Gostamos de comparar as possibilidades de destinos e hospedagens antes de escolher o roteiro.", "Informações claras ajudam a organizar cada etapa e imaginar a próxima viagem."].map((text, index) => ({
+      authorName: `Viajante de exemplo ${index + 1}`, authorUrl: null, photoUrl: null, rating: null,
+      text, relativeTime: "Avaliação ilustrativa — exemplo de apresentação", publishTime: null,
+      googleMapsUri: null, flagContentUri: null,
+    })),
+  } : live.data;
+  const isError = !illustrative && live.isError;
+  const fallback = illustrative ? null : googleReviewsFallbackUrl(hostname);
   const googleUrl = data?.url ?? fallback;
 
   // Sem dados ou com erro: bloco compacto, sem buraco na página.
@@ -167,7 +178,7 @@ export function AgencyGoogleReviewsSection({
           </div>
         )}
 
-        <div className={`${compactSpacing ? "mt-4" : "mt-6"} flex flex-col gap-1 text-muted-foreground`}>
+        {illustrative ? <p className="mt-6 text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Textos fictícios, sem nota ou integração com o Google.</p> : <div className={`${compactSpacing ? "mt-4" : "mt-6"} flex flex-col gap-1 text-muted-foreground`}>
           <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
             Google Maps
           </p>
@@ -185,7 +196,7 @@ export function AgencyGoogleReviewsSection({
             </p>
           )}
           <p className="font-sans text-[12px]">Avaliações exibidas na ordem de relevância definida pelo Google Maps.</p>
-        </div>
+        </div>}
       </div>
     </section>
   );

@@ -1489,19 +1489,7 @@ export default function AgencySiteHome({
         );
 
       case "avaliacoes":
-        if (profile.presentation) return (
-          <section key={key} id="avaliacoes" className="bg-background py-14 md:py-24">
-            <div className={container}>
-              <SectionHeading title="Avaliações de quem viaja" subtitle="Avaliação ilustrativa — exemplo de apresentação" editorial={editorial} />
-              <Card className="max-w-xl p-6">
-                <Quote className="h-6 w-6 text-primary" aria-hidden />
-                <p className="mt-4 text-base leading-relaxed">“Uma viagem pensada para o nosso ritmo, com escolhas claras e atenção aos detalhes do planejamento.”</p>
-                <p className="mt-5 font-semibold">Viajante de exemplo</p>
-                <p className="mt-2 text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Texto fictício, sem nota ou integração com o Google.</p>
-              </Card>
-            </div>
-          </section>
-        );
+        if (profile.presentation) return <AgencyGoogleReviewsSection key={key} hostname={hostname} container={container} copy={copyFor("avaliacoes")} compactSpacing={compactSpacing} illustrative />;
         if (!googleReviews) return null;
         {
           const copy = copyFor("avaliacoes");

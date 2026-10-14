@@ -160,6 +160,7 @@ export function DmcRequestCartProvider({ hostname, whatsapp, children, presentat
         open={cartOpen}
         onOpenChange={setCartOpen}
         items={items}
+        presentation={presentation}
         hostname={hostname}
         whatsapp={whatsapp}
         onEdit={(i) => { setCartOpen(false); setEditing({ kind: i.kind, title: i.title, values: i.values, id: i.id }); }}
@@ -230,9 +231,10 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
   );
 }
 
-function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onRemove, onClear }: {
+function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onRemove, onClear, presentation = false }: {
   open: boolean; onOpenChange: (o: boolean) => void; items: DmcItem[]; hostname: string; whatsapp: string | null;
   onEdit: (i: DmcItem) => void; onRemove: (id: string) => void; onClear: () => void;
+  presentation?: boolean;
 }) {
   const { state, error, submit, reset } = useAgencySiteRequest(hostname);
   const [c, setC] = useState({ name: "", phone: "", email: "", agency: "", notes: "", consent: false });
@@ -241,6 +243,7 @@ function CartDialog({ open, onOpenChange, items, hostname, whatsapp, onEdit, onR
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (presentation) return;
     setFormError(null);
     if (!items.length) return setFormError("Adicione ao menos um serviço.");
     if (c.name.trim().length < 2) return setFormError("Informe seu nome.");

@@ -64,6 +64,8 @@ export function buildGoldStandardProfile(key: AgencySiteProfileKey, overrides: P
     credentials: { kicker: "APRESENTAÇÃO ILUSTRATIVA", title: "Credenciais e conexões", text: "Espaço de apresentação para informações que a agência poderá confirmar. Nenhum selo ou certificado é atribuído nesta prévia.", items: [{ key: "cadastur", name: "Cadastro e documentação", text: "Informações e comprovantes serão incluídos somente após validação." }, { key: "parceiros", name: "Conexões de viagem", text: "Parcerias e especializações dependem de confirmação da agência." }] },
     team: [{ key: "consultoria", name: "Consultoria de viagens", role: "Apresentação ilustrativa", text: "Atendimento dedicado a conhecer os seus planos. Nomes, funções e fotografias da equipe serão confirmados pela agência." }],
     copy: { ...EDITORIAL_ROSE.copy,
+      modules: { ...EDITORIAL_ROSE.copy?.modules, subtitle: "Consultoria, planejamento e atenção aos detalhes para viagens que respeitam o perfil de cada cliente." },
+      highlights: EDITORIAL_DMC.copy?.highlights,
       destinations: { title: "Descubra o seu próximo destino", subtitle: "Inspirações para viagens pelo Brasil e pelo mundo, organizadas conforme o seu perfil." },
       differentials: { title: `O que você encontra na ${name}`, subtitle: "Planejamento e atenção aos detalhes da sua viagem." },
       avaliacoes: { kicker: "EXEMPLO DE APRESENTAÇÃO", title: "Avaliações de quem viaja", subtitle: "Avaliação ilustrativa — exemplo de apresentação. Não é um depoimento real nem uma integração com o Google." },
