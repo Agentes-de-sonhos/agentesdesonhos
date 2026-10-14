@@ -195,7 +195,7 @@ const emptyPassenger = (): FlightPassengerInput => ({
 
 
 function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, imageSlot, hideInlineImport, wizardMode }: Omit<TripServiceFormProps, "serviceType"> & { hideInlineImport?: boolean; wizardMode?: boolean }) {
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<File[]>(() => (Array.isArray(defaultValues?.__importedFiles) ? defaultValues.__importedFiles : []));
   const [segments, setSegments] = useState<FlightSegmentInput[]>(
     defaultValues?.segments?.length > 0 ? defaultValues.segments : [emptySegment()]
   );
@@ -6674,6 +6674,24 @@ function mapFlightImportToDefaults(importData: any) {
   };
 }
 
+/** Sobrepõe localizador, passageiros, bilhetes, bagagem, check-in e embarque do documento + arquivo enviado. */
+export function mergeFullAirfareDefaults(base: any, raw: any, file?: File | null) {
+  const out: any = { ...base };
+  if (raw && typeof raw === "object") {
+    const full: any = parsedAirfareToTripFlightData(raw);
+    for (const [k, v] of Object.entries(full)) {
+      if (k === "segments") continue;
+      if (Array.isArray(v) ? v.length > 0 : !!v) out[k] = v;
+    }
+    out.segments = (base.segments || []).map((s: any) => {
+      const m = full.segments.find((f: any) => f.flight_number && f.flight_number.replace(/\s/g, "") === (s.flight_number || "").replace(/\s/g, ""));
+      return m ? { ...s, terminal: s.terminal || m.terminal, gate: s.gate || m.gate } : s;
+    });
+  }
+  if (file) out.__importedFiles = [file];
+  return out;
+}
+
 function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
   const isEditing = !!props.defaultValues;
   const [mode, setMode] = useState<"chooser" | "import" | "manual">(isEditing ? "manual" : "chooser");
@@ -6698,8 +6716,8 @@ function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
             </DialogHeader>
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
               <FlightAutoImport
-                onImport={(data) => {
-                  setImportedDefaults(mapFlightImportToDefaults(data));
+                onImport={(data, raw, file) => {
+                  setImportedDefaults(mergeFullAirfareDefaults(mapFlightImportToDefaults(data), raw, file));
                   setMode("manual");
                 }}
               />
