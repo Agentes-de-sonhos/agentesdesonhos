@@ -16,11 +16,12 @@ const CONSULADOS = ["Brasília", "São Paulo", "Rio de Janeiro", "Recife", "Port
  * Envia pela mesma Edge Function segura da Central de Solicitações: o tenant
  * é resolvido no servidor pelo hostname e o lead chega ao CRM + e-mail da agência.
  */
-export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a proposta", className = "" }: {
+export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a proposta", className = "", presentation = false }: {
   hostname: string;
   whatsapp: string | null;
   label?: string;
   className?: string;
+  presentation?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const { state, error, submit, reset } = useAgencySiteRequest(hostname);
@@ -30,6 +31,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (presentation) return;
     setFormError(null);
     if (f.name.trim().length < 2) return setFormError("Informe seu nome.");
     const digits = f.phone.replace(/\D/g, "");
@@ -84,7 +86,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
               </div>
               <DialogTitle className="mt-4">Solicitação enviada!</DialogTitle>
               <DialogDescription className="mt-2">
-                A Amanda recebeu seu pedido e retorna com a proposta da assessoria de visto americano.
+                {presentation ? "Apresentação sem envio de solicitação." : "A Amanda recebeu seu pedido e retorna com a proposta da assessoria de visto americano."}
               </DialogDescription>
               {whatsapp && (
                 <Button asChild size="lg" className="mt-6">
@@ -99,7 +101,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
               <DialogHeader>
                 <DialogTitle>{label}</DialogTitle>
                 <DialogDescription>
-                  Conte rapidamente quem viaja e a Amanda retorna com a proposta da assessoria B1/B2. Nada é cobrado agora.
+                  {presentation ? "Conte quem viaja para revisar o pedido B1/B2. Formulário ilustrativo, sem envio ou cobrança." : "Conte rapidamente quem viaja e a Amanda retorna com a proposta da assessoria B1/B2. Nada é cobrado agora."}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={send} className="grid gap-3 sm:grid-cols-2">
@@ -140,7 +142,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
                 </div>
                 <label className="flex items-start gap-2 text-xs text-muted-foreground sm:col-span-2">
                   <input type="checkbox" className="mt-0.5" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
-                  Autorizo a 100 Limites a usar meus dados para retornar com a proposta, conforme a privacidade do site.
+                  {presentation ? "Exemplo de consentimento para contato da Bardelli Viagens — nenhum dado será enviado nesta apresentação." : "Autorizo a 100 Limites a usar meus dados para retornar com a proposta, conforme a privacidade do site."}
                 </label>
                 {(formError || error) && <p className="text-sm font-medium text-destructive sm:col-span-2" role="alert">{formError ?? error}</p>}
                 <Button type="submit" size="lg" disabled={state === "submitting"} className="wl-visa-proposal sm:col-span-2">

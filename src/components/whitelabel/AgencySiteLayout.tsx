@@ -85,7 +85,7 @@ export function AgencyBrandBar({
   const logoUrl = resolveAgencyLogoUrl(info);
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
-  const blogStatus = usePublicBlogStatus(navOverride ? null : info.hostname).data;
+  const blogStatus = usePublicBlogStatus(navOverride || resolveSiteProfile(info.hostname).presentation ? null : info.hostname).data;
   const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
   if (editorial) {
@@ -95,7 +95,7 @@ export function AgencyBrandBar({
         <div
           className={`${siteContainer(true)} flex items-center justify-between gap-6 ${headerBrand.headerClassName}`}
         >
-          <Link to={agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
+          <Link to={resolveSiteProfile(info.hostname).presentation ? agencySiteHref("/") : agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
             {headerLogoUrl ? (
               <img
                 src={headerLogoUrl}
@@ -108,7 +108,7 @@ export function AgencyBrandBar({
               </span>
             )}
             {/* Logotipos que já contêm o nome da marca não repetem o wordmark. */}
-            {!headerBrand.logoOnly && !(headerLogoUrl && logoIncludesWordmark(info.hostname)) && (
+            {!resolveSiteProfile(info.hostname).presentation && !headerBrand.logoOnly && !(headerLogoUrl && logoIncludesWordmark(info.hostname)) && (
               <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
                 <BrandText>{name}</BrandText>
               </span>
@@ -213,7 +213,7 @@ export function AgencyBrandBar({
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <div className={`mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 ${headerBrand.headerClassName}`}>
-        <Link to={agencyContextHref("/")} className="flex items-center gap-3 min-w-0">
+        <Link to={resolveSiteProfile(info.hostname).presentation ? agencySiteHref("/") : agencyContextHref("/")} className="flex items-center gap-3 min-w-0">
           {headerLogoUrl ? (
             <img src={headerLogoUrl} alt={`Logo ${name}`} className={headerBrand.logoClassName} />
           ) : (
@@ -291,7 +291,7 @@ export function AgencyFooter({
   const profile = resolveSiteProfile(info.hostname);
   const footer = profile.footer;
   const footerWhatsapp = noWhatsapp || footer?.whatsappHidden ? null : footer?.whatsapp?.replace(/\D/g, "") || wa;
-  const blogStatus = usePublicBlogStatus(navOverride ? null : info.hostname).data;
+  const blogStatus = usePublicBlogStatus(navOverride || resolveSiteProfile(info.hostname).presentation ? null : info.hostname).data;
   const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
   if (luxury) {

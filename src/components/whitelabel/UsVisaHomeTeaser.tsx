@@ -24,8 +24,8 @@ function formatDate(iso: string | null | undefined) {
 }
 
 /** Vitrine interativa da home: espera por consulado (dados oficiais) + CTA para /visto-americano. */
-export function UsVisaHomeTeaser() {
-  const { data, isLoading } = useUsVisaPublicInfo();
+export function UsVisaHomeTeaser({ presentation = false }: { presentation?: boolean } = {}) {
+  const { data, isLoading } = useUsVisaPublicInfo(!presentation);
   const waits = data?.interview_wait_times ?? null;
   const [selected, setSelected] = useState(CITIES[0].key);
 
@@ -66,7 +66,7 @@ export function UsVisaHomeTeaser() {
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-foreground/75">
               Escolha a cidade e consulte a espera para a próxima entrevista de visto de turismo e negócios (B1/B2).
-              A Amanda orienta você em cada etapa.
+              {presentation ? "Atendimento e condições a confirmar com a agência." : "A Amanda orienta você em cada etapa."}
             </p>
             {fee !== null && (
               <p className="mt-4 text-sm text-foreground/75">
@@ -126,7 +126,7 @@ export function UsVisaHomeTeaser() {
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Próxima entrevista</p>
                   <p className="mt-1 text-3xl font-semibold leading-tight text-foreground md:text-4xl">
-                    {isLoading ? "…" : wait?.display_pt || "Indisponível"}
+                    {isLoading ? "…" : wait?.display_pt || (presentation ? "A consultar" : "Indisponível")}
                   </p>
                 {fastest === selected && (
                   <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-foreground">

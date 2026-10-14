@@ -55,7 +55,7 @@ function XcaretHeader({ info }: { info: AgencyDomainInfo }) {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur">
       <div className={`${contentWidth} flex min-h-[76px] items-center justify-between gap-3 py-2`}>
-        <Link to={agencyContextHref("/")} className="flex min-w-0 items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+        <Link to={info.hostname === "bardelli-presentation.preview.local" ? agencySiteHref("/") : agencyContextHref("/")} className="flex min-w-0 items-center gap-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
           {logo && <img src={preset.logoUrl ?? logo} alt="Destinos com a Ju" className="h-14 w-auto max-w-[130px] object-contain" />}
           <span className="hidden text-sm font-medium text-muted-foreground sm:inline">Voltar ao site</span>
         </Link>
@@ -138,7 +138,7 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           />
         </div>
       )}
-      <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
+      <div data-xcaret-mobile-play className="pointer-events-none absolute inset-x-0 top-1/2 z-10 flex -translate-y-1/2 justify-center lg:hidden">
         <div className="pointer-events-auto"><HeroVideoButton /></div>
       </div>
       <div className="absolute inset-x-0 bottom-28 z-10 md:bottom-32 lg:bottom-[128px]">
