@@ -67,13 +67,6 @@ export function parsedAirfareToTripFlightData(raw: any): TripFlightData {
     segment_type: total <= 1 ? "ida" : i === 0 ? "ida" : i === total - 1 ? "volta" : "conexao",
   }));
 
-  // Ida e volta: quando o último trecho retorna à origem, marca trechos intermediários corretamente.
-  if (total >= 2 && segments[0].origin_airport && segments[0].origin_airport === segments[total - 1].destination_airport) {
-    const turnIdx = segments.findIndex((s, i) => i > 0 && s.origin_airport === segments[i - 1].destination_airport
-      && s.destination_airport === segments[0].origin_airport) ;
-    void turnIdx;
-  }
-
   const ordemToIdx = new Map<number, number>();
   voos.forEach((v, i) => ordemToIdx.set(typeof v.ordem === "number" ? v.ordem : i + 1, i));
 
