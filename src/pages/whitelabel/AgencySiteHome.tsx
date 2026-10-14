@@ -1580,6 +1580,43 @@ export default function AgencySiteHome({
       case "newsletter":
         {
         const copy = copyFor("newsletter");
+        if (editorial && profile.newsletterMedia) {
+          const media = profile.newsletterMedia;
+          return (
+            <Fragment key={key}>
+            <section id="novidades" className="bg-background">
+              <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
+                <div className="wl-newsletter-card wl-alt-gradient overflow-hidden rounded-2xl border border-[hsl(var(--wl-ink)_/_0.08)]">
+                  <div className="grid items-stretch md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+                    <div className="px-8 py-12 md:px-14 md:py-16">
+                      <p className="wl-kicker inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red,var(--primary)))]">
+                        <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
+                      </p>
+                      <h2 className="mt-4 text-pretty text-3xl font-extrabold leading-[1.1] text-[hsl(var(--wl-ink))] md:text-[clamp(2rem,3vw,2.6rem)]">
+                        {copy.title ?? "Receba novidades e oportunidades"}
+                      </h2>
+                      <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)] md:text-base">
+                        {copy.subtitle}
+                      </p>
+                      <Button
+                        size="lg"
+                        className="mt-8 h-12 w-full rounded-xl bg-primary px-7 text-primary-foreground hover:bg-primary/90 md:w-auto"
+                        onClick={() => setInspirationOpen(true)}
+                      >
+                        {copy.cta ?? "Quero entrar no grupo"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </div>
+                    <div className="relative min-h-[240px] md:min-h-full">
+                      <img src={media.src} alt={media.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            {profile.socialStrip && <SocialStrip strip={profile.socialStrip} />}
+            </Fragment>
+          );
+        }
         if (editorial) {
           return (
             <Fragment key={key}>

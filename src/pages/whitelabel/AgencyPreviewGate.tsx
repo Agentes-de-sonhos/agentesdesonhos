@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { type AgencyDomainInfo, agencyDisplayName, normalizeHostname } from "@/lib/agencyDomains";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
+import { BARDELLI_PRESENTATION_INFO } from "@/lib/adsBriefingPreview";
 import {
   grantPreviewAccess,
   hasPreviewAccess,
@@ -45,6 +46,10 @@ export default function AgencyPreviewGate({ info }: { info: AgencyDomainInfo }) 
    * apenas pela Edge Function, para CORS.
    */
   const host = normalizeHostname(info.hostname);
+  const siteInfo: AgencyDomainInfo =
+    host === "bardelliviagens.com.br" || host === "www.bardelliviagens.com.br"
+      ? { ...BARDELLI_PRESENTATION_INFO, logo_url: info.logo_url || BARDELLI_PRESENTATION_INFO.logo_url }
+      : info;
   const name = agencyDisplayName(info);
   const accent = safeAccent(info.primary_color);
 
@@ -140,8 +145,9 @@ export default function AgencyPreviewGate({ info }: { info: AgencyDomainInfo }) 
             Sair do preview
           </button>
         </div>
-        <AgencySiteLayout info={info}>
-          <AgencySiteHome info={info} />
+        {/* Bardelli: /preview mostra a apresentação completa (dados ilustrativos, sem envios). */}
+        <AgencySiteLayout info={siteInfo}>
+          <AgencySiteHome info={siteInfo} noindex />
         </AgencySiteLayout>
       </div>
     );
