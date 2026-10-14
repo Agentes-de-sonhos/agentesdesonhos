@@ -3,11 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { isTechnicalPreviewHost, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
+import { AgencyPresentationPages } from "@/components/whitelabel/AgencyPresentationPages";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
+const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
+const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
 const AgencyResortPage = lazy(() => import("@/pages/whitelabel/AgencyResortPage"));
 const BrazilResortsMap = lazy(() => import("@/components/resorts-brasil/BrazilResortsMap").then((m) => ({ default: m.BrazilResortsMap })));
 const OrlandoEditorialGallery = lazy(() => import("@/components/orlando/OrlandoEditorialGallery").then((m) => ({ default: m.OrlandoEditorialGallery })));
@@ -17,7 +20,7 @@ const OrlandoTicketsSection = lazy(() => import("@/components/orlando/OrlandoTic
 const INTERACTIVE_AREA = "#ingressos-orlando, [data-preview-interactive]";
 
 /** Controles puramente visuais que continuam funcionando (carrosséis, FAQ, menu). */
-const SAFE_BUTTON = /anterior|próxim|proxim|slide|foto|vídeo|video|play|pausar|reproduzir|menu|fechar/i;
+const SAFE_BUTTON = /solicitar|calcular|adicionar|minha solicitação|finalizar solicitação|montar minha|consulte a proposta|conhecer possibilidades|revisar|editar|remover|^voltar$|^continuar$|^próximo$|anterior|próxim|proxim|slide|foto|vídeo|video|play|pausar|reproduzir|menu|fechar/i;
 
 /**
  * Prévia técnica revisável da fixture ADS. Reusa AgencySiteLayout/AgencySiteHome
@@ -29,7 +32,9 @@ export default function AdsBriefingPreview() {
   const navigate = useNavigate();
   const base = `/ads-briefing-preview/${jobId}`;
   const fixture = resolveAdsPreviewFixture(jobId);
-  const allowed = isTechnicalPreviewHost(window.location.hostname);
+  const allowed = fixture?.profile.presentation
+    ? ["localhost", "127.0.0.1", "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app"].includes(window.location.hostname)
+    : isTechnicalPreviewHost(window.location.hostname);
   const [notice, setNotice] = useState(false);
   useAgencyFavicon(allowed ? fixture?.info.logo_url : null);
 
@@ -69,8 +74,9 @@ export default function AdsBriefingPreview() {
         btn &&
         (btn.hasAttribute("aria-expanded") ||
           SAFE_BUTTON.test(btn.getAttribute("aria-label") ?? "") ||
+          (fixture.profile.presentation && btn.getAttribute("type") !== "submit" && (SAFE_BUTTON.test(btn.textContent ?? "") || !!btn.closest("[role=dialog]"))) ||
           (btn.getAttribute("type") !== "submit" && !!btn.closest(INTERACTIVE_AREA)));
-      if (link || (btn && !safe)) {
+      if (link || (btn && !safe && btn.dataset.previewLocal !== "true")) {
         e.preventDefault();
         e.stopImmediatePropagation();
         flash();
@@ -78,7 +84,9 @@ export default function AdsBriefingPreview() {
     };
     const onSubmit = (e: Event) => {
       e.preventDefault();
-      e.stopImmediatePropagation();
+      // Only the cart item editor is local-only. Never allow checkout/lead submits,
+      // including portals mounted outside the page wrapper.
+      if (!(fixture.profile.presentation && e.target instanceof HTMLFormElement && e.target.dataset.previewLocal === "cart-item")) e.stopImmediatePropagation();
       flash();
     };
     document.addEventListener("click", onClick, true);
@@ -114,7 +122,10 @@ export default function AdsBriefingPreview() {
     subPath === "" ||
     (subPath === "xcaret" && pages.xcaret) ||
     (subPath === "ingressos-orlando" && pages.orlandoTickets) ||
-    ((subPath === "resorts-brasil" || resortSlug) && pages.resorts);
+    ((subPath === "resorts-brasil" || resortSlug) && pages.resorts) ||
+    (subPath === "visto-americano" && pages.visa) ||
+    (subPath === "dmc-portugal" && pages.dmc) ||
+    (!!pages.editorial && /^(ofertas|blog(?:\/[a-z0-9-]+)?|politicasdeprivacidade|termosdeuso|area-do-cliente)$/.test(subPath));
 
   function renderPage() {
     if (!fixture) return null;
@@ -125,6 +136,12 @@ export default function AdsBriefingPreview() {
     let body: JSX.Element = <AgencySiteHome info={info} noindex />;
     if (subPath === "ingressos-orlando") {
       body = <><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></>;
+    } else if (subPath === "visto-americano") {
+      body = <div data-preview-interactive><UsVisaLandingPage info={info} presentation /></div>;
+    } else if (subPath === "dmc-portugal") {
+      body = <div data-preview-interactive><DmcPortugalLandingPage info={info} presentation /></div>;
+    } else if (pages.editorial && /^(ofertas|blog|politicas|termos|area-do-cliente)/.test(subPath)) {
+      body = <AgencyPresentationPages page={subPath} info={info} />;
     } else if (subPath === "resorts-brasil") {
       body = <div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap title={pages.resorts?.title} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>;
     } else if (resortSlug) {

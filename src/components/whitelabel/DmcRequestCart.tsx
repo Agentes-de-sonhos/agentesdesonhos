@@ -98,9 +98,10 @@ export function describeItem(item: DmcItem): string {
   return `${item.title} — ${parts.join("; ")}`;
 }
 
-export function DmcRequestCartProvider({ hostname, whatsapp, children }: { hostname: string; whatsapp: string | null; children: React.ReactNode }) {
+export function DmcRequestCartProvider({ hostname, whatsapp, children, presentation = false }: { hostname: string; whatsapp: string | null; children: React.ReactNode; presentation?: boolean }) {
+  const storageKey = presentation ? `${STORAGE_KEY}:presentation:${hostname}` : STORAGE_KEY;
   const [items, setItems] = useState<DmcItem[]>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem(storageKey) || "[]"); } catch { return []; }
   });
   const [editing, setEditing] = useState<{ kind: DmcKind; title: string; values: Record<string, string>; id?: string } | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
@@ -109,8 +110,8 @@ export function DmcRequestCartProvider({ hostname, whatsapp, children }: { hostn
   const cartBtn = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* ignore */ }
-  }, [items]);
+    try { localStorage.setItem(storageKey, JSON.stringify(items)); } catch { /* ignore */ }
+  }, [items, storageKey]);
 
   const open = useCallback((kind: DmcKind, title: string, origin?: HTMLElement | null) => {
     originRef.current = origin ?? null;
@@ -188,9 +189,9 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{editing.title}</DialogTitle>
-          <DialogDescription>Informe os dados básicos. A Amanda confirma valores e disponibilidade na proposta.</DialogDescription>
+          <DialogDescription>Informe os dados básicos. A equipe confirma valores e disponibilidade na proposta.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
+        <form data-preview-local="cart-item" onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
           {fields.map((f) => (
             <div key={f.name} className={f.type === "select" || f.name === "idades" || f.name === "destino" || f.name === "origem" ? "sm:col-span-2" : ""}>
               <Label htmlFor={`dmc-${f.name}`} className="text-xs">{f.label}{f.required ? " *" : ""}</Label>
@@ -201,7 +202,7 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
                   className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 >
-                  {f.options!.map((o) => <option key={o}>{o}</option>)}
+                  {f.options?.map((o) => <option key={o}>{o}</option>)}
                 </select>
               ) : (
                 <Input
@@ -220,7 +221,7 @@ function ItemDialog({ editing, onClose, onSave }: { editing: { kind: DmcKind; ti
             <Textarea id="dmc-obs" rows={2} maxLength={300} value={values.obs ?? ""} onChange={(e) => setValues((v) => ({ ...v, obs: e.target.value }))} className="mt-1" />
           </div>
           {error && <p role="alert" className="text-sm font-medium text-destructive sm:col-span-2">{error}</p>}
-          <Button type="submit" size="lg" className="sm:col-span-2">
+          <Button data-preview-local="true" type="submit" size="lg" className="sm:col-span-2">
             {editing.id ? "Salvar alterações" : <><Plus className="mr-2 h-4 w-4" />Adicionar à solicitação</>}
           </Button>
         </form>

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { usePresentationTextRewrite } from "@/hooks/usePresentationTextRewrite";
 import { useLocation } from "react-router-dom";
 import { Car, Check, Dog, Globe2, MapPin, MessageCircle, Plane, Route as RouteIcon, Users } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
@@ -180,7 +181,21 @@ function CartCta() {
   );
 }
 
-export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInfo }) {
+const PRESENTATION_REWRITES: [string, string][] = [
+  ["Mais de 20 anos de experiência no turismo e à frente da 100 Limites Viagens desde 2015. Morar fora do Brasil ampliou", "A Bardelli Viagens propõe uma conversa sobre seu planejamento em Portugal. Esta apresentação ilustra"],
+  ["sua visão sobre atendimento:", "uma forma de atendimento:"],
+  ["100 Limites desde 2015", "Planejamento personalizado"],
+  ["Mais de 20 anos de experiência no turismo", "Proposta ilustrativa de atendimento"],
+  ["Base em Lisboa, Portugal", "Base em São Paulo, Brasil"],
+  ["A 100 Limites oferece concierge, assistência e acompanhamento personalizado em Portugal", "Esta apresentação ilustra possibilidades de concierge, assistência e acompanhamento em Portugal"],
+  ["Como DMC em Portugal, o foco é representar agências de viagens", "A proposta ilustrativa de atendimento em Portugal considera a parceria com agências de viagens"],
+  ["100 Limites Viagens", "Bardelli Viagens"], ["100 Limites", "Bardelli Viagens"],
+  ["Amanda Larini", "Equipe Bardelli"], ["a Amanda", "a equipe"], ["pela Amanda", "pela equipe"], ["Amanda", "Equipe Bardelli"],
+];
+
+export default function DmcPortugalLandingPage({ info, presentation = false }: { info: AgencyDomainInfo; presentation?: boolean }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  usePresentationTextRewrite(rootRef, presentation ? PRESENTATION_REWRITES : undefined);
   const location = useLocation();
   const br = agencyWhatsappNumber(info);
   const talkHref = br ? wa(br, "Olá, Amanda! Gostaria de falar sobre os serviços de DMC em Portugal.") : null;
@@ -216,9 +231,11 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
   );
 
   return (
-    <DmcRequestCartProvider hostname={info.hostname} whatsapp={br}>
-      <SEO
-        title="DMC em Portugal para agências | 100 Limites"
+    <DmcRequestCartProvider hostname={info.hostname} whatsapp={br} presentation={presentation}>
+    <div ref={rootRef}>
+    {presentation && <p className="bg-muted px-5 py-4 text-center text-sm text-muted-foreground">Portugal · conteúdo ilustrativo de apresentação. Serviços, capacidades e parceiros dependem de confirmação; não representa operação local própria.</p>}
+      <SEO noindex={presentation}
+        title={`Portugal para agências | ${presentation ? info.agency_name : "100 Limites"}`}
         description="Serviços de assistência e acompanhamento turístico personalizado em Portugal para clientes de agências brasileiras: concierge, consultoria de itinerários, grupos, Europa e pet friendly."
       />
 
@@ -432,7 +449,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
       {/* Sobre */}
       <Section id="sobre">
         <div className="grid items-center gap-8 md:grid-cols-[0.9fr_1.1fr]">
-          <img src={amandaLisboa.url} alt="Amanda Larini em Lisboa" className="aspect-[4/5] w-full max-w-md rounded-2xl object-cover" />
+          <img src={presentation ? ptSintra : amandaLisboa.url} alt={presentation ? "Paisagem de Sintra em Portugal" : "Amanda Larini em Lisboa"} className="aspect-[4/5] w-full max-w-md rounded-2xl object-cover" />
           <div>
             <H2 k="Quem somos">Amanda Larini</H2>
             <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
@@ -472,6 +489,7 @@ export default function DmcPortugalLandingPage({ info }: { info: AgencyDomainInf
           <Ctas className="mt-7 justify-center" />
         </div>
       </Section>
+    </div>
     </DmcRequestCartProvider>
   );
 }

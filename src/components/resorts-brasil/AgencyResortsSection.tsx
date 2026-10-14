@@ -16,10 +16,12 @@ export function AgencyResortsSection({
   allHref,
   resortHref,
   initialState = "BA",
+  title = "Explore os resorts do Brasil com a 100 Limites",
 }: {
   allHref: string;
   resortHref: (slug: string) => string;
   initialState?: string;
+  title?: string;
 }) {
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -36,7 +38,7 @@ export function AgencyResortsSection({
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary wl-kicker">Resorts no Brasil</p>
-          <h2 className="mt-3 font-display text-3xl text-foreground md:text-4xl">Explore os resorts do Brasil com a 100 Limites</h2>
+          <h2 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{title}</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
             {BRAZIL_RESORTS.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
           </p>

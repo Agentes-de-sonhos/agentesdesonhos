@@ -493,7 +493,7 @@ export default function AgencySiteHome({
   const faq = profile.faq ?? DEFAULT_FAQ;
   // No laboratório nenhuma consulta de vitrine real é disparada.
   const showcasePublished = useAgencyShowcasePublished(
-    lab ? null : info.public_slug || info.agency_slug,
+    (lab || profile.presentation) ? null : info.public_slug || info.agency_slug,
   );
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
@@ -865,7 +865,7 @@ export default function AgencySiteHome({
       case "offers":
         // Tenants reais só exibem ofertas com vitrine publicada; o laboratório
         // mostra o bloco com exemplos editoriais para referência visual.
-        if (!showcasePublished && !lab) return null;
+        if (!showcasePublished && !lab && !profile.presentation) return null;
         return (
           <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
@@ -873,7 +873,7 @@ export default function AgencySiteHome({
                 <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas selecionadas</h2>
                 <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
                 <p className="mt-4 text-muted-foreground">
-                  Nossa vitrine reúne as oportunidades do momento, atualizadas pela equipe.
+                  {profile.presentation ? "Seleção ilustrativa de destinos — exemplos de apresentação, sem preços ou ofertas vigentes." : "Nossa vitrine reúne as oportunidades do momento, atualizadas pela equipe."}
                 </p>
               </div>
               <Button asChild variant="outline">
@@ -1463,9 +1463,10 @@ export default function AgencySiteHome({
 
       case "resorts":
         return (
-          <section id="resorts" className="scroll-mt-24 bg-background py-14 md:py-20">
+          <section key={key} id="resorts" className="scroll-mt-24 bg-background py-14 md:py-20">
             <div className={container}>
               <AgencyResortsSection
+                title={profile.presentation ? `Explore os resorts do Brasil com a ${name}` : undefined}
                 allHref={agencySiteHref("/resorts-brasil")}
                 resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)}
               />
@@ -1477,17 +1478,30 @@ export default function AgencySiteHome({
         return (
           <Fragment key={key}>
             <OrlandoTicketsSection hostname={hostname} phone={info.phone} />
-            {profile.key === "editorialDmc" && (
+            {(profile.key === "editorialDmc" || profile.visaHome) && (
               // O Visto americano é uma seção à parte: superfície branca própria
               // (o invólucro pai traz o degradê da seção Orlando).
               <div className="wl-alt-surface bg-card">
-                <UsVisaHomeTeaser />
+                <div data-preview-interactive={profile.presentation ? "" : undefined}><UsVisaHomeTeaser presentation={profile.presentation} /></div>
               </div>
             )}
           </Fragment>
         );
 
       case "avaliacoes":
+        if (profile.presentation) return (
+          <section key={key} id="avaliacoes" className="bg-background py-14 md:py-24">
+            <div className={container}>
+              <SectionHeading title="Avaliações de quem viaja" subtitle="Avaliação ilustrativa — exemplo de apresentação" editorial={editorial} />
+              <Card className="max-w-xl p-6">
+                <Quote className="h-6 w-6 text-primary" aria-hidden />
+                <p className="mt-4 text-base leading-relaxed">“Uma viagem pensada para o nosso ritmo, com escolhas claras e atenção aos detalhes do planejamento.”</p>
+                <p className="mt-5 font-semibold">Viajante de exemplo</p>
+                <p className="mt-2 text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Texto fictício, sem nota ou integração com o Google.</p>
+              </Card>
+            </div>
+          </section>
+        );
         if (!googleReviews) return null;
         {
           const copy = copyFor("avaliacoes");
@@ -1659,7 +1673,7 @@ export default function AgencySiteHome({
           noindex={noindex}
           description={profile.seo.description}
           canonical={profile.seo.canonical ?? "/"}
-          jsonLd={jsonLd}
+          jsonLd={profile.presentation ? undefined : jsonLd}
         />
       )}
       {/* PRIMEIRA DOBRA: hero + Central de Solicitações avançando sobre o banner */}
@@ -1907,7 +1921,7 @@ export default function AgencySiteHome({
           rendered += 1;
           if (startGradient && section.key === "orlando") rendered += 1;
           tagged = (
-            <div key={`${section.key}-surface`} className={`wl-alt-surface ${gradient ? "wl-alt-gradient" : "bg-card"}`}>
+            <div key={`${section.key}-surface`} className={`wl-alt-surface ${profile.presentation && section.key === "authority" ? "wl-presentation-dark" : ""} ${gradient ? "wl-alt-gradient" : "bg-card"}`}>
               {node}
             </div>
           );

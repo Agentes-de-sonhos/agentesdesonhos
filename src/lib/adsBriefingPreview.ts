@@ -3,6 +3,8 @@
  * Conteúdo 100% local: nenhum tenant, conta ou cadastro real é consultado.
  * Servida apenas no host técnico id-preview (e localhost de desenvolvimento).
  */
+import { buildGoldStandardProfile } from "@/lib/goldStandardSiteTemplate";
+import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
@@ -643,6 +645,37 @@ export const MUNDO_EM_CORES_XCARET_REWRITES: [string, string][] = [
 ];
 
 
+export const BARDELLI_PRESENTATION_JOB_ID = "bardelli-completa-v1";
+export const BARDELLI_PRESENTATION_HOST = "bardelli-presentation.preview.local";
+export const BARDELLI_PRESENTATION_INFO: AgencyDomainInfo = {
+  ...ADS_PREVIEW_INFO, user_id: "00000000-0000-0000-0000-00000000ba01", hostname: BARDELLI_PRESENTATION_HOST,
+  agency_name: "Bardelli Viagens", owner_name: "Bárbara Bardelli", logo_url: bardelliLogo.url,
+  primary_color: "#D71920", secondary_color: "#181818", phone: null,
+  cnpj: "09.475.657/0001-80", city: "São Paulo", state: "SP",
+};
+export const BARDELLI_PRESENTATION_PROFILE = buildGoldStandardProfile("bardelliPresentation", {
+  navDensity: "compact",
+  about: { title: "Bardelli Viagens" },
+  footer: { description: "Consultoria de viagem e roteiros personalizados.", whatsapp: "(11) 97576-7319", phone: "(11) 97576-7319", email: "barbara@bardelliviagens.com.br", instagram: "https://www.instagram.com/bardelliviagens/", instagramLabel: "@bardelliviagens", address: "Rua Cabiúna, 42 — Apto 93 A — Vila Mascote — São Paulo/SP", legalName: "JP Serviços de Informação e Asse em Turismo Ltda", cnpj: "09.475.657/0001-80" },
+});
+// Preserve the complete baseline About while setting the real identity.
+BARDELLI_PRESENTATION_PROFILE.about = buildGoldStandardProfile("bardelliPresentation", {}, "Bardelli Viagens").about;
+if (BARDELLI_PRESENTATION_PROFILE.about) {
+  BARDELLI_PRESENTATION_PROFILE.about.title = "Uma viagem com a sua identidade, planejada com cuidado";
+  BARDELLI_PRESENTATION_PROFILE.about.ownerName = "Bárbara Bardelli";
+}
+BARDELLI_PRESENTATION_PROFILE.signature = { ...BARDELLI_PRESENTATION_PROFILE.signature, kicker: "O JEITO BARDELLI DE PLANEJAR", title: "Uma viagem bem planejada começa por uma boa conversa.", text: "Antes de sugerir destinos, hotéis ou experiências, queremos entender quem vai viajar, o que espera viver e quais detalhes são realmente importantes. É assim que cada viagem ganha personalidade, tranquilidade e significado." };
+BARDELLI_PRESENTATION_PROFILE.copy = { ...BARDELLI_PRESENTATION_PROFILE.copy, differentials: { title: "O que você encontra na Bardelli Viagens", subtitle: "Planejamento e atenção aos detalhes da sua viagem." } };
+BARDELLI_PRESENTATION_PROFILE.seo = { title: "Apresentação — Bardelli Viagens", description: "Apresentação completa para revisão da Bardelli Viagens." };
+BARDELLI_PRESENTATION_PROFILE.socialStrip = { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/bardelliviagens/" }] };
+export const BARDELLI_XCARET_REWRITES: [string, string][] = [
+  ["Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.", "Xcaret: possibilidades para uma viagem com a sua cara."],
+  ["Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.", "A Bardelli Viagens convida você a descobrir o universo Xcaret, com parques, hotéis e experiências na Riviera Maya."],
+  ["Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.", "Nesta apresentação, reunimos inspirações para comparar hospedagens, parques e experiências de acordo com o perfil de quem vai viajar."],
+  ["Quero ouvir o que você imagina para essas férias", "Queremos ouvir o que você imagina para essas férias"],
+  ["Destinos com a Ju", "Bardelli Viagens"], ["Juliana", "Equipe Bardelli"], ["Oi, Ju!", "Olá, Bardelli!"], ["da Ju", "da equipe"], ["à Ju", "à equipe"], ["a Ju", "a equipe"], ["A Ju", "A equipe"], ["com a Ju", "com a Bardelli"],
+];
+
 export interface AdsBriefingPreviewFixture {
   jobId: string;
   info: AgencyDomainInfo;
@@ -655,10 +688,19 @@ export interface AdsBriefingPreviewFixture {
     xcaret?: { slots: XcaretMediaSlots; textRewrites?: [string, string][] };
     resorts?: { title?: string };
     orlandoTickets?: boolean;
+    visa?: boolean;
+    dmc?: boolean;
+    editorial?: boolean;
   };
 }
 
 const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
+  [BARDELLI_PRESENTATION_JOB_ID]: {
+    jobId: BARDELLI_PRESENTATION_JOB_ID, info: BARDELLI_PRESENTATION_INFO, profile: BARDELLI_PRESENTATION_PROFILE,
+    notice: "Bardelli Viagens · apresentação para revisão · textos e serviços ilustrativos a confirmar · nenhum envio real",
+    documentTitle: "Apresentação completa — Bardelli Viagens", realAgency: true,
+    pages: { xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
+  },
   [ADS_PREVIEW_JOB_ID]: {
     jobId: ADS_PREVIEW_JOB_ID,
     info: ADS_PREVIEW_INFO,

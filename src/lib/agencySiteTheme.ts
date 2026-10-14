@@ -40,6 +40,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-14-v1.preview.local": "siteBaseEditorial",
   "briefing-16-v1.preview.local": "siteBaseEditorial",
   "briefing-17-v1.preview.local": "siteBaseEditorial",
+  "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",
   "www.bardelliviagens.com.br": "siteBaseEditorial",
 };
@@ -95,7 +96,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
     const extra =
       h === "briefing-14-v1.preview.local"
         ? " wl-mundo"
-        : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
+        : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br" || h === "bardelli-presentation.preview.local"
           ? " wl-bardelli"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
