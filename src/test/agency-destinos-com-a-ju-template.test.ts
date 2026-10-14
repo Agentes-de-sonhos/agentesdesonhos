@@ -39,7 +39,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
   it("entrega conteúdo aprovado, cinco destinos e seis especialidades", () => {
     for (const host of JU_HOSTS) {
       const profile = resolveSiteProfile(host);
-      expect(profile.hero?.[0].title).toBe("Sua viagem importa.\nCada detalhe também.");
+      expect(profile.hero?.[0].title).toBe("Viva a magia de Orlando\ncom quem conhece cada detalhe");
       expect(profile.destinations).toHaveLength(5);
       expect(profile.modules).toHaveLength(6);
       expect(profile.authority?.title).toContain("Cruzeiros");
