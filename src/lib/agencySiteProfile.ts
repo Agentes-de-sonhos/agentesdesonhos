@@ -15,7 +15,7 @@ import momentFriends from "@/assets/100limites-moment-friends.jpg";
 import xcaretPanorama from "@/assets/whitelabel/xcaret/xcaret-panorama.webp.asset.json";
 import julianaXcaretAtXplor from "@/assets/whitelabel/xcaret/juliana-xplor-sign.webp.asset.json";
 import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
-import destinosXcaretCover from "@/assets/whitelabel/destinos-xcaret-capa.png.asset.json";
+import destinosXcaretCover from "@/assets/whitelabel/destinos-xcaret-capa-v2.png.asset.json";
 import xcaretSnorkel from "@/assets/whitelabel/xcaret/xcaret-snorkel.webp.asset.json";
 import xcaretXoximilco from "@/assets/whitelabel/xcaret/xoximilco.webp.asset.json";
 import amandaLariniPerfil from "@/assets/whitelabel/100-limites/amanda-larini-perfil.png.asset.json";
