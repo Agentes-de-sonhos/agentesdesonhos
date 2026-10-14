@@ -283,7 +283,7 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
   authority: {
     sectionLabel: "Cruzeiros",
     companies: {
-      title: "Aqui você encontra as principais companhias marítimas",
+      title: "Sua próxima viagem de cruzeiro começa aqui! Na Destinos com a Ju,\n\nvocê encontra as principais companhias de cruzeiros do mundo.",
       items: [
         { name: "Disney Cruise Line", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/Disney%20Cruise%20Lines.jpg.webp?itok=S4CUbtvJ" },
         { name: "MSC Cruzeiros", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/MSC%20Cruises.jpg.webp?itok=yN8zIFPZ" },
