@@ -542,7 +542,7 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm, tripStartDate
           }}
           onConfirm={() => {
             const mapped = parsedAirfareToFlightData(parsed, { tripStartDate });
-            onConfirm(mapped, parsed);
+            onConfirm(mapped, parsed, uploadFile);
           }}
           isAdmin={isAdmin}
           onShowDebug={debugInfo ? () => setShowDebug(true) : undefined}

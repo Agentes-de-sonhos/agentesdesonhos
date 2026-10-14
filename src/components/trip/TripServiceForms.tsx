@@ -901,10 +901,11 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
       >
         <AirfareSmartImport
           onCancel={() => setAiImportOpen(false)}
-          onConfirm={(_mapped, raw) => {
+          onConfirm={(_mapped, raw, file) => {
             const legacy = normalizeParsedAirfareToLegacy(raw);
             handleFlightImport(legacy);
             applyFullAirfareFields(raw);
+            if (file) setFiles((prev) => (prev.some((p) => p.name === file.name && p.size === file.size) ? prev : [...prev, file]));
             setAiImportOpen(false);
           }}
         />
