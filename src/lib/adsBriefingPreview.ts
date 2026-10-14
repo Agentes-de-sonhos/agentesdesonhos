@@ -647,6 +647,10 @@ export const MUNDO_EM_CORES_XCARET_REWRITES: [string, string][] = [
 
 export const BARDELLI_PRESENTATION_JOB_ID = "bardelli-completa-v1";
 export const BARDELLI_PRESENTATION_HOST = "bardelli-presentation.preview.local";
+/** Complete presentation allowlist; does not change the global preview helper. */
+export function isCompletePresentationHost(hostname: string): boolean {
+  return ["localhost", "127.0.0.1", "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app"].includes(hostname);
+}
 export const BARDELLI_PRESENTATION_INFO: AgencyDomainInfo = {
   ...ADS_PREVIEW_INFO, user_id: "00000000-0000-0000-0000-00000000ba01", hostname: BARDELLI_PRESENTATION_HOST,
   agency_name: "Bardelli Viagens", owner_name: "Bárbara Bardelli", logo_url: bardelliLogo.url,

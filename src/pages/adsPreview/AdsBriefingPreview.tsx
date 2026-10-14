@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
-import { isTechnicalPreviewHost, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
+import { isTechnicalPreviewHost, isCompletePresentationHost, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
 import { AgencyPresentationPages } from "@/components/whitelabel/AgencyPresentationPages";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
@@ -33,7 +33,7 @@ export default function AdsBriefingPreview() {
   const base = `/ads-briefing-preview/${jobId}`;
   const fixture = resolveAdsPreviewFixture(jobId);
   const allowed = fixture?.profile.presentation
-    ? ["localhost", "127.0.0.1", "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app"].includes(window.location.hostname)
+    ? isCompletePresentationHost(window.location.hostname)
     : isTechnicalPreviewHost(window.location.hostname);
   const [notice, setNotice] = useState(false);
   useAgencyFavicon(allowed ? fixture?.info.logo_url : null);

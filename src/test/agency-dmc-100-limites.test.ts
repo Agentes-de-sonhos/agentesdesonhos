@@ -115,13 +115,13 @@ describe("seção DMC da 100 Limites", () => {
       homeSource.indexOf('case "orlando"'),
       homeSource.indexOf('case "avaliacoes"'),
     );
-    expect(orlandoCase).toContain("<UsVisaHomeTeaser />");
+    expect(orlandoCase).toContain("<UsVisaHomeTeaser presentation={profile.presentation} />");
     expect(orlandoCase).toContain('profile.key === "editorialDmc"');
     const resortsCase = homeSource.slice(
       homeSource.indexOf('case "resorts"'),
       homeSource.indexOf('case "orlando"'),
     );
-    expect(resortsCase).not.toContain("<UsVisaHomeTeaser />");
+    expect(resortsCase).not.toContain("<UsVisaHomeTeaser presentation={profile.presentation} />");
     const profile = resolveSiteProfile("100limites.tur.br");
     const orders = resolveSections(profile.sections);
     expect(orders.find((section) => section.key === "orlando")?.order).toBeLessThan(
