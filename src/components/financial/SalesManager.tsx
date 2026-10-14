@@ -456,7 +456,7 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
                           {(() => {
                             const gap = saleFinancialGap(products.length, totalCommission);
                             return gap ? (
-                              <div className="mt-1 max-w-[260px] text-xs text-destructive" data-testid="sale-financial-gap">
+                              <div className="mt-1 max-w-[260px] text-xs text-muted-foreground" data-testid="sale-financial-gap">
                                 {SALE_GAP_MESSAGE[gap]}
                               </div>
                             ) : null;

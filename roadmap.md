@@ -70,4 +70,5 @@
 - [x] 100 Limites: landing /visto-americano (B1/B2) lendo us_visa_public_info, sem publicar.
 - [x] 100 Limites: micro-interações de hover na landing /visto-americano (CTA do WhatsApp com verde profundo + texto branco e "pop", foto da Amanda com zoom que vai e volta, cartões de benefícios/etapas/custos com elevação e borda da marca, número da etapa preenchido, linhas da tabela de esperas com fundo), tudo em tokens semânticos, sem exagero, com respeito a prefers-reduced-motion, sem publicar.
 - [x] 100 Limites: perguntas frequentes da landing /visto-americano sem sublinhado no hover; pergunta e setinha assumem o âmbar/dourado escuro da marca (token --wl-gold), sem publicar.
-- [x] Financeiro: venda nova não aparece em Entradas/Comissões — diagnosticar e corrigir (sem alterar dados reais)
+- [x] Financeiro (visibilidade): comissão sem datas aparece no mês da venda; aviso informativo na aba Vendas (sem alterar dados reais)
+- [ ] Financeiro (atomicidade): criação de venda + serviços ainda não é transacional nem idempotente — aguardando aprovação da proposta de RPC no servidor (sem migração aplicada)

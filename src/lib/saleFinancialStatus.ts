@@ -1,9 +1,10 @@
 import { isInMonth } from "@/utils/monthFilter";
 
 /**
- * Entradas e Comissões nascem dos serviços (sale_products) com comissão > 0.
- * Uma venda sem serviços ou só com comissão zero não gera nada — nunca
- * derivamos comissão do valor bruto da venda.
+ * Comissões lista os serviços (sale_products) da venda, inclusive os de
+ * comissão zero. A Entrada automática só nasce de serviço com comissão > 0.
+ * Venda sem serviços não aparece em nenhuma das duas abas. Nunca derivamos
+ * comissão do valor bruto, e comissão zero pode ser legítima.
  */
 export type SaleFinancialGap = "no_products" | "zero_commission" | null;
 
@@ -14,8 +15,8 @@ export function saleFinancialGap(productCount: number, totalCommission: number):
 }
 
 export const SALE_GAP_MESSAGE: Record<Exclude<SaleFinancialGap, null>, string> = {
-  no_products: "Sem serviços: adicione um produto com comissão para gerar Entrada e Comissão.",
-  zero_commission: "Comissão zerada: informe a comissão do produto para gerar a Entrada.",
+  no_products: "Venda sem serviços cadastrados: ela não aparece em Entradas nem em Comissões.",
+  zero_commission: "Comissão total zero: os serviços aparecem em Comissões, mas não geram Entrada automática.",
 };
 
 /**
