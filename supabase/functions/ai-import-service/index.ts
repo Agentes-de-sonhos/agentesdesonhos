@@ -396,7 +396,7 @@ serve(async (req) => {
       return errorResponse("IA indisponível no momento. Tente novamente em instantes.", 500);
     }
 
-    const systemPrompt = SYSTEM_PROMPTS[serviceType as ImportType];
+    const systemPrompt = SYSTEM_PROMPTS[serviceType as ImportType] + "\n" + COMPLETE_FIELDS_RULE;
     const schema = SCHEMAS[serviceType as ImportType];
 
     const userParts: Array<Record<string, unknown>> = [];
