@@ -1885,6 +1885,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_update_prompt: {
+        Row: {
+          activated_at: string | null
+          id: number
+          is_active: boolean
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          activated_at?: string | null
+          id: number
+          is_active?: boolean
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          activated_at?: string | null
+          id?: number
+          is_active?: boolean
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       attractions: {
         Row: {
           address: string | null
