@@ -14,6 +14,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const DEFAULT_PASSWORD_SHA256 =
   "5b96b65122b8f54d41a4433c8b8f2807bd8e040f7d5a7857cb1aab1981585b5d";
 
+/** Senha de prévia própria por tenant (somente SHA-256, escopada ao hostname). */
+const BARDELLI_PREVIEW_SHA256 = "36f46a8c505c94611e1e75ff2d2eddd0a4215ec146e953c867767087538f4a4a";
+const TENANT_PASSWORD_SHA256: Record<string, string> = {
+  "bardelliviagens.com.br": BARDELLI_PREVIEW_SHA256,
+  "www.bardelliviagens.com.br": BARDELLI_PREVIEW_SHA256,
+};
+
 const PLATFORM_ORIGIN_SUFFIXES = ["lovable.app", "lovableproject.com", "localhost"];
 
 const BASE_HEADERS: Record<string, string> = {
@@ -126,7 +133,9 @@ Deno.serve(async (req) => {
 
     const expected = (Deno.env.get("AGENCY_PREVIEW_PASSWORD_SHA256") || DEFAULT_PASSWORD_SHA256).trim();
     const provided = await sha256Hex(password);
-    if (!safeEqualHex(provided, expected)) {
+    const tenantHash = TENANT_PASSWORD_SHA256[hostname];
+    const ok = safeEqualHex(provided, expected) || (!!tenantHash && safeEqualHex(provided, tenantHash));
+    if (!ok) {
       return json({ ok: false }, 401, headers);
     }
 
