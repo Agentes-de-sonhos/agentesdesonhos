@@ -676,7 +676,18 @@ function TripWalletContent() {
   };
 
   const handleAIImport = async (result: AIImportResult) => {
+    const attachments: { url: string; name: string }[] = [];
+    if (result.file) {
+      try {
+        attachments.push(await uploadVoucher(result.file));
+      } catch (err: any) {
+        toast({ title: "Arquivo não anexado", description: "Os dados foram importados, mas anexe o documento manualmente.", variant: "destructive" });
+      }
+    }
     await addService({
+      ...(attachments.length > 0
+        ? { voucher_url: attachments[0].url, voucher_name: attachments[0].name, attachments }
+        : {}),
       service_type: result.service_type as TripServiceType,
       service_data: (result.service_type === "flight" && result.raw_airfare
         ? parsedAirfareToTripFlightData(result.raw_airfare)
