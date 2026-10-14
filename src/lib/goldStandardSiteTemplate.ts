@@ -4,6 +4,9 @@ import type { AgencySiteProfile, AgencySiteProfileKey } from "@/lib/agencySitePr
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import { XCARET_IMAGES } from "@/components/landing/xcaret/content";
 
+import xcaretPresentation from "@/assets/presentation/xcaret-presentation.jpg.asset.json";
+import portugalPresentation from "@/assets/whitelabel/100-limites/pt-sintra.jpg";
+
 import cruiseLogo0 from "@/assets/presentation/cruise-company-0.webp.asset.json";
 import cruiseLogo1 from "@/assets/presentation/cruise-company-1.webp.asset.json";
 import cruiseLogo2 from "@/assets/presentation/cruise-company-2.webp.asset.json";
@@ -33,7 +36,7 @@ export function buildGoldStandardProfile(key: AgencySiteProfileKey, overrides: P
     featuredExperience: {
       ...(EDITORIAL_ROSE.featuredExperience ?? { enabled: true, title: "", description: "", mainImage: { src: "", alt: "" } }), kicker: "DESCUBRA O UNIVERSO XCARET", title: "Xcaret: natureza, cultura e experiências no México",
       description: "Parques, hotéis e paisagens da Riviera Maya em uma viagem que pode combinar aventura, descanso e cultura mexicana. Descubra as possibilidades e converse sobre o que faz sentido para o seu perfil, suas datas e o ritmo de quem vai viajar.",
-      mainImage: { src: XCARET_IMAGES.xcaret.src, alt: XCARET_IMAGES.xcaret.alt, fit: "contain" },
+      mainImage: { src: xcaretPresentation.url, alt: "Montagem de apresentação: vista aérea Xcaret, Hotel Xcaret México, Xplor e Xenses; sem fotos pessoais ou certificados", fit: "contain" },
       consultantImage: null, badge: null, secondaryImages: [],
       highlights: ["Parques e experiências", "Hotéis na Riviera Maya", "Planejamento personalizado", "Orientação para sua viagem"],
     },
@@ -60,7 +63,7 @@ export function buildGoldStandardProfile(key: AgencySiteProfileKey, overrides: P
       { q: "Onde encontro meus documentos?", a: "Após a contratação, consulte a agência sobre a disponibilização dos documentos e orientações da sua viagem." },
       { q: "Como solicito uma proposta?", a: "Escolha o serviço e informe os dados iniciais da viagem. Na apresentação técnica, o formulário pode ser revisado, mas nenhum pedido é enviado." },
     ],
-    dmc: { kicker: "PORTUGAL · APRESENTAÇÃO ILUSTRATIVA", title: "Portugal, com planejamento no seu ritmo", text: "Cidades históricas, gastronomia e paisagens para descobrir. Esta apresentação demonstra uma área de assistência e planejamento em Portugal; serviços, parceiros e disponibilidade dependem de confirmação da agência, sem afirmar operação local própria.", services: [{ key: "roteiros", label: "Planejamento de roteiro" }, { key: "acompanhamento", label: "Assistência ao viajante" }, { key: "grupos", label: "Ideias para grupos" }, { key: "consultoria", label: "Consultoria de viagem" }], cta: "Conhecer as possibilidades em Portugal", whatsappMessage: "Gostaria de conhecer as possibilidades em Portugal.", note: "Conteúdo ilustrativo de apresentação — capacidades e parceiros a confirmar.", presentation: { surface: "light", imageUrl: XCARET_IMAGES.chichen.src } },
+    dmc: { kicker: "PORTUGAL · APRESENTAÇÃO ILUSTRATIVA", title: "Portugal, com planejamento no seu ritmo", text: "Cidades históricas, gastronomia e paisagens para descobrir. Esta apresentação demonstra uma área de assistência e planejamento em Portugal; serviços, parceiros e disponibilidade dependem de confirmação da agência, sem afirmar operação local própria.", services: [{ key: "roteiros", label: "Planejamento de roteiro" }, { key: "acompanhamento", label: "Assistência ao viajante" }, { key: "grupos", label: "Ideias para grupos" }, { key: "consultoria", label: "Consultoria de viagem" }], cta: "Conhecer as possibilidades em Portugal", whatsappMessage: "Gostaria de conhecer as possibilidades em Portugal.", note: "Conteúdo ilustrativo de apresentação — capacidades e parceiros a confirmar.", presentation: { surface: "light", imageUrl: portugalPresentation } },
     credentials: { kicker: "APRESENTAÇÃO ILUSTRATIVA", title: "Credenciais e conexões", text: "Espaço de apresentação para informações que a agência poderá confirmar. Nenhum selo ou certificado é atribuído nesta prévia.", items: [{ key: "cadastur", name: "Cadastro e documentação", text: "Informações e comprovantes serão incluídos somente após validação." }, { key: "parceiros", name: "Conexões de viagem", text: "Parcerias e especializações dependem de confirmação da agência." }] },
     team: [{ key: "consultoria", name: "Consultoria de viagens", role: "Apresentação ilustrativa", text: "Atendimento dedicado a conhecer os seus planos. Nomes, funções e fotografias da equipe serão confirmados pela agência." }],
     copy: { ...EDITORIAL_ROSE.copy,
