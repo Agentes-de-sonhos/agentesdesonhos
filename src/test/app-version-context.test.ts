@@ -129,3 +129,41 @@ describe("useAppVersion — no polling in white-label context", () => {
     expect(addSpy.mock.calls.some((c) => c[0] === "visibilitychange")).toBe(false);
   });
 });
+
+
+describe("resolveUpdatePrompt — pop-up manual de atualização (1x por versão)", () => {
+  const base = {
+    flagActive: true,
+    flagVersion: "2026.10.14-v1",
+    currentVersion: "2026.10.13-v1",
+    dismissedVersion: null as string | null,
+  };
+
+  it("não mostra quando o sinal está inativo", () => {
+    expect(resolveUpdatePrompt({ ...base, flagActive: false }).prompt).toBe(false);
+  });
+
+  it("não mostra quando a versão ativa já é a versão do app", () => {
+    expect(resolveUpdatePrompt({ ...base, currentVersion: "2026.10.14-v1" }).prompt).toBe(false);
+  });
+
+  it("mostra o aviso quando há versão nova ativa", () => {
+    const decision = resolveUpdatePrompt(base);
+    expect(decision.prompt).toBe(true);
+    expect(decision.targetVersion).toBe("2026.10.14-v1");
+  });
+
+  it("não mostra de novo depois que o usuário fechou o aviso daquela versão", () => {
+    expect(resolveUpdatePrompt({ ...base, dismissedVersion: "2026.10.14-v1" }).prompt).toBe(false);
+  });
+
+  it("mostra de novo em um release posterior ativado manualmente", () => {
+    const decision = resolveUpdatePrompt({
+      ...base,
+      flagVersion: "2026.11.01-v1",
+      dismissedVersion: "2026.10.14-v1",
+    });
+    expect(decision.prompt).toBe(true);
+    expect(decision.targetVersion).toBe("2026.11.01-v1");
+  });
+});
