@@ -16,7 +16,7 @@ export function AgencyResortsSection({
   allHref,
   resortHref,
   initialState = "BA",
-  title = "Explore os resorts do Brasil com a Ju",
+  title = "Explore os resorts do Brasil",
 }: {
   allHref: string;
   resortHref: (slug: string) => string;
