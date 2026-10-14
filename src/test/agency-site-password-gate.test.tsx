@@ -26,7 +26,6 @@ vi.mock("@/lib/agencySitePassword", async (orig) => {
 
 const OWNERS = [
   "9433421c-2252-4030-acab-135c03ab009e",
-  "4d028510-034f-4c0f-9a33-4275dca0607a",
   "d14b95d2-7eeb-4717-bfca-b76482ddfb4f",
   "4d5a7157-59b6-4329-8768-7f8895e8ce92",
 ];

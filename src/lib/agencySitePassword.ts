@@ -15,7 +15,6 @@ import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 /** Ativar/desativar aqui. owner user_id → rótulo interno. */
 export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
   "9433421c-2252-4030-acab-135c03ab009e": "100 Limites Viagens",
-  "4d028510-034f-4c0f-9a33-4275dca0607a": "Destinos com a Ju",
   "d14b95d2-7eeb-4717-bfca-b76482ddfb4f": "Paraíso Viagens",
   "4d5a7157-59b6-4329-8768-7f8895e8ce92": "Essyatur",
 };
