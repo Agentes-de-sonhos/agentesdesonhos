@@ -40,6 +40,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-14-v1.preview.local": "siteBaseEditorial",
   "briefing-16-v1.preview.local": "siteBaseEditorial",
   "briefing-17-v1.preview.local": "siteBaseEditorial",
+  "bardelliviagens.com.br": "siteBaseEditorial",
+  "www.bardelliviagens.com.br": "siteBaseEditorial",
 };
 
 function normalizeHost(hostname?: string | null): string {
@@ -89,7 +91,13 @@ export function siteThemeRootClass(hostname?: string | null): string {
   if (theme === "faeEditorial") return `${EDITORIAL_ROOT_CLASS} ${FAE_ROOT_CLASS}`;
   if (theme === "siteBaseEditorial") {
     // O Mundo em Cores: acabamento claro próprio, só no host da prévia.
-    const extra = normalizeHost(hostname) === "briefing-14-v1.preview.local" ? " wl-mundo" : "";
+    const h = normalizeHost(hostname);
+    const extra =
+      h === "briefing-14-v1.preview.local"
+        ? " wl-mundo"
+        : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
+          ? " wl-bardelli"
+          : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
   }
   if (theme === "casaNovaEditorial") return `${EDITORIAL_ROOT_CLASS} ${CASA_NOVA_ROOT_CLASS}`;
