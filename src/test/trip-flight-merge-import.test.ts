@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mergeFullAirfareDefaults } from "@/components/trip/TripServiceForms";
+import { mergeFullAirfareDefaults } from "@/lib/tripFlightImport";
 
 const raw = {
   voos: [

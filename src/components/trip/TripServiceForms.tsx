@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { AirfareSmartImport } from "@/components/quote/flight-wizard/AirfareSmartImport";
 import { normalizeParsedAirfareToLegacy } from "@/components/trip/FlightAutoImport";
-import { parsedAirfareToTripFlightData } from "@/lib/tripFlightImport";
+import { parsedAirfareToTripFlightData, mergeFullAirfareDefaults } from "@/lib/tripFlightImport";
 import { normalizeServiceItemFields } from "@/lib/serviceImportFieldAliases";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -6672,24 +6672,6 @@ function mapFlightImportToDefaults(importData: any) {
     segments,
     passengers: [],
   };
-}
-
-/** Sobrepõe localizador, passageiros, bilhetes, bagagem, check-in e embarque do documento + arquivo enviado. */
-export function mergeFullAirfareDefaults(base: any, raw: any, file?: File | null) {
-  const out: any = { ...base };
-  if (raw && typeof raw === "object") {
-    const full: any = parsedAirfareToTripFlightData(raw);
-    for (const [k, v] of Object.entries(full)) {
-      if (k === "segments") continue;
-      if (Array.isArray(v) ? v.length > 0 : !!v) out[k] = v;
-    }
-    out.segments = (base.segments || []).map((s: any) => {
-      const m = full.segments.find((f: any) => f.flight_number && f.flight_number.replace(/\s/g, "") === (s.flight_number || "").replace(/\s/g, ""));
-      return m ? { ...s, terminal: s.terminal || m.terminal, gate: s.gate || m.gate } : s;
-    });
-  }
-  if (file) out.__importedFiles = [file];
-  return out;
 }
 
 function FlightEntry(props: Omit<TripServiceFormProps, "serviceType">) {
