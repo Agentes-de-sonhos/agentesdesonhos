@@ -640,9 +640,9 @@ const EDITORIAL_ROSE: AgencySiteProfile = {
     overlay: "strongLeft",
   },
   hero: [
-    { title: "Sua viagem importa.\nCada detalhe também.", subtitle: "Consultoria completa e atendimento próximo para você viajar com tranquilidade, segurança\ne experiências que realmente combinam com você.", image: "heroVarenna", focalPoint: "varenna", order: 1, enabled: true },
-    { title: "Orlando, Europa, cruzeiros e resorts\nplanejados por quem conhece", subtitle: "Destinos, hospedagens e experiências selecionados de acordo com o perfil, o momento e as prioridades de cada viajante.", image: "heroSantoriniShip", focalPoint: "santoriniShip", order: 2, enabled: true },
-    { title: "Viva a magia de Orlando\ncom quem conhece cada detalhe", subtitle: "Roteiros inteligentes, ingressos oficiais e consultoria completa para sua família aproveitar o melhor dos parques com tranquilidade.", image: "heroJuMagicKingdom", focalPoint: "juMagicKingdom", textWidth: "narrowLeft", order: 3, enabled: true },
+    { title: "Viva a magia de Orlando\ncom quem conhece cada detalhe", subtitle: "Roteiros inteligentes, ingressos oficiais e consultoria completa para sua família aproveitar o melhor dos parques com tranquilidade.", image: "heroJuMagicKingdom", focalPoint: "juMagicKingdom", textWidth: "narrowLeft", order: 1, enabled: true },
+    { title: "Sua viagem importa.\nCada detalhe também.", subtitle: "Consultoria completa e atendimento próximo para você viajar com tranquilidade, segurança\ne experiências que realmente combinam com você.", image: "heroVarenna", focalPoint: "varenna", order: 2, enabled: true },
+    { title: "Orlando, Europa, cruzeiros e resorts\nplanejados por quem conhece", subtitle: "Destinos, hospedagens e experiências selecionados de acordo com o perfil, o momento e as prioridades de cada viajante.", image: "heroSantoriniShip", focalPoint: "santoriniShip", order: 3, enabled: true },
   ],
   requestCenter: {
     title: "Por onde você quer começar?",
