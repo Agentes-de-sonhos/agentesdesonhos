@@ -71,6 +71,13 @@ CONFIANÇA:
 FONTES DE ENTRADA:
 - Você pode receber a IMAGEM/PDF original e/ou texto extraído. Use AMBAS. A imagem é primária para logos, ícones e estrutura de tabela; o texto é confiável para números, datas e câmbio.
 
+BILHETES EMITIDOS / CONFIRMAÇÕES DE RESERVA (e-tickets, recibos, itinerários de companhia):
+- Preencha "reserva.localizador" com o código da reserva/PNR (rótulos: "Código da reserva", "Localizador", "LOC", "LOC CIA", "Record Locator", "PNR", "Booking reference"). Ex.: "WOSJZS". Somente letras/números, maiúsculas.
+- "reserva.status_emissao": "emitido" quando houver número de bilhete/e-ticket; "confirmado" se reserva confirmada sem bilhete; "pendente" se aguardando.
+- "passageiros": UM item por passageiro listado. nome no formato usual "Nome Sobrenome" (converta "CARVALHO/EDUARDO MR" → "Eduardo Carvalho"); tipo adulto/crianca/bebe (ADT/CHD/INF); bilhete = número do e-ticket exatamente como aparece (ex.: "957.2302.720650"); fidelidade = programa + número; documento só se aparecer; assentos = lista {trecho_ordem, assento} por voo.
+- Por voo: terminal_saida e portao somente se aparecerem.
+- Bagagem, check-in (link, abertura, status, observações) e orientações de embarque (antecedência, terminal, documentos obrigatórios, regras de imigração, observações) SOMENTE se estiverem escritos no documento. NÃO preencha com conhecimento geral. Deixe vazio o que não aparecer.
+
 IMPORTANTE FINAL:
 - NÃO RESUMA. NÃO INVENTE ANO. NÃO devolva apenas 1 voo se a tabela tem 4. NÃO concatene companhias no array. SEMPRE chame extract_airfare_document.`;
 
@@ -131,6 +138,8 @@ const TOOL_SCHEMA = {
               bagagem_despachada: { type: ["boolean", "null"] },
               quantidade_bagagem_despachada: { type: ["integer", "null"] },
               alerta: { type: "string" },
+              terminal_saida: { type: "string", description: "Terminal de partida, se aparecer" },
+              portao: { type: "string", description: "Portão de embarque, se aparecer" },
             },
             required: ["ordem"],
             additionalProperties: false,
@@ -146,6 +155,53 @@ const TOOL_SCHEMA = {
           },
           required: [],
           additionalProperties: false,
+        },
+        reserva: {
+          type: "object",
+          properties: {
+            localizador: { type: "string", description: "PNR / código da reserva / LOC CIA" },
+            status_emissao: { type: "string", description: "emitido | confirmado | pendente" },
+            bagagem_mao: { type: "string" },
+            bagagem_despachada: { type: "string" },
+            bagagem_extra: { type: "string" },
+            regras_bagagem: { type: "string" },
+            checkin_url: { type: "string" },
+            checkin_abertura: { type: "string" },
+            checkin_status: { type: "string", description: "pendente | realizado" },
+            checkin_observacoes: { type: "string" },
+            antecedencia_aeroporto: { type: "string" },
+            terminal_embarque: { type: "string" },
+            documentos_obrigatorios: { type: "string" },
+            regras_imigracao: { type: "string" },
+            orientacoes_embarque: { type: "string" },
+          },
+          required: [],
+          additionalProperties: false,
+        },
+        passageiros: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              nome: { type: "string" },
+              tipo: { type: "string", description: "adulto | crianca | bebe" },
+              bilhete: { type: "string", description: "Número do e-ticket" },
+              documento: { type: "string" },
+              fidelidade: { type: "string" },
+              observacoes: { type: "string" },
+              assentos: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: { trecho_ordem: { type: "integer" }, assento: { type: "string" } },
+                  required: [],
+                  additionalProperties: false,
+                },
+              },
+            },
+            required: ["nome"],
+            additionalProperties: false,
+          },
         },
         observacoes: { type: "array", items: { type: "string" } },
         campos_nao_identificados: { type: "array", items: { type: "string" } },
@@ -250,6 +306,7 @@ Deno.serve(async (req) => {
         "Para cada voo preencha: companhia (pelo logo/texto), número do voo, data e hora de saída, data e hora de chegada, origem (IATA + cidade), destino (IATA + cidade), duração, escalas, equipamento, cabine, base tarifária e bagagem. " +
         "NÃO INVENTE ANO: se o ano não estiver visível, devolva data como 'DD MMM' (ex.: '25 Set') e adicione 'ano_pendente' em campos_nao_identificados. " +
         "Capture também: tipo de tarifa (RT/OW/MT), passageiros, moeda, total na moeda original, total em R$, câmbio (USD 1,00 = R$ X), data do câmbio, taxa de combustível e TODAS as observações tarifárias do rodapé. " +
+        "Se for BILHETE EMITIDO ou confirmação de reserva, preencha também reserva.localizador (Código da reserva / LOC CIA / PNR), passageiros (nome, tipo, nº do bilhete, fidelidade, assentos por trecho), terminal/portão e quaisquer informações de bagagem, check-in e embarque que estejam escritas — deixe vazio o que não aparecer. " +
         "SEMPRE chame extract_airfare_document — nunca retorne texto explicativo.",
     });
     if (text) {
@@ -347,6 +404,9 @@ Deno.serve(async (req) => {
       }))
       .sort((a: any, b: any) => (a.ordem || 0) - (b.ordem || 0));
 
+    parsed.reserva = parsed.reserva || {};
+    if (parsed.reserva.localizador) parsed.reserva.localizador = String(parsed.reserva.localizador).replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+    parsed.passageiros = Array.isArray(parsed.passageiros) ? parsed.passageiros.filter((p: any) => p && p.nome) : [];
     parsed.observacoes = Array.isArray(parsed.observacoes) ? parsed.observacoes : [];
     parsed.campos_nao_identificados = Array.isArray(parsed.campos_nao_identificados) ? parsed.campos_nao_identificados : [];
     parsed.confianca_extracao = parsed.confianca_extracao || {};

@@ -58,6 +58,8 @@ export type AIImportServiceType =
 export interface AIImportResult {
   service_type: AIImportServiceType;
   service_data: Record<string, any>;
+  /** Resultado bruto do extrator de passagens (somente para voos). */
+  raw_airfare?: any;
 }
 
 interface AIImportServiceModalProps {
@@ -221,7 +223,7 @@ export function AIImportServiceModal({
         }
 
         const flightData = parsedAirfareToFlightData(parsed) as Record<string, any>;
-        await onImport({ service_type: "flight", service_data: flightData });
+        await onImport({ service_type: "flight", service_data: flightData, raw_airfare: parsed });
         toast({
           title: `Passagem aérea importada — ${voos.length} voo(s)`,
           description: "Abra o serviço para revisar os segmentos.",

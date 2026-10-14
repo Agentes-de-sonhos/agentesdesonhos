@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { WizardAIImportButton, WizardHeaderPortal, WalletGenericImportDialog, WalletCarRentalImportDialog, ImportDialogShell } from "@/components/trip/WizardAIImport";
 import { AirfareSmartImport } from "@/components/quote/flight-wizard/AirfareSmartImport";
 import { normalizeParsedAirfareToLegacy } from "@/components/trip/FlightAutoImport";
+import { parsedAirfareToTripFlightData } from "@/lib/tripFlightImport";
 import { normalizeServiceItemFields } from "@/lib/serviceImportFieldAliases";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -444,6 +445,31 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
       const next = summaryParts.join("\n");
       form.setValue("boarding_notes", existing ? `${existing}\n${next}` : next);
     }
+  };
+
+  /** Preenche localizador, passageiros, bilhetes, assentos, terminal/portão, bagagem, check-in e embarque. */
+  const applyFullAirfareFields = (raw: any) => {
+    const full = parsedAirfareToTripFlightData(raw);
+    const textFields = [
+      "locator_code", "carry_on", "checked_baggage", "extra_baggage", "baggage_rules",
+      "checkin_url", "checkin_open_date", "checkin_notes", "recommended_arrival",
+      "boarding_terminal", "required_documents", "immigration_rules",
+    ] as const;
+    textFields.forEach((k) => { if (full[k]) form.setValue(k, full[k] as any); });
+    if (full.flight_status) form.setValue("flight_status", full.flight_status);
+    if (full.checkin_status === "realizado") form.setValue("checkin_status", "realizado");
+    if (full.passengers.length) {
+      setPassengers((prev) => {
+        const names = new Set(prev.map((p) => p.name.toLowerCase()));
+        return [...prev, ...full.passengers.filter((p) => !names.has(p.name.toLowerCase()))];
+      });
+    }
+    // Terminal e portão por trecho (casando pelo nº do voo)
+    setSegments((prev) => prev.map((s) => {
+      const match = full.segments.find((f) => f.flight_number && f.flight_number.replace(/\s/g, "") === s.flight_number.replace(/\s/g, ""));
+      if (!match) return s;
+      return { ...s, terminal: s.terminal || match.terminal, gate: s.gate || match.gate };
+    }));
   };
 
   const stepTitles = [
@@ -878,6 +904,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
           onConfirm={(_mapped, raw) => {
             const legacy = normalizeParsedAirfareToLegacy(raw);
             handleFlightImport(legacy);
+            applyFullAirfareFields(raw);
             setAiImportOpen(false);
           }}
         />

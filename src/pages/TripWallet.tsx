@@ -36,6 +36,7 @@ import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { PublicShareBar } from "@/components/shared/PublicShareBar";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
+import { parsedAirfareToTripFlightData } from "@/lib/tripFlightImport";
 import { FileText as FileTextIcon } from "lucide-react";
 import { ImportQuoteIntoWalletDialog } from "@/components/trip/ImportQuoteIntoWalletDialog";
 import { ImportFullPackageIntoWalletDialog } from "@/components/trip/ImportFullPackageIntoWalletDialog";
@@ -677,7 +678,9 @@ function TripWalletContent() {
   const handleAIImport = async (result: AIImportResult) => {
     await addService({
       service_type: result.service_type as TripServiceType,
-      service_data: result.service_data as any,
+      service_data: (result.service_type === "flight" && result.raw_airfare
+        ? parsedAirfareToTripFlightData(result.raw_airfare)
+        : result.service_data) as any,
     });
   };
 
