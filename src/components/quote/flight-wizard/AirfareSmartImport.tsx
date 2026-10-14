@@ -331,7 +331,7 @@ export function parsedAirfareToFlightData(
 interface Props {
   quoteId?: string;
   onCancel: () => void;
-  onConfirm: (data: Partial<FlightData>, raw: ParsedAirfare) => void;
+  onConfirm: (data: Partial<FlightData>, raw: ParsedAirfare, file?: File | null) => void;
   /** Início da viagem: fornece o ano quando o documento traz só dia/mês. */
   tripStartDate?: Date;
 }

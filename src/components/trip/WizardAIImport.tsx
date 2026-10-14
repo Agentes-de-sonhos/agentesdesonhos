@@ -94,7 +94,7 @@ function ImportDialogShell({ open, onOpenChange, title, description, children }:
 
 /** Generic wallet AI import dialog for services that use GenericServiceSmartImport. */
 export function WalletGenericImportDialog({
-  open, onOpenChange, serviceKey, title, description, onApply,
+  open, onOpenChange, serviceKey, title, description, onApply, onFile,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -103,6 +103,8 @@ export function WalletGenericImportDialog({
   description?: string;
   /** Raw parsed data (Portuguese keys) returned by the AI. */
   onApply: (parsed: Record<string, any>) => void;
+  /** Recebe o arquivo enviado para anexá-lo em Documentos. */
+  onFile?: (file: File) => void;
 }) {
   const cfg = SERVICE_IMPORT_CONFIGS[serviceKey];
   return (
@@ -113,7 +115,7 @@ export function WalletGenericImportDialog({
         fields={cfg.fields}
         mapToInitialData={cfg.mapToInitialData}
         onCancel={() => onOpenChange(false)}
-        onConfirm={(_mapped, raw) => { onApply(raw); onOpenChange(false); }}
+        onConfirm={(_mapped, raw, file) => { onApply(raw); if (file && onFile) onFile(file); onOpenChange(false); }}
       />
     </ImportDialogShell>
   );
@@ -121,11 +123,12 @@ export function WalletGenericImportDialog({
 
 /** Car rental uses a dedicated smart import (like Orçamentos). */
 export function WalletCarRentalImportDialog({
-  open, onOpenChange, onApply,
+  open, onOpenChange, onApply, onFile,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   onApply: (mapped: Record<string, any>) => void;
+  onFile?: (file: File) => void;
 }) {
   return (
     <ImportDialogShell
@@ -136,7 +139,7 @@ export function WalletCarRentalImportDialog({
     >
       <CarRentalSmartImport
         onCancel={() => onOpenChange(false)}
-        onConfirm={(_mapped, raw) => { onApply(raw as any); onOpenChange(false); }}
+        onConfirm={(_mapped, raw, file) => { onApply(raw as any); if (file && onFile) onFile(file); onOpenChange(false); }}
       />
     </ImportDialogShell>
   );
