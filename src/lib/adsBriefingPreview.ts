@@ -5,6 +5,7 @@
  */
 import { buildGoldStandardProfile } from "@/lib/goldStandardSiteTemplate";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
+import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
@@ -669,6 +670,22 @@ BARDELLI_PRESENTATION_PROFILE.signature = { ...BARDELLI_PRESENTATION_PROFILE.sig
 BARDELLI_PRESENTATION_PROFILE.copy = { ...BARDELLI_PRESENTATION_PROFILE.copy, differentials: { title: "O que você encontra na Bardelli Viagens", subtitle: "Planejamento e atenção aos detalhes da sua viagem." } };
 BARDELLI_PRESENTATION_PROFILE.seo = { title: "Apresentação — Bardelli Viagens", description: "Apresentação completa para revisão da Bardelli Viagens." };
 BARDELLI_PRESENTATION_PROFILE.socialStrip = { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/bardelliviagens/" }] };
+BARDELLI_PRESENTATION_PROFILE.copy = {
+  ...BARDELLI_PRESENTATION_PROFILE.copy,
+  newsletter: {
+    kicker: "GRUPO DE NOVIDADES NO WHATSAPP",
+    title: "Receba novidades e oportunidades",
+    subtitle: "Informe seu nome, WhatsApp e e-mail. Depois de enviar, você será direcionado para o grupo de WhatsApp da Bardelli Viagens, onde compartilhamos novidades e oportunidades de viagem.",
+    cta: "Quero entrar no grupo",
+  },
+};
+BARDELLI_PRESENTATION_PROFILE.inspirationDialog = {
+  title: "Entre no grupo de novidades",
+  description: "Preencha seus dados. Ao confirmar, você será direcionado para o grupo de WhatsApp da Bardelli Viagens.",
+  submitLabel: "Confirmar e entrar no grupo",
+  notice: "Ao confirmar, você autoriza o contato da agência e será levado ao grupo de WhatsApp.",
+};
+BARDELLI_PRESENTATION_PROFILE.newsletterMedia = { src: bardelliNewsletterPhoto, alt: "Praia de águas claras — foto ilustrativa" };
 export const BARDELLI_XCARET_REWRITES: [string, string][] = [
   ["Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.", "Xcaret: possibilidades para uma viagem com a sua cara."],
   ["Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.", "A Bardelli Viagens convida você a descobrir o universo Xcaret, com parques, hotéis e experiências na Riviera Maya."],
