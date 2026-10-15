@@ -694,6 +694,57 @@ export const BARDELLI_XCARET_REWRITES: [string, string][] = [
   ["Destinos com a Ju", "Bardelli Viagens"], ["Juliana", "Equipe Bardelli"], ["Oi, Ju!", "Olá, Bardelli!"], ["da Ju", "da equipe"], ["à Ju", "à equipe"], ["a Ju", "a equipe"], ["A Ju", "A equipe"], ["com a Ju", "com a Bardelli"],
 ];
 
+export const DRICA_PRESENTATION_JOB_ID = "drica-completa-v1";
+export const DRICA_PRESENTATION_HOST = "drica-presentation.preview.local";
+export const DRICA_PRESENTATION_INFO: AgencyDomainInfo = {
+  ...DRICA_VIAGENS_PREVIEW_INFO, hostname: DRICA_PRESENTATION_HOST,
+  user_id: "00000000-0000-0000-0000-00000000dc01", cnpj: "11.636.130/0001-31",
+};
+const dricaBaseline = buildGoldStandardProfile("dricaPresentation", {}, "Drica Viagens");
+export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
+  ...dricaBaseline, navDensity: "compact", randomizeDestinations: false,
+  heroPresentation: { ...dricaBaseline.heroPresentation, kicker: "DRICA VIAGENS · DESDE 2010" },
+  hero: [
+    { title: "Drica Viagens", subtitle: "Segurança e suporte antes, durante e depois da viagem. Cada detalhe será cuidado com carinho, atenção e dedicação.", image: "orlandoMagicKingdom", order: 1, enabled: true },
+    { title: "Famílias, parques e viagens sob medida", subtitle: "Da magia de Orlando à Disney Cruise Line, experiências planejadas para todas as gerações, com escuta e cuidado.", image: "cruzeiroDisneyWish", order: 2, enabled: true },
+    { title: "Londres, Japão e novas descobertas", subtitle: "Curadoria criteriosa de hotéis e serviços, turismo esportivo e roteiros que respeitam seu ritmo de viajar.", image: "dricaJapan", order: 3, enabled: true },
+  ],
+  signature: { kicker: "O JEITO DRICA DE CUIDAR", title: "Cada detalhe da sua viagem será cuidado com carinho, atenção e dedicação.", text: "Segurança e suporte antes, durante e depois da viagem. Adriana Martins escuta seus planos e acompanha cada escolha, com curadoria criteriosa e atendimento pessoal." },
+  modules: [
+    ...(DRICA_VIAGENS_PREVIEW_PROFILE.modules ?? []).map(m => m.key === "asia-oceania" ? { ...m, image: "dricaJapan" as const } : m),
+    { key: "esportivo", title: "Turismo esportivo", text: "Seu esporte também pode inspirar a próxima viagem: datas, hospedagem e deslocamentos pensados em conjunto.", service: "pacotes", image: "dricaLondon", enabled: true, order: 6 },
+  ],
+  destinations: (DRICA_VIAGENS_PREVIEW_PROFILE.destinations ?? []).map(d => ({ ...d, image: d.key === "londres-europa" ? "dricaLondon" : d.key === "leste-europeu" ? "dricaPrague" : d.key === "japao" ? "dricaJapan" : d.image })),
+  about: { ...DRICA_VIAGENS_PREVIEW_PROFILE.about,
+    title: "Adriana Martins: proximidade para cuidar da sua viagem",
+    image: "dricaLondon", media: undefined,
+    text: [
+      DRICA_VIAGENS_PREVIEW_PROFILE.about?.text ?? "",
+      "Orlando, Londres, Leste Europeu, Disney Cruise Line e Japão estão entre os destinos prioritários da Drica. Estados Unidos e Canadá, Europa, grupos acompanhados, cruzeiros, Ásia e Oceania ampliam as possibilidades de roteiros sob medida. Famílias e parques, assim como o turismo esportivo, ganham um planejamento atento aos interesses e ao ritmo de quem viaja.",
+      "O atendimento é feito pela proprietária por WhatsApp, telefone, e-mail ou videochamada. Cada detalhe da sua viagem será cuidado com carinho, atenção e dedicação, antes da partida e no acompanhamento até o retorno. Em incidentes, o suporte direto cabe ao fornecedor responsável; a Drica acompanha e auxilia na comunicação e nos encaminhamentos, sem substituir essa responsabilidade.",
+    ].join("\n\n"),
+  },
+  differentials: DRICA_VIAGENS_PREVIEW_PROFILE.differentials,
+  conciergePoints: [
+    { key: "escuta", title: "1. Uma conversa com Adriana", text: "WhatsApp, telefone, e-mail ou videochamada para conhecer seus planos, viajantes e necessidades." },
+    { key: "curadoria", title: "2. Curadoria e proposta", text: "Hotéis, serviços e experiências comparados com critério, conforme o perfil e o investimento desejado." },
+    { key: "preparacao", title: "3. Preparação para embarcar", text: "Conferência das escolhas e orientações para partir com clareza e segurança." },
+    { key: "acompanhamento", title: "4. Acompanhamento até o retorno", text: "Em incidentes, o fornecedor presta o suporte direto. A Drica acompanha e auxilia na comunicação e nos encaminhamentos." },
+  ],
+  faq: [...(DRICA_VIAGENS_PREVIEW_PROFILE.faq ?? []),
+    { q: "Vocês organizam turismo esportivo?", a: "Sim. O planejamento combina o interesse pelo esporte com datas, hospedagem e deslocamentos adequados ao roteiro, conforme a disponibilidade dos serviços." },
+    { q: "Como escolher entre cruzeiros, resorts e uma viagem sob medida?", a: "Adriana conversa sobre suas prioridades, ritmo e orçamento para comparar as possibilidades. Produtos e itinerários são avaliados de acordo com quem vai viajar." },
+  ],
+  copy: { ...dricaBaseline.copy, ...DRICA_VIAGENS_PREVIEW_PROFILE.copy,
+    newsletter: { kicker: "NOVIDADES DRICA VIAGENS", title: "Sua próxima inspiração começa aqui", subtitle: "Destinos e ideias para viajar no seu ritmo. Formulário de demonstração: nenhum dado é enviado ou cadastrado.", cta: "Conhecer novidades" },
+  },
+  footer: DRICA_VIAGENS_PREVIEW_PROFILE.footer,
+  newsletterMedia: { src: bardelliNewsletterPhoto, alt: "Praia de águas claras — imagem ilustrativa de viagem" },
+  socialStrip: { title: "Encontre a Drica no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/dricaviagens" }] },
+  seo: { title: "Apresentação completa — Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins. Apresentação técnica sem envios." },
+};
+export const DRICA_XCARET_REWRITES: [string, string][] = BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replaceAll("Bardelli Viagens", "Drica Viagens").replaceAll("Equipe Bardelli", "Equipe Drica").replaceAll("Bardelli", "Drica")]);
+
 /* ------------------------------------------------------------------ */
 /* Bardelli Viagens — perfil OFICIAL (bardelliviagens.com.br).          */
 /* Dados do briefing 18. Sem endereço residencial, CPF ou contrato.     */
@@ -757,6 +808,12 @@ export interface AdsBriefingPreviewFixture {
 }
 
 const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
+  [DRICA_PRESENTATION_JOB_ID]: {
+    jobId: DRICA_PRESENTATION_JOB_ID, info: DRICA_PRESENTATION_INFO, profile: DRICA_PRESENTATION_PROFILE,
+    notice: "Drica Viagens · apresentação completa para revisão · conteúdo ilustrativo identificado · sem envios ou publicação",
+    documentTitle: "Apresentação completa — Drica Viagens", realAgency: true,
+    pages: { xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: DRICA_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
+  },
   [BARDELLI_PRESENTATION_JOB_ID]: {
     jobId: BARDELLI_PRESENTATION_JOB_ID, info: BARDELLI_PRESENTATION_INFO, profile: BARDELLI_PRESENTATION_PROFILE,
     notice: "Bardelli Viagens · apresentação para revisão · textos e serviços ilustrativos a confirmar · nenhum envio real",

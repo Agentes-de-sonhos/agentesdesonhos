@@ -100,6 +100,7 @@ export function resolveSections(
  * Mapeamento central em `AgencySiteHome` — nunca imports espalhados.
  */
 export type AgencyImageSlot =
+  | "dricaLondon" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort"
   | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler" | "heroJuMagicKingdom"

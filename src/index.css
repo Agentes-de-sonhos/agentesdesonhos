@@ -1456,15 +1456,25 @@ body[data-booking-selection-bar] {
 
 /* Complete technical presentations only: preserve the reference dark cruise band
    against the shared alternating-surface reset; clip off-canvas carousels. */
-[data-ads-preview="bardelli-completa-v1"] { overflow-x: clip; }
-[data-ads-preview="bardelli-completa-v1"] .wl-presentation-dark > #autoridade {
+:is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) { overflow-x: clip; }
+:is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) .wl-presentation-dark > #autoridade {
   background-color: hsl(var(--wl-navy)) !important;
 }
-[data-ads-preview="bardelli-completa-v1"] .wl-resort-logo-box { padding-inline: 0.75rem; }
-[data-ads-preview="bardelli-completa-v1"] .wl-resort-logo { max-height: 5rem; }
-[data-ads-preview="bardelli-completa-v1"] :is(h1,h2,h3,h4) { letter-spacing: 0; }
+:is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) .wl-resort-logo-box { padding-inline: 0.75rem; }
+:is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) .wl-resort-logo { max-height: 5rem; }
+:is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) :is(h1,h2,h3,h4) { letter-spacing: 0; }
 
 @media (max-width: 1023px) {
-  [data-ads-preview="bardelli-completa-v1"] #inicio { min-height: 820px; }
-  [data-ads-preview="bardelli-completa-v1"] [data-xcaret-mobile-play] { top: auto; bottom: 205px; transform: none; }
+  :is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) #inicio { min-height: 820px; }
+  :is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) [data-xcaret-mobile-play] { top: auto; bottom: 205px; transform: none; }
 }
+
+/* Drica: synthetic presentation only; no real hostname is mapped. */
+.wl-editorial.wl-site-base.wl-drica {
+  --primary: 340 100% 30%; --primary-foreground: 0 0% 100%;
+  --ring: 204 45% 36%; --wl-red: 204 45% 36%;
+  --wl-navy: 204 45% 30%; --wl-ink: 204 30% 15%;
+  --wl-sand: 204 15% 97%; --secondary: 204 15% 97%;
+  --secondary-foreground: 204 30% 15%; --accent: 340 25% 96%;
+}
+.wl-editorial.wl-site-base.wl-drica :is(h1,h2,h3,h4) { font-family: inherit; font-weight: 700; letter-spacing: 0; }

@@ -1,6 +1,7 @@
 # Project Memory
 
 ## Memories
+- [Drica Viagens](mem://features/whitelabel/drica-viagens.md) — Identidade confirmada, atendimento e limites da apresentação isolada
 - [Modelo completo de novos sites](mem://features/whitelabel/complete-new-sites.md) — União integral das duas referências, apresentação sem fatos inventados
 - [O Mundo em Cores](mem://features/whitelabel/mundo-em-cores) — Conteúdo aprovado, 29 anos da Vanessa e acabamento claro da prévia isolada
 - [Galeria editorial Orlando](mem://features/whitelabel/orlando-editorial-gallery) — Nove fotos oficiais somente na página de ingressos da Destinos com a Ju, formulário preservado
