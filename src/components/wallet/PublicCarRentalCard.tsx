@@ -98,7 +98,7 @@ export function PublicCarRentalCard({ service, access, locale = "pt-BR" }: { ser
 
   return <article id={`service-${service.id}`} data-testid="public-car-card" className="wallet-hotel-theme min-w-0 space-y-4 text-sm leading-relaxed text-foreground [overflow-wrap:anywhere] sm:space-y-5">
     {images.length > 0
-      ? <div className="relative overflow-hidden rounded-2xl"><ServiceImageCarousel images={images} alt={model || tc("title")} placeId={resolveServicePlaceId(service)} hideFallback panoramic /><span className="pointer-events-none absolute bottom-2 right-2 rounded-md bg-foreground/70 px-2 py-0.5 text-xs text-background">{tc("illustrative")}</span></div>
+      ? <div className="relative overflow-hidden rounded-2xl"><ServiceImageCarousel images={images} alt={model || tc("title")} placeId={resolveServicePlaceId(service)} hideFallback panoramic /><span className="pointer-events-none absolute bottom-2 left-2 rounded-md bg-foreground/70 px-2 py-0.5 text-xs text-background">{tc("illustrative")}</span></div>
       : <div aria-hidden="true" className="flex h-28 items-center justify-center rounded-2xl border border-border bg-primary/5 text-primary/50 sm:h-36"><Car className="h-14 w-14" /></div>}
     {(model || statusLabel || data.rental_company) && <header className="space-y-1">
       <div className="flex items-start justify-between gap-3">
