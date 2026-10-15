@@ -28,6 +28,19 @@
   --warning: 36 85% 35%;
   letter-spacing: 0;
 }
+/* Hotel-only public presentation; no changes to flight tokens. */
+.wallet-hotel-theme {
+  --background: 210 30% 98%;
+  --foreground: 222 47% 16%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 16%;
+  --border: 214 28% 88%;
+  --muted: 210 25% 96%;
+  --muted-foreground: 215 18% 40%;
+  --success: 148 65% 30%;
+  --warning: 36 85% 35%;
+  letter-spacing: 0;
+}
 .wallet-flight-banner img { height: 120px; aspect-ratio: auto; }
 @media (min-width: 640px) { .wallet-flight-banner img { height: 160px; } }
 

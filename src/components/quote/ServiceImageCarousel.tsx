@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, X, ImageOff, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Image, ImageOff, Loader2 } from "lucide-react";
 import { useServiceImages } from "@/hooks/useServiceImages";
+import { Button } from "@/components/ui/button";
 
 interface ServiceImageCarouselProps {
   /** URLs do Storage e/ou referências `gplace://{place_id}/{i}` */
@@ -12,6 +13,8 @@ interface ServiceImageCarouselProps {
   placeId?: string | null;
   /** Oculta o bloco de fallback quando não houver nenhuma imagem utilizável */
   hideFallback?: boolean;
+  panoramic?: boolean;
+  viewPhotosLabel?: string;
 }
 
 function ImageFallback({ alt, loading }: { alt: string; loading?: boolean }) {
@@ -41,7 +44,7 @@ function GoogleAttribution({ attributions }: { attributions: string[] }) {
   );
 }
 
-export function ServiceImageCarousel({ images, alt, disableExpand = false, placeId, hideFallback }: ServiceImageCarouselProps) {
+export function ServiceImageCarousel({ images, alt, disableExpand = false, placeId, hideFallback, panoramic = false, viewPhotosLabel }: ServiceImageCarouselProps) {
   const { usable, loading, markFailed, hasGoogleImage, attributions } = useServiceImages(images, placeId);
   const srcs = usable.map((u) => u.src as string);
 
@@ -105,6 +108,16 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
     if (hideFallback && !loading) return null;
     return <ImageFallback alt={alt} loading={loading} />;
   }
+
+  if (panoramic) return <>
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
+      <img src={srcs[selectedIndex] || srcs[0]} alt={alt} className="h-44 w-full object-cover sm:h-56" onError={() => markFailed(usable[selectedIndex]?.ref || usable[0].ref)} />
+      <span className="absolute right-3 top-3 rounded-full bg-foreground/80 px-3 py-1 text-xs font-semibold text-background">{selectedIndex + 1} / {srcs.length}</span>
+      {!disableExpand && <Button variant="secondary" className="absolute bottom-3 right-3 h-10 rounded-xl bg-foreground/85 text-background hover:bg-foreground" onClick={() => openLightbox(selectedIndex)}><Image className="h-4 w-4" />{viewPhotosLabel}</Button>}
+    </div>
+    {hasGoogleImage && <GoogleAttribution attributions={attributions} />}
+    {!disableExpand && lightboxOpen && <Lightbox images={srcs} index={lightboxIndex} onClose={closeLightbox} onPrev={lightboxPrev} onNext={lightboxNext} />}
+  </>;
 
   // Single image — no carousel needed
   if (srcs.length === 1) {
