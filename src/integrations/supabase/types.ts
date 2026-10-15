@@ -17665,6 +17665,17 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_trip_agency_wallet_defaults: {
+        Args: { _trip_id: string }
+        Returns: {
+          show_calendar: boolean
+          show_next_activity: boolean
+          show_next_service: boolean
+          show_signature: boolean
+          show_support_tools: boolean
+          show_whatsapp: boolean
+        }[]
+      }
       get_trip_by_public_code: {
         Args: { p_agency_slug: string; p_code: string }
         Returns: Json
@@ -18401,6 +18412,7 @@ export type Database = {
         Args: { p_agency_slug: string; p_code: string; p_password: string }
         Returns: Json
       }
+      wallet_agency_owner: { Args: { _uid: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "agente" | "promotor" | "fornecedor"
