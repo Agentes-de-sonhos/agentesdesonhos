@@ -1144,7 +1144,8 @@ export async function generateTripPDF(
   itineraryActivities?: ItineraryActivityForPDF[],
   voucherAccess?: VoucherAccessOptions,
   locale: PublicLocale = "pt-BR",
-  options: { modules?: PdfModules; signature?: PdfSignature | null } = {},
+  /** Pode ser uma Promise: a janela abre antes de qualquer espera (evita bloqueio de pop-up). */
+  optionsInput: { modules?: PdfModules; signature?: PdfSignature | null } | Promise<{ modules?: PdfModules; signature?: PdfSignature | null }> = {},
 ) {
   const t = tWallet(locale);
   // Abrir a janela ANTES dos awaits para evitar bloqueio de popup pelo navegador.
@@ -1164,6 +1165,7 @@ export async function generateTripPDF(
   };
   const sorted = [...(trip.services || [])].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
   const resolveImg = await buildServiceImageResolver(sorted);
+  const options = await Promise.resolve(optionsInput).catch(() => ({}) as { modules?: PdfModules; signature?: PdfSignature | null });
   void voucherAccess;
   const html = buildTripPdfHtml({ trip, profile, itineraryActivities, locale, resolveImg, documentUrl, modules: options.modules, signature: options.signature });
 

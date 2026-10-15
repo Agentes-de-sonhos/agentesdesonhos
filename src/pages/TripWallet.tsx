@@ -789,9 +789,10 @@ function TripWalletContent() {
   const handleGeneratePDF = async () => {
     if (!trip) return;
     // Mesmas flags resolvidas da carteira (carteira > agência dona > sistema).
-    const defaults = await fetchTripAgencyWalletDefaults(trip.id).catch(() => null);
-    const modules = resolveWalletSettings(defaults, (trip as any).wallet_modules ?? null);
-    await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" }, resolvePublicLocale(agentProfile), pdfSignatureOptions(modules, (trip as any).signature_snapshot, agentProfile));
+    // A busca roda depois que a janela do PDF já abriu (sem bloqueio de pop-up).
+    const options = fetchTripAgencyWalletDefaults(trip.id).catch(() => null)
+      .then((defaults) => pdfSignatureOptions(resolveWalletSettings(defaults, (trip as any).wallet_modules ?? null), (trip as any).signature_snapshot, agentProfile));
+    await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" }, resolvePublicLocale(agentProfile), options);
   };
 
   // Listing view
