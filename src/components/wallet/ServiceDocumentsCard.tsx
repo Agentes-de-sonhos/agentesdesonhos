@@ -21,6 +21,7 @@ import {
 } from "@/lib/serviceDocuments";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tPublicFlight } from "@/i18n/publicMaterials/flights";
 
 const KIND_ICON: Record<ServiceDocumentKind, typeof FileText> = {
   pdf: FileText,
@@ -47,6 +48,7 @@ interface Props {
   initialVisible?: number;
   className?: string;
   locale?: PublicLocale;
+  variant?: "default" | "flight";
 }
 
 const INITIAL_LIMIT = 3;
@@ -57,19 +59,23 @@ function DocumentRow({
   onDownload,
   downloading,
   locale = "pt-BR",
+  variant = "default",
 }: {
   doc: ServiceDocument;
   onOpen: (doc: ServiceDocument) => void;
   onDownload: (doc: ServiceDocument) => void;
   downloading: boolean;
   locale?: PublicLocale;
+  variant?: "default" | "flight";
 }) {
   const t = tWallet(locale);
+  const tf = tPublicFlight(locale);
+  const flight = variant === "flight";
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
 
   return (
-    <li className="flex flex-col gap-2.5 rounded-xl border border-border/70 bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+    <li className={cn("flex flex-col gap-2.5 rounded-xl border border-border/70 bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3", flight && "border-0 bg-transparent p-0 sm:flex-col sm:items-stretch")}>
       <div className="flex min-w-0 flex-1 items-center gap-2.5">
         <span
           aria-hidden
@@ -90,30 +96,33 @@ function DocumentRow({
       </div>
 
       <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
-        <button
+        <Button
           type="button"
           onClick={() => onOpen(doc)}
           aria-label={t("docsOpenAria", { name: doc.name })}
           className={cn(
             "inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-primary px-4 text-[12px] font-semibold text-primary-foreground sm:flex-none",
             "transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+            flight && "h-auto min-h-12 rounded-xl px-3 py-3 text-sm whitespace-normal sm:flex-1",
           )}
         >
           <Eye className="h-3.5 w-3.5" aria-hidden />
-          {t("docsOpenBtn")}
-        </button>
-        <button
+          {flight && doc.kind === "pdf" ? tf("openPdf") : t("docsOpenBtn")}
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={() => onDownload(doc)}
           disabled={downloading}
           aria-label={t("docsDownloadAria", { name: doc.name })}
           className={cn(
             "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-muted-foreground",
             "transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50",
+            flight && "h-12 w-12 rounded-xl",
           )}
         >
           <Download className="h-3.5 w-3.5" aria-hidden />
-        </button>
+        </Button>
       </div>
     </li>
   );
@@ -126,8 +135,11 @@ export function ServiceDocumentsCard({
   initialVisible = INITIAL_LIMIT,
   className,
   locale = "pt-BR",
+  variant = "default",
 }: Props) {
   const t = tWallet(locale);
+  const tf = tPublicFlight(locale);
+  const flight = variant === "flight";
   const [expanded, setExpanded] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<ServiceDocument | null>(null);
   const viewer = useSecureDocument();
@@ -174,13 +186,14 @@ export function ServiceDocumentsCard({
       className={cn(
         "mt-3 w-full min-w-0 rounded-2xl border border-border bg-background p-3.5",
         className,
+        flight && "m-0 bg-card p-4 sm:p-5",
       )}
       aria-label={t("docsHeading")}
     >
       <header className="mb-2.5 flex items-center gap-1.5">
         <Paperclip className="h-3.5 w-3.5 text-primary" aria-hidden />
-        <h4 className="text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground">
-          {t("docsHeading")}
+        <h4 className={cn("text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground", flight && "text-base font-bold normal-case tracking-normal")}>
+          {flight ? tf("documents") : t("docsHeading")}
         </h4>
         {docs.length > 1 && (
           <span className="ml-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
@@ -198,6 +211,7 @@ export function ServiceDocumentsCard({
             onDownload={handleDownload}
             downloading={viewer.downloading}
             locale={locale}
+            variant={variant}
           />
         ))}
       </ul>

@@ -48,6 +48,7 @@ import {
 } from "@/lib/walletSettings";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
+import { PublicFlightCard } from "@/components/wallet/PublicFlightCard";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { CategoryServiceView } from "@/components/wallet/category/CategoryServiceView";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
@@ -762,6 +763,11 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
   const isAttraction = service.service_type === 'attraction';
   const isInsurance = service.service_type === 'insurance';
   const isOther = service.service_type === 'other';
+
+  if (isFlight) return <PublicFlightCard service={service} locale={locale} access={{
+    mode: "public", slug: voucherAccess.slug || undefined,
+    shareToken: voucherAccess.shareToken || undefined, password: voucherAccess.password,
+  }} />;
 
   return (
     <Card
@@ -2706,6 +2712,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
       </div>
       <ServiceDetailOverlay
+        flightPresentation={activeService?.service_type === "flight"}
         service={activeService}
         open={activeService !== null}
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
@@ -2716,6 +2723,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       </ServiceDetailOverlay>
       {/* Group overlay: lista todos os serviços de um mesmo tipo (Passagens, Hospedagem, etc.) */}
       <ServiceDetailOverlay
+        flightPresentation={activeGroupType === "flight"}
         open={activeGroupType !== null}
         onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
         title={activeGroupType ? getServiceSectionLabel(activeGroupType, publicLocale) : undefined}
@@ -2725,6 +2733,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       >
         {activeGroupType && (
           <CategoryServiceView
+            locale={publicLocale}
             type={activeGroupType}
             services={grouped[activeGroupType] || []}
             renderFullCard={(s) => <PublicServiceCard service={s} locale={publicLocale} />}
