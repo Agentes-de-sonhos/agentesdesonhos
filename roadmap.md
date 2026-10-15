@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Completar apresentação técnica Drica com padrão ouro, navegação isolada, identidade confirmada, testes e QA desktop/mobile; registrar evidências sem publicar ou alterar dados reais.
+- [x] Completar apresentação técnica Drica com padrão ouro, navegação isolada e identidade confirmada; 54 testes, build OK, QA 360/390/desktop e carrinho sem envio. Evidências e limite de reprodução audiovisual em docs/validacao-drica-apresentacao-completa.md; sem publicação/dados reais.
 - [x] Aplicar referência de hospedagem pública; 66 regressões aprovadas, build/typecheck automático OK; 360/390px/desktop e fonte ampliada sem overflow, galeria/copiar/accordion verificados isoladamente. Carteira real protegida por senha: fotos e voucher reais não verificados; sem publicar.
 - [x] Atualizar somente passagens públicas: layout, dados e anexos preservados; 54 testes, build/typecheck automático OK; 360/390px/desktop, copiar e accordion verificados em sessão isolada. Carteira real protegida por senha: PDF real não verificado; sem publicar.
 - [x] Completar modelo reutilizável e apresentação Bardelli pela união integral Ju/100 Limites; matriz em docs/padrao-ouro-sites.md, 48 testes, páginas/desktop/mobile/carrinho sem envio e isolamento validados; sem publicar ou alterar banco.

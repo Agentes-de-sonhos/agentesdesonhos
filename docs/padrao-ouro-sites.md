@@ -49,3 +49,11 @@ Apresentação completa: https://id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f
 Continuidade no mesmo prefixo: `/xcaret`, `/visto-americano`, `/ingressos-orlando`, `/resorts-brasil`, `/resorts-brasil/{slug}`, `/dmc-portugal`, `/blog`, `/blog/{slug}`, `/ofertas`. Links legais/área do cliente explicam a limitação de apresentação, sem consultar dados privados.
 
 Allowlist estrita exclusiva desta apresentação: o hostname técnico acima, `localhost` e `127.0.0.1`; hostname de produção, domínio real Bardelli, `www`, outro preview e sufixos enganosos são recusados. A senha e as rotas reais `/preview` e `/preview/gestao` continuam intactas; a raiz Bardelli permanece em construção. Nenhuma publicação/deploy ou escrita no banco foi realizada.
+
+## Aplicação Drica Viagens — briefing 16
+- Apresentação integral: `/ads-briefing-preview/drica-completa-v1`, hostname sintético `drica-presentation.preview.local`. Rascunho `/ads-briefing-preview/briefing-16-v1` preservado.
+- Mesmo inventário integral da matriz acima, via `buildGoldStandardProfile`; alterações só por opt-in do perfil sintético. Três slides, oito serviços, seis campanhas, cinco destinos, três momentos, quatro vídeos/cinco logos, Sobre em três parágrafos, quatro diferenciais/quatro etapas, sete FAQs, três avaliações ilustrativas.
+- Identidade e copy confirmadas pelo briefing Drica, sem importar histórico, pessoas ou certificações das referências. Sobre preserva o texto do rascunho e acrescenta dois parágrafos. Portugal permanece ilustração, com títulos neutros e nenhuma operação própria atribuída. Cadastur não exibido.
+- Novos slots opt-in `dricaLondon`, `dricaJapan`, `dricaPrague`: fotos de Londres, Kyoto e Praga via pointers CDN em `src/assets/presentation/drica/`. Fontes Unsplash: `photo-1513635269975-59663e0ac1ad`, `photo-1493976040374-85c8e12f0c0e`, `photo-1541849546-216549ae216d`. Inspeção visual corrigiu uma imagem inicial inadequada antes da entrega.
+- Blog/ofertas têm três itens locais próprios (Orlando multigeracional, Londres/turismo esportivo, Japão); não ativam módulos ou consultam registros reais. Layout, páginas e mecanismos de segurança seguem compartilhados; estilos vinho/azul são exclusivos `wl-drica`/`data-ads-preview="drica-completa-v1"`.
+- Evidências, testes e limitações: `docs/validacao-drica-apresentacao-completa.md`.
