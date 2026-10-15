@@ -351,6 +351,13 @@
       "when": 1792038873815,
       "tag": "0049_agency_image_library",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1792039245829,
+      "tag": "0050_agency_image_library_team_permissions",
+      "breakpoints": true
     }
   ]
 }

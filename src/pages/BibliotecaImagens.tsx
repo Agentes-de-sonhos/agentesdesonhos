@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { usePermissions } from "@/hooks/usePermissions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FolderPlus, Images, Link2, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,12 @@ export default function BibliotecaImagens() {
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<LibraryImage | null>(null);
   const [folderDialog, setFolderDialog] = useState<{ id?: string; name: string } | null>(null);
-  const [pending, setPending] = useState(getPendingLibraryRetries());
+  const [pending, setPending] = useState(0);
+  useEffect(() => { void getPendingLibraryRetries().then(setPending); }, []);
+  const { can } = usePermissions();
+  const canCreate = can("quotes.create") || can("quotes.edit") || can("wallet.create") || can("wallet.edit");
+  const canEdit = can("quotes.edit") || can("wallet.edit");
+  const canDelete = can("quotes.delete") || can("wallet.delete");
 
   const images = useQuery({ queryKey: LIBRARY_QUERY_KEY, queryFn: listLibraryImages, staleTime: 60 * 1000 });
   const folders = useQuery({ queryKey: LIBRARY_FOLDERS_KEY, queryFn: listLibraryFolders, staleTime: 60 * 1000 });
@@ -49,17 +55,17 @@ export default function BibliotecaImagens() {
           <p className="text-sm text-muted-foreground">Links de imagens compartilhados com toda a equipe da sua agência.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => setFolderDialog({ name: "" })}><FolderPlus className="mr-1.5 h-4 w-4" />Nova pasta</Button>
-          <Button onClick={() => setAddOpen(true)}><Plus className="mr-1.5 h-4 w-4" />Adicionar link</Button>
+          {canEdit && <Button variant="outline" onClick={() => setFolderDialog({ name: "" })}><FolderPlus className="mr-1.5 h-4 w-4" />Nova pasta</Button>}
+          {canCreate && <Button onClick={() => setAddOpen(true)}><Plus className="mr-1.5 h-4 w-4" />Adicionar link</Button>}
         </div>
       </div>
 
-      {pending > 0 && (
+      {pending > 0 && canCreate && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-muted/40 p-3 text-sm">
           <span>{pending} foto(s) de serviços salvos ainda não entraram na biblioteca.</span>
           <Button size="sm" variant="outline" onClick={async () => {
             const ok = await retryPendingLibraryRegistrations();
-            setPending(getPendingLibraryRetries());
+            setPending(await getPendingLibraryRetries());
             if (ok) refresh(); else toast({ title: "Ainda não foi possível registrar. Tente novamente.", variant: "destructive" });
           }}>Tentar novamente</Button>
         </div>
@@ -78,14 +84,14 @@ export default function BibliotecaImagens() {
             {(folders.data || []).map((f) => <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        {activeFolder && (
+        {activeFolder && (canEdit || canDelete) && (
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon" aria-label="Renomear pasta" onClick={() => setFolderDialog({ id: activeFolder, name: folderName.get(activeFolder) || "" })}><Pencil className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" aria-label="Excluir pasta" onClick={() => {
+            {canEdit && <Button variant="ghost" size="icon" aria-label="Renomear pasta" onClick={() => setFolderDialog({ id: activeFolder, name: folderName.get(activeFolder) || "" })}><Pencil className="h-4 w-4" /></Button>}
+            {canDelete && <Button variant="ghost" size="icon" aria-label="Excluir pasta" onClick={() => {
               if (!confirm("Excluir esta pasta? As imagens dela vão para \"Sem pasta\".")) return;
               run.mutate(() => deleteLibraryFolder(activeFolder));
               setFolder("all");
-            }}><Trash2 className="h-4 w-4" /></Button>
+            }}><Trash2 className="h-4 w-4" /></Button>}
           </div>
         )}
       </div>
@@ -99,7 +105,7 @@ export default function BibliotecaImagens() {
           <p className="max-w-md text-sm text-muted-foreground">
             Ao adicionar uma foto por link em um serviço e salvar, ela aparece aqui automaticamente. Você também pode adicionar links manualmente.
           </p>
-          <Button onClick={() => setAddOpen(true)}><Link2 className="mr-1.5 h-4 w-4" />Adicionar link</Button>
+          {canCreate && <Button onClick={() => setAddOpen(true)}><Link2 className="mr-1.5 h-4 w-4" />Adicionar link</Button>}
         </div>
       ) : visible.length === 0 ? (
         <p className="py-10 text-center text-sm text-muted-foreground">Nenhuma imagem encontrada.</p>
@@ -110,13 +116,13 @@ export default function BibliotecaImagens() {
               <LibraryThumb url={img.url} alt={img.name} className="aspect-[4/3] w-full" />
               <div className="space-y-1 p-2">
                 <p className="truncate text-sm font-medium" title={img.name}>{img.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{img.folder_id ? folderName.get(img.folder_id) || "Sem pasta" : "Sem pasta"}</p>
+                <p className="truncate text-xs text-muted-foreground" title={img.url}>{img.folder_id ? folderName.get(img.folder_id) || "Sem pasta" : "Sem pasta"}</p>
                 <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" className="h-7 flex-1 px-2 text-xs" onClick={() => setEditing(img)}><Pencil className="mr-1 h-3 w-3" />Editar</Button>
-                  <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-destructive" aria-label={`Excluir ${img.name}`} onClick={() => {
+                  {canEdit && <Button size="sm" variant="ghost" className="h-7 flex-1 px-2 text-xs" onClick={() => setEditing(img)}><Pencil className="mr-1 h-3 w-3" />Editar</Button>}
+                  {canDelete && <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-destructive" aria-label={`Excluir ${img.name}`} onClick={() => {
                     if (!confirm("Excluir da biblioteca? Serviços que já usam esta foto não mudam.")) return;
                     run.mutate(() => deleteLibraryImage(img.id));
-                  }}><Trash2 className="h-3 w-3" /></Button>
+                  }}><Trash2 className="h-3 w-3" /></Button>}
                 </div>
               </div>
             </div>

@@ -60,17 +60,83 @@ export function defaultNameFromUrl(raw: string): string {
 
 /* ───────── Origem "link" (proveniência em memória) ───────── */
 
-/** URL guardada no serviço → URL externa original colada pelo usuário. */
+/** URL guardada no serviço → URL externa original colada pelo usuário (só em memória). */
 const linkProvenance = new Map<string, string>();
-const pendingRetry = new Map<string, string>(); // sourceUrl → name
 
 export function noteLinkImage(storedUrl: string, sourceUrl: string) {
   if (!storedUrl || !isLibraryEligibleUrl(sourceUrl)) return;
   linkProvenance.set(storedUrl, sourceUrl.trim());
 }
 
-export function getPendingLibraryRetries(): number {
-  return pendingRetry.size;
+/* ───────── Fila de nova tentativa persistida (por agência + usuário) ───────── */
+
+const RETRY_PREFIX = "ads:image-library-retry:v1:";
+const AGENCY_CACHE_PREFIX = "ads:image-library-agency:v1:";
+const MAX_RETRY_ITEMS = 50;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export interface LibraryScope { agencyId: string; userId: string }
+interface RetryItem { url: string; name: string }
+
+function safeStorage(): Storage | null {
+  try { return typeof window !== "undefined" ? window.localStorage : null; } catch { return null; }
+}
+
+export function retryStorageKey(scope: LibraryScope) {
+  return `${RETRY_PREFIX}${scope.agencyId}:${scope.userId}`;
+}
+
+/** Agência + usuário atuais. Usa a agência resolvida pelo servidor; cache só do mesmo usuário. */
+export async function resolveLibraryScope(): Promise<LibraryScope | null> {
+  const { data: sess } = await supabase.auth.getSession();
+  const userId = sess?.session?.user?.id;
+  if (!userId || !UUID_RE.test(userId)) return null;
+  const store = safeStorage();
+  try {
+    const { data, error } = await supabase.rpc("current_image_library_agency" as any);
+    if (!error && typeof data === "string" && UUID_RE.test(data)) {
+      store?.setItem(AGENCY_CACHE_PREFIX + userId, data);
+      return { agencyId: data, userId };
+    }
+  } catch { /* offline: usa cache do mesmo usuário */ }
+  const cached = store?.getItem(AGENCY_CACHE_PREFIX + userId);
+  return cached && UUID_RE.test(cached) ? { agencyId: cached, userId } : null;
+}
+
+/** Lê com validação: itens inválidos/sensíveis são descartados silenciosamente. */
+export function readRetryQueue(scope: LibraryScope): RetryItem[] {
+  const store = safeStorage();
+  if (!store) return [];
+  try {
+    const parsed = JSON.parse(store.getItem(retryStorageKey(scope)) || "[]");
+    if (!Array.isArray(parsed)) return [];
+    const seen = new Set<string>();
+    const out: RetryItem[] = [];
+    for (const it of parsed) {
+      const url = typeof it?.url === "string" ? normalizeLibraryUrl(it.url) : null;
+      if (!url || !isLibraryEligibleUrl(url) || seen.has(url)) continue;
+      seen.add(url);
+      const name = typeof it?.name === "string" && it.name.trim() ? it.name.trim().slice(0, 120) : defaultNameFromUrl(url);
+      out.push({ url, name });
+    }
+    return out.slice(0, MAX_RETRY_ITEMS);
+  } catch {
+    return [];
+  }
+}
+
+function writeRetryQueue(scope: LibraryScope, items: RetryItem[]) {
+  const store = safeStorage();
+  if (!store) return;
+  try {
+    if (items.length === 0) store.removeItem(retryStorageKey(scope));
+    else store.setItem(retryStorageKey(scope), JSON.stringify(items.slice(0, MAX_RETRY_ITEMS)));
+  } catch { /* armazenamento cheio/bloqueado: mantém só a tentativa atual */ }
+}
+
+export async function getPendingLibraryRetries(): Promise<number> {
+  const scope = await resolveLibraryScope();
+  return scope ? readRetryQueue(scope).length : 0;
 }
 
 async function upsertMany(rows: Array<{ url: string; name: string; source: LibraryImage["source"] }>) {
@@ -84,32 +150,41 @@ async function upsertMany(rows: Array<{ url: string; name: string; source: Libra
 /**
  * Chamado SOMENTE depois que o serviço foi salvo com sucesso.
  * Registra apenas as fotos com origem link que continuam no serviço.
- * Nunca lança: falha vira pendência com retry idempotente.
+ * Nunca lança: falha vira pendência persistida (agência + usuário).
+ * Upsert idempotente: URL já existente conta como registrada.
  */
 export async function registerLinkImagesAfterSave(finalUrls: string[] | undefined | null): Promise<{ registered: number; failed: number }> {
-  const sources = Array.from(new Set(
-    (finalUrls || []).map((u) => linkProvenance.get(u)).filter((s): s is string => !!s),
-  ));
+  const stored = (finalUrls || []).filter((u) => linkProvenance.has(u));
+  const sources = Array.from(new Set(stored.map((u) => linkProvenance.get(u)!).filter(isLibraryEligibleUrl)));
+  stored.forEach((u) => linkProvenance.delete(u));
   if (sources.length === 0) return { registered: 0, failed: 0 };
   const rows = sources.map((url) => ({ url, name: defaultNameFromUrl(url), source: "service_link" as const }));
   try {
     await upsertMany(rows);
-    (finalUrls || []).forEach((u) => linkProvenance.delete(u));
     return { registered: rows.length, failed: 0 };
   } catch {
-    rows.forEach((r) => pendingRetry.set(r.url, r.name));
+    const scope = await resolveLibraryScope().catch(() => null);
+    if (scope) {
+      const merged = [...readRetryQueue(scope)];
+      for (const r of rows) if (!merged.some((m) => m.url === r.url)) merged.push({ url: r.url, name: r.name });
+      writeRetryQueue(scope, merged);
+    }
     return { registered: 0, failed: rows.length };
   }
 }
 
+/** Reenvia só a fila da agência + usuário atuais; remove ao confirmar. */
 export async function retryPendingLibraryRegistrations(): Promise<boolean> {
-  const rows = Array.from(pendingRetry.entries()).map(([url, name]) => ({ url, name, source: "service_link" as const }));
-  if (rows.length === 0) return true;
+  const scope = await resolveLibraryScope();
+  if (!scope) return false;
+  const items = readRetryQueue(scope);
+  if (items.length === 0) { writeRetryQueue(scope, []); return true; }
   try {
-    await upsertMany(rows);
-    rows.forEach((r) => pendingRetry.delete(r.url));
+    await upsertMany(items.map((i) => ({ ...i, source: "service_link" as const })));
+    writeRetryQueue(scope, []);
     return true;
   } catch {
+    writeRetryQueue(scope, items);
     return false;
   }
 }
@@ -117,7 +192,6 @@ export async function retryPendingLibraryRegistrations(): Promise<boolean> {
 /** Testes */
 export function __resetLibraryProvenance() {
   linkProvenance.clear();
-  pendingRetry.clear();
 }
 
 /* ───────── CRUD ───────── */
