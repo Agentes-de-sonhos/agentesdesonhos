@@ -712,6 +712,15 @@ img {
   --wl-ink: 0 0% 7%;
   --wl-sand: 0 20% 98%;
 }
+/* Bardelli oficial (briefing): primária #e32400, secundária #000000. */
+.wl-editorial.wl-site-base.wl-bardelli.wl-bardelli-official {
+  --primary: 10 100% 45%;
+  --ring: 10 100% 45%;
+  --wl-red: 10 100% 45%;
+  --foreground: 0 0% 0%;
+  --wl-navy: 0 0% 0%;
+  --wl-ink: 0 0% 0%;
+}
 .wl-editorial.wl-site-base.wl-bardelli h1,
 .wl-editorial.wl-site-base.wl-bardelli h2,
 .wl-editorial.wl-site-base.wl-bardelli h3 {

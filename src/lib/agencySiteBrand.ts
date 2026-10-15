@@ -21,7 +21,7 @@ import casaNovaLogo from "@/assets/whitelabel/logo-casa-nova-tur.png.asset.json"
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
-import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
+import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.json";
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {

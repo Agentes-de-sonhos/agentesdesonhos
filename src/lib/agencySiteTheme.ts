@@ -96,7 +96,9 @@ export function siteThemeRootClass(hostname?: string | null): string {
     const extra =
       h === "briefing-14-v1.preview.local"
         ? " wl-mundo"
-        : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br" || h === "bardelli-presentation.preview.local"
+        : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
+          ? " wl-bardelli wl-bardelli-official"
+          : h === "bardelli-presentation.preview.local"
           ? " wl-bardelli"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
