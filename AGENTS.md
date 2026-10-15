@@ -14,6 +14,6 @@
 - New ADS presentations use content-complete `buildGoldStandardProfile`, reference profiles and `docs/padrao-ouro-sites.md`; continuity pages stay in allowlisted synthetic fixtures with backend blocked. Why: complete reviews without invented production facts or changed tenants.
 - White-label CTA hover is action-specific: WhatsApp buttons may shift to WhatsApp green (`wl-visa-cta`); request pop-up buttons keep brand yellow (`wl-visa-proposal`). Why: green promises an instant handoff a form does not deliver.
 - Update prompt shows once per user while flag `app_update_prompt` targets another version. Why: owner-controlled.
-- Image library (`agency_image_library`): agency-scoped via `current_image_library_agency()`; link photos register only after service save. Why: shared per agency, no orphan entries.
+- Image library (`agency_image_library`): agency-scoped via `current_image_library_agency()`; link photos register only after service save. Why: no orphan entries.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
-- Wallet modules resolve in SQL (trip > owning agency via `wallet_agency_owner` > system); panel uses `get_trip_agency_wallet_defaults`. Why: same agency.
+- Wallet modules: trip > owning agency (`wallet_agency_owner`) > system, in SQL. Why: same agency.
