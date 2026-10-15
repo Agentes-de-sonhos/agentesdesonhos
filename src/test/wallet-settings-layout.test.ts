@@ -25,12 +25,11 @@ describe("editor compacto da Carteira Digital", () => {
     }
   });
 
-  it("mostra as quatro etapas gerais sem criar publicação automática", () => {
+  it("mostra três etapas gerais, sem a etapa Publicar", () => {
     expect(wallet).toContain('short: "Adicionar serviços"');
     expect(wallet).toContain('short: "Organizar serviços"');
     expect(wallet).toContain('short: "Configurar carteira"');
-    expect(wallet).toContain('short: "Publicar"');
-    expect(wallet).toContain("O link público atual está disponível para compartilhamento.");
+    expect(wallet).not.toContain('short: "Publicar"');
   });
 });
 

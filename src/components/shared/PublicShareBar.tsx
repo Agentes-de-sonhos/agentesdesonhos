@@ -81,7 +81,7 @@ export function PublicShareBar({
   return (
     <TooltipProvider delayDuration={150}>
       <div className={"flex w-full items-center gap-2 overflow-x-auto " + (className || "")}>
-        <div className="flex h-9 w-[360px] shrink-0 items-center gap-1.5 overflow-hidden rounded-md border bg-background pl-2.5">
+        <div className="flex h-9 w-[360px] shrink-0 items-center gap-1.5 overflow-hidden rounded-md border border-foreground bg-background pl-2.5">
           <LinkIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <span
             title={publicUrl || "Link público indisponível"}
@@ -97,7 +97,7 @@ export function PublicShareBar({
               type="button"
               size="sm"
               variant="outline"
-              className="h-9 w-9 shrink-0 p-0"
+              className="h-9 w-9 shrink-0 rounded-md border-foreground bg-background p-0 text-foreground hover:bg-muted"
               aria-label={actionLabels.copy}
               disabled={!hasPublicUrl}
               onClick={handleCopyLink}
@@ -114,7 +114,7 @@ export function PublicShareBar({
               type="button"
               size="sm"
               variant="outline"
-              className="h-9 w-9 shrink-0 p-0"
+              className="h-9 w-9 shrink-0 rounded-md border-foreground bg-background p-0 text-foreground hover:bg-muted"
               aria-label={actionLabels.open}
               disabled={!hasPublicUrl}
               onClick={() => publicUrl && window.open(publicUrl, "_blank", "noopener,noreferrer")}
