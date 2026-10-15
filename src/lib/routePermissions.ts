@@ -55,6 +55,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { prefix: '/ferramentas-ia/criar-conteudo', any: ['marketing.captions.view'] },
   { prefix: '/ferramentas-ia', any: ['quotes.view', 'itineraries.view', 'wallet.view'] },
   { prefix: '/bloco-notas', any: ['notes.view'] },
+  { prefix: '/biblioteca-imagens', any: ['quotes.view', 'wallet.view'] },
   { prefix: '/calculadora', any: ['calculator.view'] },
 
   // Agenda
