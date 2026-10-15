@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Plane, CalendarDays, Copy, Check, Users, UserRound, Luggage, Briefcase, AlertTriangle, ChevronDown, CheckCircle2 } from "lucide-react";
+import { CalendarDays, Copy, Check, Users, UserRound, Luggage, Briefcase, AlertTriangle, ChevronDown, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { FormattedText } from "@/components/ui/formatted-text";
@@ -47,11 +47,13 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
   return <article id={`service-${service.id}`} data-testid="public-flight-card" className="wallet-flight-theme min-w-0 space-y-4 text-sm leading-relaxed text-foreground [overflow-wrap:anywhere] sm:space-y-5">
     {images.length > 0 && <div className="wallet-flight-banner overflow-hidden rounded-2xl"><ServiceImageCarousel images={images} alt={data.main_airline || data.airline || t("svcSectionFlight")} placeId={resolveServicePlaceId(service)} hideFallback /></div>}
     <header className="space-y-3 py-1">
-      <h2 className="text-xl font-bold leading-snug sm:text-2xl">{route.origin || "—"} <span className="text-primary">{route.roundTrip ? "⇄" : "→"}</span> {route.destination || "—"}</h2>
-      {data.flight_status && <span className={data.flight_status === "emitido" ? "inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-sm font-semibold text-success" : "inline-flex rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"}>
+      <div className="flex items-start justify-between gap-3">
+      <h2 className="min-w-0 flex-1 text-xl font-bold leading-snug sm:text-2xl">{route.origin || "—"} <span className="text-primary">{route.roundTrip ? "⇄" : "→"}</span> {route.destination || "—"}</h2>
+      {data.flight_status && <span className={data.flight_status === "emitido" ? "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-success/10 px-3 py-1 text-sm font-semibold text-success" : "inline-flex shrink-0 rounded-full bg-muted px-3 py-1 text-sm text-muted-foreground"}>
         {data.flight_status === "emitido" && <CheckCircle2 className="h-4 w-4" />}
         {data.flight_status === "emitido" ? t("stEmitido") : data.flight_status === "confirmado" ? t("stConfirmado") : data.flight_status === "pendente" ? t("stPendente") : data.flight_status}
       </span>}
+      </div>
       {dates.length > 0 && <p className="flex items-start gap-2 text-muted-foreground"><CalendarDays className="mt-0.5 h-4 w-4 shrink-0" /><span>{dates.join(" · ")}</span></p>}
     </header>
     <section className="flex items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5" aria-label={t("fldLocalizador")}>
@@ -65,10 +67,18 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
           <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary">{seg.segment_type === "volta" ? t("segVolta") : seg.segment_type === "conexao" ? t("segConexao") : t("fldIda")}{seg.flight_date ? ` · ${date(seg.flight_date)}` : ""}</span>
           <span className="text-sm font-semibold">{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>
         </div>
-        <div className="grid grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[minmax(0,1fr)_80px_minmax(0,1fr)]">
-          <div><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.departure_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.origin_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.origin_city || ""}</p></div>
-          <div className="relative mt-3 flex items-center justify-center border-t-2 border-dotted border-primary/30"><Plane className="absolute -top-3 h-6 w-6 bg-card px-0.5 text-primary" aria-hidden /></div>
-          <div className="text-right"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.arrival_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.destination_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.destination_city || ""}</p></div>
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 sm:gap-4">
+          <div className="min-w-0 max-w-[5.5rem] sm:w-32 sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.departure_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.origin_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.origin_city || ""}</p></div>
+          <div data-testid="flight-route-track" className="flex h-7 w-full min-w-0 items-center sm:h-8" aria-hidden="true">
+            <span className="h-2 w-2 shrink-0 rounded-full border-2 border-muted-foreground/50 bg-card sm:h-2.5 sm:w-2.5" />
+            <span className="min-w-0 flex-1 border-t border-dashed border-muted-foreground/40" />
+            <svg viewBox="0 0 32 32" className="mx-1 h-7 w-7 shrink-0 fill-current text-primary sm:h-8 sm:w-8" focusable="false">
+              <path d="M29 14.5 20 13 11 3H7l6 10-7 .5-3-4H1l2 6.5L1 22h2l3-4 7 .5L7 29h4l9-11 9-1.5c2-.3 2-1.7 0-2Z" />
+            </svg>
+            <span className="min-w-0 flex-1 border-t border-dashed border-muted-foreground/40" />
+            <span className="h-2 w-2 shrink-0 rounded-full border-2 border-muted-foreground/50 bg-card sm:h-2.5 sm:w-2.5" />
+          </div>
+          <div className="min-w-0 max-w-[5.5rem] text-right sm:w-32 sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.arrival_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.destination_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.destination_city || ""}</p></div>
         </div>
         {(seg.origin_airport_name || seg.destination_airport_name) && <p className="mt-3 text-sm text-muted-foreground">{publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city })} → {publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city })}</p>}
         {(seg.terminal || seg.gate) && <p className="mt-3 text-sm text-muted-foreground">{[seg.terminal ? `${t("fldTerminal")}: ${seg.terminal}` : "", seg.gate ? `${t("fldPortao")}: ${seg.gate}` : ""].filter(Boolean).join(" · ")}</p>}
