@@ -72,7 +72,8 @@ export default function AdsBriefingPreview() {
       if (link && href.startsWith("#")) return;
       const safe =
         btn &&
-        (btn.hasAttribute("aria-expanded") ||
+        ((fixture.jobId === "drica-completa-v1" && btn.getAttribute("type") !== "submit") ||
+          btn.hasAttribute("aria-expanded") ||
           SAFE_BUTTON.test(btn.getAttribute("aria-label") ?? "") ||
           (fixture.profile.presentation && btn.getAttribute("type") !== "submit" && (SAFE_BUTTON.test(btn.textContent ?? "") || !!btn.closest("[role=dialog]"))) ||
           (btn.getAttribute("type") !== "submit" && !!btn.closest(INTERACTIVE_AREA)));

@@ -195,7 +195,22 @@ const PRESENTATION_REWRITES: [string, string][] = [
 
 export default function DmcPortugalLandingPage({ info, presentation = false }: { info: AgencyDomainInfo; presentation?: boolean }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  usePresentationTextRewrite(rootRef, presentation ? PRESENTATION_REWRITES : undefined);
+  const dricaPresentation = presentation && info.hostname === "drica-presentation.preview.local";
+  const presentationRewrites: [string, string][] = PRESENTATION_REWRITES.map(([from, to]) => [from, to.split("Bardelli Viagens").join(info.agency_name || "A agência").split("Equipe Bardelli").join("Consultoria de viagens").split("Base em São Paulo, Brasil").join(dricaPresentation ? "Atendimento no Rio de Janeiro, Brasil" : "Base em São Paulo, Brasil")]);
+  if (dricaPresentation) presentationRewrites.unshift(
+    ["Para quem não se sente à vontade viajando sozinho ou quer mais tranquilidade, oferecemos a companhia de uma", "Exemplo ilustrativo: quem prefere viajar acompanhado pode avaliar a contratação de uma"],
+    ["a agência conta com apoio local em cada etapa.", "o apoio local dependeria de parceiros e serviços a confirmar."],
+    ["Prestamos assistência e acompanhamento aos passageiros, com suporte à agência.", "Exemplo de acompanhamento por fornecedores a validar, sem operação própria da Drica."],
+    ["Enviamos a proposta com o que está incluído.", "Exemplo de proposta a validar, com serviços e inclusões definidos pelos fornecedores."],
+    ["Da cotação à operação", "Exemplo de planejamento · sem contratação"],
+    ["Operação e suporte", "Acompanhamento ilustrativo"],
+    ["Sua operação receptiva em Portugal, com o cuidado da sua marca", "Portugal: ideias para uma viagem no seu ritmo"],
+    ["DMC em Portugal · Para agências", "PORTUGAL · CONTEÚDO ILUSTRATIVO"],
+    ["O que operamos para a sua agência", "Possibilidades ilustrativas para explorar"],
+    ["Estrutura de apoio ao atendimento", "Exemplos de estrutura · parceiros a validar"],
+    ["Quando necessário, podemos auxiliar na articulação com empresas parceiras para serviços de transporte, contratados separadamente.", "Exemplos de serviços, sem oferta vigente. Operadores, transporte e disponibilidade precisam ser validados antes de qualquer contratação."],
+  );
+  usePresentationTextRewrite(rootRef, presentation ? presentationRewrites : undefined);
   const location = useLocation();
   const br = agencyWhatsappNumber(info);
   const talkHref = br ? wa(br, "Olá, Amanda! Gostaria de falar sobre os serviços de DMC em Portugal.") : null;

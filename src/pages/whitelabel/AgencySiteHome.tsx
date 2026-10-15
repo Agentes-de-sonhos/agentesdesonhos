@@ -1,3 +1,6 @@
+import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
+import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
+import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
@@ -102,6 +105,7 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
+  dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
   resort: destinoResort,
   cruzeiro: destinoCruzeiro,

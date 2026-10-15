@@ -40,6 +40,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-14-v1.preview.local": "siteBaseEditorial",
   "briefing-16-v1.preview.local": "siteBaseEditorial",
   "briefing-17-v1.preview.local": "siteBaseEditorial",
+  "drica-presentation.preview.local": "siteBaseEditorial",
   "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",
   "www.bardelliviagens.com.br": "siteBaseEditorial",
@@ -94,7 +95,9 @@ export function siteThemeRootClass(hostname?: string | null): string {
     // O Mundo em Cores: acabamento claro próprio, só no host da prévia.
     const h = normalizeHost(hostname);
     const extra =
-      h === "briefing-14-v1.preview.local"
+      h === "drica-presentation.preview.local"
+        ? " wl-drica"
+        : h === "briefing-14-v1.preview.local"
         ? " wl-mundo"
         : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
           ? " wl-bardelli wl-bardelli-official"

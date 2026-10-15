@@ -142,7 +142,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
                 </div>
                 <label className="flex items-start gap-2 text-xs text-muted-foreground sm:col-span-2">
                   <input type="checkbox" className="mt-0.5" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
-                  {presentation ? "Exemplo de consentimento para contato da Bardelli Viagens — nenhum dado será enviado nesta apresentação." : "Autorizo a 100 Limites a usar meus dados para retornar com a proposta, conforme a privacidade do site."}
+                  {presentation ? `Exemplo de consentimento para contato da ${hostname === "drica-presentation.preview.local" ? "Drica Viagens" : "Bardelli Viagens"} — nenhum dado será enviado nesta apresentação.` : "Autorizo a 100 Limites a usar meus dados para retornar com a proposta, conforme a privacidade do site."}
                 </label>
                 {(formError || error) && <p className="text-sm font-medium text-destructive sm:col-span-2" role="alert">{formError ?? error}</p>}
                 <Button type="submit" size="lg" disabled={state === "submitting"} className="wl-visa-proposal sm:col-span-2">
