@@ -51,7 +51,7 @@ export function AuthSplitLayout({ children, wide }: Props) {
         <img src={logoDark} alt="Agentes de Sonhos" className="auth-split__logo" />
         <div className="auth-split__copy">
           <h2 className="auth-split__headline">
-            Sua próxima grande <em>viagem</em> começa aqui.
+            Sua agência de viagens&nbsp;em um só lugar.
           </h2>
           <p className="auth-split__sub">
             Mais organização para sua agência.
