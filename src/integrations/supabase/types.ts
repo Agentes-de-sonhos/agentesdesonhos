@@ -16070,6 +16070,7 @@ export type Database = {
           updated_at: string
           user_id: string
           wallet_cover_url: string | null
+          wallet_modules: Json | null
         }
         Insert: {
           access_password?: string | null
@@ -16096,6 +16097,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           wallet_cover_url?: string | null
+          wallet_modules?: Json | null
         }
         Update: {
           access_password?: string | null
@@ -16122,6 +16124,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           wallet_cover_url?: string | null
+          wallet_modules?: Json | null
         }
         Relationships: [
           {
@@ -17667,6 +17670,17 @@ export type Database = {
         Returns: Json
       }
       get_trip_public_branding: { Args: { p_token: string }; Returns: Json }
+      get_trip_wallet_settings: {
+        Args: { _trip_id: string }
+        Returns: {
+          show_calendar: boolean
+          show_next_activity: boolean
+          show_next_service: boolean
+          show_signature: boolean
+          show_support_tools: boolean
+          show_whatsapp: boolean
+        }[]
+      }
       get_user_analytics: {
         Args: { _end_date?: string; _start_date?: string }
         Returns: {

@@ -11,9 +11,9 @@ export interface AgencyWalletSettings {
 
 export const DEFAULT_WALLET_SETTINGS: AgencyWalletSettings = {
   show_calendar: true,
-  show_next_service: true,
-  show_next_activity: true,
-  show_support_tools: true,
+  show_next_service: false,
+  show_next_activity: false,
+  show_support_tools: false,
   show_signature: true,
   show_whatsapp: true,
 };
@@ -64,10 +64,28 @@ export async function fetchAgencyWalletSettings(userId: string | null | undefine
   const row: any = Array.isArray(data) ? data[0] : data;
   return {
     show_calendar: row.show_calendar ?? true,
-    show_next_service: row.show_next_service ?? true,
-    show_next_activity: row.show_next_activity ?? true,
-    show_support_tools: row.show_support_tools ?? true,
+    show_next_service: row.show_next_service ?? false,
+    show_next_activity: row.show_next_activity ?? false,
+    show_support_tools: row.show_support_tools ?? false,
     show_signature: row.show_signature ?? true,
     show_whatsapp: row.show_whatsapp ?? true,
   };
+}
+
+export type WalletModuleOverrides = Partial<AgencyWalletSettings>;
+
+/** Mantém apenas chaves conhecidas com valor booleano explícito. */
+export function sanitizeWalletOverrides(value: unknown): WalletModuleOverrides {
+  const out: WalletModuleOverrides = {};
+  if (!value || typeof value !== "object" || Array.isArray(value)) return out;
+  for (const { key } of WALLET_MODULES) {
+    const v = (value as Record<string, unknown>)[key];
+    if (typeof v === "boolean") out[key] = v;
+  }
+  return out;
+}
+
+/** Precedência: ajuste explícito da carteira > padrão da agência > padrão do sistema. */
+export function resolveWalletSettings(agency: Partial<AgencyWalletSettings> | null | undefined, overrides: unknown): AgencyWalletSettings {
+  return { ...DEFAULT_WALLET_SETTINGS, ...(agency || {}), ...sanitizeWalletOverrides(overrides) };
 }

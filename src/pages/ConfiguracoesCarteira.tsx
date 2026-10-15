@@ -63,7 +63,7 @@ export default function ConfiguracoesCarteira() {
   const handleSave = async () => {
     try {
       await save(draft);
-      toast({ title: "Configurações salvas", description: "Atualizadas para todas as carteiras." });
+      toast({ title: "Configurações salvas", description: "Padrão da agência atualizado. Carteiras personalizadas mantêm a própria escolha." });
     } catch (e: any) {
       toast({ title: "Erro ao salvar", description: e?.message ?? "Tente novamente.", variant: "destructive" });
     }
@@ -73,7 +73,7 @@ export default function ConfiguracoesCarteira() {
     setDraft({ ...DEFAULT_WALLET_SETTINGS });
     try {
       await save({ ...DEFAULT_WALLET_SETTINGS });
-      toast({ title: "Padrão restaurado", description: "Todos os módulos foram reativados." });
+      toast({ title: "Padrão restaurado", description: "Calendário, assinatura e WhatsApp ativos; demais módulos desativados." });
     } catch (e: any) {
       toast({ title: "Erro ao restaurar", description: e?.message ?? "Tente novamente.", variant: "destructive" });
     }
@@ -90,7 +90,7 @@ export default function ConfiguracoesCarteira() {
             </h1>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
               Personalize quais módulos serão exibidos para seus passageiros na Carteira Digital
-              Pública. As alterações valem para todas as carteiras da sua agência — novas e existentes.
+              Pública. Este é o padrão da sua agência: vale para as carteiras novas e para as existentes que não foram personalizadas. Carteiras com módulos ajustados individualmente preservam a própria escolha.
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
@@ -105,8 +105,9 @@ export default function ConfiguracoesCarteira() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Restaurar padrão recomendado?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Todos os módulos opcionais serão reativados na configuração padrão. Essa ação
-                    afeta imediatamente todas as carteiras da sua agência.
+                    Calendário, assinatura e botão WhatsApp ficam ativos; próximo serviço, próxima
+                    atividade e ferramentas de apoio ficam desativados. Carteiras personalizadas
+                    individualmente mantêm a própria escolha.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
