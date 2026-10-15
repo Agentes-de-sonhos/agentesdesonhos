@@ -61,7 +61,7 @@ describe("PDF da Carteira Digital", () => {
   });
   it("condutores neutros e assinatura/WhatsApp independentes", () => {
     expect(html).not.toMatch(/Principal|Adicional/);
-    expect(build({ show_signature: false, show_whatsapp: true })).not.toContain("sig-name");
+    expect(build({ show_signature: false, show_whatsapp: true })).not.toContain(`class="sig-name"`);
     expect(build({ show_signature: false, show_whatsapp: true })).toContain("wa.me/5511999999999");
     expect(build({ show_signature: true, show_whatsapp: false })).not.toContain("wa.me/");
   });
