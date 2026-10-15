@@ -42,6 +42,7 @@ export const SECTION_ITEMS: Record<string, MenuItemConfig[]> = {
     { key: "orcamento", label: "Orçamento" },
     { key: "roteiros", label: "Roteiros" },
     { key: "bloco_notas", label: "Bloco de Notas" },
+    { key: "biblioteca_imagens", label: "Biblioteca de imagens" },
   ],
   clientes: [
     { key: "dashboard_fin", label: "Dashboard" },
