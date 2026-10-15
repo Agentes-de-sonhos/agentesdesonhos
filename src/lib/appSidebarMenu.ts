@@ -54,7 +54,6 @@ export const APP_CREATE_GROUP: AppSidebarGroup = {
     { key: "orcamento", title: "Orçamento", url: "/ferramentas-ia/gerar-orcamento", icon: Calculator, requiredFeature: "quote_generator" },
     { key: "roteiros", title: "Roteiro", url: "/ferramentas-ia/criar-roteiro", icon: Route, requiredFeature: "itinerary" },
     { key: "carteira_digital", title: "Carteira Digital", url: "/ferramentas-ia/trip-wallet", icon: Wallet, requiredFeature: "trip_wallet" },
-    { key: "biblioteca_imagens", title: "Biblioteca de imagens", url: "/biblioteca-imagens", icon: Images },
   ],
 };
 
@@ -66,6 +65,7 @@ export const APP_PROJECTS_GROUP: AppSidebarGroup = {
     { key: "projetos_orcamentos", title: "Orçamentos", url: "/meus-projetos?tab=orcamentos", icon: FileText, requiredFeature: "quote_generator" },
     { key: "projetos_roteiros", title: "Roteiros", url: "/meus-projetos?tab=roteiros", icon: Route, requiredFeature: "itinerary" },
     { key: "projetos_carteiras", title: "Carteiras digitais", url: "/meus-projetos?tab=carteiras", icon: Wallet, requiredFeature: "trip_wallet" },
+    { key: "biblioteca_imagens", title: "Biblioteca de imagens", url: "/biblioteca-imagens", icon: Images },
   ],
 };
 
