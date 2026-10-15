@@ -125,7 +125,7 @@ describe("menu lateral Agentes de Sonhos", () => {
     expect(expandedOnlyEnd).toBeGreaterThan(-1);
     expect(account).toBeGreaterThan(expandedOnlyEnd);
     expect(mobile).not.toContain("data-sidebar-expanded-navigation");
-    expect(mobile).toContain('{section("GESTÃO")}{management.map');
+    expect(mobile).toContain('management.length > 0 && section("GESTÃO")');
     expect(mobile).toContain('{section("OUTRAS")}{others.map');
   });
 
