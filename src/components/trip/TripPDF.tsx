@@ -9,6 +9,8 @@ import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@
 import { formatPublicLongDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { publicAirportText } from "@/lib/airportDisplay";
+import { buildWhatsAppUrl } from "@/lib/commercialSignature";
+import { renderFlightPdf, renderHotelPdf, renderCarPdf, documentCta, documentsTitle, icon as pdfIcon } from "@/components/trip/tripPdfServices";
 
 /** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
 export type PdfImageResolver = (ref: string) => string | null;
@@ -1132,55 +1134,31 @@ function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg:
   `;
 }
 
+export interface PdfModules { show_signature: boolean; show_whatsapp: boolean }
+export interface PdfSignature { name?: string | null; photo_url?: string | null; agency_name?: string | null; title?: string | null; whatsapp?: string | null; phone?: string | null; email?: string | null }
+
 function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
-  if (!profile?.agency_logo_url) {
-    return `
-      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
-        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
-          ${profile?.agency_name || tWallet(locale)("agencyFallbackName")}
-        </p>
-      </div>
-    `;
-  }
-  return `
-    <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
-      <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
-    </div>
-  `;
+  const t = tWallet(locale);
+  const logo = profile?.agency_logo_url
+    ? `<img class="logo" src="${escapeHtml(profile.agency_logo_url)}" alt="${escapeHtml(profile.agency_name || "Logo")}" />`
+    : `<p class="logo-text">${escapeHtml(profile?.agency_name || t("agencyFallbackName"))}</p>`;
+  return `<header class="brand-row">${logo}<span class="badge">${escapeHtml(t("pdfWalletBadge"))}</span></header>`;
 }
 
-function generateAgentSignature(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
-  if (!profile) return "";
-  const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
-    : `<div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#0f766e,#14b8a6);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">${profile.name.charAt(0).toUpperCase()}</div>`;
-  const whatsappNumber = profile.phone?.replace(/\D/g, "") || "";
-  const whatsappLink = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
-    : "";
-  return `
-    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">${tWallet(locale)("pdfConsultant")}</p>
-      </div>
-      <div style="padding:14px 18px;text-align:center;">
-        ${avatarHtml}
-        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
-        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
-        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
-        ${
-          whatsappLink
-            ? `<div style="margin-top:10px;">
-                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
-                  ${tWallet(locale)("pdfTalkOnWhatsApp")}
-                </a>
-              </div>`
-            : ""
-        }
-      </div>
-    </div>
-  `;
+function generateAgentSignature(sig: PdfSignature | null, modules: PdfModules, generatedAt: string, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
+  const showSig = modules.show_signature && !!sig?.name;
+  const wa = modules.show_whatsapp ? buildWhatsAppUrl(sig?.whatsapp || sig?.phone) : "";
+  const footer = `<p class="generated">${escapeHtml(generatedAt)}</p>`;
+  if (!showSig && !wa) return `<div class="end-block">${footer}</div>`;
+  const avatar = sig?.photo_url
+    ? `<img class="avatar" src="${escapeHtml(sig.photo_url)}" alt="" />`
+    : `<div class="avatar avatar-fallback">${escapeHtml((sig?.name || "?").charAt(0).toUpperCase())}</div>`;
+  const waBtn = wa ? `<a class="wa" href="${escapeHtml(wa)}">${escapeHtml(t("pdfTalkOnWhatsApp"))}</a>` : "";
+  const inner = showSig
+    ? `<table class="sig-grid"><tr><td class="sig-av">${avatar}</td><td><p class="code-label">${escapeHtml(t("pdfConsultant"))}</p><p class="sig-name">${escapeHtml(sig!.name)}</p>${[sig?.title, sig?.agency_name].filter(Boolean).length ? `<p class="muted">${escapeHtml([sig?.title, sig?.agency_name].filter(Boolean).join(" · "))}</p>` : ""}${sig?.email ? `<p class="muted">${escapeHtml(sig.email)}</p>` : ""}</td><td class="sig-cta">${waBtn}</td></tr></table>`
+    : `<table class="sig-grid"><tr><td><p class="strong">${escapeHtml(t("whatsapp"))}</p></td><td class="sig-cta">${waBtn}</td></tr></table>`;
+  return `<div class="end-block"><section class="pdf-panel signature">${inner}</section>${footer}</div>`;
 }
 
 export interface ItineraryActivityForPDF {
@@ -1291,252 +1269,223 @@ function generateItinerarySection(
   `;
 }
 
+const SERVICE_ICON: Record<TripServiceType, string> = {
+  flight: "plane", hotel: "bed", car_rental: "car", transfer: "route",
+  attraction: "ticket", insurance: "shield", cruise: "ship", train: "train", other: "box",
+};
+
+export interface TripPdfBuildInput {
+  trip: Trip;
+  profile?: AgentProfile | null;
+  itineraryActivities?: ItineraryActivityForPDF[];
+  locale?: PublicLocale;
+  resolveImg: PdfImageResolver;
+  /** Caminho do anexo → URL permanente segura (serve-voucher). */
+  documentUrl: (path: string) => string | null;
+  modules?: PdfModules;
+  signature?: PdfSignature | null;
+  generatedAt?: Date;
+}
+
+/** HTML completo do PDF (renderizador único usado por salvar/baixar e imprimir). */
+export function buildTripPdfHtml(input: TripPdfBuildInput): string {
+  const { trip, profile = null, locale = "pt-BR", resolveImg, documentUrl } = input;
+  const modules = input.modules || { show_signature: true, show_whatsapp: true };
+  const t = tWallet(locale);
+  const parseLocal = (d: string) => { const [y, m, day] = d.split("-").map(Number); return new Date(y, m - 1, day); };
+  const startDate = parseLocal(trip.start_date);
+  const endDate = parseLocal(trip.end_date);
+  const days = Math.round((endDate.getTime() - startDate.getTime()) / 86400000) + 1;
+  const labels = getServiceLabels(locale);
+  const sorted = [...(trip.services || [])].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
+  const servicesHtml = sorted.map((service) => {
+    const type = service.service_type as TripServiceType;
+    const label = labels[type] || t("serviceOther");
+    const images = collectServiceImages(service, resolveImg);
+    let head = "", body = "";
+    const ctx = { images, locale };
+    if (type === "flight") ({ head, body } = renderFlightPdf(service, ctx));
+    else if (type === "hotel") ({ head, body } = renderHotelPdf(service, ctx));
+    else if (type === "car_rental") ({ head, body } = renderCarPdf(service, ctx));
+    else body = renderServiceLayout(service, renderServiceBody(service, locale), resolveImg);
+
+    const files: { url: string; name: string }[] = service.attachments?.length
+      ? service.attachments.filter((a: any) => a?.url).map((a: any) => ({ url: a.url, name: a.name || "" }))
+      : service.voucher_url ? [{ url: service.voucher_url, name: service.voucher_name || "" }] : [];
+    const cta = documentCta(type, locale);
+    const docs = files.map((f, i) => {
+      const href = documentUrl(f.url);
+      const friendly = cta ? (files.length > 1 ? `${cta} (${i + 1})` : cta) : (f.name || t("fldDocumentos"));
+      const meta = f.name && f.name !== friendly ? `<span class="doc-name">${escapeHtml(f.name)}</span>` : "";
+      return href
+        ? `<a class="doc" href="${escapeHtml(href)}">${pdfIcon("file", 14)}<span><span class="doc-cta">${escapeHtml(friendly)}</span>${meta}</span></a>`
+        : `<span class="doc doc-off">${pdfIcon("file", 14)}<span><span class="doc-cta">${escapeHtml(friendly)}</span>${meta}</span></span>`;
+    }).join("");
+    const docsHtml = docs ? `<section class="docs"><p class="code-label">${escapeHtml(documentsTitle(type, locale))}</p><div class="doc-list">${docs}</div></section>` : "";
+
+    // Cabeçalho do serviço + primeiro bloco ficam juntos; o resto quebra naturalmente.
+    return `<article class="svc">
+      <div class="svc-start">
+        <div class="svc-strip"><span class="svc-ico">${pdfIcon(SERVICE_ICON[type] || "box", 14)}</span>${escapeHtml(label)}</div>
+        ${head}
+      </div>
+      <div class="svc-body">${body}</div>
+      ${docsHtml}
+    </article>`;
+  }).join("");
+
+  const supabaseItin = (p: string) => (/^https?:\/\//i.test(p) ? p : documentUrl(p));
+  const itineraryHtml = generateItinerarySection(input.itineraryActivities || [], supabaseItin, locale);
+  const now = input.generatedAt || new Date();
+  const generatedAt = t("pdfGeneratedAt", { date: locale === "it-IT"
+    ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(now)
+    : format(now, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) });
+  const title = (trip as any).trip_title || trip.destination;
+
+  return `<!DOCTYPE html>
+<html lang="${locale}"><head><meta charset="UTF-8"><title>Carteira Digital — ${escapeHtml(title || trip.client_name)}</title>
+<style>${PDF_CSS}</style></head>
+<body><main class="doc">
+  ${generateAgencyHeader(profile, locale)}
+  <section class="hero">
+    <h1>${escapeHtml(title)}</h1>
+    <p class="muted">${(trip as any).trip_title ? `${escapeHtml(trip.destination)} · ` : ""}${escapeHtml(t("pdfPreparedFor"))} <strong>${escapeHtml(trip.client_name)}</strong></p>
+    <table class="overview"><tr>
+      <td><p class="code-label">${pdfIcon("pin", 11)} ${escapeHtml(t("pdfDestination"))}</p><p class="strong">${escapeHtml(trip.destination)}</p></td>
+      <td><p class="code-label">${pdfIcon("calendar", 11)} ${escapeHtml(t("pdfPeriod"))}</p><p class="strong">${escapeHtml(formatDate(trip.start_date, locale))} — ${escapeHtml(formatDate(trip.end_date, locale))}</p><p class="muted">${days} ${escapeHtml(days === 1 ? t("daysLabelOne") : t("daysLabelOther"))}</p></td>
+      <td><p class="code-label">${pdfIcon("user", 11)} ${escapeHtml(t("pdfClient"))}</p><p class="strong">${escapeHtml(trip.client_name)}</p></td>
+    </tr></table>
+  </section>
+  <h2 class="section-title">${escapeHtml(t("pdfServicesTitle"))}</h2>
+  ${servicesHtml || `<p class="muted center">${escapeHtml(t("pdfNoServices"))}</p>`}
+  ${itineraryHtml}
+  ${generateAgentSignature(input.signature ?? (profile ? { name: profile.name, photo_url: profile.avatar_url, agency_name: profile.agency_name, phone: profile.phone } : null), modules, generatedAt, locale)}
+</main></body></html>`;
+}
+
+const PDF_CSS = `
+*{margin:0;padding:0;box-sizing:border-box}
+@page{size:A4;margin:13mm 13mm 14mm;@bottom-center{content:counter(page) " / " counter(pages);font:8pt system-ui,sans-serif;color:#94a3b8}}
+html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
+body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0f1d3a;font-size:10.5pt;line-height:1.45;overflow-wrap:anywhere;word-break:normal}
+img{max-width:100%;display:block}
+a{color:#0e7490;text-decoration:underline}
+.doc{max-width:184mm;margin:0 auto}
+.pre{white-space:pre-wrap}
+.muted{color:#5b6b85}.small{font-size:9pt}.strong{font-weight:700}.center{text-align:center}
+.accent{color:#0891b2}
+.brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:4mm;border-bottom:1px solid #dbe3ee;margin-bottom:5mm}
+.logo{max-height:16mm;max-width:62mm;width:auto;height:auto;object-fit:contain}
+.logo-text{font-size:15pt;font-weight:800;color:#0f1d3a}
+.badge{font-size:8pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#0e7490;background:#e6f6fa;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.hero{break-inside:avoid;margin-bottom:6mm}
+.hero h1{font-size:21pt;line-height:1.15;font-weight:800;margin-bottom:1mm}
+.overview{width:100%;border-collapse:separate;border-spacing:0;margin-top:4mm;border:1px solid #dbe3ee;border-radius:12px;background:#f7f9fc}
+.overview td{width:33.3%;padding:3mm 4mm;vertical-align:top}
+.overview td+td{border-left:1px solid #dbe3ee}
+.section-title{font-size:9pt;letter-spacing:.2em;text-transform:uppercase;color:#5b6b85;margin:0 0 3mm;break-after:avoid}
+.code-label{font-size:8pt;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5b6b85;margin-bottom:1mm}
+.svc{border:1px solid #dbe3ee;border-radius:14px;padding:4mm;margin-bottom:5mm;background:#fff;break-inside:auto}
+.svc-start{break-inside:avoid;break-after:avoid}
+.svc-strip{display:flex;align-items:center;gap:6px;font-size:8.5pt;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0e7490;margin-bottom:3mm}
+.svc-ico{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:7px;background:#e6f6fa}
+.banner{border-radius:12px;overflow:hidden;margin-bottom:3mm;background:#eef2f7}
+.banner img{width:100%;object-fit:cover}
+.banner-low img{height:34mm}.banner-hotel img{height:52mm}
+.rel{position:relative}.illus{position:absolute;left:6px;bottom:6px;font-size:7.5pt;background:rgba(15,29,58,.7);color:#fff;border-radius:4px;padding:1px 6px}
+.thumbs{display:flex;gap:2mm;margin:-1mm 0 3mm}.thumbs img{width:32mm;height:20mm;object-fit:cover;border-radius:8px}
+.svc-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.svc-title{font-size:15pt;line-height:1.25;font-weight:800;min-width:0;flex:1}
+.svc-sub{color:#5b6b85;margin-top:1mm;display:flex;gap:5px;align-items:flex-start}
+.stars{color:#d99a06;letter-spacing:2px;margin-top:.5mm}
+.company{font-size:9pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5b6b85;margin-top:.5mm}
+.facts{display:flex;flex-wrap:wrap;gap:4mm;margin-top:2mm}.facts span{display:inline-flex;gap:5px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;border-radius:999px;padding:3px 10px;font-size:9pt;font-weight:700;background:#eef2f7;color:#5b6b85;white-space:nowrap}
+.chip-ok{background:#e7f7ee;color:#15803d}
+.code-box{margin-top:3mm;border:1px solid #cdeaf2;background:#eef9fc;border-radius:12px;padding:3mm 4mm;break-inside:avoid}
+.code-val{font-size:17pt;font-weight:800;letter-spacing:.04em}.code-val-sm{font-size:12.5pt;font-weight:800}
+.code-sep{border-top:1px solid #cdeaf2;margin-top:2mm;padding-top:2mm}
+.pdf-panel{border:1px solid #dbe3ee;border-radius:12px;padding:3mm 4mm;margin-top:3mm;break-inside:avoid;background:#fff}
+.pdf-panel.amber{border-color:#f3dfae;background:#fffbf0;break-inside:auto}
+.panel-title{display:flex;align-items:center;gap:6px;font-size:10.5pt;font-weight:800;margin-bottom:2mm;break-after:avoid}
+.panel-label{flex:1}.ctx{font-size:8pt;font-weight:500;color:#94a3b8;max-width:55%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ico{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:7px;background:#e6f6fa;color:#0e7490}
+.ico-amber{background:#fdf0cf;color:#b45309}
+.row{margin:.6mm 0;orphans:2;widows:2}.row strong{color:#0f1d3a}
+.list{list-style:none}.list li{display:flex;gap:8px;padding:1.6mm 0;border-top:1px solid #edf1f6}.list li:first-child{border-top:0;padding-top:0}
+.seg-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:2mm}
+.tag{font-size:8.5pt;font-weight:800;text-transform:uppercase;color:#0e7490;background:#e6f6fa;border-radius:6px;padding:2px 8px;white-space:nowrap}
+.seg-airline{font-weight:700;font-size:9.5pt;text-align:right}
+.seg-grid{width:100%;border-collapse:collapse;table-layout:fixed}
+.seg-col{width:27%;vertical-align:top}.seg-mid{vertical-align:middle;padding:0 3mm}
+.seg-time{font-size:20pt;font-weight:800;line-height:1.1}.seg-code{font-weight:700;font-size:10pt;margin-top:.5mm}.seg-city{font-size:9pt}
+.track{display:flex;align-items:center;gap:4px;margin-top:-6mm}
+.dot{width:9px;height:9px;border:2px solid #94a3b8;border-radius:50%;background:#fff;flex-shrink:0}
+.dash{flex:1;border-top:2px dashed #b9c4d4}
+.plane svg{fill:#0891b2;stroke:#0891b2;transform:rotate(45deg)}
+.cols{width:100%;border-collapse:collapse;table-layout:fixed}.cols td{vertical-align:top;padding-right:4mm}.cols td+td{border-left:1px solid #edf1f6;padding-left:4mm}
+.dates-grid{width:100%;border-collapse:collapse;table-layout:fixed}.dates-grid td{text-align:center;vertical-align:middle}.dates-mid{width:28%}
+.date-big{font-size:15pt;font-weight:800;text-transform:uppercase;line-height:1.15}
+.time{font-size:12pt;color:#5b6b85;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;background:#e6f6fa;color:#0e7490;font-weight:700;font-size:9pt;padding:3px 10px}
+.places{width:100%;border-collapse:separate;border-spacing:3mm 0;margin:0 -3mm;table-layout:fixed}.place{vertical-align:top;width:50%}
+.links{display:flex;flex-wrap:wrap;gap:4mm;margin-top:1.5mm}.links a{display:inline-flex;gap:4px;align-items:center;font-weight:600}
+.docs{margin-top:3mm;padding-top:3mm;border-top:1px solid #edf1f6;break-before:avoid;break-inside:avoid}
+.doc-list{display:flex;flex-wrap:wrap;gap:2mm}
+.doc{display:inline-flex;gap:6px;align-items:center;border:1px solid #9fd8e6;background:#eef9fc;border-radius:10px;padding:2mm 3mm;text-decoration:none;color:#0e7490;max-width:100%}
+.doc-off{border-color:#dbe3ee;background:#f7f9fc;color:#5b6b85}
+.doc-cta{display:block;font-weight:700}.doc-name{display:block;font-size:8.5pt;color:#5b6b85}
+.end-block{break-inside:avoid;margin-top:4mm}
+.signature{margin-top:0}
+.sig-grid{width:100%;border-collapse:collapse}.sig-grid td{vertical-align:middle}
+.sig-av{width:18mm}.avatar{width:15mm;height:15mm;border-radius:50%;object-fit:cover}
+.avatar-fallback{display:flex;align-items:center;justify-content:center;background:#e6f6fa;color:#0e7490;font-weight:800;font-size:14pt}
+.sig-name{font-size:13pt;font-weight:800}
+.sig-cta{text-align:right;width:52mm}
+.wa{display:inline-block;background:#1fa855;color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:2.2mm 5mm}
+.generated{text-align:center;font-size:8pt;color:#94a3b8;margin-top:3mm}
+.pdf-block{break-inside:avoid}
+p{orphans:2;widows:2}
+h1,h2,h3,h4{break-after:avoid}
+`;
+
 export async function generateTripPDF(
   trip: Trip,
   profile?: AgentProfile | null,
   itineraryActivities?: ItineraryActivityForPDF[],
   voucherAccess?: VoucherAccessOptions,
-  locale: PublicLocale = "pt-BR"
+  locale: PublicLocale = "pt-BR",
+  options: { modules?: PdfModules; signature?: PdfSignature | null } = {},
 ) {
   const t = tWallet(locale);
-  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   // Abrir a janela ANTES dos awaits para evitar bloqueio de popup pelo navegador.
   const printWindow = window.open("", "_blank");
   if (printWindow) {
     try {
-      printWindow.document.write(
-        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Preparando PDF…</body></html>',
-      );
+      printWindow.document.write('<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Preparando PDF…</body></html>');
     } catch {}
   }
-  const startDate = parseLocal(trip.start_date);
-  const endDate = parseLocal(trip.end_date);
-  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-  // Build permanent voucher URLs using the serve-voucher proxy
   toast.info("Preparando PDF com documentos...");
-  const permanentUrlCache: Record<string, string> = {};
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const shareToken = (trip as any).share_token;
-
-  if (supabaseUrl && shareToken) {
-    for (const service of (trip.services || [])) {
-      const files: { path: string }[] = [];
-      if (service.attachments?.length > 0) {
-        for (const att of service.attachments) {
-          if (att.url) files.push({ path: att.url });
-        }
-      } else if (service.voucher_url) {
-        files.push({ path: service.voucher_url });
-      }
-      for (const file of files) {
-        const cleanPath = extractVoucherPath(file.path);
-        if (cleanPath) {
-          const url = `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
-          permanentUrlCache[file.path] = url;
-        }
-      }
-    }
-  }
-
-  // Group services by type, but preserve user-defined order:
-  // - services within each group keep their order_index
-  // - groups themselves are sorted by the lowest order_index of their first service
-  const sortedServices = [...(trip.services || [])].sort(
-    (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
-  );
-
-  // Resolve referências do Google (gplace:// e URLs legadas) para URLs válidas
-  // no momento da geração — nada é copiado ou persistido.
-  const resolveImg = await buildServiceImageResolver(sortedServices);
-
-  // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
-  const servicesHtml = sortedServices.map((service) => {
-    const type = service.service_type as TripServiceType;
-    const serviceLabels = getServiceLabels(locale);
-    const label = serviceLabels[type] || t("serviceOther");
-    const emoji = SERVICE_EMOJI[type] || "📋";
-    const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
-    const bodyHtml = renderServiceBody(service, locale);
-    const galleryHtml = renderServiceGallery(service, resolveImg);
-
-    let attachmentsHtml = '';
-    if (service.attachments?.length > 0) {
-      attachmentsHtml = service.attachments.map((att: any) => {
-        const signedUrl = permanentUrlCache[att.url];
-        if (signedUrl) {
-          return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;margin-right:12px;">📎 ${att.name} ↗</a>`;
-        }
-        return `<span style="color:#64748b;font-size:12px;">📎 ${att.name}</span>`;
-      }).join(' ');
-    } else if (service.voucher_url) {
-      const signedUrl = permanentUrlCache[service.voucher_url];
-      const name = service.voucher_name || 'Documento anexo';
-      if (signedUrl) {
-        attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;">📎 ${name} ↗</a>`;
-      } else {
-        attachmentsHtml = `<span style="color:#64748b;font-size:12px;">📎 ${name}</span>`;
-      }
-    }
-
-    const attachmentsBlock = attachmentsHtml
-      ? `<div class="pdf-block" style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;">${attachmentsHtml}</div>`
-      : "";
-
-    return `
-      <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-        <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
-          <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-            <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
-            <div style="min-width:0;">
-              <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
-            </div>
-          </div>
-        </div>
-        <div style="padding:12px 16px;">
-          ${galleryHtml}
-          ${renderServiceLayout(service, bodyHtml, resolveImg)}
-          ${attachmentsBlock}
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  const resolveItineraryUrl = (p: string): string | null => {
-    if (!p) return null;
-    if (/^https?:\/\//i.test(p)) return p;
-    if (!supabaseUrl || !shareToken) return null;
-    const cleanPath = extractVoucherPath(p);
-    if (!cleanPath) return null;
-    return `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
+  const documentUrl = (path: string): string | null => {
+    if (!supabaseUrl || !shareToken || !path) return null;
+    const clean = extractVoucherPath(path);
+    return clean ? `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(clean)}` : null;
   };
-  const itineraryHtml = generateItinerarySection(itineraryActivities || [], resolveItineraryUrl, locale);
-
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Carteira Digital — ${(trip as any).trip_title || trip.client_name}</title>
-      <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
-        img { max-width:100%; height:auto; }
-        a { color:#0f766e; }
-        @media print {
-          @page { size: A4; margin: 14mm 10mm 10mm 10mm; }
-          @page :first { margin-top: 8mm; }
-          html, body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            background: #fff !important;
-            line-height: 1.42 !important;
-          }
-          a { color:#0f766e !important; text-decoration:underline !important; }
-
-          .pdf-hero { padding-top: 0 !important; padding-bottom: 6px !important; }
-          .pdf-hero h1 { font-size: 26px !important; line-height: 1.05 !important; margin-bottom: 2px !important; }
-          .pdf-hero p { margin-top: 2px !important; }
-
-          .overview-card { padding: 10px 14px !important; margin-bottom: 12px !important; }
-
-          .service-card { margin-bottom: 7px !important; }
-          .service-card > div:last-child { padding: 9px 14px !important; }
-          .service-title { padding: 6px 12px !important; }
-          .pdf-details p { margin: 1px 0 !important; line-height: 1.38 !important; }
-
-          .agent-signature { margin-top: 10px !important; }
-          .agent-signature > div:last-child { padding: 10px 16px !important; }
-
-          .pdf-block,
-          .pdf-header,
-          .agent-signature,
-          .overview-card,
-          img { break-inside: avoid; page-break-inside: avoid; }
-
-          .agent-signature { break-before: avoid; page-break-before: avoid; }
-
-          .pdf-title, .section-title, .service-title {
-            break-after: avoid; page-break-after: avoid;
-          }
-          .pdf-card, .pdf-details, .service-card {
-            break-inside: auto; page-break-inside: auto;
-          }
-          h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
-          p { orphans: 3; widows: 3; }
-        }
-      </style>
-    </head>
-    <body>
-      <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
-        ${generateAgencyHeader(profile || null, locale)}
-
-        <div style="padding:6px 32px 0;">
-          <!-- Hero -->
-          <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
-            <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
-              ${t("pdfWalletBadge")}
-            </div>
-            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(trip as any).trip_title || trip.destination}</h1>
-            <p style="font-size:14px;color:#64748b;margin-top:4px;">
-              ${(trip as any).trip_title ? `<span>${trip.destination} • </span>` : ''}${t("pdfPreparedFor")} <strong style="color:#1e293b;">${trip.client_name}</strong>
-            </p>
-          </div>
-
-          <!-- Overview -->
-          <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-            <div>
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 ${t("pdfDestination")}</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.destination}</p>
-            </div>
-            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 ${t("pdfPeriod")}</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(trip.start_date, locale)} — ${formatDate(trip.end_date, locale)}</p>
-              <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} ${days === 1 ? t("daysLabelOne") : t("daysLabelOther")}</p>
-            </div>
-            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👤 ${t("pdfClient")}</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.client_name}</p>
-            </div>
-          </div>
-
-          <!-- Services -->
-          <div style="margin-bottom:18px;">
-            <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
-              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-              <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">${t("pdfServicesTitle")}</h3>
-              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-            </div>
-            ${servicesHtml || `<p style="text-align:center;color:#94a3b8;padding:32px;">${t('pdfNoServices')}</p>`}
-          </div>
-
-          <!-- Itinerary -->
-          ${itineraryHtml}
-
-          <!-- Agent Signature -->
-          ${generateAgentSignature(profile || null, locale)}
-
-          <p style="text-align:center;font-size:10px;color:#94a3b8;margin-top:14px;">
-            ${t("pdfGeneratedAt", { date: locale === "it-IT" ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date()) : format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) })}
-          </p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+  const sorted = [...(trip.services || [])].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+  const resolveImg = await buildServiceImageResolver(sorted);
+  void voucherAccess;
+  const html = buildTripPdfHtml({ trip, profile, itineraryActivities, locale, resolveImg, documentUrl, modules: options.modules, signature: options.signature });
 
   if (!printWindow) {
     toast.error(t("pdfPopupBlocked"));
     return;
   }
-
   printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
   await waitForWindowImages(printWindow);
-  try {
-    printWindow.print();
-  } catch {
-    /* impressão cancelada pelo usuário/ambiente */
-  }
+  try { printWindow.print(); } catch { /* impressão cancelada */ }
 }
