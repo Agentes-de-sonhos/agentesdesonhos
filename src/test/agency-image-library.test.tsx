@@ -8,8 +8,11 @@ const rows = [
   { id: "1", url: "https://cdn.example.com/a/Praia.JPG?w=800", name: "Praia", folder_id: null, source: "manual", created_at: "2026-01-01" },
   { id: "2", url: "https://cdn.example.com/b/hotel.jpg", name: "Hotel", folder_id: "f1", source: "service_link", created_at: "2026-01-01" },
 ];
+const scope = { user: "11111111-1111-1111-1111-111111111111", agency: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" };
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
+    auth: { getSession: async () => ({ data: { session: { user: { id: scope.user } } } }) },
+    rpc: async () => ({ data: scope.agency, error: null }),
     from: (table: string) => ({
       upsert,
       select: () => ({
@@ -28,7 +31,7 @@ import {
 } from "@/lib/agencyImageLibrary";
 import { AgencyLibraryPicker, LibraryThumb } from "@/components/image-library/AgencyLibraryPicker";
 
-beforeEach(() => { __resetLibraryProvenance(); upsert.mockClear(); upsert.mockResolvedValue({ error: null }); });
+beforeEach(() => { localStorage.clear(); scope.agency = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"; __resetLibraryProvenance(); upsert.mockClear(); upsert.mockResolvedValue({ error: null }); });
 
 describe("biblioteca de imagens — regras", () => {
   it("normaliza só com trim, preservando case e parâmetros", () => {
@@ -63,14 +66,33 @@ describe("biblioteca de imagens — regras", () => {
     expect(call[1]).toEqual({ onConflict: "agency_id,url", ignoreDuplicates: true });
   });
 
-  it("falha do registro não lança e deixa retry idempotente", async () => {
+  it("falha após salvar persiste fila por agência+usuário, sobrevive ao reload e limpa ao registrar", async () => {
     upsert.mockResolvedValueOnce({ error: { message: "x" } });
     noteLinkImage("https://bucket/s.webp", "https://cdn.example.com/s.jpg");
     const r = await registerLinkImagesAfterSave(["https://bucket/s.webp"]);
     expect(r.failed).toBe(1);
-    expect(getPendingLibraryRetries()).toBe(1);
+    const key = `ads:image-library-retry:v1:${scope.agency}:${scope.user}`;
+    expect(JSON.parse(localStorage.getItem(key)!)).toEqual([{ url: "https://cdn.example.com/s.jpg", name: "cdn.example.com" }]);
+    __resetLibraryProvenance(); // "reload": memória zerada, fila continua
+    expect(await getPendingLibraryRetries()).toBe(1);
     expect(await retryPendingLibraryRegistrations()).toBe(true);
-    expect(getPendingLibraryRetries()).toBe(0);
+    expect(localStorage.getItem(key)).toBeNull();
+  });
+
+  it("fila da agência A nunca é reenviada na agência B; itens sensíveis na leitura são descartados", async () => {
+    const keyA = `ads:image-library-retry:v1:${scope.agency}:${scope.user}`;
+    localStorage.setItem(keyA, JSON.stringify([{ url: "https://cdn.example.com/a.jpg", name: "A" }, { url: "javascript:x" }, { url: "https://maps.googleapis.com/p?x=1" }]));
+    expect(await getPendingLibraryRetries()).toBe(1);
+    scope.agency = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+    expect(await getPendingLibraryRetries()).toBe(0);
+    expect(await retryPendingLibraryRegistrations()).toBe(true);
+    expect(upsert).not.toHaveBeenCalled();
+    expect(localStorage.getItem(keyA)).not.toBeNull();
+  });
+
+  it("sem save não há fila (colar e cancelar não persiste nada)", async () => {
+    noteLinkImage("https://bucket/z.webp", "https://cdn.example.com/z.jpg");
+    expect(Object.keys(localStorage).filter((k) => k.includes("retry"))).toEqual([]);
   });
 
   it("filtra por nome e pasta (Sem pasta)", () => {
@@ -89,6 +111,10 @@ describe("servidor e integração", () => {
     expect(sql).toContain("NEW.agency_id := _agency");
     expect(sql).toContain("invalid folder");
     expect(sql).not.toMatch(/TO anon/);
+    const perms = readFileSync("drizzle/migrations/0050_agency_image_library_team_permissions.sql", "utf8");
+    expect(perms).toMatch(/WHEN 'delete' THEN public.can_team\('quotes.delete'\) OR public.can_team\('wallet.delete'\)/);
+    expect(perms).toMatch(/FOR DELETE[\s\S]{0,160}image_library_can\('delete'\)/);
+    expect(perms).toMatch(/images update[\s\S]{0,160}image_library_can\('edit'\)/);
   });
   it("registro só no sucesso do salvamento do serviço; biblioteca não tem FK com serviços", () => {
     const q = readFileSync("src/hooks/useQuotes.ts", "utf8");
