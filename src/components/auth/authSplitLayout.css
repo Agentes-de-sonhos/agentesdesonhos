@@ -32,7 +32,7 @@
 .auth-split__logo { position: absolute; top: 7.2%; left: 4.2%; width: min(27vw, 440px); height: auto; z-index: 2; }
 .auth-split__copy { position: absolute; left: 10.5%; right: 6%; top: 32%; z-index: 2; }
 .auth-split__headline {
-  font-size: clamp(2.4rem, 4.35vw, 4.6rem);
+  font-size: clamp(2.4rem, 3.95vw, 4.6rem);
   line-height: 1.08; font-weight: 700; letter-spacing: -0.02em; margin: 0;
 }
 .auth-split__headline em { font-style: normal; color: hsl(var(--auth-cyan)); }
