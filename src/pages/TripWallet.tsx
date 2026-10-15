@@ -150,19 +150,6 @@ function TripServiceCategoryGrid({
         <FileTextIcon className="h-6 w-6 text-fuchsia-500" />
         <span className="text-center leading-tight px-1">Importar orçamento</span>
       </button>
-      <button
-        type="button"
-        onClick={onImportPackage}
-        aria-label="Importar pacote com IA"
-        className={cn(
-          "group relative flex flex-col items-center justify-center gap-2 rounded-2xl w-full aspect-square text-xs font-medium transition-all duration-200 border",
-          "bg-gradient-to-br from-violet-100 to-violet-50 text-violet-700",
-          "border-transparent hover:scale-[1.02] hover:shadow-md hover:border-border/60",
-        )}
-      >
-        <Sparkles className="h-6 w-6 text-violet-500" />
-        <span className="text-center leading-tight px-1">Importar pacote com IA</span>
-      </button>
     </div>
   );
 }
@@ -1043,7 +1030,6 @@ function TripWalletContent() {
             { step: 1, short: "Adicionar serviços", hint: "Inclua passagens, hospedagens e outros itens da viagem.", accentClass: "bg-sky-500" },
             { step: 2, short: "Organizar serviços", hint: "Revise, edite e ordene os serviços adicionados.", accentClass: "bg-emerald-500" },
             { step: 3, short: "Configurar carteira", hint: "Defina dados, acesso, roteiro e assinatura.", accentClass: "bg-violet-500" },
-            { step: 4, short: "Publicar", hint: trip.public_access_code || trip.slug || trip.share_token ? "O link público atual está disponível para compartilhamento." : "Use a ação atual de compartilhamento quando a carteira estiver pronta.", accentClass: "bg-rose-500" },
           ]}
         />
 
