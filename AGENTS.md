@@ -15,4 +15,4 @@
 - White-label CTA hover is action-specific: WhatsApp buttons may shift to WhatsApp green (`wl-visa-cta`); request pop-up buttons keep brand yellow (`wl-visa-proposal`). Why: green promises an instant handoff a form does not deliver.
 - Update prompt (`useAppVersion`) shows once per user only while flag `app_update_prompt` targets a version other than the running bundle (set via SQL after release). Why: owner-controlled.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
-- Wallet modules resolve in SQL (trip > owning agency via `wallet_agency_owner` > system); panel uses `get_trip_agency_wallet_defaults`. Why: same agency, private.
+- Wallet modules resolve in SQL (trip > owning agency via `wallet_agency_owner` > system); panel uses `get_trip_agency_wallet_defaults`. Why: same agency.

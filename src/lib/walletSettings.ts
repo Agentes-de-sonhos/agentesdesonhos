@@ -93,7 +93,7 @@ export function resolveWalletSettings(agency: Partial<AgencyWalletSettings> | nu
 /** Padrão da agência DONA da viagem (resolvido no servidor; vazio se o usuário não for da mesma agência). */
 export async function fetchTripAgencyWalletDefaults(tripId: string): Promise<AgencyWalletSettings> {
   const { data, error } = await supabase.rpc("get_trip_agency_wallet_defaults" as never, { _trip_id: tripId } as never);
-  const row: any = Array.isArray(data) ? data[0] : data;
+  const row: any = Array.isArray(data) ? (data as any[])[0] : data;
   if (error || !row) return { ...DEFAULT_WALLET_SETTINGS };
   return resolveWalletSettings(row, null);
 }
