@@ -37,4 +37,10 @@ describe("locação pública", () => {
     expect(screen.getByText("Nota livre")).toBeInTheDocument();
     expect(screen.getByText("Balcão no térreo")).toBeInTheDocument();
   });
+  it("lista condutores só pelo nome, sem inferir principal/adicional", () => {
+    renderCard({ drivers: [{ name: "Ana" }, { name: "Bruno" }] });
+    expect(screen.getByText("Ana")).toBeInTheDocument();
+    expect(screen.getByText("Bruno")).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/principal|adicional/i);
+  });
 });
