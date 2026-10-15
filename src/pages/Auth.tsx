@@ -28,6 +28,7 @@ import { useTeamSession } from "@/contexts/TeamSessionContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AuthSplitLayout, AUTH_SUPPORT_HREF } from "@/components/auth/AuthSplitLayout";
 import { MultiStepSignup } from "@/components/auth/MultiStepSignup";
 import {
   Form,
@@ -68,17 +69,6 @@ type ResetFormData = z.infer<typeof resetSchema>;
 
 type AuthView = "login" | "magic-link" | "magic-link-sent" | "forgot-password" | "forgot-sent" | "password-signup";
 
-// Brand Header Component
-function BrandHeader() {
-  return (
-    <div className="flex flex-col items-center space-y-3">
-      <img src={logoAgentes} alt="Agentes de Sonhos" className="h-36 w-auto object-contain shrink-0" />
-      <p className="mt-1 text-sm text-muted-foreground">
-        Plataforma inteligente para agentes de viagem
-      </p>
-    </div>
-  );
-}
 
 export default function Auth() {
   useNoindex();
@@ -376,45 +366,41 @@ export default function Auth() {
   // Signup success screen
   if (signupSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
-          <CardHeader className="pt-10 pb-4 text-center space-y-6">
-            <BrandHeader />
-            <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Verifique seu email</CardTitle>
+      <AuthSplitLayout wide={view === "password-signup"}>
+        <Card className="w-full border-0 bg-transparent shadow-none">
+          <CardHeader className="px-0 pt-0 pb-6 text-center space-y-6">
+                        <div className="space-y-2">
+              <CardTitle className="auth-split__title">Verifique seu email</CardTitle>
               <CardDescription className="text-base leading-relaxed">
                 Enviamos um link de confirmação para o seu email. Clique no link para ativar sua conta.
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="px-8 pb-10">
+          <CardContent className="px-0 pb-0">
             <Button onClick={goToLogin} className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
               Voltar para login
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </AuthSplitLayout>
     );
   }
 
   // Magic Link sent screen
   if (view === "magic-link-sent") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
-          <CardHeader className="pt-10 pb-4 text-center space-y-6">
-            <BrandHeader />
-            <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Verifique seu email</CardTitle>
-              <CardDescription className="text-sm">
+      <AuthSplitLayout>
+        <Card className="w-full border-0 bg-transparent shadow-none">
+          <CardHeader className="px-0 pt-0 pb-6 text-center space-y-6">
+                        <div className="space-y-2">
+              <CardTitle className="auth-split__title">Verifique seu email</CardTitle>
+              <CardDescription className="auth-split__desc">
                 Enviamos um link de acesso para<br />
                 <span className="font-medium text-foreground">{pendingEmail}</span>
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="px-8 pb-10 space-y-6">
+          <CardContent className="px-0 pb-0 space-y-6">
             {error && (
               <Alert variant="destructive" className="rounded-xl">
                 <AlertDescription>{error}</AlertDescription>
@@ -448,7 +434,7 @@ export default function Auth() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </AuthSplitLayout>
     );
   }
 
@@ -456,20 +442,18 @@ export default function Auth() {
   // Forgot password sent screen
   if (view === "forgot-sent") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-        <Card className="relative w-full max-w-md rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm">
-          <CardHeader className="pt-10 pb-4 text-center space-y-6">
-            <BrandHeader />
-            <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Email enviado</CardTitle>
-              <CardDescription className="text-sm">
+      <AuthSplitLayout>
+        <Card className="w-full border-0 bg-transparent shadow-none">
+          <CardHeader className="px-0 pt-0 pb-6 text-center space-y-6">
+                        <div className="space-y-2">
+              <CardTitle className="auth-split__title">Email enviado</CardTitle>
+              <CardDescription className="auth-split__desc">
                 Enviamos um link de redefinição de senha para<br />
                 <span className="font-medium text-foreground">{pendingEmail}</span>
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="px-8 pb-10 space-y-6">
+          <CardContent className="px-0 pb-0 space-y-6">
             <div className="flex flex-col items-center gap-3 py-4">
               <Mail className="h-12 w-12 text-primary/70" />
               <p className="text-sm text-muted-foreground text-center leading-relaxed">
@@ -481,50 +465,45 @@ export default function Auth() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </AuthSplitLayout>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-4">
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiMwMDAiIGZpbGwtb3BhY2l0eT0iMC4wMiI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-50" />
-
-      <Card className={`relative w-full rounded-3xl border-0 bg-card/95 shadow-2xl shadow-primary/10 backdrop-blur-sm transition-all duration-300 ${
-        view === "password-signup" ? "max-w-2xl" : "max-w-md"
-      }`}>
-        <CardHeader className={`text-center space-y-6 ${view === "password-signup" ? "pt-8 pb-4" : "pt-10 pb-4"}`}>
-          <BrandHeader />
-
+    <AuthSplitLayout wide={view === "password-signup"}>
+        <Card className="w-full border-0 bg-transparent shadow-none">
+        <CardHeader className="px-0 pt-0 pb-8 text-center space-y-6">
+          
           {view === "login" && (
             <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Acesse sua conta</CardTitle>
-              <CardDescription className="text-sm">Entre com seu email e senha</CardDescription>
+              <CardTitle className="auth-split__title">Bem-vindo de volta!</CardTitle>
+              <CardDescription className="auth-split__desc">Acesse sua conta para continuar.</CardDescription>
             </div>
           )}
 
           {view === "magic-link" && (
             <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Acesso por link</CardTitle>
-              <CardDescription className="text-sm">Informe seu email para receber o link de acesso</CardDescription>
+              <CardTitle className="auth-split__title">Acesso por link</CardTitle>
+              <CardDescription className="auth-split__desc">Informe seu email para receber o link de acesso</CardDescription>
             </div>
           )}
 
           {view === "forgot-password" && (
             <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Esqueceu sua senha?</CardTitle>
-              <CardDescription className="text-sm">Informe seu email para receber o link de redefinição</CardDescription>
+              <CardTitle className="auth-split__title">Esqueceu sua senha?</CardTitle>
+              <CardDescription className="auth-split__desc">Informe seu email para receber o link de redefinição</CardDescription>
             </div>
           )}
 
           {view === "password-signup" && (
             <div className="space-y-2">
-              <CardTitle className="text-xl font-semibold">Cadastro de Agente</CardTitle>
-              <CardDescription className="text-sm">Complete seu cadastro em poucos passos</CardDescription>
+              <CardTitle className="auth-split__title">Cadastro de Agente</CardTitle>
+              <CardDescription className="auth-split__desc">Complete seu cadastro em poucos passos</CardDescription>
             </div>
           )}
         </CardHeader>
 
-        <CardContent className={`space-y-5 ${view === "password-signup" ? "px-6 pb-8" : "px-8 pb-10"}`}>
+        <CardContent className="space-y-5 px-0 pb-0">
           {inactivityMessage && (
             <Alert className="rounded-xl border-amber-500/50 bg-amber-50 dark:bg-amber-950/30">
               <AlertDescription className="text-amber-700 dark:text-amber-400">{inactivityMessage}</AlertDescription>
@@ -540,23 +519,21 @@ export default function Auth() {
           {view === "login" && (
             <div className="space-y-5">
               <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-6">
                   <FormField
                     control={loginForm.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Email
-                        </FormLabel>
+                        <FormLabel className="auth-split__label">E-mail</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Mail className="auth-split__icon" aria-hidden="true" />
                             <Input
                               type="email"
                               placeholder="seu@email.com"
                               autoComplete="email"
-                              className="h-12 pl-11 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                              className="auth-split__input"
                               {...field}
                             />
                           </div>
@@ -570,32 +547,39 @@ export default function Auth() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Senha
-                        </FormLabel>
+                        <div className="flex items-center justify-between gap-3">
+                          <FormLabel className="auth-split__label">Senha</FormLabel>
+                          <button
+                            type="button"
+                            onClick={() => { setView("forgot-password"); setError(null); }}
+                            className="auth-split__link"
+                          >
+                            Esqueci minha senha
+                          </button>
+                        </div>
                         <FormControl>
                           <div className="relative">
-                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Lock className="auth-split__icon" aria-hidden="true" />
                             <Input
                               type={showPassword ? "text" : "password"}
                               placeholder="••••••••"
                               autoComplete="current-password"
-                              className="h-12 pl-11 pr-12 rounded-xl border-muted-foreground/20 bg-muted/30 focus:bg-background transition-colors"
+                              className="auth-split__input pr-16"
                               {...field}
                             />
-                            <Button
+                            <button
                               type="button"
-                              variant="ghost"
-                              size="icon"
-                              className="absolute right-1 top-1/2 -translate-y-1/2 h-10 w-10 hover:bg-transparent"
+                              className="auth-split__eye"
+                              aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                              aria-pressed={showPassword}
                               onClick={() => setShowPassword(!showPassword)}
                             >
                               {showPassword ? (
-                                <EyeOff className="h-4 w-4 text-muted-foreground" />
+                                <EyeOff className="h-5 w-5" />
                               ) : (
-                                <Eye className="h-4 w-4 text-muted-foreground" />
+                                <Eye className="h-5 w-5" />
                               )}
-                            </Button>
+                            </button>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -605,7 +589,7 @@ export default function Auth() {
 
                   <Button
                     type="submit"
-                    className="w-full h-12 rounded-xl text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.01] transition-all"
+                    className="auth-split__submit"
                     disabled={isLoading}
                   >
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -614,16 +598,9 @@ export default function Auth() {
                 </form>
               </Form>
 
-              {/* Secondary options — subtle links */}
-              <div className="flex items-center justify-end pt-1">
-                <button
-                  type="button"
-                  onClick={() => { setView("forgot-password"); setError(null); }}
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Esqueci minha senha
-                </button>
-              </div>
+              <p className="auth-split__help">
+                Precisa de ajuda? <a href={AUTH_SUPPORT_HREF}>Fale com o suporte</a>
+              </p>
             </div>
           )}
 
@@ -730,14 +707,7 @@ export default function Auth() {
             />
           )}
         </CardContent>
-
-        {/* Footer branding */}
-        <div className="pb-6 text-center">
-          <p className="text-[10px] text-muted-foreground/50">
-            Desenvolvido por <span className="font-medium">Nobre Digital</span>
-          </p>
-        </div>
       </Card>
-    </div>
+      </AuthSplitLayout>
   );
 }
