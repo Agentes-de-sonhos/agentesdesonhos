@@ -169,6 +169,10 @@ const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
     headerClassName: "h-24 md:h-[112px]",
     logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
   },
+  // Drica Viagens: logotipo em tamanho dobrado no cabeçalho e no rodapé.
+  "drica-presentation.preview.local": DRICA_HEADER_BRAND_PRESET,
+  "dricaviagens.rio": DRICA_HEADER_BRAND_PRESET,
+  "www.dricaviagens.rio": DRICA_HEADER_BRAND_PRESET,
 };
 
 export function normalizeBrandHost(hostname?: string | null): string {
