@@ -2276,7 +2276,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                     return (
                       <div className="flex flex-col gap-5">
                         {showCal && (
-                          <div className="flex flex-col gap-5 md:order-3">
+                          <div className="flex flex-col gap-5">
                             <div className="flex items-center gap-3 my-1">
                               <div className="h-px flex-1 bg-border/60" />
                               <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
