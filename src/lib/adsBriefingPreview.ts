@@ -26,7 +26,6 @@ import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-lo
 import mundoEmCoresVanessa from "@/assets/ads-preview/mundo-em-cores-vanessa-oficial.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
-import bardelliBriefing18Logo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.json";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
 export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
@@ -696,40 +695,11 @@ export const BARDELLI_XCARET_REWRITES: [string, string][] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* briefing-18-v1 — Bardelli Viagens (prévia técnica, host sintético)  */
-/* Identidade confirmada só por CNPJ/domínio; o tenant real NÃO é lido. */
-/* Sem endereço residencial, CPF ou dados contratuais.                 */
+/* Bardelli Viagens — perfil OFICIAL (bardelliviagens.com.br).          */
+/* Dados do briefing 18. Sem endereço residencial, CPF ou contrato.     */
+/* O status "em construção" do domínio é controlado em agencySiteStatus. */
 /* ------------------------------------------------------------------ */
-export const BARDELLI_BRIEFING18_JOB_ID = "briefing-18-v1";
-export const BARDELLI_BRIEFING18_PATH = `/ads-briefing-preview/${BARDELLI_BRIEFING18_JOB_ID}`;
-export const BARDELLI_BRIEFING18_HOST = "briefing-18-v1.preview.local";
-
-export const BARDELLI_BRIEFING18_INFO: AgencyDomainInfo = {
-  user_id: "00000000-0000-0000-0000-000000000018",
-  agency_slug: "",
-  public_slug: null,
-  hostname: BARDELLI_BRIEFING18_HOST,
-  is_primary: false,
-  agency_name: "Bardelli Viagens",
-  owner_name: "Barbara Bardelli",
-  logo_url: bardelliBriefing18Logo.url,
-  cover_image_url: null,
-  primary_color: "#e32400",
-  secondary_color: "#000000",
-  secondary_auto: false,
-  tertiary_color: null,
-  tertiary_auto: true,
-  on_secondary_color: null,
-  // Sem telefone no info: nenhum link real de WhatsApp é gerado pela engine.
-  phone: null,
-  city: "São Paulo",
-  state: "SP",
-  bio: null,
-  cnpj: "09.475.657/0001-80",
-  whatsapp_group_url: null,
-};
-
-export const BARDELLI_BRIEFING18_PROFILE: AgencySiteProfile = buildGoldStandardProfile("bardelliBriefing18", {
+export const BARDELLI_OFFICIAL_PROFILE: AgencySiteProfile = buildGoldStandardProfile("bardelliCurated", {
   navDensity: "compact",
   footer: {
     description: "Viagens de lazer personalizadas para famílias, casais e grupos de amigos. Planejamento antes e durante a viagem, com suporte por WhatsApp.",
@@ -742,22 +712,31 @@ export const BARDELLI_BRIEFING18_PROFILE: AgencySiteProfile = buildGoldStandardP
     cnpj: "09.475.657/0001-80",
   },
 }, "Bardelli Viagens");
-if (BARDELLI_BRIEFING18_PROFILE.about) {
-  BARDELLI_BRIEFING18_PROFILE.about.title = "Uma viagem com a sua identidade, planejada com cuidado";
-  BARDELLI_BRIEFING18_PROFILE.about.ownerName = "Barbara Bardelli";
-  BARDELLI_BRIEFING18_PROFILE.about.text = [
+if (BARDELLI_OFFICIAL_PROFILE.about) {
+  BARDELLI_OFFICIAL_PROFILE.about.title = "Uma viagem com a sua identidade, planejada com cuidado";
+  BARDELLI_OFFICIAL_PROFILE.about.ownerName = "Barbara Bardelli";
+  BARDELLI_OFFICIAL_PROFILE.about.text = [
     "A Bardelli Viagens nasceu em 2008 com um propósito claro: planejar viagens de lazer personalizadas para famílias, casais e grupos de amigos. À frente da agência, Barbara Bardelli reúne 33 anos de experiência no turismo.",
     "Cada roteiro começa por uma conversa: quem vai viajar, o ritmo desejado e o que tornaria essa viagem inesquecível. Estados Unidos e Canadá, parques temáticos como Walt Disney World e Universal, resorts e all-inclusive, Europa, Brasil, Ásia, Caribe e cruzeiros fazem parte das especialidades.",
     "O atendimento acompanha você antes e durante a viagem, com suporte pelo WhatsApp para que cada detalhe esteja resolvido e você aproveite com tranquilidade.",
   ].join("\n\n");
 }
-BARDELLI_BRIEFING18_PROFILE.signature = { ...BARDELLI_PRESENTATION_PROFILE.signature! };
-BARDELLI_BRIEFING18_PROFILE.copy = { ...BARDELLI_PRESENTATION_PROFILE.copy };
-BARDELLI_BRIEFING18_PROFILE.inspirationDialog = BARDELLI_PRESENTATION_PROFILE.inspirationDialog;
-BARDELLI_BRIEFING18_PROFILE.newsletterMedia = BARDELLI_PRESENTATION_PROFILE.newsletterMedia;
-BARDELLI_BRIEFING18_PROFILE.socialStrip = { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/bardelliviagens/" }] };
-BARDELLI_BRIEFING18_PROFILE.seo = { title: "Prévia para revisão — Bardelli Viagens", description: "Prévia técnica para revisão da Bardelli Viagens. Conteúdo ilustrativo a confirmar." };
-BARDELLI_BRIEFING18_PROFILE.hideConciergeActions = true;
+BARDELLI_OFFICIAL_PROFILE.signature = { ...BARDELLI_PRESENTATION_PROFILE.signature! };
+BARDELLI_OFFICIAL_PROFILE.copy = { ...BARDELLI_PRESENTATION_PROFILE.copy };
+BARDELLI_OFFICIAL_PROFILE.inspirationDialog = BARDELLI_PRESENTATION_PROFILE.inspirationDialog;
+BARDELLI_OFFICIAL_PROFILE.newsletterMedia = BARDELLI_PRESENTATION_PROFILE.newsletterMedia;
+BARDELLI_OFFICIAL_PROFILE.socialStrip = { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/bardelliviagens/" }] };
+// Site oficial: sem modo apresentação (formulários reais) e sem blocos que
+// dependem de confirmação da agência (Portugal, equipe, pontos do concierge).
+BARDELLI_OFFICIAL_PROFILE.presentation = false;
+BARDELLI_OFFICIAL_PROFILE.demo = false;
+delete BARDELLI_OFFICIAL_PROFILE.dmc;
+delete BARDELLI_OFFICIAL_PROFILE.team;
+delete BARDELLI_OFFICIAL_PROFILE.testimonials;
+delete BARDELLI_OFFICIAL_PROFILE.conciergePoints;
+BARDELLI_OFFICIAL_PROFILE.sections = { ...BARDELLI_OFFICIAL_PROFILE.sections, dmc: { enabled: false }, team: { enabled: false }, testimonials: { enabled: false } };
+BARDELLI_OFFICIAL_PROFILE.nav = (BARDELLI_OFFICIAL_PROFILE.nav ?? []).filter((n) => n.to !== "/dmc-portugal");
+BARDELLI_OFFICIAL_PROFILE.seo = { title: "Bardelli Viagens — viagens de lazer personalizadas", description: "Viagens personalizadas para famílias, casais e grupos de amigos: Disney, Universal, Xcaret, resorts, cruzeiros e Europa. Desde 2008." };
 
 export interface AdsBriefingPreviewFixture {
   jobId: string;
@@ -820,15 +799,6 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     notice: "Prévia para revisão — sem publicação · ações desativadas",
     documentTitle: "Prévia para revisão — Viajar Tirismo",
     realAgency: true,
-  },
-  [BARDELLI_BRIEFING18_JOB_ID]: {
-    jobId: BARDELLI_BRIEFING18_JOB_ID,
-    info: BARDELLI_BRIEFING18_INFO,
-    profile: BARDELLI_BRIEFING18_PROFILE,
-    notice: "Prévia para revisão — sem publicação · ações desativadas",
-    documentTitle: "Prévia para revisão — Bardelli Viagens",
-    realAgency: true,
-    pages: { xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
   },
 };
 

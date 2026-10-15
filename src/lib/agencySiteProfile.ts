@@ -33,7 +33,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_BRIEFING18_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -57,8 +57,7 @@ export type AgencySiteProfileKey =
   /** Bardelli Viagens — padrão ouro (São Paulo/SP), prévia em /preview. */
   | "bardelliCurated"
   | "bardelliPresentation"
-  /** Prévia técnica briefing-18-v1 (Bardelli); host sintético, sem vínculo com o domínio real. */
-  | "bardelliBriefing18";
+;
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
@@ -1026,93 +1025,6 @@ const ESSYA_CURATED: AgencySiteProfile = {
   },
 };
 
-/** Bardelli Viagens: padrão ouro; conteúdo só do perfil público da agência. */
-const BARDELLI_CURATED: AgencySiteProfile = {
-  key: "bardelliCurated",
-  alternateSurfaces: true,
-  compactSectionSpacing: true,
-  randomizeDestinations: true,
-  resortsMap: { enabled: true },
-  nav: [
-    { label: "Início", to: "/" },
-    { label: "Sobre", to: "/#sobre" },
-    { label: "Parques em Orlando", to: "/ingressos-orlando" },
-    { label: "Resorts no Brasil", to: "/resorts-brasil" },
-    { label: "Destinos", to: "/#destinos" },
-    { label: "Dúvidas", to: "/#faq" },
-    { label: "Área do Cliente", to: "/area-do-cliente" },
-  ],
-  sections: {
-    ...Object.fromEntries(["orlando", "resorts", "authority", "destinations", "highlights", "modules", "about", "differentials", "concierge", "testimonials", "avaliacoes", "faq", "newsletter"].map((key, i) => [key, { enabled: true, order: i + 1 }])),
-    dmc: { enabled: false }, offers: { enabled: false }, signature: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
-    testimonials: { enabled: false }, avaliacoes: { enabled: false }, authority: { enabled: false },
-  },
-  heroImage: "parques",
-  hero: [
-    { title: "Transformamos o sonho de viajar em experiências inesquecíveis", subtitle: "Consultoria de viagem e roteiros personalizados, pensados para o seu jeito de viajar.", order: 1, enabled: true },
-    { title: "Orlando com quem é especialista", subtitle: "Parques, ingressos, hospedagem e roteiro organizados para aproveitar cada dia.", image: "parques", order: 2, enabled: true },
-    { title: "Resorts no Brasil para descansar de verdade", subtitle: "Maragogi, litoral de Pernambuco e outros destinos escolhidos com cuidado.", image: "resort", order: 3, enabled: true },
-  ],
-  signature: {
-    kicker: "BARDELLI VIAGENS",
-    title: "Consultoria de viagem e roteiros personalizados.",
-    text: "Cada viagem começa por uma conversa: entendemos quem viaja e o que deseja viver, e desenhamos um roteiro sob medida.",
-  },
-  about: {
-    kicker: "SOBRE A BARDELLI VIAGENS",
-    title: "Atendimento próximo, do sonho ao embarque.",
-    text: "A Bardelli Viagens faz consultoria de viagem e roteiros personalizados, com especialidade em Orlando e em resorts no Brasil. Você fala diretamente com quem planeja a sua viagem.",
-    image: "resort",
-    showLocation: true,
-  },
-  differentials: [
-    { title: "Consultoria personalizada", text: "Roteiros criados a partir do perfil de quem viaja, nunca de um pacote pronto.", icon: "consultivo" },
-    { title: "Especialista em Orlando", text: "Parques, ingressos e hospedagem organizados para aproveitar cada dia.", icon: "fornecedores" },
-    { title: "Resorts selecionados", text: "Hospedagens no Brasil escolhidas para descansar com a família.", icon: "conferido" },
-    { title: "Acompanhamento", text: "Suporte próximo antes, durante e depois da viagem.", icon: "acompanhamento" },
-  ],
-  destinations: [
-    { key: "orlando", image: "parques", label: "Parques", title: "Orlando", text: "A magia dos parques com um roteiro pensado para a sua família.", service: "ingressos", enabled: true, order: 1 },
-    { key: "nordeste", image: "litoral", label: "Brasil", title: "Resorts no Nordeste", text: "Maragogi e litoral de Pernambuco com conforto e praticidade.", service: "hospedagem", enabled: true, order: 2 },
-    { key: "cruzeiros", image: "cruzeiro", label: "No mar", title: "Cruzeiros", text: "Navios, itinerários e cabines comparados com clareza.", service: "cruzeiros", enabled: true, order: 3 },
-    { key: "europa", image: "europa", label: "Cultura", title: "Europa", text: "Cidades, gastronomia e paisagens no seu ritmo.", service: "pacotes", enabled: true, order: 4 },
-  ],
-  modules: [
-    { key: "orlando", title: "Orlando e parques", text: "Ingressos, hotéis e roteiro dia a dia.", service: "ingressos", image: "parques", enabled: true, order: 1 },
-    { key: "resorts", title: "Resorts no Brasil", text: "Hospedagens para descansar com a família.", service: "hospedagem", image: "resort", enabled: true, order: 2 },
-    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação para escolher navio, roteiro e cabine.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 3 },
-    { key: "sob-medida", title: "Viagens sob medida", text: "Roteiros personalizados para qualquer destino.", service: "pacotes", image: "europa", enabled: true, order: 4 },
-  ],
-  highlights: [
-    { title: "Orlando", text: "Planejamento completo de parques e hospedagem.", service: "ingressos", cta: "Planejar Orlando" },
-    { title: "Resorts no Brasil", text: "Os resorts certos para o seu momento.", service: "hospedagem", cta: "Solicitar resort" },
-    { title: "Roteiros personalizados", text: "Uma viagem desenhada para você.", service: "pacotes", cta: "Solicitar proposta" },
-  ],
-  faq: [
-    { q: "Como funciona o atendimento?", a: "Você envia uma solicitação pelo site ou fala pelo WhatsApp. Entendemos o seu perfil e preparamos uma proposta personalizada." },
-    { q: "Vocês planejam viagens para Orlando?", a: "Sim. Orlando é uma das especialidades da Bardelli Viagens: parques, ingressos, hospedagem e roteiro." },
-    { q: "Atendem resorts no Brasil?", a: "Sim. Planejamos hospedagens em resorts no Brasil, como em Maragogi e no litoral de Pernambuco." },
-    { q: "Como começo a planejar?", a: "Envie uma solicitação pelo formulário do site contando a ideia inicial da viagem." },
-  ],
-  copy: {
-    destinations: { title: "Descubra o seu próximo destino", subtitle: "Algumas das viagens que a Bardelli Viagens planeja com cuidado." },
-    modules: { title: "Especialidades", subtitle: "Consultoria de viagem e roteiros personalizados." },
-    differentials: { title: "Por que viajar com a Bardelli Viagens", subtitle: "Atendimento próximo em cada etapa." },
-    faq: { title: "Dúvidas frequentes" },
-  },
-  footer: {
-    description: "Consultoria de viagem e roteiros personalizados. Especialista em Orlando.",
-    whatsapp: "(11) 97576-7319",
-    phone: "(11) 97576-7319",
-    email: "barbara@bardelliviagens.com.br",
-    instagram: "https://www.instagram.com/bardelliviagens/",
-    instagramLabel: "@bardelliviagens",
-    address: "Rua Cabiúna, 42 — Apto 93 A — Vila Mascote — São Paulo/SP",
-    legalName: "JP Serviços de Informação e Asse em Turismo Ltda",
-    cnpj: "09.475.657/0001-80",
-  },
-};
-
 const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
 
   "100limites.tur.br": "editorialDmc",
@@ -1137,7 +1049,6 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   /** Host sintético do rascunho briefing-17 — vinculação de domínio pendente. */
   "briefing-17-v1.preview.local": "viajarTirismoBriefing17",
   "bardelli-presentation.preview.local": "bardelliPresentation",
-  "briefing-18-v1.preview.local": "bardelliBriefing18",
   "bardelliviagens.com.br": "bardelliCurated",
   "www.bardelliviagens.com.br": "bardelliCurated",
 };
@@ -1155,9 +1066,8 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   mundoEmCoresBriefing14: MUNDO_EM_CORES_PREVIEW_PROFILE,
   dricaViagensBriefing16: DRICA_VIAGENS_PREVIEW_PROFILE,
   viajarTirismoBriefing17: VIAJAR_TIRISMO_PREVIEW_PROFILE,
-  bardelliCurated: BARDELLI_CURATED,
+  bardelliCurated: BARDELLI_OFFICIAL_PROFILE,
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
-  bardelliBriefing18: BARDELLI_BRIEFING18_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
