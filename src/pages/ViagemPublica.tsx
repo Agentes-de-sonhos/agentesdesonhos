@@ -51,6 +51,7 @@ import { PublicHotelCard } from "@/components/wallet/PublicHotelCard";
 import { PublicFlightCard } from "@/components/wallet/PublicFlightCard";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { CategoryServiceView } from "@/components/wallet/category/CategoryServiceView";
+import { flightTicketCount } from "@/lib/publicWalletFlight";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
 import { NextActivityCard } from "@/components/wallet/NextActivityCard";
 
