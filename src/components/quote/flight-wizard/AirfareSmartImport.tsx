@@ -78,6 +78,10 @@ export interface ParsedAirfare {
     bagagem?: number;
     observacoes?: number;
   };
+  /** Dados de reserva emitida (localizador, status, check-in...). */
+  reserva?: Record<string, any>;
+  /** Passageiros com bilhete, assentos e fidelidade. */
+  passageiros?: Array<Record<string, any>>;
 }
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -481,6 +485,9 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm, tripStartDate
         observacoes: Array.isArray(candidate!.observacoes) ? candidate!.observacoes : [],
         campos_nao_identificados: Array.isArray(candidate!.campos_nao_identificados) ? candidate!.campos_nao_identificados : [],
         confianca_extracao: candidate!.confianca_extracao || {},
+        // Preserva localizador e passageiros (bilhetes, assentos, fidelidade) para a Carteira Digital.
+        reserva: candidate!.reserva || undefined,
+        passageiros: Array.isArray(candidate!.passageiros) ? candidate!.passageiros : undefined,
       };
       // Auto-classify segment types for any voo that didn't come pre-classified from the AI.
       try {
