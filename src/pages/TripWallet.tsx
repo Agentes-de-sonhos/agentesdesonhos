@@ -1,3 +1,4 @@
+import { AgencyLibraryPicker, LibraryThumb } from "@/components/image-library/AgencyLibraryPicker";
 import { SubscriptionGuard } from "@/components/subscription/SubscriptionGuard";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
@@ -1070,6 +1071,7 @@ function TripWalletContent() {
                       onPlaceIdChange={setAddPlaceId}
                       googlePhotoSlot={
                         ["hotel","attraction","transfer","car_rental","cruise"].includes(selectedServiceType) ? (
+                          <>
                           <GoogleHotelPhotos
                             placeId={addPlaceId}
                             existingUrls={addImageUrls}
@@ -1079,6 +1081,24 @@ function TripWalletContent() {
                             onPhotosSelected={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
                             onPhotoRemoved={(url) => setAddImageUrls(prev => prev.filter(u => u !== url))}
                           />
+                          <div className="space-y-2">
+                            {addImageUrls.some(u => !u.startsWith("gplace://")) && (
+                              <div className="flex gap-2 overflow-x-auto pb-1">
+                                {addImageUrls.filter(u => !u.startsWith("gplace://")).map((url) => (
+                                  <div key={url} className="relative shrink-0">
+                                    <LibraryThumb url={url} alt="Foto da biblioteca" className="h-20 w-28 rounded-md border" />
+                                    <button type="button" aria-label="Remover foto" onClick={() => setAddImageUrls(prev => prev.filter(u => u !== url))} className="absolute top-1 right-1 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center"><X className="h-3 w-3" /></button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            <AgencyLibraryPicker
+                              existingUrls={addImageUrls}
+                              maxSelectable={10}
+                              onAdd={(urls) => setAddImageUrls(prev => [...prev, ...urls.filter(u => !prev.includes(u))])}
+                            />
+                          </div>
+                          </>
                         ) : null
                       }
                     />
@@ -1197,6 +1217,11 @@ function TripWalletContent() {
                               </span>
                             </Button>
                           </label>
+                          <AgencyLibraryPicker
+                            existingUrls={editingService.image_urls || []}
+                            maxSelectable={10}
+                            onAdd={(urls) => handleAddServiceImageUrls(editingService.id, urls)}
+                          />
                         </div>
                       }
                     />
