@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils";
 import { formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ServiceDocumentsCard } from "@/components/wallet/ServiceDocumentsCard";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
+import { generateTripPDF, pdfSignatureOptions, type VoucherAccessOptions } from "@/components/trip/TripPDF";
 import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
 import { TripConverters } from "@/components/trip/TripConverters";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
@@ -2125,7 +2125,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" sideOffset={6} className="min-w-[10rem]">
                   <DropdownMenuItem
-                    onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword }, publicLocale)}
+                    onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword }, publicLocale, pdfSignatureOptions(walletSettings, (tripData as any).signature_snapshot, agentProfile))}
                     className="cursor-pointer"
                   >
                     <FileText className="mr-2 h-4 w-4" />
@@ -2140,7 +2140,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword }, publicLocale)}>
+              <Button size="sm" variant="outline" className="shadow-sm" onClick={() => generateTripPDF(tripData, agentProfile, itineraryActivities, { mode: "public", slug: tripData.slug, shareToken: tripData.share_token, password: usedPassword }, publicLocale, pdfSignatureOptions(walletSettings, (tripData as any).signature_snapshot, agentProfile))}>
                 <FileText className="mr-2 h-4 w-4" /> {tWallet(publicLocale)("downloadPdf")}
               </Button>
             )}

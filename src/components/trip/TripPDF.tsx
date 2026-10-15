@@ -9,7 +9,7 @@ import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@
 import { formatPublicLongDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { publicAirportText } from "@/lib/airportDisplay";
-import { buildWhatsAppUrl } from "@/lib/commercialSignature";
+import { buildWhatsAppUrl, resolveSignatureContact } from "@/lib/commercialSignature";
 import { renderFlightPdf, renderHotelPdf, renderCarPdf, documentCta, documentsTitle, icon as pdfIcon } from "@/components/trip/tripPdfServices";
 
 /** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
@@ -814,6 +814,16 @@ function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg:
 
 export interface PdfModules { show_signature: boolean; show_whatsapp: boolean }
 export interface PdfSignature { name?: string | null; photo_url?: string | null; agency_name?: string | null; title?: string | null; whatsapp?: string | null; phone?: string | null; email?: string | null }
+
+/** Assinatura/WhatsApp a partir das flags resolvidas da carteira (independentes). */
+export function pdfSignatureOptions(settings: { show_signature: boolean; show_whatsapp: boolean }, snapshot: any, agent: AgentProfile | null | undefined): { modules: PdfModules; signature: PdfSignature | null } {
+  if (!snapshot && !agent) return { modules: { show_signature: settings.show_signature, show_whatsapp: settings.show_whatsapp }, signature: null };
+  const sig = resolveSignatureContact(snapshot, agent as any);
+  return {
+    modules: { show_signature: settings.show_signature, show_whatsapp: settings.show_whatsapp },
+    signature: { name: sig.name, photo_url: sig.photo_url, title: sig.title, email: sig.email, whatsapp: sig.whatsapp, phone: sig.phone, agency_name: agent?.agency_name ?? null },
+  };
+}
 
 function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
   const t = tWallet(locale);
