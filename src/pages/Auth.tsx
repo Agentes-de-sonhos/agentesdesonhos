@@ -42,6 +42,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { useNoindex } from "@/hooks/useNoindex";
+import { silentUpdateOnLogin } from "@/hooks/useAppVersion";
 import { ToastAction } from "@/components/ui/toast";
 import { isSupportSessionForUser } from "@/lib/impersonation";
 import {
@@ -91,6 +92,11 @@ export default function Auth() {
   const { toast } = useToast();
 
   const { checkCanAttempt, recordFailedAttempt, recordSuccess } = useLoginProtection();
+
+  // Ao abrir o login, carrega silenciosamente a versão mais recente (sem pop-up).
+  useEffect(() => {
+    void silentUpdateOnLogin();
+  }, []);
 
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),

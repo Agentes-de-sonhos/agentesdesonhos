@@ -303,3 +303,40 @@ export async function performAppUpdate(): Promise<void> {
     finalReload();
   }
 }
+const SILENT_UPDATE_KEY = "app-silent-update-attempt";
+
+/**
+ * Decides whether the login screen should silently reload into the newest
+ * published version. Only one attempt per target version (prevents loops if
+ * the CDN still serves the old bundle).
+ */
+export function shouldSilentUpdate(options: {
+  flagActive: boolean;
+  flagVersion: string | null;
+  currentVersion: string;
+  lastAttemptVersion: string | null;
+}): boolean {
+  const { flagActive, flagVersion, currentVersion, lastAttemptVersion } = options;
+  if (currentVersion === "dev" || !flagActive || !flagVersion) return false;
+  if (flagVersion === currentVersion) return false;
+  return lastAttemptVersion !== flagVersion;
+}
+
+/** Login screen: silently refresh to the latest version, no pop-up. */
+export async function silentUpdateOnLogin(): Promise<void> {
+  if (!APP_UPDATE_PROMPT_ENABLED || isPublicUpdateContext()) return;
+  const currentVersion = typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "dev";
+  if (currentVersion === "dev") return;
+  const flag = await fetchUpdatePromptFlag();
+  let last: string | null = null;
+  try { last = localStorage.getItem(SILENT_UPDATE_KEY); } catch { /* noop */ }
+  if (!shouldSilentUpdate({
+    flagActive: flag?.is_active ?? false,
+    flagVersion: flag?.version ?? null,
+    currentVersion,
+    lastAttemptVersion: last,
+  })) return;
+  try { localStorage.setItem(SILENT_UPDATE_KEY, flag!.version); } catch { /* noop */ }
+  dismissAppUpdate(flag!.version);
+  await performAppUpdate();
+}
