@@ -330,6 +330,13 @@
       "when": 1792007915711,
       "tag": "0046_create_app_update_prompt_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1792037612319,
+      "tag": "0047_wallet_modules_per_trip",
+      "breakpoints": true
     }
   ]
 }
