@@ -160,3 +160,30 @@ describe("prévia ADS ads-email-test-v1", () => {
     });
   });
 });
+
+
+describe("Drica complete route security", () => {
+  it("blocks rendering on real and published hosts", async () => {
+    const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+    for (const hostname of ["dricaviagens.rio", "www.dricaviagens.rio", "agentedesonhoproject.lovable.app", "another.lovable.app"]) {
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname }, writable: true });
+      const result = renderPreview(<MemoryRouter initialEntries={["/ads-briefing-preview/drica-completa-v1"]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes></MemoryRouter>);
+      expect(await screen.findByText("Página não encontrada")).toBeInTheDocument();
+      expect(document.querySelector('[data-ads-preview="drica-completa-v1"]')).toBeNull();
+      result.unmount();
+    }
+  });
+  it("sets noindex and prevents backend, external actions and submits on technical host", async () => {
+    Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
+    const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+    const result = renderPreview(<MemoryRouter initialEntries={["/ads-briefing-preview/drica-completa-v1"]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes></MemoryRouter>);
+    expect(await screen.findByText(/Drica Viagens · apresentação completa para revisão/)).toBeInTheDocument();
+    expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toContain("noindex");
+    const backend = import.meta.env.VITE_SUPABASE_URL as string;
+    if (backend) await expect(window.fetch(`${backend}/rest/v1/profiles`)).rejects.toThrow(/backend desativado/);
+    expect(window.open("https://wa.me/5521987907853")).toBeNull();
+    const form = document.createElement("form"); document.body.append(form);
+    expect(form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))).toBe(false);
+    form.remove(); result.unmount();
+  });
+});

@@ -1,6 +1,6 @@
 import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
 import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
-import dricaPrague from "@/assets/presentation/drica/prague.jpg.asset.json";
+import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";

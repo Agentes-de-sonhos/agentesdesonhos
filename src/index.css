@@ -1478,3 +1478,8 @@ body[data-booking-selection-bar] {
   --secondary-foreground: 204 30% 15%; --accent: 340 25% 96%;
 }
 .wl-editorial.wl-site-base.wl-drica :is(h1,h2,h3,h4) { font-family: inherit; font-weight: 700; letter-spacing: 0; }
+
+@media (max-width: 767px) {
+  [data-ads-preview="drica-completa-v1"] #topo [data-hero-actions-placement] { padding-bottom: 2.5rem; }
+}
+[data-ads-preview="drica-completa-v1"] #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: hsl(var(--primary-foreground)); }
