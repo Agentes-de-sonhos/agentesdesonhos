@@ -50,11 +50,37 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { user_id, return_link, redirect_to } = await req.json();
+    const { user_id, return_link, redirect_to, new_password } = await req.json();
 
-    if (!user_id) {
+    if (!user_id || typeof user_id !== "string") {
       return new Response(JSON.stringify({ error: "user_id é obrigatório" }), {
         status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (new_password !== undefined) {
+      if (typeof new_password !== "string" || new_password.length < 6 || new_password.length > 72) {
+        return new Response(JSON.stringify({ error: "A senha deve ter entre 6 e 72 caracteres." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: updErr } = await adminClient.auth.admin.updateUserById(user_id, { password: new_password });
+      if (updErr) {
+        console.error("Set password error:", updErr);
+        return new Response(JSON.stringify({ error: "Não foi possível alterar a senha." }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      try {
+        await adminClient.from("admin_action_logs").insert({
+          admin_user_id: caller.id, target_user_id: user_id, action: "set_password", details: {},
+        });
+      } catch { /* não bloqueia */ }
+      return new Response(JSON.stringify({ success: true, mode: "password_set" }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
