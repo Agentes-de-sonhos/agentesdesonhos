@@ -34,6 +34,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/minha-vitrine": "Vitrine de Ofertas",
   "/personalizador-laminas": "Personalizador de Lâminas",
   "/bloco-notas": "Bloco de Notas",
+  "/biblioteca-imagens": "Biblioteca de imagens",
   "/gestao-clientes": "Gestão de Clientes",
   "/gestao-clientes/clientes": "Clientes",
   "/gestao-clientes/funil": "Oportunidades",

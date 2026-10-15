@@ -19,6 +19,7 @@ import {
 import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggestions";
 import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
+import { AgencyLibraryPicker } from "@/components/image-library/AgencyLibraryPicker";
 import { AirportSearchInput } from "@/components/quote/AirportSearchInput";
 import { RequiredFieldsScope, ServiceFormActions } from "@/components/quote/RequiredFieldsScope";
 import { focusFirstInvalidField } from "@/lib/serviceFormRequired";
@@ -3190,6 +3191,13 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
           </button>
         )}
       </div>
+      {canAddMore && (
+        <AgencyLibraryPicker
+          existingUrls={imageUrls}
+          maxSelectable={MAX_IMAGES_PER_SERVICE - imageUrls.length}
+          onAdd={handleGooglePhotosSelected}
+        />
+      )}
       {statusLine}
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
       {placeId && (

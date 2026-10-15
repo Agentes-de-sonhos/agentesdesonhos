@@ -25,6 +25,8 @@ import {
   removeImageRef,
 } from "@/lib/quoteHotelGallery";
 import type { AddImageResult } from "@/lib/quoteHotelGallery";
+import { noteLinkImage } from "@/lib/agencyImageLibrary";
+import { AgencyLibraryPicker } from "@/components/image-library/AgencyLibraryPicker";
 
 export const HOTEL_GALLERY_SAVING_LABEL = "Salvando…";
 export const HOTEL_GALLERY_SAVED_LABEL = "Salvo";
@@ -148,6 +150,7 @@ export function HotelPhotoGallery({
       // A importação é idempotente: a mesma URL de origem devolve o mesmo arquivo.
       const res = tryAdd(importedUrl);
       if (res.ok) {
+        noteLinkImage(importedUrl, candidate);
         setUrlValue("");
         setUrlOpen(false);
       }
@@ -335,6 +338,12 @@ export function HotelPhotoGallery({
             {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
             {uploading ? "Enviando…" : "Enviar foto"}
           </Button>
+          <AgencyLibraryPicker
+            existingUrls={active}
+            maxSelectable={MAX_HOTEL_GALLERY_IMAGES - active.length}
+            onAdd={(urls) => urls.forEach((u) => tryAdd(u))}
+            disabled={atLimit}
+          />
           {status === "error" && retryRef.current && (
             <Button
               type="button"

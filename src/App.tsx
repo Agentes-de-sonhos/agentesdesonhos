@@ -68,6 +68,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const Materiais = lazy(() => import("./pages/Materiais"));
 const MeusMateriais = lazy(() => import("./pages/MeusMateriais"));
+const BibliotecaImagens = lazy(() => import("./pages/BibliotecaImagens"));
 const BloqueiosAereos = lazy(() => import("./pages/BloqueiosAereos"));
 const Calculadora = lazy(() => import("./pages/Calculadora"));
 const Agenda = lazy(() => import("./pages/Agenda"));
@@ -371,6 +372,7 @@ const App = () => {
               <Route path="/bloqueios-aereos" element={<BloqueiosAereos />} />
               <Route path="/agenda" element={<Agenda />} />
               <Route path="/bloco-notas" element={<BlocoNotas />} />
+              <Route path="/biblioteca-imagens" element={<BibliotecaImagens />} />
               <Route path="/calculadora" element={<Calculadora />} />
               <Route path="/perfil" element={<Perfil />} />
               <Route path="/minha-conta" element={<MinhaConta />} />

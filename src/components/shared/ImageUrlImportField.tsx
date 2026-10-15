@@ -9,6 +9,7 @@ import {
   containsImageRef,
   isValidHttpImageUrl,
 } from "@/lib/quoteHotelGallery";
+import { noteLinkImage } from "@/lib/agencyImageLibrary";
 
 export const IMAGE_URL_TRIGGER_LABEL = "Adicionar link da internet";
 export const IMAGE_URL_INVALID_MESSAGE = "Informe um link http ou https válido de imagem.";
@@ -97,6 +98,8 @@ export function useImageUrlImport({ existingUrls, onAdd, disabled, limitMessage 
         setError(IMAGE_URL_DUPLICATE_MESSAGE);
         return;
       }
+      // Origem "link": registrada na biblioteca só depois que o serviço for salvo.
+      noteLinkImage(importedUrl, candidate);
       onAdd(importedUrl);
       close();
     } catch {

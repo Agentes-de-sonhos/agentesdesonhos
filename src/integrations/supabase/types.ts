@@ -784,6 +784,77 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_image_folders: {
+        Row: {
+          agency_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agency_image_library: {
+        Row: {
+          agency_id: string
+          created_at: string
+          created_by: string | null
+          folder_id: string | null
+          id: string
+          name: string
+          source: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          created_by?: string | null
+          folder_id?: string | null
+          id?: string
+          name: string
+          source?: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          created_by?: string | null
+          folder_id?: string | null
+          id?: string
+          name?: string
+          source?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_image_library_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "agency_image_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_membership: {
         Row: {
           agency_id: string
@@ -17277,6 +17348,7 @@ export type Database = {
         Returns: boolean
       }
       current_agency_id: { Args: never; Returns: string }
+      current_image_library_agency: { Args: never; Returns: string }
       delete_my_supplier_review: {
         Args: { _review_id: string }
         Returns: boolean
