@@ -2228,7 +2228,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                         <Icon className={cn("h-5 w-5", colors.icon)} />
                       </div>
                       <span className="text-[11px] font-medium text-foreground/80 text-center leading-tight break-words line-clamp-2">{getServiceSectionLabel(type, publicLocale)}</span>
-                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{grouped[type].length}</span>
+                      <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-semibold", colors.badge)}>{type === "flight" ? flightTicketCount(grouped[type]) : grouped[type].length}</span>
                     </button>
                   );
                 })}

@@ -43,6 +43,7 @@ export function CategoryServiceView({
   const cfg = CATEGORY_CONFIG[type];
   const catText = categoryText(type, locale);
   const total = services.length;
+  const countTotal = type === "flight" ? flightTicketCount(services) : total;
   const [gridMode, setGridMode] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);

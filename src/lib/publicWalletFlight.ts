@@ -10,11 +10,22 @@ export function publicFlightRoute(data: Partial<TripFlightData>) {
   if (data.trip_type === "ida_volta" && first && end?.destination_airport === first.origin_airport && outbound.length > 1) {
     end = outbound[outbound.length - 2];
   }
-  const origin = data.origin_city || first?.origin_city || first?.origin_airport || "";
+  const isCode = (v?: string) => !!v && /^[A-Z]{3}$/.test(v.trim());
+  const pick = (stored: string | undefined, city?: string, code?: string) =>
+    stored && !isCode(stored) ? stored : city || stored || code || "";
+  const origin = pick(data.origin_city, first?.origin_city, first?.origin_airport);
   const storedDestination = data.destination_city;
-  const destination = storedDestination && storedDestination !== origin
-    ? storedDestination : end?.destination_city || end?.destination_airport || "";
+  const destination = storedDestination && storedDestination !== data.origin_city && !isCode(storedDestination)
+    ? storedDestination : end?.destination_city || end?.destination_airport || storedDestination || "";
   return { origin, destination, roundTrip: data.trip_type === "ida_volta" || returnIndex > 0 };
+}
+
+/** Número de bilhetes: um por passageiro cadastrado (mínimo 1 por serviço). */
+export function flightTicketCount(services: Array<{ service_data?: unknown }>) {
+  return services.reduce((sum, s) => {
+    const pax = (s.service_data as Partial<TripFlightData> | undefined)?.passengers;
+    return sum + (Array.isArray(pax) && pax.length ? pax.length : 1);
+  }, 0);
 }
 
 export function publicFlightSegments(data: Partial<TripFlightData>): Partial<TripFlightSegment>[] {
