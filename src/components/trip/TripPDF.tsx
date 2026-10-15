@@ -9,6 +9,8 @@ import { isGoogleImageRef, resolveServiceImages, resolveServicePlaceId } from "@
 import { formatPublicLongDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { publicAirportText } from "@/lib/airportDisplay";
+import { buildWhatsAppUrl, resolveSignatureContact } from "@/lib/commercialSignature";
+import { renderFlightPdf, renderHotelPdf, renderCarPdf, documentCta, documentsTitle, icon as pdfIcon } from "@/components/trip/tripPdfServices";
 
 /** Resolvedor de referência persistida -> URL utilizável no HTML do PDF. */
 export type PdfImageResolver = (ref: string) => string | null;
@@ -117,23 +119,6 @@ function getServiceLabels(locale: PublicLocale): Record<TripServiceType, string>
   attraction: t("serviceAttraction"), insurance: t("serviceInsurance"), cruise: t("serviceCruise"), train: t("serviceTrain"), other: t("serviceOther"),
   };
 }
-// Emoji + gradiente por serviço (alinhado ao QuotePDF para consistência visual)
-const SERVICE_EMOJI: Record<TripServiceType, string> = {
-  flight: "✈️", hotel: "🏨", car_rental: "🚗", transfer: "🚐",
-  attraction: "🎟️", insurance: "🛡️", cruise: "🚢", train: "🚆", other: "📦",
-};
-const SERVICE_GRADIENTS: Record<TripServiceType, { bg: string; fg: string; iconBg: string }> = {
-  flight:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.15),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
-  hotel:      { bg: "linear-gradient(90deg,rgba(245,158,11,0.18),rgba(217,119,6,0.05))",  fg: "#b45309", iconBg: "rgba(255,255,255,0.85)" },
-  car_rental: { bg: "linear-gradient(90deg,rgba(16,185,129,0.18),rgba(5,150,105,0.05))",  fg: "#047857", iconBg: "rgba(255,255,255,0.85)" },
-  transfer:   { bg: "linear-gradient(90deg,rgba(139,92,246,0.18),rgba(124,58,237,0.05))", fg: "#6d28d9", iconBg: "rgba(255,255,255,0.85)" },
-  attraction: { bg: "linear-gradient(90deg,rgba(236,72,153,0.18),rgba(219,39,119,0.05))", fg: "#be185d", iconBg: "rgba(255,255,255,0.85)" },
-  insurance:  { bg: "linear-gradient(90deg,rgba(6,182,212,0.18),rgba(8,145,178,0.05))",   fg: "#0e7490", iconBg: "rgba(255,255,255,0.85)" },
-  cruise:     { bg: "linear-gradient(90deg,rgba(15,118,110,0.12),rgba(15,118,110,0.05))", fg: "#0f766e", iconBg: "rgba(255,255,255,0.85)" },
-  train:      { bg: "linear-gradient(90deg,rgba(100,116,139,0.18),rgba(71,85,105,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
-  other:      { bg: "linear-gradient(90deg,rgba(148,163,184,0.18),rgba(100,116,139,0.05))", fg: "#475569", iconBg: "rgba(255,255,255,0.85)" },
-};
-
 function formatDate(dateStr: string, locale: PublicLocale = "pt-BR") {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
@@ -274,7 +259,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.trip_cancellation) details.push(`${t("fldCancelamento")}: ${data.trip_cancellation}`);
       if (data.dental_assistance) details.push(`${t("fldOdontologica")}: ${data.dental_assistance}`);
       if (data.medical_repatriation) details.push(`${t("fldRepatriacao")}: ${data.medical_repatriation}`);
-      if (data.emergency_phone) details.push(`📞 ${t("fldEmergencia")}: ${data.emergency_phone}`);
+      if (data.emergency_phone) details.push(`${pdfIcon("phone", 12)} ${t("fldEmergencia")}: ${data.emergency_phone}`);
       if (data.emergency_whatsapp) details.push(`💬 WhatsApp: ${data.emergency_whatsapp}`);
       if (data.insured_persons?.length > 0) details.push(`${t("fldSegurados")}: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
       if (data.how_to_activate) details.push(`${t("fldComoAcionar")}: ${data.how_to_activate}`);
@@ -402,280 +387,13 @@ function pillTitle(parts: { label?: string; value: string; muted?: boolean }[]):
 function renderServiceHeadline(opts: { title?: string; dates?: string; lines?: string[] }): string {
   const { title, dates, lines = [] } = opts;
   const titleHtml = title ? `<p style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 2px;line-height:1.3;">${escapeHtml(title)}</p>` : "";
-  const datesHtml = dates ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px;">📅 ${escapeHtml(dates)}</p>` : "";
+  const datesHtml = dates ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px;">${pdfIcon("calendar", 12)} ${escapeHtml(dates)}</p>` : "";
   const linesHtml = lines.filter(Boolean).map(l => `<p style="${TXT}">${escapeHtml(l)}</p>`).join("");
   if (!titleHtml && !datesHtml && !linesHtml) return "";
   return `<div class="pdf-block" style="margin-bottom:4px;">${titleHtml}${datesHtml}${linesHtml}</div>`;
 }
 
 function fmtDate(d: any, locale: PublicLocale = "pt-BR"): string { return d ? formatDate(String(d), locale) : ""; }
-
-function renderFlightBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
-  const t = tWallet(locale);
-  const data = service.service_data as any;
-  const tripTypeMap: Record<string, string> = { ida: t("tripSomenteIda"), ida_volta: t("tripIdaVolta"), multi_trechos: t("tripMultiTrechos") };
-  const statusMap: Record<string, string> = { confirmado: t("statusConfirmadoEmoji"), emitido: t("statusEmitidoEmoji"), pendente: t("statusPendenteEmoji") };
-  const airline = data.main_airline || data.airline || '';
-  const firstDate = data.segments?.[0]?.flight_date || data.departure_date || '';
-  const lastDate = data.segments?.[data.segments?.length - 1]?.flight_date || data.return_date || '';
-  const datesStr = firstDate ? `${fmtDate(firstDate)}${lastDate && lastDate !== firstDate ? ` - ${fmtDate(lastDate)}` : ''}` : "";
-
-  const head = renderServiceHeadline({
-    title: `${data.origin_city || ''} → ${data.destination_city || ''}`,
-    dates: datesStr,
-    lines: [
-      airline ? `${t("fldCompanhia")}: ${airline}` : "",
-      data.trip_type ? `${t("fldTipo")}: ${tripTypeMap[data.trip_type] || data.trip_type}` : "",
-      data.locator_code ? `${t("fldLocalizador")}: ${data.locator_code}` : "",
-      data.flight_status ? `${t("fldStatus")}: ${statusMap[data.flight_status] || data.flight_status}` : "",
-    ],
-  });
-
-  // Segments timeline
-  let segmentsHtml = "";
-  if (data.segments?.length > 0) {
-    const segCards = data.segments.map((seg: any, i: number) => {
-      const segType = seg.segment_type === 'ida' ? t("fldIda") : seg.segment_type === 'conexao' ? t("segConexao") : t("segVolta");
-      let conn = "";
-      if (i > 0 && data.segments[i - 1]) {
-        const prev = data.segments[i - 1];
-        if (prev.flight_date === seg.flight_date && prev.arrival_time && seg.departure_time) {
-          const [ph, pm] = prev.arrival_time.split(':').map(Number);
-          const [sh, sm] = seg.departure_time.split(':').map(Number);
-          const diff = (sh * 60 + sm) - (ph * 60 + pm);
-          if (diff > 0) {
-            const h = Math.floor(diff / 60); const m = diff % 60;
-            conn = `<p style="font-size:10px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:3px 8px;border-radius:6px;margin:4px 0;font-weight:600;">${escapeHtml(t("sectionConexaoEm"))} ${escapeHtml(seg.origin_city || seg.origin_airport || '')} — ${h}h${m > 0 ? String(m).padStart(2, '0') : ''}</p>`;
-          }
-        }
-      }
-      return `${conn}<div style="border-left:2px solid rgba(15,118,110,0.4);padding:3px 0 3px 9px;margin:2px 0;">
-        <p style="margin:0 0 2px;font-size:10px;">
-          <span style="background:rgba(15,118,110,0.12);color:#0f766e;padding:1px 6px;border-radius:4px;font-weight:700;">${escapeHtml(segType)}</span>
-          ${seg.airline ? `<span style="color:#64748b;margin-left:6px;">${escapeHtml(seg.airline)}</span>` : ''}
-          ${seg.flight_number ? `<span style="color:#64748b;font-family:'Courier New',monospace;margin-left:6px;">${escapeHtml(seg.flight_number)}</span>` : ''}
-        </p>
-        <p style="margin:1px 0;font-size:12px;font-weight:600;color:#1e293b;">${escapeHtml(publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city }))} → ${escapeHtml(publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city }))}</p>
-        <p style="margin:1px 0;font-size:10px;color:#64748b;">
-          ${seg.flight_date ? escapeHtml(fmtDate(seg.flight_date)) : ''}${seg.departure_time ? ` • ${escapeHtml(seg.departure_time)}` : ''}${seg.arrival_time ? ` → ${escapeHtml(seg.arrival_time)}` : ''}${seg.terminal ? ` • ${t("fldTerminal")} ${escapeHtml(seg.terminal)}` : ''}${seg.gate ? ` • ${t("fldPortao")} ${escapeHtml(seg.gate)}` : ''}
-        </p>
-      </div>`;
-    }).join("");
-    segmentsHtml = `<div class="pdf-block" style="margin-top:6px;padding:8px 11px;background:#f1f5f9;border-radius:8px;">
-      <p style="${SECTION_TITLE}">${escapeHtml(t("sectionTrechos"))}</p>${segCards}</div>`;
-  }
-
-  const passengersHtml = data.passengers?.length > 0
-    ? miniCard(t("sectionPassageirosPerson"), data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)} (${p.passenger_type === 'adulto' ? t("paxAdulto") : p.passenger_type === 'crianca' ? t("paxCrianca") : t("paxBebe")})${p.seat ? ` • ${t("fldAssento")} ${escapeHtml(p.seat)}` : ''}</p>`))
-    : "";
-
-  const baggageHtml = (data.carry_on || data.checked_baggage)
-    ? miniCard(t("sectionBagagem"), [
-        p(t("fldMao"), data.carry_on),
-        p(t("fldDespachada"), data.checked_baggage),
-        p(t("fldExtra"), data.extra_baggage),
-        data.baggage_rules ? `<p style="${TXT_ITALIC}">${escapeHtml(data.baggage_rules)}</p>` : "",
-      ])
-    : "";
-
-  const boardingHtml = (data.recommended_arrival || data.required_documents || data.boarding_notes)
-    ? miniCard(t("sectionOrientacoesEmbarque"), [
-        p(t("fldAntecedencia"), data.recommended_arrival),
-        p(t("fldTerminal"), data.boarding_terminal),
-        p(t("fldDocumentos"), data.required_documents),
-        p(t("fldImigracao"), data.immigration_rules),
-        data.boarding_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>` : "",
-      ])
-    : "";
-
-  const checkinHtml = data.checkin_url
-    ? `<div class="pdf-block" style="margin-top:6px;"><a href="${escapeHtml(data.checkin_url)}" style="display:inline-block;background:#0f766e;color:#fff;padding:7px 14px;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;">${escapeHtml(t("ctaCheckinOnline"))}</a>${data.checkin_open_date ? `<p style="${TXT}">${t("fldAbertura")}: ${escapeHtml(data.checkin_open_date)}</p>` : ''}</div>`
-    : "";
-
-  return head + segmentsHtml + passengersHtml + baggageHtml + boardingHtml + checkinHtml;
-}
-
-function renderHotelBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
-  const t = tWallet(locale);
-  const data = service.service_data as any;
-  const catMap: Record<string, string> = { '3': '⭐⭐⭐', '4': '⭐⭐⭐⭐', '5': '⭐⭐⭐⭐⭐', boutique: t("catBoutique"), resort: t("catResort"), pousada: t("catPousada") };
-  const roomMap: Record<string, string> = { standard: t("roomStandard"), superior: t("roomSuperior"), deluxe: t("roomDeluxe"), suite: t("roomSuite"), suite_junior: t("roomSuiteJunior"), presidencial: t("roomPresidencial"), apartamento: t("roomApartamento"), villa: t("roomVilla"), bangalo: t("roomBangalo") };
-  const mealMap: Record<string, string> = { somente_hospedagem: t("mealSomenteHospedagem"), cafe_manha: t("mealCafeManha"), meia_pensao: t("mealMeiaPensao"), pensao_completa: t("mealPensaoCompleta"), all_inclusive: t("mealAllInclusive") };
-  const bedMap: Record<string, string> = { king: t("bedKing"), queen: t("bedQueen"), twin: t("bedTwin"), single: t("bedSingle"), double: t("bedDouble"), triple: t("bedTriple") };
-  const statusMap: Record<string, string> = { confirmada: t("hotelStatusConfirmada"), emitida: t("hotelStatusEmitida"), pre_reserva: t("hotelStatusPreReserva") };
-
-  let nights: number | null = null;
-  try { const [sy,sm,sd] = data.check_in.split('-').map(Number); const [ey,em,ed] = data.check_out.split('-').map(Number); nights = Math.ceil((new Date(ey,em-1,ed).getTime() - new Date(sy,sm-1,sd).getTime()) / 86400000); } catch {}
-
-  const head = renderServiceHeadline({
-    title: `${data.hotel_name}${data.hotel_category ? ` ${catMap[data.hotel_category] || data.hotel_category}` : ''}`,
-    dates: `${fmtDate(data.check_in)} - ${fmtDate(data.check_out)}${nights ? ` (${nights} ${t("nightsLabelOther")})` : ''}`,
-    lines: [
-      `${data.city || ''}${data.country ? `, ${data.country}` : ''}`,
-      data.reservation_status ? `${t("fldStatus")}: ${statusMap[data.reservation_status] || data.reservation_status}` : "",
-      data.reservation_code ? `${t("fldReserva")}: ${data.reservation_code}` : "",
-      data.room_type ? `${t("fldAcomodacao")}: ${roomMap[data.room_type] || data.room_type}` : "",
-      data.meal_plan ? `${t("fldRegime")}: ${mealMap[data.meal_plan] || data.meal_plan}` : "",
-    ],
-  });
-
-  const checkin = miniCard(t("sectionCheckin"), [
-    p(t("fldHorario"), data.checkin_time),
-    data.early_checkin ? p(t("fldEarlyCheckin"), data.early_checkin === 'sim' ? t("availIncluso") : data.early_checkin === 'mediante_taxa' ? t("availMedianteTaxa") : data.early_checkin === 'sob_consulta' ? t("availSobConsulta") : t("availNaoDisponivel")) : "",
-    p(t("fldTitular"), data.checkin_holder),
-    data.checkin_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.checkin_instructions)}</p>` : "",
-    p(t("fldChegadaTardia"), data.late_arrival_policy),
-  ]);
-
-  const checkout = miniCard(t("sectionCheckout"), [
-    p(t("fldHorario"), data.checkout_time),
-    data.late_checkout ? p(t("fldLateCheckout"), data.late_checkout === 'sim' ? t("availIncluso") : data.late_checkout === 'mediante_taxa' ? `${t("availMedianteTaxa")}${data.late_checkout_fee ? ` (${data.late_checkout_fee})` : ''}` : data.late_checkout === 'sob_consulta' ? t("availSobConsulta") : t("availNaoDisponivel")) : "",
-    data.checkout_procedure ? p(t("fldProcedimento"), data.checkout_procedure === 'recepcao' ? t("checkoutProcRecepcao") : data.checkout_procedure === 'express' ? t("checkoutProcExpress") : t("checkoutProcOnline")) : "",
-    data.checkout_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.checkout_instructions)}</p>` : "",
-  ]);
-
-  const room = miniCard(t("sectionAcomodacao"), [
-    data.bed_type ? p(t("fldCama"), bedMap[data.bed_type] || data.bed_type) : "",
-    p(t("fldHospedes"), data.guest_count),
-    p(t("fldVista"), data.room_view),
-    p(t("fldAmenities"), data.amenities),
-  ]);
-
-  const food = miniCard(t("sectionAlimentacao"), [
-    p(t("fldCafeDaManha"), data.breakfast_hours),
-    p(t("fldRestaurantes"), data.restaurants_included),
-    data.food_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.food_notes)}</p>` : "",
-    p(t("fldAllInclusive"), data.all_inclusive_rules),
-  ]);
-
-  const includedBadges: string[] = [];
-  if (data.breakfast_included === 'sim') includedBadges.push(t("badgeCafe"));
-  if (data.wifi_included === 'sim') includedBadges.push(t("badgeWifi"));
-  if (data.taxes_included === 'sim') includedBadges.push(t("badgeTaxas"));
-  if (data.parking_included === 'sim') includedBadges.push(t("badgeEstacionamento"));
-  if (data.transfer_included === 'sim') includedBadges.push(t("badgeTransfer"));
-  const included = (includedBadges.length || data.resort_fee || data.other_inclusions)
-    ? miniCard(t("sectionInclusosReserva"), [
-        badgeRow(includedBadges),
-        p(t("fldResortFee"), data.resort_fee),
-        data.other_inclusions ? `<p style="${TXT}">${escapeHtml(data.other_inclusions)}</p>` : "",
-      ])
-    : "";
-
-  const policies = miniCard(t("sectionPoliticas"), [
-    p(t("fldCancelamento"), data.cancellation_policy),
-    p(t("fldCriancas"), data.children_policy),
-    p(t("fldPets"), data.pet_policy),
-    data.mandatory_fees ? `<p style="${TXT_FG}font-weight:600;">⚠️ ${t("fldTaxasDestino")}: ${escapeHtml(data.mandatory_fees)}</p>` : "",
-    data.hotel_deposit ? p(t("fldCaucao"), `${data.hotel_deposit}${data.hotel_deposit_method ? ` (${data.hotel_deposit_method})` : ''}`) : "",
-  ]);
-
-  const guests = data.guests?.length > 0
-    ? miniCard(t("sectionHospedesFamily"), data.guests.map((g: any) => `<p style="${TXT}">${escapeHtml(g.name)}${g.age ? ` (${g.age})` : ''}${g.notes ? ` • ${escapeHtml(g.notes)}` : ''}</p>`))
-    : "";
-
-  const location = miniCard(t("sectionLocalizacaoContato"), [
-    data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
-    data.hotel_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.hotel_phone)}</p>` : "",
-    data.hotel_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.hotel_email)}</p>` : "",
-    data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">${escapeHtml(t("ctaVerNoMapa"))}</a></p>` : "",
-    data.hotel_website ? `<p style="${TXT}"><a href="${escapeHtml(data.hotel_website)}" style="color:#0f766e;text-decoration:underline;">${escapeHtml(t("ctaSiteOficial"))}</a></p>` : "",
-  ]);
-
-  const notes = (data.special_requests || data.agency_notes || data.notes)
-    ? miniCard(t("sectionObservacoes"), [
-        p(t("fldSolicitacoes"), data.special_requests),
-        data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
-        data.notes && !data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.notes)}</p>` : "",
-      ])
-    : "";
-
-  return head + checkin + checkout + room + food + included + policies + guests + location + notes;
-}
-
-function renderCarRentalBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
-  const data = service.service_data as any;
-  const t = tWallet(locale);
-  const head = renderServiceHeadline({
-    title: `${data.car_type ? escapeHtml(data.car_type) : ''}${data.car_model ? ` • ${escapeHtml(data.car_model)}` : ''}`,
-    dates: data.pickup_date && data.dropoff_date ? `${fmtDate(data.pickup_date, locale)} - ${fmtDate(data.dropoff_date, locale)}` : "",
-    lines: [
-      data.rental_company ? `${t("fldLocadora")}: ${data.rental_company}` : "",
-      data.reservation_code ? `${t("fldReserva")}: ${data.reservation_code}` : "",
-    ],
-  });
-
-  const pickup = miniCard(t("sectionRetirada"), [
-    data.pickup_address ? `<p style="${TXT}">${escapeHtml(data.pickup_address)}</p>` : "",
-    data.pickup_city ? `<p style="${TXT}">${escapeHtml(data.pickup_city)}${data.pickup_country ? `, ${escapeHtml(data.pickup_country)}` : ''}</p>` : "",
-    data.pickup_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.pickup_date, locale))}${data.pickup_time ? ` ${t("wordAs")} ${escapeHtml(data.pickup_time)}` : ''}</p>` : "",
-    p(t("fldTerminal"), data.pickup_terminal),
-    data.pickup_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.pickup_phone)}</p>` : "",
-    data.pickup_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.pickup_instructions)}</p>` : "",
-  ]);
-
-  const dropoff = miniCard(t("sectionDevolucao"), [
-    data.dropoff_address ? `<p style="${TXT}">${escapeHtml(data.dropoff_address)}</p>` : "",
-    data.dropoff_city ? `<p style="${TXT}">${escapeHtml(data.dropoff_city)}${data.dropoff_country ? `, ${escapeHtml(data.dropoff_country)}` : ''}</p>` : "",
-    data.dropoff_date ? `<p style="${TXT}">📅 ${escapeHtml(fmtDate(data.dropoff_date, locale))}${data.dropoff_time ? ` ${t("wordAs")} ${escapeHtml(data.dropoff_time)}` : ''}</p>` : "",
-    data.dropoff_instructions ? `<p style="${TXT_ITALIC}">${escapeHtml(data.dropoff_instructions)}</p>` : "",
-    data.dropoff_late_policy ? `<p style="${TXT}">⏰ ${escapeHtml(data.dropoff_late_policy)}</p>` : "",
-  ]);
-
-  const vehicle = miniCard(t("sectionVeiculo"), [
-    p(t("fldModelo"), data.car_model),
-    data.transmission ? p(t("fldTransmissao"), data.transmission === 'automatico' ? t("transmAutomatico") : t("transmManual")) : "",
-    p(t("fldCombustivel"), data.fuel_type),
-    badgeRow([
-      data.doors ? `🚪 ${data.doors} ${t("wordPortas")}` : "",
-      data.passenger_capacity ? `👤 ${data.passenger_capacity} ${t("wordPassageiros")}` : "",
-      data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
-    ].filter(Boolean) as string[]),
-    p(t("fldPlaca"), data.plate),
-  ]);
-
-  const insurance = miniCard(t("sectionSeguros"), [
-    p(t("fldBasico"), data.basic_insurance),
-    p(t("fldTotalCdwLdw"), data.full_insurance),
-    p(t("fldTerceiros"), data.third_party_protection),
-    p(t("fldRoubo"), data.theft_protection),
-    p(t("fldDanos"), data.damage_protection),
-    data.deductible ? `<p style="${TXT_FG}font-weight:600;">${t("fldFranquia")}: ${escapeHtml(data.deductible)}</p>` : "",
-    data.insurance_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.insurance_notes)}</p>` : "",
-  ]);
-
-  const deposit = data.deposit_amount
-    ? miniCard(t("sectionCaucaoPagamento"), [
-        p(t("fldCaucao"), data.deposit_amount),
-        p(t("fldForma"), data.deposit_method),
-        data.card_in_driver_name ? `<p style="${TXT_FG}font-weight:600;">⚠️ ${t("fldCartaoCondutor")}: ${escapeHtml(data.card_in_driver_name)}</p>` : "",
-        p(t("fldPagamento"), data.payment_status),
-      ], "amber")
-    : "";
-
-  const drivers = data.drivers?.length > 0
-    ? miniCard(t("sectionCondutores"), data.drivers.map((d: any, i: number) => `<p style="${TXT}">${i === 0 ? '🔑 ' : '👤 '}${escapeHtml(d.name)}${d.document ? ` • ${escapeHtml(d.document)}` : ''}</p>`))
-    : "";
-
-  const fuel = data.fuel_policy
-    ? miniCard(t("sectionCombustivel"), [
-        p(t("fldPolitica"), data.fuel_policy === 'cheio_cheio' ? t("fuelCheioCheio") : data.fuel_policy === 'cheio_vazio' ? t("fuelCheioVazio") : data.fuel_policy),
-        p(t("fldPenalidade"), data.fuel_penalty),
-        data.fuel_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.fuel_notes)}</p>` : "",
-      ])
-    : "";
-
-  const orient = miniCard(t("sectionOrientacoes"), [
-    p(t("fldDocumentos"), data.required_documents),
-    p(t("fldIdadeMinima"), data.minimum_age),
-    p(t("fldPid"), data.international_permit),
-    data.traffic_rules ? `<p style="${TXT_ITALIC}">${escapeHtml(data.traffic_rules)}</p>` : "",
-    data.emergency_contact ? `<p style="${TXT}">📞 ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
-  ]);
-
-  return head + pickup + dropoff + vehicle + insurance + deposit + drivers + fuel + orient;
-}
-
 
 function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   const data = service.service_data as any;
@@ -685,7 +403,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
     ? `${data.origin_location} → ${data.destination_location}`
     : data.location || '';
   const head = renderServiceHeadline({
-    title: `${typeMap[data.transfer_type] || data.transfer_type || t("serviceTransfer")} — ${route}`,
+    title: `${typeMap[data.transfer_type] || data.transfer_type || t("serviceTransfer")}${route ? ` — ${route}` : ""}`,
     dates: data.date ? `${fmtDate(data.date, locale)}${data.time ? ` ${t("wordAs")} ${data.time}` : ''}` : "",
     lines: [
       data.company_name ? `${t("fldEmpresa")}: ${data.company_name}` : "",
@@ -712,7 +430,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
         p(t("fldAeroporto"), data.departure_airport),
         p(t("fldSaidaRecomendada"), data.recommended_departure),
         data.boarding_point ? p(t("fldEmbarque"), data.boarding_point === 'lobby' ? t("boardingLobby") : data.boarding_point === 'entrada' ? t("boardingEntrada") : data.boarding_point === 'estacionamento' ? t("boardingEstacionamento") : data.boarding_point) : "",
-        data.departure_alert ? `<p style="margin-top:4px;font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 9px;border-radius:6px;font-weight:600;">⚠️ ${escapeHtml(data.departure_alert)}</p>` : "",
+        data.departure_alert ? `<p style="margin-top:4px;font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 9px;border-radius:6px;font-weight:600;">${pdfIcon("info", 12)} ${escapeHtml(data.departure_alert)}</p>` : "",
       ])
     : "";
 
@@ -721,7 +439,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
         p(t("fldNome"), data.driver_name),
         p(t("fldIdioma"), data.driver_language),
         p(t("fldPlaca"), data.vehicle_plate),
-        data.driver_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.driver_phone)}</p>` : "",
+        data.driver_phone ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${escapeHtml(data.driver_phone)}</p>` : "",
       ])
     : "";
 
@@ -729,8 +447,8 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
     ? miniCard(t("sectionVeiculoTransfer"), [
         data.vehicle_type ? p(t("fldTipo"), data.vehicle_type === 'sedan' ? t("vehicleSedan") : data.vehicle_type === 'suv' ? t("vehicleSuv") : data.vehicle_type === 'van' ? t("vehicleVan") : data.vehicle_type === 'minibus' ? t("vehicleMinibus") : data.vehicle_type === 'onibus' ? t("vehicleOnibus") : data.vehicle_type) : "",
         badgeRow([
-          data.vehicle_capacity ? `👤 ${data.vehicle_capacity} ${t("wordPassageiros")}` : "",
-          data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
+          data.vehicle_capacity ? `${pdfIcon("user", 12)} ${data.vehicle_capacity} ${t("wordPassageiros")}` : "",
+          data.luggage_capacity ? `${pdfIcon("luggage", 12)} ${data.luggage_capacity}` : "",
           data.air_conditioning === 'sim' ? t("badgeArCondicionado") : "",
         ].filter(Boolean) as string[]),
         data.vehicle_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.vehicle_notes)}</p>` : "",
@@ -752,7 +470,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
   const orient = (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes)
     ? miniCard(t("sectionOrientacoes"), [
         p(t("fldDocumentos"), data.required_documents),
-        data.emergency_contact ? `<p style="${TXT}">📞 ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
+        data.emergency_contact ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
         data.agency_contact ? `<p style="${TXT}">📱 ${t("fldAgencia")}: ${escapeHtml(data.agency_contact)}</p>` : "",
         data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaPlanoB")}</p><p style="${TXT_FG}">${escapeHtml(data.plan_b)}</p></div>` : "",
         data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
@@ -865,9 +583,9 @@ function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR
 
   const emergency = (data.emergency_phone || data.emergency_whatsapp || data.emergency_email)
     ? miniCard(t("sectionContatosEmergencia"), [
-        data.emergency_phone ? `<p style="${TXT_FG}font-weight:600;">📞 ${escapeHtml(data.emergency_phone)}</p>` : "",
+        data.emergency_phone ? `<p style="${TXT_FG}font-weight:600;">${pdfIcon("phone", 12)} ${escapeHtml(data.emergency_phone)}</p>` : "",
         data.emergency_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.emergency_whatsapp)}</p>` : "",
-        data.emergency_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.emergency_email)}</p>` : "",
+        data.emergency_email ? `<p style="${TXT}">${pdfIcon("link", 12)} ${escapeHtml(data.emergency_email)}</p>` : "",
         data.emergency_24h === 'sim' ? `<p style="${TXT}color:#0f766e;font-weight:600;">${t("badge24h")}</p>` : "",
         p(t("fldIdiomas"), data.emergency_languages),
         data.insurer_website ? `<p style="${TXT}"><a href="${escapeHtml(data.insurer_website)}" style="color:#0f766e;text-decoration:underline;">${t("ctaSiteSeguradora")}</a></p>` : "",
@@ -1004,9 +722,9 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
     ? miniCard(t("sectionContato"), [
         data.contact_name ? `<p style="${TXT}">${escapeHtml(data.contact_name)}${data.contact_company ? ` — ${escapeHtml(data.contact_company)}` : ''}</p>` : "",
         p("🌐", data.contact_language),
-        data.contact_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.contact_phone)}</p>` : "",
+        data.contact_phone ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${escapeHtml(data.contact_phone)}</p>` : "",
         data.contact_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.contact_whatsapp)}</p>` : "",
-        data.contact_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.contact_email)}</p>` : "",
+        data.contact_email ? `<p style="${TXT}">${pdfIcon("link", 12)} ${escapeHtml(data.contact_email)}</p>` : "",
       ])
     : "";
 
@@ -1026,7 +744,7 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
         p(t("fldIdioma"), data.guide_language),
         p(t("fldHorario"), data.guide_tour_time),
         p(t("fldDuracao"), data.guide_tour_duration),
-        data.guide_meeting_point ? `<p style="${TXT}">📍 ${t("fldEncontro")}: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
+        data.guide_meeting_point ? `<p style="${TXT}">${pdfIcon("pin", 12)} ${t("fldEncontro")}: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
       ])
     : "";
 
@@ -1048,9 +766,6 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
 
 function renderServiceBody(service: TripService, locale: PublicLocale = "pt-BR"): string {
   switch (service.service_type) {
-    case "flight": return renderFlightBody(service, locale);
-    case "hotel": return renderHotelBody(service, locale);
-    case "car_rental": return renderCarRentalBody(service, locale);
     case "transfer": return renderTransferBody(service, locale);
     case "attraction": return renderAttractionBody(service, locale);
     case "insurance": return renderInsuranceBody(service, locale);
@@ -1061,40 +776,6 @@ function renderServiceBody(service: TripService, locale: PublicLocale = "pt-BR")
       // Fallback to legacy flat list if any future type is unmapped
       return getServiceDetails(service, locale).map(d => `<p style="${TXT}">${escapeHtml(d)}</p>`).join("");
   }
-}
-
-function renderServiceGallery(service: TripService, resolveImg: PdfImageResolver): string {
-  // Aligned with QuotePDF: hotels get a grid of up to 10 thumbnails;
-  // other service types get a single left-side image rendered inside renderServiceLayout.
-  const urls = collectServiceImages(service, resolveImg);
-  if (!urls.length) return "";
-  if (service.service_type !== 'hotel') return "";
-  const hotelImages = urls.slice(0, 10);
-  const rows: string[] = [];
-  for (let i = 0; i < hotelImages.length; i += 5) {
-    const row = hotelImages.slice(i, i + 5);
-    const rowHtml = row
-      .map(
-        (src) => `
-          <td style="width:20%;vertical-align:middle;padding:3px;">
-            <div style="width:100%;height:78px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;text-align:center;line-height:78px;font-size:0;">
-              <img src="${src}" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;vertical-align:middle;display:inline-block;" />
-            </div>
-          </td>
-        `
-      )
-      .join("");
-    const padCount = 5 - row.length;
-    const padHtml = padCount > 0 ? Array(padCount).fill('<td style="width:20%;padding:3px;"></td>').join("") : "";
-    rows.push(`<tr>${rowHtml}${padHtml}</tr>`);
-  }
-  return `
-    <div class="pdf-block pdf-hotel-gallery" style="margin-bottom:8px;">
-      <table style="width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;">
-        ${rows.join("")}
-      </table>
-    </div>
-  `;
 }
 
 /**
@@ -1114,7 +795,6 @@ export function collectServiceImages(service: TripService, resolveImg: PdfImageR
 }
 
 function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg: PdfImageResolver): string {
-  if (service.service_type === 'hotel') return bodyHtml;
   const urls = collectServiceImages(service, resolveImg);
   const firstImage = urls[0];
   if (!firstImage) return bodyHtml;
@@ -1132,55 +812,41 @@ function renderServiceLayout(service: TripService, bodyHtml: string, resolveImg:
   `;
 }
 
-function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
-  if (!profile?.agency_logo_url) {
-    return `
-      <div style="text-align:center;padding:10px 0;background:#ffffff;border-bottom:1px solid #e2e8f0;border-radius:0;">
-        <p style="font-size:22px;font-weight:800;color:#0f766e;margin:0;letter-spacing:-0.3px;">
-          ${profile?.agency_name || tWallet(locale)("agencyFallbackName")}
-        </p>
-      </div>
-    `;
-  }
-  return `
-    <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
-      <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
-    </div>
-  `;
+export interface PdfModules { show_signature: boolean; show_whatsapp: boolean }
+export interface PdfSignature { name?: string | null; photo_url?: string | null; agency_name?: string | null; title?: string | null; whatsapp?: string | null; phone?: string | null; email?: string | null }
+
+/** Assinatura/WhatsApp a partir das flags resolvidas da carteira (independentes). */
+export function pdfSignatureOptions(settings: { show_signature: boolean; show_whatsapp: boolean }, snapshot: any, agent: AgentProfile | null | undefined): { modules: PdfModules; signature: PdfSignature | null } {
+  if (!snapshot && !agent) return { modules: { show_signature: settings.show_signature, show_whatsapp: settings.show_whatsapp }, signature: null };
+  const sig = resolveSignatureContact(snapshot, agent as any);
+  return {
+    modules: { show_signature: settings.show_signature, show_whatsapp: settings.show_whatsapp },
+    signature: { name: sig.name, photo_url: sig.photo_url, title: sig.title, email: sig.email, whatsapp: sig.whatsapp, phone: sig.phone, agency_name: agent?.agency_name ?? null },
+  };
 }
 
-function generateAgentSignature(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
-  if (!profile) return "";
-  const avatarHtml = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:68px;height:68px;border-radius:50%;object-fit:cover;border:4px solid rgba(15,118,110,0.12);box-shadow:0 8px 20px rgba(0,0,0,0.08);display:inline-block;" />`
-    : `<div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#0f766e,#14b8a6);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,0.08);">${profile.name.charAt(0).toUpperCase()}</div>`;
-  const whatsappNumber = profile.phone?.replace(/\D/g, "") || "";
-  const whatsappLink = whatsappNumber
-    ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
-    : "";
-  return `
-    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid #e2e8f0;border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-      <div style="background:linear-gradient(90deg,rgba(241,245,249,0.7),rgba(241,245,249,0.2));padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;">${tWallet(locale)("pdfConsultant")}</p>
-      </div>
-      <div style="padding:14px 18px;text-align:center;">
-        ${avatarHtml}
-        <p style="font-size:17px;font-weight:800;color:#1e293b;margin:8px 0 1px;">${profile.name}</p>
-        ${profile.agency_name ? `<p style="font-size:12px;color:#64748b;margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
-        ${profile.city || profile.state ? `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
-        ${
-          whatsappLink
-            ? `<div style="margin-top:10px;">
-                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
-                  ${tWallet(locale)("pdfTalkOnWhatsApp")}
-                </a>
-              </div>`
-            : ""
-        }
-      </div>
-    </div>
-  `;
+function generateAgencyHeader(profile: AgentProfile | null, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
+  const logo = profile?.agency_logo_url
+    ? `<img class="logo" src="${escapeHtml(profile.agency_logo_url)}" alt="${escapeHtml(profile.agency_name || "Logo")}" />`
+    : `<p class="logo-text">${escapeHtml(profile?.agency_name || t("agencyFallbackName"))}</p>`;
+  return `<header class="brand-row">${logo}<span class="badge">${escapeHtml(t("pdfWalletBadge"))}</span></header>`;
+}
+
+function generateAgentSignature(sig: PdfSignature | null, modules: PdfModules, generatedAt: string, locale: PublicLocale = "pt-BR"): string {
+  const t = tWallet(locale);
+  const showSig = modules.show_signature && !!sig?.name;
+  const wa = modules.show_whatsapp ? buildWhatsAppUrl(sig?.whatsapp || sig?.phone) : "";
+  const footer = `<p class="generated">${escapeHtml(generatedAt)}</p>`;
+  if (!showSig && !wa) return `<div class="end-block">${footer}</div>`;
+  const avatar = sig?.photo_url
+    ? `<img class="avatar" src="${escapeHtml(sig.photo_url)}" alt="" />`
+    : `<div class="avatar avatar-fallback">${escapeHtml((sig?.name || "?").charAt(0).toUpperCase())}</div>`;
+  const waBtn = wa ? `<a class="wa" href="${escapeHtml(wa)}">${escapeHtml(t("pdfTalkOnWhatsApp"))}</a>` : "";
+  const inner = showSig
+    ? `<table class="sig-grid"><tr><td class="sig-av">${avatar}</td><td><p class="code-label">${escapeHtml(t("pdfConsultant"))}</p><p class="sig-name">${escapeHtml(sig!.name)}</p>${[sig?.title, sig?.agency_name].filter(Boolean).length ? `<p class="muted">${escapeHtml([sig?.title, sig?.agency_name].filter(Boolean).join(" · "))}</p>` : ""}${sig?.email ? `<p class="muted">${escapeHtml(sig.email)}</p>` : ""}</td><td class="sig-cta">${waBtn}</td></tr></table>`
+    : `<table class="sig-grid"><tr><td><p class="strong">${escapeHtml(t("whatsapp"))}</p></td><td class="sig-cta">${waBtn}</td></tr></table>`;
+  return `<div class="end-block"><section class="pdf-panel signature">${inner}</section>${footer}</div>`;
 }
 
 export interface ItineraryActivityForPDF {
@@ -1230,8 +896,8 @@ function generateItinerarySection(
         <div style="border-left: 2px solid #0f766e33; padding-left: 10px; margin-bottom: 6px;">
           <p style="font-weight: 600; font-size: 13px; margin: 0;">${act.title}</p>
           ${act.description ? `<p style="font-size: 12px; color: #475569; margin: 2px 0 0 0;">${act.description}</p>` : ''}
-          ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">⏰ ${act.start_time}</p>` : ''}
-          ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">📍 ${act.location}</p>` : ''}
+          ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${pdfIcon("calendar", 12)} ${act.start_time}</p>` : ''}
+          ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${pdfIcon("pin", 12)} ${act.location}</p>` : ''}
           ${act.notes ? `<p style="font-size: 11px; color: #64748b; font-style: italic; margin: 2px 0 0 0;">${act.notes}</p>` : ''}
           ${act.maps_url ? `<p style="font-size: 11px; margin: 2px 0 0 0;"><a href="${act.maps_url.startsWith('http') ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}" style="color: #0f766e; text-decoration: underline;">${t("pdfMapsLink")}</a></p>` : ''}
           ${(() => {
@@ -1246,7 +912,7 @@ function generateItinerarySection(
               .map(p => ({ url: resolveUrl(p), name: decodeURIComponent((p.split('/').pop() || 'documento').replace(/^\d+_/, '')) }))
               .filter(d => !!d.url);
             if (!docs.length) return '';
-            return `<div style="margin-top:6px;">${docs.map(d => `<a href="${d.url}" style="display:inline-block;font-size:11px;color:#0f766e;text-decoration:underline;margin-right:8px;">📎 ${d.name}</a>`).join('')}</div>`;
+            return `<div style="margin-top:6px;">${docs.map(d => `<a href="${d.url}" style="display:inline-block;font-size:11px;color:#0f766e;text-decoration:underline;margin-right:8px;">${pdfIcon("file", 12)} ${d.name}</a>`).join('')}</div>`;
           })()}
         </div>
       `).join("");
@@ -1291,252 +957,236 @@ function generateItinerarySection(
   `;
 }
 
+const SERVICE_ICON: Record<TripServiceType, string> = {
+  flight: "plane", hotel: "bed", car_rental: "car", transfer: "route",
+  attraction: "ticket", insurance: "shield", cruise: "ship", train: "train", other: "box",
+};
+
+export interface TripPdfBuildInput {
+  trip: Trip;
+  profile?: AgentProfile | null;
+  itineraryActivities?: ItineraryActivityForPDF[];
+  locale?: PublicLocale;
+  resolveImg: PdfImageResolver;
+  /** Caminho do anexo → URL permanente segura (serve-voucher). */
+  documentUrl: (path: string) => string | null;
+  modules?: PdfModules;
+  signature?: PdfSignature | null;
+  generatedAt?: Date;
+}
+
+/** HTML completo do PDF (renderizador único usado por salvar/baixar e imprimir). */
+// Interface labels from translations carry decorative emojis that A4 print fonts
+// render as empty boxes; SVG icons replace them in the PDF.
+const LABEL_EMOJI_RE = /(>|<\/svg>)\s*(?:[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2705}]\u{FE0F}?\s*)+/gu;
+export function stripPdfLabelEmojis(html: string): string {
+  return html.replace(LABEL_EMOJI_RE, "$1");
+}
+
+export function buildTripPdfHtml(input: TripPdfBuildInput): string {
+  return stripPdfLabelEmojis(buildTripPdfHtmlRaw(input));
+}
+
+function buildTripPdfHtmlRaw(input: TripPdfBuildInput): string {
+  const { trip, profile = null, locale = "pt-BR", resolveImg, documentUrl } = input;
+  const modules = input.modules || { show_signature: true, show_whatsapp: true };
+  const t = tWallet(locale);
+  const parseLocal = (d: string) => { const [y, m, day] = d.split("-").map(Number); return new Date(y, m - 1, day); };
+  const startDate = parseLocal(trip.start_date);
+  const endDate = parseLocal(trip.end_date);
+  const days = Math.round((endDate.getTime() - startDate.getTime()) / 86400000) + 1;
+  const labels = getServiceLabels(locale);
+  const sorted = [...(trip.services || [])].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
+  const servicesHtml = sorted.map((service) => {
+    const type = service.service_type as TripServiceType;
+    const label = labels[type] || t("serviceOther");
+    const images = collectServiceImages(service, resolveImg);
+    let head = "", body = "";
+    const ctx = { images, locale };
+    if (type === "flight") ({ head, body } = renderFlightPdf(service, ctx));
+    else if (type === "hotel") ({ head, body } = renderHotelPdf(service, ctx));
+    else if (type === "car_rental") ({ head, body } = renderCarPdf(service, ctx));
+    else body = renderServiceLayout(service, renderServiceBody(service, locale), resolveImg);
+
+    const files: { url: string; name: string }[] = service.attachments?.length
+      ? service.attachments.filter((a: any) => a?.url).map((a: any) => ({ url: a.url, name: a.name || "" }))
+      : service.voucher_url ? [{ url: service.voucher_url, name: service.voucher_name || "" }] : [];
+    const cta = documentCta(type, locale);
+    const docs = files.map((f, i) => {
+      const href = documentUrl(f.url);
+      const friendly = cta ? (files.length > 1 ? `${cta} (${i + 1})` : cta) : (f.name || t("fldDocumentos"));
+      const meta = f.name && f.name !== friendly ? `<span class="doc-name">${escapeHtml(f.name)}</span>` : "";
+      return href
+        ? `<a class="doc" href="${escapeHtml(href)}">${pdfIcon("file", 14)}<span><span class="doc-cta">${escapeHtml(friendly)}</span>${meta}</span></a>`
+        : `<span class="doc doc-off">${pdfIcon("file", 14)}<span><span class="doc-cta">${escapeHtml(friendly)}</span>${meta}</span></span>`;
+    }).join("");
+    const docsHtml = docs ? `<section class="docs"><p class="code-label">${escapeHtml(documentsTitle(type, locale))}</p><div class="doc-list">${docs}</div></section>` : "";
+
+    // Cabeçalho do serviço + primeiro bloco ficam juntos; o resto quebra naturalmente.
+    return `<article class="svc">
+      <div class="svc-start">
+        <div class="svc-strip"><span class="svc-ico">${pdfIcon(SERVICE_ICON[type] || "box", 14)}</span>${escapeHtml(label)}</div>
+        ${head}
+      </div>
+      <div class="svc-body">${body}</div>
+      ${docsHtml}
+    </article>`;
+  }).join("");
+
+  const supabaseItin = (p: string) => (/^https?:\/\//i.test(p) ? p : documentUrl(p));
+  const itineraryHtml = generateItinerarySection(input.itineraryActivities || [], supabaseItin, locale);
+  const now = input.generatedAt || new Date();
+  const generatedAt = t("pdfGeneratedAt", { date: locale === "it-IT"
+    ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(now)
+    : format(now, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) });
+  const title = (trip as any).trip_title || trip.destination;
+
+  return `<!DOCTYPE html>
+<html lang="${locale}"><head><meta charset="UTF-8"><title>Carteira Digital — ${escapeHtml(title || trip.client_name)}</title>
+<style>${PDF_CSS}</style></head>
+<body><main class="pdf-doc">
+  ${generateAgencyHeader(profile, locale)}
+  <section class="hero">
+    <h1>${escapeHtml(title)}</h1>
+    <p class="muted">${(trip as any).trip_title ? `${escapeHtml(trip.destination)} · ` : ""}${escapeHtml(t("pdfPreparedFor"))} <strong>${escapeHtml(trip.client_name)}</strong></p>
+    <table class="overview"><tr>
+      <td><p class="code-label">${pdfIcon("pin", 11)} ${escapeHtml(t("pdfDestination"))}</p><p class="strong">${escapeHtml(trip.destination)}</p></td>
+      <td><p class="code-label">${pdfIcon("calendar", 11)} ${escapeHtml(t("pdfPeriod"))}</p><p class="strong">${escapeHtml(formatDate(trip.start_date, locale))} — ${escapeHtml(formatDate(trip.end_date, locale))}</p><p class="muted">${days} ${escapeHtml(days === 1 ? t("daysLabelOne") : t("daysLabelOther"))}</p></td>
+      <td><p class="code-label">${pdfIcon("user", 11)} ${escapeHtml(t("pdfClient"))}</p><p class="strong">${escapeHtml(trip.client_name)}</p></td>
+    </tr></table>
+  </section>
+  <h2 class="section-title">${escapeHtml(t("pdfServicesTitle"))}</h2>
+  ${servicesHtml || `<p class="muted center">${escapeHtml(t("pdfNoServices"))}</p>`}
+  ${itineraryHtml}
+  ${generateAgentSignature(input.signature ?? (profile ? { name: profile.name, photo_url: profile.avatar_url, agency_name: profile.agency_name, phone: profile.phone } : null), modules, generatedAt, locale)}
+</main></body></html>`;
+}
+
+const PDF_CSS = `
+*{margin:0;padding:0;box-sizing:border-box}
+@page{size:A4;margin:13mm 13mm 14mm;@bottom-center{content:counter(page) " / " counter(pages);font:8pt system-ui,sans-serif;color:#94a3b8}}
+html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
+body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0f1d3a;font-size:10.5pt;line-height:1.45;overflow-wrap:anywhere;word-break:normal}
+img{max-width:100%;display:block}
+a{color:#0e7490;text-decoration:underline}
+.pdf-doc{max-width:184mm;margin:0 auto}
+.pre{white-space:pre-wrap}
+.muted{color:#5b6b85}.small{font-size:9pt}.strong{font-weight:700}.center{text-align:center}
+.accent{color:#0891b2}
+.brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:4mm;border-bottom:1px solid #dbe3ee;margin-bottom:5mm}
+.logo{max-height:16mm;max-width:62mm;width:auto;height:auto;object-fit:contain}
+.logo-text{font-size:15pt;font-weight:800;color:#0f1d3a}
+.badge{font-size:8pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#0e7490;background:#e6f6fa;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.hero{break-inside:avoid;margin-bottom:6mm}
+.hero h1{font-size:21pt;line-height:1.15;font-weight:800;margin-bottom:1mm}
+.overview{width:100%;border-collapse:separate;border-spacing:0;margin-top:4mm;border:1px solid #dbe3ee;border-radius:12px;background:#f7f9fc}
+.overview td{width:33.3%;padding:3mm 4mm;vertical-align:top}
+.overview td+td{border-left:1px solid #dbe3ee}
+.section-title{font-size:9pt;letter-spacing:.2em;text-transform:uppercase;color:#5b6b85;margin:0 0 3mm;break-after:avoid}
+.code-label{font-size:8pt;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#5b6b85;margin-bottom:1mm}
+.svc{border:1px solid #dbe3ee;border-radius:14px;padding:4mm;margin-bottom:5mm;background:#fff;break-inside:auto}
+.svc-start{break-inside:avoid;break-after:avoid}
+.svc-strip{display:flex;align-items:center;gap:6px;font-size:8.5pt;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#0e7490;margin-bottom:3mm}
+.svc-ico{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:7px;background:#e6f6fa}
+.banner{border-radius:12px;overflow:hidden;margin-bottom:3mm;background:#eef2f7}
+.banner img{width:100%;object-fit:cover}
+.banner-low img{height:34mm}.banner-hotel img{height:52mm}
+.rel{position:relative}.illus{position:absolute;left:6px;bottom:6px;font-size:7.5pt;background:rgba(15,29,58,.7);color:#fff;border-radius:4px;padding:1px 6px}
+.thumbs{display:flex;gap:2mm;margin:-1mm 0 3mm}.thumbs img{width:32mm;height:20mm;object-fit:cover;border-radius:8px}
+.svc-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.svc-title{font-size:15pt;line-height:1.25;font-weight:800;min-width:0;flex:1}
+.svc-sub{color:#5b6b85;margin-top:1mm;display:flex;gap:5px;align-items:flex-start}
+.stars{color:#d99a06;letter-spacing:2px;margin-top:.5mm}
+.company{font-size:9pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5b6b85;margin-top:.5mm}
+.facts{display:flex;flex-wrap:wrap;gap:4mm;margin-top:2mm}.facts span{display:inline-flex;gap:5px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;border-radius:999px;padding:3px 10px;font-size:9pt;font-weight:700;background:#eef2f7;color:#5b6b85;white-space:nowrap}
+.chip-ok{background:#e7f7ee;color:#15803d}
+.code-box{margin-top:3mm;border:1px solid #cdeaf2;background:#eef9fc;border-radius:12px;padding:3mm 4mm;break-inside:avoid}
+.code-val{font-size:17pt;font-weight:800;letter-spacing:.04em}.code-val-sm{font-size:12.5pt;font-weight:800}
+.code-sep{border-top:1px solid #cdeaf2;margin-top:2mm;padding-top:2mm}
+.pdf-panel{border:1px solid #dbe3ee;border-radius:12px;padding:3mm 4mm;margin-top:3mm;break-inside:avoid;background:#fff}
+.pdf-panel.amber{border-color:#f3dfae;background:#fffbf0;break-inside:auto}
+.panel-title{display:flex;align-items:center;gap:6px;font-size:10.5pt;font-weight:800;margin-bottom:2mm;break-after:avoid}
+.panel-label{flex:1}.ctx{font-size:8pt;font-weight:500;color:#94a3b8;max-width:55%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ico{display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:7px;background:#e6f6fa;color:#0e7490}
+.ico-amber{background:#fdf0cf;color:#b45309}
+.row{margin:.6mm 0;orphans:2;widows:2}.row strong{color:#0f1d3a}
+.list{list-style:none}.list li{display:flex;gap:8px;padding:1.6mm 0;border-top:1px solid #edf1f6}.list li:first-child{border-top:0;padding-top:0}
+.seg-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:2mm}
+.tag{font-size:8.5pt;font-weight:800;text-transform:uppercase;color:#0e7490;background:#e6f6fa;border-radius:6px;padding:2px 8px;white-space:nowrap}
+.seg-airline{font-weight:700;font-size:9.5pt;text-align:right}
+.seg-grid{width:100%;border-collapse:collapse;table-layout:fixed}
+.seg-col{width:27%;vertical-align:top}.seg-mid{vertical-align:middle;padding:0 3mm}
+.seg-time{font-size:20pt;font-weight:800;line-height:1.1}.seg-code{font-weight:700;font-size:10pt;margin-top:.5mm}.seg-city{font-size:9pt}
+.track{display:flex;align-items:center;gap:4px;margin-top:-6mm}
+.dot{width:9px;height:9px;border:2px solid #94a3b8;border-radius:50%;background:#fff;flex-shrink:0}
+.dash{flex:1;border-top:2px dashed #b9c4d4}
+.plane svg{fill:#0891b2;stroke:#0891b2;transform:rotate(45deg)}
+.cols{width:100%;border-collapse:collapse;table-layout:fixed}.cols td{vertical-align:top;padding-right:4mm}.cols td+td{border-left:1px solid #edf1f6;padding-left:4mm}
+.dates-grid{width:100%;border-collapse:collapse;table-layout:fixed}.dates-grid td{text-align:center;vertical-align:middle}.dates-mid{width:28%}
+.date-big{font-size:15pt;font-weight:800;text-transform:uppercase;line-height:1.15}
+.time{font-size:12pt;color:#5b6b85;font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;background:#e6f6fa;color:#0e7490;font-weight:700;font-size:9pt;padding:3px 10px}
+.places{width:100%;border-collapse:separate;border-spacing:3mm 0;margin:0 -3mm;table-layout:fixed}.place{vertical-align:top;width:50%}
+.links{display:flex;flex-wrap:wrap;gap:4mm;margin-top:1.5mm}.links a{display:inline-flex;gap:4px;align-items:center;font-weight:600}
+.docs{margin-top:3mm;padding-top:3mm;border-top:1px solid #edf1f6;break-before:avoid;break-inside:avoid}
+.doc-list{display:flex;flex-wrap:wrap;gap:2mm}
+.doc{display:inline-flex;gap:6px;align-items:center;border:1px solid #9fd8e6;background:#eef9fc;border-radius:10px;padding:2mm 3mm;text-decoration:none;color:#0e7490;max-width:100%}
+.doc-off{border-color:#dbe3ee;background:#f7f9fc;color:#5b6b85}
+.doc-cta{display:block;font-weight:700}.doc-name{display:block;font-size:8.5pt;color:#5b6b85}
+.end-block{break-inside:avoid;margin-top:4mm}
+.signature{margin-top:0}
+.sig-grid{width:100%;border-collapse:collapse}.sig-grid td{vertical-align:middle}
+.sig-av{width:18mm}.avatar{width:15mm;height:15mm;border-radius:50%;object-fit:cover}
+.avatar-fallback{display:flex;align-items:center;justify-content:center;background:#e6f6fa;color:#0e7490;font-weight:800;font-size:14pt}
+.sig-name{font-size:13pt;font-weight:800}
+.sig-cta{text-align:right;width:52mm}
+.wa{display:inline-block;background:#1fa855;color:#fff;text-decoration:none;font-weight:700;border-radius:999px;padding:2.2mm 5mm}
+.generated{text-align:center;font-size:8pt;color:#94a3b8;margin-top:3mm}
+.pdf-block{break-inside:avoid}
+p{orphans:2;widows:2}
+h1,h2,h3,h4{break-after:avoid}
+`;
+
 export async function generateTripPDF(
   trip: Trip,
   profile?: AgentProfile | null,
   itineraryActivities?: ItineraryActivityForPDF[],
   voucherAccess?: VoucherAccessOptions,
-  locale: PublicLocale = "pt-BR"
+  locale: PublicLocale = "pt-BR",
+  /** Pode ser uma Promise: a janela abre antes de qualquer espera (evita bloqueio de pop-up). */
+  optionsInput: { modules?: PdfModules; signature?: PdfSignature | null } | Promise<{ modules?: PdfModules; signature?: PdfSignature | null }> = {},
 ) {
   const t = tWallet(locale);
-  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
   // Abrir a janela ANTES dos awaits para evitar bloqueio de popup pelo navegador.
   const printWindow = window.open("", "_blank");
   if (printWindow) {
     try {
-      printWindow.document.write(
-        '<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Preparando PDF…</body></html>',
-      );
+      printWindow.document.write('<!doctype html><html><body style="font-family:sans-serif;padding:24px;color:#475569;">Preparando PDF…</body></html>');
     } catch {}
   }
-  const startDate = parseLocal(trip.start_date);
-  const endDate = parseLocal(trip.end_date);
-  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-
-  // Build permanent voucher URLs using the serve-voucher proxy
   toast.info("Preparando PDF com documentos...");
-  const permanentUrlCache: Record<string, string> = {};
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const shareToken = (trip as any).share_token;
-
-  if (supabaseUrl && shareToken) {
-    for (const service of (trip.services || [])) {
-      const files: { path: string }[] = [];
-      if (service.attachments?.length > 0) {
-        for (const att of service.attachments) {
-          if (att.url) files.push({ path: att.url });
-        }
-      } else if (service.voucher_url) {
-        files.push({ path: service.voucher_url });
-      }
-      for (const file of files) {
-        const cleanPath = extractVoucherPath(file.path);
-        if (cleanPath) {
-          const url = `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
-          permanentUrlCache[file.path] = url;
-        }
-      }
-    }
-  }
-
-  // Group services by type, but preserve user-defined order:
-  // - services within each group keep their order_index
-  // - groups themselves are sorted by the lowest order_index of their first service
-  const sortedServices = [...(trip.services || [])].sort(
-    (a, b) => (a.order_index ?? 0) - (b.order_index ?? 0)
-  );
-
-  // Resolve referências do Google (gplace:// e URLs legadas) para URLs válidas
-  // no momento da geração — nada é copiado ou persistido.
-  const resolveImg = await buildServiceImageResolver(sortedServices);
-
-  // Cards de serviço alinhados visualmente ao QuotePDF (gradiente por categoria + emoji)
-  const servicesHtml = sortedServices.map((service) => {
-    const type = service.service_type as TripServiceType;
-    const serviceLabels = getServiceLabels(locale);
-    const label = serviceLabels[type] || t("serviceOther");
-    const emoji = SERVICE_EMOJI[type] || "📋";
-    const grad = SERVICE_GRADIENTS[type] || SERVICE_GRADIENTS.other;
-    const bodyHtml = renderServiceBody(service, locale);
-    const galleryHtml = renderServiceGallery(service, resolveImg);
-
-    let attachmentsHtml = '';
-    if (service.attachments?.length > 0) {
-      attachmentsHtml = service.attachments.map((att: any) => {
-        const signedUrl = permanentUrlCache[att.url];
-        if (signedUrl) {
-          return `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;margin-right:12px;">📎 ${att.name} ↗</a>`;
-        }
-        return `<span style="color:#64748b;font-size:12px;">📎 ${att.name}</span>`;
-      }).join(' ');
-    } else if (service.voucher_url) {
-      const signedUrl = permanentUrlCache[service.voucher_url];
-      const name = service.voucher_name || 'Documento anexo';
-      if (signedUrl) {
-        attachmentsHtml = `<a href="${signedUrl}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;color:#0f766e;font-size:12px;text-decoration:underline;">📎 ${name} ↗</a>`;
-      } else {
-        attachmentsHtml = `<span style="color:#64748b;font-size:12px;">📎 ${name}</span>`;
-      }
-    }
-
-    const attachmentsBlock = attachmentsHtml
-      ? `<div class="pdf-block" style="margin-top:8px;padding-top:6px;border-top:1px solid #f1f5f9;">${attachmentsHtml}</div>`
-      : "";
-
-    return `
-      <div class="pdf-card service-card" style="border:1px solid #e2e8f0;border-radius:14px;margin-bottom:10px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-        <div class="pdf-block pdf-header service-title" style="display:flex;justify-content:space-between;align-items:center;gap:12px;background:${grad.bg};padding:8px 14px;color:${grad.fg};">
-          <div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">
-            <div style="width:34px;height:34px;border-radius:9px;background:${grad.iconBg};display:inline-flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${emoji}</div>
-            <div style="min-width:0;">
-              <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${grad.fg};margin:0;line-height:1.2;">${label}</p>
-            </div>
-          </div>
-        </div>
-        <div style="padding:12px 16px;">
-          ${galleryHtml}
-          ${renderServiceLayout(service, bodyHtml, resolveImg)}
-          ${attachmentsBlock}
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  const resolveItineraryUrl = (p: string): string | null => {
-    if (!p) return null;
-    if (/^https?:\/\//i.test(p)) return p;
-    if (!supabaseUrl || !shareToken) return null;
-    const cleanPath = extractVoucherPath(p);
-    if (!cleanPath) return null;
-    return `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(cleanPath)}`;
+  const documentUrl = (path: string): string | null => {
+    if (!supabaseUrl || !shareToken || !path) return null;
+    const clean = extractVoucherPath(path);
+    return clean ? `${supabaseUrl}/functions/v1/serve-voucher?token=${encodeURIComponent(shareToken)}&file=${encodeURIComponent(clean)}` : null;
   };
-  const itineraryHtml = generateItinerarySection(itineraryActivities || [], resolveItineraryUrl, locale);
-
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <title>Carteira Digital — ${(trip as any).trip_title || trip.client_name}</title>
-      <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:#1e293b; line-height:1.5; background:#f8fafc; }
-        img { max-width:100%; height:auto; }
-        a { color:#0f766e; }
-        @media print {
-          @page { size: A4; margin: 14mm 10mm 10mm 10mm; }
-          @page :first { margin-top: 8mm; }
-          html, body {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            background: #fff !important;
-            line-height: 1.42 !important;
-          }
-          a { color:#0f766e !important; text-decoration:underline !important; }
-
-          .pdf-hero { padding-top: 0 !important; padding-bottom: 6px !important; }
-          .pdf-hero h1 { font-size: 26px !important; line-height: 1.05 !important; margin-bottom: 2px !important; }
-          .pdf-hero p { margin-top: 2px !important; }
-
-          .overview-card { padding: 10px 14px !important; margin-bottom: 12px !important; }
-
-          .service-card { margin-bottom: 7px !important; }
-          .service-card > div:last-child { padding: 9px 14px !important; }
-          .service-title { padding: 6px 12px !important; }
-          .pdf-details p { margin: 1px 0 !important; line-height: 1.38 !important; }
-
-          .agent-signature { margin-top: 10px !important; }
-          .agent-signature > div:last-child { padding: 10px 16px !important; }
-
-          .pdf-block,
-          .pdf-header,
-          .agent-signature,
-          .overview-card,
-          img { break-inside: avoid; page-break-inside: avoid; }
-
-          .agent-signature { break-before: avoid; page-break-before: avoid; }
-
-          .pdf-title, .section-title, .service-title {
-            break-after: avoid; page-break-after: avoid;
-          }
-          .pdf-card, .pdf-details, .service-card {
-            break-inside: auto; page-break-inside: auto;
-          }
-          h1, h2, h3 { break-after: avoid; page-break-after: avoid; }
-          p { orphans: 3; widows: 3; }
-        }
-      </style>
-    </head>
-    <body>
-      <div style="max-width:820px;margin:0 auto;padding:0 0 20px;">
-        ${generateAgencyHeader(profile || null, locale)}
-
-        <div style="padding:6px 32px 0;">
-          <!-- Hero -->
-          <div class="pdf-block pdf-hero" style="text-align:center;padding:2px 0 12px;">
-            <div style="display:inline-block;background:rgba(15,118,110,0.1);color:#0f766e;padding:5px 14px;border-radius:9999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;margin-bottom:8px;">
-              ${t("pdfWalletBadge")}
-            </div>
-            <h1 style="font-size:32px;font-weight:800;color:#1e293b;margin:0 0 2px;letter-spacing:-1px;line-height:1.05;">${(trip as any).trip_title || trip.destination}</h1>
-            <p style="font-size:14px;color:#64748b;margin-top:4px;">
-              ${(trip as any).trip_title ? `<span>${trip.destination} • </span>` : ''}${t("pdfPreparedFor")} <strong style="color:#1e293b;">${trip.client_name}</strong>
-            </p>
-          </div>
-
-          <!-- Overview -->
-          <div class="pdf-block overview-card" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 18px;margin-bottom:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-            <div>
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📍 ${t("pdfDestination")}</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.destination}</p>
-            </div>
-            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">📅 ${t("pdfPeriod")}</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${formatDate(trip.start_date, locale)} — ${formatDate(trip.end_date, locale)}</p>
-              <p style="font-size:12px;color:#94a3b8;margin-top:2px;">${days} ${days === 1 ? t("daysLabelOne") : t("daysLabelOther")}</p>
-            </div>
-            <div style="border-left:1px solid #f1f5f9;padding-left:18px;">
-              <p style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:700;">👤 ${t("pdfClient")}</p>
-              <p style="font-size:14px;font-weight:700;color:#1e293b;">${trip.client_name}</p>
-            </div>
-          </div>
-
-          <!-- Services -->
-          <div style="margin-bottom:18px;">
-            <div class="pdf-title section-title" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
-              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-              <h3 style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:#64748b;margin:0;white-space:nowrap;">${t("pdfServicesTitle")}</h3>
-              <div style="flex:1;height:1px;background:#e2e8f0;"></div>
-            </div>
-            ${servicesHtml || `<p style="text-align:center;color:#94a3b8;padding:32px;">${t('pdfNoServices')}</p>`}
-          </div>
-
-          <!-- Itinerary -->
-          ${itineraryHtml}
-
-          <!-- Agent Signature -->
-          ${generateAgentSignature(profile || null, locale)}
-
-          <p style="text-align:center;font-size:10px;color:#94a3b8;margin-top:14px;">
-            ${t("pdfGeneratedAt", { date: locale === "it-IT" ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(new Date()) : format(new Date(), "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) })}
-          </p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+  const sorted = [...(trip.services || [])].sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+  const resolveImg = await buildServiceImageResolver(sorted);
+  const options = await Promise.resolve(optionsInput).catch(() => ({}) as { modules?: PdfModules; signature?: PdfSignature | null });
+  void voucherAccess;
+  const html = buildTripPdfHtml({ trip, profile, itineraryActivities, locale, resolveImg, documentUrl, modules: options.modules, signature: options.signature });
 
   if (!printWindow) {
     toast.error(t("pdfPopupBlocked"));
     return;
   }
-
   printWindow.document.open();
   printWindow.document.write(html);
   printWindow.document.close();
   await waitForWindowImages(printWindow);
-  try {
-    printWindow.print();
-  } catch {
-    /* impressão cancelada pelo usuário/ambiente */
-  }
+  try { printWindow.print(); } catch { /* impressão cancelada */ }
 }

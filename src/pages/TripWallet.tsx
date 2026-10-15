@@ -33,7 +33,8 @@ import { TripEditForm } from "@/components/trip/TripEditForm";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { TripWalletModulesCard } from "@/components/wallet/TripWalletModulesCard";
 
-import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
+import { generateTripPDF, pdfSignatureOptions, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
+import { fetchTripAgencyWalletDefaults, resolveWalletSettings } from "@/lib/walletSettings";
 import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { useItineraryActivities } from "@/hooks/useItineraryActivities";
 import { PublicShareBar } from "@/components/shared/PublicShareBar";
@@ -786,7 +787,12 @@ function TripWalletContent() {
   };
 
   const handleGeneratePDF = async () => {
-    if (trip) await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" }, resolvePublicLocale(agentProfile));
+    if (!trip) return;
+    // Mesmas flags resolvidas da carteira (carteira > agência dona > sistema).
+    // A busca roda depois que a janela do PDF já abriu (sem bloqueio de pop-up).
+    const options = fetchTripAgencyWalletDefaults(trip.id).catch(() => null)
+      .then((defaults) => pdfSignatureOptions(resolveWalletSettings(defaults, (trip as any).wallet_modules ?? null), (trip as any).signature_snapshot, agentProfile));
+    await generateTripPDF(trip, agentProfile, itineraryActivities as ItineraryActivityForPDF[], { mode: "authenticated" }, resolvePublicLocale(agentProfile), options);
   };
 
   // Listing view
