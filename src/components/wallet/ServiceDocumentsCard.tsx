@@ -21,6 +21,7 @@ import {
 } from "@/lib/serviceDocuments";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import type { PublicLocale } from "@/i18n/publicMaterials/locale";
+import { tPublicHotel } from "@/i18n/publicMaterials/hotels";
 import { tPublicFlight } from "@/i18n/publicMaterials/flights";
 
 const KIND_ICON: Record<ServiceDocumentKind, typeof FileText> = {
@@ -48,7 +49,7 @@ interface Props {
   initialVisible?: number;
   className?: string;
   locale?: PublicLocale;
-  variant?: "default" | "flight";
+  variant?: "default" | "flight" | "hotel";
 }
 
 const INITIAL_LIMIT = 3;
@@ -66,11 +67,12 @@ function DocumentRow({
   onDownload: (doc: ServiceDocument) => void;
   downloading: boolean;
   locale?: PublicLocale;
-  variant?: "default" | "flight";
+  variant?: "default" | "flight" | "hotel";
 }) {
   const t = tWallet(locale);
   const tf = tPublicFlight(locale);
-  const flight = variant === "flight";
+  const flight = variant === "flight" || variant === "hotel";
+  const th = tPublicHotel(locale);
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
 
@@ -107,7 +109,7 @@ function DocumentRow({
           )}
         >
           <Eye className="h-3.5 w-3.5" aria-hidden />
-          {flight && doc.kind === "pdf" ? tf("openPdf") : t("docsOpenBtn")}
+          {variant === "hotel" ? th("openVoucher") : flight && doc.kind === "pdf" ? tf("openPdf") : t("docsOpenBtn")}
         </Button>
         <Button
           type="button"
@@ -139,7 +141,8 @@ export function ServiceDocumentsCard({
 }: Props) {
   const t = tWallet(locale);
   const tf = tPublicFlight(locale);
-  const flight = variant === "flight";
+  const flight = variant === "flight" || variant === "hotel";
+  const th = tPublicHotel(locale);
   const [expanded, setExpanded] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<ServiceDocument | null>(null);
   const viewer = useSecureDocument();
@@ -193,7 +196,7 @@ export function ServiceDocumentsCard({
       <header className="mb-2.5 flex items-center gap-1.5">
         <Paperclip className="h-3.5 w-3.5 text-primary" aria-hidden />
         <h4 className={cn("text-[10px] font-semibold uppercase tracking-[0.14em] text-foreground", flight && "text-base font-bold normal-case tracking-normal")}>
-          {flight ? tf("documents") : t("docsHeading")}
+          {variant === "hotel" ? th("documents") : flight ? tf("documents") : t("docsHeading")}
         </h4>
         {docs.length > 1 && (
           <span className="ml-0.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
