@@ -52,6 +52,7 @@ import { PublicFlightCard } from "@/components/wallet/PublicFlightCard";
 import { ServiceDetailOverlay } from "@/components/wallet/ServiceDetailOverlay";
 import { CategoryServiceView } from "@/components/wallet/category/CategoryServiceView";
 import { flightTicketCount } from "@/lib/publicWalletFlight";
+import { PublicCarRentalCard } from "@/components/wallet/PublicCarRentalCard";
 import { NextAppointmentCard } from "@/components/wallet/NextAppointmentCard";
 import { NextActivityCard } from "@/components/wallet/NextActivityCard";
 
@@ -768,6 +769,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
     mode: "public", slug: voucherAccess.slug || undefined,
     shareToken: voucherAccess.shareToken || undefined, password: voucherAccess.password,
   }} />;
+  if (isCarRental) return <PublicCarRentalCard service={service} locale={locale} access={{ mode: "public", slug: voucherAccess.slug || undefined, shareToken: voucherAccess.shareToken || undefined, password: voucherAccess.password }} />;
   if (isHotel) return <PublicHotelCard service={service} locale={locale} access={{ mode: "public", slug: voucherAccess.slug || undefined, shareToken: voucherAccess.shareToken || undefined, password: voucherAccess.password }} />;
 
   return (
@@ -1079,7 +1081,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
           <div className="mt-2 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("secVeiculoCarro")}</p>
             {data.car_model && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldModelo")}: {data.car_model}</p>}
-            {data.transmission && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">t("fldTransmissao")+": " + (data.transmission === 'automatico' ? t("transmissaoAutomatico") : t("transmissaoManual"))</p>}
+            {data.transmission && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTransmissao")}: {data.transmission === "automatico" ? t("transmissaoAutomatico") : t("transmissaoManual")}</p>}
             {data.fuel_type && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldCombustivel")}: {data.fuel_type}</p>}
             <div className="flex flex-wrap gap-3 text-[13px] text-foreground/80 leading-relaxed break-words mt-1">
               {data.doors && <span>🚪 {data.doors} {t("wordPortas")}</span>}
@@ -2608,6 +2610,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       <ServiceDetailOverlay
         flightPresentation={activeService?.service_type === "flight"}
         hotelPresentation={activeService?.service_type === "hotel"}
+        carPresentation={activeService?.service_type === "car_rental"}
         service={activeService}
         open={activeService !== null}
         onOpenChange={(open) => { if (!open) setActiveService(null); }}
@@ -2620,6 +2623,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       <ServiceDetailOverlay
         flightPresentation={activeGroupType === "flight"}
         hotelPresentation={activeGroupType === "hotel"}
+        carPresentation={activeGroupType === "car_rental"}
         open={activeGroupType !== null}
         onOpenChange={(open) => { if (!open) setActiveGroupType(null); }}
         title={activeGroupType ? getServiceSectionLabel(activeGroupType, publicLocale) : undefined}

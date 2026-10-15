@@ -1,3 +1,4 @@
+import { tPublicCar } from "@/i18n/publicMaterials/cars";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -66,7 +67,7 @@ export function ServiceDetailOverlay({
   const styledPresentation = flightPresentation || hotelPresentation || carPresentation;
   const Icon = hotelPresentation ? BedDouble : carPresentation ? Car : icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
   const label =
-    flightPresentation ? t("svcSectionFlight") : hotelPresentation ? t("serviceHotel") : carPresentation ? t("svcSectionCar") : title ?? (service ? SERVICE_LABELS[service.service_type] ?? t("fldServico") : t("fldServico"));
+    flightPresentation ? t("svcSectionFlight") : hotelPresentation ? t("serviceHotel") : carPresentation ? tPublicCar(locale)("title") : title ?? (service ? SERVICE_LABELS[service.service_type] ?? t("fldServico") : t("fldServico"));
 
   const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">(() => {
     if (typeof window === "undefined") return "md";

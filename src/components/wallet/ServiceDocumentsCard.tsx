@@ -74,6 +74,7 @@ function DocumentRow({
   const tf = tPublicFlight(locale);
   const flight = variant === "flight" || variant === "hotel" || variant === "car";
   const th = tPublicHotel(locale);
+  const tc = tPublicCar(locale);
   const Icon = KIND_ICON[doc.kind];
   const meta = [doc.ext, doc.size].filter(Boolean).join(" · ");
 
@@ -144,6 +145,7 @@ export function ServiceDocumentsCard({
   const tf = tPublicFlight(locale);
   const flight = variant === "flight" || variant === "hotel" || variant === "car";
   const th = tPublicHotel(locale);
+  const tc = tPublicCar(locale);
   const [expanded, setExpanded] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<ServiceDocument | null>(null);
   const viewer = useSecureDocument();
