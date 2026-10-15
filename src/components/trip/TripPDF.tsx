@@ -976,7 +976,18 @@ export interface TripPdfBuildInput {
 }
 
 /** HTML completo do PDF (renderizador único usado por salvar/baixar e imprimir). */
+// Interface labels from translations carry decorative emojis that A4 print fonts
+// render as empty boxes; SVG icons replace them in the PDF.
+const LABEL_EMOJI_RE = /(>|<\/svg>)\s*(?:[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B50}\u{2705}]\u{FE0F}?\s*)+/gu;
+export function stripPdfLabelEmojis(html: string): string {
+  return html.replace(LABEL_EMOJI_RE, "$1");
+}
+
 export function buildTripPdfHtml(input: TripPdfBuildInput): string {
+  return stripPdfLabelEmojis(buildTripPdfHtmlRaw(input));
+}
+
+function buildTripPdfHtmlRaw(input: TripPdfBuildInput): string {
   const { trip, profile = null, locale = "pt-BR", resolveImg, documentUrl } = input;
   const modules = input.modules || { show_signature: true, show_whatsapp: true };
   const t = tWallet(locale);
