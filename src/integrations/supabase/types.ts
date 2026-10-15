@@ -17823,6 +17823,7 @@ export type Database = {
         Args: { _user_id: string; _year: number }
         Returns: boolean
       }
+      image_library_can: { Args: { _action: string }; Returns: boolean }
       immutable_unaccent: { Args: { "": string }; Returns: string }
       import_booking_request_into_operation: {
         Args: { p_operation_id: string }
