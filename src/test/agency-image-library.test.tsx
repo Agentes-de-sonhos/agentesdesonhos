@@ -55,11 +55,11 @@ describe("biblioteca de imagens — regras", () => {
   });
 
   it("após salvar, registra a URL externa original com dedupe por agência+URL", async () => {
-    noteLinkImage("https://bucket/quote-images/url-1.webp", " https://cdn.example.com/Fotos/X.jpg?v=2 ");
+    noteLinkImage("https://bucket/quote-images/url-1.webp", " https://cdn.example.com/Fotos/Praia-Azul.jpg?v=2 ");
     const r = await registerLinkImagesAfterSave(["https://bucket/quote-images/url-1.webp"]);
     expect(r.registered).toBe(1);
     const call = (upsert.mock.calls as any[])[0];
-    expect(call[0]).toEqual([{ url: "https://cdn.example.com/Fotos/X.jpg?v=2", name: "X", source: "service_link" }]);
+    expect(call[0]).toEqual([{ url: "https://cdn.example.com/Fotos/Praia-Azul.jpg?v=2", name: "Praia Azul", source: "service_link" }]);
     expect(call[1]).toEqual({ onConflict: "agency_id,url", ignoreDuplicates: true });
   });
 
