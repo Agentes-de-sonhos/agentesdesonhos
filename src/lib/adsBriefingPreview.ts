@@ -726,6 +726,16 @@ BARDELLI_OFFICIAL_PROFILE.copy = { ...BARDELLI_PRESENTATION_PROFILE.copy };
 BARDELLI_OFFICIAL_PROFILE.inspirationDialog = BARDELLI_PRESENTATION_PROFILE.inspirationDialog;
 BARDELLI_OFFICIAL_PROFILE.newsletterMedia = BARDELLI_PRESENTATION_PROFILE.newsletterMedia;
 BARDELLI_OFFICIAL_PROFILE.socialStrip = { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/bardelliviagens/" }] };
+// Site oficial: sem modo apresentação (formulários reais) e sem blocos que
+// dependem de confirmação da agência (Portugal, equipe, pontos do concierge).
+BARDELLI_OFFICIAL_PROFILE.presentation = false;
+BARDELLI_OFFICIAL_PROFILE.demo = false;
+delete BARDELLI_OFFICIAL_PROFILE.dmc;
+delete BARDELLI_OFFICIAL_PROFILE.team;
+delete BARDELLI_OFFICIAL_PROFILE.testimonials;
+delete BARDELLI_OFFICIAL_PROFILE.conciergePoints;
+BARDELLI_OFFICIAL_PROFILE.sections = { ...BARDELLI_OFFICIAL_PROFILE.sections, dmc: { enabled: false }, team: { enabled: false }, testimonials: { enabled: false } };
+BARDELLI_OFFICIAL_PROFILE.nav = (BARDELLI_OFFICIAL_PROFILE.nav ?? []).filter((n) => n.to !== "/dmc-portugal");
 BARDELLI_OFFICIAL_PROFILE.seo = { title: "Bardelli Viagens — viagens de lazer personalizadas", description: "Viagens personalizadas para famílias, casais e grupos de amigos: Disney, Universal, Xcaret, resorts, cruzeiros e Europa. Desde 2008." };
 
 export interface AdsBriefingPreviewFixture {
