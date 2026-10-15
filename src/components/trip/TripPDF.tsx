@@ -259,7 +259,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.trip_cancellation) details.push(`${t("fldCancelamento")}: ${data.trip_cancellation}`);
       if (data.dental_assistance) details.push(`${t("fldOdontologica")}: ${data.dental_assistance}`);
       if (data.medical_repatriation) details.push(`${t("fldRepatriacao")}: ${data.medical_repatriation}`);
-      if (data.emergency_phone) details.push(`📞 ${t("fldEmergencia")}: ${data.emergency_phone}`);
+      if (data.emergency_phone) details.push(`${pdfIcon("phone", 12)} ${t("fldEmergencia")}: ${data.emergency_phone}`);
       if (data.emergency_whatsapp) details.push(`💬 WhatsApp: ${data.emergency_whatsapp}`);
       if (data.insured_persons?.length > 0) details.push(`${t("fldSegurados")}: ${data.insured_persons.map((p: any) => p.name).join(', ')}`);
       if (data.how_to_activate) details.push(`${t("fldComoAcionar")}: ${data.how_to_activate}`);
@@ -387,7 +387,7 @@ function pillTitle(parts: { label?: string; value: string; muted?: boolean }[]):
 function renderServiceHeadline(opts: { title?: string; dates?: string; lines?: string[] }): string {
   const { title, dates, lines = [] } = opts;
   const titleHtml = title ? `<p style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 2px;line-height:1.3;">${escapeHtml(title)}</p>` : "";
-  const datesHtml = dates ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px;">📅 ${escapeHtml(dates)}</p>` : "";
+  const datesHtml = dates ? `<p style="font-size:11px;color:#64748b;margin:0 0 4px;">${pdfIcon("calendar", 12)} ${escapeHtml(dates)}</p>` : "";
   const linesHtml = lines.filter(Boolean).map(l => `<p style="${TXT}">${escapeHtml(l)}</p>`).join("");
   if (!titleHtml && !datesHtml && !linesHtml) return "";
   return `<div class="pdf-block" style="margin-bottom:4px;">${titleHtml}${datesHtml}${linesHtml}</div>`;
@@ -430,7 +430,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
         p(t("fldAeroporto"), data.departure_airport),
         p(t("fldSaidaRecomendada"), data.recommended_departure),
         data.boarding_point ? p(t("fldEmbarque"), data.boarding_point === 'lobby' ? t("boardingLobby") : data.boarding_point === 'entrada' ? t("boardingEntrada") : data.boarding_point === 'estacionamento' ? t("boardingEstacionamento") : data.boarding_point) : "",
-        data.departure_alert ? `<p style="margin-top:4px;font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 9px;border-radius:6px;font-weight:600;">⚠️ ${escapeHtml(data.departure_alert)}</p>` : "",
+        data.departure_alert ? `<p style="margin-top:4px;font-size:11px;color:#b45309;background:#fffbeb;border:1px solid #fde68a;padding:6px 9px;border-radius:6px;font-weight:600;">${pdfIcon("info", 12)} ${escapeHtml(data.departure_alert)}</p>` : "",
       ])
     : "";
 
@@ -439,7 +439,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
         p(t("fldNome"), data.driver_name),
         p(t("fldIdioma"), data.driver_language),
         p(t("fldPlaca"), data.vehicle_plate),
-        data.driver_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.driver_phone)}</p>` : "",
+        data.driver_phone ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${escapeHtml(data.driver_phone)}</p>` : "",
       ])
     : "";
 
@@ -447,8 +447,8 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
     ? miniCard(t("sectionVeiculoTransfer"), [
         data.vehicle_type ? p(t("fldTipo"), data.vehicle_type === 'sedan' ? t("vehicleSedan") : data.vehicle_type === 'suv' ? t("vehicleSuv") : data.vehicle_type === 'van' ? t("vehicleVan") : data.vehicle_type === 'minibus' ? t("vehicleMinibus") : data.vehicle_type === 'onibus' ? t("vehicleOnibus") : data.vehicle_type) : "",
         badgeRow([
-          data.vehicle_capacity ? `👤 ${data.vehicle_capacity} ${t("wordPassageiros")}` : "",
-          data.luggage_capacity ? `🧳 ${data.luggage_capacity}` : "",
+          data.vehicle_capacity ? `${pdfIcon("user", 12)} ${data.vehicle_capacity} ${t("wordPassageiros")}` : "",
+          data.luggage_capacity ? `${pdfIcon("luggage", 12)} ${data.luggage_capacity}` : "",
           data.air_conditioning === 'sim' ? t("badgeArCondicionado") : "",
         ].filter(Boolean) as string[]),
         data.vehicle_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.vehicle_notes)}</p>` : "",
@@ -470,7 +470,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
   const orient = (data.required_documents || data.emergency_contact || data.plan_b || data.agency_notes)
     ? miniCard(t("sectionOrientacoes"), [
         p(t("fldDocumentos"), data.required_documents),
-        data.emergency_contact ? `<p style="${TXT}">📞 ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
+        data.emergency_contact ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
         data.agency_contact ? `<p style="${TXT}">📱 ${t("fldAgencia")}: ${escapeHtml(data.agency_contact)}</p>` : "",
         data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaPlanoB")}</p><p style="${TXT_FG}">${escapeHtml(data.plan_b)}</p></div>` : "",
         data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
@@ -583,9 +583,9 @@ function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR
 
   const emergency = (data.emergency_phone || data.emergency_whatsapp || data.emergency_email)
     ? miniCard(t("sectionContatosEmergencia"), [
-        data.emergency_phone ? `<p style="${TXT_FG}font-weight:600;">📞 ${escapeHtml(data.emergency_phone)}</p>` : "",
+        data.emergency_phone ? `<p style="${TXT_FG}font-weight:600;">${pdfIcon("phone", 12)} ${escapeHtml(data.emergency_phone)}</p>` : "",
         data.emergency_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.emergency_whatsapp)}</p>` : "",
-        data.emergency_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.emergency_email)}</p>` : "",
+        data.emergency_email ? `<p style="${TXT}">${pdfIcon("link", 12)} ${escapeHtml(data.emergency_email)}</p>` : "",
         data.emergency_24h === 'sim' ? `<p style="${TXT}color:#0f766e;font-weight:600;">${t("badge24h")}</p>` : "",
         p(t("fldIdiomas"), data.emergency_languages),
         data.insurer_website ? `<p style="${TXT}"><a href="${escapeHtml(data.insurer_website)}" style="color:#0f766e;text-decoration:underline;">${t("ctaSiteSeguradora")}</a></p>` : "",
@@ -722,9 +722,9 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
     ? miniCard(t("sectionContato"), [
         data.contact_name ? `<p style="${TXT}">${escapeHtml(data.contact_name)}${data.contact_company ? ` — ${escapeHtml(data.contact_company)}` : ''}</p>` : "",
         p("🌐", data.contact_language),
-        data.contact_phone ? `<p style="${TXT}">📞 ${escapeHtml(data.contact_phone)}</p>` : "",
+        data.contact_phone ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${escapeHtml(data.contact_phone)}</p>` : "",
         data.contact_whatsapp ? `<p style="${TXT}">💬 WhatsApp: ${escapeHtml(data.contact_whatsapp)}</p>` : "",
-        data.contact_email ? `<p style="${TXT}">✉️ ${escapeHtml(data.contact_email)}</p>` : "",
+        data.contact_email ? `<p style="${TXT}">${pdfIcon("link", 12)} ${escapeHtml(data.contact_email)}</p>` : "",
       ])
     : "";
 
@@ -744,7 +744,7 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
         p(t("fldIdioma"), data.guide_language),
         p(t("fldHorario"), data.guide_tour_time),
         p(t("fldDuracao"), data.guide_tour_duration),
-        data.guide_meeting_point ? `<p style="${TXT}">📍 ${t("fldEncontro")}: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
+        data.guide_meeting_point ? `<p style="${TXT}">${pdfIcon("pin", 12)} ${t("fldEncontro")}: ${escapeHtml(data.guide_meeting_point)}</p>` : "",
       ])
     : "";
 
@@ -896,8 +896,8 @@ function generateItinerarySection(
         <div style="border-left: 2px solid #0f766e33; padding-left: 10px; margin-bottom: 6px;">
           <p style="font-weight: 600; font-size: 13px; margin: 0;">${act.title}</p>
           ${act.description ? `<p style="font-size: 12px; color: #475569; margin: 2px 0 0 0;">${act.description}</p>` : ''}
-          ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">⏰ ${act.start_time}</p>` : ''}
-          ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">📍 ${act.location}</p>` : ''}
+          ${act.start_time ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${pdfIcon("calendar", 12)} ${act.start_time}</p>` : ''}
+          ${act.location ? `<p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">${pdfIcon("pin", 12)} ${act.location}</p>` : ''}
           ${act.notes ? `<p style="font-size: 11px; color: #64748b; font-style: italic; margin: 2px 0 0 0;">${act.notes}</p>` : ''}
           ${act.maps_url ? `<p style="font-size: 11px; margin: 2px 0 0 0;"><a href="${act.maps_url.startsWith('http') ? act.maps_url : `https://www.google.com/maps/search/${encodeURIComponent(act.maps_url)}`}" style="color: #0f766e; text-decoration: underline;">${t("pdfMapsLink")}</a></p>` : ''}
           ${(() => {
@@ -912,7 +912,7 @@ function generateItinerarySection(
               .map(p => ({ url: resolveUrl(p), name: decodeURIComponent((p.split('/').pop() || 'documento').replace(/^\d+_/, '')) }))
               .filter(d => !!d.url);
             if (!docs.length) return '';
-            return `<div style="margin-top:6px;">${docs.map(d => `<a href="${d.url}" style="display:inline-block;font-size:11px;color:#0f766e;text-decoration:underline;margin-right:8px;">📎 ${d.name}</a>`).join('')}</div>`;
+            return `<div style="margin-top:6px;">${docs.map(d => `<a href="${d.url}" style="display:inline-block;font-size:11px;color:#0f766e;text-decoration:underline;margin-right:8px;">${pdfIcon("file", 12)} ${d.name}</a>`).join('')}</div>`;
           })()}
         </div>
       `).join("");
