@@ -32,6 +32,7 @@ describe("menu lateral Agentes de Sonhos", () => {
       "Orçamentos",
       "Roteiros",
       "Carteiras digitais",
+      "Biblioteca de imagens",
     ]);
     expect(APP_AGENDA_ITEM.title).toBe("Agenda");
     expect(APP_MANAGEMENT_ITEMS.map((item) => item.title)).toEqual([
@@ -68,6 +69,7 @@ describe("menu lateral Agentes de Sonhos", () => {
       "/meus-projetos?tab=orcamentos",
       "/meus-projetos?tab=roteiros",
       "/meus-projetos?tab=carteiras",
+      "/biblioteca-imagens",
     ]);
     expect(APP_MANAGEMENT_ITEMS.find((item) => item.title === "Clientes")?.requiredPermission).toBe("clients.view");
     expect(APP_MANAGEMENT_ITEMS.find((item) => item.title === "Financeiro")?.requiredFeature).toBe("financial");
