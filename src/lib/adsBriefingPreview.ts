@@ -769,6 +769,11 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   socialStrip: { title: "Encontre a Drica no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/dricaviagens" }] },
   seo: { title: "Apresentação completa — Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins. Apresentação técnica sem envios." },
 };
+// Seções retiradas a pedido (15/10/2026): Xcaret, Visto americano, Portugal,
+// Credenciais e conexões e Equipe e consultores.
+delete DRICA_PRESENTATION_PROFILE.dmc;
+delete DRICA_PRESENTATION_PROFILE.credentials;
+delete DRICA_PRESENTATION_PROFILE.team;
 
 /* ------------------------------------------------------------------ */
 /* Bardelli Viagens — perfil OFICIAL (bardelliviagens.com.br).          */
