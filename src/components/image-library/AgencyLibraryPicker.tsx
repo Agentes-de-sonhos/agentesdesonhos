@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Check, ImageOff, Library, Loader2, Search } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, ImageOff, Library, Link2, Loader2, Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { filterLibraryImages, listLibraryFolders, listLibraryImages } from "@/lib/agencyImageLibrary";
+import { addLibraryImage, defaultNameFromUrl, filterLibraryImages, listLibraryFolders, listLibraryImages } from "@/lib/agencyImageLibrary";
 import { cn } from "@/lib/utils";
 
 export const LIBRARY_QUERY_KEY = ["agency-image-library"] as const;
@@ -49,6 +49,10 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
   const [search, setSearch] = useState("");
   const [folder, setFolder] = useState<string>("all");
   const [selected, setSelected] = useState<string[]>([]);
+  const [newUrl, setNewUrl] = useState("");
+  const [urlError, setUrlError] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const qc = useQueryClient();
 
   const images = useQuery({ queryKey: LIBRARY_QUERY_KEY, queryFn: listLibraryImages, enabled: open, staleTime: 2 * 60 * 1000 });
   const folders = useQuery({ queryKey: LIBRARY_FOLDERS_KEY, queryFn: listLibraryFolders, enabled: open, staleTime: 2 * 60 * 1000 });
@@ -65,7 +69,28 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
     });
   };
 
-  const close = () => { setOpen(false); setSelected([]); setSearch(""); };
+  const close = () => { setOpen(false); setSelected([]); setSearch(""); setNewUrl(""); setUrlError(null); };
+
+  const addByUrl = async () => {
+    const url = newUrl.trim();
+    if (!url || adding) return;
+    if (existing.has(url)) { setUrlError("Esta foto já está no serviço."); return; }
+    const inLibrary = (images.data || []).some((img) => img.url === url);
+    setAdding(true);
+    try {
+      if (!inLibrary) {
+        await addLibraryImage(url, defaultNameFromUrl(url), folder !== "all" && folder !== "none" ? folder : null);
+        await qc.invalidateQueries({ queryKey: LIBRARY_QUERY_KEY });
+      }
+      setSelected((prev) => prev.includes(url) ? prev : maxSelectable <= 1 ? [url] : prev.length >= maxSelectable ? prev : [...prev, url]);
+      setNewUrl("");
+      setSearch("");
+    } catch (e) {
+      setUrlError(e instanceof Error ? e.message : "Não foi possível adicionar a imagem.");
+    } finally {
+      setAdding(false);
+    }
+  };
 
   return (
     <>
@@ -103,6 +128,24 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
               </SelectContent>
             </Select>
           </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
+              <Link2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={newUrl}
+                onChange={(e) => { setNewUrl(e.target.value); setUrlError(null); }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void addByUrl(); } }}
+                placeholder="Colar link de uma nova foto (https://...)"
+                className="pl-8"
+                aria-label="Link da nova foto"
+              />
+            </div>
+            <Button type="button" variant="outline" onClick={() => void addByUrl()} disabled={!newUrl.trim() || adding} className="gap-1.5">
+              {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Adicionar por link
+            </Button>
+          </div>
+          {urlError && <p className="text-xs text-destructive" role="alert">{urlError}</p>}
           <div className="flex-1 overflow-y-auto min-h-[200px]" data-testid="library-picker-grid">
             {images.isLoading ? (
               <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
