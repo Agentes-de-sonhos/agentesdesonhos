@@ -30,6 +30,7 @@ import { TripServiceList } from "@/components/trip/TripServiceCard";
 import { TripWalletList } from "@/components/trip/TripWalletList";
 import { TripEditForm } from "@/components/trip/TripEditForm";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
+import { TripWalletModulesCard } from "@/components/wallet/TripWalletModulesCard";
 
 import { generateTripPDF, type ItineraryActivityForPDF } from "@/components/trip/TripPDF";
 import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
@@ -1330,7 +1331,7 @@ function TripWalletContent() {
           renderInitial={() => <WalletInitialSettings trip={trip} isSaving={isUpdating} onUpdate={(updates) => updateTrip({ id: trip.id, ...updates } as any)} coverPicker={<WalletCoverPicker trip={trip} isSaving={isUpdating} onChange={(url) => updateTrip({ id: trip.id, wallet_cover_url: url } as any)} />} />}
           renderAccess={() => <WalletAccessSettings trip={trip} onCopyPassword={handleCopyPassword} onUpdatePassword={(password) => updatePassword({ id: trip.id, password })} onRegeneratePassword={handleRegeneratePassword} onUnlock={() => unlockTrip(trip.id)} />}
           renderItinerary={() => trip.itinerary_mode === "legacy" ? <LegacyItinerarySection trip={trip} onRequestAddService={() => { setSettingsOpen(false); openServicesAccordion(); }} /> : <TripItineraryV2 trip={trip} active={settingsOpen} />}
-          renderAdvanced={() => <DocumentSignatureCard table="trips" docId={trip.id} initialSnapshot={(trip as any).signature_snapshot ?? null} onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })} unwrapped inlineSelector hideUseDefaultAction />}
+          renderAdvanced={() => <div className="space-y-6"><DocumentSignatureCard table="trips" docId={trip.id} initialSnapshot={(trip as any).signature_snapshot ?? null} onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })} unwrapped inlineSelector hideUseDefaultAction /><TripWalletModulesCard tripId={trip.id} initialOverrides={(trip as any).wallet_modules ?? null} onSaved={() => queryClient.invalidateQueries({ queryKey: ["trip", id] })} /></div>}
         />
 
         {/* AI Import Modal */}
