@@ -148,7 +148,7 @@ export function CategoryServiceView({
           </h2>
           <p className="mt-0.5 text-xs sm:text-sm text-[hsl(var(--wallet-brand))] font-medium inline-flex items-center gap-1.5">
             <FileText className="h-3.5 w-3.5" />
-            {catText.countWord(total)}
+            {catText.countWord(countTotal)}
           </p>
         </div>
         <div id={`service-card-${only.id}`}>{renderFullCard(only)}</div>
@@ -165,7 +165,7 @@ export function CategoryServiceView({
         </h2>
         <p className="mt-0.5 text-xs sm:text-sm text-[hsl(var(--wallet-brand))] font-medium inline-flex items-center gap-1.5">
           <FileText className="h-3.5 w-3.5" />
-          {catText.countWord(total)}
+          {catText.countWord(countTotal)}
         </p>
       </div>
 
