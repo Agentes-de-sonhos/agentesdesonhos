@@ -389,7 +389,7 @@ export default function Auth() {
   // Magic Link sent screen
   if (view === "magic-link-sent") {
     return (
-      <AuthSplitLayout wide={view === "password-signup"}>
+      <AuthSplitLayout>
         <Card className="w-full border-0 bg-transparent shadow-none">
           <CardHeader className="px-0 pt-0 pb-6 text-center space-y-6">
                         <div className="space-y-2">
@@ -442,7 +442,7 @@ export default function Auth() {
   // Forgot password sent screen
   if (view === "forgot-sent") {
     return (
-      <AuthSplitLayout wide={view === "password-signup"}>
+      <AuthSplitLayout>
         <Card className="w-full border-0 bg-transparent shadow-none">
           <CardHeader className="px-0 pt-0 pb-6 text-center space-y-6">
                         <div className="space-y-2">
