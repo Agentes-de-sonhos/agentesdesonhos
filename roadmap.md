@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Atualizar somente passagens públicas: layout aprovado, dados reais, anexos e traduções; validar testes e mobile/desktop sem publicar.
+- [x] Atualizar somente passagens públicas: layout, dados e anexos preservados; 54 testes, build/typecheck automático OK; 360/390px/desktop, copiar e accordion verificados em sessão isolada. Carteira real protegida por senha: PDF real não verificado; sem publicar.
 - [x] Completar modelo reutilizável e apresentação Bardelli pela união integral Ju/100 Limites; matriz em docs/padrao-ouro-sites.md, 48 testes, páginas/desktop/mobile/carrinho sem envio e isolamento validados; sem publicar ou alterar banco.
 - [x] Concluir LEGOLAND Florida, Kennedy Space Center e ICON Park: 158 itens/161 âncoras, PNGs 5130×7290/4800×2698/1512×1460; 17 logos, quatro telas/100–200%, gestos e fechamento acessível; preservar 14 mapas e orçamento, sem publicar. Evidências e limitações em docs/validacao-final-parques-orlando.md.
 - [x] Concluir Universal Studios Florida, Islands of Adventure, Epic Universe e Volcano Bay dos PDFs: 196 itens/198 âncoras, crops sRGB 3475×3240 a 360 dpi, 14 logos, 52 testes e quatro telas/gestos; preservar dez mapas e orçamento, sem publicar. Evidências em docs/validacao-universal-parks.md.

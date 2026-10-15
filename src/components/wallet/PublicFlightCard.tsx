@@ -57,7 +57,7 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
     <section className="flex items-center justify-between gap-3 rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-5" aria-label={t("fldLocalizador")}>
       <div className="min-w-0"><h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">{t("fldLocalizador")}</h3><p className="select-all text-2xl font-bold sm:text-3xl">{data.locator_code || "—"}</p></div>
       {data.locator_code && <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-xl border-primary/20 bg-card text-primary" onClick={() => void copy()} aria-label={tf("copy")} title={tf("copy")}>{copiedCode === data.locator_code ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}</Button>}
-      <span className="sr-only" role="status">{copiedCode === data.locator_code ? tf("copied") : ""}</span>
+      <span className="sr-only" role="status">{copiedCode && copiedCode === data.locator_code ? tf("copied") : ""}</span>
     </section>
     <div className="space-y-4">
       {segments.map((seg, i) => <section key={i} className="rounded-2xl border border-border bg-card p-4 sm:p-5" aria-label={`${t("fldVoo")} ${i + 1}`}>
@@ -87,7 +87,7 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
       {baggageFields.map(([label, value], i) => <div key={i} className="mt-3 border-t border-border pt-3 text-muted-foreground">{label && <span className="font-semibold">{label}: </span>}<FormattedText>{String(value)}</FormattedText></div>)}
     </Section>
     {boardingFields.length > 0 && <Collapsible open={boardingOpen} onOpenChange={setBoardingOpen} className="rounded-2xl border border-border bg-card">
-      <CollapsibleTrigger asChild><Button variant="ghost" className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal rounded-2xl p-4 text-left text-base font-semibold"><AlertTriangle className="h-5 w-5 shrink-0 text-warning" /><span className="flex-1">{t("sectionOrientacoesEmbarquePlain")}</span><ChevronDown className={`h-5 w-5 shrink-0 transition-transform motion-reduce:transition-none ${boardingOpen ? "rotate-180" : ""}`} /></Button></CollapsibleTrigger>
+      <CollapsibleTrigger asChild><Button variant="ghost" className="h-auto min-h-14 w-full justify-start gap-3 whitespace-normal rounded-2xl p-4 text-left text-base font-semibold hover:bg-muted hover:text-foreground"><AlertTriangle className="h-5 w-5 shrink-0 text-warning" /><span className="flex-1">{t("sectionOrientacoesEmbarquePlain")}</span><ChevronDown className={`h-5 w-5 shrink-0 transition-transform motion-reduce:transition-none ${boardingOpen ? "rotate-180" : ""}`} /></Button></CollapsibleTrigger>
       <CollapsibleContent><div className="space-y-3 border-t border-border p-4 text-sm">{boardingFields.map(([label, value], i) => <div key={i}><p className="font-semibold">{label}</p><FormattedText>{String(value)}</FormattedText></div>)}</div></CollapsibleContent>
     </Collapsible>}
     {(data.checkin_url || data.checkin_notes || data.checkin_open_date || data.checkin_status) && <Section title={t("fldCheckin")} icon={<CheckCircle2 className="h-5 w-5 text-primary" />}>
