@@ -701,8 +701,14 @@ export const DRICA_PRESENTATION_INFO: AgencyDomainInfo = {
   user_id: "00000000-0000-0000-0000-00000000dc01", cnpj: "11.636.130/0001-31",
 };
 const dricaBaseline = buildGoldStandardProfile("dricaPresentation", {}, "Drica Viagens");
+const DRICA_PRESENTATION_NAV = (dricaBaseline.nav ?? [])
+  .filter((l) => l.to !== "/visto-americano" && l.to !== "/dmc-portugal")
+  .map((l) => l.children ? { ...l, children: l.children.filter((c) => c.to !== "/xcaret") } : l);
 export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   ...dricaBaseline, navDensity: "compact", randomizeDestinations: false,
+  visaHome: false, featuredExperience: undefined,
+  sections: { ...dricaBaseline.sections, dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false } },
+  nav: DRICA_PRESENTATION_NAV,
   heroPresentation: { ...dricaBaseline.heroPresentation, kicker: "DRICA VIAGENS · ONLINE, DO RIO DE JANEIRO · DESDE 2010" },
   hero: [
     { title: "Seu próximo destino pode ser o melhor capítulo da sua história", subtitle: "Roteiros personalizados, pacotes, cruzeiros, seguros e ingressos, com segurança e suporte antes, durante e depois da viagem.", image: "orlandoMagicKingdom", order: 1, enabled: true },
@@ -763,7 +769,11 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   socialStrip: { title: "Encontre a Drica no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/dricaviagens" }] },
   seo: { title: "Apresentação completa — Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins. Apresentação técnica sem envios." },
 };
-export const DRICA_XCARET_REWRITES: [string, string][] = BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.split("Bardelli Viagens").join("Drica Viagens").split("Equipe Bardelli").join("Equipe Drica").split("Bardelli").join("Drica")]);
+// Seções retiradas a pedido (15/10/2026): Xcaret, Visto americano, Portugal,
+// Credenciais e conexões e Equipe e consultores.
+delete DRICA_PRESENTATION_PROFILE.dmc;
+delete DRICA_PRESENTATION_PROFILE.credentials;
+delete DRICA_PRESENTATION_PROFILE.team;
 
 /* ------------------------------------------------------------------ */
 /* Bardelli Viagens — perfil OFICIAL (bardelliviagens.com.br).          */
@@ -832,7 +842,7 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     jobId: DRICA_PRESENTATION_JOB_ID, info: DRICA_PRESENTATION_INFO, profile: DRICA_PRESENTATION_PROFILE,
     notice: "Drica Viagens · apresentação completa para revisão · conteúdo ilustrativo identificado · sem envios ou publicação",
     documentTitle: "Apresentação completa — Drica Viagens", realAgency: true,
-    pages: { xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: DRICA_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
+    pages: { resorts: { title: "Explore os resorts do Brasil" }, orlandoTickets: true, editorial: true },
   },
   [BARDELLI_PRESENTATION_JOB_ID]: {
     jobId: BARDELLI_PRESENTATION_JOB_ID, info: BARDELLI_PRESENTATION_INFO, profile: BARDELLI_PRESENTATION_PROFILE,

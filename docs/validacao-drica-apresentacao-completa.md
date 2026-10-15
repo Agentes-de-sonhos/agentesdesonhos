@@ -44,3 +44,6 @@ Os quatro vídeos de cruzeiro estão presentes no perfil e conservam os arquivos
 - `src/components/whitelabel/AgencySiteLayout.tsx`, `AgencyPresentationPages.tsx`, `UsVisaProposalDialog.tsx`; `src/components/orlando/OrlandoEditorialGallery.tsx`, `OrlandoTicketsSection.tsx`.
 - `src/index.css`, pointers `src/assets/presentation/drica/*`.
 - `src/test/drica-complete-presentation.test.ts`, `ads-briefing-preview.test.tsx`; `AGENTS.md`, inventário padrão ouro, memória de identidade e `roadmap.md`.
+
+## 15/10/2026 — Seções retiradas a pedido
+Removidas da apresentação `drica-completa-v1`: Xcaret (bloco da home e página `/xcaret`), Visto americano (seção da home e `/visto-americano`), Portugal — planejamento no seu ritmo (`/dmc-portugal`), Credenciais e conexões e Equipe e consultores. O menu foi ajustado em conjunto e a grade "Tudo para a sua viagem" (6 serviços) passou a ocupar o lugar do bloco Xcaret na home. Menção a Xcaret permanece apenas como inspiração de destino no texto Sobre. Nada foi publicado; rascunho `briefing-16-v1` intacto. Testes: 19 aprovados; typecheck OK.
