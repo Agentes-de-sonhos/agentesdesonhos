@@ -17,3 +17,4 @@
 - Image library (`agency_image_library`): agency-scoped in SQL; link photos register only after service save. Why: no orphan entries.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
 - Wallet modules: trip > owning agency (`wallet_agency_owner`) > system, in SQL. Why: same agency.
+- Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: new videos per page without code changes.
