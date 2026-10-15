@@ -2302,7 +2302,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           </div>
                         )}
                         {showNextService && (
-                          <div className="md:order-1">
+                          <div>
                             <NextAppointmentCard
                               services={services}
                               onOpenService={handleOpenService}
@@ -2311,7 +2311,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                           </div>
                         )}
                         {showNextActivity && (
-                          <div className="md:order-2">
+                          <div>
                           <NextActivityCard
                             activities={itineraryActivities as any}
                             locale={publicLocale}
