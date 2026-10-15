@@ -106,8 +106,8 @@ function buildAppointments(
         break;
       }
       case "hotel": {
-        const ci = parseDateTime(data.check_in, data.check_in_time);
-        const co = parseDateTime(data.check_out, data.check_out_time);
+        const ci = parseDateTime(data.check_in, data.check_in_time || data.checkin_time);
+        const co = parseDateTime(data.check_out, data.check_out_time || data.checkout_time);
         if (ci) out.push({ when: ci.d, hasTime: ci.hasTime, kind: "hotel_checkin", title: data.hotel_name || t("serviceHotel"), subtitle: data.city, service: s });
         if (co) out.push({ when: co.d, hasTime: co.hasTime, kind: "hotel_checkout", title: data.hotel_name || t("serviceHotel"), subtitle: data.city, service: s });
         break;
@@ -168,9 +168,16 @@ function pickNext(items: Appointment[], now: Date): Appointment | null {
     return end.getTime() >= now.getTime();
   });
   if (future.length === 0) return null;
+  const dayKey = (d: Date) => d.getFullYear() * 10000 + d.getMonth() * 100 + d.getDate();
   future.sort((a, b) => {
-    const da = a.when.getTime() - b.when.getTime();
-    if (da !== 0) return da;
+    const dd = dayKey(a.when) - dayKey(b.when);
+    if (dd !== 0) return dd;
+    // Same day: if either has no time, the event order is unknown — use the
+    // journey priority (e.g. flight before hotel check-in).
+    if (a.hasTime && b.hasTime) {
+      const dt = a.when.getTime() - b.when.getTime();
+      if (dt !== 0) return dt;
+    }
     return PRIORITY[a.kind] - PRIORITY[b.kind];
   });
   return future[0];
