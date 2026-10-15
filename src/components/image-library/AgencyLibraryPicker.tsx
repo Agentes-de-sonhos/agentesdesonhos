@@ -152,7 +152,7 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
             ) : visible.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted-foreground">
                 {(images.data || []).length === 0
-                  ? "A biblioteca ainda está vazia. Fotos adicionadas por link nos serviços aparecem aqui depois de salvar."
+                  ? "A biblioteca ainda está vazia. Cole o link de uma foto acima para adicioná-la."
                   : "Nenhuma imagem encontrada."}
               </p>
             ) : (
