@@ -1034,7 +1034,7 @@ export function buildTripPdfHtml(input: TripPdfBuildInput): string {
   return `<!DOCTYPE html>
 <html lang="${locale}"><head><meta charset="UTF-8"><title>Carteira Digital — ${escapeHtml(title || trip.client_name)}</title>
 <style>${PDF_CSS}</style></head>
-<body><main class="doc">
+<body><main class="pdf-doc">
   ${generateAgencyHeader(profile, locale)}
   <section class="hero">
     <h1>${escapeHtml(title)}</h1>
@@ -1059,7 +1059,7 @@ html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#
 body{font-family:'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0f1d3a;font-size:10.5pt;line-height:1.45;overflow-wrap:anywhere;word-break:normal}
 img{max-width:100%;display:block}
 a{color:#0e7490;text-decoration:underline}
-.doc{max-width:184mm;margin:0 auto}
+.pdf-doc{max-width:184mm;margin:0 auto}
 .pre{white-space:pre-wrap}
 .muted{color:#5b6b85}.small{font-size:9pt}.strong{font-weight:700}.center{text-align:center}
 .accent{color:#0891b2}
