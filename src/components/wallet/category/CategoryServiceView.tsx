@@ -9,6 +9,7 @@ import {
 } from "react";
 import { ChevronDown, FileText, Paperclip, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { flightTicketCount } from "@/lib/publicWalletFlight";
 import type { TripService, TripServiceType } from "@/types/trip";
 import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
