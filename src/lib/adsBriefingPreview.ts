@@ -821,6 +821,15 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     documentTitle: "Prévia para revisão — Viajar Tirismo",
     realAgency: true,
   },
+  [BARDELLI_BRIEFING18_JOB_ID]: {
+    jobId: BARDELLI_BRIEFING18_JOB_ID,
+    info: BARDELLI_BRIEFING18_INFO,
+    profile: BARDELLI_BRIEFING18_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Bardelli Viagens",
+    realAgency: true,
+    pages: { xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
+  },
 };
 
 export function resolveAdsPreviewFixture(jobId?: string): AdsBriefingPreviewFixture | null {

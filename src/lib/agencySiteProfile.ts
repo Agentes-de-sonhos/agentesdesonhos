@@ -33,7 +33,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_BRIEFING18_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -56,7 +56,9 @@ export type AgencySiteProfileKey =
   | "viajarTirismoBriefing17"
   /** Bardelli Viagens — padrão ouro (São Paulo/SP), prévia em /preview. */
   | "bardelliCurated"
-  | "bardelliPresentation";
+  | "bardelliPresentation"
+  /** Prévia técnica briefing-18-v1 (Bardelli); host sintético, sem vínculo com o domínio real. */
+  | "bardelliBriefing18";
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
 export interface AgencySignatureContent {
@@ -1135,6 +1137,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   /** Host sintético do rascunho briefing-17 — vinculação de domínio pendente. */
   "briefing-17-v1.preview.local": "viajarTirismoBriefing17",
   "bardelli-presentation.preview.local": "bardelliPresentation",
+  "briefing-18-v1.preview.local": "bardelliBriefing18",
   "bardelliviagens.com.br": "bardelliCurated",
   "www.bardelliviagens.com.br": "bardelliCurated",
 };
@@ -1154,6 +1157,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   viajarTirismoBriefing17: VIAJAR_TIRISMO_PREVIEW_PROFILE,
   bardelliCurated: BARDELLI_CURATED,
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
+  bardelliBriefing18: BARDELLI_BRIEFING18_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
