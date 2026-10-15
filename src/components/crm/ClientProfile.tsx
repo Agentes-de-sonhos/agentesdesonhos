@@ -73,13 +73,7 @@ export function ClientProfile({ client, onBack, onEdit }: ClientProfileProps) {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-  const formatDateShort = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
-    } catch {
-      return dateStr;
-    }
-  };
+  const formatDateShort = (dateStr: string) => formatLocalDateBR(dateStr, dateStr);
 
   const handleCreateTrip = async (data: TripFormData) => {
     await createTrip({ ...data, client_name: client.name });
