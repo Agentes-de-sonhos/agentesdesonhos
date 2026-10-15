@@ -51,3 +51,24 @@ describe("cabeçalho somente com logotipo por tenant", () => {
     });
   });
 });
+
+describe("logotipo dobrado da Drica Viagens", () => {
+  it.each([
+    "drica-presentation.preview.local",
+    "dricaviagens.rio",
+    "www.dricaviagens.rio",
+  ])("dobra o logotipo no cabeçalho e no rodapé de %s", (hostname) => {
+    const preset = resolveAgencyHeaderBrandPreset(hostname);
+    // Dobro da caixa editorial anterior (h-12 / max-w-[200px]).
+    expect(preset.logoClassName).toContain("h-20");
+    expect(preset.logoClassName).toContain("md:h-24");
+    expect(preset.logoClassName).toContain("md:max-w-[340px]");
+    expect(preset.headerClassName).toContain("md:h-[112px]");
+  });
+
+  it("não altera as demais agências", () => {
+    expect(resolveAgencyHeaderBrandPreset("faeviagens.com.br").logoClassName).toBe(
+      "h-12 w-auto max-w-[200px] object-contain",
+    );
+  });
+});
