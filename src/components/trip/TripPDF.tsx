@@ -403,7 +403,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
     ? `${data.origin_location} → ${data.destination_location}`
     : data.location || '';
   const head = renderServiceHeadline({
-    title: `${typeMap[data.transfer_type] || data.transfer_type || t("serviceTransfer")} — ${route}`,
+    title: `${typeMap[data.transfer_type] || data.transfer_type || t("serviceTransfer")}${route ? ` — ${route}` : ""}`,
     dates: data.date ? `${fmtDate(data.date, locale)}${data.time ? ` ${t("wordAs")} ${data.time}` : ''}` : "",
     lines: [
       data.company_name ? `${t("fldEmpresa")}: ${data.company_name}` : "",
