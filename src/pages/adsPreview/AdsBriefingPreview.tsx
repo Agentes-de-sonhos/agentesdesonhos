@@ -99,7 +99,8 @@ export default function AdsBriefingPreview() {
     const backend = import.meta.env.VITE_SUPABASE_URL as string;
     window.fetch = (input, init) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-      if (backend && url.startsWith(backend)) {
+      // Única exceção: leitura das avaliações públicas do Google (sem escrita).
+      if (backend && url.startsWith(backend) && url.split("?")[0] !== `${backend}/functions/v1/google-place-reviews`) {
         return Promise.reject(new Error("Prévia de teste: acesso ao backend desativado."));
       }
       return origFetch(input, init);

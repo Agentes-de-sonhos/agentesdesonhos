@@ -15,6 +15,9 @@ const PLACE_BY_HOSTNAME: Record<string, string> = {
   "www.destinoscomaju.com.br": "ChIJhTnCndr3zpQRyRaMIZaR7Kw",
   "100limites.tur.br": "ChIJja6jcMrwnUYR1bK8iqexXQg",
   "www.100limites.tur.br": "ChIJja6jcMrwnUYR1bK8iqexXQg",
+  "dricaviagens.rio": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
+  "www.dricaviagens.rio": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
+  "drica-presentation.preview.local": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
 };
 
 const FIELD_MASK = "id,displayName,rating,userRatingCount,googleMapsUri,reviews,attributions";

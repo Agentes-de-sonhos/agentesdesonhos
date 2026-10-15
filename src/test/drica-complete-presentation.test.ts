@@ -30,7 +30,7 @@ describe("Drica — apresentação integral isolada", () => {
     expect(p.featuredExperience?.badge).toBeNull(); expect(p.featuredExperience?.consultantImage).toBeNull();
     expect(p.conciergePoints?.[3].text).toMatch(/fornecedor.*suporte direto/);
     expect(p.dmc?.note).toContain("ilustrativo"); expect(p.credentials?.text).toContain("Nenhum selo");
-    expect(p.copy?.avaliacoes?.subtitle).toContain("Avaliação ilustrativa — exemplo de apresentação");
+    expect(p.copy?.avaliacoes?.subtitle).toContain("Avaliações reais");
     expect(DRICA_XCARET_REWRITES.map(([,to])=>to).join(" ")).not.toMatch(/Bardelli|Juliana|Expert/);
   });
   it("habilita continuidades locais sem atribuir domínio real", () => {

@@ -25,11 +25,19 @@ const CEM_LIMITES: GoogleReviewsHostConfig = {
   placeId: "ChIJja6jcMrwnUYR1bK8iqexXQg",
 };
 
+const DRICA_VIAGENS: GoogleReviewsHostConfig = {
+  label: "Drica Viagens",
+  placeId: "ChIJtcpG9uG2W48RfGhKmSu3ImM",
+};
+
 const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
   "destinoscomaju.com.br": DESTINOS_COM_A_JU,
   "www.destinoscomaju.com.br": DESTINOS_COM_A_JU,
   "100limites.tur.br": CEM_LIMITES,
   "www.100limites.tur.br": CEM_LIMITES,
+  "dricaviagens.rio": DRICA_VIAGENS,
+  "www.dricaviagens.rio": DRICA_VIAGENS,
+  "drica-presentation.preview.local": DRICA_VIAGENS,
 };
 
 export function resolveGoogleReviewsConfig(hostname: string | null | undefined) {

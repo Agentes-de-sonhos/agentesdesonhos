@@ -1493,7 +1493,7 @@ export default function AgencySiteHome({
         );
 
       case "avaliacoes":
-        if (profile.presentation) return <AgencyGoogleReviewsSection key={key} hostname={hostname} container={container} copy={copyFor("avaliacoes")} compactSpacing={compactSpacing} illustrative />;
+        if (profile.presentation && !googleReviews) return <AgencyGoogleReviewsSection key={key} hostname={hostname} container={container} copy={copyFor("avaliacoes")} compactSpacing={compactSpacing} illustrative />;
         if (!googleReviews) return null;
         {
           const copy = copyFor("avaliacoes");
