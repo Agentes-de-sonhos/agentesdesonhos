@@ -68,7 +68,7 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
           <span className="text-sm font-semibold">{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>
         </div>
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 sm:gap-4">
-          <div className="min-w-0 max-w-[5.5rem] sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.departure_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.origin_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.origin_city || ""}</p></div>
+          <div className="min-w-0 max-w-[5.5rem] sm:w-32 sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.departure_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.origin_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.origin_city || ""}</p></div>
           <div data-testid="flight-route-track" className="flex h-7 w-full min-w-0 items-center sm:h-8" aria-hidden="true">
             <span className="h-2 w-2 shrink-0 rounded-full border-2 border-muted-foreground/50 bg-card sm:h-2.5 sm:w-2.5" />
             <span className="min-w-0 flex-1 border-t border-dashed border-muted-foreground/40" />
@@ -78,7 +78,7 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
             <span className="min-w-0 flex-1 border-t border-dashed border-muted-foreground/40" />
             <span className="h-2 w-2 shrink-0 rounded-full border-2 border-muted-foreground/50 bg-card sm:h-2.5 sm:w-2.5" />
           </div>
-          <div className="min-w-0 max-w-[5.5rem] text-right sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.arrival_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.destination_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.destination_city || ""}</p></div>
+          <div className="min-w-0 max-w-[5.5rem] text-right sm:w-32 sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.arrival_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.destination_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.destination_city || ""}</p></div>
         </div>
         {(seg.origin_airport_name || seg.destination_airport_name) && <p className="mt-3 text-sm text-muted-foreground">{publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city })} → {publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city })}</p>}
         {(seg.terminal || seg.gate) && <p className="mt-3 text-sm text-muted-foreground">{[seg.terminal ? `${t("fldTerminal")}: ${seg.terminal}` : "", seg.gate ? `${t("fldPortao")}: ${seg.gate}` : ""].filter(Boolean).join(" · ")}</p>}
