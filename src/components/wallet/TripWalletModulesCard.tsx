@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Calendar as CalendarIcon, Plane, MapPin, Wrench, UserRound, MessageCircle, RotateCcw, Loader2, LayoutGrid } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useAgencyWalletSettings } from "@/hooks/useAgencyWalletSettings";
-import { WALLET_MODULES, resolveWalletSettings, sanitizeWalletOverrides, type AgencyWalletSettings, type WalletModuleOverrides } from "@/lib/walletSettings";
+import { useQuery } from "@tanstack/react-query";
+import { WALLET_MODULES, fetchTripAgencyWalletDefaults, resolveWalletSettings, sanitizeWalletOverrides, type AgencyWalletSettings, type WalletModuleOverrides } from "@/lib/walletSettings";
 import { toast } from "sonner";
 
 export const WALLET_MODULE_ICONS: Record<keyof AgencyWalletSettings, typeof CalendarIcon> = {
@@ -18,21 +18,32 @@ export const WALLET_MODULE_ICONS: Record<keyof AgencyWalletSettings, typeof Cale
 
 /** Módulos da carteira pública ajustados somente para esta carteira (autosave). */
 export function TripWalletModulesCard({ tripId, initialOverrides, onSaved }: { tripId: string; initialOverrides: unknown; onSaved?: () => void }) {
-  const { settings: agency, loading } = useAgencyWalletSettings();
+  // Padrão da agência dona da viagem (mesma resolução usada na carteira pública), nunca a conta conectada.
+  const { data: agency, isLoading: loading } = useQuery({
+    queryKey: ["trip-agency-wallet-defaults", tripId],
+    queryFn: () => fetchTripAgencyWalletDefaults(tripId),
+    staleTime: 5 * 60 * 1000,
+  });
   const [overrides, setOverrides] = useState<WalletModuleOverrides>(() => sanitizeWalletOverrides(initialOverrides));
   const [saving, setSaving] = useState<string | null>(null);
-  useEffect(() => { setOverrides(sanitizeWalletOverrides(initialOverrides)); }, [tripId, JSON.stringify(initialOverrides ?? null)]);
+  const latest = useRef(overrides);
+  const pending = useRef(0);
+  // Só ressincroniza com o servidor quando não há gravação em andamento (não perde cliques rápidos).
+  useEffect(() => { if (pending.current === 0) { const o = sanitizeWalletOverrides(initialOverrides); latest.current = o; setOverrides(o); } }, [tripId, JSON.stringify(initialOverrides ?? null)]);
 
-  const effective = resolveWalletSettings(agency, overrides);
+  const effective = resolveWalletSettings(agency ?? null, overrides);
   const customized = Object.keys(overrides).length > 0;
 
   const persist = async (next: WalletModuleOverrides, key: string) => {
-    const prev = overrides;
+    const prev = latest.current;
+    latest.current = next;
     setOverrides(next);
     setSaving(key);
+    pending.current += 1;
     const { error } = await supabase.from("trips").update({ wallet_modules: Object.keys(next).length ? next : null } as never).eq("id", tripId);
+    pending.current -= 1;
     setSaving(null);
-    if (error) { setOverrides(prev); toast.error("Não foi possível salvar o módulo. Tente novamente."); return; }
+    if (error) { if (latest.current === next) { latest.current = prev; setOverrides(prev); } toast.error("Não foi possível salvar o módulo. Tente novamente."); return; }
     onSaved?.();
   };
 
@@ -57,7 +68,7 @@ export function TripWalletModulesCard({ tripId, initialOverrides, onSaved }: { t
           </span>
           {saving === key ? <Loader2 className="mt-1 h-4 w-4 animate-spin text-muted-foreground" /> : null}
           <Switch id={`trip-module-${key}`} aria-label={label} checked={effective[key]} disabled={loading || !!saving}
-            onCheckedChange={(checked) => void persist({ ...overrides, [key]: checked }, key)} />
+            onCheckedChange={(checked) => void persist({ ...latest.current, [key]: checked }, key)} />
         </label>;
       })}
     </div>

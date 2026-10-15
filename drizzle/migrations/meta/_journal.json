@@ -337,6 +337,13 @@
       "when": 1792037612319,
       "tag": "0047_wallet_modules_per_trip",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1792037928537,
+      "tag": "0048_wallet_settings_trip_agency_owner",
+      "breakpoints": true
     }
   ]
 }

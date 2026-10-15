@@ -43,7 +43,6 @@ import { resolveSignatureContact, buildWhatsAppUrl } from "@/lib/commercialSigna
 import {
   AgencyWalletSettings,
   DEFAULT_WALLET_SETTINGS,
-  fetchAgencyWalletSettings,
 } from "@/lib/walletSettings";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
 import type { ItineraryDay } from "@/types/itinerary";
@@ -2081,13 +2080,8 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
       setWalletSettings({ ...DEFAULT_WALLET_SETTINGS, ...embedded });
       return;
     }
-    const ownerId = (tripData as any)?.user_id;
-    if (!ownerId) return;
-    let cancelled = false;
-    fetchAgencyWalletSettings(ownerId).then((s) => {
-      if (!cancelled) setWalletSettings(s);
-    });
-    return () => { cancelled = true; };
+    // Sem configuração entregue pelo acesso autorizado, usa o padrão do sistema.
+    setWalletSettings({ ...DEFAULT_WALLET_SETTINGS });
   }, [(tripData as any)?.user_id, (tripData as any)?.wallet_settings]);
 
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
