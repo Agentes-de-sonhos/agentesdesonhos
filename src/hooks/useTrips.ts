@@ -191,6 +191,7 @@ export function useTrips() {
           trip_title: src.trip_title ? `${src.trip_title} (cópia)` : null,
           wallet_cover_url: src.wallet_cover_url ?? null,
           signature_snapshot: null,
+          wallet_modules: src.wallet_modules ?? null,
           share_token: shareToken,
           access_password: generatePassword(),
           // A cópia não herda vínculos operacionais nem códigos públicos —
