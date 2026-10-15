@@ -198,6 +198,12 @@ export default function DmcPortugalLandingPage({ info, presentation = false }: {
   const dricaPresentation = presentation && info.hostname === "drica-presentation.preview.local";
   const presentationRewrites: [string, string][] = PRESENTATION_REWRITES.map(([from, to]) => [from, to.replaceAll("Bardelli Viagens", info.agency_name || "A agência").replaceAll("Equipe Bardelli", "Consultoria de viagens").replaceAll("Base em São Paulo, Brasil", dricaPresentation ? "Atendimento no Rio de Janeiro, Brasil" : "Base em São Paulo, Brasil")]);
   if (dricaPresentation) presentationRewrites.unshift(
+    ["Para quem não se sente à vontade viajando sozinho ou quer mais tranquilidade, oferecemos a companhia de uma", "Exemplo ilustrativo: quem prefere viajar acompanhado pode avaliar a contratação de uma"],
+    ["a agência conta com apoio local em cada etapa.", "o apoio local dependeria de parceiros e serviços a confirmar."],
+    ["Prestamos assistência e acompanhamento aos passageiros, com suporte à agência.", "Exemplo de acompanhamento por fornecedores a validar, sem operação própria da Drica."],
+    ["Enviamos a proposta com o que está incluído.", "Exemplo de proposta a validar, com serviços e inclusões definidos pelos fornecedores."],
+    ["Da cotação à operação", "Exemplo de planejamento · sem contratação"],
+    ["Operação e suporte", "Acompanhamento ilustrativo"],
     ["Sua operação receptiva em Portugal, com o cuidado da sua marca", "Portugal: ideias para uma viagem no seu ritmo"],
     ["DMC em Portugal · Para agências", "PORTUGAL · CONTEÚDO ILUSTRATIVO"],
     ["O que operamos para a sua agência", "Possibilidades ilustrativas para explorar"],
