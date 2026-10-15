@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, X, ImageOff, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Image, ImageOff, Loader2 } from "lucide-react";
 import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 
@@ -113,7 +113,7 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
     <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
       <img src={srcs[selectedIndex] || srcs[0]} alt={alt} className="h-44 w-full object-cover sm:h-56" onError={() => markFailed(usable[selectedIndex]?.ref || usable[0].ref)} />
       <span className="absolute right-3 top-3 rounded-full bg-foreground/80 px-3 py-1 text-xs font-semibold text-background">{selectedIndex + 1} / {srcs.length}</span>
-      {!disableExpand && <Button variant="secondary" className="absolute bottom-3 right-3 h-10 rounded-xl bg-foreground/85 text-background hover:bg-foreground" onClick={() => openLightbox(selectedIndex)}><ImageOff className="h-4 w-4" />{viewPhotosLabel}</Button>}
+      {!disableExpand && <Button variant="secondary" className="absolute bottom-3 right-3 h-10 rounded-xl bg-foreground/85 text-background hover:bg-foreground" onClick={() => openLightbox(selectedIndex)}><Image className="h-4 w-4" />{viewPhotosLabel}</Button>}
     </div>
     {hasGoogleImage && <GoogleAttribution attributions={attributions} />}
     {!disableExpand && lightboxOpen && <Lightbox images={srcs} index={lightboxIndex} onClose={closeLightbox} onPrev={lightboxPrev} onNext={lightboxNext} />}
