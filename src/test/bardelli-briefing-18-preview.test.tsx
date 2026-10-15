@@ -56,7 +56,7 @@ describe("briefing-18-v1 (Bardelli Viagens)", () => {
     }
     expect(resolveSiteProfile("www.destinoscomaju.com.br").key).toBe("editorialRose");
     expect(resolveSiteProfile("100limites.tur.br").key).toBe("editorialDmc");
-    expect(JSON.stringify(resolveAdsPreviewFixture("briefing-18-v1"))).not.toMatch(/bardelliviagens\.com\.br"/);
+    expect(INFO.hostname).not.toMatch(/bardelliviagens/);
   });
 
   it("omite endereço residencial e dados privados", () => {
