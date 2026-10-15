@@ -27,7 +27,6 @@ import {
 import { cn } from "@/lib/utils";
 import { formatItineraryDayHeader } from "@/lib/dateParsing";
 import { ServiceDocumentsCard } from "@/components/wallet/ServiceDocumentsCard";
-import { FlightStatusBadge } from "@/components/trip/FlightStatusBadge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { generateTripPDF, type VoucherAccessOptions } from "@/components/trip/TripPDF";
 import { TripCalendar, LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
@@ -63,7 +62,6 @@ import { agencyBrandInputFromProfile, pickBrandProfile } from "@/lib/brandTheme"
 import { usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { resolvePublicLocale, formatPublicShortDate, formatPublicDate, pluralize, type PublicLocale } from "@/i18n/publicMaterials/locale";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
-import { publicAirportText } from "@/lib/airportDisplay";
 
 /**
  * Hero cover for the trip: shows a destination photo full-width with the
@@ -830,113 +828,6 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
               );
             })}
           </dl>
-        )}
-
-        {/* Flight segments timeline */}
-        {isFlight && data.segments?.length > 0 && (
-          <div className="mt-3 space-y-2">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionTrechos")}</p>
-            {data.segments.map((seg: any, i: number) => {
-              const segTypeLabel = seg.segment_type === 'ida' ? t('fldIda') : seg.segment_type === 'conexao' ? t('segConexao') : t('segVolta');
-              // Connection time calc
-              let connectionInfo: string | null = null;
-              if (i > 0 && data.segments[i-1]) {
-                const prev = data.segments[i-1];
-                if (prev.flight_date === seg.flight_date && prev.arrival_time && seg.departure_time) {
-                  const [ph, pm] = prev.arrival_time.split(':').map(Number);
-                  const [sh, sm] = seg.departure_time.split(':').map(Number);
-                  const diff = (sh * 60 + sm) - (ph * 60 + pm);
-                  if (diff > 0) {
-                    const h = Math.floor(diff / 60);
-                    const m = diff % 60;
-                    connectionInfo = `${t('fldConexaoEm')} ${seg.origin_city || seg.origin_airport} — ${h}h${m > 0 ? `${m.toString().padStart(2, '0')}` : ''}`;
-                  }
-                }
-              }
-              return (
-                <div key={i}>
-                  {connectionInfo && (
-                    <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-md mb-1 font-medium">
-                      ✈️ {connectionInfo}
-                    </div>
-                  )}
-                  <div className="border-l-2 border-primary/30 pl-3 py-1">
-                    <div className="flex items-center gap-2 text-xs flex-wrap">
-                      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium">{segTypeLabel}</span>
-                      {seg.airline && <span className="text-muted-foreground">{seg.airline}</span>}
-                      {seg.flight_number && <span className="font-mono text-muted-foreground">{seg.flight_number}</span>}
-                      {seg.flight_number && seg.flight_date && (
-                        <FlightStatusBadge
-                          tripServiceId={service.id}
-                          flightNumber={seg.flight_number}
-                          flightDate={seg.flight_date}
-                          locale={locale}
-                        />
-                      )}
-                    </div>
-                    <p className="text-sm font-medium mt-0.5">
-                      {publicAirportText({ code: seg.origin_airport, customName: seg.origin_airport_name, city: seg.origin_city })} → {publicAirportText({ code: seg.destination_airport, customName: seg.destination_airport_name, city: seg.destination_city })}
-                    </p>
-                    <p className="text-[13px] text-foreground/80 leading-relaxed break-words">
-                      {seg.flight_date ? formatDate(seg.flight_date) : ''}
-                      {seg.departure_time ? ` • ${seg.departure_time}` : ''}
-                      {seg.arrival_time ? ` → ${seg.arrival_time}` : ''}
-                      {seg.terminal ? ` • ${t("fldTerminal")} ${seg.terminal}` : ''}
-                      {seg.gate ? ` • ${t("fldPortao")} ${seg.gate}` : ''}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Flight passengers */}
-        {isFlight && data.passengers?.length > 0 && (
-          <div className="mt-3">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">{t("sectionPassageirosPerson")}</p>
-            {data.passengers.map((p: any, i: number) => (
-              <p key={i} className="text-[13px] text-foreground/80 leading-relaxed break-words">
-                {p.name} ({p.passenger_type === 'adulto' ? t('paxAdulto') : p.passenger_type === 'crianca' ? t('paxCrianca') : t('paxBebe')})
-                {p.seat ? ` • ${t('fldAssento')} ${p.seat}` : ''}
-              </p>
-            ))}
-          </div>
-        )}
-
-        {/* Flight baggage */}
-        {isFlight && (data.carry_on || data.checked_baggage) && (
-          <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5 mb-1">{t("sectionBagagem")}</p>
-            {data.carry_on && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldMao")}: {data.carry_on}</p>}
-            {data.checked_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDespachada")}: {data.checked_baggage}</p>}
-            {data.extra_baggage && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldExtra")}: {data.extra_baggage}</p>}
-            {data.baggage_rules && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic mt-1"><FormattedText>{String(data.baggage_rules)}</FormattedText></div>}
-          </div>
-        )}
-
-        {/* Flight boarding instructions */}
-        {isFlight && (data.recommended_arrival || data.required_documents || data.boarding_notes) && (
-          <div className="mt-3 p-4 bg-muted/40 rounded-2xl ring-1 ring-border/40 space-y-1">
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.14em] mb-1.5">{t("sectionOrientacoesEmbarque")}</p>
-            {data.recommended_arrival && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldAntecedencia")}: {data.recommended_arrival}</p>}
-            {data.boarding_terminal && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldTerminal")}: {data.boarding_terminal}</p>}
-            {data.required_documents && <div className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldDocumentosField")}: <FormattedText>{String(data.required_documents)}</FormattedText></div>}
-            {data.immigration_rules && <p className="text-[13px] text-foreground/80 leading-relaxed break-words">{t("fldImigracao")}: {data.immigration_rules}</p>}
-            {data.boarding_notes && <div className="text-[13px] text-foreground/80 leading-relaxed break-words italic"><FormattedText>{String(data.boarding_notes)}</FormattedText></div>}
-          </div>
-        )}
-
-        {/* Flight check-in */}
-        {isFlight && data.checkin_url && (
-          <div className="mt-3">
-            <a href={data.checkin_url} target="_blank" rel="noopener noreferrer">
-              <Button variant="default" className="w-full sm:w-auto h-11 rounded-full text-sm font-medium shadow-sm px-6">
-                {t("ctaCheckinOnline")}
-              </Button>
-            </a>
-            {data.checkin_open_date && <p className="text-[13px] text-foreground/80 leading-relaxed break-words mt-1">{t("fldAbertura")}: {data.checkin_open_date}</p>}
-          </div>
         )}
 
         {/* Cruise itinerary */}
