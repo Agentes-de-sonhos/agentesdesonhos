@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import logoAgentes from "@/assets/logo-agentes-de-sonhos.png";
-import logoDark from "@/assets/logo-agentes-de-sonhos-dark.png.asset.json";
+import logoDark from "@/assets/logo-agentes-de-sonhos-dark.png";
 import "./authSplitLayout.css";
 
 /** Destino de suporte já usado pela plataforma (Políticas de Privacidade). */
@@ -48,7 +48,7 @@ export function AuthSplitLayout({ children, wide }: Props) {
   return (
     <div className="auth-split">
       <aside className="auth-split__panel" aria-hidden="false">
-        <img src={logoDark.url} alt="Agentes de Sonhos" className="auth-split__logo" />
+        <img src={logoDark} alt="Agentes de Sonhos" className="auth-split__logo" />
         <div className="auth-split__copy">
           <h2 className="auth-split__headline">
             Sua próxima grande <em>viagem</em> começa aqui.
