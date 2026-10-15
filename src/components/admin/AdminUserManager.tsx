@@ -273,6 +273,27 @@ export function AdminUserManager() {
       toast({ title: "Erro ao atualizar status", description: err.message, variant: "destructive" });
     },
   });
+  const [passwordUser, setPasswordUser] = useState<UserWithDetails | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const setPasswordMutation = useMutation({
+    mutationFn: async ({ userId, password }: { userId: string; password: string }) => {
+      const resp = await supabase.functions.invoke("admin-reset-password", {
+        body: { user_id: userId, new_password: password },
+      });
+      if (resp.error) throw new Error(resp.error.message || "Erro ao alterar senha");
+      if (resp.data?.error) throw new Error(resp.data.error);
+      return resp.data;
+    },
+    onSuccess: () => {
+      setPasswordSaved(true);
+      toast({ title: "Senha alterada com sucesso!" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Erro ao alterar senha", description: err.message, variant: "destructive" });
+    },
+  });
   const resetPasswordMutation = useMutation({
     mutationFn: async (userId: string) => {
       const resp = await supabase.functions.invoke("admin-reset-password", {
@@ -766,6 +787,16 @@ export function AdminUserManager() {
                         {can.resetPassword && <Button
                           variant="ghost"
                           size="icon"
+                          title="Alterar senha"
+                          onClick={() => setPasswordUser(user)}
+                        >
+                          <Settings2 className="h-4 w-4 hidden" />
+                          <span className="sr-only">Alterar senha</span>
+                          <KeyRound className="h-4 w-4 text-primary" />
+                        </Button>}
+                        {can.resetPassword && <Button
+                          variant="ghost"
+                          size="icon"
                           title="Gerar link para criar senha"
                           className="text-blue-600 hover:text-blue-700"
                           onClick={() => generateSetupLinkMutation.mutate(user)}
@@ -1108,6 +1139,73 @@ export function AdminUserManager() {
                 }}
               >
                 Fechar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={!!passwordUser}
+          onOpenChange={(o) => {
+            if (!o) { setPasswordUser(null); setNewPassword(""); setShowNewPassword(false); setPasswordSaved(false); }
+          }}
+        >
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Alterar senha do usuário</DialogTitle>
+              <DialogDescription>
+                {passwordUser?.name} — {passwordUser?.email}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="admin-new-password">Nova senha</Label>
+              <div className="relative">
+                <Input
+                  id="admin-new-password"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => { setNewPassword(e.target.value); setPasswordSaved(false); }}
+                  placeholder="Mínimo de 6 caracteres"
+                  autoComplete="new-password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowNewPassword((v) => !v)}
+                  aria-label={showNewPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => {
+                  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+                  const arr = new Uint32Array(12);
+                  crypto.getRandomValues(arr);
+                  setNewPassword(Array.from(arr, (n) => chars[n % chars.length]).join(""));
+                  setShowNewPassword(true);
+                  setPasswordSaved(false);
+                }}>Gerar senha segura</Button>
+                {passwordSaved && (
+                  <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => {
+                    navigator.clipboard.writeText(newPassword);
+                    toast({ title: "Senha copiada" });
+                  }}>
+                    <Copy className="h-4 w-4" /> Copiar senha
+                  </Button>
+                )}
+              </div>
+              {passwordSaved && <p className="text-sm text-muted-foreground">Senha salva. O usuário já pode entrar com ela.</p>}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPasswordUser(null)}>Fechar</Button>
+              <Button
+                disabled={newPassword.length < 6 || setPasswordMutation.isPending || passwordSaved}
+                onClick={() => passwordUser && setPasswordMutation.mutate({ userId: passwordUser.user_id, password: newPassword })}
+              >
+                {setPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Salvar senha
               </Button>
             </DialogFooter>
           </DialogContent>
