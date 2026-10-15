@@ -45,6 +45,7 @@ export function SecureDocumentViewer({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
+        hideClose
         className={cn(
           "max-w-[96vw] p-0 gap-0 sm:max-w-[90vw] lg:max-w-5xl",
           "h-[92vh] sm:h-[88vh] flex flex-col overflow-hidden",
