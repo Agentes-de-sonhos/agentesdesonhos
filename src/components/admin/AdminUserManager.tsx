@@ -790,7 +790,6 @@ export function AdminUserManager() {
                           title="Alterar senha"
                           onClick={() => setPasswordUser(user)}
                         >
-                          <Settings2 className="h-4 w-4 hidden" />
                           <span className="sr-only">Alterar senha</span>
                           <KeyRound className="h-4 w-4 text-primary" />
                         </Button>}
