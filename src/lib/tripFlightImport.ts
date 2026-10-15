@@ -82,11 +82,16 @@ export function parsedAirfareToTripFlightData(raw: any): TripFlightData {
       .filter(Boolean);
     const ticket = str(p.bilhete);
     const doc = str(p.documento);
-    const notes = [str(p.fidelidade) && `Fidelidade: ${str(p.fidelidade)}`, str(p.observacoes)].filter(Boolean).join(" • ");
+    const notes = [
+      ticket && doc ? `Documento: ${doc}` : "",
+      str(p.fidelidade) && `Fidelidade: ${str(p.fidelidade)}`,
+      str(p.observacoes),
+    ].filter(Boolean).join(" • ");
     return {
       name: str(p.nome),
       passenger_type: paxType(p.tipo),
-      document: ticket ? `E-ticket ${ticket}${doc ? ` • ${doc}` : ""}` : doc,
+      // Campo "document" exibido como "Nº do Bilhete (E-ticket)".
+      document: ticket || doc,
       seat: seats.join(", "),
       notes,
     };
@@ -117,7 +122,7 @@ export function parsedAirfareToTripFlightData(raw: any): TripFlightData {
   const anyCarry = voos.some((v) => v.bagagem_mao === true);
   const baggageTexts = Array.from(new Set(voos.map((v) => str(v.bagagem_texto)).filter(Boolean)));
 
-  const hasTicket = passengers.some((p) => p.document.startsWith("E-ticket"));
+  const hasTicket = passageiros.some((p) => !!str(p?.bilhete));
   const boardingNotes = [str(reserva.orientacoes_embarque), ...(Array.isArray(raw?.observacoes) ? raw.observacoes.map(str) : [])]
     .filter(Boolean).join("\n");
 

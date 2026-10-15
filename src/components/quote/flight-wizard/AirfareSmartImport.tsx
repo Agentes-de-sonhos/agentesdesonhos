@@ -78,6 +78,10 @@ export interface ParsedAirfare {
     bagagem?: number;
     observacoes?: number;
   };
+  /** Dados de reserva emitida (localizador, status, check-in...). */
+  reserva?: Record<string, any>;
+  /** Passageiros com bilhete, assentos e fidelidade. */
+  passageiros?: Array<Record<string, any>>;
 }
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -481,6 +485,9 @@ export function AirfareSmartImport({ quoteId, onCancel, onConfirm, tripStartDate
         observacoes: Array.isArray(candidate!.observacoes) ? candidate!.observacoes : [],
         campos_nao_identificados: Array.isArray(candidate!.campos_nao_identificados) ? candidate!.campos_nao_identificados : [],
         confianca_extracao: candidate!.confianca_extracao || {},
+        // Preserva localizador e passageiros (bilhetes, assentos, fidelidade) para a Carteira Digital.
+        reserva: candidate!.reserva || undefined,
+        passageiros: Array.isArray(candidate!.passageiros) ? candidate!.passageiros : undefined,
       };
       // Auto-classify segment types for any voo that didn't come pre-classified from the AI.
       try {
@@ -794,6 +801,39 @@ function ReviewScreen({
               : "Alguns dados não foram identificados com segurança. Revise os campos destacados antes de continuar."}
           </span>
         </div>
+      )}
+
+      {/* RESERVA E PASSAGEIROS */}
+      {(data.reserva?.localizador || (data.passageiros && data.passageiros.length > 0)) && (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            <h4 className="text-sm font-semibold">Reserva e passageiros</h4>
+            {data.reserva?.localizador && (
+              <div className="text-sm">
+                <span className="text-muted-foreground">Código Localizador (PNR): </span>
+                <span className="font-mono font-semibold">{String(data.reserva.localizador)}</span>
+                {data.reserva?.status_emissao && (
+                  <Badge variant="secondary" className="ml-2">{String(data.reserva.status_emissao)}</Badge>
+                )}
+              </div>
+            )}
+            {data.passageiros && data.passageiros.length > 0 && (
+              <ul className="space-y-1 text-sm">
+                {data.passageiros.map((p, i) => {
+                  const seats = (Array.isArray(p.assentos) ? p.assentos : []).map((a: any) => a?.assento).filter(Boolean).join(", ");
+                  return (
+                    <li key={i} className="rounded-md bg-muted px-3 py-2">
+                      <span className="font-medium">{String(p.nome || "Passageiro")}</span>
+                      {p.bilhete && <span className="text-muted-foreground"> • Bilhete: {String(p.bilhete)}</span>}
+                      {seats && <span className="text-muted-foreground"> • Assento: {seats}</span>}
+                      {p.fidelidade && <span className="text-muted-foreground"> • Fidelidade: {String(p.fidelidade)}</span>}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* RESUMO */}

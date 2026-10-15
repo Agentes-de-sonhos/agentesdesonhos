@@ -455,7 +455,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
       "checkin_url", "checkin_open_date", "checkin_notes", "recommended_arrival",
       "boarding_terminal", "required_documents", "immigration_rules",
     ] as const;
-    textFields.forEach((k) => { if (full[k]) form.setValue(k, full[k] as any); });
+    textFields.forEach((k) => { if (full[k]) form.setValue(k, full[k] as any, { shouldDirty: true }); });
     if (full.flight_status) form.setValue("flight_status", full.flight_status);
     if (full.checkin_status === "realizado") form.setValue("checkin_status", "realizado");
     if (full.passengers.length) {
@@ -700,7 +700,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
 
         {passengers.map((p, i) => (
           <div key={i} className="flex items-center gap-2 p-2 bg-muted rounded-lg text-sm">
-            <span className="flex-1">{p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'}){p.seat ? ` • ${p.seat}` : ''}</span>
+            <span className="flex-1">{p.name} ({p.passenger_type === 'adulto' ? 'Adulto' : p.passenger_type === 'crianca' ? 'Criança' : 'Bebê'}){p.seat ? ` • ${p.seat}` : ''}{p.document ? ` • Bilhete: ${p.document}` : ''}</span>
             <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" onClick={() => { setNewPax({ ...p }); setPassengers(passengers.filter((_, idx) => idx !== i)); setIsEditingPax(true); }}>
               <Pencil className="h-3 w-3" />
             </Button>
@@ -728,7 +728,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
             <Input placeholder="Assento (ex: 12A)" value={newPax.seat} onChange={(e) => setNewPax({ ...newPax, seat: e.target.value })} />
           </div>
           <div className="grid gap-2 sm:grid-cols-2">
-            <Input placeholder="Documento (opcional)" value={newPax.document} onChange={(e) => setNewPax({ ...newPax, document: e.target.value })} />
+            <Input aria-label="Nº do Bilhete (E-ticket)" placeholder="Nº do Bilhete (E-ticket) — ex: 957.2302.720650" value={newPax.document} onChange={(e) => setNewPax({ ...newPax, document: e.target.value })} />
             <Input placeholder="Observações" value={newPax.notes} onChange={(e) => setNewPax({ ...newPax, notes: e.target.value })} />
           </div>
           <Button type="button" variant="outline" size="sm" onClick={addPassenger}>
