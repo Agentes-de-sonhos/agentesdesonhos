@@ -196,7 +196,7 @@ const PRESENTATION_REWRITES: [string, string][] = [
 export default function DmcPortugalLandingPage({ info, presentation = false }: { info: AgencyDomainInfo; presentation?: boolean }) {
   const rootRef = useRef<HTMLDivElement>(null);
   const dricaPresentation = presentation && info.hostname === "drica-presentation.preview.local";
-  const presentationRewrites: [string, string][] = PRESENTATION_REWRITES.map(([from, to]) => [from, to.replaceAll("Bardelli Viagens", info.agency_name || "A agência").replaceAll("Equipe Bardelli", "Consultoria de viagens").replaceAll("Base em São Paulo, Brasil", dricaPresentation ? "Atendimento no Rio de Janeiro, Brasil" : "Base em São Paulo, Brasil")]);
+  const presentationRewrites: [string, string][] = PRESENTATION_REWRITES.map(([from, to]) => [from, to.split("Bardelli Viagens").join(info.agency_name || "A agência").split("Equipe Bardelli").join("Consultoria de viagens").split("Base em São Paulo, Brasil").join(dricaPresentation ? "Atendimento no Rio de Janeiro, Brasil" : "Base em São Paulo, Brasil")]);
   if (dricaPresentation) presentationRewrites.unshift(
     ["Para quem não se sente à vontade viajando sozinho ou quer mais tranquilidade, oferecemos a companhia de uma", "Exemplo ilustrativo: quem prefere viajar acompanhado pode avaliar a contratação de uma"],
     ["a agência conta com apoio local em cada etapa.", "o apoio local dependeria de parceiros e serviços a confirmar."],

@@ -743,7 +743,7 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   socialStrip: { title: "Encontre a Drica no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/dricaviagens" }] },
   seo: { title: "Apresentação completa — Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins. Apresentação técnica sem envios." },
 };
-export const DRICA_XCARET_REWRITES: [string, string][] = BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replaceAll("Bardelli Viagens", "Drica Viagens").replaceAll("Equipe Bardelli", "Equipe Drica").replaceAll("Bardelli", "Drica")]);
+export const DRICA_XCARET_REWRITES: [string, string][] = BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.split("Bardelli Viagens").join("Drica Viagens").split("Equipe Bardelli").join("Equipe Drica").split("Bardelli").join("Drica")]);
 
 /* ------------------------------------------------------------------ */
 /* Bardelli Viagens — perfil OFICIAL (bardelliviagens.com.br).          */
