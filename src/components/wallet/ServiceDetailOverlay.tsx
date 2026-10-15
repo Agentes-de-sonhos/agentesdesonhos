@@ -1,3 +1,4 @@
+import { tPublicCar } from "@/i18n/publicMaterials/cars";
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -37,6 +38,7 @@ interface ServiceDetailOverlayProps {
   locale?: PublicLocale;
   flightPresentation?: boolean;
   hotelPresentation?: boolean;
+  carPresentation?: boolean;
 }
 
 /**
@@ -58,13 +60,14 @@ export function ServiceDetailOverlay({
   locale = "pt-BR",
   flightPresentation = false,
   hotelPresentation = false,
+  carPresentation = false,
 }: ServiceDetailOverlayProps) {
   const t = tWallet(locale);
   const isMobile = useIsMobile();
-  const styledPresentation = flightPresentation || hotelPresentation;
-  const Icon = hotelPresentation ? BedDouble : icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
+  const styledPresentation = flightPresentation || hotelPresentation || carPresentation;
+  const Icon = hotelPresentation ? BedDouble : carPresentation ? Car : icon ?? (service ? ICONS[service.service_type] ?? FileText : FileText);
   const label =
-    flightPresentation ? t("svcSectionFlight") : hotelPresentation ? t("serviceHotel") : title ?? (service ? SERVICE_LABELS[service.service_type] ?? t("fldServico") : t("fldServico"));
+    flightPresentation ? t("svcSectionFlight") : hotelPresentation ? t("serviceHotel") : carPresentation ? tPublicCar(locale)("title") : title ?? (service ? SERVICE_LABELS[service.service_type] ?? t("fldServico") : t("fldServico"));
 
   const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">(() => {
     if (typeof window === "undefined") return "md";
@@ -129,7 +132,7 @@ export function ServiceDetailOverlay({
         <SheetContent
           side="bottom"
           hideCloseButton
-          className={cn("p-0 rounded-t-3xl flex flex-col bg-background border-t border-border/50 overflow-hidden", flightPresentation ? "wallet-flight-theme" : hotelPresentation ? "wallet-hotel-theme" : undefined)}
+          className={cn("p-0 rounded-t-3xl flex flex-col bg-background border-t border-border/50 overflow-hidden", flightPresentation ? "wallet-flight-theme" : (hotelPresentation || carPresentation) ? "wallet-hotel-theme" : undefined)}
           style={{
             ...style,
             marginTop: 'max(56px, env(safe-area-inset-top) + 40px)',
@@ -172,7 +175,7 @@ export function ServiceDetailOverlay({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("max-w-2xl max-h-[88vh] p-0 flex flex-col rounded-2xl overflow-hidden border-border/40", flightPresentation ? "wallet-flight-theme" : hotelPresentation ? "wallet-hotel-theme" : undefined)} style={style}>
+      <DialogContent className={cn("max-w-2xl max-h-[88vh] p-0 flex flex-col rounded-2xl overflow-hidden border-border/40", flightPresentation ? "wallet-flight-theme" : (hotelPresentation || carPresentation) ? "wallet-hotel-theme" : undefined)} style={style}>
         <DialogHeader className="px-7 py-5 border-b border-border/50 text-left bg-card">
           <DialogTitle asChild>
             {Header}
