@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { syncLinkImagesToLibrary } from "@/lib/agencyImageLibrarySync";
 import { supabase } from "@/integrations/supabase/client";
 import { parseQuoteDeleteError } from "@/lib/travelFiles";
 import { useAuth } from "@/hooks/useAuth";
@@ -410,10 +411,11 @@ export function useQuote(id: string | undefined) {
       await recalcQuoteTotal(id);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
       toast({ title: "Serviço adicionado", description: "O serviço foi adicionado ao orçamento." });
+      void syncLinkImagesToLibrary(vars.image_urls);
     },
     onError: (error) => {
       toast({ title: "Erro ao adicionar serviço", description: error.message, variant: "destructive" });
@@ -448,10 +450,11 @@ export function useQuote(id: string | undefined) {
       if (error) throw error;
       await recalcQuoteTotal(id);
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["quote", id] });
       queryClient.invalidateQueries({ queryKey: ["quotes"] });
       toast({ title: "Serviço atualizado", description: "O serviço foi atualizado com sucesso." });
+      void syncLinkImagesToLibrary(vars.image_urls);
     },
     onError: (error) => {
       toast({ title: "Erro ao atualizar serviço", description: error.message, variant: "destructive" });
