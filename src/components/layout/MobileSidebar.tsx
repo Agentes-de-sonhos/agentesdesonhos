@@ -23,6 +23,7 @@ import {
   CreditCard,
   Wallet,
   StickyNote,
+  Images,
   Home,
   BookOpen,
   Compass,
