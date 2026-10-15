@@ -344,6 +344,13 @@
       "when": 1792037928537,
       "tag": "0048_wallet_settings_trip_agency_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1792038873815,
+      "tag": "0049_agency_image_library",
+      "breakpoints": true
     }
   ]
 }
