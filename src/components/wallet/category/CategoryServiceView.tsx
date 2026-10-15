@@ -9,6 +9,7 @@ import {
 } from "react";
 import { ChevronDown, FileText, Paperclip, LayoutGrid, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { flightTicketCount } from "@/lib/publicWalletFlight";
 import type { TripService, TripServiceType } from "@/types/trip";
 import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
@@ -43,6 +44,7 @@ export function CategoryServiceView({
   const cfg = CATEGORY_CONFIG[type];
   const catText = categoryText(type, locale);
   const total = services.length;
+  const countTotal = type === "flight" ? flightTicketCount(services) : total;
   const [gridMode, setGridMode] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
