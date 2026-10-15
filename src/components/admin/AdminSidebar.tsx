@@ -75,6 +75,7 @@ const menuGroups: AdminMenuGroup[] = [
       { id: "academy", label: "Academy", icon: GraduationCap },
       { id: "playbooks", label: "Playbooks", icon: BookOpen },
       { id: "curadoria", label: "Notícias", icon: Newspaper },
+      { id: "tutorials", label: "Videoaulas", icon: GraduationCap },
     ],
   },
   {
