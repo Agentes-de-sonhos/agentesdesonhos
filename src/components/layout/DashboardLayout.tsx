@@ -76,7 +76,7 @@ export function DashboardLayout({ children, flushHorizontal = false }: Dashboard
               : "py-4 px-4 sm:py-6 sm:px-6 lg:pl-6 lg:pr-6 xl:pl-12 xl:pr-12 flex-1 pb-20 lg:pb-4 min-w-0"
           }
         >
-          <div className="flex justify-end empty:hidden mb-2 has-[button]:mb-2">
+          <div className="flex justify-end empty:hidden mb-2">
             <ContextualTutorialsButton />
           </div>
           {children}
