@@ -17,6 +17,7 @@ import { AdminAcademyManager } from "@/components/admin/AdminAcademyManager";
 import { AdminCommunityManager } from "@/components/admin/AdminCommunityManager";
 import { AdminUserManager } from "@/components/admin/AdminUserManager";
 import { AdminPopupsManager } from "@/components/admin/AdminPopupsManager";
+import { AdminTutorialsManager } from "@/components/admin/AdminTutorialsManager";
 import { AdminPlaybookManager } from "@/components/admin/AdminPlaybookManager";
 import { AdminNewsCurationManager } from "@/components/admin/AdminNewsCurationManager";
 import { AdminNewsCollectorManager } from "@/components/admin/AdminNewsCollectorManager";
@@ -71,6 +72,7 @@ const TAB_LABELS: Record<string, string> = {
   curadoria: "Notícias",
   "menu-order": "Menu",
   popups: "Pop-ups",
+  tutorials: "Videoaulas",
   suppliers: "Links",
   "registration-links": "Links Cadastro",
   "page-banners": "Capas",
@@ -119,6 +121,8 @@ function AdminContent({ tab }: { tab: string }) {
       );
     case "materials":
       return <AdminMaterialsManager />;
+    case "tutorials":
+      return <AdminTutorialsManager />;
     case "telegram":
       return <AdminTelegramManager />;
     case "trade-events":
