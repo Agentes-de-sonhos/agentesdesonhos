@@ -1,3 +1,4 @@
+import { formatLocalDateBR } from "@/lib/dateUtils";
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -75,10 +76,7 @@ export function TravelersSection({ clientId, clientName }: TravelersSectionProps
     }
   };
 
-  const formatDate = (d: string | null) => {
-    if (!d) return "—";
-    try { return format(new Date(d), "dd/MM/yyyy", { locale: ptBR }); } catch { return d; }
-  };
+  const formatDate = (d: string | null) => formatLocalDateBR(d);
 
   return (
     <Card>
