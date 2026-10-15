@@ -737,6 +737,7 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   ],
   copy: { ...dricaBaseline.copy, ...DRICA_VIAGENS_PREVIEW_PROFILE.copy,
     newsletter: { kicker: "NOVIDADES DRICA VIAGENS", title: "Sua próxima inspiração começa aqui", subtitle: "Destinos e ideias para viajar no seu ritmo. Formulário de demonstração: nenhum dado é enviado ou cadastrado.", cta: "Conhecer novidades" },
+    avaliacoes: { kicker: "AVALIAÇÕES NO GOOGLE", title: "O que dizem os clientes da Drica", subtitle: "Avaliações reais publicadas no perfil da Drica Viagens no Google." },
   },
   footer: DRICA_VIAGENS_PREVIEW_PROFILE.footer,
   newsletterMedia: { src: bardelliNewsletterPhoto, alt: "Praia de águas claras — imagem ilustrativa de viagem" },
