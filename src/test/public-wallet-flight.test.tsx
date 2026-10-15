@@ -42,6 +42,22 @@ describe("Passagens públicas — apresentação e dados reais", () => {
     await waitFor(() => expect(writeText).toHaveBeenCalledWith("ABC123"));
     expect(screen.getByRole("status")).toHaveTextContent("Localizador copiado");
   });
+  it("mantém selo junto ao título e trajeto flexível preenchido em ida e volta", () => {
+    render(<PublicFlightCard service={service} access={access} />);
+    const title = screen.getByRole("heading", { name: "São Paulo ⇄ Montevidéu" });
+    expect(title).toHaveClass("min-w-0", "flex-1");
+    expect(title.parentElement).toContainElement(screen.getByText("Emitido"));
+    expect(screen.getByText("Emitido")).toHaveClass("shrink-0");
+    const tracks = screen.getAllByTestId("flight-route-track");
+    expect(tracks).toHaveLength(2);
+    for (const track of tracks) {
+      expect(track).toHaveClass("w-full", "min-w-0");
+      expect(track.parentElement).toHaveClass("grid-cols-[auto_minmax(0,1fr)_auto]");
+      expect(track.querySelector("svg")).toHaveClass("fill-current", "text-primary");
+      expect(track.querySelectorAll(".rounded-full")).toHaveLength(2);
+      expect(track.querySelectorAll(".border-dashed")).toHaveLength(2);
+    }
+  });
   it("orientações começam fechadas, incluindo campos isolados", () => {
     render(<PublicFlightCard service={service} access={access} />);
     const trigger = screen.getByRole("button", { name: "Orientações de embarque" });
