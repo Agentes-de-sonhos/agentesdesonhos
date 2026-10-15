@@ -18,13 +18,14 @@ interface PlaceMapCardProps extends MapPoint {
   compact?: boolean;
   className?: string;
   locale?: PublicLocale;
+  hideActions?: boolean;
 }
 
 /**
  * Mapa estático clicável + ações de rota. Degrada com elegância:
  * sem coordenadas (ou se a imagem falhar) mostra apenas os botões de link.
  */
-export function PlaceMapCard({ latitude, longitude, address, name, placeId, compact, className, locale }: PlaceMapCardProps) {
+export function PlaceMapCard({ latitude, longitude, address, name, placeId, compact, className, locale, hideActions = false }: PlaceMapCardProps) {
   const [imageFailed, setImageFailed] = useState(false);
   const t = tWallet(locale);
   const point: MapPoint = { latitude, longitude, address, name, placeId };
@@ -115,7 +116,7 @@ export function PlaceMapCard({ latitude, longitude, address, name, placeId, comp
           </div>
         </DialogContent>
       </Dialog>
-      <div className="flex flex-wrap gap-2 mt-2">
+      {!hideActions && <div className="flex flex-wrap gap-2 mt-2">
         {routeUrl && (
           <a href={routeUrl} target="_blank" rel="noopener noreferrer">
             <Button size="sm" className="h-8 rounded-full px-3 text-xs">
@@ -137,7 +138,7 @@ export function PlaceMapCard({ latitude, longitude, address, name, placeId, comp
             </Button>
           </a>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

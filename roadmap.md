@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Aplicar referência de hospedagem pública, preservar dados/galeria/anexos e validar 360/390px/desktop e fonte ampliada; sem publicar.
 - [x] Atualizar somente passagens públicas: layout, dados e anexos preservados; 54 testes, build/typecheck automático OK; 360/390px/desktop, copiar e accordion verificados em sessão isolada. Carteira real protegida por senha: PDF real não verificado; sem publicar.
 - [x] Completar modelo reutilizável e apresentação Bardelli pela união integral Ju/100 Limites; matriz em docs/padrao-ouro-sites.md, 48 testes, páginas/desktop/mobile/carrinho sem envio e isolamento validados; sem publicar ou alterar banco.
 - [x] Concluir LEGOLAND Florida, Kennedy Space Center e ICON Park: 158 itens/161 âncoras, PNGs 5130×7290/4800×2698/1512×1460; 17 logos, quatro telas/100–200%, gestos e fechamento acessível; preservar 14 mapas e orçamento, sem publicar. Evidências e limitações em docs/validacao-final-parques-orlando.md.
