@@ -107,6 +107,16 @@ const LUXURY_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
 };
 
 /**
+ * Drica Viagens: o logotipo aparece em tamanho dobrado no cabeçalho e,
+ * como o rodapé editorial reusa esta caixa, no rodapé também.
+ */
+const DRICA_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
+  logoOnly: false,
+  headerClassName: "h-24 md:h-[112px]",
+  logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
+};
+
+/**
  * Header-only brand presentation. Kept declarative and host-scoped so artwork
  * with different proportions can be sized independently without affecting any
  * other tenant or the footer/public documents.
@@ -169,6 +179,10 @@ const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
     headerClassName: "h-24 md:h-[112px]",
     logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
   },
+  // Drica Viagens: logotipo em tamanho dobrado no cabeçalho e no rodapé.
+  "drica-presentation.preview.local": DRICA_HEADER_BRAND_PRESET,
+  "dricaviagens.rio": DRICA_HEADER_BRAND_PRESET,
+  "www.dricaviagens.rio": DRICA_HEADER_BRAND_PRESET,
 };
 
 export function normalizeBrandHost(hostname?: string | null): string {
