@@ -2,23 +2,29 @@ import { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { classifyMatches, normalizeText } from "@/lib/hotelPlaceMatch";
 
 interface HotelPrediction {
   place_id: string;
   name: string;
   secondary: string;
+  is_hotel?: boolean;
 }
 
-export function HotelPhotoSearch({ name, city, onSelect }: {
+export function HotelPhotoSearch({ name, city, onSelect, autoResolve = false, onAutoSelect }: {
   name: string;
   city: string;
   onSelect: (hotel: HotelPrediction) => void;
+  autoResolve?: boolean;
+  onAutoSelect?: (hotel: HotelPrediction) => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<HotelPrediction[]>([]);
   const [error, setError] = useState("");
   const requestRef = useRef(0);
   const busyRef = useRef(false);
+  const autoSelectRef = useRef(onAutoSelect);
+  autoSelectRef.current = onAutoSelect;
 
   useEffect(() => {
     requestRef.current += 1;
@@ -29,7 +35,7 @@ export function HotelPhotoSearch({ name, city, onSelect }: {
     return () => { requestRef.current += 1; };
   }, [name, city]);
 
-  const search = async () => {
+  const search = async (automatic = false) => {
     if (busyRef.current || name.trim().length < 3) return;
     busyRef.current = true;
     const request = ++requestRef.current;
@@ -45,6 +51,22 @@ export function HotelPhotoSearch({ name, city, onSelect }: {
       const hotels: HotelPrediction[] = (data?.predictions || []).filter(
         (p: HotelPrediction) => typeof p.place_id === "string" && !!p.place_id && typeof p.name === "string",
       );
+      if (automatic) {
+        const match = classifyMatches({ hotelName: name.trim(), city: city.trim() }, hotels.map((hotel) => ({
+          place_id: hotel.place_id, name: hotel.name, formatted_address: hotel.secondary,
+          types: hotel.is_hotel === true ? ["lodging"] : [],
+        })));
+        const best = match.best;
+        // Require full locality, not only partial tokens accepted by the shared scorer.
+        if (best && best.nameScore >= 0.9 && city.trim() &&
+          normalizeText(best.candidate.formatted_address).includes(normalizeText(city))) {
+          const hotel = hotels.find((item) => item.place_id === best.candidate.place_id);
+          if (hotel && autoSelectRef.current) {
+            autoSelectRef.current(hotel);
+            return;
+          }
+        }
+      }
       setResults(hotels);
       if (!hotels.length) setError("Nenhum hotel encontrado. Confira o nome e a cidade.");
     } catch {
@@ -56,6 +78,15 @@ export function HotelPhotoSearch({ name, city, onSelect }: {
       }
     }
   };
+
+  useEffect(() => {
+    if (!autoResolve) return;
+    let cancelled = false;
+    // Once per opening, not every keystroke; cancel StrictMode's discarded mount.
+    queueMicrotask(() => { if (!cancelled) void search(true); });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="space-y-2">

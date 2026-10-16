@@ -11,6 +11,39 @@ vi.mock("@/integrations/supabase/client", () => ({
 beforeEach(() => invoke.mockReset());
 
 describe("busca explícita pelo nome de hospedagem", () => {
+  it("resolve hotel seguro ao abrir sem seleção manual", async () => {
+    const automatic = vi.fn();
+    const manual = vi.fn();
+    invoke.mockResolvedValue({ data: { predictions: [
+      { place_id: "SAFE", name: "Portofino Bay", secondary: "Orlando, FL", is_hotel: true },
+    ] }, error: null });
+    render(<HotelPhotoSearch name="Portofino Bay" city="Orlando" autoResolve onAutoSelect={automatic} onSelect={manual} />);
+    await waitFor(() => expect(automatic).toHaveBeenCalledTimes(1));
+    expect(automatic.mock.calls[0][0].place_id).toBe("SAFE");
+    expect(invoke).toHaveBeenCalledTimes(1);
+    expect(manual).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["ambíguo", "Orlando", [
+      { place_id: "A", name: "Portofino Bay", secondary: "Orlando", is_hotel: true },
+      { place_id: "B", name: "Portofino Bay", secondary: "Orlando", is_hotel: true },
+    ]],
+    ["cidade conflitante", "Lisboa", [{ place_id: "A", name: "Portofino Bay", secondary: "Orlando", is_hotel: true }]],
+    ["sem cidade", "", [{ place_id: "A", name: "Portofino Bay", secondary: "Orlando", is_hotel: true }]],
+    ["não hotel", "Orlando", [{ place_id: "A", name: "Portofino Bay", secondary: "Orlando", is_hotel: false }]],
+  ])("exige confirmação em resultado %s", async (_, city, predictions) => {
+    const automatic = vi.fn();
+    const manual = vi.fn();
+    invoke.mockResolvedValue({ data: { predictions }, error: null });
+    render(<HotelPhotoSearch name="Portofino Bay" city={city} autoResolve onAutoSelect={automatic} onSelect={manual} />);
+    const choices = await screen.findAllByRole("button", { name: /Portofino Bay.*Orlando/ });
+    expect(automatic).not.toHaveBeenCalled();
+    expect(invoke).toHaveBeenCalledTimes(1);
+    fireEvent.click(choices[0]);
+    expect(manual).toHaveBeenCalledTimes(1);
+  });
+
   it("não consulta ao abrir; envia nome e cidade apenas no clique e exige confirmação", async () => {
     const select = vi.fn();
     invoke.mockResolvedValue({ data: { predictions: [
