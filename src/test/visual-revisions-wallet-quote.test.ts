@@ -51,8 +51,8 @@ describe("Observações da hospedagem", () => {
   it("bloco de largura total com título 'Observações:' e whitespace preservado", () => {
     expect(wallet).toContain("{isHotel && (data.notes || data.special_requests || data.agency_notes) && (");
     expect(wallet).toContain('>{t("secObservacoesColon")}<');
-    expect(wallet).toContain("w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words");
-    expect(wallet).toContain('{t("fldSolicitacoes")}: {data.special_requests}');
+    expect(wallet).toContain("w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed break-words");
+    expect(wallet).toContain('{t("fldSolicitacoes")}: <FormattedText>{String(data.special_requests)}</FormattedText>');
     expect(tw("secObservacoesColon")).toBe("Observações:");
     expect(tw("fldSolicitacoes")).toBe("Solicitações");
   });
