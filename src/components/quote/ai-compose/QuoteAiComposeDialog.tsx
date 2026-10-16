@@ -20,7 +20,7 @@ interface Props {
 }
 
 interface ComposeResult {
-  trip_meta: { titulo?: string | null; destino?: string | null; data_inicio?: string | null; data_fim?: string | null };
+  trip_meta: { cliente_nome?: string | null; adultos?: number | null; criancas?: number | null; idades_criancas?: number[]; titulo?: string | null; destino?: string | null; data_inicio?: string | null; data_fim?: string | null };
   blocks: AiBlock[];
   nao_incluidos: string[];
   informacoes_importantes: string[];
@@ -42,6 +42,20 @@ async function invokeCompose(body: Record<string, unknown>) {
   if ((data as any)?.error) throw new Error((data as any).error);
   return data as any;
 }
+
+const DATE_FIELDS: Record<string, { path: string[]; label: string }[]> = {
+  flight: [{ path: ["resumo", "data_ida"], label: "Ida" }, { path: ["resumo", "data_retorno"], label: "Volta" }],
+  hotel: [{ path: ["check_in"], label: "Check-in" }, { path: ["check_out"], label: "Check-out" }],
+  attraction: [{ path: ["data"], label: "Data" }],
+  insurance: [{ path: ["data_inicio"], label: "Início" }, { path: ["data_fim"], label: "Fim" }],
+};
+const getPath = (o: any, p: string[]) => p.reduce((a, k) => a?.[k], o);
+const setPath = (o: any, p: string[], v: string) => {
+  const out = { ...(o || {}) };
+  if (p.length === 1) { out[p[0]] = v || null; return out; }
+  out[p[0]] = setPath(out[p[0]], p.slice(1), v);
+  return out;
+};
 
 const summary = (b: AiBlock) => {
   const d: any = b.data || {};
@@ -208,6 +222,11 @@ export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService }: P
 
         {result && !compare && (
           <div className="space-y-4">
+            <div className="rounded-md border p-3 text-sm space-y-1">
+              <p><span className="font-medium">Cliente:</span> {result.trip_meta.cliente_nome || "não informado (selecione no orçamento)"}</p>
+              <p><span className="font-medium">Destino:</span> {result.trip_meta.destino || "não informado"} · <span className="font-medium">Período:</span> {result.trip_meta.data_inicio || "?"} a {result.trip_meta.data_fim || "?"}</p>
+              <p><span className="font-medium">Viajantes:</span> {result.trip_meta.adultos ?? "?"} adulto(s), {result.trip_meta.criancas ?? 0} criança(s){result.trip_meta.idades_criancas?.length ? ` (${result.trip_meta.idades_criancas.join(", ")} anos)` : ""}</p>
+            </div>
             {warnings.length > 0 && (
               <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 space-y-1">
                 {warnings.map((w, i) => (
@@ -229,6 +248,21 @@ export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService }: P
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{TYPE_LABEL[b.type] || b.type}{b.label ? ` — ${b.label}` : ""}</p>
                     <p className="text-xs text-muted-foreground break-words">{summary(b)}</p>
+                    {DATE_FIELDS[b.type] && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {DATE_FIELDS[b.type].map((f) => (
+                          <label key={f.label} className="text-xs flex items-center gap-1">
+                            {f.label}
+                            <input
+                              type="date"
+                              className="h-7 rounded border border-input bg-background px-1 text-xs"
+                              value={/^\d{4}-\d{2}-\d{2}$/.test(String(getPath(b.data, f.path) ?? "")) ? getPath(b.data, f.path) : ""}
+                              onChange={(e) => setResult((r) => r && ({ ...r, blocks: r.blocks.map((x) => (x.id === b.id ? { ...x, data: setPath(x.data, f.path, e.target.value) } : x)) }))}
+                            />
+                          </label>
+                        ))}
+                      </div>
+                    )}
                     {b.missing_fields.length > 0 && <p className="text-xs text-muted-foreground mt-1">Faltando: {b.missing_fields.join(", ")}</p>}
                   </div>
                   <Button
@@ -255,7 +289,7 @@ export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService }: P
             </div>
             <div className="flex justify-between gap-2">
               <Button variant="outline" onClick={() => setResult(null)}>Voltar ao texto</Button>
-              <Button onClick={createSelected} disabled={creating || selected.size === 0}>
+              <Button onClick={() => { if (window.confirm(`Criar ${selected.size} item(ns) neste orçamento?`)) createSelected(); }} disabled={creating || selected.size === 0}>
                 {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />} Criar selecionados
               </Button>
             </div>
