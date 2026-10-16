@@ -971,7 +971,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   const [searchStatus, setSearchStatus] = useState<"idle" | "empty" | "error">("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [googleRequestTrigger, setGoogleRequestTrigger] = useState(0);
+  const [googleRequestTrigger, setGoogleRequestTrigger] = useState((init as any)?.place_id ? 1 : 0);
+  const allowOpeningResolutionRef = useRef(true);
 
   // Propagate the persisted Google place_id to the parent (ServiceImageUpload)
   // on mount / when editing a duplicated service, so the Google photo gallery
@@ -1017,6 +1018,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   const metadataRequestRef = useRef<string | null>(null);
 
   const handleHotelNameInput = useCallback((value: string, formOnChange: (v: string) => void) => {
+    allowOpeningResolutionRef.current = false;
     formOnChange(value);
     setSelectedPlaceId(null);
     onPlaceIdChange?.(null);
@@ -1147,13 +1149,20 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
           )} />
         </div>
 
-        {/* Photos: explicit lookup, then user-confirmed hotel. */}
+        {/* Resolve prefilled hotels on opening; confirm ambiguous matches. */}
         {React.isValidElement(photoSlot) ? React.cloneElement(photoSlot as React.ReactElement<{
           hotelSearch?: React.ReactNode; googleRequestTrigger?: number;
         }>, {
           hotelSearch: !selectedPlaceId ? <HotelPhotoSearch
             name={form.watch("hotel_name") || ""}
             city={form.watch("city") || ""}
+            autoResolve={allowOpeningResolutionRef.current}
+            onAutoSelect={(hotel) => {
+              // Link only: preserve imported fields and selected images.
+              setSelectedPlaceId(hotel.place_id);
+              onPlaceIdChange?.(hotel.place_id);
+              setGoogleRequestTrigger((value) => value + 1);
+            }}
             onSelect={(hotel) => {
               if (debounceRef.current) clearTimeout(debounceRef.current);
               handleSelectPrediction(hotel);

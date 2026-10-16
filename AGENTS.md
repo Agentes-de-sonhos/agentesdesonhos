@@ -20,4 +20,4 @@
 - Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: new videos per page without code changes.
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
-- Quote hotel photos: explicit gallery name search via existing autocomplete, user-confirmed place before photos. Why: no guessed hotels or auto-fetch.
+- Quote hotel photos: opening lookup, safe-match linking, ambiguity confirmation, user-selected photos. Why: no wrong hotel or overwritten fields.
