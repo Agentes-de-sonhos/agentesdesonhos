@@ -6,7 +6,8 @@
  * mode "document": texto extraído de UM PDF → um bloco do tipo informado
  *                  (para comparação campo a campo no frontend).
  *
- * Segurança/custo: kill switch QUOTE_AI_PILOT_ENABLED + allowlist QUOTE_AI_PILOT_ALLOWED_USER_IDS + papel admin, check_ai_usage, limite diário
+ * mode "status":   somente leitura, sem IA e sem contador → { eligible, enabled }.
+ * Segurança/custo: kill switch QUOTE_AI_PILOT_ENABLED + allowlist QUOTE_AI_PILOT_ALLOWED_USER_IDS (sem papel admin), check_ai_usage, limite diário
  * reservado antes da IA (5/usuário, teto global), fail closed.
  * Não grava orçamento, não envia mensagens.
  */
@@ -88,7 +89,7 @@ const documentSchema = {
   properties: { block: blockSchema },
 };
 
-const MODEL = "google/gemini-2.5-flash";
+const MODEL = "google/gemini-3.1-flash-lite";
 const MAX_OUTPUT_TOKENS = 4000;
 const AI_TIMEOUT_MS = 45_000;
 
@@ -163,9 +164,13 @@ Deno.serve(async (req) => {
 
   try {
     // KILL SWITCH: desligado por padrão. Só funciona com config explícita no servidor.
+    // Autorização = allowlist explícita de auth user.id (NÃO depende de papel admin).
     const enabled = Deno.env.get("QUOTE_AI_PILOT_ENABLED") === "true";
     const allow = new Set((Deno.env.get("QUOTE_AI_PILOT_ALLOWED_USER_IDS") || "").split(",").map((x) => x.trim()).filter(Boolean));
-    if (!enabled || allow.size === 0) return json({ error: "Recurso em teste, indisponível." }, 403);
+
+    let body: any;
+    try { body = await req.json(); } catch { return json({ error: "Corpo inválido." }, 400); }
+    const mode = body?.mode;
 
     const auth = req.headers.get("Authorization");
     if (!auth?.startsWith("Bearer ")) return json({ error: "Não autorizado." }, 401);
@@ -174,19 +179,24 @@ Deno.serve(async (req) => {
     const { data: u, error: uErr } = await admin.auth.getUser(auth.slice(7));
     if (uErr || !u?.user) return json({ error: "Sessão inválida. Faça login novamente." }, 401);
     const userId = u.user.id;
+    const eligible = enabled && allow.has(userId);
 
-    if (!allow.has(userId)) return json({ error: "Recurso em teste, indisponível." }, 403);
-    const { data: roles, error: rErr } = await admin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin");
-    if (rErr || !roles || roles.length === 0) return json({ error: "Recurso em teste, indisponível." }, 403);
+    // STATUS: somente leitura — sem IA, sem contador, sem revelar allowlist/IDs.
+    if (mode === "status") return json({ eligible, enabled: eligible });
 
-    const { data: canUse, error: cErr } = await admin.rpc("check_ai_usage", { _user_id: userId });
+    if (!eligible) return json({ error: "Recurso em teste, indisponível." }, 403);
+
+    // check_ai_usage usa auth.uid(): precisa ser chamado com a sessão do próprio usuário.
+    const userClient = createClient(url, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      auth: { persistSession: false },
+      global: { headers: { Authorization: auth } },
+    });
+    const { data: canUse, error: cErr } = await userClient.rpc("check_ai_usage", { _user_id: userId });
     if (cErr || canUse !== true) return json({ error: "Cota de IA indisponível." }, 429);
 
-    let body: any;
-    try { body = await req.json(); } catch { return json({ error: "Corpo inválido." }, 400); }
-    const mode = body?.mode;
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) return json({ error: "Configuração de IA indisponível." }, 500);
+
 
     const today = spDate();
     const todayInfo = `Hoje é ${today}.`;
