@@ -43,6 +43,25 @@ describe("Documentos do serviço", () => {
   });
 });
 
+describe("Notas ricas no PDF da carteira", () => {
+  const tripPdf = readFileSync("src/components/trip/TripPDF.tsx", "utf8");
+  const pdfServices = readFileSync("src/components/trip/tripPdfServices.ts", "utf8");
+
+  it("TripPDF renderiza notas com richNote (HTML sanitizado, sem tags cruas)", () => {
+    expect(tripPdf).toContain("function richNote(");
+    expect(tripPdf).toContain("sanitizedDescriptionHtml(s)");
+    expect(tripPdf).toContain("richNote(data.agency_notes)");
+    expect(tripPdf).toContain("richNote(data.agency_tips)");
+    expect(tripPdf).toContain("richNote(data.usage_instructions)");
+    expect(tripPdf).not.toContain("escapeHtml(data.agency_notes)");
+  });
+
+  it("renderer de voo/hotel/locação sanitiza HTML em valores de texto livre", () => {
+    expect(pdfServices).toContain("isHtmlDescription(s)");
+    expect(pdfServices).toContain("sanitizedDescriptionHtml(s)");
+  });
+});
+
 describe("Observações da hospedagem", () => {
   it("não entra mais na grade de detalhes de duas colunas", () => {
     expect(wallet).not.toContain("hotelDetails.push(`Obs: ${data.notes}`)");
