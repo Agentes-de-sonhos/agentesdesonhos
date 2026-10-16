@@ -1,4 +1,4 @@
-import { descriptionToPlainText } from "@/lib/richDescription";
+import { descriptionToPlainText, isHtmlDescription, sanitizedDescriptionHtml } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
@@ -342,6 +342,17 @@ const SECTION_TITLE = "font-size:10px;font-weight:800;text-transform:uppercase;l
 function escapeHtml(s: any): string {
   if (s == null) return "";
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/**
+ * Notas/textos livres vindos do editor rico: quando o valor já é HTML,
+ * sanitiza e renderiza a formatação; texto simples legado é escapado.
+ * Evita que tags como `<p>` apareçam cruas no PDF.
+ */
+function richNote(v: any): string {
+  if (v == null || v === "") return "";
+  const s = String(v);
+  return isHtmlDescription(s) ? sanitizedDescriptionHtml(s) : escapeHtml(s);
 }
 
 type Row = string | null | false | undefined;
