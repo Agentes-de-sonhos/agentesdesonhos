@@ -51,6 +51,9 @@ import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
+import { QuoteAiComposeDialog } from "@/components/quote/ai-compose/QuoteAiComposeDialog";
+import { useUserRole } from "@/hooks/useUserRole";
+import { isQuoteAiPilotEnabled, readQuoteAiPilotFlag } from "@/lib/quoteAiPilot";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
@@ -448,6 +451,9 @@ export default function GerarOrcamento() {
   const { agencySlug, customDomain } = useAgencyPublicSite();
   const [showAIImport, setShowAIImport] = useState(false);
   const [showFullPackage, setShowFullPackage] = useState(false);
+  const [showAiCompose, setShowAiCompose] = useState(false);
+  const { isAdmin: isPilotAdmin } = useUserRole();
+  const aiPilotOn = isQuoteAiPilotEnabled(isPilotAdmin, readQuoteAiPilotFlag());
   const [showExportWallet, setShowExportWallet] = useState(false);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
@@ -1434,6 +1440,11 @@ export default function GerarOrcamento() {
               open={openSections.add}
               onToggle={() => toggleSection("add")}
             >
+              {aiPilotOn && (
+                <Button variant="outline" size="sm" className="mb-3" onClick={() => setShowAiCompose(true)}>
+                  Montar orçamento com IA (teste)
+                </Button>
+              )}
               <ServiceCategoryGrid
                 countByType={serviceCountByType}
                 onSelect={(type) => { setEditingService(null); setSelectedServiceType(type); }}
@@ -1992,6 +2003,21 @@ export default function GerarOrcamento() {
         allowedTypes={["flight","hotel","car_rental","transfer","attraction","insurance","cruise","other"]}
         onImport={handleAIImport}
       />
+      {aiPilotOn && (
+        <QuoteAiComposeDialog
+          open={showAiCompose}
+          onOpenChange={setShowAiCompose}
+          onConfirmService={async (svc) => {
+            await addService({
+              service_type: svc.service_type,
+              service_data: svc.service_data as any,
+              amount: Number(svc.amount) || 0,
+              option_label: svc.option_label ?? null,
+              description: svc.description ?? null,
+            } as any);
+          }}
+        />
+      )}
       <FullPackageImportModal
         open={showFullPackage}
         onOpenChange={setShowFullPackage}
