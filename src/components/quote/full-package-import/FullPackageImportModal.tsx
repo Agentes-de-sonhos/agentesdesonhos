@@ -41,7 +41,7 @@ import {
 
 /* ─────────────── Types ─────────────── */
 
-interface AiBlock {
+export interface AiBlock {
   id: string;
   type: ServiceType;
   confidence: number;
@@ -1327,7 +1327,7 @@ function findPrev(idx: number, blocks: AiBlock[]): number {
 
 /* ─────────────── Block → service mapping ─────────────── */
 
-function mapBlockToService(block: AiBlock): FullPackageImportResult | null {
+export function mapBlockToService(block: AiBlock): FullPackageImportResult | null {
   const label = block.label || undefined;
   try {
     if (block.type === "flight") {
