@@ -1270,7 +1270,7 @@ export default function GerarOrcamento() {
                     isLoading={isCreating}
                     defaults={
                       aiPrefill && !opportunityPrefill
-                        ? { client_id: "", client_name: "", destination: aiPrefill.destination, start_date: aiPrefill.start_date, end_date: aiPrefill.end_date, adults_count: aiPrefill.adults_count, children_count: aiPrefill.children_count } as any
+                        ? { client_id: null, client_name: null, destination: aiPrefill.destination, start_date: aiPrefill.start_date, end_date: aiPrefill.end_date, adults_count: aiPrefill.adults_count, children_count: aiPrefill.children_count }
                         : opportunityPrefill
                         ? {
                             client_id: opportunityPrefill.client_id,
@@ -1474,8 +1474,8 @@ export default function GerarOrcamento() {
                           await addService({ service_type: svc.service_type, service_data: svc.service_data as any, amount: Number(svc.amount) || 0, option_label: svc.option_label ?? null, description: svc.description ?? null } as any);
                           ok++;
                         }
-                        toast.success(`${ok} serviço(s) incluídos.`);
-                      } catch { toast.error(`Falha ao incluir (${ok} incluídos).`); }
+                        toast({ title: `${ok} serviço(s) incluídos.` });
+                      } catch { toast({ title: `Falha ao incluir (${ok} incluídos).`, variant: "destructive" }); }
                       finally { setApplyingAiPending(false); setAiPendingTick((t) => t + 1); }
                     }}>Incluir no orçamento</Button>
                     <Button size="sm" variant="outline" disabled={applyingAiPending} onClick={() => { clearPending(); setAiPendingTick((t) => t + 1); }}>Descartar</Button>
