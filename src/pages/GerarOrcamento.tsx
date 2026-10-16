@@ -1292,6 +1292,25 @@ export default function GerarOrcamento() {
                 onOpenChange={setImportOpen}
                 onImported={(id) => navigate(nav.quote(id))}
               />
+                  {aiPilotOn && (
+                    <QuoteAiComposeDialog
+                      open={showAiPre}
+                      onOpenChange={setShowAiPre}
+                      onConfirmPlan={(meta, services) => {
+                        savePending(services as any);
+                        const iso = (v?: string | null) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
+                        setAiPrefill({
+                          destination: meta.destino || undefined,
+                          start_date: iso(meta.data_inicio),
+                          end_date: iso(meta.data_fim),
+                          adults_count: meta.adultos ?? undefined,
+                          children_count: meta.criancas ?? undefined,
+                          n: services.length,
+                        });
+                        setAiPendingTick((t) => t + 1);
+                      }}
+                    />
+                  )}
             </TabsContent>
 
             <TabsContent value="list" className="mt-5">
@@ -2045,25 +2064,6 @@ export default function GerarOrcamento() {
         allowedTypes={["flight","hotel","car_rental","transfer","attraction","insurance","cruise","other"]}
         onImport={handleAIImport}
       />
-      {aiPilotOn && (
-        <QuoteAiComposeDialog
-          open={showAiPre}
-          onOpenChange={setShowAiPre}
-          onConfirmPlan={(meta, services) => {
-            savePending(services as any);
-            const iso = (v?: string | null) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
-            setAiPrefill({
-              destination: meta.destino || undefined,
-              start_date: iso(meta.data_inicio),
-              end_date: iso(meta.data_fim),
-              adults_count: meta.adultos ?? undefined,
-              children_count: meta.criancas ?? undefined,
-              n: services.length,
-            });
-            setAiPendingTick((t) => t + 1);
-          }}
-        />
-      )}
       {aiPilotOn && (
         <QuoteAiComposeDialog
           open={showAiCompose}
