@@ -52,11 +52,21 @@ describe("comparação do PDF", () => {
   });
 });
 
-describe("gate do piloto", () => {
-  it("só admin com a chave de teste ligada", () => {
-    expect(isQuoteAiPilotEnabled(false, "on")).toBe(false);
-    expect(isQuoteAiPilotEnabled(true, null)).toBe(false);
-    expect(isQuoteAiPilotEnabled(true, "on")).toBe(true);
+describe("gate do piloto (UI)", () => {
+  const host = "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app";
+  it("oculto quando o servidor não confirma (flag off ou fora da lista)", () => {
+    expect(isQuoteAiPilotEnabled({ host, flag: "on", eligible: false })).toBe(false);
+    expect(isQuoteAiPilotEnabled({ host, flag: "on", eligible: undefined })).toBe(false);
+  });
+  it("oculto sem a chave local, mesmo elegível", () => {
+    expect(isQuoteAiPilotEnabled({ host, flag: null, eligible: true })).toBe(false);
+  });
+  it("oculto no site publicado e em domínios de agência", () => {
+    expect(isQuoteAiPilotEnabled({ host: "agentedesonhoproject.lovable.app", flag: "on", eligible: true })).toBe(false);
+    expect(isQuoteAiPilotEnabled({ host: "app.agentesdesonhos.com.br", flag: "on", eligible: true })).toBe(false);
+  });
+  it("visível só no preview com chave local e confirmação do servidor", () => {
+    expect(isQuoteAiPilotEnabled({ host, flag: "on", eligible: true })).toBe(true);
   });
 });
 
