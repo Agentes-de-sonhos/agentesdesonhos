@@ -39,6 +39,8 @@ vi.mock("@/integrations/supabase/client", () => ({
   },
 }));
 vi.mock("@/hooks/useAuth", () => ({ useAuth: () => ({ user: { id: "user-1" } }) }));
+// This suite exercises the gallery, not the independent library's queries.
+vi.mock("@/components/image-library/AgencyLibraryPicker", () => ({ AgencyLibraryPicker: () => null }));
 
 const googlePhotos = Array.from({ length: 6 }, (_, i) => ({
   url: `https://cdn.example/full-${i}.jpg`,

@@ -18,6 +18,7 @@ import {
 } from "@/components/shared/ImageUrlImportField";
 import { AttractionAISuggestions } from "@/components/quote/AttractionAISuggestions";
 import { MAX_ATTRACTION_PHOTOS } from "@/lib/attractionSuggestions";
+import { HotelPhotoSearch } from "@/components/quote/HotelPhotoSearch";
 import { HotelPhotoGallery } from "@/components/quote/HotelPhotoGallery";
 import { AgencyLibraryPicker } from "@/components/image-library/AgencyLibraryPicker";
 import { AirportSearchInput } from "@/components/quote/AirportSearchInput";
@@ -970,6 +971,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   const [searchStatus, setSearchStatus] = useState<"idle" | "empty" | "error">("idle");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [googleRequestTrigger, setGoogleRequestTrigger] = useState(0);
 
   // Propagate the persisted Google place_id to the parent (ServiceImageUpload)
   // on mount / when editing a duplicated service, so the Google photo gallery
@@ -1019,6 +1021,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
     setSelectedPlaceId(null);
     onPlaceIdChange?.(null);
     metadataRequestRef.current = null;
+    setGoogleRequestTrigger(0);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchAutocomplete(value), 300);
   }, [fetchAutocomplete, onPlaceIdChange]);
@@ -1078,7 +1081,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         price: total,
         rooms,
         notes: values.notes || "",
-        place_id: selectedPlaceId ?? (init as any)?.place_id ?? null,
+        place_id: selectedPlaceId,
       };
       onSubmit(data, total, values.option_label || undefined, values.service_description || undefined);
     } catch (err) {
@@ -1144,8 +1147,21 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
           )} />
         </div>
 
-        {/* 2. Google photos (auto after hotel selection) */}
-        {photoSlot}
+        {/* Photos: explicit lookup, then user-confirmed hotel. */}
+        {React.isValidElement(photoSlot) ? React.cloneElement(photoSlot as React.ReactElement<{
+          hotelSearch?: React.ReactNode; googleRequestTrigger?: number;
+        }>, {
+          hotelSearch: !selectedPlaceId ? <HotelPhotoSearch
+            name={form.watch("hotel_name") || ""}
+            city={form.watch("city") || ""}
+            onSelect={(hotel) => {
+              if (debounceRef.current) clearTimeout(debounceRef.current);
+              handleSelectPrediction(hotel);
+              setGoogleRequestTrigger((value) => value + 1);
+            }}
+          /> : undefined,
+          googleRequestTrigger,
+        }) : photoSlot}
 
         {/* 3. Período da hospedagem (seletor único de intervalo) */}
         <div className="grid gap-4">
@@ -2996,7 +3012,7 @@ export function photoKeys(urls: string[]): string[] {
 
 
 
-function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange, photoQuery, photoContext, conciseLabel = false }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void; photoQuery?: string | null; photoContext?: string | null; conciseLabel?: boolean }) {
+function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId, hotelMode, placeKind, hasSavedService, onGalleryPendingChange, photoQuery, photoContext, conciseLabel = false, hotelSearch, googleRequestTrigger }: { imageUrls: string[]; onImageUrlsChange: (urls: string[]) => void; isUploading: boolean; placeId?: string | null; hotelMode?: boolean; placeKind?: 'hotel' | 'attraction' | 'other' | 'other_service'; hasSavedService?: boolean; onGalleryPendingChange?: (pending: boolean) => void; photoQuery?: string | null; photoContext?: string | null; conciseLabel?: boolean; hotelSearch?: React.ReactNode; googleRequestTrigger?: number }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -3153,6 +3169,8 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
         placeId={placeId}
         hasSavedService={hasSavedService}
         onPendingChange={onGalleryPendingChange}
+        hotelSearch={hotelSearch}
+        googleRequestTrigger={googleRequestTrigger}
       />
     );
   }

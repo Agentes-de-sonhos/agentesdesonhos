@@ -34,6 +34,8 @@ interface GoogleHotelPhotosProps {
   maxPhotos?: number;
   /** Seleciona automaticamente a primeira foto quando nenhuma estiver selecionada. */
   autoSelectFirst?: boolean;
+  /** Explicit photo-search intent from the hotel editor. */
+  requestTrigger?: number;
 }
 
 // In-memory cache to avoid re-fetching
@@ -53,6 +55,7 @@ export function GoogleHotelPhotos({
   hideCounter = false,
   maxPhotos,
   autoSelectFirst = false,
+  requestTrigger = 0,
 }: GoogleHotelPhotosProps) {
 
   const [photos, setPhotos] = useState<GooglePhoto[]>([]);
@@ -69,10 +72,10 @@ export function GoogleHotelPhotos({
     if (placeId !== fetchedRef.current) {
       setPhotos([]);
       setShowGallery(false);
-      setRequested(autoShow || alwaysOpen);
+      setRequested(autoShow || alwaysOpen || requestTrigger > 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [placeId]);
+  }, [placeId, requestTrigger]);
 
   useEffect(() => {
     if (!placeId || !requested || placeId === fetchedRef.current) return;
