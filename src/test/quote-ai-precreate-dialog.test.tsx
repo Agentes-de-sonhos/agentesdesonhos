@@ -10,7 +10,7 @@ vi.mock("@/components/quote/full-package-import/FullPackageImportModal", () => (
 
 describe("botão inicial 'Montar com IA (teste)'", () => {
   const src = readFileSync("src/pages/GerarOrcamento.tsx", "utf8");
-  const start = src.indexOf("  if (!id) {\n    return");
+  const start = src.indexOf("  if (!id) {\n    const activeTab");
   const end = src.indexOf("</DashboardLayout>", start);
   const preBranch = src.slice(start, end);
   const rest = src.slice(end);
