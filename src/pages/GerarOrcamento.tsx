@@ -843,7 +843,7 @@ export default function GerarOrcamento() {
     });
     incrementUsage();
     setDraftBanner(null);
-    if (aiPrefill) bindPending(newQuote.id);
+    if (aiPrefill) { bindPending(newQuote.id); setAiPrefill(null); }
     navigate(nav.quote(newQuote.id));
   };
 
