@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Piloto "Montar orçamento com IA".
@@ -25,9 +26,10 @@ export function readQuoteAiPilotFlag(): string | null {
 /** Consulta o status somente se host e flag local permitirem (evita chamadas para usuários comuns). */
 export function useQuoteAiPilot(): boolean {
   const host = typeof window !== "undefined" ? window.location.hostname : "";
-  const precheck = isPilotPreviewHost(host);
+  const { user } = useAuth();
+  const precheck = isPilotPreviewHost(host) && !!user;
   const { data } = useQuery({
-    queryKey: ["quote-ai-pilot-status"],
+    queryKey: ["quote-ai-pilot-status", user?.id],
     enabled: precheck,
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
