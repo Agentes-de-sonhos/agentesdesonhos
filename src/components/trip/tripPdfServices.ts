@@ -14,6 +14,7 @@ import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { tPublicFlight } from "@/i18n/publicMaterials/flights";
 import { tPublicHotel } from "@/i18n/publicMaterials/hotels";
 import { tPublicCar } from "@/i18n/publicMaterials/cars";
+import { isHtmlDescription, sanitizedDescriptionHtml } from "@/lib/richDescription";
 
 export function esc(v: unknown): string {
   if (v === null || v === undefined) return "";
