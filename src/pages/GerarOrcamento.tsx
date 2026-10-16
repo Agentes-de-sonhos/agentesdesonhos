@@ -53,6 +53,7 @@ import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteAiComposeDialog } from "@/components/quote/ai-compose/QuoteAiComposeDialog";
 import { useQuoteAiPilot } from "@/lib/quoteAiPilot";
+import { savePending, bindPending, pendingFor, takePending, clearPending } from "@/lib/quoteAiPending";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
@@ -451,6 +452,10 @@ export default function GerarOrcamento() {
   const [showAIImport, setShowAIImport] = useState(false);
   const [showFullPackage, setShowFullPackage] = useState(false);
   const [showAiCompose, setShowAiCompose] = useState(false);
+  const [showAiPre, setShowAiPre] = useState(false);
+  const [aiPrefill, setAiPrefill] = useState<{ destination?: string; start_date?: string; end_date?: string; adults_count?: number; children_count?: number; n: number } | null>(null);
+  const [aiPendingTick, setAiPendingTick] = useState(0);
+  const [applyingAiPending, setApplyingAiPending] = useState(false);
   const aiPilotOn = useQuoteAiPilot();
   const [showExportWallet, setShowExportWallet] = useState(false);
   const [paymentTerms, setPaymentTerms] = useState("");
@@ -838,6 +843,7 @@ export default function GerarOrcamento() {
     });
     incrementUsage();
     setDraftBanner(null);
+    if (aiPrefill) { bindPending(newQuote.id); setAiPrefill(null); }
     navigate(nav.quote(newQuote.id));
   };
 
@@ -1231,24 +1237,41 @@ export default function GerarOrcamento() {
                         Preencha os dados iniciais para criar um orçamento profissional.
                       </p>
                     </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 h-9 rounded-lg"
-                      onClick={() => setImportOpen(true)}
-                    >
-                      <Download className="h-4 w-4" />
-                      Importar
-                    </Button>
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+                      {aiPilotOn && (
+                        <Button type="button" size="sm" className="h-9 rounded-lg" onClick={() => setShowAiPre(true)}>
+                          <Sparkles className="h-4 w-4" />
+                          Montar com IA (teste)
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 h-9 rounded-lg"
+                        onClick={() => setImportOpen(true)}
+                      >
+                        <Download className="h-4 w-4" />
+                        Importar
+                      </Button>
+                    </div>
                   </div>
+                  {aiPrefill && (
+                    <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
+                      <p>Dados da IA preenchidos. <strong>Selecione o cliente</strong>, revise e clique em "Criar Orçamento".{aiPrefill.n > 0 ? ` ${aiPrefill.n} serviço(s) ficarão prontos para você confirmar no editor.` : ""}</p>
+                      <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={() => { clearPending(); setAiPrefill(null); }}>Descartar dados da IA</Button>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="p-6">
                   <QuoteClientForm
+                    key={aiPrefill ? `ai-${aiPendingTick}` : "base"}
                     onSubmit={handleCreateQuote}
                     isLoading={isCreating}
                     defaults={
-                      opportunityPrefill
+                      aiPrefill && !opportunityPrefill
+                        ? { client_id: null, client_name: null, destination: aiPrefill.destination, start_date: aiPrefill.start_date, end_date: aiPrefill.end_date, adults_count: aiPrefill.adults_count, children_count: aiPrefill.children_count }
+                        : opportunityPrefill
                         ? {
                             client_id: opportunityPrefill.client_id,
                             client_name: opportunityPrefill.client_name,
@@ -1438,9 +1461,30 @@ export default function GerarOrcamento() {
               open={openSections.add}
               onToggle={() => toggleSection("add")}
             >
+              {quote && pendingFor(quote.id).length > 0 && (
+                <div className="mb-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm space-y-2" data-ai-pending>
+                  <p><strong>{pendingFor(quote.id).length} serviço(s) preparados pela IA</strong> aguardam sua confirmação. Sem preços inventados; revise cada um depois.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" disabled={applyingAiPending} onClick={async () => {
+                      const list = takePending(quote.id);
+                      setApplyingAiPending(true);
+                      let ok = 0;
+                      try {
+                        for (const svc of list) {
+                          await addService({ service_type: svc.service_type, service_data: svc.service_data as any, amount: Number(svc.amount) || 0, option_label: svc.option_label ?? null, description: svc.description ?? null } as any);
+                          ok++;
+                        }
+                        toast({ title: `${ok} serviço(s) incluídos.` });
+                      } catch { toast({ title: `Falha ao incluir (${ok} incluídos).`, variant: "destructive" }); }
+                      finally { setApplyingAiPending(false); setAiPendingTick((t) => t + 1); }
+                    }}>Incluir no orçamento</Button>
+                    <Button size="sm" variant="outline" disabled={applyingAiPending} onClick={() => { clearPending(); setAiPendingTick((t) => t + 1); }}>Descartar</Button>
+                  </div>
+                </div>
+              )}
               {aiPilotOn && (
                 <Button variant="outline" size="sm" className="mb-3" onClick={() => setShowAiCompose(true)}>
-                  Montar orçamento com IA (teste)
+                  <Sparkles className="h-4 w-4" /> Adicionar com IA (teste)
                 </Button>
               )}
               <ServiceCategoryGrid
@@ -2001,6 +2045,25 @@ export default function GerarOrcamento() {
         allowedTypes={["flight","hotel","car_rental","transfer","attraction","insurance","cruise","other"]}
         onImport={handleAIImport}
       />
+      {aiPilotOn && (
+        <QuoteAiComposeDialog
+          open={showAiPre}
+          onOpenChange={setShowAiPre}
+          onConfirmPlan={(meta, services) => {
+            savePending(services as any);
+            const iso = (v?: string | null) => (v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined);
+            setAiPrefill({
+              destination: meta.destino || undefined,
+              start_date: iso(meta.data_inicio),
+              end_date: iso(meta.data_fim),
+              adults_count: meta.adultos ?? undefined,
+              children_count: meta.criancas ?? undefined,
+              n: services.length,
+            });
+            setAiPendingTick((t) => t + 1);
+          }}
+        />
+      )}
       {aiPilotOn && (
         <QuoteAiComposeDialog
           open={showAiCompose}

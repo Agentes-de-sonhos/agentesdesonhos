@@ -16,7 +16,9 @@ import { mapBlockToService, type AiBlock, type FullPackageImportResult } from "@
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onConfirmService: (svc: FullPackageImportResult) => Promise<void> | void;
+  onConfirmService?: (svc: FullPackageImportResult) => Promise<void> | void;
+  /** Pré-criação: devolve dados iniciais + serviços preparados; nada é gravado. */
+  onConfirmPlan?: (meta: ComposeResult["trip_meta"], services: FullPackageImportResult[]) => void;
 }
 
 interface ComposeResult {
@@ -66,7 +68,7 @@ const summary = (b: AiBlock) => {
   return d.titulo || d.descricao || b.label;
 };
 
-export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService }: Props) {
+export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService, onConfirmPlan }: Props) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ComposeResult | null>(null);
@@ -164,11 +166,17 @@ export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService }: P
     if (result.nao_incluidos.length && selected.has("nao_incluidos")) extras.push(mk("nao_incluidos", "Itens não incluídos", result.nao_incluidos));
     if (result.informacoes_importantes.length && selected.has("informacoes")) extras.push(mk("informacoes", "Informações importantes", result.informacoes_importantes));
     let ok = 0;
+    if (onConfirmPlan) {
+      const svcs = [...result.blocks.filter((x) => selected.has(x.id)), ...extras].map(mapBlockToService).filter(Boolean) as FullPackageImportResult[];
+      onConfirmPlan(result.trip_meta, svcs);
+      onOpenChange(false); setResult(null); setText(""); setCreating(false);
+      return;
+    }
     try {
       for (const b of [...result.blocks.filter((x) => selected.has(x.id)), ...extras]) {
         const svc = mapBlockToService(b);
         if (!svc) continue;
-        await onConfirmService(svc);
+        await onConfirmService?.(svc);
         ok++;
       }
       toast.success(`${ok} serviço(s) adicionados. Revise cada um antes de compartilhar.`);
@@ -287,10 +295,10 @@ export function QuoteAiComposeDialog({ open, onOpenChange, onConfirmService }: P
                 </label>
               )}
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
               <Button variant="outline" onClick={() => setResult(null)}>Voltar ao texto</Button>
-              <Button onClick={() => { if (window.confirm(`Criar ${selected.size} item(ns) neste orçamento?`)) createSelected(); }} disabled={creating || selected.size === 0}>
-                {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />} Criar selecionados
+              <Button onClick={() => { if (onConfirmPlan || window.confirm(`Criar ${selected.size} item(ns) neste orçamento?`)) createSelected(); }} disabled={creating || (selected.size === 0 && !onConfirmPlan)}>
+                {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />} {onConfirmPlan ? "Usar no novo orçamento" : "Criar selecionados"}
               </Button>
             </div>
           </div>

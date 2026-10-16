@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { checkQuoteTimeline } from "@/lib/quoteAiTimeline";
 import { diffServiceFields, applySelectedFields } from "@/lib/serviceFieldDiff";
 import { isQuoteAiPilotEnabled } from "@/lib/quoteAiPilot";
+import { savePending, bindPending, pendingFor, takePending, readPending } from "@/lib/quoteAiPending";
 
 const today = new Date(2026, 9, 16);
 const flight = { id: "f", type: "flight", data: { resumo: { data_ida: "2027-01-10", data_retorno: "2027-01-20" } } };
@@ -55,18 +56,38 @@ describe("comparação do PDF", () => {
 describe("gate do piloto (UI)", () => {
   const host = "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app";
   it("oculto quando o servidor não confirma (flag off ou fora da lista)", () => {
-    expect(isQuoteAiPilotEnabled({ host, flag: "on", eligible: false })).toBe(false);
-    expect(isQuoteAiPilotEnabled({ host, flag: "on", eligible: undefined })).toBe(false);
-  });
-  it("oculto sem a chave local, mesmo elegível", () => {
-    expect(isQuoteAiPilotEnabled({ host, flag: null, eligible: true })).toBe(false);
+    expect(isQuoteAiPilotEnabled({ host, eligible: false })).toBe(false);
+    expect(isQuoteAiPilotEnabled({ host, eligible: undefined })).toBe(false);
   });
   it("oculto no site publicado e em domínios de agência", () => {
-    expect(isQuoteAiPilotEnabled({ host: "agentedesonhoproject.lovable.app", flag: "on", eligible: true })).toBe(false);
-    expect(isQuoteAiPilotEnabled({ host: "app.agentesdesonhos.com.br", flag: "on", eligible: true })).toBe(false);
+    expect(isQuoteAiPilotEnabled({ host: "agentedesonhoproject.lovable.app", eligible: true })).toBe(false);
+    expect(isQuoteAiPilotEnabled({ host: "app.agentesdesonhos.com.br", eligible: true })).toBe(false);
   });
-  it("visível só no preview com chave local e confirmação do servidor", () => {
-    expect(isQuoteAiPilotEnabled({ host, flag: "on", eligible: true })).toBe(true);
+  it("visível no preview quando o servidor confirma, sem exigir console", () => {
+    expect(isQuoteAiPilotEnabled({ host, eligible: true })).toBe(true);
+  });
+});
+
+describe("serviços preparados antes do orçamento", () => {
+  const mem = () => { const m = new Map<string, string>(); return { getItem: (k: string) => m.get(k) ?? null, setItem: (k: string, v: string) => void m.set(k, v), removeItem: (k: string) => void m.delete(k) }; };
+  const svc = { service_type: "hotel", service_data: { nome_hotel: "Portofino" }, amount: 0 };
+  it("nada fica pendente se o usuário cancela (zero serviços)", () => {
+    const s = mem(); savePending([], s);
+    expect(readPending(s)).toBeNull();
+  });
+  it("antes de criar o orçamento, nenhum serviço é entregue a quote algum", () => {
+    const s = mem(); savePending([svc], s);
+    expect(pendingFor("q1", s)).toEqual([]);
+  });
+  it("vincula só ao orçamento criado e aplica uma única vez", () => {
+    const s = mem(); savePending([svc], s); bindPending("q1", s); bindPending("q2", s);
+    expect(pendingFor("q2", s)).toEqual([]);
+    expect(takePending("q1", s)).toHaveLength(1);
+    expect(takePending("q1", s)).toEqual([]);
+  });
+  it("nova prévia substitui a anterior, sem misturar", () => {
+    const s = mem(); savePending([svc, svc], s); savePending([svc], s); bindPending("q1", s);
+    expect(pendingFor("q1", s)).toHaveLength(1);
   });
 });
 

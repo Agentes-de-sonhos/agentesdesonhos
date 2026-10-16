@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * Piloto "Montar orçamento com IA".
- * UI aparece só quando: host de preview técnico + localStorage quote_ai_pilot=on
- * + o servidor (modo "status", sem IA/sem contador) confirma eligible=true.
+ * UI aparece só quando: host de preview técnico + o servidor (modo "status", sem IA/sem contador) confirma eligible=true.
  * Não depende de papel admin; o servidor bloqueia qualquer outra conta.
  */
 export const QUOTE_AI_PILOT_KEY = "quote_ai_pilot";
@@ -14,8 +14,9 @@ export function isPilotPreviewHost(host: string): boolean {
     || /\.lovableproject\.com$/i.test(host);
 }
 
-export function isQuoteAiPilotEnabled(opts: { host: string; flag: string | null; eligible: boolean | undefined }): boolean {
-  return isPilotPreviewHost(opts.host) && opts.flag === "on" && opts.eligible === true;
+/** Visível só em host de preview + confirmação do servidor (allowlist). Flag local é opcional/ignorada. */
+export function isQuoteAiPilotEnabled(opts: { host: string; eligible: boolean | undefined }): boolean {
+  return isPilotPreviewHost(opts.host) && opts.eligible === true;
 }
 
 export function readQuoteAiPilotFlag(): string | null {
@@ -25,10 +26,10 @@ export function readQuoteAiPilotFlag(): string | null {
 /** Consulta o status somente se host e flag local permitirem (evita chamadas para usuários comuns). */
 export function useQuoteAiPilot(): boolean {
   const host = typeof window !== "undefined" ? window.location.hostname : "";
-  const flag = readQuoteAiPilotFlag();
-  const precheck = isPilotPreviewHost(host) && flag === "on";
+  const { user } = useAuth();
+  const precheck = isPilotPreviewHost(host) && !!user;
   const { data } = useQuery({
-    queryKey: ["quote-ai-pilot-status"],
+    queryKey: ["quote-ai-pilot-status", user?.id],
     enabled: precheck,
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
@@ -39,5 +40,5 @@ export function useQuoteAiPilot(): boolean {
       return (data as { eligible?: boolean } | null)?.eligible === true;
     },
   });
-  return isQuoteAiPilotEnabled({ host, flag, eligible: data });
+  return isQuoteAiPilotEnabled({ host, eligible: data });
 }
