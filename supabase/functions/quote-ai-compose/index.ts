@@ -6,8 +6,8 @@
  * mode "document": texto extraído de UM PDF → um bloco do tipo informado
  *                  (para comparação campo a campo no frontend).
  *
- * Segurança/custo: exige login + papel admin, check_ai_usage, limite diário
- * próprio (daily_feature_usage, feature "quote_ai_pilot") e tamanho máximo.
+ * Segurança/custo: kill switch QUOTE_AI_PILOT_ENABLED + allowlist QUOTE_AI_PILOT_ALLOWED_USER_IDS + papel admin, check_ai_usage, limite diário
+ * reservado antes da IA (5/usuário, teto global), fail closed.
  * Não grava orçamento, não envia mensagens.
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
