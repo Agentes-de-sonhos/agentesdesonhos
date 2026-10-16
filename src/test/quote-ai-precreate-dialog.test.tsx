@@ -5,6 +5,7 @@ import { QuoteAiComposeDialog } from "@/components/quote/ai-compose/QuoteAiCompo
 
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { functions: { invoke: vi.fn() } } }));
 vi.mock("@/lib/pdfText", () => ({ extractPdfText: vi.fn() }));
+vi.mock("@/lib/fullPackageImportPayload", () => ({ hasSufficientText: () => true }));
 vi.mock("@/components/quote/full-package-import/FullPackageImportModal", () => ({ mapBlockToService: vi.fn() }));
 
 describe("botão inicial 'Montar com IA (teste)'", () => {
