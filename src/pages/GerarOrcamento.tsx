@@ -52,8 +52,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ServiceModal } from "@/components/quote/ServiceModal";
 import { FullPackageImportModal, type FullPackageImportResult } from "@/components/quote/full-package-import/FullPackageImportModal";
 import { QuoteAiComposeDialog } from "@/components/quote/ai-compose/QuoteAiComposeDialog";
-import { useUserRole } from "@/hooks/useUserRole";
-import { isQuoteAiPilotEnabled, readQuoteAiPilotFlag } from "@/lib/quoteAiPilot";
+import { useQuoteAiPilot } from "@/lib/quoteAiPilot";
 import { QuoteSettingsModal, type QuoteSettingsStep } from "@/components/quote/QuoteSettingsModal";
 import { DocumentSignatureCard } from "@/components/quote/QuoteSignatureCard";
 import { QuoteStepCard } from "@/components/quote/QuoteStepCard";
@@ -452,8 +451,7 @@ export default function GerarOrcamento() {
   const [showAIImport, setShowAIImport] = useState(false);
   const [showFullPackage, setShowFullPackage] = useState(false);
   const [showAiCompose, setShowAiCompose] = useState(false);
-  const { isAdmin: isPilotAdmin } = useUserRole();
-  const aiPilotOn = isQuoteAiPilotEnabled(isPilotAdmin, readQuoteAiPilotFlag());
+  const aiPilotOn = useQuoteAiPilot();
   const [showExportWallet, setShowExportWallet] = useState(false);
   const [paymentTerms, setPaymentTerms] = useState("");
   const [validUntil, setValidUntil] = useState<Date | undefined>();
