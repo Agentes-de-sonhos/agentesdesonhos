@@ -430,7 +430,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
         data.arrival_airport ? p(t("fldAeroporto"), `${data.arrival_airport}${data.arrival_terminal ? ` • ${t("fldTerminal")} ${data.arrival_terminal}` : ''}`) : "",
         p(t("fldEsperaMotorista"), data.driver_wait_time),
         data.reception_type ? p(t("fldRecepcao"), data.reception_type === 'placa' ? t("receptionPlaca") : data.reception_type === 'balcao' ? t("receptionBalcao") : t("receptionPontoFixo")) : "",
-        data.meeting_instructions ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaOndeEncontrarMotorista")}</p><p style="${TXT_FG}">${escapeHtml(data.meeting_instructions)}</p></div>` : "",
+        data.meeting_instructions ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaOndeEncontrarMotorista")}</p><p style="${TXT_FG}">${richNote(data.meeting_instructions)}</p></div>` : "",
       ])
     : "";
 
@@ -462,7 +462,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
           data.luggage_capacity ? `${pdfIcon("luggage", 12)} ${data.luggage_capacity}` : "",
           data.air_conditioning === 'sim' ? t("badgeArCondicionado") : "",
         ].filter(Boolean) as string[]),
-        data.vehicle_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.vehicle_notes)}</p>` : "",
+        data.vehicle_notes ? `<p style="${TXT_ITALIC}">${richNote(data.vehicle_notes)}</p>` : "",
       ])
     : "";
 
@@ -474,7 +474,7 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
     ? miniCard(t("sectionLocais"), [
         p(t("fldEmbarque"), data.pickup_address),
         p(t("fldDestino"), data.destination_address),
-        data.location_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.location_notes)}</p>` : "",
+        data.location_notes ? `<p style="${TXT_ITALIC}">${richNote(data.location_notes)}</p>` : "",
       ])
     : "";
 
@@ -483,8 +483,8 @@ function renderTransferBody(service: TripService, locale: PublicLocale = "pt-BR"
         p(t("fldDocumentos"), data.required_documents),
         data.emergency_contact ? `<p style="${TXT}">${pdfIcon("phone", 12)} ${t("fldEmergencia")}: ${escapeHtml(data.emergency_contact)}</p>` : "",
         data.agency_contact ? `<p style="${TXT}">📱 ${t("fldAgencia")}: ${escapeHtml(data.agency_contact)}</p>` : "",
-        data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaPlanoB")}</p><p style="${TXT_FG}">${escapeHtml(data.plan_b)}</p></div>` : "",
-        data.agency_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>` : "",
+        data.plan_b ? `<div style="margin-top:4px;padding:6px 9px;background:rgba(15,118,110,0.06);border:1px solid rgba(15,118,110,0.2);border-radius:6px;"><p style="font-size:10px;color:#0f766e;font-weight:600;margin:0;">${t("ctaPlanoB")}</p><p style="${TXT_FG}">${richNote(data.plan_b)}</p></div>` : "",
+        data.agency_notes ? `<p style="${TXT_ITALIC}">${richNote(data.agency_notes)}</p>` : "",
       ])
     : "";
 
@@ -527,7 +527,7 @@ function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-B
     : "";
 
   const instructions = data.usage_instructions
-    ? miniCard(t("sectionInstrucoesImportantes"), [`<p style="${TXT_FG}">${escapeHtml(data.usage_instructions)}</p>`], "primary")
+    ? miniCard(t("sectionInstrucoesImportantes"), [`<p style="${TXT_FG}">${richNote(data.usage_instructions)}</p>`], "primary")
     : "";
 
   const passengers = data.passengers?.length > 0
@@ -547,7 +547,7 @@ function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-B
     ? miniCard(t("sectionRegrasPoliticas"), [
         p(t("fldCancelamento"), data.cancellation_policy),
         p(t("fldAlteracao"), data.change_policy),
-        data.attraction_rules ? `<p style="${TXT}">${escapeHtml(data.attraction_rules)}</p>` : "",
+        data.attraction_rules ? `<p style="${TXT}">${richNote(data.attraction_rules)}</p>` : "",
         data.prohibited_items ? `<p style="${TXT}">${t("ctaProibido")}: ${escapeHtml(data.prohibited_items)}</p>` : "",
         data.dress_code ? `<p style="${TXT}">👔 ${t("fldDressCode")}: ${escapeHtml(data.dress_code)}</p>` : "",
         data.required_documents ? `<p style="${TXT}">📄 ${t("fldDocumentos")}: ${escapeHtml(data.required_documents)}</p>` : "",
@@ -555,7 +555,7 @@ function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-B
     : "";
 
   const tips = data.agency_tips
-    ? miniCard(t("sectionDicasAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    ? miniCard(t("sectionDicasAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${richNote(data.agency_tips)}</p>`], "tips")
     : "";
 
   const contacts = (data.attraction_contact || data.operator_contact || data.agency_contact || data.emergency_contact)
@@ -568,7 +568,7 @@ function renderAttractionBody(service: TripService, locale: PublicLocale = "pt-B
     : "";
 
   const notes = data.agency_notes
-    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${richNote(data.agency_notes)}</p>`])
     : "";
 
   return head + codes + usage + instructions + passengers + location + rules + tips + contacts + notes;
@@ -618,10 +618,10 @@ function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR
 
   const procedure = (data.how_to_activate || data.hospital_procedure || data.reimbursement_info)
     ? miniCard(t("sectionOQueFazerEmergencia"), [
-        data.how_to_activate ? `<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.how_to_activate)}</p>` : "",
+        data.how_to_activate ? `<p style="${TXT_FG}white-space:pre-line;">${richNote(data.how_to_activate)}</p>` : "",
         p(`📄 ${t("fldDocumentos")}`, data.required_documents_claim),
-        data.hospital_procedure ? `<p style="${TXT}">🏥 ${escapeHtml(data.hospital_procedure)}</p>` : "",
-        data.reimbursement_info ? `<p style="${TXT}">💰 ${t("fldReembolso")}: ${escapeHtml(data.reimbursement_info)}</p>` : "",
+        data.hospital_procedure ? `<p style="${TXT}">🏥 ${richNote(data.hospital_procedure)}</p>` : "",
+        data.reimbursement_info ? `<p style="${TXT}">💰 ${t("fldReembolso")}: ${richNote(data.reimbursement_info)}</p>` : "",
       ], "primary")
     : "";
 
@@ -630,11 +630,11 @@ function renderInsuranceBody(service: TripService, locale: PublicLocale = "pt-BR
     : "";
 
   const tips = data.agency_tips
-    ? miniCard(t("sectionOrientacoesAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    ? miniCard(t("sectionOrientacoesAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${richNote(data.agency_tips)}</p>`], "tips")
     : "";
 
   const notes = data.agency_notes
-    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${richNote(data.agency_notes)}</p>`])
     : "";
 
   return head + emergency + coverages + procedure + insured + tips + notes;
@@ -668,7 +668,7 @@ function renderCruiseBody(service: TripService, locale: PublicLocale = "pt-BR"):
         p(t("fldDocumentos"), data.required_documents),
         p(t("fldBagagem"), data.baggage_policy),
         p(t("fldDressCodeTitle"), data.dress_code),
-        data.boarding_notes ? `<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>` : "",
+        data.boarding_notes ? `<p style="${TXT_ITALIC}">${richNote(data.boarding_notes)}</p>` : "",
       ])
     : "";
 
@@ -698,7 +698,7 @@ function renderTrainBody(service: TripService, locale: PublicLocale = "pt-BR"): 
     ? miniCard(t("sectionPassageirosPerson"), data.passengers.map((p: any) => `<p style="${TXT}">${escapeHtml(p.name)}</p>`))
     : "";
   const notes = data.boarding_notes
-    ? miniCard(t("sectionOrientacoesClipboard"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.boarding_notes)}</p>`])
+    ? miniCard(t("sectionOrientacoesClipboard"), [`<p style="${TXT_ITALIC}">${richNote(data.boarding_notes)}</p>`])
     : "";
   return head + passengers + notes;
 }
@@ -724,7 +724,7 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
         data.location_name ? `<p style="${TXT_FG}font-weight:600;">${escapeHtml(data.location_name)}</p>` : "",
         data.address ? `<p style="${TXT}">${escapeHtml(data.address)}</p>` : "",
         p(t("fldPontoEncontro"), data.meeting_point),
-        data.how_to_arrive ? `<p style="${TXT_ITALIC}">${escapeHtml(data.how_to_arrive)}</p>` : "",
+        data.how_to_arrive ? `<p style="${TXT_ITALIC}">${richNote(data.how_to_arrive)}</p>` : "",
         data.maps_url ? `<p style="${TXT}"><a href="${escapeHtml(data.maps_url)}" style="color:#0f766e;text-decoration:underline;">${t("ctaAbrirNoMapa")}</a></p>` : "",
       ])
     : "";
@@ -743,7 +743,7 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
     ? miniCard(t("sectionChipInternet"), [
         p(t("fldOperadora"), data.chip_operator),
         data.chip_type ? p(t("fldTipo"), data.chip_type === 'esim' ? t("chipEsimDigital") : t("chipFisico")) : "",
-        data.chip_activation_instructions ? `<p style="${TXT_FG}font-weight:600;margin-top:4px;">${t("ctaInstrucoesAtivacao")}</p><p style="${TXT}white-space:pre-line;">${escapeHtml(data.chip_activation_instructions)}</p>` : "",
+        data.chip_activation_instructions ? `<p style="${TXT_FG}font-weight:600;margin-top:4px;">${t("ctaInstrucoesAtivacao")}</p><p style="${TXT}white-space:pre-line;">${richNote(data.chip_activation_instructions)}</p>` : "",
         data.chip_activation_url ? `<p style="${TXT}"><a href="${escapeHtml(data.chip_activation_url)}" style="color:#0f766e;text-decoration:underline;">${t("ctaLinkAtivacao")}</a></p>` : "",
         p(t("fldSuporte"), data.chip_support),
       ], "primary")
@@ -760,15 +760,15 @@ function renderOtherBody(service: TripService, locale: PublicLocale = "pt-BR"): 
     : "";
 
   const tips = data.agency_tips
-    ? miniCard(t("sectionOrientacoesAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${escapeHtml(data.agency_tips)}</p>`], "tips")
+    ? miniCard(t("sectionOrientacoesAgente"), [`<p style="${TXT_FG}white-space:pre-line;">${richNote(data.agency_tips)}</p>`], "tips")
     : "";
 
   const description = data.description
-    ? miniCard(t("sectionDescricao"), [`<p style="${TXT}white-space:pre-line;">${escapeHtml(data.description)}</p>`])
+    ? miniCard(t("sectionDescricao"), [`<p style="${TXT}white-space:pre-line;">${richNote(data.description)}</p>`])
     : "";
 
   const notes = data.agency_notes
-    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${escapeHtml(data.agency_notes)}</p>`])
+    ? miniCard(t("sectionObservacoes"), [`<p style="${TXT_ITALIC}">${richNote(data.agency_notes)}</p>`])
     : "";
 
   return head + location + contact + chip + guide + tips + description + notes;
