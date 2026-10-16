@@ -1036,7 +1036,7 @@ function PublicServiceCard({ service, locale = "pt-BR" }: { service: TripService
               <div className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]"><FormattedText>{String(data.notes)}</FormattedText></div>
             )}
             {data.special_requests && (
-              <p className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{t("fldSolicitacoes")}: {data.special_requests}</p>
+              <div className="w-full min-w-0 text-[13px] text-foreground/80 leading-relaxed break-words [overflow-wrap:anywhere]">{t("fldSolicitacoes")}: <FormattedText>{String(data.special_requests)}</FormattedText></div>
             )}
             {data.agency_notes && (
               <div className="w-full min-w-0 text-[13px] italic text-foreground/80 leading-relaxed whitespace-pre-wrap break-words [overflow-wrap:anywhere]"><FormattedText>{String(data.agency_notes)}</FormattedText></div>
