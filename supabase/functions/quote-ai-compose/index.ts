@@ -65,10 +65,14 @@ const blockSchema = {
 const composeSchema = {
   type: "object",
   additionalProperties: false,
-  required: ["titulo", "destino", "data_inicio", "data_fim", "blocks", "nao_incluidos", "informacoes_importantes", "duvidas"],
+  required: ["titulo", "cliente_nome", "destino", "data_inicio", "data_fim", "adultos", "criancas", "idades_criancas", "blocks", "nao_incluidos", "informacoes_importantes", "duvidas"],
   properties: {
     titulo: { type: ["string", "null"] },
+    cliente_nome: { type: ["string", "null"] },
     destino: { type: ["string", "null"] },
+    adultos: { type: ["integer", "null"] },
+    criancas: { type: ["integer", "null"] },
+    idades_criancas: { type: "array", items: { type: "integer" } },
     data_inicio: { type: ["string", "null"] },
     data_fim: { type: ["string", "null"] },
     blocks: { type: "array", items: blockSchema },
@@ -195,15 +199,16 @@ Deno.serve(async (req) => {
 Devolva blocos de serviço; data_json é um objeto JSON (em string) no schema do tipo:
 ${SCHEMAS}
 Itens que o agente disser que NÃO estão incluídos vão em nao_incluidos; avisos/regras ao cliente em informacoes_importantes.
+Identifique cliente (cliente_nome), adultos, crianças e idades se ditos; senão null/[].
 Pontos ambíguos vão em duvidas (perguntas curtas). ${RULES}
 ${todayInfo}`;
+      await bump(admin, userId, today, usage);
       result = await callModel(apiKey, system, text, "quote_compose", composeSchema);
       if (!result.ok) return failFromModel(result);
       const d = result.data || {};
-      await bump(admin, userId, today, usage);
       return json({
         success: true,
-        trip_meta: { titulo: d.titulo ?? null, destino: d.destino ?? null, data_inicio: d.data_inicio ?? null, data_fim: d.data_fim ?? null },
+        trip_meta: { titulo: d.titulo ?? null, cliente_nome: d.cliente_nome ?? null, adultos: d.adultos ?? null, criancas: d.criancas ?? null, idades_criancas: Array.isArray(d.idades_criancas) ? d.idades_criancas : [], destino: d.destino ?? null, data_inicio: d.data_inicio ?? null, data_fim: d.data_fim ?? null },
         blocks: (Array.isArray(d.blocks) ? d.blocks : []).slice(0, 25).map(parseBlock),
         nao_incluidos: (d.nao_incluidos || []).slice(0, 30).map(String),
         informacoes_importantes: (d.informacoes_importantes || []).slice(0, 30).map(String),
@@ -219,9 +224,9 @@ ${todayInfo}`;
 ${SCHEMAS}
 ${RULES}
 ${todayInfo}`;
+      await bump(admin, userId, today, usage);
       result = await callModel(apiKey, system, text.slice(0, MAX_DOC_TEXT), "service_document", documentSchema);
       if (!result.ok) return failFromModel(result);
-      await bump(admin, userId, today, usage);
       const block = parseBlock({ ...result.data?.block, type }, 0);
       return json({ success: true, block });
     }

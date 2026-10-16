@@ -59,3 +59,18 @@ describe("gate do piloto", () => {
     expect(isQuoteAiPilotEnabled(true, "on")).toBe(true);
   });
 });
+
+describe("exemplo do proprietário (Orlando, outubro)", () => {
+  it("aponta a noite 15→16 sem hotel e datas passadas", () => {
+    const w = checkQuoteTimeline([
+      { id: "f", type: "flight", data: { resumo: { data_ida: "2027-10-10", data_retorno: "2027-10-21" } } },
+      { id: "h1", type: "hotel", label: "Portofino", data: { check_in: "2027-10-10", check_out: "2027-10-15" } },
+      { id: "h2", type: "hotel", label: "Pop Century", data: { check_in: "2027-10-16", check_out: "2027-10-21" } },
+    ], { today: new Date(2026, 9, 16) });
+    const gap = w.find((x) => x.kind === "uncovered_nights");
+    expect(gap?.message).toContain("1 noite(s)");
+    expect(gap?.message).toContain("15/10 a 16/10");
+    const past = checkQuoteTimeline([{ id: "h", type: "hotel", data: { check_in: "2026-10-10", check_out: "2026-10-15" } }], { today: new Date(2026, 9, 16) });
+    expect(past.filter((x) => x.kind === "past_date")).toHaveLength(2);
+  });
+});
