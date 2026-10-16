@@ -14,6 +14,7 @@ import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { tPublicFlight } from "@/i18n/publicMaterials/flights";
 import { tPublicHotel } from "@/i18n/publicMaterials/hotels";
 import { tPublicCar } from "@/i18n/publicMaterials/cars";
+import { isHtmlDescription, sanitizedDescriptionHtml } from "@/lib/richDescription";
 
 export function esc(v: unknown): string {
   if (v === null || v === undefined) return "";
@@ -49,7 +50,16 @@ export function icon(name: string, size = 14, color = "currentColor"): string {
 }
 
 const fmtShort = (v: string | undefined, locale: PublicLocale) => (v ? formatPublicShortDate(v, locale) || v : "");
-const text = (v: unknown) => `<span class="pre">${esc(v)}</span>`;
+/**
+ * Valores de texto livre: quando o conteúdo já é HTML (editor rico),
+ * sanitiza e preserva a formatação; texto simples legado é escapado.
+ * Evita tags cruas como `<p>` no PDF de voo/hotel/locação.
+ */
+const text = (v: unknown) => {
+  if (v === null || v === undefined) return "";
+  const s = String(v);
+  return isHtmlDescription(s) ? `<span class="pre rich">${sanitizedDescriptionHtml(s)}</span>` : `<span class="pre">${esc(s)}</span>`;
+};
 
 /** Bloco pequeno e indivisível (card com título). `ctx` = contexto do serviço em continuação. */
 export function panel(title: string, iconName: string, inner: string, opts: { ctx?: string; tone?: "amber" | "default" } = {}): string {
