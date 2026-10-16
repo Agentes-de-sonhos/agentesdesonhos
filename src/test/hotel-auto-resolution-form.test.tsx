@@ -28,7 +28,7 @@ describe("abertura da hospedagem preenchida por IA", () => {
     render(<TooltipProvider><QueryClientProvider client={new QueryClient()}><ServiceForm
       serviceType="hotel" onSubmit={save} onCancel={() => {}} isLoading={false}
       initialData={{ amount: 0, description: "Descrição importada preservada", service_data: {
-        hotel_name: "Portofino Bay", city: "Orlando", check_in: "2027-01-10", check_out: "2027-01-12",
+        hotel_name: "Portofino Bay", city: "Orlando", meal_plan: "breakfast", check_in: "2027-01-10", check_out: "2027-01-12",
       } }}
     /></QueryClientProvider></TooltipProvider>);
     const photo = await screen.findByRole("button", { name: "Selecionar foto 1" }, { timeout: 5000 });
