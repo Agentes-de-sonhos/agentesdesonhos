@@ -43,6 +43,8 @@ interface HotelPhotoGalleryProps {
   hasSavedService?: boolean;
   /** Mantido por compatibilidade: a galeria nunca fica pendente (autosave). */
   onPendingChange?: (pending: boolean) => void;
+  hotelSearch?: React.ReactNode;
+  googleRequestTrigger?: number;
 }
 
 /**
@@ -60,6 +62,8 @@ export function HotelPhotoGallery({
   placeId,
   hasSavedService,
   onPendingChange,
+  hotelSearch,
+  googleRequestTrigger,
 }: HotelPhotoGalleryProps) {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -231,13 +235,13 @@ export function HotelPhotoGallery({
     await uploadFile(file);
   };
 
-  const showSection = !!placeId || active.length > 0;
+  const showSection = !!placeId || active.length > 0 || !!hotelSearch;
   if (!showSection) {
     return (
       <div className="space-y-1" data-testid="hotel-gallery-empty">
         <p className="text-sm font-medium">{HOTEL_GALLERY_TITLE}</p>
         <p className="text-xs text-muted-foreground italic">
-          Selecione um hotel acima para carregar fotos automaticamente.
+          Selecione um hotel acima para buscar fotos do Google.
         </p>
       </div>
     );
@@ -299,6 +303,7 @@ export function HotelPhotoGallery({
       )}
 
       <div className="space-y-3">
+        {!placeId && hotelSearch}
         {placeId && (
           <GoogleHotelPhotos
             placeId={placeId}
@@ -310,6 +315,7 @@ export function HotelPhotoGallery({
             headingLabel={HOTEL_GALLERY_SUGGESTIONS_TITLE}
             buttonLabel="Buscar fotos do Google"
             loadingLabel="Buscando sugestões do Google…"
+            requestTrigger={googleRequestTrigger}
           />
         )}
 

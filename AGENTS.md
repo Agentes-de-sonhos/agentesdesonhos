@@ -2,7 +2,7 @@
 - Flight/hotel cards and opt-in styles are public-only. Why: preserves admin, other services and secure access.
 - Magic Kingdom maps: on-demand same-origin iframe, CDN image pointers, origin-checked Escape; at 100% full column width and natural height (iframe owns scroll). Why: height containment shrank the approved map.
 - Other parks share one static engine: category-scoped IDs, independent anchors (all highlighted), no guessed pins, native-pixel/lossless maps, full pages kept. Why: no invented pins or overlapping entries.
-- Orlando editorial photo gallery is added at the public tickets route only for an explicit hostname allowlist (Destinos com a Ju, 100 Limites), outside the shared wizard; its photographs use CDN pointers with official-source credit. Why: preserves wizard and other tenants.
+- Orlando editorial gallery: public tickets, allowlisted Ju/100 Limites hosts only, outside wizard; CDN pointers with official credits. Why: tenant isolation.
 - Tenant hero variants, photo-above campaigns and visited-destination strips use shared opt-in components with safe defaults and scoped preview styles. Why: tenant isolation, no engine duplication.
 - ADS briefing e-mail: server-to-server Edge Function `ads-briefing-email` with relay-token auth (SHA-256 in private `ads_briefing_integration`), service-role-only queue + run tables; retries piggyback on the `product-landing-lead-emails` cron. Why: owner-only internal trigger, no public/tenant surface.
 - ADS site previews use path-keyed local fixtures on synthetic hostnames and the shared white-label renderer, gated to technical preview hosts with commercial actions and backend access blocked. Why: review without publishing or touching tenant data.
@@ -19,3 +19,5 @@
 - Wallet modules: trip > owning agency (`wallet_agency_owner`) > system, in SQL. Why: same agency.
 - Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: new videos per page without code changes.
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
+
+- Quote hotel photos: explicit gallery name search via existing autocomplete, user-confirmed place before photos. Why: no guessed hotels or automatic paid lookups.
