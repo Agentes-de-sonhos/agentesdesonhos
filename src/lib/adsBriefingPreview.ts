@@ -222,7 +222,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     newsletter: { enabled: true, order: 10 },
   },
   heroImage: "europa",
-  heroPresentation: { kicker: "VIAGENS PERSONALIZADAS · SÃO PAULO", overlay: "strongLeft", actionsPlacement: "right" },
+  heroPresentation: { kicker: "VIAGEM DESENHADA PARA VOCÊ", overlay: "strongLeft", actionsPlacement: "right" },
   requestCenter: { title: "Por onde você quer começar?", titlePlacement: "above-card" },
   resortsMap: { enabled: true },
   featuredExperience: {
@@ -239,20 +239,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     ctaHref: "/xcaret",
   },
   hero: [
-    {
-      title: "Sua próxima viagem, com as suas cores.",
-      subtitle: "Roteiros personalizados e acompanhamento antes, durante e depois da viagem.",
-      image: "europa",
-      order: 1,
-      enabled: true,
-    },
-    {
-      title: "Uma viagem com a sua personalidade.",
-      subtitle: "Tudo começa com uma conversa sobre suas preferências e o seu ritmo.",
-      image: "parques",
-      order: 2,
-      enabled: true,
-    },
+    { title: "Viagem desenhada para você.", subtitle: "Roteiros sob medida, criados a partir do seu jeito de viajar, com acompanhamento antes, durante e depois.", image: "heroVarenna", order: 1, enabled: true },
+    { title: "Existe uma Europa para cada pessoa.", subtitle: "Desenhamos a sua, no seu ritmo, para você viver a sua própria história.", image: "europa", order: 2, enabled: true },
+    { title: "Viajar em boa companhia.", subtitle: "Grupos acompanhados para quem quer descobrir o mundo com segurança e novas amizades.", image: "heroSantoriniShip", order: 3, enabled: true },
   ],
   signature: {
     kicker: "O MUNDO EM CORES",
@@ -260,11 +249,12 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     text: "Tudo começa com uma conversa sobre suas preferências, seu ritmo e o que você deseja viver. Juntos, planejamos roteiro, hospedagem e experiências, com orientação e suporte em cada etapa.",
   },
   destinations: [
-    { key: "europa", image: "europa", label: "Europa", title: "Europa", text: "Cidades, paisagens e experiências combinadas em um roteiro com ritmo e personalidade.", service: "pacotes", enabled: true, order: 1 },
-    { key: "orlando", image: "parques", label: "Famílias", title: "Orlando e parques", text: "Parques, hospedagem, ingressos e deslocamentos organizados para aproveitar cada dia.", service: "ingressos", enabled: true, order: 2 },
-    { key: "cruzeiros", image: "cruzeiro", label: "Mar e descobertas", title: "Cruzeiros", text: "Navios, cabines e itinerários pelo Mediterrâneo e Caribe escolhidos com orientação.", service: "cruzeiros", enabled: true, order: 3 },
-    { key: "xcaret", image: "litoral", label: "México", title: "Xcaret", text: "Natureza, cultura e parques em uma experiência planejada para casais, famílias e amigos.", service: "ingressos", enabled: true, order: 4 },
-    { key: "eua-canada", image: "grupos", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Roteiros urbanos, natureza e viagens acompanhadas com logística bem estruturada.", service: "pacotes", enabled: true, order: 5 },
+    { key: "europa", image: "heroVarenna", label: "Itália e Europa", title: "Existe uma Europa para cada pessoa", text: "Da Itália a outros cantos da Europa, desenhamos um roteiro com a sua cara: no seu ritmo, com liberdade ou em circuito, para viver a sua própria história.", service: "pacotes", enabled: true, order: 1 },
+    { key: "grecia-grupo", image: "heroSantoriniShip", label: "Grupo acompanhado", title: "Grécia em Boa Companhia", text: "Saída em grupo de 20 a 28 de junho, com acompanhamento da Vanessa. Programa completo em breve; peça já as informações.", service: "pacotes", enabled: true, order: 2 },
+    { key: "orlando-grupo", image: "orlandoMagicKingdom", label: "Grupo acompanhado", title: "Orlando em grupo", text: "Parques em boa companhia, com organização de ingressos, hospedagem e deslocamentos. Datas em confirmação.", service: "ingressos", enabled: true, order: 3 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Destaque NCL", title: "Cruzeiros com a NCL", text: "Navios da Norwegian Cruise Line e de outras companhias pelo Caribe, Mediterrâneo e muito mais, escolhidos para o seu perfil.", service: "cruzeiros", enabled: true, order: 4 },
+    { key: "club-med", image: "resort", label: "Resorts internacionais", title: "Club Med pelo mundo", text: "Resorts all inclusive de praia e de neve, com estrutura para famílias, casais e amigos.", service: "hospedagem", enabled: true, order: 5 },
+    { key: "xcaret", image: "litoral", label: "México", title: "Xcaret", text: "Natureza, cultura e parques em uma experiência planejada para casais, famílias e amigos.", service: "ingressos", enabled: true, order: 6 },
   ],
   modules: [
     { key: "personalizadas", title: "Viagens personalizadas", text: "Roteiros, hotéis e serviços selecionados a partir do perfil de quem viaja.", service: "pacotes", image: "europa", enabled: true, order: 1 },
@@ -317,6 +307,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     },
   },
   inspirationDialog: {
+    groupUrl: "https://chat.whatsapp.com/BsNGH7VRiILHfPqZhoASUu?mode=gi_t",
     title: "Entre no grupo de novidades",
     description: "Preencha seus dados para receber novidades e oportunidades de viagem da O Mundo em Cores.",
     submitLabel: "Confirmar",
@@ -333,7 +324,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     email: "contato@omundoemcores.com.br",
     instagram: "https://www.instagram.com/omundoemcoresviagens",
     instagramLabel: "@omundoemcoresviagens",
-    showLocation: true,
+    legalName: "V Figueiredo Viagens e Turismo Ltda",
+    cnpj: "27.702.093/0001-52",
+    showLocation: false,
   },
   testimonials: [
     { key: "thais-rosa", author: "Thaís Rosa", quote: "competência, carinho, personalização, amor, dedicação" },

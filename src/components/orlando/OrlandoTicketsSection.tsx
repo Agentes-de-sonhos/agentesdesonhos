@@ -27,6 +27,7 @@ import {
   type OrlandoCategory,
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
+import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { DisneyParkMapTrigger, isParkMapId } from "./DisneyParkMapDialog";
 
 const CARD_LOGOS: Record<string, string> = {
@@ -345,6 +346,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
             {whatsappHref && (
               <Button asChild className="mt-6"><a href={whatsappHref} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />Falar no WhatsApp</a></Button>
             )}
+            <WhatsappGroupInvite hostname={hostname} />
           </div>
         ) : step === null ? (
           <>

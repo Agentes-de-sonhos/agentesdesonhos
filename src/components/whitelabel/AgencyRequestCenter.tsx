@@ -20,6 +20,7 @@ import {
   validateContactStep, validateServiceStep,
   type ContactValues, type RequestField, type ServiceValues,
 } from "@/lib/agencySiteRequests";
+import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 
 const SERVICE_ICONS: Record<string, typeof Plane> = {
@@ -279,6 +280,7 @@ export function AgencyRequestCenter({
               Recebemos o seu pedido de {service.label.toLowerCase()}. Um consultor da {agencyName} vai
               retornar pelo canal escolhido para alinhar os detalhes.
             </p>
+            <WhatsappGroupInvite hostname={hostname} />
             <Button className="mt-6" variant="outline" onClick={startOver}>
               Fazer outra solicitação
             </Button>
