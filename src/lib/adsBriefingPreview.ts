@@ -254,7 +254,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     { key: "orlando-grupo", image: "orlandoMagicKingdom", label: "Grupo acompanhado", title: "Orlando em grupo", text: "Parques em boa companhia, com organização de ingressos, hospedagem e deslocamentos. Datas em confirmação.", service: "ingressos", enabled: true, order: 3 },
     { key: "cruzeiros", image: "cruzeiro", label: "Destaque NCL", title: "Cruzeiros com a NCL", text: "Navios da Norwegian Cruise Line e de outras companhias pelo Caribe, Mediterrâneo e muito mais, escolhidos para o seu perfil.", service: "cruzeiros", enabled: true, order: 4 },
     { key: "club-med", image: "resort", label: "Resorts internacionais", title: "Club Med pelo mundo", text: "Resorts all inclusive de praia e de neve, com estrutura para famílias, casais e amigos.", service: "hospedagem", enabled: true, order: 5 },
-    { key: "resorts-nacionais", image: "nordesteResort", label: "Resorts nacionais", title: "Hotéis Iberostar", text: "Resorts all inclusive à beira-mar no Brasil, com gastronomia, lazer e conforto para famílias e casais.", service: "hospedagem", enabled: true, order: 6 },
+    { key: "resorts-nacionais", image: "iberostarPraiaDoForte", label: "Resorts nacionais", title: "Hotéis Iberostar no Brasil", text: "Resorts all inclusive à beira-mar no Brasil, com gastronomia, lazer e conforto para famílias e casais.", service: "hospedagem", enabled: true, order: 6 },
   ],
   modules: [
     { key: "personalizadas", title: "Viagens personalizadas", text: "Roteiros, hotéis e serviços selecionados a partir do perfil de quem viaja.", service: "pacotes", image: "europa", enabled: true, order: 1 },
