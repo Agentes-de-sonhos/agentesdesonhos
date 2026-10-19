@@ -1142,13 +1142,13 @@ export default function AgencySiteHome({
                       />
                     </div>
                   )}
+                  {aboutCopy?.visitedDestinations?.presentation === "flags" && (
+                    <div className="min-w-0 pt-2">
+                      <VisitedFlagsCarousel title={aboutCopy.visitedDestinations.title} names={aboutCopy.visitedDestinations.names} />
+                    </div>
+                  )}
                 </div>}
               </div>
-              {aboutCopy?.visitedDestinations?.presentation === "flags" && (
-                <div className={`${container} -mt-4 pb-14 md:-mt-8 md:pb-20`}>
-                  <VisitedFlagsCarousel title={aboutCopy.visitedDestinations.title} names={aboutCopy.visitedDestinations.names} />
-                </div>
-              )}
             </section>
           );
         }

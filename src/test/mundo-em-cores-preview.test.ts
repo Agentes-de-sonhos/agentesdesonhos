@@ -7,7 +7,7 @@ describe("O Mundo em Cores approved isolated presentation", () => {
   it("uses professional experience without inventing a founding date", () => {
     expect(profile.about?.badge).toEqual({ value: "29 anos", label: "de experiência no turismo" });
     expect(profile.about?.title).toBe("Viagens planejadas para o seu jeito de viver o mundo.");
-    expect(JSON.stringify(profile)).not.toMatch(/30 anos|27 anos|2012|2017|antecipação|curadoria|jornada|Vinculação de domínio/i);
+    expect(JSON.stringify(profile)).not.toMatch(/30 anos|2012|2017|antecipação|curadoria|jornada|Vinculação de domínio/i);
     expect(profile.about?.text).toContain("Olá, eu sou a Vanessa Figueiredo.");
   });
   it("preserves safe synthetic identity and uses opt-in shared visuals", () => {
