@@ -264,6 +264,10 @@ export interface AgencyFeaturedExperience {
   consultantImage?: AgencyFeaturedImage | null;
   badge?: AgencyFeaturedImage | null;
   secondaryImages?: AgencyFeaturedImage[];
+  /** Opcional: galeria com troca automática no lugar da imagem principal. */
+  gallery?: AgencyFeaturedImage[];
+  /** Intervalo da galeria em ms (padrão 6000). */
+  galleryIntervalMs?: number;
   highlights?: string[];
   ctaLabel?: string;
   /** URL da landing; null mantém o botão inativo, sem link fictício. */

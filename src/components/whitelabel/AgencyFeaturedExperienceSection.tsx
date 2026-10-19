@@ -2,6 +2,7 @@ import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import type { AgencyFeaturedExperience } from "@/lib/agencySiteProfile";
+import { AgencyFeaturedGallery } from "./AgencyFeaturedGallery";
 
 /**
  * "Experiência em destaque": seção editorial reutilizável e totalmente
@@ -68,6 +69,11 @@ export function AgencyFeaturedExperienceSection({
           )}
         </div>
 
+        {config.gallery && config.gallery.length > 0 ? (
+          <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
+            <AgencyFeaturedGallery images={config.gallery} intervalMs={config.galleryIntervalMs} badge={config.badge} />
+          </div>
+        ) : (
         <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
           <div
             className={`relative overflow-hidden rounded-3xl ${
@@ -124,6 +130,7 @@ export function AgencyFeaturedExperienceSection({
           </div>
           <div className="hidden md:block md:h-10" aria-hidden />
         </div>
+        )}
       </div>
     </section>
   );
