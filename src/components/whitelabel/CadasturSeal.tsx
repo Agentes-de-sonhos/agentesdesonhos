@@ -3,12 +3,14 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import cadasturSeal from "@/assets/whitelabel/selo-cadastur.png.asset.json";
 import certLimites from "@/assets/whitelabel/certificado-cadastur-100-limites.jpg.asset.json";
+import certMundo from "@/assets/whitelabel/certificado-cadastur-o-mundo-em-cores.jpg.asset.json";
 import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.jpg.asset.json";
 
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null) {
   const h = hostname ?? "";
   if (/(^|\.)destinoscomaju\.com\.br$/i.test(h)) return { url: certJu.url, agency: "Destinos com a Ju" };
+  if (h === "briefing-14-v1.preview.local" || /(^|\.)omundoemcores\.com\.br$/i.test(h)) return { url: certMundo.url, agency: "O Mundo em Cores" };
   if (/100limites/i.test(h)) return { url: certLimites.url, agency: "100 Limites" };
   return null;
 }

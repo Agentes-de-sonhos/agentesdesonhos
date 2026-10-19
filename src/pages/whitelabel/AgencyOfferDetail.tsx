@@ -1,3 +1,4 @@
+import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -294,6 +295,7 @@ function OfferRequestDialog({
             <p className="text-sm text-muted-foreground">
               Recebemos seu interesse em “{offer.title}”. Nossa equipe vai conferir disponibilidade e valores e retornará pelo WhatsApp informado.
             </p>
+            <WhatsappGroupInvite hostname={info.hostname} />
             <Button onClick={() => close(false)}>Fechar</Button>
           </div>
         ) : (

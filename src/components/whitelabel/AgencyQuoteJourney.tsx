@@ -34,6 +34,7 @@ import {
   validateOccurrence,
   type Occurrence, type ServiceGroup,
 } from "@/lib/agencyJourneyOccurrences";
+import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { focusNextField, useKeyboardInset, useRevealFocusedField } from "@/hooks/useKeyboardInsets";
 import { agencySiteHref } from "@/lib/agencyContextLink";
@@ -990,6 +991,7 @@ export function AgencyQuoteJourney({
                 {totalServices === 1 ? "1 serviço" : `${totalServices} serviços`}. Um consultor da {agencyName} vai
                 retornar para alinhar todos os detalhes.
               </p>
+              <WhatsappGroupInvite hostname={hostname} />
               <Button className="mt-6" variant="outline" data-testid="wlq-success-close" onClick={handleSuccessClose}>
                 Fechar
               </Button>
