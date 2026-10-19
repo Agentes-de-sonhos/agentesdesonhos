@@ -216,6 +216,8 @@ export interface AgencySiteProfile {
     text?: string;
     image?: AgencyImageSlot;
     images?: { src: string; alt: string; position?: string; aspect?: "square" }[];
+    /** Opt-in: mural panorâmico navegável (arrastar/setas, em loop) no lugar das fotos. */
+    mural?: { src: string; alt: string };
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
     badge?: { value: string; label?: string };
     /** Fatos institucionais confirmados, apresentados separadamente. */
