@@ -32,9 +32,11 @@ export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
   portraitJuliana: { src: mundoXcaretParque.url, alt: "Vanessa Figueiredo no parque Xcaret, junto à placa Xcaret México", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1656)" },
   trainingPhoto: { src: mundoXcaretXplor.url, alt: "Vanessa Figueiredo na caverna do parque Xplor, junto à pedra Xplor por Xcaret", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0921)" },
   julianaExtra: { src: mundoXcaretXelha.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0749)" },
-  expertBadge: null,
-  julianaAtDestination: XCARET_IMAGES.hotelMexico,
+  expertBadge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret", source: "Selo Xperts Xcaret" },
+  julianaAtDestination: { src: mundoXcaretFechamento.url, alt: "Vanessa Figueiredo no letreiro Xcaret México 35 anos", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1646)" },
 };
+import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
+import mundoXcaretFechamento from "@/assets/ads-preview/mundo-xcaret-vanessa-35anos.webp.asset.json";
 import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
@@ -664,9 +666,9 @@ export const VIAJAR_TIRISMO_PREVIEW_PROFILE: AgencySiteProfile = {
  * ou certificação que a Vanessa não confirmou.
  */
 export const MUNDO_EM_CORES_XCARET_REWRITES: [string, string][] = [
-  ["Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.", "Um universo de parques e hotéis para planejar com cuidado."],
-  ["Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.", "Sou a Vanessa Figueiredo, da O Mundo em Cores, e organizo cada etapa da sua viagem à Riviera Maya."],
-  ["Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.", "Ajudo você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar."],
+  ["Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado.", "Eu fui conhecer o Xcaret para planejar a sua viagem com ainda mais cuidado."],
+  ["Sou a Juliana, da Destinos com a Ju. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada.", "Sou a Vanessa Figueiredo, da O Mundo em Cores. Estive no Xcaret para conhecer o destino de perto e participar de uma capacitação especializada."],
+  ["Voltei com o selo Expert e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar.", "Voltei com o selo Xperts e ainda mais preparada para ajudar você a escolher a hospedagem, os parques e as experiências que combinam com o seu jeito de viajar."],
   ["Destinos com a Ju", "O Mundo em Cores"],
   ["Juliana", "Vanessa"],
   ["Oi, Ju!", "Oi, Vanessa!"],
@@ -878,7 +880,7 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     jobId: BARDELLI_PRESENTATION_JOB_ID, info: BARDELLI_PRESENTATION_INFO, profile: BARDELLI_PRESENTATION_PROFILE,
     notice: "Bardelli Viagens · apresentação para revisão · textos e serviços ilustrativos a confirmar · nenhum envio real",
     documentTitle: "Apresentação completa — Bardelli Viagens", realAgency: true,
-    pages: { xcaret: { slots: MUNDO_EM_CORES_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
+    pages: { xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES }, resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, visa: true, dmc: true, editorial: true },
   },
   [ADS_PREVIEW_JOB_ID]: {
     jobId: ADS_PREVIEW_JOB_ID,
