@@ -32,9 +32,11 @@ export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
   portraitJuliana: { src: mundoXcaretParque.url, alt: "Vanessa Figueiredo no parque Xcaret, junto à placa Xcaret México", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1656)" },
   trainingPhoto: { src: mundoXcaretXplor.url, alt: "Vanessa Figueiredo na caverna do parque Xplor, junto à pedra Xplor por Xcaret", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0921)" },
   julianaExtra: { src: mundoXcaretXelha.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0749)" },
-  expertBadge: null,
-  julianaAtDestination: XCARET_IMAGES.hotelMexico,
+  expertBadge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret", source: "Selo Xperts Xcaret" },
+  julianaAtDestination: { src: mundoXcaretFechamento.url, alt: "Vanessa Figueiredo no letreiro Xcaret México 35 anos", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1646)" },
 };
+import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
+import mundoXcaretFechamento from "@/assets/ads-preview/mundo-xcaret-vanessa-35anos.webp.asset.json";
 import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
