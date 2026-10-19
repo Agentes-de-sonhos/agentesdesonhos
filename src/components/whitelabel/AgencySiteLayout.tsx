@@ -424,7 +424,12 @@ export function AgencyFooter({
       : plainFooter
       ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-background"
       : "border-t border-[var(--brand-border,hsl(var(--wl-ink)_/_0.12))] bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]";
-    const footerLogoClass = plainFooter
+    /**
+     * O Mundo em Cores (prévia): logotipo do rodapé sem moldura/sombra e na
+     * mesma caixa do cabeçalho. Demais tenants seguem com o acabamento atual.
+     */
+    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14";
+    const footerLogoClass = plainFooterLogo
       ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
       : "h-12 w-auto max-w-[200px] object-contain";
     return (
@@ -434,7 +439,7 @@ export function AgencyFooter({
           <div>
             <div className="flex flex-wrap items-center gap-4">
             {logoUrl ? (
-              plainFooter ? (
+              plainFooterLogo ? (
                 <img src={logoUrl} alt={`Logo ${name}`} loading="lazy" className={footerLogoClass} />
               ) : (
                 <span className="inline-flex rounded-lg bg-white p-3 shadow-[0_1px_2px_hsl(0_0%_0%/0.35)]">
