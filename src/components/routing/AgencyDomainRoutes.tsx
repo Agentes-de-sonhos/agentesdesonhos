@@ -41,6 +41,7 @@ const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPag
 const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
 const AgencyBlogPage = lazy(() => import("@/pages/whitelabel/AgencyBlogPage"));
 const AgencyBlogPostPage = lazy(() => import("@/pages/whitelabel/AgencyBlogPostPage"));
+const AgencyLinksPage = lazy(() => import("@/pages/whitelabel/AgencyLinksPage"));
 
 /** 100 Limites: URLs antigas do portfólio DMC apontam para âncoras da landing única. */
 const DMC_LEGACY_REDIRECTS: Record<string, string> = {
@@ -214,6 +215,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               element={<StandaloneTool info={info} kind={r.kind} />}
             />
           ))}
+
+          {/* Página de links (bio) da agência: standalone, para todos os domínios. */}
+          <Route path="/links" element={<AgencyLinksPage info={info} />} />
 
           {/* Landing institucional standalone, protegida pelo gate e isolada por perfil/hostname. */}
           {resolveSiteProfile(info.hostname).key === "editorialRose" && (

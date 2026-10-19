@@ -20,8 +20,12 @@ const SOCIAL_META: Record<keyof SocialLinks, { icon: React.ComponentType<any>; l
   tiktok: { icon: Youtube, label: "TikTok" },
 };
 
-export default function CartaoPublico() {
-  const { slug } = useParams<{ slug: string }>();
+export default function CartaoPublico({
+  slugOverride,
+  publicUrlOverride,
+}: { slugOverride?: string; publicUrlOverride?: string } = {}) {
+  const params = useParams<{ slug: string }>();
+  const slug = slugOverride ?? params.slug;
   const { data: card, isLoading } = usePublicBusinessCard(slug);
 
   useEffect(() => {
@@ -69,7 +73,7 @@ export default function CartaoPublico() {
 
   const primaryColor = card.primary_color || "#0284c7";
   const secondaryColor = card.secondary_color || "#f97316";
-  const publicUrl = `${PUBLIC_DOMAIN}/${card.slug}`;
+  const publicUrl = publicUrlOverride || `${PUBLIC_DOMAIN}/${card.slug}`;
   const activeSocials = Object.entries(card.social_links).filter(([, v]) => !!v) as [keyof SocialLinks, string][];
 
   return (

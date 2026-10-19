@@ -22,11 +22,13 @@ interface Props {
   card: BusinessCard;
   onDelete: (id: string) => void;
   isDeleting: boolean;
+  /** Link da bio no domínio próprio da agência (ex.: https://site.com.br/links). */
+  bioUrl?: string | null;
 }
 
-export function BusinessCardListItem({ card, onDelete, isDeleting }: Props) {
+export function BusinessCardListItem({ card, onDelete, isDeleting, bioUrl }: Props) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const shareUrl = getCardPublicUrl(card.slug);
+  const shareUrl = bioUrl || getCardPublicUrl(card.slug);
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -94,7 +96,9 @@ export function BusinessCardListItem({ card, onDelete, isDeleting }: Props) {
           </p>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <ExternalLink className="h-3 w-3 shrink-0" />
-            <span className="truncate">contato.tur.br/{card.slug}</span>
+            <span className="truncate">
+              {bioUrl ? bioUrl.replace(/^https?:\/\//, "") : `contato.tur.br/${card.slug}`}
+            </span>
           </div>
         </div>
 

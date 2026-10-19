@@ -9,11 +9,22 @@ import { useNavigate } from "react-router-dom";
 import { AdminEditButton } from "@/components/layout/AdminEditButton";
 import { BusinessCardListItem } from "@/components/card-wizard/BusinessCardListItem";
 import { CreateCardDialog } from "@/components/card-wizard/CreateCardDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 
 function MeuCartaoContent() {
   const { cards, isLoading, createCard, deleteCard, cardCount, canCreate } = useBusinessCards();
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
+  const { customDomain } = useAgencyCustomDomain();
+  // `/links` do domínio mostra o cartão ativo mais antigo do dono da agência.
+  const bioCardId =
+    customDomain && user?.id && user.id === agencyOwnerId
+      ? cards.find((c) => c.is_active)?.id
+      : undefined;
 
   const handleCreate = ({ slug, label }: { slug: string; label: string }) => {
     createCard.mutate(
@@ -45,7 +56,7 @@ function MeuCartaoContent() {
           <div className="flex-1 space-y-1">
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <CreditCard className="h-6 w-6 text-primary" />
-              Meus Cartões Virtuais
+              Página de Links (Bio) e Cartões
             </h1>
             <p className="text-sm text-muted-foreground">
               Você pode ter até {MAX_BUSINESS_CARDS} cartões ativos —
@@ -91,6 +102,7 @@ function MeuCartaoContent() {
                   card={card}
                   onDelete={(id) => deleteCard.mutate(id)}
                   isDeleting={deleteCard.isPending}
+                  bioUrl={card.id === bioCardId ? `https://${customDomain}/links` : null}
                 />
               ))}
 
