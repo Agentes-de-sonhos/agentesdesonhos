@@ -82,6 +82,7 @@ import slMendoza from "@/assets/whitelabel/100-limites/destino-mendoza.jpg.asset
 import destinoOrlandoMk from "@/assets/whitelabel/destinos-com-a-ju/destino-orlando-mk.avif.asset.json";
 import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
+import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
@@ -119,6 +120,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   mendoza: slMendoza.url,
   cruzeiroDisneyWish: destinoCruzeiroWish.url,
   nordesteResort: destinoNordesteResort.url,
+  iberostarPraiaDoForte: iberostarPraiaDoForte.url,
   heroVarenna: heroVarenna.url,
   heroSantoriniShip: heroSantoriniShip.url,
   heroAirportTraveler: heroAirportTraveler.url,
