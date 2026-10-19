@@ -9,11 +9,22 @@ import { useNavigate } from "react-router-dom";
 import { AdminEditButton } from "@/components/layout/AdminEditButton";
 import { BusinessCardListItem } from "@/components/card-wizard/BusinessCardListItem";
 import { CreateCardDialog } from "@/components/card-wizard/CreateCardDialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
+import { useAgencyCustomDomain } from "@/hooks/useAgencyCustomDomain";
 
 function MeuCartaoContent() {
   const { cards, isLoading, createCard, deleteCard, cardCount, canCreate } = useBusinessCards();
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
+  const { customDomain } = useAgencyCustomDomain();
+  // `/links` do domínio mostra o cartão ativo mais antigo do dono da agência.
+  const bioCardId =
+    customDomain && user?.id && user.id === agencyOwnerId
+      ? cards.find((c) => c.is_active)?.id
+      : undefined;
 
   const handleCreate = ({ slug, label }: { slug: string; label: string }) => {
     createCard.mutate(
