@@ -13,14 +13,31 @@ import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/con
 
 type XcaretMediaSlots = Record<"portraitJuliana" | "trainingPhoto" | "julianaExtra" | "expertBadge" | "julianaAtDestination", XcaretImage | null>;
 
-/** Fotos temporárias (acervo oficial Xcaret) no lugar das fotos da Juliana. */
-export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
+/** Fotos temporárias (acervo oficial Xcaret) no lugar das fotos da Juliana. Usado pela Bardelli. */
+export const GENERIC_XCARET_SLOTS: XcaretMediaSlots = {
   portraitJuliana: XCARET_IMAGES.xcaret,
   trainingPhoto: XCARET_IMAGES.xelHa,
   julianaExtra: XCARET_IMAGES.xplor,
   expertBadge: null,
   julianaAtDestination: XCARET_IMAGES.hotelMexico,
 };
+
+/**
+ * O Mundo em Cores: fotos originais da Vanessa (Drive da cliente, pasta
+ * "Fotos da Vanessa em Xcaret"), cada uma no MESMO parque da foto que substitui,
+ * identificado pela placa visível. Hotel Xcaret México preservado (sem foto
+ * comprovada do mesmo hotel).
+ */
+export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
+  portraitJuliana: { src: mundoXcaretParque.url, alt: "Vanessa Figueiredo no parque Xcaret, junto à placa Xcaret México", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1656)" },
+  trainingPhoto: { src: mundoXcaretXplor.url, alt: "Vanessa Figueiredo na caverna do parque Xplor, junto à pedra Xplor por Xcaret", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0921)" },
+  julianaExtra: { src: mundoXcaretXelha.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0749)" },
+  expertBadge: null,
+  julianaAtDestination: XCARET_IMAGES.hotelMexico,
+};
+import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
+import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
+import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
 import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 // Real personal photographs from https://omundoemcores.com.br/wp-content/uploads/2024/07/Vanessa.png
