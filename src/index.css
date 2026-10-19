@@ -1484,6 +1484,12 @@ body[data-booking-selection-bar] {
 }
 [data-ads-preview="drica-completa-v1"] #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: hsl(var(--primary-foreground)); }
 
+/* O Mundo em Cores: faixa de cruzeiros no azul-petróleo do logotipo, texto branco. */
+.wl-mundo .wl-alt-surface > #autoridade { background-color: #245C81 !important; background-image: none !important; }
+.wl-mundo #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: #8CDFF1 !important; }
+.wl-mundo #autoridade button { background-color: #FFFFFF; color: #245C81; }
+.wl-mundo #autoridade button:hover { background-color: #F1F6FA; }
+
 /* O Mundo em Cores: mapa de resorts com as 5 cores das placas do logotipo, uma por macrorregião. */
 .wl-mundo { --mc-ne: #F69F61; --mc-se: #245C81; --mc-s: #F57A7A; --mc-co: #3C94BB; --mc-n: #8CDFF1; }
 .wl-mundo [data-region="ne"] { --mc: var(--mc-ne); --mc-ink: #FFFFFF; }
