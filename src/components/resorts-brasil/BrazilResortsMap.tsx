@@ -20,6 +20,14 @@ export const STATES: [string, string, number, number][] = [
   ["SP", "São Paulo", 4, 6], ["RJ", "Rio de Janeiro", 5, 6], ["PR", "Paraná", 3, 6],
   ["SC", "Santa Catarina", 3, 7], ["RS", "Rio Grande do Sul", 2, 7],
 ];
+/** Macrorregião por UF (usada por temas opt-in para colorir o mapa). */
+export const REGION_OF: Record<string, "n" | "ne" | "co" | "se" | "s"> = {
+  AC: "n", AM: "n", AP: "n", PA: "n", RO: "n", RR: "n", TO: "n",
+  AL: "ne", BA: "ne", CE: "ne", MA: "ne", PB: "ne", PE: "ne", PI: "ne", RN: "ne", SE: "ne",
+  DF: "co", GO: "co", MT: "co", MS: "co",
+  ES: "se", MG: "se", RJ: "se", SP: "se",
+  PR: "s", RS: "s", SC: "s",
+};
 export const STATE_NAME = Object.fromEntries(STATES.map(([uf, n]) => [uf, n]));
 
 export const prettyName = (name: string) =>
@@ -137,6 +145,8 @@ export function BrazilResortsMap({
               return (
                 <g
                   key={uf}
+                  data-region={n ? REGION_OF[uf] : undefined}
+                  data-active={active || undefined}
                   role={n ? "button" : undefined}
                   tabIndex={n ? 0 : -1}
                   aria-label={n ? `${name}, ${n} resort${n > 1 ? "s" : ""}` : name}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { BRAZIL_RESORTS } from "./resortsData";
 import { BRAZIL_STATE_PATHS, BRAZIL_VIEWBOX } from "./brazilStatePaths";
-import { STATES, STATE_NAME, logoFor, prettyName } from "./BrazilResortsMap";
+import { REGION_OF, STATES, STATE_NAME, logoFor, prettyName } from "./BrazilResortsMap";
 
 const MAX_CARDS = 6;
 
@@ -59,6 +59,8 @@ export function AgencyResortsSection({
             return (
               <g
                 key={uf}
+                data-region={n ? REGION_OF[uf] : undefined}
+                data-active={active || undefined}
                 role={n ? "button" : undefined}
                 tabIndex={n ? 0 : -1}
                 aria-label={n ? `${name}, ${n} resort${n > 1 ? "s" : ""}` : name}
@@ -97,6 +99,8 @@ export function AgencyResortsSection({
             <button
               key={uf}
               type="button"
+              data-region={REGION_OF[uf]}
+              data-active={selected === uf || undefined}
               onClick={() => setSelected(uf)}
               className={cn(
                 "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm transition-colors",
