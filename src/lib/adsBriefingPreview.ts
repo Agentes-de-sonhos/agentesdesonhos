@@ -25,6 +25,7 @@ import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.jso
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 // Real personal photographs from https://omundoemcores.com.br/wp-content/uploads/2024/07/Vanessa.png
 import mundoEmCoresVanessa from "@/assets/ads-preview/mundo-em-cores-vanessa-oficial.png.asset.json";
+import mundoEmCoresVanessaMural from "@/assets/ads-preview/mundo-em-cores-vanessa-mural.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 
@@ -268,6 +269,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     text: "Olá, eu sou a Vanessa Figueiredo.\n\nHá 29 anos entrego sonhos em forma de viagens, sendo os últimos 16 anos à frente da minha agência, a O Mundo em Cores · Studio de Viagens.\n\nVivo em constante aprendizado sobre destinos, passeios e novidades para construir roteiros personalizados, sempre com dicas e sugestões que fazem toda a diferença para cada viajante. É a profissão que escolhi, e que sinto que me escolheu, para levar às pessoas, com muito amor, experiências, vivências e realizações.\n\nA cada embarque, eu cuido, planejo, vibro, sonho e viajo junto. Este é o meu verdadeiro propósito: desenhar cada viagem com cuidado nos detalhes, como se fosse para mim. E, na verdade, sempre é!\n\nA realização de cada cliente é uma enorme satisfação pessoal e profissional, aquele sentimento bom que volta pra gente quando fazemos alguém feliz. Acredito que as pessoas são únicas, com suas preferências e gostos, e assim também devem ser suas viagens.\n\nSeja bem-vindo(a) à O Mundo em Cores.",
     badge: { value: "29 anos", label: "de experiência no turismo" },
     images: [{ src: mundoEmCoresVanessa.url, alt: "Vanessa Figueiredo em fotografias pessoais de suas viagens, publicadas em seu site oficial", aspect: "square" }],
+    mural: { src: mundoEmCoresVanessaMural.url, alt: "Mural de fotos de viagens da Vanessa Figueiredo" },
     visitedDestinations: { title: "Destinos que já conheci", names: ["Brasil", "Estados Unidos", "Canadá", "México", "Itália", "Suíça", "Espanha", "Portugal", "Inglaterra", "Montenegro", "Croácia", "França", "Argentina", "Chile", "Paraguai", "Bahamas", "República Dominicana", "Colômbia", "Indonésia", "Vaticano"], presentation: "flags" },
 
     showLocation: true,
