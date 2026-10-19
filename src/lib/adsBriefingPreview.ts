@@ -4,6 +4,7 @@
  * Servida apenas no host técnico id-preview (e localhost de desenvolvimento).
  */
 import { buildGoldStandardProfile } from "@/lib/goldStandardSiteTemplate";
+import { EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
 import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
@@ -170,6 +171,22 @@ export const MUNDO_EM_CORES_PREVIEW_INFO: AgencyDomainInfo = {
 };
 
 export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
+  // Cruzeiros: estrutura da Destinos com a Ju (vídeos + companhias), texto neutro sem fatos pessoais.
+  authority: {
+    sectionLabel: "Cruzeiros",
+    companies: {
+      title: "Sua próxima viagem de cruzeiro começa aqui! Na O Mundo em Cores,\nvocê encontra as principais companhias de cruzeiros do mundo.",
+      items: EDITORIAL_ROSE.authority?.companies?.items ?? [],
+    },
+    kicker: "ESCOLHAS PARA A SUA VIAGEM",
+    title: "Cruzeiros para diferentes formas de viajar",
+    paragraphs: [
+      "Comparamos navios, itinerários, cabines e experiências a bordo para indicar o cruzeiro que combina com o seu perfil, seja em família, a dois ou com amigos.",
+      "Do Caribe ao Mediterrâneo, cuidamos da escolha da companhia, das datas e dos detalhes de embarque para que você aproveite cada dia no mar com tranquilidade.",
+    ],
+    cta: "Quero planejar meu cruzeiro", service: "cruzeiros", image: "cruzeiro", video: "disneyWishCruise",
+    videos: EDITORIAL_ROSE.authority?.videos,
+  },
   key: "mundoEmCoresBriefing14",
   compactSectionSpacing: true,
   alternateSurfaces: true,
@@ -180,6 +197,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     { label: "Xcaret", to: "/xcaret" },
     { label: "Ingressos", to: "/ingressos-orlando" },
     { label: "Resorts", to: "/resorts-brasil" },
+    { label: "Cruzeiros", to: "/#autoridade" },
     { label: "Sobre", to: "/#sobre" },
     { label: "Atendimento", to: "/#atendimento" },
   ],
@@ -189,7 +207,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     credentials: { enabled: false },
     team: { enabled: false },
     avaliacoes: { enabled: false },
-    authority: { enabled: false },
+    authority: { enabled: true, order: 4.5 },
     highlights: { enabled: false },
     signature: { enabled: false },
     destinations: { enabled: true, order: 2 },
