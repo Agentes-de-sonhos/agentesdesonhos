@@ -30,8 +30,8 @@ export const GENERIC_XCARET_SLOTS: XcaretMediaSlots = {
  */
 export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
   portraitJuliana: { src: mundoXcaretParque.url, alt: "Vanessa Figueiredo no parque Xcaret, junto à placa Xcaret México", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1656)" },
-  trainingPhoto: { src: mundoXcaretXelha.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0749)" },
-  julianaExtra: { src: mundoXcaretXplor.url, alt: "Vanessa Figueiredo na caverna do parque Xplor, junto à pedra Xplor por Xcaret", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0921)" },
+  trainingPhoto: { src: mundoXcaretXplor.url, alt: "Vanessa Figueiredo na caverna do parque Xplor, junto à pedra Xplor por Xcaret", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0921)" },
+  julianaExtra: { src: mundoXcaretXelha.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0749)" },
   expertBadge: null,
   julianaAtDestination: XCARET_IMAGES.hotelMexico,
 };
