@@ -99,6 +99,8 @@ export function AgencyResortsSection({
             <button
               key={uf}
               type="button"
+              data-region={REGION_OF[uf]}
+              data-active={selected === uf || undefined}
               onClick={() => setSelected(uf)}
               className={cn(
                 "shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm transition-colors",

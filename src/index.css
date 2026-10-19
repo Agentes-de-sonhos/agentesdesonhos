@@ -1483,3 +1483,22 @@ body[data-booking-selection-bar] {
   [data-ads-preview="drica-completa-v1"] #topo [data-hero-actions-placement] { padding-bottom: 2.5rem; }
 }
 [data-ads-preview="drica-completa-v1"] #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: hsl(var(--primary-foreground)); }
+
+/* O Mundo em Cores: mapa de resorts com as 5 cores das placas do logotipo, uma por macrorregião. */
+.wl-mundo { --mc-ne: #F69F61; --mc-se: #245C81; --mc-s: #F57A7A; --mc-co: #3C94BB; --mc-n: #8CDFF1; }
+.wl-mundo [data-region="ne"] { --mc: var(--mc-ne); --mc-ink: #FFFFFF; }
+.wl-mundo [data-region="se"] { --mc: var(--mc-se); --mc-ink: #FFFFFF; }
+.wl-mundo [data-region="s"]  { --mc: var(--mc-s);  --mc-ink: #FFFFFF; }
+.wl-mundo [data-region="co"] { --mc: var(--mc-co); --mc-ink: #FFFFFF; }
+.wl-mundo [data-region="n"]  { --mc: var(--mc-n);  --mc-ink: #245C81; }
+.wl-mundo g[data-region] > path { fill: color-mix(in srgb, var(--mc) 55%, white) !important; }
+.wl-mundo g[data-region]:hover > path,
+.wl-mundo g[data-region]:focus-visible > path { fill: color-mix(in srgb, var(--mc) 80%, white) !important; }
+.wl-mundo g[data-region][data-active] > path { fill: var(--mc) !important; }
+.wl-mundo g[data-region] circle { fill: var(--mc) !important; stroke: #FFFFFF; stroke-width: 2.5; }
+.wl-mundo g[data-region] text { fill: var(--mc-ink) !important; }
+.wl-mundo g[data-region][data-active] circle { fill: #FFFFFF !important; stroke: var(--mc); }
+.wl-mundo g[data-region][data-active] text { fill: var(--mc) !important; }
+.wl-mundo g[data-region="n"][data-active] text { fill: #245C81 !important; }
+.wl-mundo button[data-region][data-active] { background-color: var(--mc) !important; border-color: var(--mc) !important; color: var(--mc-ink) !important; }
+.wl-mundo button[data-region]:not([data-active]) { border-color: color-mix(in srgb, var(--mc) 55%, white) !important; }
