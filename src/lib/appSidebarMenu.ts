@@ -99,7 +99,7 @@ export const APP_MORE_GROUP: AppSidebarGroup = {
     { key: "beneficios", title: "Benefícios e Descontos", url: "/beneficios", icon: Tag, requiredFeature: "benefits" },
     { key: "paginas_vendas", title: "Páginas de Vendas", url: "/meus-leads/landings", icon: FileText, requiredFeature: "lead_capture" },
     { key: "captacao_leads", title: "Formulário Conversacional", url: "/meus-leads", icon: UserPlus, requiredFeature: "lead_capture", exactUrl: true },
-    { key: "cartao_visitas", title: "Página de Links (Bio)", url: "/meu-cartao", icon: CreditCard, requiredFeature: "business_card" },
+    { key: "cartao_visitas", title: "Cartão Virtual & Links (Bio)", url: "/meu-cartao", icon: CreditCard, requiredFeature: "business_card" },
     { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store, requiredFeature: "showcase" },
     { key: "conteudo", title: "Legendas, Stories e WhatsApp", url: "/ferramentas-ia/criar-conteudo", icon: FileText, requiredFeature: "content_creator" },
     { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush, requiredFeature: "lamina_customizer" },

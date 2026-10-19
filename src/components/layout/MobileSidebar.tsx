@@ -237,7 +237,7 @@ const marketingSection: MenuSection = {
   textColor: "text-pink-700",
   borderColor: "border-pink-600",
   items: [
-    { key: "cartao_visitas", title: "Página de Links (Bio)", url: "/meu-cartao", icon: CreditCard },
+    { key: "cartao_visitas", title: "Cartão Virtual & Links (Bio)", url: "/meu-cartao", icon: CreditCard },
     { key: "vitrine_ofertas", title: "Vitrine de Ofertas", url: "/minha-vitrine", icon: Store },
     { key: "personalizador_laminas", title: "Personalizador de Lâminas", url: "/personalizador-laminas", icon: Paintbrush },
     { key: "captacao_leads", title: "Captação de Leads", url: "/meus-leads", icon: UserPlus },

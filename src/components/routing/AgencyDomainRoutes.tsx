@@ -64,6 +64,17 @@ const Fallback = () => (
   </div>
 );
 
+function AgencyCardRoute({ info }: { info: AgencyDomainInfo }) {
+  const { cardSlug } = useParams();
+  return (
+    <AgencyLinksPage
+      info={info}
+      cardSlug={cardSlug}
+      fallback={<AgencySiteLayout info={info}><LinkUnavailable /></AgencySiteLayout>}
+    />
+  );
+}
+
 function LinkUnavailable() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-6 text-center">
@@ -279,6 +290,8 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/termosdeuso" element={isLimites100LegalPreviewActive(info.hostname) ? <Limites100LegalPreviewPage kind="terms" /> : <TermosDeUso />} />
             <Route path="*" element={<LinkUnavailable />} />
           </Route>
+          {/* Cartão virtual individual da agência (ex.: /juliana); senão, indisponível. */}
+          <Route path="/:cardSlug" element={<AgencyCardRoute info={info} />} />
         </Routes>
       </AgencySitePasswordGate>
   );

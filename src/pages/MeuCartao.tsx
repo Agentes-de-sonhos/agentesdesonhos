@@ -21,10 +21,8 @@ function MeuCartaoContent() {
   const { agencyOwnerId } = useAgencyOwnerId();
   const { customDomain } = useAgencyCustomDomain();
   // `/links` do domínio mostra o cartão ativo mais antigo do dono da agência.
-  const bioCardId =
-    customDomain && user?.id && user.id === agencyOwnerId
-      ? cards.find((c) => c.is_active)?.id
-      : undefined;
+  // Cartões do dono da agência também abrem em `dominio/{slug}` (ex.: /juliana).
+  const ownsDomain = !!customDomain && !!user?.id && user.id === agencyOwnerId;
 
   const handleCreate = ({ slug, label }: { slug: string; label: string }) => {
     createCard.mutate(
@@ -56,7 +54,7 @@ function MeuCartaoContent() {
           <div className="flex-1 space-y-1">
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <CreditCard className="h-6 w-6 text-primary" />
-              Página de Links (Bio) e Cartões
+              Cartão Virtual & Links (Bio)
             </h1>
             <p className="text-sm text-muted-foreground">
               Você pode ter até {MAX_BUSINESS_CARDS} cartões ativos —
@@ -102,7 +100,7 @@ function MeuCartaoContent() {
                   card={card}
                   onDelete={(id) => deleteCard.mutate(id)}
                   isDeleting={deleteCard.isPending}
-                  bioUrl={card.id === bioCardId ? `https://${customDomain}/links` : null}
+                  bioUrl={ownsDomain ? `https://${customDomain}/${card.slug}` : null}
                 />
               ))}
 
