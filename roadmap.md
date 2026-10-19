@@ -76,3 +76,4 @@
 - [x] 100 Limites: perguntas frequentes da landing /visto-americano sem sublinhado no hover; pergunta e setinha assumem o âmbar/dourado escuro da marca (token --wl-gold), sem publicar.
 - [x] Financeiro (visibilidade): comissão sem datas aparece no mês da venda; aviso informativo na aba Vendas (sem alterar dados reais)
 - [ ] Financeiro (atomicidade): criação de venda + serviços ainda não é transacional nem idempotente — aguardando aprovação da proposta de RPC no servidor (sem migração aplicada)
+- [x] Página de Links (Bio): /links em todos os domínios de agência reaproveitando o cartão virtual do dono; menu renomeado; link do domínio no painel; sem publicar.

@@ -56,7 +56,7 @@ function MeuCartaoContent() {
           <div className="flex-1 space-y-1">
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <CreditCard className="h-6 w-6 text-primary" />
-              Meus Cartões Virtuais
+              Página de Links (Bio) e Cartões
             </h1>
             <p className="text-sm text-muted-foreground">
               Você pode ter até {MAX_BUSINESS_CARDS} cartões ativos —
@@ -102,6 +102,7 @@ function MeuCartaoContent() {
                   card={card}
                   onDelete={(id) => deleteCard.mutate(id)}
                   isDeleting={deleteCard.isPending}
+                  bioUrl={card.id === bioCardId ? `https://${customDomain}/links` : null}
                 />
               ))}
 
