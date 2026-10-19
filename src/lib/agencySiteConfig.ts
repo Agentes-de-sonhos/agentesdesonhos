@@ -102,7 +102,7 @@ export function resolveSections(
 export type AgencyImageSlot =
   | "dricaLondon" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
-  | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort"
+  | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
   | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler" | "heroJuMagicKingdom"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
