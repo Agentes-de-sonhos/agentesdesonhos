@@ -35,6 +35,18 @@ export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
   expertBadge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret", source: "Selo Xperts Xcaret" },
   julianaAtDestination: { src: mundoXcaretFechamento.url, alt: "Vanessa Figueiredo no letreiro Xcaret México 35 anos", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1646)" },
 };
+import mundoXcaretGal0749 from "@/assets/ads-preview/mundo-xcaret-galeria-0749.webp.asset.json";
+import mundoXcaretGal0921 from "@/assets/ads-preview/mundo-xcaret-galeria-0921.webp.asset.json";
+import mundoXcaretGal1179 from "@/assets/ads-preview/mundo-xcaret-galeria-1179.webp.asset.json";
+import mundoXcaretGal1646 from "@/assets/ads-preview/mundo-xcaret-galeria-1646.webp.asset.json";
+import mundoXcaretGal1655 from "@/assets/ads-preview/mundo-xcaret-galeria-1655.webp.asset.json";
+import mundoXcaretGal1656 from "@/assets/ads-preview/mundo-xcaret-galeria-1656.webp.asset.json";
+import mundoXcaretGal1824 from "@/assets/ads-preview/mundo-xcaret-galeria-1824.webp.asset.json";
+import mundoXcaretGal1977 from "@/assets/ads-preview/mundo-xcaret-galeria-1977.webp.asset.json";
+import mundoXcaretGal2031 from "@/assets/ads-preview/mundo-xcaret-galeria-2031.webp.asset.json";
+import mundoXcaretGal2070 from "@/assets/ads-preview/mundo-xcaret-galeria-2070.webp.asset.json";
+import mundoXcaretGalDFF0 from "@/assets/ads-preview/mundo-xcaret-galeria-DFF0.webp.asset.json";
+import mundoXcaretGalF103 from "@/assets/ads-preview/mundo-xcaret-galeria-F103.webp.asset.json";
 import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 import mundoXcaretFechamento from "@/assets/ads-preview/mundo-xcaret-vanessa-35anos.webp.asset.json";
 import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
@@ -248,13 +260,28 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   featuredExperience: {
     enabled: true,
     id: "experiencia-xcaret",
-    kicker: "RIVIERA MAYA · MÉXICO",
-    title: "Parques e hotéis Xcaret",
-    description: "Natureza, cultura mexicana e aventura em parques e hotéis no Caribe mexicano. A Vanessa ajuda você a escolher os parques, hotéis e experiências que combinam com a sua viagem.",
+    kicker: "ESPECIALISTA XPERTS XCARET",
+    title: "Vanessa esteve no Xcaret e voltou especialista no destino",
+    description: "A Vanessa visitou recentemente os parques e hotéis Xcaret na Riviera Maya, fez a capacitação oficial e recebeu o selo Xperts Xcaret. Agora usa essa vivência para ajudar você a escolher os parques, hotéis e experiências que combinam com a sua viagem.",
     mainImage: { src: XCARET_IMAGES.xcaret.src, alt: XCARET_IMAGES.xcaret.alt, position: "center" },
+    gallery: [
+      { src: mundoXcaretGalF103.url, alt: "Vanessa Figueiredo em hotel Xcaret com o selo Xperts Xcaret 2026" },
+      { src: mundoXcaretGal1646.url, alt: "Vanessa Figueiredo no letreiro Xcaret México 35 anos" },
+      { src: mundoXcaretGal1655.url, alt: "Vanessa Figueiredo junto aos flamingos do parque Xcaret" },
+      { src: mundoXcaretGal0921.url, alt: "Vanessa Figueiredo na caverna do Xplor por Xcaret" },
+      { src: mundoXcaretGal2070.url, alt: "Vanessa Figueiredo no parque Xel-Há, com o rio de águas cristalinas" },
+      { src: mundoXcaretGal1179.url, alt: "Vanessa Figueiredo diante da piscina com vista para o mar do Caribe" },
+      { src: mundoXcaretGal1656.url, alt: "Vanessa Figueiredo junto à placa Xcaret México" },
+      { src: mundoXcaretGal1824.url, alt: "Vanessa Figueiredo junto à placa La Casa de la Playa" },
+      { src: mundoXcaretGal1977.url, alt: "Vanessa Figueiredo na adega de vinhos do complexo Xcaret" },
+      { src: mundoXcaretGal0749.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há" },
+      { src: mundoXcaretGal2031.url, alt: "Vanessa Figueiredo junto à pedra Xcaret México" },
+      { src: mundoXcaretGalDFF0.url, alt: "Vanessa Figueiredo com drinque e vista para o mar do Caribe" },
+    ],
+    galleryIntervalMs: 6000,
     consultantImage: null,
-    badge: null,
-    highlights: ["Parques e passeios", "Hotéis Xcaret", "Planejamento personalizado"],
+    badge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret" },
+    highlights: ["Visita recente ao destino", "Selo Xperts Xcaret", "Parques e hotéis Xcaret", "Planejamento personalizado"],
     ctaLabel: "Saiba mais sobre este destino",
     ctaHref: "/xcaret",
   },
