@@ -59,7 +59,6 @@ export function AgencyPhotoMural({ src, alt }: { src: string; alt: string }) {
             alt={i === 1 ? alt : ""}
             aria-hidden={i === 1 ? undefined : true}
             draggable={false}
-            loading="lazy"
             className="h-full w-auto max-w-none shrink-0"
           />
         ))}
