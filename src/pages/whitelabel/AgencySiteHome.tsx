@@ -1924,7 +1924,7 @@ export default function AgencySiteHome({
       )}
 
       {/* Oculta só visualmente: o modal de solicitação segue disponível. */}
-      <div hidden={!showRequests}>
+      <div id="central-solicitacoes" className="scroll-mt-24" hidden={!showRequests}>
       {editorial ? (
         /* 50/50 EXATO: o card sobe metade da própria altura e o fundo areia
            começa no eixo central dele, então a base da foto corta o card ao meio. */
