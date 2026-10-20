@@ -326,6 +326,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       enabled: true,
     },
     {
+      image: "paraisoLago",
       title: "O mundo, vivido no seu ritmo",
       subtitle:
         "Da savana africana aos vinhedos do Douro: cada jornada nasce de uma curadoria atenta ao seu tempo.",
