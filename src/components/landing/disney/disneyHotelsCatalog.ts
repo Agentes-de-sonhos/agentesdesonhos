@@ -334,7 +334,7 @@ export const DISNEY_HOTELS: DisneyHotel[] = [
 
 /** Futuro — fora do catálogo atual de 31. */
 export const DISNEY_FUTURE_HOTELS: DisneyHotel[] = [
-  { slug: "lakeshore-lodge", name: "Disney's Lakeshore Lodge", category: "Deluxe", kind: "hotel", status: "future", opening: "01/07/2027 (anunciado)",
+  { slug: "lakeshore-lodge", name: "Disney's Lakeshore Lodge", category: "Deluxe", kind: "hotel", status: "future", opening: "01/07/2027",
     paragraphs: [
       "O Lakeshore Lodge é um novo hotel Deluxe anunciado pela Disney à beira do Bay Lake.",
       "A inauguração anunciada é 01/07/2027. Detalhes de acomodações e serviços serão confirmados conforme a Disney divulgar.",
