@@ -24,7 +24,15 @@ const BARDELLI_CONTACTS: AgencySiteContacts = {
   phone: "(11) 97576-7319",
 };
 
+// Telefone/WhatsApp principal da Paraíso Viagens (briefing Fernando, 20/10/2026):
+// vale para todo contato e envio de solicitações do site.
+const PARAISO_CONTACTS: AgencySiteContacts = {
+  phone: "(48) 99946-6467",
+};
+
 const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
+  "paraisoviagens.com": PARAISO_CONTACTS,
+  "www.paraisoviagens.com": PARAISO_CONTACTS,
   "bardelliviagens.com.br": BARDELLI_CONTACTS,
   "www.bardelliviagens.com.br": BARDELLI_CONTACTS,
   "destinoscomaju.com.br": {
