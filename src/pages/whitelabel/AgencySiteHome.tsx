@@ -1869,10 +1869,13 @@ export default function AgencySiteHome({
             {profile.heroPresentation?.cta && profile.heroPresentation.actionsPlacement !== "right" && (
               <Button
                 size="lg"
-                className="mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
+                className="wl-hero-cta mt-7 bg-primary text-primary-foreground hover:bg-primary/90"
                 onClick={() => openRequest(profile.heroPresentation?.cta?.service ?? "pacotes")}
               >
-                {profile.heroPresentation.cta.label} <ArrowRight className="ml-2 h-4 w-4" />
+                {profile.heroPresentation.cta.label}{" "}
+                <span className="wl-hero-cta-arrow inline-flex items-center" aria-hidden="true">
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
               </Button>
             )}
 

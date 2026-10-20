@@ -308,7 +308,8 @@ const LUXURY_CURATED: AgencySiteProfile = {
     team: { enabled: false },
     signature: { enabled: true, order: 1 },
     destinations: { order: 2 },
-    modules: { order: 3 },
+    // "Coleções de experiências" retirada a pedido da agência.
+    modules: { enabled: false, order: 3 },
     highlights: { order: 4 },
     differentials: { order: 5 },
     about: { order: 6 },
