@@ -12,7 +12,8 @@ import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
   MessageCircle, ArrowRight, Sparkles, ChevronLeft, ChevronRight, Mail,
   MapPin, CheckCircle2, Quote, Route, UserRound, Users, FileCheck2, LifeBuoy, Handshake,
-  Award, Play, Pause,
+  Award, Play, Pause, Bed, Waves, UtensilsCrossed, Wine,
+
 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -707,21 +708,40 @@ export default function AgencySiteHome({
             const fx = profile.partnerSpotlight;
             return (
               <section id="explora-monaco" aria-labelledby="explora-monaco-title" className="bg-[hsl(var(--wl-navy))] text-[hsl(var(--wl-ivory,40_33%_97%))]">
-                <div className={`${container} grid items-center gap-10 py-16 md:grid-cols-2 md:py-24`}>
-                  <div className="overflow-hidden rounded-2xl">
-                    <img src={fx.image} alt={fx.imageAlt} loading="lazy" width={1600} height={1008} className="aspect-[16/10] h-full w-full object-cover" />
+                <div className={`${container} grid items-center gap-10 py-16 md:grid-cols-[1fr_1fr] md:gap-14 md:py-24`}>
+                  <div className="overflow-hidden rounded-xl">
+                    {fx.video ? (
+                      <video src={fx.video} poster={fx.image} autoPlay muted loop playsInline preload="auto" aria-label={fx.imageAlt} className="aspect-square h-full w-full object-cover md:aspect-[5/4]" />
+                    ) : (
+                      <img src={fx.image} alt={fx.imageAlt} loading="lazy" width={1600} height={1008} className="aspect-[16/10] h-full w-full object-cover" />
+                    )}
                   </div>
                   <div>
-                    <p className="text-xs font-semibold tracking-[0.2em] opacity-80">{fx.kicker}</p>
-                    <h2 id="explora-monaco-title" className="mt-4 font-display text-3xl leading-tight md:text-5xl">{fx.title}</h2>
+                    <p className="text-xs font-semibold tracking-[0.25em] text-[var(--brand-secondary)]">{fx.kicker}</p>
+                    <h2 id="explora-monaco-title" className="mt-3 font-display text-3xl leading-tight md:text-5xl">{fx.title}</h2>
                     <p className="mt-5 text-base leading-relaxed opacity-90">{fx.text}</p>
-                    <ul className="mt-6 flex flex-wrap gap-2">
+                    {fx.subtext ? <p className="mt-3 text-sm leading-relaxed opacity-75">{fx.subtext}</p> : null}
+                    {fx.stats?.length ? (
+                      <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+                        {fx.stats.map((s) => {
+                          const Icon = { bed: Bed, waves: Waves, dining: UtensilsCrossed, wine: Wine, users: Users }[s.icon];
+                          return (
+                            <li key={s.label} className="flex flex-col items-center text-center">
+                              <Icon className="h-5 w-5 text-[var(--brand-secondary)]" aria-hidden="true" />
+                              <span className="mt-2 font-display text-2xl leading-none">{s.value}</span>
+                              <span className="mt-1.5 text-[11px] uppercase tracking-wide opacity-75">{s.label}</span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : null}
+                    <ul className="mt-8 flex flex-wrap gap-2">
                       {fx.points.map((pt) => (
                         <li key={pt} className="rounded-full border border-current/30 px-4 py-1.5 text-sm opacity-90">{pt}</li>
                       ))}
                     </ul>
-                    <a href={fx.url} target="_blank" rel="noopener noreferrer" className="wl-hero-cta mt-8 inline-flex items-center gap-3 rounded-md bg-[var(--brand-secondary)] px-6 py-3 font-semibold text-[var(--brand-on-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
-                      {fx.cta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    <a href={fx.url} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-md bg-[var(--brand-secondary)] px-6 py-3.5 pr-8 font-semibold text-[var(--brand-on-secondary)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+                      <span>{fx.cta}</span> <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
                     </a>
                     {fx.note ? <p className="mt-4 text-xs opacity-70">{fx.note}</p> : null}
                   </div>
