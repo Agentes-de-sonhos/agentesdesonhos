@@ -64,15 +64,15 @@ Deno.serve(async (req) => {
   }
   const action = String(body?.action || "");
   const tenant = String(body?.tenant || "");
-  if (!PROTECTED.has(tenant)) return json({ ok: false }, 401);
+  if (!PROTECTED.has(tenant)) return json({ ok: false }, 200);
 
   try {
     if (action === "unlock") {
       const password = typeof body.password === "string" ? body.password : "";
-      if (!password || password.length > 200) return json({ ok: false }, 401);
+      if (!password || password.length > 200) return json({ ok: false }, 200);
       const expected = (Deno.env.get("SITE_UNLOCK_PASSWORD_SHA256") || DEFAULT_PASSWORD_SHA256).trim().toLowerCase();
       const provided = hex(await crypto.subtle.digest("SHA-256", enc.encode(password)));
-      if (!safeEqual(provided, expected)) return json({ ok: false }, 401);
+      if (!safeEqual(provided, expected)) return json({ ok: false }, 200);
       const exp = Math.floor(Date.now() / 1000) + TTL_SECONDS;
       const payload = b64url(enc.encode(JSON.stringify({ t: tenant, exp })));
       return json({ ok: true, token: `${payload}.${await sign(payload)}`, exp: exp * 1000 }, 200);
@@ -81,12 +81,12 @@ Deno.serve(async (req) => {
     if (action === "verify") {
       const token = typeof body.token === "string" ? body.token : "";
       const [payload, sig] = token.split(".");
-      if (!payload || !sig || token.length > 1000) return json({ ok: false }, 401);
-      if (!safeEqual(await sign(payload), sig)) return json({ ok: false }, 401);
+      if (!payload || !sig || token.length > 1000) return json({ ok: false }, 200);
+      if (!safeEqual(await sign(payload), sig)) return json({ ok: false }, 200);
       const data = JSON.parse(fromB64url(payload)) as { t?: string; exp?: number };
       const now = Math.floor(Date.now() / 1000);
       if (data.t !== tenant || typeof data.exp !== "number" || data.exp <= now || data.exp - now > TTL_SECONDS + 60) {
-        return json({ ok: false }, 401);
+        return json({ ok: false }, 200);
       }
       return json({ ok: true, token, exp: data.exp * 1000 }, 200);
     }
