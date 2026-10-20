@@ -316,7 +316,9 @@ const LUXURY_CURATED: AgencySiteProfile = {
     overlay: "strongLeft",
   },
   hero: [
+    // Foto enviada pelo dono da agência para o primeiro slide do banner.
     {
+      image: "paraisoAmalfi",
       title: "Viagens extraordinárias começam nos detalhes",
       subtitle:
         "Roteiros personalizados, hotéis excepcionais e experiências escolhidas, uma a uma, para a sua forma de viajar.",
