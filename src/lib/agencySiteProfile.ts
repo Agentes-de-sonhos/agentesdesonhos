@@ -312,7 +312,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       label: "Experiências",
       to: "/#destaques",
       children: [
-        { label: "Inspirações", to: "/#destaques" },
+        { label: "Inspirações", to: "/#novidades" },
         { label: "Explora · Grande Prêmio de Mônaco 2027", to: "/#explora-monaco" },
       ],
     },
@@ -1033,7 +1033,7 @@ const ESSYA_CURATED: AgencySiteProfile = {
     { label: "Sobre a Essyatur", to: "/#sobre" },
     { label: "Experiências", to: "/#destinos" },
     { label: "Serviços", to: "/#campanhas" },
-    { label: "Inspirações", to: "/#destaques" },
+    { label: "Inspirações", to: "/#novidades" },
     { label: "Dúvidas Frequentes", to: "/#faq" },
     { label: "Contato", to: "/#atendimento" },
     { label: "Área do Cliente", to: "/area-do-cliente" },

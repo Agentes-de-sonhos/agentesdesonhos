@@ -147,6 +147,7 @@ export function AgencyBrandBar({
                 <a
                   key={l.to}
                   href={agencySiteHref(l.to)}
+                  {...(/^https?:/.test(l.to) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   className="text-[15px] font-medium text-foreground/70 transition-colors hover:text-foreground"
                 >
                   {l.label}
