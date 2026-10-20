@@ -1,4 +1,5 @@
 import AgencyResortPage from "@/pages/whitelabel/AgencyResortPage";
+import { getUniversalHotelPage } from "@/components/landing/universal/universalHotelsCatalog";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGallery";
