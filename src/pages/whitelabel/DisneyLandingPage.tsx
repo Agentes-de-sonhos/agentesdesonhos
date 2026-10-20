@@ -76,11 +76,12 @@ function Hero() {
           {DISNEY_HERO.map((s, i) => (
             <CarouselItem key={s.park} className="pl-0">
               <div className="relative h-[530px] max-h-[530px] w-full overflow-hidden bg-gradient-to-br from-primary to-foreground">
-                {s.image && <img src={s.image} alt={s.alt} className="absolute inset-0 h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />}
+                <img src={DISNEY_PARK_PHOTOS[s.park].url} alt={s.alt ?? s.kicker} className="absolute inset-0 h-full w-full object-cover" loading={i === 0 ? "eager" : "lazy"} />
                 <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/45 to-transparent" />
+                <PhotoCredit p={DISNEY_PARK_PHOTOS[s.park]} className="right-3 top-3" />
                 <div className={`${W} relative flex h-full flex-col justify-end pb-16 md:justify-center md:pb-0`}>
                   <div className="max-w-xl text-background">
-                    <img src={DISNEY_LOGOS[s.park]} alt="" className="mb-5 h-16 w-auto rounded-full bg-background/90 object-contain p-1.5 md:h-20" />
+                    <img src={DISNEY_LOGOS[s.park]} alt="" className="mb-5 h-16 w-auto object-contain brightness-0 invert drop-shadow md:h-20" data-testid="hero-logo" />
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-background/80">{s.kicker}</p>
                     <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight md:text-6xl">{s.title}</h1>
                     <p className="mt-4 text-pretty text-base leading-7 text-background/90 md:text-lg">{s.subtitle}</p>
@@ -100,17 +101,32 @@ function Hero() {
   );
 }
 
+function PhotoCredit({ p, className = "" }: { p: DisneyPhoto; className?: string }) {
+  const label = `Foto: ${p.credit}`;
+  return p.source
+    ? <a href={p.source} target="_blank" rel="noopener noreferrer" className={`absolute z-10 max-w-[80%] truncate rounded bg-foreground/60 px-2 py-0.5 text-[10px] text-background hover:underline ${className}`}>{label}</a>
+    : <span className={`absolute z-10 max-w-[80%] truncate rounded bg-foreground/60 px-2 py-0.5 text-[10px] text-background ${className}`}>{label}</span>;
+}
+
 function ParkCard({ p }: { p: DisneyPark }) {
+  const photo = DISNEY_PARK_PHOTOS[p.id];
   return (
-    <article className="flex flex-col rounded-md border border-border bg-card p-6 shadow-sm">
-      <div className="flex items-center gap-4"><img src={DISNEY_LOGOS[p.id]} alt="" className="h-16 w-16 object-contain" /><h3 className="text-xl font-semibold">{p.name}</h3></div>
-      <p className="mt-4 flex-1 leading-7 text-muted-foreground">{p.description}</p>
+    <article className="flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-sm" data-testid={`park-${p.id}`}>
+      <div className="relative">
+        <img src={photo.url} alt={p.name} className="aspect-[16/10] w-full object-cover" loading="lazy" />
+        <img src={DISNEY_LOGOS[p.id]} alt={p.name} className="absolute bottom-3 left-3 h-16 w-16 rounded-full bg-background object-contain p-1.5 shadow-md" />
+        <PhotoCredit p={photo} className="bottom-2 right-2" />
+      </div>
+      <div className="flex flex-1 flex-col p-6">
+      <h3 className="text-2xl font-semibold">{p.name}</h3>
+      <p className="mt-3 flex-1 leading-7 text-muted-foreground">{p.description}</p>
       <ul className="mt-4 flex flex-wrap gap-2">{p.highlights.map((h) => <li key={h} className="rounded-full bg-muted px-3 py-1 text-xs font-medium">{h}</li>)}</ul>
       <div className="mt-6 flex flex-wrap items-center gap-4">
         <DisneyParkMapTrigger park={p.id} ariaLabel={`Explorar o mapa de ${p.name}`} className="flex h-11 w-fit items-center gap-2 rounded-md border border-border bg-background px-5 text-sm font-medium hover:border-primary/60 hover:text-primary">
           <MapIcon className="h-4 w-4" aria-hidden /> Explorar mapa
         </DisneyParkMapTrigger>
         <a href={p.source} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">Fonte oficial <ExternalLink className="h-3 w-3" /></a>
+      </div>
       </div>
     </article>
   );
@@ -186,7 +202,26 @@ export default function DisneyLandingPage({ info }: { info: AgencyDomainInfo }) 
         <section id="disney-springs" className="scroll-mt-24 wl-alt-gradient py-16 md:py-24">
           <div className={`${W} max-w-4xl`}>
             <Intro kicker="Compras, gastronomia e entretenimento" title={DISNEY_SPRINGS.title}>{DISNEY_SPRINGS.paragraphs.map((t) => <p key={t}>{t}</p>)}</Intro>
-            <ul className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{DISNEY_SPRINGS.items.map(([t, d]) => <li key={t} className="rounded-md bg-card p-4"><p className="font-semibold">{t}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{d}</p></li>)}</ul>
+          </div>
+          <div className={`${W} mt-10`}>
+            <Carousel opts={{ align: "start" }} data-testid="springs-gallery">
+              <CarouselContent>
+                {DISNEY_SPRINGS_SPOTS.map((s) => (
+                  <CarouselItem key={s.name} className="basis-[85%] sm:basis-1/2 lg:basis-1/3">
+                    <article className="h-full overflow-hidden rounded-md bg-card shadow-sm">
+                      <div className="relative"><img src={s.photo.url} alt={s.name} className="aspect-[4/3] w-full object-cover" loading="lazy" /><PhotoCredit p={s.photo} className="bottom-2 right-2" /></div>
+                      <div className="p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{s.kind}</p>
+                        <h3 className="mt-1 text-lg font-semibold">{s.name}</h3>
+                        <p className="mt-1 text-sm leading-6 text-muted-foreground">{s.text}</p>
+                      </div>
+                    </article>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious aria-label="Anterior" className="-left-3 hidden md:flex" />
+              <CarouselNext aria-label="Próximo" className="-right-3 hidden md:flex" />
+            </Carousel>
           </div>
         </section>
 
