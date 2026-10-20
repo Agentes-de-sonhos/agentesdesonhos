@@ -703,8 +703,8 @@ export default function AgencySiteHome({
             )}
             </div>
           </section>
-          {profile.featuredExperience ? (() => {
-            const fx = profile.featuredExperience;
+          {profile.partnerSpotlight ? (() => {
+            const fx = profile.partnerSpotlight;
             return (
               <section id="explora-monaco" aria-labelledby="explora-monaco-title" className="bg-[hsl(var(--wl-navy))] text-[hsl(var(--wl-ivory,40_33%_97%))]">
                 <div className={`${container} grid items-center gap-10 py-16 md:grid-cols-2 md:py-24`}>

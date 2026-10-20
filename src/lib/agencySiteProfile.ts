@@ -202,7 +202,7 @@ export interface AgencySiteProfile {
   faq?: { q: string; a: string }[];
   signature?: AgencySignatureContent;
   /** Destaque editorial opt-in de produto parceiro (renderizado após "highlights"). */
-  featuredExperience?: {
+  partnerSpotlight?: {
     kicker: string;
     title: string;
     text: string;
@@ -306,7 +306,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
   // WhatsApp no atendimento nem nas perguntas frequentes.
   hideConciergeWhatsapp: true,
   hideFaqWhatsapp: true,
-  featuredExperience: {
+  partnerSpotlight: {
     kicker: "EXPERIÊNCIA EXCLUSIVA · EXPLORA JOURNEYS",
     title: "EXPLORA I · Grande Prêmio de Mônaco 2027",
     text: "Viva o fim de semana mais glamouroso da Fórmula 1 a bordo do EXPLORA I, atracado no Porto Hercule, a cerca de 150 metros do F1 Paddock Club, de 2 a 7 de junho de 2027.",
