@@ -46,6 +46,51 @@ function SectionIntro({ kicker, title, children }: { kicker?: string; title: str
   );
 }
 
+const HOTEL_TABS = ["Todos", "Signature Collection", "Premium", "Prime Value", "Econômica"] as const;
+const HOTELS_STEP = 6;
+
+function HotelsGallery() {
+  const [tab, setTab] = useState<(typeof HOTEL_TABS)[number]>("Todos");
+  const [visible, setVisible] = useState(HOTELS_STEP);
+  const list = tab === "Todos" ? UNIVERSAL_HOTELS : UNIVERSAL_HOTELS.filter((h) => h.category === tab);
+  const shown = list.slice(0, visible);
+  const remaining = list.length - shown.length;
+  return (
+    <div className="mx-auto mt-10 max-w-[1120px]">
+      <div role="tablist" aria-label="Categorias de hotéis" className="flex gap-2 overflow-x-auto pb-2 md:flex-wrap md:justify-center">
+        {HOTEL_TABS.map((t) => (
+          <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => { setTab(t); setVisible(HOTELS_STEP); }}
+            className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-colors ${tab === t ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground/80 hover:border-primary/60 hover:text-primary"}`}>
+            {t}
+          </button>
+        ))}
+      </div>
+      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((h) => (
+          <article key={h.name} className="flex h-full flex-col overflow-hidden rounded-md bg-card shadow-sm">
+            <img src={h.image} alt={h.name} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+            <div className="flex flex-1 flex-col p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{h.category}</p>
+              <h3 className="mt-2 text-xl font-semibold">{h.name}</h3>
+              <p className="mt-2 flex-1 text-pretty text-sm leading-6 text-muted-foreground">{h.description}</p>
+              <a href={xcaretWhatsappUrl(`Olá! Quero saber mais sobre o ${h.name}.`)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                Explore <ArrowRight className="h-4 w-4" aria-hidden />
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+      {remaining > 0 && (
+        <div className="mt-8 flex justify-center">
+          <Button variant="outline" size="lg" className="rounded-md" onClick={() => setVisible((v) => v + HOTELS_STEP)}>
+            Ver mais hotéis ({remaining})
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Header({ info }: { info: AgencyDomainInfo }) {
   const logo = resolveAgencyLogoUrl(info);
   const preset = resolveAgencyHeaderBrandPreset(info.hostname);
