@@ -13,6 +13,8 @@ import { useNoindex } from "@/hooks/useNoindex";
 import { agencyContextHref } from "@/lib/agencyContextLink";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
+/** Data real da importação única do snapshot Google (commit 3246f344, 20/10/2026). */
+const GOOGLE_SNAPSHOT_DATE = "20/10/2026";
 const fmt = (iso: string) => iso.split("-").reverse().join("/");
 
 interface GSnap { address: string; rating?: number | null; total?: number | null; mapsUrl: string; lat: number; lng: number; photos: { url: string; credit: string }[]; reviews: { author: string; rating?: number; text: string; relativeTime?: string }[] }
@@ -24,7 +26,13 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
   const hotel = useMemo(() => getDisneyHotel(slug), [slug]);
   const { submit, simulated } = useDisneyPreviewRequest(info.hostname);
   useNoindex();
-  useEffect(() => { if (hotel) document.title = `${hotel.name} · ${info.agency_name ?? "Disney"}`; window.scrollTo(0, 0); }, [hotel, info.agency_name]);
+  // O título da agência é aplicado pelo layout pai depois deste efeito; adiamos para o nome do hotel prevalecer.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (!hotel) return;
+    const t = window.setTimeout(() => { document.title = `${hotel.name} · ${info.agency_name ?? "Disney"}`; }, 0);
+    return () => window.clearTimeout(t);
+  }, [hotel, info.agency_name]);
 
   const onSubmitQuote = useCallback(async (req: HotelQuoteRequest) => {
     if (!hotel) return;
@@ -114,7 +122,7 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
                 </div>
                 <a href={g.mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">Ver avaliações <ChevronRight className="h-4 w-4" /></a>
                 <ReviewsCarousel reviews={reviews} />
-                <p className="mt-3 text-[11px] text-muted-foreground">Avaliações de usuários do Google, com o nome do autor exibido em cada uma.</p>
+                <p className="mt-3 text-[11px] text-muted-foreground" data-testid="disney-snapshot-date">Nota, total e avaliações de usuários do Google (autor em cada uma) consultados em {GOOGLE_SNAPSHOT_DATE}{sharedWith ? `, da ficha de ${sharedWith}` : ""}. Não é uma leitura ao vivo; tempos como "há 2 meses" referem-se à data da consulta.</p>
               </section>
             )}
           </aside>

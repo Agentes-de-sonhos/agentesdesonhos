@@ -117,7 +117,7 @@ function ParkCard({ p }: { p: DisneyPark }) {
 }
 
 const STEP = 6;
-const GCOVER: Record<string, string | undefined> = Object.fromEntries(Object.entries(disneyGoogle as Record<string, { photos: { url: string }[] } | null>).map(([k, v]) => [k, v?.photos[0]?.url]));
+const GCOVER: Record<string, { url: string; credit?: string } | undefined> = Object.fromEntries(Object.entries(disneyGoogle as Record<string, { photos: { url: string; credit?: string }[] } | null>).map(([k, v]) => [k, v?.photos[0]]));
 
 function HotelsGallery() {
   const [tab, setTab] = useState<(typeof DISNEY_HOTEL_TABS)[number]>("Todos");
@@ -138,7 +138,12 @@ function HotelsGallery() {
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="disney-hotels-grid">
         {shown.map((h) => (
           <article key={h.slug} className="flex h-full flex-col overflow-hidden rounded-md border border-border bg-card shadow-sm">
-            {GCOVER[h.slug] && <img src={GCOVER[h.slug]} alt={h.name} loading="lazy" className="aspect-[16/10] w-full object-cover" />}
+            {GCOVER[h.slug] && (
+              <figure className="relative">
+                <img src={GCOVER[h.slug]!.url} alt={h.name} loading="lazy" className="aspect-[16/10] w-full object-cover" />
+                {GCOVER[h.slug]!.credit && <figcaption className="absolute bottom-2 left-2 max-w-[80%] truncate rounded bg-foreground/60 px-1.5 py-0.5 text-[10px] text-background" data-testid="cover-credit">Foto: {GCOVER[h.slug]!.credit} · Google</figcaption>}
+              </figure>
+            )}
             <div className="flex flex-1 flex-col p-5">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{h.category} · {KIND_LABEL[h.kind]}</p>
             <h3 className="mt-2 text-lg font-semibold">{h.name}</h3>
