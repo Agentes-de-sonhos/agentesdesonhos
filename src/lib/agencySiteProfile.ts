@@ -306,6 +306,28 @@ const CLASSIC: AgencySiteProfile = { key: "classic" };
 /** Paraíso Viagens — curadoria de luxo, sem DMC e sem depoimentos. */
 const LUXURY_CURATED: AgencySiteProfile = {
   key: "luxuryCurated",
+  nav: [
+    { label: "Início", to: "/" },
+    {
+      label: "Experiências",
+      to: "/#destaques",
+      children: [
+        { label: "Inspirações", to: "/#novidades" },
+        { label: "Explora · Grande Prêmio de Mônaco 2027", to: "/#explora-monaco" },
+      ],
+    },
+    {
+      label: "Sobre",
+      to: "/#sobre",
+      children: [
+        { label: "Nossa trajetória", to: "/#sobre" },
+        { label: "Credenciais", to: "/#credenciais" },
+        { label: "FAQ", to: "/#faq" },
+      ],
+    },
+    { label: "Grupo WhatsApp", to: "https://chat.whatsapp.com/H65S2OtR73Q3PnAGH6sCoT" },
+    { label: "Área do Cliente", to: "/area-do-cliente" },
+  ],
   // A Paraíso conduz o contato pela Central de Solicitações: sem atalho de
   // WhatsApp no atendimento nem nas perguntas frequentes.
   hideConciergeWhatsapp: true,
@@ -1011,7 +1033,7 @@ const ESSYA_CURATED: AgencySiteProfile = {
     { label: "Sobre a Essyatur", to: "/#sobre" },
     { label: "Experiências", to: "/#destinos" },
     { label: "Serviços", to: "/#campanhas" },
-    { label: "Inspirações", to: "/#destaques" },
+    { label: "Inspirações", to: "/#novidades" },
     { label: "Dúvidas Frequentes", to: "/#faq" },
     { label: "Contato", to: "/#atendimento" },
     { label: "Área do Cliente", to: "/area-do-cliente" },
