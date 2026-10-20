@@ -129,7 +129,7 @@ export function AgencyBrandBar({
                     {l.label}
                     <ChevronDown className="h-4 w-4 opacity-70" />
                   </a>
-                  <div className="invisible absolute left-0 top-full z-50 min-w-[13rem] pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                  <div className="wl-nav-submenu invisible absolute left-0 top-full z-50 min-w-[13rem] pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                     <div className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-lg">
                       {l.children.map((c) => (
                         <a
@@ -314,7 +314,7 @@ export function AgencyFooter({
     ];
     return (
       <footer id="rodape" className="wl-luxury-footer">
-        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
+        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
             <div className="flex flex-wrap items-center gap-4">
               {logoUrl ? (
@@ -359,15 +359,21 @@ export function AgencyFooter({
                 {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
               </p>
             )}
-            {(footer?.address || location) && (
-              <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.address ?? location}
-              </p>
-            )}
-            {footer?.hours && (
-              <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer.hours}
-              </p>
+            {(footer?.address || location || footer?.hours) && (
+              <div className="mt-5 flex flex-col gap-3 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)] md:flex-row md:items-start md:gap-5">
+                {(footer?.address || location) && (
+                  <p className="flex flex-[1.35] items-start gap-2">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" />
+                    <span>{footer?.address ?? location}</span>
+                  </p>
+                )}
+                {footer?.hours && (
+                  <p className="flex flex-1 items-start justify-start gap-2 border-t border-[hsl(var(--wl-ink)_/_0.12)] pt-3 md:justify-end md:border-l md:border-t-0 md:pl-5 md:pt-0 md:text-right">
+                    <Clock className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" />
+                    <span>{footer.hours}</span>
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
