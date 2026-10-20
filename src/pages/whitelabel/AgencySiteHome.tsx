@@ -1312,9 +1312,7 @@ export default function AgencySiteHome({
                       <Button
                         size="lg"
                         className="w-full shrink-0 sm:w-auto"
-                        onClick={() =>
-                          document.getElementById("central-solicitacoes")?.scrollIntoView({ behavior: "smooth", block: "start" })
-                        }
+                        onClick={() => openRequest(copy.extraCta!.service)}
                       >
                         {copy.extraCta.label} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                       </Button>
