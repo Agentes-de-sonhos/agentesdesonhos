@@ -22,4 +22,5 @@
 
 - Hotel photos: safe-match on open, confirm ambiguity. Why: no wrong hotel.
 - Universal `/universal`: editorialRose only, shared ticket rules/maps. Why: opt-in reuse.
+- Disney `/disney` + `/disney/hoteis/:slug`: editorialRose AND technical preview host only (`disneyPreviewGate`); submits simulated there (`useDisneyPreviewRequest`); no hotel photos/ratings without licence. Why: preview-only, no real CRM leads.
 - Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.
