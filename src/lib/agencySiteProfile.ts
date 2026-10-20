@@ -128,6 +128,8 @@ export interface AgencyFooterContent {
   instagram?: string;
   instagramLabel?: string;
   address?: string;
+  /** Horário de atendimento exibido abaixo do endereço (opt-in por tenant). */
+  hours?: string;
   legalName?: string;
   cnpj?: string;
   /** Exibe a cidade/UF do cadastro quando não há endereço editorial. */
@@ -357,6 +359,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
     phone: "(48) 3222-8022",
     email: "atendimento@paraisoviagens.com",
     address: "Av. Prof. Othon Gama D’Eça, 900 — Torre 1, sala 803 — Centro — Florianópolis/SC — CEP 88015-240",
+    hours: "Atendimento: seg. a qui. das 9h às 18h30 · sex. das 9h às 18h",
     legalName: "Garcez e Paraíso Agência de Turismo Ltda.",
     cnpj: "01.848.030/0001-15",
   },
@@ -501,6 +504,10 @@ const LUXURY_CURATED: AgencySiteProfile = {
     {
       q: "Como funciona o atendimento e o acompanhamento?",
       a: "Você envia a sua solicitação pela Central, conversamos para entender os detalhes e apresentamos uma proposta clara. Confirmada a viagem, seguimos acompanhando antes, durante e depois.",
+    },
+    {
+      q: "Qual é o horário de atendimento da Paraíso?",
+      a: "Atendemos de segunda a quinta-feira, das 9h às 18h30, e às sextas-feiras, das 9h às 18h. Solicitações enviadas à noite, aos fins de semana ou feriados são respondidas a partir do dia útil seguinte.",
     },
     {
       q: "Como começo a planejar?",
