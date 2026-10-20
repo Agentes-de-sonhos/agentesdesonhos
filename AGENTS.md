@@ -14,12 +14,11 @@
 - New ADS presentations use complete `buildGoldStandardProfile`, reference profiles and `docs/padrao-ouro-sites.md`; continuity uses allowlisted synthetic fixtures with backend blocked; editorial/photo overrides are synthetic-profile opt-ins. Why: complete reviews without invented facts or changed tenants.
 - White-label CTA hover: WhatsApp may turn green (`wl-visa-cta`); request pop-ups stay brand yellow (`wl-visa-proposal`). Why: green promises an instant handoff, unlike forms.
 - Update prompt: once per user while `app_update_prompt` targets another version. Why: owner-controlled.
-- Image library: agency-scoped in SQL; links register after service save. Why: no orphans.
+- Image library: agency-scoped in SQL, links after service save; hotel photos safe-match on open, confirm ambiguity. Why: no orphans/wrong hotel.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
 - Wallet modules: trip > owner agency > system (SQL). Why: isolation.
 - Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: new videos per page without code changes.
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
-- Hotel photos: safe-match on open, confirm ambiguity. Why: no wrong hotel.
 - Universal `/universal` (editorialRose, shared rules/maps) and Disney `/disney` (editorialRose + technical preview host only, simulated submits, no unlicensed hotel photos/ratings). Why: opt-in, preview-safe.
 - Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.
