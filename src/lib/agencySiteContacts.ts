@@ -25,6 +25,8 @@ const BARDELLI_CONTACTS: AgencySiteContacts = {
 };
 
 const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
+  "paraisoviagens.com": PARAISO_CONTACTS,
+  "www.paraisoviagens.com": PARAISO_CONTACTS,
   "bardelliviagens.com.br": BARDELLI_CONTACTS,
   "www.bardelliviagens.com.br": BARDELLI_CONTACTS,
   "destinoscomaju.com.br": {
