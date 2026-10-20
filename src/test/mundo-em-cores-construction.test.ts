@@ -29,3 +29,10 @@ describe("O Mundo em Cores — site completo no domínio, com senha", () => {
     expect(canonicalRedirectHost("www.omundoemcores.com.br")).toBeNull();
   });
 });
+
+import { siteThemeRootClass } from "@/lib/agencySiteTheme";
+describe("O Mundo em Cores — domínio usa o visual aprovado", () => {
+  it("aplica tema editorial wl-mundo nos dois hosts", () => {
+    for (const h of ["omundoemcores.com.br", "www.omundoemcores.com.br"]) expect(siteThemeRootClass(h)).toContain("wl-mundo");
+  });
+});

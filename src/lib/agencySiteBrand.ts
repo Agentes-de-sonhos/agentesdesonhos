@@ -37,6 +37,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "casanovatur.demo.local": casaNovaLogo.url,
   /** Briefing 14 — rascunho técnico, sem associação a domínio público. */
   "briefing-14-v1.preview.local": mundoEmCoresLogo.url,
+  "omundoemcores.com.br": mundoEmCoresLogo.url,
+  "www.omundoemcores.com.br": mundoEmCoresLogo.url,
   /** Briefing 16 — logo autorizado, limitado ao host sintético da prévia. */
   "briefing-16-v1.preview.local": dricaViagensLogo.url,
   /** Briefing 17 — logo enviado, limitado ao host sintético da prévia. */
@@ -72,6 +74,8 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "casanovatur.demo.local",
   "www.essyatur.com.br",
   "briefing-14-v1.preview.local",
+  "omundoemcores.com.br",
+  "www.omundoemcores.com.br",
   "briefing-16-v1.preview.local",
   "briefing-17-v1.preview.local",
   "bardelliviagens.com.br",
@@ -165,6 +169,16 @@ const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
     logoClassName: "h-[72px] w-auto max-w-[120px] object-contain md:h-24 md:max-w-[160px]",
   },
   "briefing-14-v1.preview.local": {
+    logoOnly: true,
+    headerClassName: "h-24 md:h-[112px]",
+    logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
+  },
+  "omundoemcores.com.br": {
+    logoOnly: true,
+    headerClassName: "h-24 md:h-[112px]",
+    logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",
+  },
+  "www.omundoemcores.com.br": {
     logoOnly: true,
     headerClassName: "h-24 md:h-[112px]",
     logoClassName: "h-20 w-auto max-w-[260px] object-contain md:h-24 md:max-w-[340px]",

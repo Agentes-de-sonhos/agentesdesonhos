@@ -38,6 +38,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "casanovatur.demo.local": "casaNovaEditorial",
   "www.essyatur.com.br": "essyaEditorial",
   "briefing-14-v1.preview.local": "siteBaseEditorial",
+  "omundoemcores.com.br": "siteBaseEditorial",
+  "www.omundoemcores.com.br": "siteBaseEditorial",
   "briefing-16-v1.preview.local": "siteBaseEditorial",
   "briefing-17-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
@@ -97,7 +99,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
     const extra =
       h === "drica-presentation.preview.local"
         ? " wl-drica"
-        : h === "briefing-14-v1.preview.local"
+        : h === "briefing-14-v1.preview.local" || h === "omundoemcores.com.br" || h === "www.omundoemcores.com.br"
         ? " wl-mundo"
         : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
           ? " wl-bardelli wl-bardelli-official"
