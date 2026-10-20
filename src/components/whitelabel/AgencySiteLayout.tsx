@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
@@ -304,18 +305,30 @@ export function AgencyFooter({
       <footer id="rodape" className="wl-luxury-footer">
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.3fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
           <div>
-            {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt={`Logo ${name}`}
-                loading="lazy"
-                className="h-16 w-auto max-w-[260px] object-contain md:h-[72px] md:max-w-[300px]"
-              />
-            ) : (
-              <p className="text-lg font-bold tracking-tight text-[hsl(var(--wl-ink))]">
-                <BrandText>{name}</BrandText>
-              </p>
-            )}
+            <div className="flex flex-wrap items-center gap-4">
+              {logoUrl ? (
+                <img
+                  src={logoUrl}
+                  alt={`Logo ${name}`}
+                  loading="lazy"
+                  className="h-16 w-auto max-w-[260px] object-contain md:h-[72px] md:max-w-[300px]"
+                />
+              ) : (
+                <p className="text-lg font-bold tracking-tight text-[hsl(var(--wl-ink))]">
+                  <BrandText>{name}</BrandText>
+                </p>
+              )}
+              {/paraisoviagens\.com$/i.test(info.hostname ?? "") && (
+                <div className="flex items-center gap-3 border-l border-[hsl(var(--wl-ink)_/_0.15)] pl-4">
+                  <img
+                    src={iataTidsSeal.url}
+                    alt="Selo IATA TIDS — Travel Industry Designator Service"
+                    loading="lazy"
+                    className="h-14 w-14 rounded-full object-contain md:h-16 md:w-16"
+                  />
+                </div>
+              )}
+            </div>
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
               {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
             </p>
