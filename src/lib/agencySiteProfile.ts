@@ -377,9 +377,8 @@ const LUXURY_CURATED: AgencySiteProfile = {
     title: "Uma trajetória construída desde 2011.",
     text:
       "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas. Cada proposta passa pelo olhar delas antes de chegar até você.",
-    // Imagem neutra de ambientação: não há retrato autorizado de Mariana e Daniela.
-    // Quando houver fotos reais aprovadas, usar `images` com o retrato no lugar.
-    image: "villa",
+    // Foto enviada pelo dono da agência para a seção "Quem desenha a sua viagem".
+    image: "paraisoFounders",
     facts: ["Atuação desde 2011", "Atendimento conduzido por Mariana e Daniela", "Integrante da comunidade LUXPERTS"],
     badge: { value: "Desde 2011", label: "Experiência e cuidado em cada etapa." },
   },
