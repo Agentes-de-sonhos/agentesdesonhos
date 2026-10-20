@@ -1,11 +1,11 @@
 # Architecture rules
-- Flight/hotel cards and opt-in styles are public-only. Why: preserves admin, other services and secure access.
+- Flight/hotel cards and opt-in styles: public-only. Why: protects admin, other services and secure access.
 - Magic Kingdom maps: on-demand same-origin iframe, CDN image pointers, origin-checked Escape; at 100% full column width and natural height (iframe owns scroll). Why: height containment shrank the approved map.
 - Other parks share one static engine: category-scoped IDs, independent anchors (all highlighted), no guessed pins, native-pixel/lossless maps, full pages kept. Why: no invented pins or overlapping entries.
 - Orlando editorial gallery: public tickets, allowlisted Ju/100 Limites hosts only, outside wizard; CDN pointers with official credits. Why: tenant isolation.
 - Tenant hero variants, photo-above campaigns and visited strips use shared opt-in components, safe defaults and scoped preview styles. Why: tenant isolation, no duplicated engine.
 - ADS briefing e-mail: server-to-server Edge Function `ads-briefing-email` with relay-token auth (SHA-256 in private `ads_briefing_integration`), service-role-only queue + run tables; retries piggyback on the `product-landing-lead-emails` cron. Why: owner-only internal trigger, no public/tenant surface.
-- ADS site previews use path-keyed local fixtures on synthetic hostnames and the shared white-label renderer, gated to technical preview hosts with commercial actions and backend access blocked. Why: review without publishing or touching tenant data.
+- ADS previews: path-keyed local fixtures, synthetic hostnames, shared white-label renderer; technical hosts only, commercial actions/backend blocked. Why: review without publishing or touching tenant data.
 - Sale contract templates embed dynamic fields inside fixed legal text via `agency_contract_templates.render_config` (mode `slotted`, tokens resolved by `src/lib/contractSlots.ts`); literal agency text lives in `src/lib/contractTemplates/*`. Why: one generic engine for every agency; legal text exactly as written.
 - SiteLab Base presentation (sections/themes + prospect identity) lives per browser in localStorage (`src/lib/sitelabPresentation.ts`), edited at `/sitelab-base/gestao/apresentacao`, applied only when `profile.demo`. Why: `sitelab_templates` writes are platform-admin-only and the lab panel rejects admins.
 - Official US B1/B2 visa data lives in single-row public table `us_visa_public_info` (updated by an external scheduled ChatGPT task, no in-app cron), consumed only opt-in via `useUsVisaPublicInfo` / `UsVisaOfficialInfo`. Why: one shared official source, never auto-enabled.
@@ -16,9 +16,10 @@
 - Update prompt: once per user while `app_update_prompt` targets another version. Why: owner-controlled.
 - Image library: agency-scoped in SQL; links register after service save. Why: no orphans.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
-- Wallet modules: trip > owner agency > system (SQL). Why: same agency.
+- Wallet modules: trip > owner agency > system (SQL). Why: isolation.
 - Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: new videos per page without code changes.
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
-- Quote hotel photos: safe-match on open, confirm if ambiguous. Why: no wrong hotel.
-- Universal landing `/universal` (editorialRose only); ticket rules `lib/universalTickets.ts`; maps via `DisneyParkMapTrigger`. Why: reusable per agency.
+- Hotel photos: safe-match on open, confirm ambiguity. Why: no wrong hotel.
+- Universal `/universal`: editorialRose only, shared ticket rules/maps. Why: opt-in reuse.
+- Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.

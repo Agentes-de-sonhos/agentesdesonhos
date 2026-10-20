@@ -75,6 +75,44 @@ describe("envio", () => {
 describe("configurador (componente)", () => {
   beforeEach(() => invoke.mockReset());
 
+  it("bloqueia os botões em 14, libera ao diminuir e continua com 8 dias", async () => {
+    render(<UniversalTicketsConfigurator hostname="destinoscomaju.com.br" />);
+    for (const name of ["Universal Studios Florida", "Universal Islands of Adventure", "Universal Epic Universe", "Universal Volcano Bay"]) fireEvent.click(screen.getByText(name));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    fireEvent.click(screen.getByText("Já tenho as datas"));
+    fireEvent.change(screen.getByLabelText("Chegada a Orlando"), { target: { value: "2027-09-01" } });
+    fireEvent.change(screen.getByLabelText("Saída de Orlando"), { target: { value: "2027-09-30" } });
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    fireEvent.click(screen.getByText("Quero repetir um ou mais parques"));
+    const plus = screen.getByRole("button", { name: "Mais um dia em Universal Studios Florida" });
+    const minus = screen.getByRole("button", { name: "Menos um dia em Universal Studios Florida" });
+    for (let i = 0; i < 10; i++) fireEvent.click(plus);
+    expect(screen.getByTestId("days-universal-studios")).toHaveTextContent("11 dias");
+    expect(plus).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Mais um dia em Universal Epic Universe" })).toBeDisabled();
+    fireEvent.click(minus);
+    expect(plus).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Mais um dia em Universal Epic Universe" })).toBeEnabled();
+    for (let i = 0; i < 5; i++) fireEvent.click(minus);
+    expect(screen.getByTestId("days-universal-studios")).toHaveTextContent("5 dias");
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    expect(screen.getByText("Sim, quero trocar e usar o Hogwarts Express")).toBeVisible();
+    fireEvent.click(screen.getByText("Um dia para cada parque"));
+    expect(screen.queryByRole("button", { name: /Mais um dia/ })).toBeNull();
+    fireEvent.click(screen.getByText("Não, prefiro um parque por dia"));
+    fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Quero receber a cotação" }));
+    fireEvent.click(screen.getByTestId("extra-hhn"));
+    fireEvent.change(screen.getByLabelText("Chegada a Orlando"), { target: { value: "2027-11-01" } });
+    fireEvent.change(screen.getByLabelText("Saída de Orlando"), { target: { value: "2027-11-30" } });
+    expect(screen.queryByTestId("extra-hhn")).toBeNull();
+    fireEvent.change(screen.getByLabelText("Chegada a Orlando"), { target: { value: "2027-09-01" } });
+    expect(screen.getByTestId("extra-hhn")).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(screen.getAllByText("Universal Islands of Adventure")[0]);
+    expect(screen.queryByText("Sim, quero trocar e usar o Hogwarts Express")).toBeNull();
+    expect(invoke).not.toHaveBeenCalled();
+  });
+
   async function reachContact() {
     render(<UniversalTicketsConfigurator hostname="www.destinoscomaju.com.br" />);
     fireEvent.click(screen.getByText("Universal Studios Florida"));

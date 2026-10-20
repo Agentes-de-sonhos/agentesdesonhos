@@ -45,57 +45,63 @@ export function useAgencySiteRequest(hostname: string) {
     async (payload: Record<string, unknown>) => {
       setState("submitting");
       setError(null);
-      const idempotencyKey = `${session}:${Date.now().toString(36)}`;
-      const { data, error: fnError } = await supabase.functions.invoke("submit-agency-site-request", {
-        body: {
-          ...payload,
-          hostname,
-          session_id: session,
-          idempotency_key: idempotencyKey,
-          source_url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
-          elapsed_ms: Date.now() - openedAt.current,
-          utm: readUtm(),
-        },
-      });
-
-      const result = (data ?? {}) as {
-        error?: string;
-        success?: boolean;
-        duplicate?: boolean;
-        trace?: string;
-      };
-
-      if (fnError) {
-        setState("error");
-        // Em respostas non-2xx o corpo vem em fnError.context (FunctionsHttpError):
-        // é ali que está a mensagem específica de campo inválido e o código de rastreio.
-        let body: { error?: string; trace?: string } = {};
-        try {
-          const ctx = (fnError as unknown as { context?: Response }).context;
-          if (ctx && typeof ctx.clone === "function") body = await ctx.clone().json();
-        } catch {
-          /* corpo não-JSON: mantém a mensagem amigável */
-        }
-        setError(
-          body.error ??
-            result.error ??
-            "Não foi possível enviar sua solicitação agora. Tente novamente em instantes.",
-        );
-        console.error("[agency-site-request] falha no envio", {
-          trace: body.trace ?? result.trace ?? null,
-          detail: fnError.message,
+      try {
+        const idempotencyKey = `${session}:${Date.now().toString(36)}`;
+        const { data, error: fnError } = await supabase.functions.invoke("submit-agency-site-request", {
+          body: {
+            ...payload,
+            hostname,
+            session_id: session,
+            idempotency_key: idempotencyKey,
+            source_url: typeof window !== "undefined" ? window.location.href.slice(0, 500) : null,
+            elapsed_ms: Date.now() - openedAt.current,
+            utm: readUtm(),
+          },
         });
-        return { error: true as const };
-      }
-
-      if (result.error) {
+  
+        const result = (data ?? {}) as {
+          error?: string;
+          success?: boolean;
+          duplicate?: boolean;
+          trace?: string;
+        };
+  
+        if (fnError) {
+          setState("error");
+          // Em respostas non-2xx o corpo vem em fnError.context (FunctionsHttpError):
+          // é ali que está a mensagem específica de campo inválido e o código de rastreio.
+          let body: { error?: string; trace?: string } = {};
+          try {
+            const ctx = (fnError as unknown as { context?: Response }).context;
+            if (ctx && typeof ctx.clone === "function") body = await ctx.clone().json();
+          } catch {
+            /* corpo não-JSON: mantém a mensagem amigável */
+          }
+          setError(
+            body.error ??
+              result.error ??
+              "Não foi possível enviar sua solicitação agora. Tente novamente em instantes.",
+          );
+          console.error("[agency-site-request] falha no envio", {
+            trace: body.trace ?? result.trace ?? null,
+            detail: fnError.message,
+          });
+          return { error: true as const };
+        }
+  
+        if (result.error || result.success !== true) {
+          setState("error");
+          setError(result.error ?? "Não foi possível confirmar o envio da sua solicitação. Tente novamente em instantes.");
+          return { error: true as const };
+        }
+  
+        setState("success");
+        return { success: true as const, duplicate: result.duplicate === true };
+      } catch {
         setState("error");
-        setError(result.error);
+        setError("Não foi possível enviar sua solicitação agora. Verifique sua conexão e tente novamente.");
         return { error: true as const };
       }
-
-      setState("success");
-      return { success: true as const, duplicate: result.duplicate === true };
     },
     [hostname, session],
   );
