@@ -19,6 +19,7 @@ import {
   type DisneyPark,
 } from "@/components/landing/disney/content";
 import { DISNEY_FUTURE_HOTELS, DISNEY_HOTELS, DISNEY_HOTEL_TABS, KIND_LABEL, OFFICIAL_CATEGORY_LABEL } from "@/components/landing/disney/disneyHotelsCatalog";
+import { DISNEY_PARK_PHOTOS, DISNEY_SPRINGS_SPOTS, type DisneyPhoto } from "@/components/landing/disney/photos";
 
 const W = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 const heading = "text-balance text-3xl font-semibold leading-tight text-foreground md:text-5xl";
