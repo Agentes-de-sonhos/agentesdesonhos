@@ -41,3 +41,10 @@ Sem publicação, deploy de função, migração, alteração de permissões ou 
 - `UniversalTicketsConfigurator.tsx` passou a importar esse pointer no lugar de `hero-ju-magic-kingdom.png.asset.json`. A home da Destinos com a Ju (`AgencySiteHome.tsx`) mantém a foto anterior.
 - Recorte do avatar: contêiner circular com `overflow-hidden` e `img` em `scale-[2.2]`, `transform-origin: 60% 35%` — equivale a um quadrado de 327 px centrado no rosto (400; 582). Comparados recortes de 200/327/450 px: o de 327 px foi o único sem corte de cabeça e com rosto reconhecível em miniatura.
 - Evidências: `naturalWidth > 0` do novo ponteiro em 1280 e 390; capturas do avatar e do cartão de apresentação conferidas; 17 testes (Universal + hook) e `build OK`.
+
+## Item "Universal Orlando Resort" no menu da Destinos com a Ju (20/10/2026)
+- `EDITORIAL_ROSE.nav` (`src/lib/agencyReferenceProfiles.ts`) passou a listar `{ label: "Universal Orlando Resort", to: "/universal" }` como primeira criança de "Especialidades", antes de Xcaret. A rota `/universal` já era restrita ao perfil `editorialRose` em `AgencyDomainRoutes.tsx`.
+- Ordem conferida no navegador com o host simulado por `?__agency_host=destinoscomaju.com.br`: Universal Orlando Resort, Xcaret, Parques e Experiências, Resorts no Brasil, Cruzeiros — tanto no submenu do desktop (1280) quanto na gaveta mobile (390), sem corte ou sobreposição.
+- Clique real no item navega para `/universal` e a landing renderiza (configurador de ingressos presente).
+- O teste antigo do menu da Ju estava desatualizado (ainda esperava o menu sem "Especialidades") e foi reescrito para a hierarquia atual; um teste novo fixa a posição de Universal antes de Xcaret e a ausência do link nos demais tenants.
+- Regressões: 57 testes (menu da Ju, SiteLab, 100 Limites, Essya Tur, Casa Nova, páginas de conteúdo, configurador Universal) e `build OK`. Nenhum lead enviado, nenhuma alteração de banco, nada publicado.

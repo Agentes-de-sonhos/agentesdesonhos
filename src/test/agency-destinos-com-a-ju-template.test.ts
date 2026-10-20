@@ -118,15 +118,46 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     }
   });
 
-  it("mantém o menu enxuto, Ofertas acessível e Área do Cliente como ação separada", () => {
+  it("mantém o menu com Especialidades, Ofertas acessível e Área do Cliente como ação separada", () => {
     expect(siteNavLinks(JU_HOSTS[0])).toEqual([
       { label: "Início", to: "/" },
-      { label: "Destinos", to: "/#destinos" },
-      { label: "Experiências", to: "/#campanhas" },
-      { label: "Cruzeiros", to: "/#autoridade" },
+      {
+        label: "Especialidades",
+        to: "/#assinatura",
+        children: [
+          { label: "Universal Orlando Resort", to: "/universal" },
+          { label: "Xcaret", to: "/#experiencia-xcaret" },
+          { label: "Parques e Experiências", to: "/#ingressos-orlando" },
+          { label: "Resorts no Brasil", to: "/#resorts" },
+          { label: "Cruzeiros", to: "/#autoridade" },
+        ],
+      },
+      { label: "Inspirações", to: "/#destinos" },
       { label: "Ofertas", to: "/ofertas" },
-      { label: "Sobre", to: "/#sobre" },
+      {
+        label: "Quem somos",
+        to: "/#sobre",
+        children: [
+          { label: "Sobre", to: "/#sobre" },
+          { label: "Avaliações", to: "/#avaliacoes" },
+          { label: "FAQ", to: "/#faq" },
+        ],
+      },
+      { label: "Área do Cliente", to: "/area-do-cliente" },
     ]);
+  });
+
+  it("oferece Universal Orlando Resort como a primeira especialidade, antes de Xcaret", () => {
+    const children =
+      siteNavLinks(JU_HOSTS[0]).find((l) => l.label === "Especialidades")?.children ?? [];
+    expect(children[0]).toEqual({ label: "Universal Orlando Resort", to: "/universal" });
+    expect(children.findIndex((c) => c.to === "/universal")).toBeLessThan(
+      children.findIndex((c) => c.label === "Xcaret"),
+    );
+    // Nenhum outro tenant recebe a especialidade nova.
+    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+      expect(JSON.stringify(siteNavLinks(host))).not.toContain("/universal");
+    }
   });
 
   it("resolve o perfil pelo hostname canônico recebido no contexto, sem depender do slug", () => {

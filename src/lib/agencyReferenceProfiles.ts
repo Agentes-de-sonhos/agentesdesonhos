@@ -206,6 +206,7 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
       label: "Especialidades",
       to: "/#assinatura",
       children: [
+        { label: "Universal Orlando Resort", to: "/universal" },
         { label: "Xcaret", to: "/#experiencia-xcaret" },
         { label: "Parques e Experiências", to: "/#ingressos-orlando" },
         { label: "Resorts no Brasil", to: "/#resorts" },
