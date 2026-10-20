@@ -24,11 +24,9 @@ vi.mock("@/lib/agencySitePassword", async (orig) => {
   };
 });
 
-const OWNERS = [
-  "9433421c-2252-4030-acab-135c03ab009e",
-  "d14b95d2-7eeb-4717-bfca-b76482ddfb4f",
-  "4d5a7157-59b6-4329-8768-7f8895e8ce92",
-];
+const OWNERS = ["4d5a7157-59b6-4329-8768-7f8895e8ce92"];
+// 100 Limites e Paraíso Viagens foram liberados ao público (sem senha).
+const RELEASED = ["9433421c-2252-4030-acab-135c03ab009e", "d14b95d2-7eeb-4717-bfca-b76482ddfb4f"];
 const FAE_LIKE = "00000000-0000-0000-0000-000000000001";
 
 const info = (user_id: string): AgencyDomainInfo => ({
@@ -70,6 +68,7 @@ afterEach(() => cleanup());
 describe("configuração declarativa", () => {
   it("protege exatamente os quatro tenants", () => {
     OWNERS.forEach((o) => expect(isTenantPasswordProtected(o)).toBe(true));
+    RELEASED.forEach((o) => expect(isTenantPasswordProtected(o)).toBe(false));
     expect(isTenantPasswordProtected(FAE_LIKE)).toBe(false);
     expect(isTenantPasswordProtected(null)).toBe(false);
   });
@@ -102,15 +101,15 @@ describe("gate", () => {
   });
   it("senha errada mostra mensagem discreta", async () => {
     unlockMock.mockResolvedValue({ status: "invalid" });
-    await renderGate(OWNERS[1]);
+    await renderGate(OWNERS[0]);
     fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "errada" } });
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Entrar" })));
     expect(screen.getByText(/Senha incorreta/)).toBeInTheDocument();
-    expect(localStorage.getItem(unlockStorageKey(OWNERS[1]))).toBeNull();
+    expect(localStorage.getItem(unlockStorageKey(OWNERS[0]))).toBeNull();
   });
   it("indisponibilidade permite tentar novamente", async () => {
     unlockMock.mockResolvedValue({ status: "unavailable" });
-    await renderGate(OWNERS[1]);
+    await renderGate(OWNERS[0]);
     fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "x" } });
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Entrar" })));
     expect(screen.getByText(/Não foi possível validar/)).toBeInTheDocument();
@@ -119,21 +118,21 @@ describe("gate", () => {
   it("senha correta guarda somente o token e libera", async () => {
     const exp = Date.now() + SITE_UNLOCK_TTL_MS;
     unlockMock.mockResolvedValue({ status: "ok", token: "p.s", exp });
-    await renderGate(OWNERS[2]);
+    await renderGate(OWNERS[0]);
     fireEvent.change(screen.getByLabelText("Senha"), { target: { value: "segredo-digitado" } });
     await act(async () => fireEvent.click(screen.getByRole("button", { name: "Entrar" })));
     expect(screen.getByTestId("site")).toBeInTheDocument();
-    const raw = localStorage.getItem(unlockStorageKey(OWNERS[2]))!;
+    const raw = localStorage.getItem(unlockStorageKey(OWNERS[0]))!;
     expect(raw).toContain("p.s");
     expect(raw).not.toContain("segredo-digitado");
   });
   it("token armazenado é verificado no servidor", async () => {
-    saveUnlock(OWNERS[3], "tok.sig", Date.now() + 1000 * 60);
+    saveUnlock(OWNERS[0], "tok.sig", Date.now() + 1000 * 60);
     verifyMock.mockResolvedValue({ status: "ok", token: "tok.sig", exp: Date.now() + 60000 });
     await act(async () => {
-      await renderGate(OWNERS[3]);
+      await renderGate(OWNERS[0]);
     });
-    expect(verifyMock).toHaveBeenCalledWith(OWNERS[3], "tok.sig");
+    expect(verifyMock).toHaveBeenCalledWith(OWNERS[0], "tok.sig");
     expect(screen.getByTestId("site")).toBeInTheDocument();
   });
   it("token expirado é descartado", () => {
