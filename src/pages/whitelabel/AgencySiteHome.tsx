@@ -1371,7 +1371,7 @@ export default function AgencySiteHome({
                     <Button size="lg" onClick={() => openRequest("pacotes")}>
                       Solicitar atendimento <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
-                    {waHref && (
+                    {waHref && !profile.hideConciergeWhatsapp && (
                       <Button asChild size="lg" variant="outline">
                         <a href={waHref} target="_blank" rel="noopener noreferrer">
                           <MessageCircle className="mr-2 h-4 w-4" /> Falar no WhatsApp
