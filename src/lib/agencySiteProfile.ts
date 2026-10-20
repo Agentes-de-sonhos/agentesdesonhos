@@ -315,7 +315,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       to: "/#destaques",
       children: [
         { label: "Inspirações", to: "/#novidades" },
-        { label: "Explora · Grande Prêmio de Mônaco 2027", to: "/#explora-monaco" },
+        { label: "EXPLORA I · Grande Prêmio de Mônaco 2027", to: "/#explora-monaco" },
       ],
     },
     {
