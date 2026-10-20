@@ -718,7 +718,7 @@ export default function AgencySiteHome({
                   </div>
                   <div>
                     <p className="text-xs font-semibold tracking-[0.25em] text-[#A8CC44]">{fx.kicker}</p>
-                    <h2 id="explora-monaco-title" className="mt-3 font-display text-3xl leading-tight md:text-5xl">{fx.title}</h2>
+                    <h2 id="explora-monaco-title" className="mt-3 font-display text-3xl leading-tight md:text-[2.6rem]">{fx.title}</h2>
                     <p className="mt-5 text-base leading-relaxed opacity-90">{fx.text}</p>
                     {fx.subtext ? <p className="mt-3 text-sm leading-relaxed opacity-75">{fx.subtext}</p> : null}
                     {fx.stats?.length ? (
