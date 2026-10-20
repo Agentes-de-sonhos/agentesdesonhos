@@ -21,3 +21,4 @@
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
 - Quote hotel photos: opening lookup, safe-match linking, ambiguity confirmation, user-selected photos. Why: no wrong hotel or overwritten fields.
+- Universal Orlando landing (`/universal`, `UniversalLandingPage` + `components/landing/universal/content.ts`) routed only for `editorialRose`; tickets section is a reserved slot (`data-slot="universal-tickets-module"`) for an external module; maps reuse `DisneyParkMapTrigger`. Why: reusable for other agencies on request without touching them.
