@@ -26,7 +26,13 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
   const hotel = useMemo(() => getDisneyHotel(slug), [slug]);
   const { submit, simulated } = useDisneyPreviewRequest(info.hostname);
   useNoindex();
-  useEffect(() => { if (hotel) document.title = `${hotel.name} · ${info.agency_name ?? "Disney"}`; window.scrollTo(0, 0); }, [hotel, info.agency_name]);
+  // O título da agência é aplicado pelo layout pai depois deste efeito; adiamos para o nome do hotel prevalecer.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (!hotel) return;
+    const t = window.setTimeout(() => { document.title = `${hotel.name} · ${info.agency_name ?? "Disney"}`; }, 0);
+    return () => window.clearTimeout(t);
+  }, [hotel, info.agency_name]);
 
   const onSubmitQuote = useCallback(async (req: HotelQuoteRequest) => {
     if (!hotel) return;
