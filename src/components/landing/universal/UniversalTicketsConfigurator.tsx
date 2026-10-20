@@ -188,7 +188,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
     <div className="mx-auto max-w-4xl space-y-6" data-testid="universal-configurator">
       <div className="flex flex-col items-center gap-6 rounded-xl bg-card p-6 shadow-sm sm:flex-row md:p-8">
         <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
-          <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2] object-cover object-[56%_46%]" />
+          <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "60% 35%" }} />
         </span>
         <div className="text-center sm:text-left">
           <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>
