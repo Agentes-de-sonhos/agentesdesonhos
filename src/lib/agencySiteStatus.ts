@@ -28,8 +28,6 @@ export interface AgencySiteStatusConfig {
 const STATUS_BY_HOST: Record<string, AgencySiteStatusConfig> = {
   "faeviagens.com.br": { status: "under_construction" },
   "www.faeviagens.com.br": { status: "under_construction" },
-  "omundoemcores.com.br": { status: "under_construction", variant: "mundoEmCores" },
-  "www.omundoemcores.com.br": { status: "under_construction", variant: "mundoEmCores" },
   "bardelliviagens.com.br": { status: "under_construction", variant: "bardelliViagens", cnpj: "09.475.657/0001-80" },
   "www.bardelliviagens.com.br": { status: "under_construction", variant: "bardelliViagens", cnpj: "09.475.657/0001-80" },
 };

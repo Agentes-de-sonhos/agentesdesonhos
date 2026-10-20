@@ -15,6 +15,7 @@ import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 /** Ativar/desativar aqui. owner user_id → rótulo interno. */
 export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
   "4d5a7157-59b6-4329-8768-7f8895e8ce92": "Essyatur",
+  "428500de-552a-411b-9663-71f8bb2e4f37": "O Mundo em Cores",
 };
 
 export const SITE_UNLOCK_TTL_MS = 7 * 24 * 60 * 60 * 1000;

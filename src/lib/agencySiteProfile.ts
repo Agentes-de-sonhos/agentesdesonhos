@@ -1170,6 +1170,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "ads-email-test-v1.demo.local": "adsEmailTestV1",
   /** Host sintético do rascunho briefing-14 — domínio público ainda não vinculado. */
   "briefing-14-v1.preview.local": "mundoEmCoresBriefing14",
+  "omundoemcores.com.br": "mundoEmCoresBriefing14",
+  "www.omundoemcores.com.br": "mundoEmCoresBriefing14",
   /** Host sintético do rascunho briefing-16 — domínio público permanece intacto. */
   "briefing-16-v1.preview.local": "dricaViagensBriefing16",
   /** Host sintético do rascunho briefing-17 — vinculação de domínio pendente. */
