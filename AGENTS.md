@@ -13,7 +13,7 @@
 - Site → Blog is an opt-in per-agency module gated by entitlement `site_blog` + permission `site.blog.manage` (RLS `blog_can_manage`); status/published versions change only through SECURITY DEFINER `blog_post_action`/`blog_run_scheduled`; public reads go only through the `public-blog` Edge Function (published or due-scheduled snapshot, private media signed per post). Why: strong tenant isolation; no partial autosave leaks to visitors.
 - New ADS presentations use complete `buildGoldStandardProfile`, reference profiles and `docs/padrao-ouro-sites.md`; continuity uses allowlisted synthetic fixtures with backend blocked; editorial/photo overrides are synthetic-profile opt-ins. Why: complete reviews without invented facts or changed tenants.
 - White-label CTA hover: WhatsApp may turn green (`wl-visa-cta`); request pop-ups stay brand yellow (`wl-visa-proposal`). Why: green promises an instant handoff, unlike forms.
-- Update prompt shows once per user while flag `app_update_prompt` targets another version. Why: owner-controlled.
+- Update prompt: once per user while `app_update_prompt` targets another version. Why: owner-controlled.
 - Image library (`agency_image_library`): agency-scoped in SQL; link photos register only after service save. Why: no orphan entries.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
 - Wallet modules: trip > owning agency (`wallet_agency_owner`) > system, in SQL. Why: same agency.
@@ -21,4 +21,4 @@
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
 - Quote hotel photos: opening lookup, safe-match linking, ambiguity confirmation, user-selected photos. Why: no wrong hotel or overwritten fields.
-- Universal Orlando landing (`/universal`, `UniversalLandingPage` + `components/landing/universal/content.ts`) routed only for `editorialRose`; tickets section is a reserved slot (`data-slot="universal-tickets-module"`) for an external module; maps reuse `DisneyParkMapTrigger`. Why: reusable for other agencies on request without touching them.
+- Universal landing `/universal` (editorialRose only); tickets = reserved slot for external module; maps via `DisneyParkMapTrigger`. Why: reusable per agency on request.
