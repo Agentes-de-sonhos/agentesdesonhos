@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Menu Destinos com a Ju: "Universal Orlando Resort" como primeira opção do submenu "Especialidades", antes de Xcaret, apontando para /universal; 57 testes (Ju + regressões de menu dos demais tenants) e build OK, submenu conferido no navegador em 1280/390 com navegação real até a landing; sem publicar.
 - [x] Universal: foto de perfil do configurador trocada pela enviada por Fernando com o globo da Universal (pointer `ju-universal-globe.png`), recorte centrado no rosto conferido em 1280/390, 17 testes e build OK; home da Ju mantém a foto anterior, sem publicar.
 - [x] Revisão Universal: logos autênticos, confirmação estrita/retry e 42 testes; oito fontes reais com naturalWidth positivo, interação 360/768/1280 sem overflow; envios simulados, sem publicar. Página hospedada completa na sessão do editor não verificada; evidências em docs/validacao-universal-revisao-publicacao.md.
 - [x] Orçamentos: opção 2, auto-resolução segura ao abrir Hospedagem e abertura de sugestões, confirmação em ambiguidades; 61 testes aprovados, fluxo completo com hotel fictício e salvamento simulado, build OK; sem publicar. Google real não consultado no QA.
