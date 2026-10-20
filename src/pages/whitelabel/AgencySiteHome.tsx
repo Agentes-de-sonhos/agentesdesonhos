@@ -637,6 +637,7 @@ export default function AgencySiteHome({
         {
         const copy = copyFor("highlights");
         return (
+          <>
           <section
             key={key}
             id="destaques"
@@ -702,6 +703,33 @@ export default function AgencySiteHome({
             )}
             </div>
           </section>
+          {profile.featuredExperience ? (() => {
+            const fx = profile.featuredExperience;
+            return (
+              <section id="explora-monaco" aria-labelledby="explora-monaco-title" className="bg-[hsl(var(--wl-navy))] text-[hsl(var(--wl-ivory,40_33%_97%))]">
+                <div className={`${container} grid items-center gap-10 py-16 md:grid-cols-2 md:py-24`}>
+                  <div className="overflow-hidden rounded-2xl">
+                    <img src={fx.image} alt={fx.imageAlt} loading="lazy" width={1600} height={1008} className="aspect-[16/10] h-full w-full object-cover" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold tracking-[0.2em] opacity-80">{fx.kicker}</p>
+                    <h2 id="explora-monaco-title" className="mt-4 font-display text-3xl leading-tight md:text-5xl">{fx.title}</h2>
+                    <p className="mt-5 text-base leading-relaxed opacity-90">{fx.text}</p>
+                    <ul className="mt-6 flex flex-wrap gap-2">
+                      {fx.points.map((pt) => (
+                        <li key={pt} className="rounded-full border border-current/30 px-4 py-1.5 text-sm opacity-90">{pt}</li>
+                      ))}
+                    </ul>
+                    <a href={fx.url} target="_blank" rel="noopener noreferrer" className="wl-hero-cta mt-8 inline-flex items-center gap-3 rounded-md bg-[var(--brand-secondary)] px-6 py-3 font-semibold text-[var(--brand-on-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+                      {fx.cta} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </a>
+                    {fx.note ? <p className="mt-4 text-xs opacity-70">{fx.note}</p> : null}
+                  </div>
+                </div>
+              </section>
+            );
+          })() : null}
+          </>
         );
         }
 
