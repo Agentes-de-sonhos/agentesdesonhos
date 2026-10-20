@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Bus, ExternalLink, ImageOff, MapPin, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Bus, ChevronRight, ExternalLink, MapPin, Sparkles, Star } from "lucide-react";
+import { HotelGallery } from "@/components/hotel-page/HotelGallery";
+import { ReviewsCarousel, Stars } from "@/components/hotel-page/HotelDetailsView";
+import googleData from "@/components/landing/disney/disneyHotelsGoogleData.json";
 import { HotelQuoteBox } from "@/components/hotel-page/HotelQuoteBox";
 import type { HotelQuoteRequest } from "@/components/hotel-page/types";
-import { getDisneyHotel, KIND_LABEL, OFFICIAL_CATEGORY_LABEL, relatedDisneyHotels } from "@/components/landing/disney/disneyHotelsCatalog";
+import { getDisneyHotel, KIND_LABEL, OFFICIAL_CATEGORY_LABEL } from "@/components/landing/disney/disneyHotelsCatalog";
 import { DISNEY_HOTEL_BENEFITS } from "@/components/landing/disney/content";
 import { useDisneyPreviewRequest } from "@/hooks/useDisneyPreviewRequest";
 import { useNoindex } from "@/hooks/useNoindex";
@@ -11,6 +14,9 @@ import { agencyContextHref } from "@/lib/agencyContextLink";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 const fmt = (iso: string) => iso.split("-").reverse().join("/");
+
+interface GSnap { address: string; rating?: number | null; total?: number | null; mapsUrl: string; lat: number; lng: number; photos: { url: string; credit: string }[]; reviews: { author: string; rating?: number; text: string; relativeTime?: string }[] }
+const GDATA = googleData as unknown as Record<string, GSnap | null>;
 
 /** Página própria de cada hospedagem Disney. Sem fotos/avaliações até haver material licenciado e verificável. */
 export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
@@ -47,8 +53,9 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
       </p>
     );
   }
-  const related = relatedDisneyHotels(hotel);
-  const mapQ = encodeURIComponent(`${hotel.name}, ${hotel.address}`);
+  const g = GDATA[hotel.slug] ?? null;
+  const mapQ = g ? `${g.lat},${g.lng}` : encodeURIComponent(`${hotel.name}, ${hotel.address}`);
+  const reviews = g ? [...g.reviews].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 5) : [];
   return (
     <div className="bg-background px-4 py-8 md:py-12">
       <article className="mx-auto max-w-6xl space-y-8 text-foreground">
@@ -61,12 +68,7 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
         </header>
         {hotel.status === "future" && <p className="rounded-md border border-primary/40 bg-primary/5 p-4 text-sm"><strong>Hotel futuro.</strong> Inauguração anunciada para {hotel.opening}. Ainda não faz parte do catálogo atual.</p>}
 
-        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-muted/40 px-6 py-10 text-center" data-testid="disney-hotel-no-photo">
-          <ImageOff className="h-8 w-8 text-muted-foreground" aria-hidden />
-          <p className="text-sm font-medium">Fotos deste hotel aguardando autorização de uso</p>
-          <p className="max-w-md text-xs text-muted-foreground">Para não mostrar imagem de outro hotel, as fotos aparecem aqui quando houver material licenciado. Enquanto isso, veja as fotos no site oficial.</p>
-          <a href={hotel.sources[0]} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">Ver no site oficial Disney <ExternalLink className="h-3.5 w-3.5" /></a>
-        </div>
+        {g && g.photos.length > 0 && <HotelGallery photos={g.photos.map((p) => ({ url: p.url, alt: hotel.name }))} hotelName={hotel.name} />}
 
         {hotel.status === "open" && <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} />}
         {simulated && <p className="text-center text-xs text-muted-foreground">Prévia: os pedidos desta página são simulados e não chegam ao CRM.</p>}
@@ -97,17 +99,17 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
             <section className="overflow-hidden rounded-2xl border border-border bg-card">
               <h2 className="flex items-center gap-2 p-5 pb-3 font-bold"><MapPin className="h-5 w-5 text-primary" aria-hidden />Localização</h2>
               <iframe title={`Mapa de ${hotel.name}`} src={`https://maps.google.com/maps?q=${mapQ}&z=14&output=embed`} loading="lazy" className="h-56 w-full border-0" referrerPolicy="no-referrer-when-downgrade" />
-              <a href={`https://www.google.com/maps/search/?api=1&query=${mapQ}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 p-4 text-sm font-medium text-primary"><ExternalLink className="h-4 w-4" />Abrir no Google Maps</a>
+              <a href={g?.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${mapQ}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 p-4 text-sm font-medium text-primary"><ExternalLink className="h-4 w-4" />Abrir no Google Maps</a>
             </section>
-            <section className="rounded-2xl border border-border bg-card p-5 text-sm">
-              <h2 className="font-bold">Fontes oficiais</h2>
-              <ul className="mt-2 space-y-1">{hotel.sources.map((s) => <li key={s}><a href={s} target="_blank" rel="noopener noreferrer" className="break-all text-primary hover:underline">{s.replace(/^https:\/\//, "")}</a></li>)}</ul>
-              <p className="mt-3 text-xs text-muted-foreground">Avaliações: consulte as avaliações no site oficial ou no Google Maps. Não exibimos notas sem fonte verificável.</p>
-            </section>
-            {related.length > 0 && (
+            {g?.rating && (
               <section className="rounded-2xl border border-border bg-card p-5">
-                <h2 className="font-bold">Hospedagens relacionadas</h2>
-                <ul className="mt-3 space-y-2 text-sm">{related.map((r) => <li key={r.slug}><Link to={agencyContextHref(`/disney/hoteis/${r.slug}`)} className="text-primary hover:underline">{r.name}</Link></li>)}</ul>
+                <h2 className="flex items-center gap-2 font-bold"><Star className="h-5 w-5 text-primary" aria-hidden />Avaliações no Google</h2>
+                <div className="mt-4 flex items-center gap-3">
+                  <span className="text-4xl font-bold tabular-nums">{g.rating.toFixed(1).replace(".", ",")}</span>
+                  <div className="flex-1"><Stars value={g.rating} /><p className="mt-0.5 text-xs text-muted-foreground">{(g.total ?? 0).toLocaleString("pt-BR")} avaliações</p></div>
+                </div>
+                <a href={g.mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">Ver avaliações <ChevronRight className="h-4 w-4" /></a>
+                <ReviewsCarousel reviews={reviews} />
               </section>
             )}
           </aside>

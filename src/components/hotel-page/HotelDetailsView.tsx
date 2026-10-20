@@ -13,7 +13,7 @@ const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble,
 };
 
-function Stars({ value, className }: { value: number; className?: string }) {
+export function Stars({ value, className }: { value: number; className?: string }) {
   return (
     <span className={`flex items-center gap-0.5 ${className ?? ""}`} aria-label={`${value} estrelas`}>
       {Array.from({ length: 5 }, (_, i) => {
@@ -112,7 +112,7 @@ function AmenitiesCarousel({ amenities }: { amenities: HotelPageData["amenities"
   );
 }
 
-function ReviewsCarousel({ reviews }: { reviews: HotelReview[] }) {
+export function ReviewsCarousel({ reviews }: { reviews: HotelReview[] }) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState(false);
   if (!reviews.length) return null;

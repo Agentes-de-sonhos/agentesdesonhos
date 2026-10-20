@@ -1,3 +1,4 @@
+import disneyGoogle from "@/components/landing/disney/disneyHotelsGoogleData.json";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ExternalLink, Map as MapIcon, Ticket } from "lucide-react";
@@ -111,6 +112,8 @@ function ParkCard({ p }: { p: DisneyPark }) {
 }
 
 const STEP = 6;
+const GCOVER: Record<string, string | undefined> = Object.fromEntries(Object.entries(disneyGoogle as Record<string, { photos: { url: string }[] } | null>).map(([k, v]) => [k, v?.photos[0]?.url]));
+
 function HotelsGallery() {
   const [tab, setTab] = useState<(typeof DISNEY_HOTEL_TABS)[number]>("Todos");
   const [n, setN] = useState(STEP);
@@ -129,12 +132,15 @@ function HotelsGallery() {
       {tab !== "Todos" && <p className="mt-3 text-center text-sm text-muted-foreground">Categoria oficial: {OFFICIAL_CATEGORY_LABEL[tab]}{tab === "Deluxe" ? " (hotéis de luxo)" : ""}</p>}
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-testid="disney-hotels-grid">
         {shown.map((h) => (
-          <article key={h.slug} className="flex h-full flex-col rounded-md border border-border bg-card p-5 shadow-sm">
+          <article key={h.slug} className="flex h-full flex-col overflow-hidden rounded-md border border-border bg-card shadow-sm">
+            {GCOVER[h.slug] && <img src={GCOVER[h.slug]} alt={h.name} loading="lazy" className="aspect-[16/10] w-full object-cover" />}
+            <div className="flex flex-1 flex-col p-5">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{h.category} · {KIND_LABEL[h.kind]}</p>
             <h3 className="mt-2 text-lg font-semibold">{h.name}</h3>
             {h.parent && <p className="mt-1 text-xs text-muted-foreground">Parte do complexo {h.parent}</p>}
             <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground line-clamp-4">{h.paragraphs[0]}</p>
             <Link to={agencyContextHref(`/disney/hoteis/${h.slug}`)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">Conhecer e solicitar cotação <ArrowRight className="h-4 w-4" aria-hidden /></Link>
+            </div>
           </article>
         ))}
       </div>
