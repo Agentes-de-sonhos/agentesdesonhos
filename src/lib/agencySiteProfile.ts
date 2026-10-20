@@ -293,6 +293,14 @@ const LUXURY_CURATED: AgencySiteProfile = {
   // WhatsApp no atendimento nem nas perguntas frequentes.
   hideConciergeWhatsapp: true,
   hideFaqWhatsapp: true,
+  // Rodapé institucional (dados públicos do CNPJ e do site oficial da agência).
+  footer: {
+    phone: "(48) 3222-8022",
+    email: "atendimento@paraisoviagens.com",
+    address: "Av. Prof. Othon Gama D’Eça, 900 — Torre 1, sala 803 — Centro — Florianópolis/SC — CEP 88015-240",
+    legalName: "Garcez e Paraíso Agência de Turismo Ltda.",
+    cnpj: "01.848.030/0001-15",
+  },
 
   sections: {
     dmc: { enabled: false },
