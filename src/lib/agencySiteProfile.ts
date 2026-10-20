@@ -300,18 +300,23 @@ const LUXURY_CURATED: AgencySiteProfile = {
     offers: { order: 11 },
   },
   heroImage: "luxo",
+  heroPresentation: {
+    kicker: "CURADORIA DE VIAGENS · DESDE 2011",
+    cta: { label: "Planejar minha viagem", service: "pacotes" },
+    overlay: "strongLeft",
+  },
   hero: [
     {
       title: "Viagens extraordinárias começam nos detalhes",
       subtitle:
-        "Roteiros personalizados, hotéis excepcionais e experiências escolhidas para a sua forma de viajar.",
+        "Roteiros personalizados, hotéis excepcionais e experiências escolhidas, uma a uma, para a sua forma de viajar.",
       order: 1,
       enabled: true,
     },
     {
-      title: "O mundo, vivido do seu jeito",
+      title: "O mundo, vivido no seu ritmo",
       subtitle:
-        "Da natureza selvagem à alta gastronomia, cada jornada nasce de uma curadoria atenta.",
+        "Da savana africana aos vinhedos do Douro: cada jornada nasce de uma curadoria atenta ao seu tempo.",
       order: 2,
       enabled: true,
     },
@@ -352,29 +357,33 @@ const LUXURY_CURATED: AgencySiteProfile = {
     { title: "Parceiros especializados", text: "Operadoras, receptivos e guias escolhidos pela especialidade em cada destino.", service: "pacotes", cta: "Solicitar proposta" },
   ],
   differentials: [
-    { title: "Roteiros desenhados para cada viajante", text: "Nada de modelo pronto: a viagem nasce da conversa e do seu repertório.", icon: "consultivo" },
-    { title: "Seleção criteriosa de hospedagens", text: "Localização, serviço e atmosfera avaliados antes de qualquer indicação.", icon: "conferido" },
-    { title: "Parceiros especializados", text: "Fornecedores escolhidos pela especialidade local, não por volume.", icon: "fornecedores" },
-    { title: "Cuidado antes, durante e depois da viagem", text: "Acompanhamento em cada etapa, do planejamento ao retorno.", icon: "acompanhamento" },
+    { title: "1. Escuta", text: "Uma conversa sobre quem viaja, o tempo disponível, o que você quer viver e o que prefere evitar.", icon: "consultivo" },
+    { title: "2. Proposta comentada", text: "Opções de roteiro e hospedagem apresentadas com o porquê de cada escolha, para você decidir com clareza.", icon: "conferido" },
+    { title: "3. Reservas e detalhes", text: "Serviços confirmados com os parceiros de cada destino e documentos organizados antes do embarque.", icon: "fornecedores" },
+    { title: "4. Acompanhamento", text: "Presença durante a viagem e uma conversa no retorno, para a próxima ser ainda melhor.", icon: "acompanhamento" },
   ],
   about: {
     kicker: "QUEM DESENHA A SUA VIAGEM",
     title: "Uma trajetória construída desde 2011.",
     text:
-      "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas.",
+      "À frente da Paraíso, Mariana e Daniela unem repertório, escuta e cuidado para desenhar viagens personalizadas. Cada proposta passa pelo olhar delas antes de chegar até você.",
+    // Imagem neutra de ambientação: não há retrato autorizado de Mariana e Daniela.
+    // Quando houver fotos reais aprovadas, usar `images` com o retrato no lugar.
     image: "villa",
+    facts: ["Atuação desde 2011", "Atendimento conduzido por Mariana e Daniela", "Integrante da comunidade LUXPERTS"],
     badge: { value: "Desde 2011", label: "Experiência e cuidado em cada etapa." },
   },
   credentials: {
     kicker: "CREDENCIAIS E CONEXÕES",
     title: "Uma rede que amplia o repertório da curadoria.",
     text:
-      "A Paraíso integra a comunidade Luxperts, que reúne agências brasileiras selecionadas e conectadas ao turismo de luxo.",
+      "A Paraíso integra a comunidade LUXPERTS, que reúne agências brasileiras selecionadas e conectadas ao turismo de luxo, com acesso a parceiros, treinamentos e hotéis de referência.",
     items: [
       {
         key: "luxperts",
-        name: "Luxperts",
-        text: "Comunidade de agências brasileiras selecionadas, conectadas ao turismo de luxo.",
+        name: "LUXPERTS",
+        // Reconhecimento da COMUNIDADE, nunca endosso individual da agência. Sem selo até haver autorização.
+        text: "Comunidade de agências brasileiras de turismo de luxo. A comunidade LUXPERTS é reconhecida como “Endorsed by Forbes Travel Guide”; o reconhecimento é da comunidade, não uma certificação individual da Paraíso.",
       },
     ],
   },
@@ -407,23 +416,26 @@ const LUXURY_CURATED: AgencySiteProfile = {
         "Referências editoriais que guiam a nossa curadoria. Escolha uma e conversamos sobre como ela pode virar a sua viagem.",
     },
     modules: {
+      kicker: "INSPIRAÇÃO",
       title: "Coleções de experiências",
-      subtitle: "Temas que acompanhamos de perto. Escolha um e conte o que você imagina.",
+      subtitle: "Oito maneiras de viajar que acompanhamos de perto. Escolha a que mais conversa com o seu momento.",
     },
     highlights: {
+      kicker: "EXPERTISE",
       title: "A curadoria Paraíso",
-      subtitle: "Três princípios que orientam cada viagem que desenhamos.",
+      subtitle: "O que nos orienta ao escolher cada roteiro, hotel e parceiro.",
     },
     differentials: {
+      kicker: "PROCESSO",
       title: "Como cuidamos de cada viagem",
-      subtitle: "O que sustenta a experiência, do primeiro contato ao retorno.",
+      subtitle: "Quatro etapas, do primeiro contato ao retorno para casa.",
     },
     concierge: {
-      kicker: "ATENDIMENTO PRÓXIMO",
-      title: "Um consultor dedicado à sua viagem",
+      kicker: "VIAGEM PERSONALIZADA",
+      title: "Comece pela Central de Solicitações",
       subtitle:
-        "Conversamos, entendemos o seu momento e desenhamos as opções. Você decide com todas as informações à mão.",
-      cta: "Planeje sua viagem",
+        "Escolha o serviço — viagem completa, hospedagem, aéreo, cruzeiro e outros — e conte o que imagina. Mariana e Daniela retornam com uma proposta comentada.",
+      cta: "Abrir a Central de Solicitações",
     },
     newsletter: {
       kicker: "INSPIRAÇÕES",
