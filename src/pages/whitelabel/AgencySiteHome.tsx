@@ -65,6 +65,12 @@ import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
 import paraisoFoundersPortrait from "@/assets/whitelabel/paraiso-founders-portrait.png.asset.json";
 import paraisoHeroAmalfi from "@/assets/whitelabel/paraiso-hero-amalfi.png.asset.json";
 import paraisoHeroLago from "@/assets/whitelabel/paraiso-hero-lago.png.asset.json";
+import paraisoHeroBoraBora from "@/assets/whitelabel/paraiso-hero-bora-bora.mp4.asset.json";
+
+/** Vídeo opcional por foto de slide (a foto vira o poster). Só a Paraíso usa. */
+const HERO_VIDEO_BY_IMAGE: Record<string, string> = {
+  [paraisoHeroAmalfi.url]: paraisoHeroBoraBora.url,
+};
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
 import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
 import destinoLuaDeMel from "@/assets/whitelabel/destino-luademel.jpg";
@@ -1736,7 +1742,20 @@ export default function AgencySiteHome({
         aria-label="Destaques da agência"
       >
         <div className="absolute inset-0">
-          {current.image ? (
+          {current.image && HERO_VIDEO_BY_IMAGE[current.image] ? (
+            <video
+              key={HERO_VIDEO_BY_IMAGE[current.image]}
+              src={HERO_VIDEO_BY_IMAGE[current.image]}
+              poster={current.image}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-label={`${name} — ${(current.title ?? "").replace(/\s*\n\s*/g, " ")}`}
+              className={`h-full w-full object-cover ${heroImagePositionClass}`}
+            />
+          ) : current.image ? (
             <img
               src={current.image}
               alt={`${name} — ${(current.title ?? "").replace(/\s*\n\s*/g, " ")}`}
