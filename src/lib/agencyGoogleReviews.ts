@@ -30,7 +30,14 @@ const DRICA_VIAGENS: GoogleReviewsHostConfig = {
   placeId: "ChIJtcpG9uG2W48RfGhKmSu3ImM",
 };
 
+const MUNDO_EM_CORES: GoogleReviewsHostConfig = {
+  label: "O Mundo em Cores - Studio de Viagens",
+  placeId: "ChIJTZfsEsVfzpQRxxTEgPrUi30",
+};
+
 const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
+  "omundoemcores.com.br": MUNDO_EM_CORES,
+  "www.omundoemcores.com.br": MUNDO_EM_CORES,
   "destinoscomaju.com.br": DESTINOS_COM_A_JU,
   "www.destinoscomaju.com.br": DESTINOS_COM_A_JU,
   "100limites.tur.br": CEM_LIMITES,
