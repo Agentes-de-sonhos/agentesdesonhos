@@ -314,7 +314,7 @@ export function AgencyFooter({
     ];
     return (
       <footer id="rodape" className="wl-luxury-footer">
-        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] md:gap-10`}>
+        <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,2fr)_minmax(0,0.75fr)_minmax(0,1.4fr)_minmax(0,1fr)] md:gap-10`}>
           <div>
             <div className="flex flex-wrap items-center gap-4">
               {logoUrl ? (
