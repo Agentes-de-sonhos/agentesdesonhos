@@ -387,6 +387,12 @@ const LUXURY_CURATED: AgencySiteProfile = {
       },
     ],
   },
+  conciergeSteps: [
+    "Escolha o serviço na Central de Solicitações",
+    "Conte destino, datas e quem viaja",
+    "Receba uma proposta comentada",
+    "Decida com calma e siga acompanhado",
+  ],
   faq: [
     {
       q: "O que torna uma viagem personalizada?",
@@ -434,7 +440,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       kicker: "VIAGEM PERSONALIZADA",
       title: "Comece pela Central de Solicitações",
       subtitle:
-        "Escolha o serviço — viagem completa, hospedagem, aéreo, cruzeiro e outros — e conte o que imagina. Mariana e Daniela retornam com uma proposta comentada.",
+        "Escolha o serviço — viagem completa, hospedagem, aéreo, cruzeiro e outros — e conte o que imagina. A Paraíso retorna com uma proposta comentada.",
       cta: "Abrir a Central de Solicitações",
     },
     newsletter: {
