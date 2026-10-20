@@ -104,7 +104,7 @@ export type AgencyImageSlot =
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
   | "heroVarenna" | "heroSantoriniShip" | "heroAirportTraveler" | "heroJuMagicKingdom"
-  | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago"
+  | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago" | "paraisoTanzania" | "paraisoEslovenia"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites";
 
