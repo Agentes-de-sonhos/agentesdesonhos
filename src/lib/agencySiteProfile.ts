@@ -328,7 +328,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       enabled: true,
     },
     {
-      image: "paraisoLago",
+      image: "paraisoTanzania",
       title: "O mundo, vivido no seu ritmo",
       subtitle:
         "Da savana africana aos vinhedos do Douro: cada jornada nasce de uma curadoria atenta ao seu tempo.",
@@ -336,6 +336,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
       enabled: true,
     },
     {
+      image: "paraisoEslovenia",
       title: "Planejamento próximo. Experiências memoráveis.",
       subtitle:
         "Conte o que você imagina. A {agency} cuida de transformar desejos em uma viagem bem desenhada.",

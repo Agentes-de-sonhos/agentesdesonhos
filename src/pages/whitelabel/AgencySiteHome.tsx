@@ -65,6 +65,8 @@ import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
 import paraisoFoundersPortrait from "@/assets/whitelabel/paraiso-founders-portrait.png.asset.json";
 import paraisoHeroAmalfi from "@/assets/whitelabel/paraiso-hero-amalfi.png.asset.json";
 import paraisoHeroLago from "@/assets/whitelabel/paraiso-hero-lago.png.asset.json";
+import paraisoHeroTanzania from "@/assets/whitelabel/paraiso-hero-tanzania.png.asset.json";
+import paraisoHeroEslovenia from "@/assets/whitelabel/paraiso-hero-eslovenia.png.asset.json";
 import paraisoHeroBoraBora from "@/assets/whitelabel/paraiso-hero-bora-bora.mp4.asset.json";
 import luxpertsForbesLogo from "@/assets/whitelabel/luxperts-forbes.png.asset.json";
 
@@ -143,6 +145,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   paraisoFounders: paraisoFoundersPortrait.url,
   paraisoAmalfi: paraisoHeroAmalfi.url,
   paraisoLago: paraisoHeroLago.url,
+  paraisoTanzania: paraisoHeroTanzania.url,
+  paraisoEslovenia: paraisoHeroEslovenia.url,
   gastronomia: destinoGastronomia,
   brasil: destinoBrasil,
   luademel: destinoLuaDeMel,
