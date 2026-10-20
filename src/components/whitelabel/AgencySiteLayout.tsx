@@ -324,12 +324,6 @@ export function AgencyFooter({
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.address ?? location}
               </p>
             )}
-            {(footer?.legalName || footer?.cnpj) && (
-              <div className="mt-4 space-y-1 text-sm text-[hsl(var(--wl-ink)_/_0.8)]">
-                {footer?.legalName && <p>{footer.legalName}</p>}
-                {footer?.cnpj && <p>CNPJ {footer.cnpj}</p>}
-              </div>
-            )}
           </div>
 
           <div>
@@ -391,6 +385,8 @@ export function AgencyFooter({
           <div>
             <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Legal</p>
             <ul className="mt-5 space-y-3">
+              {footer?.legalName && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.85)]">{footer.legalName}</li>}
+              {footer?.cnpj && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.85)]">CNPJ {footer.cnpj}</li>}
               {legalLinks.map((l) => (
                 <li key={l.to}>
                   <a
