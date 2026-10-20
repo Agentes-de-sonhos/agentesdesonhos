@@ -288,6 +288,8 @@ export function AgencyFooter({
   const editorial = isEditorialTheme(info.hostname);
   const luxury = isLuxuryTheme(info.hostname);
   const logoUrl = resolveAgencyLogoUrl(info);
+  /* Paraíso: rodapé com selos IATA/Cadastur e endereço no lugar da descrição. */
+  const paraisoFooter = /paraisoviagens\.com$/i.test(info.hostname ?? "");
   /* Canais extras declarativos (e-mail público / Instagram) — vazio por padrão. */
   const contacts = resolveSiteContacts(info.hostname);
   const profile = resolveSiteProfile(info.hostname);
