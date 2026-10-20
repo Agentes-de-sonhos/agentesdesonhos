@@ -22,4 +22,4 @@
 
 - Quote hotel photos: safe-match on open, confirm if ambiguous. Why: no wrong hotel.
 - Universal `/universal`: editorialRose only, shared ticket rules/maps. Why: opt-in reuse.
-- Site requests require `success:true`, including duplicates; catch rejection as retryable error. Why: no false receipts.
+- Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.
