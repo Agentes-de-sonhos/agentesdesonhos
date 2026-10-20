@@ -294,6 +294,8 @@ export interface AgencyFeaturedExperience {
   gallery?: AgencyFeaturedImage[];
   /** Intervalo da galeria em ms (padrão 6000). */
   galleryIntervalMs?: number;
+  /** Opt-in: galeria no formato Stories (barras de progresso no topo). */
+  galleryStyle?: "default" | "stories";
   highlights?: string[];
   ctaLabel?: string;
   /** URL da landing; null mantém o botão inativo, sem link fictício. */
