@@ -48,7 +48,7 @@ describe("TripForm — datas informadas por outro módulo não desviam um dia", 
     fireEvent.change(screen.getByLabelText("Destino Principal"), {
       target: { value: "Orlando" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Criar Viagem|Criar/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Criar Carteira/i }));
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalled());
     expect(onSubmit.mock.calls[0][0]).toMatchObject({
