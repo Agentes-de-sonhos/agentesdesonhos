@@ -3,7 +3,7 @@ import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
-import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown } from "lucide-react";
+import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown, Clock } from "lucide-react";
 import { useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
@@ -362,6 +362,11 @@ export function AgencyFooter({
             {(footer?.address || location) && (
               <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.address ?? location}
+              </p>
+            )}
+            {footer?.hours && (
+              <p className="mt-3 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer.hours}
               </p>
             )}
           </div>
