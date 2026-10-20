@@ -81,7 +81,8 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
               return last ? (
                 <button key={i} type="button" onClick={() => setOpen(0)} className="relative overflow-hidden rounded-xl bg-muted">
                   <img src={photos[i].url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-                  <span className="absolute inset-0 grid place-items-center bg-foreground/45 text-sm font-semibold text-background">
+                  {photos[i].credit && <Credit text={photos[i].credit!} />}
+                  <span className="pointer-events-none absolute inset-0 grid place-items-center bg-foreground/45 text-sm font-semibold text-background">
                     <span className="flex items-center gap-1.5"><Images className="h-4 w-4" />Ver todas as fotos</span>
                   </span>
                 </button>
