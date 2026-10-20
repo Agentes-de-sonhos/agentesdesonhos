@@ -1529,3 +1529,10 @@ body[data-booking-selection-bar] {
 .wl-mundo g[data-region="n"][data-active] text { fill: #245C81 !important; }
 .wl-mundo button[data-region][data-active] { background-color: var(--mc) !important; border-color: var(--mc) !important; color: var(--mc-ink) !important; }
 .wl-mundo button[data-region]:not([data-active]) { border-color: color-mix(in srgb, var(--mc) 55%, white) !important; }
+
+/* Paraíso: botão Solicitar do solicitador de orçamentos */
+.wl-editorial.wl-luxury .wl-qq-submit { background-color: #2D3053 !important; color: #fff !important; transition: background-color .25s ease, color .25s ease; }
+.wl-editorial.wl-luxury .wl-qq-submit svg { color: currentColor !important; transition: transform .25s ease; }
+.wl-editorial.wl-luxury .wl-qq-submit:hover, .wl-editorial.wl-luxury .wl-qq-submit:focus-visible { background-color: #A8CC44 !important; color: #2D3053 !important; }
+.wl-editorial.wl-luxury .wl-qq-submit:hover svg, .wl-editorial.wl-luxury .wl-qq-submit:focus-visible svg { transform: translateX(3px); }
+@media (prefers-reduced-motion: reduce) { .wl-editorial.wl-luxury .wl-qq-submit:hover svg { transform: none; } }
