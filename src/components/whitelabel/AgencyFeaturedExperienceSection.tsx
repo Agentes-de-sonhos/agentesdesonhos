@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import type { AgencyFeaturedExperience } from "@/lib/agencySiteProfile";
 import { AgencyFeaturedGallery } from "./AgencyFeaturedGallery";
+import { AgencyStoriesGallery } from "./AgencyStoriesGallery";
 
 /**
  * "Experiência em destaque": seção editorial reutilizável e totalmente
@@ -71,7 +72,11 @@ export function AgencyFeaturedExperienceSection({
 
         {config.gallery && config.gallery.length > 0 ? (
           <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
-            <AgencyFeaturedGallery images={config.gallery} intervalMs={config.galleryIntervalMs} badge={config.badge} />
+            {config.galleryStyle === "stories" ? (
+              <AgencyStoriesGallery images={config.gallery} intervalMs={config.galleryIntervalMs} badge={config.badge} />
+            ) : (
+              <AgencyFeaturedGallery images={config.gallery} intervalMs={config.galleryIntervalMs} badge={config.badge} />
+            )}
           </div>
         ) : (
         <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
