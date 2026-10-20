@@ -62,6 +62,7 @@ import destinoParques from "@/assets/whitelabel/destino-parques.jpg";
 import destinoSafari from "@/assets/whitelabel/destino-safari.jpg";
 import destinoDouro from "@/assets/whitelabel/destino-douro.jpg";
 import destinoVilla from "@/assets/whitelabel/destino-villa.jpg";
+import paraisoFoundersPortrait from "@/assets/whitelabel/paraiso-founders-portrait.png.asset.json";
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
 import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
 import destinoLuaDeMel from "@/assets/whitelabel/destino-luademel.jpg";
@@ -130,6 +131,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   safari: destinoSafari,
   douro: destinoDouro,
   villa: destinoVilla,
+  paraisoFounders: paraisoFoundersPortrait.url,
   gastronomia: destinoGastronomia,
   brasil: destinoBrasil,
   luademel: destinoLuaDeMel,
