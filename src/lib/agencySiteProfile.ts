@@ -1,4 +1,5 @@
 import exploraMonaco from "@/assets/paraiso/explora-monaco.jpg";
+import exploraVideo from "@/assets/paraiso/explora-i-desktop.mp4.asset.json";
 import momentFamily from "@/assets/100limites-moment-family.jpg";
 import momentHoneymoon from "@/assets/100limites-moment-honeymoon.jpg";
 import momentFriends from "@/assets/100limites-moment-friends.jpg";
@@ -211,6 +212,9 @@ export interface AgencySiteProfile {
     url: string;
     image: string;
     imageAlt: string;
+    video?: string;
+    subtext?: string;
+    stats?: { icon: "bed" | "waves" | "dining" | "wine" | "users"; value: string; label: string }[];
     note?: string;
   };
   authority?: AgencyAuthorityContent;
@@ -307,15 +311,24 @@ const LUXURY_CURATED: AgencySiteProfile = {
   hideConciergeWhatsapp: true,
   hideFaqWhatsapp: true,
   partnerSpotlight: {
-    kicker: "EXPERIÊNCIA EXCLUSIVA · EXPLORA JOURNEYS",
+    kicker: "O NAVIO · EXPLORA JOURNEYS",
     title: "EXPLORA I · Grande Prêmio de Mônaco 2027",
-    text: "Viva o fim de semana mais glamouroso da Fórmula 1 a bordo do EXPLORA I, atracado no Porto Hercule, a cerca de 150 metros do F1 Paddock Club, de 2 a 7 de junho de 2027.",
+    text: "Viva o fim de semana mais glamouroso da Fórmula 1 a bordo do EXPLORA I, atracado no Porto Hercule, a cerca de 150 metros do F1 Paddock Club, de 2 a 7 de junho de 2027. Vistas panorâmicas do oceano em todas as 456 suítes, entre as mais espaçosas de sua categoria.",
+    subtext: "Suítes com janelas do chão ao teto e terraços privativos à beira-mar.",
     points: ["Apenas Suíte", "Suíte com Arquibancada", "Suíte com Paddock Club"],
+    stats: [
+      { icon: "bed", value: "456", label: "Suítes de frente para o mar" },
+      { icon: "waves", value: "5", label: "Piscinas aquecidas" },
+      { icon: "dining", value: "6", label: "Restaurantes" },
+      { icon: "wine", value: "12", label: "Bares e lounges" },
+      { icon: "users", value: "1,25:1", label: "Hóspedes por anfitrião" },
+    ],
     cta: "Explorar a experiência Mônaco 2027",
     url: "https://explorajourneysbrasil.com.br/paraisoviagens",
     image: exploraMonaco,
-    imageAlt: "Navio de cruzeiro atracado no porto de Mônaco ao entardecer",
-    note: "Página oficial da parceria Explora Journeys Brasil · abre em nova aba. Imagem ilustrativa.",
+    imageAlt: "Navio EXPLORA I navegando em alto-mar",
+    video: exploraVideo.url,
+    note: "Página oficial da parceria Explora Journeys Brasil · abre em nova aba.",
   },
   // Rodapé institucional (dados públicos do CNPJ e do site oficial da agência).
   footer: {
