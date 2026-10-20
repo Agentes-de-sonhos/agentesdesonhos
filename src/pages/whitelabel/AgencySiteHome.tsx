@@ -68,11 +68,15 @@ import paraisoHeroLago from "@/assets/whitelabel/paraiso-hero-lago.png.asset.jso
 import paraisoHeroTanzania from "@/assets/whitelabel/paraiso-hero-tanzania.png.asset.json";
 import paraisoHeroEslovenia from "@/assets/whitelabel/paraiso-hero-eslovenia.png.asset.json";
 import paraisoHeroBoraBora from "@/assets/whitelabel/paraiso-hero-bora-bora.mp4.asset.json";
+import paraisoHeroRiviera from "@/assets/whitelabel/paraiso-hero-riviera.mp4.asset.json";
+import paraisoHeroAurora from "@/assets/whitelabel/paraiso-hero-aurora.mp4.asset.json";
 import luxpertsForbesLogo from "@/assets/whitelabel/luxperts-forbes.png.asset.json";
 
 /** Vídeo opcional por foto de slide (a foto vira o poster). Só a Paraíso usa. */
 const HERO_VIDEO_BY_IMAGE: Record<string, string> = {
   [paraisoHeroAmalfi.url]: paraisoHeroBoraBora.url,
+  [paraisoHeroTanzania.url]: paraisoHeroRiviera.url,
+  [paraisoHeroEslovenia.url]: paraisoHeroAurora.url,
 };
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
 import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
