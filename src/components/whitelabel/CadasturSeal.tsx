@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import cadasturSeal from "@/assets/whitelabel/selo-cadastur.png.asset.json";
 import certLimites from "@/assets/whitelabel/certificado-cadastur-100-limites.jpg.asset.json";
 import certMundo from "@/assets/whitelabel/certificado-cadastur-o-mundo-em-cores.jpg.asset.json";
+import certParaiso from "@/assets/paraiso/certificado-cadastur.pdf.asset.json";
 import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.jpg.asset.json";
 
 /** Certificado por agência autorizada (hostname). */
@@ -11,6 +12,7 @@ export function cadasturCertificateFor(hostname?: string | null) {
   const h = hostname ?? "";
   if (/(^|\.)destinoscomaju\.com\.br$/i.test(h)) return { url: certJu.url, agency: "Destinos com a Ju" };
   if (h === "briefing-14-v1.preview.local" || /(^|\.)omundoemcores\.com\.br$/i.test(h)) return { url: certMundo.url, agency: "O Mundo em Cores" };
+  if (/(^|\.)paraisoviagens\.com$/i.test(h)) return { url: certParaiso.url, agency: "Paraíso Viagens" };
   if (/100limites/i.test(h)) return { url: certLimites.url, agency: "100 Limites" };
   return null;
 }
@@ -61,11 +63,19 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
-              <img
-                src={certificate.url}
-                alt={`Certificado Cadastur da ${certificate.agency}`}
-                className="max-h-[80vh] w-full rounded-lg object-contain shadow-2xl"
-              />
+              {/\.pdf$/i.test(certificate.url) ? (
+                <iframe
+                  src={`${certificate.url}#view=FitH&toolbar=0`}
+                  title={`Certificado Cadastur da ${certificate.agency}`}
+                  className="h-[80vh] w-full rounded-lg bg-white shadow-2xl"
+                />
+              ) : (
+                <img
+                  src={certificate.url}
+                  alt={`Certificado Cadastur da ${certificate.agency}`}
+                  className="max-h-[80vh] w-full rounded-lg object-contain shadow-2xl"
+                />
+              )}
             </div>
           </div>,
           document.body,

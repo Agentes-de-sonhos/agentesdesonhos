@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
-import cadasturSealAsset from "@/assets/whitelabel/selo-cadastur.png.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
@@ -166,7 +165,7 @@ export function AgencyBrandBar({
             {/paraisoviagens\.com$/i.test(info.hostname ?? "") ? (
               <div className="flex items-center gap-2.5">
                 <img src={iataTidsSeal.url} alt="Selo IATA TIDS — número 96303771" title="IATA 96303771" className="h-9 w-9 rounded-full object-contain" />
-                <img src={cadasturSealAsset.url} alt="Somos certificados Cadastur" className="h-7 w-auto object-contain" />
+                <CadasturSeal hostname={info.hostname} className="h-7 w-auto object-contain" />
               </div>
             ) : (
               showCadastur(info.hostname) && <CadasturSeal hostname={info.hostname} className="h-7 w-auto object-contain" />
@@ -346,12 +345,7 @@ export function AgencyFooter({
                   </div>
                   {/* Centralizado apenas na altura da imagem do selo IATA, não no número. */}
                   <div className="flex h-14 items-center md:h-16">
-                    <img
-                      src={cadasturSealAsset.url}
-                      alt="Somos certificados Cadastur"
-                      loading="lazy"
-                      className="h-11 w-auto object-contain md:h-12"
-                    />
+                    <CadasturSeal lazy hostname={info.hostname} className="h-11 w-auto object-contain md:h-12" />
                   </div>
 
 
