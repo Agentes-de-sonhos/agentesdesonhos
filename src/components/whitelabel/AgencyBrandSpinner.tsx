@@ -8,6 +8,7 @@
 import { Loader2 } from "lucide-react";
 import { normalizeBrandHost } from "@/lib/agencySiteBrand";
 import destinosComAJuSymbol from "@/assets/whitelabel/simbolo-destinos-com-a-ju.png.asset.json";
+import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
@@ -21,10 +22,16 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "www.100limites.tur.br": CEM_LIMITES_MARK,
   "paraisoviagens.com": paraisoLogo.url,
   "www.paraisoviagens.com": paraisoLogo.url,
+  "omundoemcores.com.br": mundoEmCoresLogo.url,
+  "www.omundoemcores.com.br": mundoEmCoresLogo.url,
+  "briefing-14-v1.preview.local": mundoEmCoresLogo.url,
 };
 
 /** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
-const BREATHE_HOSTNAMES = new Set(["paraisoviagens.com", "www.paraisoviagens.com"]);
+const BREATHE_HOSTNAMES = new Set([
+  "paraisoviagens.com", "www.paraisoviagens.com",
+  "omundoemcores.com.br", "www.omundoemcores.com.br", "briefing-14-v1.preview.local",
+]);
 
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
 function resolveContextHostname(explicit?: string | null): string {
