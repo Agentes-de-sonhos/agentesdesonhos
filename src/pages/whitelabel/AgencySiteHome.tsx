@@ -66,6 +66,7 @@ import paraisoFoundersPortrait from "@/assets/whitelabel/paraiso-founders-portra
 import paraisoHeroAmalfi from "@/assets/whitelabel/paraiso-hero-amalfi.png.asset.json";
 import paraisoHeroLago from "@/assets/whitelabel/paraiso-hero-lago.png.asset.json";
 import paraisoHeroBoraBora from "@/assets/whitelabel/paraiso-hero-bora-bora.mp4.asset.json";
+import luxpertsForbesLogo from "@/assets/whitelabel/luxperts-forbes.png.asset.json";
 
 /** Vídeo opcional por foto de slide (a foto vira o poster). Só a Paraíso usa. */
 const HERO_VIDEO_BY_IMAGE: Record<string, string> = {
@@ -795,6 +796,16 @@ export default function AgencySiteHome({
                   {c.text}
                 </p>
               </div>
+              {c.logo === "luxpertsForbes" ? (
+                <div className="flex items-center justify-center rounded-sm bg-[hsl(var(--wl-sand,var(--muted)))] p-8 md:p-12">
+                  <img
+                    src={luxpertsForbesLogo.url}
+                    alt="LUXPERTS — Endorsed by Forbes Travel Guide"
+                    loading="lazy"
+                    className="h-auto w-full max-w-[420px] object-contain mix-blend-multiply"
+                  />
+                </div>
+              ) : (
               <ul className="grid content-start gap-6">
                 {c.items.map((item) => {
                   const Icon = CREDENTIAL_ICONS[item.key] ?? Award;
@@ -818,6 +829,7 @@ export default function AgencySiteHome({
                   );
                 })}
               </ul>
+              )}
             </div>
           </section>
         );

@@ -73,6 +73,8 @@ export interface AgencyCredentialsContent {
   title: string;
   text: string;
   items: { key: string; name: string; text: string }[];
+  /** Opt-in: substitui a lista da coluna direita por um logotipo fornecido pela agência. */
+  logo?: "luxpertsForbes";
 }
 
 export interface AgencySectionCopy {
@@ -390,6 +392,7 @@ const LUXURY_CURATED: AgencySiteProfile = {
     title: "Uma rede que amplia o repertório da curadoria.",
     text:
       "A Paraíso integra a comunidade LUXPERTS, que reúne agências brasileiras selecionadas e conectadas ao turismo de luxo, com acesso a parceiros, treinamentos e hotéis de referência.",
+    logo: "luxpertsForbes",
     items: [
       {
         key: "luxperts",
