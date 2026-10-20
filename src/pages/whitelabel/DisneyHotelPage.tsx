@@ -14,7 +14,7 @@ import { agencyContextHref } from "@/lib/agencyContextLink";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 /** Data real da importação única do snapshot Google (commit 3246f344, 20/10/2026). */
-export const GOOGLE_SNAPSHOT_DATE = "20/10/2026";
+const GOOGLE_SNAPSHOT_DATE = "20/10/2026";
 const fmt = (iso: string) => iso.split("-").reverse().join("/");
 
 interface GSnap { address: string; rating?: number | null; total?: number | null; mapsUrl: string; lat: number; lng: number; photos: { url: string; credit: string }[]; reviews: { author: string; rating?: number; text: string; relativeTime?: string }[] }
