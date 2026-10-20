@@ -3,6 +3,10 @@ import { ChevronLeft, ChevronRight, Images, X } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { HotelPhoto } from "./types";
 
+function Credit({ text }: { text: string }) {
+  return <span className="absolute bottom-2 left-2 max-w-[70%] truncate rounded bg-foreground/60 px-1.5 py-0.5 text-[10px] text-background" data-testid="photo-credit">Foto: {text}</span>;
+}
+
 export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hotelName: string }) {
   const [open, setOpen] = useState<number | null>(null);
   const total = photos.length;
@@ -41,6 +45,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
         loading={eager ? "eager" : "lazy"}
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       />
+      {photos[i].credit && <Credit text={photos[i].credit!} />}
     </button>
   );
 
@@ -52,6 +57,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
           {photos.map((p, i) => (
             <button key={i} type="button" onClick={() => setOpen(i)} className="relative aspect-[4/3] w-[85%] shrink-0 snap-center overflow-hidden rounded-xl bg-muted">
               <img src={p.url} alt={p.alt} loading={i ? "lazy" : "eager"} className="h-full w-full object-cover" />
+              {p.credit && <Credit text={p.credit} />}
               <span className="absolute bottom-2 right-2 rounded-full bg-foreground/70 px-2 py-0.5 text-xs text-background">{i + 1}/{total}</span>
             </button>
           ))}
@@ -122,7 +128,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
                 </>
               )}
               <div className="flex items-center justify-between px-4 py-3 text-sm">
-                <span>{photos[open].alt}</span>
+                <span>{photos[open].alt}{photos[open].credit && <span className="ml-2 opacity-80" data-testid="photo-credit">· Foto: {photos[open].credit}</span>}</span>
                 <span>{open + 1} / {total}</span>
               </div>
             </div>

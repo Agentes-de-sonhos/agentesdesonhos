@@ -50,6 +50,11 @@ function Header({ info }: { info: AgencyDomainInfo }) {
         </nav>
         <a href="#ingressos" className="lg:hidden"><Button size="sm" className="rounded-md"><Ticket className="mr-1.5 h-4 w-4" />Ingressos</Button></a>
       </div>
+      <nav aria-label="Nesta página (celular)" className="border-t border-border/60 lg:hidden" data-testid="disney-mobile-nav">
+        <div className={`${W} flex gap-2 overflow-x-auto py-2 [scrollbar-width:none]`}>
+          {links.filter(([, to]) => to !== "#ingressos").map(([l, to]) => <a key={to} href={to} className="shrink-0 rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground/80 hover:text-primary">{l}</a>)}
+        </div>
+      </nav>
     </header>
   );
 }

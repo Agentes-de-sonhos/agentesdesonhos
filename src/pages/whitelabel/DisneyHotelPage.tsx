@@ -55,6 +55,9 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
   }
   const g = GDATA[hotel.slug] ?? null;
   const mapQ = g ? `${g.lat},${g.lng}` : encodeURIComponent(`${hotel.name}, ${hotel.address}`);
+  const placeName = (g as (GSnap & { placeName?: string }) | null)?.placeName;
+  const norm = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const sharedWith = placeName && norm(placeName) !== norm(hotel.name) && Object.entries(GDATA).some(([k, v]) => k !== hotel.slug && v && (v as { placeName?: string }).placeName === placeName && norm(getDisneyHotel(k)?.name ?? "") === norm(placeName)) ? placeName : null;
   const reviews = g ? [...g.reviews].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)).slice(0, 5) : [];
   return (
     <div className="bg-background px-4 py-8 md:py-12">
@@ -68,9 +71,10 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
         </header>
         {hotel.status === "future" && <p className="rounded-md border border-primary/40 bg-primary/5 p-4 text-sm"><strong>Hotel futuro.</strong> Inauguração anunciada para {hotel.opening}. Ainda não faz parte do catálogo atual.</p>}
 
-        {g && g.photos.length > 0 && <HotelGallery photos={g.photos.map((p) => ({ url: p.url, alt: hotel.name }))} hotelName={hotel.name} />}
+        {g && g.photos.length > 0 && <HotelGallery photos={g.photos.map((p, i) => ({ url: p.url, alt: `${hotel.name} — foto ${i + 1}`, credit: p.credit || undefined }))} hotelName={hotel.name} />}
+        {sharedWith && <p className="text-xs text-muted-foreground" data-testid="disney-shared-listing">As fotos e avaliações abaixo são da ficha do Google de <strong>{sharedWith}</strong>, compartilhada com {hotel.name}. Não são avaliações exclusivas desta hospedagem.</p>}
 
-        {hotel.status === "open" && <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} />}
+        {hotel.status === "open" && <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={simulated} />}
         {simulated && <p className="text-center text-xs text-muted-foreground">Prévia: os pedidos desta página são simulados e não chegam ao CRM.</p>}
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -103,13 +107,14 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
             </section>
             {g?.rating && (
               <section className="rounded-2xl border border-border bg-card p-5">
-                <h2 className="flex items-center gap-2 font-bold"><Star className="h-5 w-5 text-primary" aria-hidden />Avaliações no Google</h2>
+                <h2 className="flex items-center gap-2 font-bold"><Star className="h-5 w-5 text-primary" aria-hidden />{sharedWith ? `Avaliações no Google de ${sharedWith}` : "Avaliações no Google"}</h2>
                 <div className="mt-4 flex items-center gap-3">
                   <span className="text-4xl font-bold tabular-nums">{g.rating.toFixed(1).replace(".", ",")}</span>
                   <div className="flex-1"><Stars value={g.rating} /><p className="mt-0.5 text-xs text-muted-foreground">{(g.total ?? 0).toLocaleString("pt-BR")} avaliações</p></div>
                 </div>
                 <a href={g.mapsUrl} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">Ver avaliações <ChevronRight className="h-4 w-4" /></a>
                 <ReviewsCarousel reviews={reviews} />
+                <p className="mt-3 text-[11px] text-muted-foreground">Avaliações de usuários do Google, com o nome do autor exibido em cada uma.</p>
               </section>
             )}
           </aside>

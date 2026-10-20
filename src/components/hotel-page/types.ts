@@ -9,6 +9,8 @@ export type HotelAmenityIcon =
 export interface HotelPhoto {
   url: string;
   alt: string;
+  /** Autoria exigida pela fonte (ex.: Google). Exibida em cada foto quando presente. */
+  credit?: string;
 }
 
 export interface HotelAmenity {
