@@ -324,7 +324,7 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
               <Button type="button" variant="outline" size="sm" className="ml-3 rounded-md" onClick={() => { reset(); void onSubmit(); }}><RotateCcw className="mr-1.5 h-4 w-4" />Tentar novamente</Button>
             </div>
           )}
-          <Button className="mt-6 w-full rounded-md sm:w-auto" size="lg" disabled={state === "submitting"} onClick={onSubmit}>
+          <Button className="mt-6 w-full rounded-md sm:w-auto" size="lg" disabled={state === "submitting"} onClick={onSubmit} data-testid="disney-submit">
             {state === "submitting" ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enviando…</> : "Solicitar cotação"}
           </Button>
         </Step>
