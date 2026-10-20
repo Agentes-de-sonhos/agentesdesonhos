@@ -377,7 +377,7 @@ export function AgencyFooter({
             )}
           </div>
 
-          <div>
+          <div className="text-center md:text-left">
             <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Navegação</p>
             <ul className="mt-5 space-y-3">
               {navLinks.map((l) => (
@@ -393,7 +393,7 @@ export function AgencyFooter({
             </ul>
           </div>
 
-          <div>
+          <div className="text-center md:text-left">
             <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Atendimento</p>
             <ul className="mt-5 space-y-3">
               {wa && !footer?.phone ? (
@@ -433,7 +433,7 @@ export function AgencyFooter({
             </ul>
           </div>
 
-          <div>
+          <div className="text-center md:text-left">
             <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Legal</p>
             <ul className="mt-5 space-y-3">
               {footer?.legalName && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.85)]">{footer.legalName}</li>}
