@@ -89,19 +89,15 @@ function Hero() {
         <CarouselContent className="ml-0">
           {UNIVERSAL_HERO.map((s, i) => (
             <CarouselItem key={s.title} className="pl-0">
-              <div className="relative h-[78vh] min-h-[520px] max-h-[760px] w-full overflow-hidden">
+              <div className="relative h-[530px] max-h-[530px] w-full overflow-hidden">
                 <img src={s.image} alt={s.alt} className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: s.focal ?? "center" }} loading={i === 0 ? "eager" : "lazy"} />
                 <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/45 to-transparent" />
-                <div className={`${contentWidth} relative flex h-full flex-col justify-end pb-20 md:justify-center md:pb-0`}>
+                <div className={`${contentWidth} relative flex h-full flex-col justify-end pb-16 md:justify-center md:pb-0`}>
                   <div className="max-w-xl text-background">
                     <img src={s.logo} alt="" className="mb-5 h-16 w-auto object-contain md:h-20" />
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-background/80">{s.kicker}</p>
                     <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight md:text-6xl">{s.title}</h1>
                     <p className="mt-4 text-pretty text-base leading-7 text-background/90 md:text-lg">{s.subtitle}</p>
-                    <div className="mt-7 flex flex-wrap gap-3">
-                      <a href="#ingressos"><Button size="lg" className="rounded-md"><Ticket className="mr-2 h-4 w-4" />Solicitar ingressos</Button></a>
-                      <a href="#parques"><Button size="lg" variant="secondary" className="rounded-md">Conhecer os parques</Button></a>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -201,27 +197,7 @@ export default function UniversalLandingPage({ info, noindex = false }: { info: 
             <SectionIntro kicker="Hospedagem" title="Conheça os hotéis da Universal Orlando Resort">
               <p>Hospedar-se no complexo traz vantagens como entrada antecipada nos parques (Early Park Admission, conforme regras vigentes) e transporte gratuito até os parques. Nos hotéis Signature, o Universal Express Unlimited está incluído nos parques participantes.</p>
             </SectionIntro>
-            <Carousel opts={{ align: "start" }} className="mx-auto mt-10 max-w-[1120px]" aria-label="Hotéis da Universal Orlando Resort">
-              <CarouselContent>
-                {UNIVERSAL_HOTELS.map((h) => (
-                  <CarouselItem key={h.name} className="basis-[88%] sm:basis-1/2 lg:basis-1/3">
-                    <article className="flex h-full flex-col overflow-hidden rounded-md bg-card shadow-sm">
-                      <img src={h.image} alt={h.name} className="aspect-[4/3] w-full object-cover" loading="lazy" />
-                      <div className="flex flex-1 flex-col p-5">
-                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{h.category}</p>
-                        <h3 className="mt-2 text-xl font-semibold">{h.name}</h3>
-                        <p className="mt-2 flex-1 text-pretty text-sm leading-6 text-muted-foreground">{h.description}</p>
-                        <a href={xcaretWhatsappUrl(`Olá! Quero saber mais sobre o ${h.name}.`)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
-                          Explore <ArrowRight className="h-4 w-4" aria-hidden />
-                        </a>
-                      </div>
-                    </article>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious aria-label="Hotel anterior" className="-left-2 top-[30%] h-11 w-11 md:-left-5" />
-              <CarouselNext aria-label="Próximo hotel" className="-right-2 top-[30%] h-11 w-11 md:-right-5" />
-            </Carousel>
+            <HotelsGallery />
           </div>
         </section>
 
