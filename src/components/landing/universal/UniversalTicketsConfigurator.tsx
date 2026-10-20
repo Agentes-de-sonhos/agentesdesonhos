@@ -106,7 +106,6 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   // Etapas: 1 parques, 2 período, 3 dias, 4 troca (só com os dois parques clássicos), 5 resumo, 6 cotação.
   const sequence = [1, 2, 3, ...(both ? [4] : []), 5, 6];
   const nextOf = (n: number) => sequence[sequence.indexOf(n) + 1];
-  const isOpen = (n: number) => sequence.includes(n) && sequence.indexOf(n) <= sequence.indexOf(Math.min(revealed, 6) as number) || (n <= revealed && sequence.includes(n));
 
   const calDays = periodMode === "dates" ? calendarDays(arrival, departure) : null;
   const validate = (n: number): string | null => {

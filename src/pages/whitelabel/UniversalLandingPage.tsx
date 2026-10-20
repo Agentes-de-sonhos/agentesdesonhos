@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { SEO } from "@/components/seo/SEO";
 import { DisneyParkMapTrigger, type UniversalMapId } from "@/components/orlando/DisneyParkMapDialog";
+import { UniversalTicketsConfigurator } from "@/components/landing/universal/UniversalTicketsConfigurator";
 import { xcaretWhatsappUrl } from "@/components/landing/xcaret/content";
 import {
   UNIVERSAL_CITYWALK,
@@ -129,15 +130,9 @@ export default function UniversalLandingPage({ info, noindex = false }: { info: 
       <main>
         <Hero />
 
-        {/* Seção 2: módulo de ingressos — aguardando o módulo definitivo (standby). */}
-        <section id="ingressos" className="scroll-mt-24 wl-alt-gradient py-16 md:py-20" data-slot="universal-tickets-module">
+        <section id="ingressos" className="scroll-mt-24 wl-alt-gradient py-16 md:py-20">
           <div className={contentWidth}>
-            <SectionIntro kicker="Ingressos" title="Monte os ingressos da sua viagem à Universal">
-              <p>Ingressos de 1 ou mais dias, Park-to-Park, combinações com Epic Universe e Volcano Bay e opções como Express Pass. Conte o que você quer viver e montamos a melhor combinação para o seu roteiro.</p>
-            </SectionIntro>
-            <div className="mt-8 flex justify-center">
-              <WaButton label="Falar sobre meus ingressos" message="Olá! Quero ajuda com ingressos para a Universal Orlando Resort." />
-            </div>
+            <UniversalTicketsConfigurator hostname={info.hostname} />
           </div>
         </section>
 
