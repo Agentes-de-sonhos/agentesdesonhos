@@ -397,6 +397,13 @@ const LUXURY_CURATED: AgencySiteProfile = {
     facts: ["Atuação desde 2011", "Atendimento conduzido por Mariana e Daniela", "Integrante da comunidade LUXPERTS"],
     badge: { value: "Desde 2011", label: "Experiência e cuidado em cada etapa." },
   },
+  inspirationDialog: {
+    groupUrl: "https://chat.whatsapp.com/H65S2OtR73Q3PnAGH6sCoT",
+    title: "Entre no grupo de inspirações",
+    description: "Preencha seus dados. Ao confirmar, você será direcionado automaticamente para o grupo de WhatsApp da Paraíso Viagens.",
+    submitLabel: "Confirmar e entrar no grupo",
+    notice: "Ao confirmar, você autoriza o contato da agência e será levado ao grupo de WhatsApp.",
+  },
   credentials: {
     kicker: "CREDENCIAIS E CONEXÕES",
     title: "Uma rede que amplia o repertório da curadoria.",
