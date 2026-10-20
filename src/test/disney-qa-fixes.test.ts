@@ -63,5 +63,5 @@ describe("hotéis", () => {
     expect(open).toHaveLength(31);
     for (const h of DISNEY_HOTELS) expect(getDisneyHotel(h.slug)?.slug).toBe(h.slug);
   });
-  it("slug inventado não resolve", () => expect(getDisneyHotel("disneys-grand-floridian-resort-and-spa")).toBeUndefined());
+  it("slug inventado não resolve", () => expect(getDisneyHotel("disneys-grand-floridian-resort-and-spa")).toBeNull());
 });
