@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
+import cadasturSealAsset from "@/assets/whitelabel/selo-cadastur.png.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
@@ -326,6 +327,13 @@ export function AgencyFooter({
                     loading="lazy"
                     className="h-14 w-14 rounded-full object-contain md:h-16 md:w-16"
                   />
+                  <img
+                    src={cadasturSealAsset.url}
+                    alt="Somos certificados Cadastur"
+                    loading="lazy"
+                    className="h-14 w-auto object-contain md:h-16"
+                  />
+
                 </div>
               )}
             </div>
