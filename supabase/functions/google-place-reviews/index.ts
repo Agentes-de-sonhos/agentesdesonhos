@@ -11,6 +11,8 @@ const corsHeaders = {
 };
 
 const PLACE_BY_HOSTNAME: Record<string, string> = {
+  "omundoemcores.com.br": "ChIJTZfsEsVfzpQRxxTEgPrUi30",
+  "www.omundoemcores.com.br": "ChIJTZfsEsVfzpQRxxTEgPrUi30",
   "destinoscomaju.com.br": "ChIJhTnCndr3zpQRyRaMIZaR7Kw",
   "www.destinoscomaju.com.br": "ChIJhTnCndr3zpQRyRaMIZaR7Kw",
   "100limites.tur.br": "ChIJja6jcMrwnUYR1bK8iqexXQg",
