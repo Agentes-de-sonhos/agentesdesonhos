@@ -54,14 +54,6 @@ const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
   },
 };
 
-// Telefone/WhatsApp principal da Paraíso Viagens (briefing Fernando, 20/10/2026):
-// vale para todo contato e envio de solicitações do site.
-const PARAISO_CONTACTS: AgencySiteContacts = {
-  phone: "(48) 99946-6467",
-};
-
-const PARAISO_HOSTS = ["paraisoviagens.com", "www.paraisoviagens.com"];
-
 function normalizeHost(hostname?: string | null): string {
   return (hostname || "").trim().toLowerCase().replace(/:\d+$/, "");
 }
