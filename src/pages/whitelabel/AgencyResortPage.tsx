@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { HotelDetailsView } from "@/components/hotel-page/HotelDetailsView";
 import { getResortPage } from "@/components/hotel-page/resortsCatalog";
-import type { HotelQuoteRequest } from "@/components/hotel-page/types";
+import type { HotelPageData, HotelQuoteRequest } from "@/components/hotel-page/types";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
@@ -43,8 +43,8 @@ export default function AgencyResortPage({ info, slug: slugProp, resolve = getRe
       service_key: "hospedagem",
       service_label: "Hospedagem",
       destination,
-      summary: `Serviços solicitados: Hospedagem | Resort: ${hotel.name} | Período: ${period} | Viajantes: ${pax}`,
-      notes: `Solicitação pela página do resort ${hotel.name}.`,
+      summary: `Serviços solicitados: Hospedagem | ${kind}: ${hotel.name} | Período: ${period} | Viajantes: ${pax}`,
+      notes: `Solicitação pela página do ${kind.toLowerCase()} ${hotel.name}.`,
       lead_name: req.contact.name,
       lead_phone: req.contact.whatsapp,
       lead_email: req.contact.email,
@@ -61,13 +61,13 @@ export default function AgencyResortPage({ info, slug: slugProp, resolve = getRe
         adultos: String(req.adults),
         criancas: String(req.childrenAges.length),
         idades_criancas: req.childrenAges.join(", "),
-        tipo_hospedagem: "Resort",
+        tipo_hospedagem: kind,
         servicos: "Hospedagem",
         servicos_keys: "hospedagem",
       },
     });
     if ("error" in res) throw new Error("Não foi possível enviar agora. Tente novamente.");
-  }, [hotel, submit]);
+  }, [hotel, submit, kind]);
 
   const whatsappUrl = useCallback((req: HotelQuoteRequest) => {
     const digits = (info.phone ?? "").replace(/\D/g, "");
@@ -85,7 +85,7 @@ export default function AgencyResortPage({ info, slug: slugProp, resolve = getRe
           <HotelDetailsView hotel={hotel} onSubmitQuote={onSubmitQuote} quoteWhatsappUrl={whatsappUrl} />
         ) : (
           <p className="py-20 text-center text-muted-foreground">
-            Resort não encontrado. <a href={agencySiteHref("/resorts-brasil")} className="text-primary underline">Ver todos os resorts</a>
+            {kind} não encontrado. <a href={agencySiteHref(backHref)} className="text-primary underline">Ver todos</a>
           </p>
         )}
       </div>
