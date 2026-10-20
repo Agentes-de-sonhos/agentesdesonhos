@@ -187,7 +187,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   return (
     <div className="mx-auto max-w-4xl space-y-6" data-testid="universal-configurator">
       <div className="flex flex-col items-center gap-6 rounded-xl bg-card p-6 shadow-sm sm:flex-row md:p-8">
-        <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="h-28 w-28 shrink-0 rounded-full object-cover object-[50%_20%] md:h-32 md:w-32" />
+        <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="h-28 w-28 shrink-0 rounded-full object-cover object-[78%_20%] md:h-32 md:w-32" />
         <div className="text-center sm:text-left">
           <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos encontrar o seu ingresso?</h2>
