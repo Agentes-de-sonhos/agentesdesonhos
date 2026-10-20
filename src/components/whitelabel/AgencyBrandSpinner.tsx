@@ -23,6 +23,9 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "www.paraisoviagens.com": paraisoLogo.url,
 };
 
+/** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
+const BREATHE_HOSTNAMES = new Set(["paraisoviagens.com", "www.paraisoviagens.com"]);
+
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
 function resolveContextHostname(explicit?: string | null): string {
   if (explicit) return normalizeBrandHost(explicit);
@@ -57,6 +60,15 @@ export function AgencyBrandSpinner({
 }: AgencyBrandSpinnerProps) {
   const mark = resolveAgencySpinnerMark(hostname);
   if (!mark) return <Loader2 className={fallbackClassName} aria-hidden="true" />;
+
+  if (BREATHE_HOSTNAMES.has(resolveContextHostname(hostname))) {
+    return (
+      <span className="relative inline-flex items-center justify-center" role="status" aria-label="Carregando">
+        <span aria-hidden className="absolute h-24 w-24 rounded-full bg-primary/20 blur-3xl animate-brand-halo motion-reduce:animate-none" />
+        <img src={mark} alt="" aria-hidden="true" className={`relative ${MARK_SIZE[size]} w-auto max-w-[220px] object-contain animate-brand-breathe motion-reduce:animate-none`} />
+      </span>
+    );
+  }
 
   return (
     <span className="wl-brand-spinner" role="status" aria-label="Carregando">
