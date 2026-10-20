@@ -1,0 +1,118 @@
+import { useCallback, useEffect, useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
+import { AlertTriangle, ArrowLeft, Bus, ExternalLink, ImageOff, MapPin, Sparkles } from "lucide-react";
+import { HotelQuoteBox } from "@/components/hotel-page/HotelQuoteBox";
+import type { HotelQuoteRequest } from "@/components/hotel-page/types";
+import { getDisneyHotel, KIND_LABEL, OFFICIAL_CATEGORY_LABEL, relatedDisneyHotels } from "@/components/landing/disney/disneyHotelsCatalog";
+import { DISNEY_HOTEL_BENEFITS } from "@/components/landing/disney/content";
+import { useDisneyPreviewRequest } from "@/hooks/useDisneyPreviewRequest";
+import { useNoindex } from "@/hooks/useNoindex";
+import { agencyContextHref } from "@/lib/agencyContextLink";
+import type { AgencyDomainInfo } from "@/lib/agencyDomains";
+
+const fmt = (iso: string) => iso.split("-").reverse().join("/");
+
+/** Página própria de cada hospedagem Disney. Sem fotos/avaliações até haver material licenciado e verificável. */
+export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
+  const { slug = "" } = useParams();
+  const hotel = useMemo(() => getDisneyHotel(slug), [slug]);
+  const { submit, simulated } = useDisneyPreviewRequest(info.hostname);
+  useNoindex();
+  useEffect(() => { if (hotel) document.title = `${hotel.name} · ${info.agency_name ?? "Disney"}`; window.scrollTo(0, 0); }, [hotel, info.agency_name]);
+
+  const onSubmitQuote = useCallback(async (req: HotelQuoteRequest) => {
+    if (!hotel) return;
+    const kids = req.childrenAges.length;
+    const pax = `${req.adults} ${req.adults === 1 ? "adulto" : "adultos"}${kids ? ` e ${kids} ${kids === 1 ? "criança" : "crianças"} (${req.childrenAges.join(", ")} anos)` : ""}`;
+    const period = `${fmt(req.checkIn)} a ${fmt(req.checkOut)}`;
+    const res = await submit({
+      service_key: "hospedagem", service_label: "Hospedagem", destination: `${hotel.name} · Walt Disney World Resort`,
+      summary: `Serviços solicitados: Hospedagem | Disney (${hotel.category}): ${hotel.name} | Período: ${period} | Viajantes: ${pax}`,
+      notes: `Solicitação pela página /disney/hoteis/${hotel.slug}.`,
+      lead_name: req.contact.name, lead_phone: req.contact.whatsapp, lead_email: req.contact.email,
+      preferred_channel: "WhatsApp", best_time: "Qualquer horário", consent: true, consent_version: "v1",
+      details: {
+        origem: "disney_hotel_page", hotel: hotel.name, hotel_slug: hotel.slug, categoria_disney: hotel.category, tipo: hotel.kind,
+        check_in: req.checkIn, check_out: req.checkOut, adultos: String(req.adults), criancas: String(kids), idades_criancas: req.childrenAges.join(", "),
+        servicos: "Hospedagem", servicos_keys: "hospedagem",
+      },
+    });
+    if ("error" in res) throw new Error("Não foi possível enviar agora. Tente novamente.");
+  }, [hotel, submit]);
+
+  if (!hotel) {
+    return (
+      <p className="px-4 py-20 text-center text-muted-foreground">
+        Hospedagem não encontrada. <Link to={agencyContextHref("/disney#hoteis")} className="text-primary underline">Ver todos os hotéis Disney</Link>
+      </p>
+    );
+  }
+  const related = relatedDisneyHotels(hotel);
+  const mapQ = encodeURIComponent(`${hotel.name}, ${hotel.address}`);
+  return (
+    <div className="bg-background px-4 py-8 md:py-12">
+      <article className="mx-auto max-w-6xl space-y-8 text-foreground">
+        <Link to={agencyContextHref("/disney#hoteis")} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"><ArrowLeft className="h-4 w-4" />Hotéis Disney</Link>
+        <header>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{OFFICIAL_CATEGORY_LABEL[hotel.category]} · {KIND_LABEL[hotel.kind]}</p>
+          <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight md:text-4xl">{hotel.name}</h1>
+          {hotel.parent && <p className="mt-1 text-sm text-muted-foreground">Parte do complexo {hotel.parent}</p>}
+          <p className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />{hotel.address}</p>
+        </header>
+        {hotel.status === "future" && <p className="rounded-md border border-primary/40 bg-primary/5 p-4 text-sm"><strong>Hotel futuro.</strong> Inauguração anunciada para {hotel.opening}. Ainda não faz parte do catálogo atual.</p>}
+
+        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-muted/40 px-6 py-10 text-center" data-testid="disney-hotel-no-photo">
+          <ImageOff className="h-8 w-8 text-muted-foreground" aria-hidden />
+          <p className="text-sm font-medium">Fotos deste hotel aguardando autorização de uso</p>
+          <p className="max-w-md text-xs text-muted-foreground">Para não mostrar imagem de outro hotel, as fotos aparecem aqui quando houver material licenciado. Enquanto isso, veja as fotos no site oficial.</p>
+          <a href={hotel.sources[0]} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">Ver no site oficial Disney <ExternalLink className="h-3.5 w-3.5" /></a>
+        </div>
+
+        {hotel.status === "open" && <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} />}
+        {simulated && <p className="text-center text-xs text-muted-foreground">Prévia: os pedidos desta página são simulados e não chegam ao CRM.</p>}
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="min-w-0 space-y-8">
+            <section>
+              <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Por que escolher {hotel.name}?</h2>
+              <div className="mt-4 space-y-4 leading-relaxed text-muted-foreground">{hotel.paragraphs.map((p) => <p key={p}>{p}</p>)}</div>
+            </section>
+            <section className="border-t border-border pt-8">
+              <h2 className="text-xl font-bold">Destaques</h2>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">{hotel.highlights.map((h) => <li key={h} className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm"><Sparkles className="h-5 w-5 shrink-0 text-primary" aria-hidden />{h}</li>)}</ul>
+            </section>
+            <section className="rounded-2xl bg-primary/5 p-5">
+              <h2 className="flex items-center gap-2 text-lg font-bold"><Bus className="h-5 w-5 text-primary" aria-hidden />Transporte</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{hotel.transport} A rede Disney pode exigir conexões e muda conforme horário e clima; não inclui transfer do aeroporto.</p>
+            </section>
+            {hotel.status === "open" && (
+              <section>
+                <h2 className="text-lg font-bold">Benefícios de hóspede Disney</h2>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">{DISNEY_HOTEL_BENEFITS.map((b) => <li key={b}>• {b}</li>)}</ul>
+              </section>
+            )}
+            {hotel.notice && <p className="flex gap-2 rounded-md border border-border bg-muted/50 p-4 text-sm text-muted-foreground"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />{hotel.notice}</p>}
+          </div>
+          <aside className="space-y-6">
+            <section className="overflow-hidden rounded-2xl border border-border bg-card">
+              <h2 className="flex items-center gap-2 p-5 pb-3 font-bold"><MapPin className="h-5 w-5 text-primary" aria-hidden />Localização</h2>
+              <iframe title={`Mapa de ${hotel.name}`} src={`https://maps.google.com/maps?q=${mapQ}&z=14&output=embed`} loading="lazy" className="h-56 w-full border-0" referrerPolicy="no-referrer-when-downgrade" />
+              <a href={`https://www.google.com/maps/search/?api=1&query=${mapQ}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 p-4 text-sm font-medium text-primary"><ExternalLink className="h-4 w-4" />Abrir no Google Maps</a>
+            </section>
+            <section className="rounded-2xl border border-border bg-card p-5 text-sm">
+              <h2 className="font-bold">Fontes oficiais</h2>
+              <ul className="mt-2 space-y-1">{hotel.sources.map((s) => <li key={s}><a href={s} target="_blank" rel="noopener noreferrer" className="break-all text-primary hover:underline">{s.replace(/^https:\/\//, "")}</a></li>)}</ul>
+              <p className="mt-3 text-xs text-muted-foreground">Avaliações: consulte as avaliações no site oficial ou no Google Maps. Não exibimos notas sem fonte verificável.</p>
+            </section>
+            {related.length > 0 && (
+              <section className="rounded-2xl border border-border bg-card p-5">
+                <h2 className="font-bold">Hospedagens relacionadas</h2>
+                <ul className="mt-3 space-y-2 text-sm">{related.map((r) => <li key={r.slug}><Link to={agencyContextHref(`/disney/hoteis/${r.slug}`)} className="text-primary hover:underline">{r.name}</Link></li>)}</ul>
+              </section>
+            )}
+          </aside>
+        </div>
+      </article>
+    </div>
+  );
+}

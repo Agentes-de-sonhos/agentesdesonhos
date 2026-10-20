@@ -38,6 +38,9 @@ const Limites100LegalPreviewPage = lazy(() => import("@/pages/whitelabel/Limites
 import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
+const DisneyLandingPage = lazy(() => import("@/pages/whitelabel/DisneyLandingPage"));
+const DisneyHotelPage = lazy(() => import("@/pages/whitelabel/DisneyHotelPage"));
+import { isDisneyPreviewRouteEnabled } from "@/lib/disneyPreviewGate";
 const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
 const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
 const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
@@ -239,6 +242,10 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           {resolveSiteProfile(info.hostname).key === "editorialRose" && (
             <Route path="/universal" element={<UniversalLandingPage info={info} />} />
           )}
+          {/* Disney: somente Destinos com a Ju e somente em hosts técnicos de prévia (não no domínio real). */}
+          {isDisneyPreviewRouteEnabled(info.hostname) && (
+            <Route path="/disney" element={<DisneyLandingPage info={info} />} />
+          )}
 
           {/* Página de oferta: mesmo chrome, porém SEM qualquer atalho para WhatsApp. */}
           <Route
@@ -273,6 +280,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             )}
             {resolveSiteProfile(info.hostname).key === "editorialRose" && (
               <Route path="/universal/hoteis/:slug" element={<AgencyResortPage info={info} resolve={getUniversalHotelPage} backHref="/universal" kind="Hotel" />} />
+            )}
+            {isDisneyPreviewRouteEnabled(info.hostname) && (
+              <Route path="/disney/hoteis/:slug" element={<DisneyHotelPage info={info} />} />
             )}
             {resolveSiteProfile(info.hostname).key === "editorialDmc" && (
               <Route path="/visto-americano" element={<UsVisaLandingPage info={info} />} />
