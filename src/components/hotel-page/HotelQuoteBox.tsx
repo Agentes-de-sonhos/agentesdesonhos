@@ -167,7 +167,7 @@ export function HotelQuoteBox({
           {status === "done" ? (
             <div className="py-4 text-center">
               <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-              <DialogTitle className="mt-3 text-xl">Solicitação recebida!</DialogTitle>
+              <DialogTitle className="mt-3 text-xl">{previewMode ? "Simulação concluída" : "Solicitação recebida!"}</DialogTitle>
               <DialogDescription className="mt-2">
                 {previewMode
                   ? "Prévia: nesta página modelo nada foi enviado. No site da agência, a solicitação entra no CRM e o consultor retorna em breve."
