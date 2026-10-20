@@ -1,5 +1,5 @@
 # Architecture rules
-- Flight/hotel cards and opt-in styles are public-only. Why: preserves admin, other services and secure access.
+- Flight/hotel cards and opt-in styles: public-only. Why: protects admin, other services and secure access.
 - Magic Kingdom maps: on-demand same-origin iframe, CDN image pointers, origin-checked Escape; at 100% full column width and natural height (iframe owns scroll). Why: height containment shrank the approved map.
 - Other parks share one static engine: category-scoped IDs, independent anchors (all highlighted), no guessed pins, native-pixel/lossless maps, full pages kept. Why: no invented pins or overlapping entries.
 - Orlando editorial gallery: public tickets, allowlisted Ju/100 Limites hosts only, outside wizard; CDN pointers with official credits. Why: tenant isolation.
