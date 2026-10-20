@@ -70,7 +70,9 @@ Deno.serve(async (req) => {
     if (action === "unlock") {
       const password = typeof body.password === "string" ? body.password : "";
       if (!password || password.length > 200) return json({ ok: false }, 200);
-      const expected = (Deno.env.get("SITE_UNLOCK_PASSWORD_SHA256") || DEFAULT_PASSWORD_SHA256).trim().toLowerCase();
+      // Senha própria por tenant (opcional): SITE_UNLOCK_PASSWORD_SHA256_<uuid sem hífens>.
+      const perTenant = Deno.env.get(`SITE_UNLOCK_PASSWORD_SHA256_${tenant.replace(/-/g, "")}`);
+      const expected = (perTenant || Deno.env.get("SITE_UNLOCK_PASSWORD_SHA256") || DEFAULT_PASSWORD_SHA256).trim().toLowerCase();
       const provided = hex(await crypto.subtle.digest("SHA-256", enc.encode(password)));
       if (!safeEqual(provided, expected)) return json({ ok: false }, 200);
       const exp = Math.floor(Date.now() / 1000) + TTL_SECONDS;
