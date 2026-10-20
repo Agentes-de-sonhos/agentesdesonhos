@@ -200,6 +200,18 @@ export interface AgencySiteProfile {
   differentials?: AgencyDifferential[];
   faq?: { q: string; a: string }[];
   signature?: AgencySignatureContent;
+  /** Destaque editorial opt-in de produto parceiro (renderizado após "highlights"). */
+  featuredExperience?: {
+    kicker: string;
+    title: string;
+    text: string;
+    points: string[];
+    cta: string;
+    url: string;
+    image: string;
+    imageAlt: string;
+    note?: string;
+  };
   authority?: AgencyAuthorityContent;
   seo?: { title: string; description: string; canonical?: string };
   reviewsCopy?: { kicker: string; title: string; subtitle: string };
