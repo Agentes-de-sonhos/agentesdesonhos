@@ -163,7 +163,14 @@ export function AgencyBrandBar({
             >
               Área do Cliente
             </a>
-            {showCadastur(info.hostname) && <CadasturSeal hostname={info.hostname} className="h-7 w-auto object-contain" />}
+            {/paraisoviagens\.com$/i.test(info.hostname ?? "") ? (
+              <div className="flex items-center gap-2.5">
+                <img src={iataTidsSeal.url} alt="Selo IATA TIDS — número 96303771" title="IATA 96303771" className="h-9 w-9 rounded-full object-contain" />
+                <img src={cadasturSealAsset.url} alt="Somos certificados Cadastur" className="h-7 w-auto object-contain" />
+              </div>
+            ) : (
+              showCadastur(info.hostname) && <CadasturSeal hostname={info.hostname} className="h-7 w-auto object-contain" />
+            )}
           </div>
 
           <button
@@ -322,7 +329,7 @@ export function AgencyFooter({
                 </p>
               )}
               {paraisoFooter && (
-                <div className="flex items-center gap-3 border-l border-[hsl(var(--wl-ink)_/_0.15)] pl-4">
+                <div className="flex items-start gap-3 border-l border-[hsl(var(--wl-ink)_/_0.15)] pl-4">
                   <div className="group flex flex-col items-center gap-1.5" title="Número IATA 96303771">
                     <img
                       src={iataTidsSeal.url}
@@ -337,12 +344,16 @@ export function AgencyFooter({
                       IATA 96303771
                     </span>
                   </div>
-                  <img
-                    src={cadasturSealAsset.url}
-                    alt="Somos certificados Cadastur"
-                    loading="lazy"
-                    className="h-14 w-auto object-contain md:h-16"
-                  />
+                  {/* Centralizado apenas na altura da imagem do selo IATA, não no número. */}
+                  <div className="flex h-14 items-center md:h-16">
+                    <img
+                      src={cadasturSealAsset.url}
+                      alt="Somos certificados Cadastur"
+                      loading="lazy"
+                      className="h-11 w-auto object-contain md:h-12"
+                    />
+                  </div>
+
 
                 </div>
               )}
