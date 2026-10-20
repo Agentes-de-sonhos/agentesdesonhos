@@ -239,7 +239,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
               </div>
               <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {monthOptions.filter((m) => m.startsWith(year)).map((m) => (
-                  <Choice key={m} active={months.includes(m)} onClick={() => toggleMonth(m)} className="px-3 py-3 text-sm font-medium capitalize">{monthLabel(m)}</Choice>
+                  <Choice key={m} active={months.includes(m)} onClick={() => toggleMonth(m)} className="px-3 py-3 text-sm font-medium">{monthLabel(m)}</Choice>
                 ))}
               </div>
               {months.length > 0 && <p className="mt-4 text-sm text-muted-foreground">Meses marcados: <span className="font-medium text-foreground">{months.map(monthLabel).join(", ")}</span></p>}
