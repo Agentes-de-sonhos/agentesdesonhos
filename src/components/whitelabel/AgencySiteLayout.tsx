@@ -317,12 +317,18 @@ export function AgencyFooter({
               </p>
             )}
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
-              Consultoria de viagens com acompanhamento do primeiro contato ao retorno.
+              {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
             </p>
-            {location && (
-              <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)_/_0.85)]">
-                <MapPin className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {location}
+            {(footer?.address || location) && (
+              <p className="mt-6 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.address ?? location}
               </p>
+            )}
+            {(footer?.legalName || footer?.cnpj) && (
+              <div className="mt-4 space-y-1 text-sm text-[hsl(var(--wl-ink)_/_0.8)]">
+                {footer?.legalName && <p>{footer.legalName}</p>}
+                {footer?.cnpj && <p>CNPJ {footer.cnpj}</p>}
+              </div>
             )}
           </div>
 
@@ -345,7 +351,7 @@ export function AgencyFooter({
           <div>
             <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Atendimento</p>
             <ul className="mt-5 space-y-3">
-              {wa ? (
+              {wa && !footer?.phone ? (
                 <li>
                   <a
                     href={`https://wa.me/${wa}`}
@@ -357,9 +363,18 @@ export function AgencyFooter({
                   </a>
                 </li>
               ) : null}
-              {info.phone ? (
-                <li className="flex items-center gap-2 text-[15px]">
-                  <Phone className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {info.phone}
+              {(footer?.phone || info.phone) ? (
+                <li>
+                  <a href={`tel:+55${(footer?.phone ?? info.phone ?? "").replace(/\D/g, "")}`} className="inline-flex items-center gap-2 py-0.5 text-[15px] hover:text-[hsl(var(--wl-ink))]">
+                    <Phone className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.phone ?? info.phone}
+                  </a>
+                </li>
+              ) : null}
+              {footer?.email ? (
+                <li>
+                  <a href={`mailto:${footer.email}`} className="inline-flex items-center gap-2 py-0.5 text-[15px] hover:text-[hsl(var(--wl-ink))]">
+                    <Mail className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer.email}
+                  </a>
                 </li>
               ) : null}
               <li>
