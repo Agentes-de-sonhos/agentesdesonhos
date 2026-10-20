@@ -1825,14 +1825,13 @@ export default function AgencySiteHome({
             <video
               key={HERO_VIDEO_BY_IMAGE[current.image]}
               src={HERO_VIDEO_BY_IMAGE[current.image]}
-              poster={current.image}
               autoPlay
               muted
               loop
               playsInline
               preload="auto"
               aria-label={`${name} — ${(current.title ?? "").replace(/\s*\n\s*/g, " ")}`}
-              className={`h-full w-full object-cover ${heroImagePositionClass}`}
+              className={`h-full w-full bg-primary object-cover ${heroImagePositionClass}`}
             />
           ) : current.image ? (
             <img
