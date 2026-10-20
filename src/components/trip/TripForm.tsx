@@ -59,6 +59,13 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
   const [clientError, setClientError] = useState("");
   const { loadDraft, saveDraft, clearDraft } = useFormDraft<FormValues>("trip-form");
 
+  // Datas "YYYY-MM-DD" são interpretadas como horário local para não perder um dia por fuso (UTC).
+  const toLocalDate = (value: unknown): Date | undefined => {
+    if (!value) return undefined;
+    if (value instanceof Date) return value;
+    return parseLocalDate(String(value)) ?? undefined;
+  };
+
   const draft = !defaultValues ? loadDraft() : null;
 
   const form = useForm<FormValues>({
@@ -67,9 +74,9 @@ export function TripForm({ onSubmit, isLoading, defaultValues }: TripFormProps) 
       client_name: defaultValues?.client_name || draft?.client_name || "",
       destination: defaultValues?.destination || draft?.destination || "",
       dateRange: defaultValues?.start_date && defaultValues?.end_date
-        ? { from: new Date(defaultValues.start_date), to: new Date(defaultValues.end_date) }
+        ? { from: toLocalDate(defaultValues.start_date)!, to: toLocalDate(defaultValues.end_date)! }
         : draft?.dateRange?.from
-          ? { from: new Date(draft.dateRange.from), to: draft.dateRange.to ? new Date(draft.dateRange.to) : undefined }
+          ? { from: toLocalDate(draft.dateRange.from)!, to: toLocalDate(draft.dateRange.to) }
           : undefined,
     },
   });
