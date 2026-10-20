@@ -108,7 +108,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   const sectionRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const showUniversalPage = resolveSiteProfile(hostname).key === "editorialRose";
+  const showUniversalPage = resolveSiteProfile(hostname).key === "editorialRose" || resolveSiteProfile(hostname).key === "editorialDmc";
   const { submit, state, error } = useAgencySiteRequest(hostname);
 
   const [step, setStep] = useState<number | null>(mode_ === "page" ? 0 : null);
