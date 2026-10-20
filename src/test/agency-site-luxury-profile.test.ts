@@ -120,3 +120,20 @@ describe("bypass de preview da home em construção", () => {
     expect(shouldRenderUnderConstruction("outraagencia.com.br", "outraagencia.com.br", "")).toBe(false);
   });
 });
+
+describe("atalho de WhatsApp nas seções de contato", () => {
+  it("Paraíso oculta o WhatsApp do atendimento e das perguntas frequentes", () => {
+    const profile = resolveSiteProfile("paraisoviagens.com");
+    expect(profile.hideConciergeWhatsapp).toBe(true);
+    expect(profile.hideFaqWhatsapp).toBe(true);
+  });
+
+  it("demais tenants mantêm o atalho de WhatsApp", () => {
+    for (const host of ["100limites.tur.br", "www.destinoscomaju.com.br", "outraagencia.com.br"]) {
+      const profile = resolveSiteProfile(host);
+      expect(profile.hideConciergeWhatsapp, host).toBeUndefined();
+      expect(profile.hideFaqWhatsapp, host).toBeUndefined();
+    }
+  });
+});
+

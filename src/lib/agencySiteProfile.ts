@@ -180,6 +180,11 @@ export interface AgencySiteProfile {
   conciergeWhatsappLabel?: string;
   /** Oculta os botões de ação da seção "concierge" (mantém o conteúdo). */
   hideConciergeActions?: boolean;
+  /** Oculta só o botão de WhatsApp do concierge, mantendo a chamada principal. */
+  hideConciergeWhatsapp?: boolean;
+  /** Oculta o botão de WhatsApp das perguntas frequentes, caindo para a Central. */
+  hideFaqWhatsapp?: boolean;
+
 
   /** Slot de imagem de fallback do hero (resolvido na apresentação). */
   heroImage?: string;
@@ -282,6 +287,11 @@ const CLASSIC: AgencySiteProfile = { key: "classic" };
 /** Paraíso Viagens — curadoria de luxo, sem DMC e sem depoimentos. */
 const LUXURY_CURATED: AgencySiteProfile = {
   key: "luxuryCurated",
+  // A Paraíso conduz o contato pela Central de Solicitações: sem atalho de
+  // WhatsApp no atendimento nem nas perguntas frequentes.
+  hideConciergeWhatsapp: true,
+  hideFaqWhatsapp: true,
+
   sections: {
     dmc: { enabled: false },
     testimonials: { enabled: false },
