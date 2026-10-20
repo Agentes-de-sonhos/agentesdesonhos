@@ -1305,6 +1305,22 @@ export default function AgencySiteHome({
                     );
                   })}
                 </ul>
+                {(copy.note || copy.extraCta) && (
+                  <div className="mt-12 flex flex-col gap-5 border-t border-foreground/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+                    {copy.note && <p className="max-w-2xl text-[15px] leading-relaxed text-foreground/80 md:text-base">{copy.note}</p>}
+                    {copy.extraCta && (
+                      <Button
+                        size="lg"
+                        className="w-full shrink-0 sm:w-auto"
+                        onClick={() =>
+                          document.getElementById("central-solicitacoes")?.scrollIntoView({ behavior: "smooth", block: "start" })
+                        }
+                      >
+                        {copy.extraCta.label} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </section>
           );

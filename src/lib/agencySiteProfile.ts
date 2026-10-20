@@ -351,7 +351,8 @@ const LUXURY_CURATED: AgencySiteProfile = {
     differentials: { order: 5 },
     about: { order: 6 },
     credentials: { enabled: true, order: 7 },
-    concierge: { order: 8 },
+    // "Viagem personalizada" unificada em "Como cuidamos de cada viagem".
+    concierge: { enabled: false, order: 8 },
     faq: { order: 9 },
     newsletter: { order: 10 },
     // Ofertas reais continuam possíveis, mas nunca lideram a página de luxo.
@@ -504,6 +505,8 @@ const LUXURY_CURATED: AgencySiteProfile = {
       kicker: "PROCESSO",
       title: "Como cuidamos de cada viagem",
       subtitle: "Quatro etapas, do primeiro contato ao retorno para casa.",
+      note: "Conte-nos o que você imagina: escolha o serviço na Central de Solicitações e a Paraíso retorna com uma proposta comentada.",
+      extraCta: { label: "Começar pela Central de Solicitações", service: "pacotes" },
     },
     concierge: {
       kicker: "VIAGEM PERSONALIZADA",
