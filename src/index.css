@@ -386,6 +386,27 @@ img {
   color: hsl(var(--wl-green));
 }
 
+/* CTA do banner: corpo azul + bloco quadrado verde no final com seta azul. */
+.wl-editorial.wl-luxury .wl-hero-cta {
+  padding-right: 0;
+  overflow: hidden;
+  gap: 1.25rem;
+}
+.wl-editorial.wl-luxury .wl-hero-cta .wl-hero-cta-arrow {
+  align-self: stretch;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  background-color: hsl(var(--wl-green));
+}
+.wl-editorial.wl-luxury .wl-hero-cta .wl-hero-cta-arrow svg {
+  margin-left: 0;
+  color: hsl(var(--wl-ink));
+  transition: transform 200ms ease;
+}
+.wl-editorial.wl-luxury .wl-hero-cta:hover .wl-hero-cta-arrow svg {
+  transform: translateX(2px);
+}
+
 /* CTA da newsletter sobre o fundo azul: verde com texto azul-marinho. */
 .wl-editorial.wl-luxury .wl-cta-invert {
   background-color: hsl(var(--wl-green));
