@@ -22,6 +22,7 @@ import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-lo
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.json";
+import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
@@ -60,6 +61,9 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
   "www.essyatur.com.br": essyaFavicon.url,
   "bardelliviagens.com.br": bardelliFavicon.url,
   "www.bardelliviagens.com.br": bardelliFavicon.url,
+  "omundoemcores.com.br": mundoEmCoresFavicon.url,
+  "www.omundoemcores.com.br": mundoEmCoresFavicon.url,
+  "briefing-14-v1.preview.local": mundoEmCoresFavicon.url,
 };
 
 /**
