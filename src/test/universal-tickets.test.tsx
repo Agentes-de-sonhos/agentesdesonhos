@@ -5,6 +5,7 @@ import {
   type UniversalParkId,
 } from "@/lib/universalTickets";
 
+Element.prototype.scrollIntoView = function () {};
 const invoke = vi.fn();
 vi.mock("@/integrations/supabase/client", () => ({ supabase: { functions: { invoke: (...a: unknown[]) => invoke(...a) } } }));
 import { UniversalTicketsConfigurator } from "@/components/landing/universal/UniversalTicketsConfigurator";
