@@ -21,6 +21,5 @@
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
 - Hotel photos: safe-match on open, confirm ambiguity. Why: no wrong hotel.
-- Universal `/universal`: editorialRose only, shared ticket rules/maps. Why: opt-in reuse.
-- Disney `/disney` + `/disney/hoteis/:slug`: editorialRose AND technical preview host only (`disneyPreviewGate`); submits simulated there (`useDisneyPreviewRequest`); no hotel photos/ratings without licence. Why: preview-only, no real CRM leads.
+- Universal `/universal` (editorialRose, shared rules/maps) and Disney `/disney` (editorialRose + technical preview host only, simulated submits, no unlicensed hotel photos/ratings). Why: opt-in, preview-safe.
 - Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.
