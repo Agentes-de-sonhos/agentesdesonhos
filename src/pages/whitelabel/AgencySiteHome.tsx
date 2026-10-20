@@ -708,10 +708,10 @@ export default function AgencySiteHome({
             const fx = profile.partnerSpotlight;
             return (
               <section id="explora-monaco" aria-labelledby="explora-monaco-title" className="bg-[hsl(var(--wl-navy))] text-[hsl(var(--wl-ivory,40_33%_97%))]">
-                <div className={`${container} grid items-start gap-10 py-10 md:grid-cols-[1fr_1fr] md:gap-14 md:py-14`}>
-                  <div className="overflow-hidden rounded-xl">
+                <div className={`${container} grid items-start gap-10 py-8 md:grid-cols-[1fr_1fr] md:gap-14 md:py-11`}>
+                  <div className={`relative overflow-hidden rounded-xl md:self-stretch ${fx.note ? "md:mb-9" : ""}`}>
                     {fx.video ? (
-                      <video src={fx.video} poster={fx.image} autoPlay muted loop playsInline preload="auto" aria-label={fx.imageAlt} className="aspect-square w-full object-cover md:aspect-[4/5]" />
+                      <video src={fx.video} poster={fx.image} autoPlay muted loop playsInline preload="auto" aria-label={fx.imageAlt} className="aspect-square w-full object-cover md:absolute md:inset-0 md:aspect-auto md:h-full" />
                     ) : (
                       <img src={fx.image} alt={fx.imageAlt} loading="lazy" width={1600} height={1008} className="aspect-[16/10] h-full w-full object-cover" />
                     )}
