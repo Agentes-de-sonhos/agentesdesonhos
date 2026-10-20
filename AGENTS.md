@@ -21,4 +21,5 @@
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
 - Quote hotel photos: safe-match on open, confirm if ambiguous. Why: no wrong hotel.
-- Universal landing `/universal` (editorialRose only); ticket rules `lib/universalTickets.ts`; maps via `DisneyParkMapTrigger`. Why: reusable per agency.
+- Universal `/universal`: editorialRose only, shared ticket rules/maps. Why: opt-in reuse.
+- Site requests require `success:true`, including duplicates; catch rejection as retryable error. Why: no false receipts.

@@ -17,14 +17,15 @@ import logoUsf from "@/assets/orlando/parks/park-universal-studios.asset.json";
 import logoIoa from "@/assets/orlando/parks/park-islands-of-adventure.asset.json";
 import logoEpic from "@/assets/orlando/parks/park-epic-universe.asset.json";
 import logoVb from "@/assets/orlando/parks/park-volcano-bay.asset.json";
-import logoHhn from "@/assets/orlando/parks/park-universal-halloween.asset.json";
-import logoUniversal from "@/assets/orlando/universal.asset.json";
+import logoHhn from "@/assets/universal/Halloween-Horror-Nights.webp.asset.json";
+import logoExpress from "@/assets/universal/Universal-Express.webp.asset.json";
+import logoVip from "@/assets/universal/VIP-Experience.webp.asset.json";
 import juPortrait from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 
 const LOGOS: Record<UniversalParkId, string> = {
   "universal-studios": logoUsf.url, "islands-of-adventure": logoIoa.url, "epic-universe": logoEpic.url, "volcano-bay": logoVb.url,
 };
-const EXTRA_LOGOS: Record<ExtraId, string> = { express: logoUniversal.url, vip: logoUniversal.url, hhn: logoHhn.url };
+const EXTRA_LOGOS: Record<ExtraId, string> = { express: logoExpress.url, vip: logoVip.url, hhn: logoHhn.url };
 
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 
@@ -53,12 +54,12 @@ function Step({ n, title, children, innerRef }: { n: number; title: string; chil
 
 function Choice({ active, onClick, children, className, ...rest }: { active: boolean; onClick: () => void; children: React.ReactNode; className?: string } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button type="button" aria-pressed={active} onClick={onClick} {...rest}
-      className={cn("relative rounded-lg border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary",
+    <Button variant="outline" type="button" aria-pressed={active} onClick={onClick} {...rest}
+      className={cn("relative block h-auto whitespace-normal rounded-lg border p-4 text-left transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary",
         active ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border bg-background hover:border-primary/50", className)}>
       {active && <Check className="absolute right-3 top-3 h-4 w-4 text-primary" aria-hidden />}
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -158,10 +159,11 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
     if (ages.some((a) => a === "")) { setStepError({ 6: "Informe a idade de cada criança na data da viagem." }); return; }
     if (!consent) { setStepError({ 6: "Autorize o contato para receber sua cotação." }); return; }
     setStepError({});
+    if (!periodMode) return;
     sending.current = true;
     try {
       const payload = buildUniversalRequest({
-        selected: ordered, daysMode: daysMode ?? "one_each", days, periodMode: periodMode!, arrival, departure, months,
+        selected: ordered, daysMode: daysMode ?? "one_each", days, periodMode, arrival, departure, months,
         parkToPark, extras: activeExtras, adults: nAdults, childAges: ages.map(Number),
         name: parsed.data.name, whatsapp: parsed.data.whatsapp, email: parsed.data.email,
       });
@@ -315,7 +317,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
           <div className="grid gap-3 sm:grid-cols-3">
             {UNIVERSAL_EXTRAS.filter((x) => x.id !== "hhn" || eligibleHhn).map((x) => (
               <Choice key={x.id} active={activeExtras.includes(x.id)} onClick={() => setExtras((e) => (e.includes(x.id) ? e.filter((y) => y !== x.id) : [...e, x.id]))} data-testid={`extra-${x.id}`}>
-                <img src={EXTRA_LOGOS[x.id]} alt="" className="h-10 w-auto object-contain" />
+                <span className={cn("flex h-28 w-full items-center justify-center rounded-md p-2", x.id === "hhn" ? "bg-foreground" : "bg-background")}><img src={EXTRA_LOGOS[x.id]} alt={x.name} className="h-24 w-full object-contain" /></span>
                 <span className="mt-3 block font-semibold">{x.name}</span>
                 <span className="mt-1 block text-sm leading-6 text-muted-foreground">{x.description}</span>
               </Choice>
