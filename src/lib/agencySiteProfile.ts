@@ -1,3 +1,4 @@
+import exploraMonaco from "@/assets/paraiso/explora-monaco.jpg";
 import momentFamily from "@/assets/100limites-moment-family.jpg";
 import momentHoneymoon from "@/assets/100limites-moment-honeymoon.jpg";
 import momentFriends from "@/assets/100limites-moment-friends.jpg";
@@ -200,6 +201,18 @@ export interface AgencySiteProfile {
   differentials?: AgencyDifferential[];
   faq?: { q: string; a: string }[];
   signature?: AgencySignatureContent;
+  /** Destaque editorial opt-in de produto parceiro (renderizado após "highlights"). */
+  partnerSpotlight?: {
+    kicker: string;
+    title: string;
+    text: string;
+    points: string[];
+    cta: string;
+    url: string;
+    image: string;
+    imageAlt: string;
+    note?: string;
+  };
   authority?: AgencyAuthorityContent;
   seo?: { title: string; description: string; canonical?: string };
   reviewsCopy?: { kicker: string; title: string; subtitle: string };
@@ -293,6 +306,17 @@ const LUXURY_CURATED: AgencySiteProfile = {
   // WhatsApp no atendimento nem nas perguntas frequentes.
   hideConciergeWhatsapp: true,
   hideFaqWhatsapp: true,
+  partnerSpotlight: {
+    kicker: "EXPERIÊNCIA EXCLUSIVA · EXPLORA JOURNEYS",
+    title: "EXPLORA I · Grande Prêmio de Mônaco 2027",
+    text: "Viva o fim de semana mais glamouroso da Fórmula 1 a bordo do EXPLORA I, atracado no Porto Hercule, a cerca de 150 metros do F1 Paddock Club, de 2 a 7 de junho de 2027.",
+    points: ["Apenas Suíte", "Suíte com Arquibancada", "Suíte com Paddock Club"],
+    cta: "Explorar a experiência Mônaco 2027",
+    url: "https://explorajourneysbrasil.com.br/paraisoviagens",
+    image: exploraMonaco,
+    imageAlt: "Navio de cruzeiro atracado no porto de Mônaco ao entardecer",
+    note: "Página oficial da parceria Explora Journeys Brasil · abre em nova aba. Imagem ilustrativa.",
+  },
   // Rodapé institucional (dados públicos do CNPJ e do site oficial da agência).
   footer: {
     phone: "(48) 3222-8022",
