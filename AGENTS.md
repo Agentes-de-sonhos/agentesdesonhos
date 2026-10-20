@@ -20,6 +20,6 @@
 - Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: new videos per page without code changes.
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only; pre-creation AI services wait in sessionStorage (`quoteAiPending`) and apply only after quote creation with explicit confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: owner-only bounded-cost test.
 
-- Quote hotel photos: safe-match on open, confirm if ambiguous. Why: no wrong hotel.
+- Hotel photos: safe-match on open, confirm ambiguity. Why: no wrong hotel.
 - Universal `/universal`: editorialRose only, shared ticket rules/maps. Why: opt-in reuse.
 - Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.
