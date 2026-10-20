@@ -288,6 +288,8 @@ export function AgencyFooter({
   const editorial = isEditorialTheme(info.hostname);
   const luxury = isLuxuryTheme(info.hostname);
   const logoUrl = resolveAgencyLogoUrl(info);
+  /* Paraíso: rodapé com selos IATA/Cadastur e endereço no lugar da descrição. */
+  const paraisoFooter = /paraisoviagens\.com$/i.test(info.hostname ?? "");
   /* Canais extras declarativos (e-mail público / Instagram) — vazio por padrão. */
   const contacts = resolveSiteContacts(info.hostname);
   const profile = resolveSiteProfile(info.hostname);
@@ -319,14 +321,22 @@ export function AgencyFooter({
                   <BrandText>{name}</BrandText>
                 </p>
               )}
-              {/paraisoviagens\.com$/i.test(info.hostname ?? "") && (
+              {paraisoFooter && (
                 <div className="flex items-center gap-3 border-l border-[hsl(var(--wl-ink)_/_0.15)] pl-4">
-                  <img
-                    src={iataTidsSeal.url}
-                    alt="Selo IATA TIDS — Travel Industry Designator Service"
-                    loading="lazy"
-                    className="h-14 w-14 rounded-full object-contain md:h-16 md:w-16"
-                  />
+                  <div className="group flex flex-col items-center gap-1.5" title="Número IATA 96303771">
+                    <img
+                      src={iataTidsSeal.url}
+                      alt="Selo IATA TIDS — Travel Industry Designator Service"
+                      loading="lazy"
+                      className="h-14 w-14 rounded-full object-contain md:h-16 md:w-16"
+                    />
+                    <span
+                      aria-label="Número IATA 96303771"
+                      className="cursor-default text-[10px] font-medium tracking-wide text-[hsl(var(--wl-ink)_/_0.7)] transition-transform duration-200 ease-out group-hover:scale-125 group-hover:text-[hsl(var(--wl-ink))]"
+                    >
+                      IATA 96303771
+                    </span>
+                  </div>
                   <img
                     src={cadasturSealAsset.url}
                     alt="Somos certificados Cadastur"
@@ -337,11 +347,13 @@ export function AgencyFooter({
                 </div>
               )}
             </div>
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
-              {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
-            </p>
+            {!paraisoFooter && (
+              <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
+                {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
+              </p>
+            )}
             {(footer?.address || location) && (
-              <p className="mt-6 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
+              <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.address ?? location}
               </p>
             )}
