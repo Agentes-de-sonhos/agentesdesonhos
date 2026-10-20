@@ -21,10 +21,13 @@ function describe(req: HotelQuoteRequest) {
  * pedido de orçamento entra no CRM da agência dona do domínio (o servidor
  * resolve a agência pelo hostname) e dispara as notificações da fila.
  */
-export default function AgencyResortPage({ info, slug: slugProp }: { info: AgencyDomainInfo; slug?: string }) {
+export default function AgencyResortPage({ info, slug: slugProp, resolve = getResortPage, backHref = "/resorts-brasil", kind = "Resort" }: {
+  info: AgencyDomainInfo; slug?: string;
+  resolve?: (slug: string) => HotelPageData | null; backHref?: string; kind?: string;
+}) {
   const params = useParams();
   const slug = slugProp ?? params.slug ?? "";
-  const hotel = useMemo(() => getResortPage(slug), [slug]);
+  const hotel = useMemo(() => resolve(slug), [slug, resolve]);
   const { submit } = useAgencySiteRequest(info.hostname);
 
   useEffect(() => {
