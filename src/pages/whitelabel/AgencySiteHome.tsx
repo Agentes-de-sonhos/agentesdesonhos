@@ -709,7 +709,7 @@ export default function AgencySiteHome({
             return (
               <section id="explora-monaco" aria-labelledby="explora-monaco-title" className="bg-[hsl(var(--wl-navy))] text-[hsl(var(--wl-ivory,40_33%_97%))]">
                 <div className={`${container} grid items-start gap-10 py-8 md:grid-cols-[1fr_1fr] md:gap-14 md:py-11`}>
-                  <div className="relative overflow-hidden rounded-xl md:self-stretch">
+                  <div className={`relative overflow-hidden rounded-xl md:self-stretch ${fx.note ? "md:mb-9" : ""}`}>
                     {fx.video ? (
                       <video src={fx.video} poster={fx.image} autoPlay muted loop playsInline preload="auto" aria-label={fx.imageAlt} className="aspect-square w-full object-cover md:absolute md:inset-0 md:aspect-auto md:h-full" />
                     ) : (
