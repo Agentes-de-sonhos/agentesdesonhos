@@ -35,3 +35,9 @@ No configurador montado a partir do código Vite atual, todas as 16 instâncias 
 O proxy de assets do localhost não entrega esses binários diretamente. O teste de interação encaminhou as requisições de imagem para os mesmos endpoints reais da prévia (não substituiu por placeholders), e a checagem independente abriu cada endpoint no Chromium sem interceptação. A abertura de todas as imagens via JavaScript a partir do documento hospedado falhou nesse ambiente; portanto não foi validada a página completa hospedada dentro da sessão do editor. Não há evidência de asset defeituoso: todas as fontes reais decodificam diretamente e no configurador testado. Conferência final da página hospedada no editor continua a cargo de Fernando antes do deploy.
 
 Sem publicação, deploy de função, migração, alteração de permissões ou dados reais.
+
+## Troca da foto de perfil (20/10/2026)
+- Foto enviada por Fernando persistida como pointer `src/assets/universal/ju-universal-globe.png.asset.json` (720 × 1280, PNG, 1.446.265 bytes): Juliana com o globo da Universal ao fundo.
+- `UniversalTicketsConfigurator.tsx` passou a importar esse pointer no lugar de `hero-ju-magic-kingdom.png.asset.json`. A home da Destinos com a Ju (`AgencySiteHome.tsx`) mantém a foto anterior.
+- Recorte do avatar: contêiner circular com `overflow-hidden` e `img` em `scale-[2.2]`, `transform-origin: 60% 35%` — equivale a um quadrado de 327 px centrado no rosto (400; 582). Comparados recortes de 200/327/450 px: o de 327 px foi o único sem corte de cabeça e com rosto reconhecível em miniatura.
+- Evidências: `naturalWidth > 0` do novo ponteiro em 1280 e 390; capturas do avatar e do cartão de apresentação conferidas; 17 testes (Universal + hook) e `build OK`.

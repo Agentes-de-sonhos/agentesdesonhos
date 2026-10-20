@@ -20,7 +20,7 @@ import logoVb from "@/assets/orlando/parks/park-volcano-bay.asset.json";
 import logoHhn from "@/assets/universal/Halloween-Horror-Nights.webp.asset.json";
 import logoExpress from "@/assets/universal/Universal-Express.webp.asset.json";
 import logoVip from "@/assets/universal/VIP-Experience.webp.asset.json";
-import juPortrait from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
+import juPortrait from "@/assets/universal/ju-universal-globe.png.asset.json";
 
 const LOGOS: Record<UniversalParkId, string> = {
   "universal-studios": logoUsf.url, "islands-of-adventure": logoIoa.url, "epic-universe": logoEpic.url, "volcano-bay": logoVb.url,
@@ -187,7 +187,9 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   return (
     <div className="mx-auto max-w-4xl space-y-6" data-testid="universal-configurator">
       <div className="flex flex-col items-center gap-6 rounded-xl bg-card p-6 shadow-sm sm:flex-row md:p-8">
-        <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="h-28 w-28 shrink-0 rounded-full object-cover object-[78%_20%] md:h-32 md:w-32" />
+        <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
+          <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "60% 35%" }} />
+        </span>
         <div className="text-center sm:text-left">
           <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos encontrar o seu ingresso?</h2>
