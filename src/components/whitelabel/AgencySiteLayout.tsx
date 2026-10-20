@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
-import cadasturSealAsset from "@/assets/whitelabel/selo-cadastur.png.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
