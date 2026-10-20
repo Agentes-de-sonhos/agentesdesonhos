@@ -347,11 +347,13 @@ export function AgencyFooter({
                 </div>
               )}
             </div>
-            <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
-              {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
-            </p>
+            {!paraisoFooter && (
+              <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
+                {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
+              </p>
+            )}
             {(footer?.address || location) && (
-              <p className="mt-6 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
+              <p className="mt-5 flex items-start gap-2 text-sm leading-relaxed text-[hsl(var(--wl-ink)_/_0.85)]">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.address ?? location}
               </p>
             )}
