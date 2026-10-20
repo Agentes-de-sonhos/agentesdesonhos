@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { SEO } from "@/components/seo/SEO";
 import { DisneyParkMapTrigger, type UniversalMapId } from "@/components/orlando/DisneyParkMapDialog";
+import { universalHotelSlugByName } from "@/components/landing/universal/universalHotelsCatalog";
 import { UniversalTicketsConfigurator } from "@/components/landing/universal/UniversalTicketsConfigurator";
 import { xcaretWhatsappUrl } from "@/components/landing/xcaret/content";
 import {
@@ -73,9 +74,9 @@ function HotelsGallery() {
               <p className="text-xs font-bold uppercase tracking-[0.14em] text-primary">{h.category}</p>
               <h3 className="mt-2 text-xl font-semibold">{h.name}</h3>
               <p className="mt-2 flex-1 text-pretty text-sm leading-6 text-muted-foreground">{h.description}</p>
-              <a href={xcaretWhatsappUrl(`Olá! Quero saber mais sobre o ${h.name}.`)} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
-                Explore <ArrowRight className="h-4 w-4" aria-hidden />
-              </a>
+              <Link to={agencyContextHref(`/universal/hoteis/${universalHotelSlugByName(h.name) ?? ""}`)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline">
+                Conhecer hotel e cotar <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
             </div>
           </article>
         ))}

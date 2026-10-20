@@ -1,4 +1,5 @@
 import AgencyResortPage from "@/pages/whitelabel/AgencyResortPage";
+import { getUniversalHotelPage } from "@/components/landing/universal/universalHotelsCatalog";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGallery";
@@ -269,6 +270,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             )}
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil/:slug" element={<AgencyResortPage info={info} />} />
+            )}
+            {resolveSiteProfile(info.hostname).key === "editorialRose" && (
+              <Route path="/universal/hoteis/:slug" element={<AgencyResortPage info={info} resolve={getUniversalHotelPage} backHref="/universal" kind="Hotel" />} />
             )}
             {resolveSiteProfile(info.hostname).key === "editorialDmc" && (
               <Route path="/visto-americano" element={<UsVisaLandingPage info={info} />} />
