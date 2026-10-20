@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   DISNEY_THEME_PARKS, DISNEY_WATER_PARKS, RECOMMENDATION_LABEL, THEME_DAYS_MAX, WATER_VISITS_MAX,
   buildDisneyRequest, clampThemeDays, clampWaterVisits, fmtDateBR, hopperApplies, monthLabel, recommendTicket,
-  upcomingMonths, validatePeriod, validateTravelers,
+  upcomingMonths, validatePeriod, validateTravelers, festivalNeedsEpcot, tripDaysInclusive, validateThemeDays, validateHopperIntent,
   type Choice3, type DisneyThemeParkId, type DisneyWaterParkId, type PeriodMode,
 } from "@/lib/disneyTickets";
 import { DISNEY_EVENTS, DISNEY_LOGOS, DISNEY_WATER_CALENDAR_URL, EVENT_STATUS_LABEL } from "./content";
@@ -85,7 +85,9 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
   const [tenPlus, setTenPlus] = useState(2);
   const [kids, setKids] = useState(0);
   const [infants, setInfants] = useState(0);
-  const [ages, setAges] = useState<string[]>([]);
+  const [kidAges, setKidAges] = useState<string[]>([]);
+  const [infantAges, setInfantAges] = useState<string[]>([]);
+  const [festivalHelp, setFestivalHelp] = useState(false);
   const [contact, setContact] = useState({ name: "", whatsapp: "", email: "" });
   const [consent, setConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
@@ -94,17 +96,29 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
 
   // Extras incompatíveis saem quando a escolha que os justificava deixa de existir.
   useEffect(() => { if (!hopperApplies(themes)) setHopper(null); if (!themes.length) setLightningLane(false); }, [themes]);
-  useEffect(() => { setAges((a) => Array.from({ length: kids + infants }, (_, i) => a[i] ?? "")); }, [kids, infants]);
+  // Cada grupo guarda suas idades: mudar um grupo nunca desloca as idades do outro.
+  useEffect(() => { setKidAges((a) => Array.from({ length: kids }, (_, i) => a[i] ?? "")); }, [kids]);
+  useEffect(() => { setInfantAges((a) => Array.from({ length: infants }, (_, i) => a[i] ?? "")); }, [infants]);
+  const ages = [...kidAges, ...infantAges];
+  const eventIntents = DISNEY_EVENTS.filter((e) => events.includes(e.id)).map((e) => ({ id: e.id, name: e.name, ticket: e.ticket }));
+  const needsEpcot = festivalNeedsEpcot(themes, eventIntents);
+  useEffect(() => { if (!needsEpcot) setFestivalHelp(false); }, [needsEpcot]);
 
   const sequence: StepId[] = ["pick", "period", ...(themes.length ? ["days" as const] : []), ...(hopperApplies(themes) ? ["hopper" as const] : []), ...(waters.length ? ["water" as const] : []), "summary", "contact"];
   const visible = sequence.filter((s) => reached.includes(s) || sequence.indexOf(s) <= Math.max(...reached.map((r) => sequence.indexOf(r))));
   const labelOf = (s: StepId) => `Etapa ${sequence.indexOf(s) + 1} de ${sequence.length}`;
-  const rec = recommendTicket({ themes, waters, events, hopper, waterExtras: waters.length ? "yes" : "no" });
+  const rec = recommendTicket({ themes, waters, events: eventIntents, hopper, waterExtras: waters.length ? "yes" : "no" });
+  const tripDays = periodMode === "dates" ? tripDaysInclusive(arrival, departure) : null;
 
   const validate = (s: StepId): string | null => {
-    if (s === "pick") return themes.length || waters.length || events.length ? null : "Escolha ao menos um parque ou evento.";
+    if (s === "pick") {
+      if (!themes.length && !waters.length && !events.length) return "Escolha ao menos um parque ou evento.";
+      if (needsEpcot && !festivalHelp) return "Os festivais do EPCOT estão incluídos na entrada do parque e precisam de um ingresso válido do EPCOT. Inclua o EPCOT nos parques temáticos ou peça orientação.";
+      return null;
+    }
     if (s === "period") return validatePeriod(periodMode, arrival, departure, months, today);
-    if (s === "hopper") return hopper ? null : "Conte se quer visitar mais de um parque no mesmo dia.";
+    if (s === "days") return validateThemeDays({ themes, themeDays, themeDaysHelp: daysHelp, periodMode, arrival, departure });
+    if (s === "hopper") return hopper ? validateHopperIntent({ themes, themeDays, themeDaysHelp: daysHelp, hopper }) : "Conte se quer visitar mais de um parque no mesmo dia.";
     return null;
   };
   const scrollTo = (s: StepId) => setTimeout(() => refs.current[s]?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
@@ -131,12 +145,12 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
     const parsed = contactSchema.safeParse(contact);
     if (!parsed.success) { setErrs({ contact: parsed.error.issues[0]?.message ?? "Revise seus dados." }); return; }
     if (!consent) { setErrs({ contact: "Autorize o contato para receber sua cotação." }); return; }
-    if (!periodMode) return;
+    if (!periodMode || state === "success") return;
     setErrs({});
     sending.current = true;
     try {
       const payload = buildDisneyRequest({
-        themes, waters, events: DISNEY_EVENTS.filter((e) => events.includes(e.id)).map((e) => ({ id: e.id, name: e.name })),
+        themes, waters, events: eventIntents,
         periodMode, arrival, departure, months, themeDays: themes.length && !daysHelp ? themeDays : null, themeDaysHelp: daysHelp,
         hopper, waterVisits: waters.length ? waterVisits : null, lightningLane, hotelInterest,
         tenPlus, kids, infants, ages: ages.map(Number), name: parsed.data.name, whatsapp: parsed.data.whatsapp, email: parsed.data.email,
@@ -149,9 +163,17 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
     return (
       <div className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 text-center shadow-sm" role="status">
         <Check className="mx-auto h-10 w-10 text-primary" aria-hidden />
-        <h3 className="mt-4 text-2xl font-semibold">Recebi sua solicitação!</h3>
-        <p className="mt-3 leading-7 text-muted-foreground">Vou analisar seu plano e confirmar o ingresso, a validade e as condições para as suas datas. Em breve entro em contato pelo WhatsApp.</p>
-        {simulated && <p className="mt-4 rounded-md bg-muted p-3 text-xs text-muted-foreground" data-testid="disney-simulated">Prévia: envio simulado. Nada foi enviado ao CRM.</p>}
+        {simulated ? (
+          <>
+            <h3 className="mt-4 text-2xl font-semibold">Simulação concluída</h3>
+            <p className="mt-3 leading-7 text-muted-foreground" data-testid="disney-simulated">Prévia: envio simulado. Nada foi enviado ao CRM e ninguém vai entrar em contato a partir deste teste.</p>
+          </>
+        ) : (
+          <>
+            <h3 className="mt-4 text-2xl font-semibold">Recebi sua solicitação!</h3>
+            <p className="mt-3 leading-7 text-muted-foreground">Vou analisar seu plano e confirmar o ingresso, a validade e as condições para as suas datas. Em breve entro em contato pelo WhatsApp.</p>
+          </>
+        )}
       </div>
     );
   }
@@ -196,6 +218,16 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
             </Opt>
           ))}
         </div>
+        {needsEpcot && (
+          <div className="mt-4 rounded-lg border border-primary/40 bg-primary/5 p-4 text-sm" data-testid="disney-festival-needs-epcot">
+            <p className="font-semibold">Festival do EPCOT não tem ingresso próprio</p>
+            <p className="mt-1 text-muted-foreground">Ele acontece dentro do EPCOT e está incluído na entrada do parque: é preciso um ingresso válido do EPCOT no dia.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button type="button" size="sm" className="rounded-md" onClick={() => setThemes((t) => (t.includes("epcot") ? t : [...t, "epcot"]))} data-testid="festival-add-epcot">Incluir EPCOT</Button>
+              <Opt active={festivalHelp} onClick={() => setFestivalHelp((v) => !v)} className="px-3 py-2 pr-9 text-sm font-medium" data-testid="festival-help">Quero orientação</Opt>
+            </div>
+          </div>
+        )}
         <Err>{errs.pick}</Err>
         {isLast("pick") && <Button className="mt-6 rounded-md" size="lg" onClick={() => goNext("pick")}>Continuar</Button>}
       </Step>
@@ -235,6 +267,10 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
             <Opt active={daysHelp} onClick={() => setDaysHelp((h) => !h)} className="py-2.5 pr-9 text-sm font-medium">Quero ajuda para decidir</Opt>
           </div>
           <p className="mt-4 text-sm text-muted-foreground">O ingresso padrão vai de 1 a 10 dias. Você pode repetir parques; não é preciso um dia para cada parque escolhido.</p>
+          {tripDays && <p className="mt-2 text-sm text-muted-foreground" data-testid="disney-trip-days">Dias de viagem em Orlando: <strong>{tripDays}</strong> (contando chegada e saída). Dias de parque são as visitas; dias de chegada e saída costumam ficar livres.</p>}
+          {!daysHelp && themes.length > themeDays && <p className="mt-2 text-sm text-muted-foreground">Você escolheu {themes.length} parques para {themeDays} {themeDays === 1 ? "dia" : "dias"}: para ver todos será preciso trocar de parque no mesmo dia.</p>}
+          <Err>{errs.days}</Err>
+          {errs.days && tripDays && themeDays > tripDays && <Button type="button" variant="outline" size="sm" className="mt-3 rounded-md" onClick={() => { setThemeDays(clampThemeDays(tripDays)); setErrs({}); }} data-testid="disney-fit-days">Ajustar para {Math.min(tripDays, THEME_DAYS_MAX)} {tripDays === 1 ? "dia" : "dias"}</Button>}
           {isLast("days") && <Button className="mt-6 rounded-md" size="lg" onClick={() => goNext("days")}>Continuar</Button>}
         </Step>
       )}
@@ -300,9 +336,14 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
           {infants > 0 && <p className="mt-2 text-xs text-muted-foreground">Menores de 3 não precisam de ingresso temático; contamos para logística e hospedagem.</p>}
           {ages.length > 0 && (
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {ages.map((a, i) => (
-                <label key={i} className="text-xs font-semibold">Idade na visita — criança {i + 1}
-                  <Input inputMode="numeric" value={a} onChange={(e) => setAges((x) => x.map((y, j) => (j === i ? e.target.value.replace(/\D/g, "").slice(0, 2) : y)))} className="mt-1 h-11" aria-label={`Idade da criança ${i + 1}`} />
+              {kidAges.map((a, i) => (
+                <label key={`k${i}`} className="text-xs font-semibold">Idade na visita — criança {i + 1} (3 a 9)
+                  <Input inputMode="numeric" value={a} onChange={(e) => setKidAges((x) => x.map((y, j) => (j === i ? e.target.value.replace(/\D/g, "").slice(0, 2) : y)))} className="mt-1 h-11" aria-label={`Idade da criança ${i + 1}`} />
+                </label>
+              ))}
+              {infantAges.map((a, i) => (
+                <label key={`i${i}`} className="text-xs font-semibold">Idade na visita — menor de 3 nº {i + 1} (0 a 2)
+                  <Input inputMode="numeric" value={a} onChange={(e) => setInfantAges((x) => x.map((y, j) => (j === i ? e.target.value.replace(/\D/g, "").slice(0, 1) : y)))} className="mt-1 h-11" aria-label={`Idade do menor de 3 anos ${i + 1}`} />
                 </label>
               ))}
             </div>
@@ -321,11 +362,11 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
           {state === "error" && (
             <div role="alert" className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
               {error ?? "Não foi possível enviar agora."} Seus dados continuam aqui.
-              <Button type="button" variant="outline" size="sm" className="ml-3 rounded-md" onClick={() => { reset(); void onSubmit(); }}><RotateCcw className="mr-1.5 h-4 w-4" />Tentar novamente</Button>
+              <Button type="button" variant="outline" size="sm" className="ml-3 rounded-md" onClick={() => { reset(); void onSubmit(); }} data-testid="disney-retry"><RotateCcw className="mr-1.5 h-4 w-4" />Tentar novamente</Button>
             </div>
           )}
           <Button className="mt-6 w-full rounded-md sm:w-auto" size="lg" disabled={state === "submitting"} onClick={onSubmit} data-testid="disney-submit">
-            {state === "submitting" ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enviando…</> : "Solicitar cotação"}
+            {state === "submitting" ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{simulated ? "Simulando…" : "Enviando…"}</> : simulated ? "Simular envio (prévia)" : "Solicitar cotação"}
           </Button>
         </Step>
       )}
