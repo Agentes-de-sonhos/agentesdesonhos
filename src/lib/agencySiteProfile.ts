@@ -469,11 +469,11 @@ const LUXURY_CURATED: AgencySiteProfile = {
       cta: "Abrir a Central de Solicitações",
     },
     newsletter: {
-      kicker: "INSPIRAÇÕES",
+      kicker: "GRUPO DE INSPIRAÇÕES NO WHATSAPP",
       title: "Receba inspirações para a sua próxima viagem",
       subtitle:
-        "Deixe o seu contato e o canal preferido: enviamos ideias de destinos e experiências alinhadas ao seu estilo de viajar.",
-      cta: "Quero receber inspirações",
+        "Informe seu nome, WhatsApp e e-mail. Depois de enviar, você será direcionado para o grupo de WhatsApp da Paraíso Viagens, onde compartilhamos destinos, experiências e oportunidades selecionadas.",
+      cta: "Quero entrar no grupo",
     },
     faq: {
       title: "Perguntas frequentes",
