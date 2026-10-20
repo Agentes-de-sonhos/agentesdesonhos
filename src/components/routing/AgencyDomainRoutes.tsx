@@ -36,6 +36,7 @@ const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
 const Limites100LegalPreviewPage = lazy(() => import("@/pages/whitelabel/Limites100LegalPreviewPage"));
 import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
+const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
 const AgencyContentPage = lazy(() => import("@/pages/whitelabel/AgencyContentPage"));
 const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
 const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
@@ -233,6 +234,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           {/* Landing institucional standalone, protegida pelo gate e isolada por perfil/hostname. */}
           {resolveSiteProfile(info.hostname).key === "editorialRose" && (
             <Route path="/xcaret" element={<XcaretLandingPage info={info} />} />
+          )}
+          {resolveSiteProfile(info.hostname).key === "editorialRose" && (
+            <Route path="/universal" element={<UniversalLandingPage info={info} />} />
           )}
 
           {/* Página de oferta: mesmo chrome, porém SEM qualquer atalho para WhatsApp. */}
