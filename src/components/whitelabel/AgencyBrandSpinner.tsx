@@ -8,6 +8,7 @@
 import { Loader2 } from "lucide-react";
 import { normalizeBrandHost } from "@/lib/agencySiteBrand";
 import destinosComAJuSymbol from "@/assets/whitelabel/simbolo-destinos-com-a-ju.png.asset.json";
+import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
 const CEM_LIMITES_MARK =
@@ -18,7 +19,12 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "www.destinoscomaju.com.br": destinosComAJuSymbol.url,
   "100limites.tur.br": CEM_LIMITES_MARK,
   "www.100limites.tur.br": CEM_LIMITES_MARK,
+  "paraisoviagens.com": paraisoLogo.url,
+  "www.paraisoviagens.com": paraisoLogo.url,
 };
+
+/** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
+const BREATHE_HOSTNAMES = new Set(["paraisoviagens.com", "www.paraisoviagens.com"]);
 
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
 function resolveContextHostname(explicit?: string | null): string {
@@ -54,6 +60,15 @@ export function AgencyBrandSpinner({
 }: AgencyBrandSpinnerProps) {
   const mark = resolveAgencySpinnerMark(hostname);
   if (!mark) return <Loader2 className={fallbackClassName} aria-hidden="true" />;
+
+  if (BREATHE_HOSTNAMES.has(resolveContextHostname(hostname))) {
+    return (
+      <span className="relative inline-flex items-center justify-center" role="status" aria-label="Carregando">
+        <span aria-hidden className="absolute h-24 w-24 rounded-full bg-primary/20 blur-3xl animate-brand-halo motion-reduce:animate-none" />
+        <img src={mark} alt="" aria-hidden="true" className={`relative ${MARK_SIZE[size]} w-auto max-w-[220px] object-contain animate-brand-breathe motion-reduce:animate-none`} />
+      </span>
+    );
+  }
 
   return (
     <span className="wl-brand-spinner" role="status" aria-label="Carregando">
