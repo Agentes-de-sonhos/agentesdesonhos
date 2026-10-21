@@ -4,6 +4,7 @@ import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json"
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
+import { useAgencyResortCuration } from "@/lib/resortCuration";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -453,6 +454,7 @@ export default function AgencySiteHome({
   const wa = agencyWhatsappNumber(info);
   const rawLocation = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
+  const { data: resortCuration } = useAgencyResortCuration(hostname);
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
   const googleReviews = isGoogleReviewsEnabled(hostname);
@@ -1578,6 +1580,8 @@ export default function AgencySiteHome({
                 title={profile.presentation ? `Explore os resorts do Brasil com a ${name}` : undefined}
                 allHref={agencySiteHref("/resorts-brasil")}
                 resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)}
+                curation={resortCuration}
+                agencyName={name}
               />
             </div>
           </section>

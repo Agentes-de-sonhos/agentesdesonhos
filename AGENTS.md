@@ -22,3 +22,4 @@
 
 - Universal `/universal` (editorialRose, shared rules/maps) and Disney `/disney` (editorialRose + technical preview host only, simulated submits, no unlicensed hotel photos/ratings). Why: opt-in, preview-safe.
 - Site requests: `success:true` required, including duplicates; rejections are retryable errors. Why: no false receipts.
+- Resort curation (featured/hidden) lives per agency owner in `agency_resort_settings` (RLS owner-only), edited at `/site/resorts`, read publicly only via SECURITY DEFINER `get_agency_resort_settings(hostname)`; home starts with no state selected and falls back to a random region-balanced sample. Why: tenant isolation, catalog stays global.
