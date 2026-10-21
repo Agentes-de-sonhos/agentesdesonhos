@@ -1447,8 +1447,10 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-alt-surface > section.wl-soft-gradient { background-color: transparent !important; background-image: none !important; }
 .wl-mundo .wl-alt-surface:has(> #destinos) { background-image: linear-gradient(180deg, #FFFFFF 50%, #FFF6E3 100%) !important; }
 .wl-mundo .wl-alt-surface:has(> #resorts) { background-image: linear-gradient(180deg, #FFFFFF 50%, #FDEEF1 100%) !important; }
-.wl-mundo .wl-alt-surface:has(> #diferenciais),
-.wl-mundo .wl-alt-surface:has(> #atendimento) { background-image: linear-gradient(180deg, #FFFFFF 50%, #EDF5FA 100%) !important; }
+.wl-mundo .wl-alt-surface:has(> #diferenciais) { background-image: linear-gradient(180deg, #FFFFFF 50%, #EDF5FA 100%) !important; }
+/* "Como funciona / Da primeira conversa ao retorno": fundo branco (Fernando). */
+.wl-mundo .wl-alt-surface:has(> #atendimento) { background-image: none !important; }
+.wl-mundo #atendimento { background-color: transparent !important; }
 .wl-mundo .wl-alt-surface:has(> #faq) { background-image: linear-gradient(180deg, #FFFFFF 50%, #FFFAEE 100%) !important; }
 .wl-mundo .wl-steps-card:nth-child(4n+1) .wl-step-num { background-color: #F69F61 !important; }
 .wl-mundo .wl-steps-card:nth-child(4n+2) .wl-step-num { background-color: #F57A7A !important; }
