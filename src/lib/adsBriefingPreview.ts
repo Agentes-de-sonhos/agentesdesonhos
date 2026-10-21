@@ -52,6 +52,33 @@ import mundoXcaretFechamento from "@/assets/ads-preview/mundo-xcaret-vanessa-35a
 import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
+import mundoXcaretMontagem from "@/assets/ads-preview/mundo-xcaret-montagem-home.png.asset.json";
+
+/**
+ * Modelo salvo: galeria estilo Stories do Instagram (tracinhos de progresso,
+ * 5 s por foto). Para reutilizar em outra seção/agência, use em
+ * featuredExperience: `gallery`, `galleryStyle: "stories"`, `galleryIntervalMs`.
+ * Componente: src/components/whitelabel/AgencyStoriesGallery.tsx.
+ */
+export const MUNDO_EM_CORES_XCARET_STORIES_GALLERY = {
+  gallery: [
+    { src: mundoXcaretGal1646.url, alt: "Vanessa Figueiredo no letreiro Xcaret México 35 anos" },
+    { src: mundoXcaretGal1655.url, alt: "Vanessa Figueiredo junto aos flamingos do parque Xcaret" },
+    { src: mundoXcaretGal0921.url, alt: "Vanessa Figueiredo na caverna do Xplor por Xcaret" },
+    { src: mundoXcaretGal2070.url, alt: "Vanessa Figueiredo no parque Xel-Há, com o rio de águas cristalinas" },
+    { src: mundoXcaretGal1179.url, alt: "Vanessa Figueiredo diante da piscina com vista para o mar do Caribe" },
+    { src: mundoXcaretGal1656.url, alt: "Vanessa Figueiredo junto à placa Xcaret México" },
+    { src: mundoXcaretGal1824.url, alt: "Vanessa Figueiredo junto à placa La Casa de la Playa" },
+    { src: mundoXcaretGal1977.url, alt: "Vanessa Figueiredo na adega de vinhos do complexo Xcaret" },
+    { src: mundoXcaretGal0749.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há" },
+    { src: mundoXcaretGal2031.url, alt: "Vanessa Figueiredo junto à pedra Xcaret México" },
+    { src: mundoXcaretGalDFF0.url, alt: "Vanessa Figueiredo com drinque e vista para o mar do Caribe" },
+    { src: mundoXcaretGalF103.url, alt: "Vanessa Figueiredo em hotel Xcaret com o selo Xperts Xcaret 2026" },
+  ],
+  galleryStyle: "stories" as const,
+  galleryIntervalMs: 5000,
+  badge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret" },
+};
 import logoAsset from "@/assets/ads-preview/ads-email-test-v1-logo.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
 // Real personal photographs from https://omundoemcores.com.br/wp-content/uploads/2024/07/Vanessa.png
