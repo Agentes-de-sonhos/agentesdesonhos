@@ -6,7 +6,7 @@ import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGa
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { useAgencyResortCuration } from "@/lib/resortCuration";
 
-function CuratedResortsMap({ hostname, ...rest }: { hostname: string } & React.ComponentProps<typeof BrazilResortsMap>) {
+function CuratedResortsMap({ hostname, ...rest }: { hostname: string } & import("react").ComponentProps<typeof BrazilResortsMap>) {
   const { data } = useAgencyResortCuration(hostname);
   return <BrazilResortsMap {...rest} curation={data} />;
 }
