@@ -1088,6 +1088,39 @@ export type Database = {
           },
         ]
       }
+      agency_resort_settings: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          is_featured: boolean
+          is_hidden: boolean
+          resort_slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_featured?: boolean
+          is_hidden?: boolean
+          resort_slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_featured?: boolean
+          is_hidden?: boolean
+          resort_slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       agency_showcases: {
         Row: {
           auto_categories: string[] | null
@@ -17510,6 +17543,15 @@ export type Database = {
       get_agency_admin_portal: { Args: { p_hostname: string }; Returns: Json }
       get_agency_by_slug: { Args: { p_slug: string }; Returns: Json }
       get_agency_domain: { Args: { p_hostname: string }; Returns: Json }
+      get_agency_resort_settings: {
+        Args: { _hostname: string }
+        Returns: {
+          display_order: number
+          is_featured: boolean
+          is_hidden: boolean
+          resort_slug: string
+        }[]
+      }
       get_agency_signature_base: {
         Args: { _agency_id: string }
         Returns: {
