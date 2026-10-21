@@ -150,6 +150,7 @@ const HotelRaioX = lazy(() => import("./pages/HotelRaioX"));
 const CampanhaIndicacao = lazy(() => import("./pages/CampanhaIndicacao"));
 const MeusProjetos = lazy(() => import("./pages/MeusProjetos"));
 const BlogPanel = lazy(() => import("./pages/site/BlogPanel"));
+const ResortsCurationPanel = lazy(() => import("./pages/site/ResortsCurationPanel"));
 const BlogEditorPage = lazy(() => import("./pages/site/BlogEditorPage"));
 const BlogPreviewPage = lazy(() => import("./pages/site/BlogPreviewPage"));
 const ProcessoReserva = lazy(() => import("./pages/ProcessoReserva"));
@@ -337,6 +338,7 @@ const App = () => {
               <Route path="/ferramentas-ia" element={<FerramentasIA />} />
               <Route path="/meus-projetos" element={<MeusProjetos />} />
               <Route path="/site/blog" element={<BlogPanel />} />
+              <Route path="/site/resorts" element={<ResortsCurationPanel />} />
               <Route path="/site/blog/:id" element={<BlogEditorPage />} />
               <Route path="/site/blog/:id/previa" element={<BlogPreviewPage />} />
               <Route path="/reservas" element={<CentralReservas />} />
