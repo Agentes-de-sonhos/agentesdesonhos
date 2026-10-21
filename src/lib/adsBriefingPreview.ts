@@ -228,6 +228,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     { label: "Destinos", to: "/#destinos" },
     { label: "Xcaret", to: "/xcaret" },
     { label: "Ingressos", to: "/ingressos-orlando" },
+    { label: "Universal", to: "/universal" },
     { label: "Resorts", to: "/resorts-brasil" },
     { label: "Cruzeiros", to: "/#autoridade" },
     { label: "Sobre", to: "/#sobre" },
