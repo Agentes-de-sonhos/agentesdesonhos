@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { BRAZIL_RESORTS } from "./resortsData";
 import { BRAZIL_STATE_PATHS, BRAZIL_VIEWBOX } from "./brazilStatePaths";
 import { REGION_OF, STATES, STATE_NAME, logoFor, prettyName } from "./BrazilResortsMap";
+import { EMPTY_CURATION, applyCuration, initialSelection, type ResortCuration } from "@/lib/resortCuration";
 
 const MAX_CARDS = 6;
 
@@ -15,21 +16,27 @@ const MAX_CARDS = 6;
 export function AgencyResortsSection({
   allHref,
   resortHref,
-  initialState = "BA",
   title = "Explore os resorts do Brasil",
+  curation = EMPTY_CURATION,
+  agencyName,
 }: {
   allHref: string;
   resortHref: (slug: string) => string;
-  initialState?: string;
   title?: string;
+  curation?: ResortCuration;
+  agencyName?: string;
 }) {
+  const visible = useMemo(() => applyCuration(BRAZIL_RESORTS, curation), [curation]);
+  const featured = useMemo(() => new Set(curation.featured), [curation]);
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    BRAZIL_RESORTS.forEach((r) => (c[r.uf] = (c[r.uf] ?? 0) + 1));
+    visible.forEach((r) => (c[r.uf] = (c[r.uf] ?? 0) + 1));
     return c;
-  }, []);
-  const [selected, setSelected] = useState(counts[initialState] ? initialState : "SP");
-  const all = BRAZIL_RESORTS.filter((r) => r.uf === selected);
+  }, [visible]);
+  const initial = useMemo(() => initialSelection(visible, curation, REGION_OF, MAX_CARDS), [visible, curation]);
+  const [selected, setSelectedRaw] = useState<string | null>(null);
+  const setSelected = (uf: string) => setSelectedRaw((cur) => (cur === uf ? null : uf));
+  const all = selected ? visible.filter((r) => r.uf === selected) : initial.resorts;
   const shown = all.slice(0, MAX_CARDS);
   const ufs = STATES.filter(([uf]) => counts[uf]).sort((a, b) => counts[b[0]] - counts[a[0]]);
 
@@ -40,7 +47,7 @@ export function AgencyResortsSection({
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary wl-kicker">Resorts no Brasil</p>
           <h2 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{title}</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
-            {BRAZIL_RESORTS.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
+            {visible.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
           </p>
         </div>
         <Button asChild variant="outline" className="wl-resorts-btn hidden rounded-full md:inline-flex">
@@ -114,7 +121,11 @@ export function AgencyResortsSection({
 
         <div className="min-w-0">
           <p className="mb-4 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">{STATE_NAME[selected]}</span> · mostrando {shown.length} de {all.length} resort{all.length > 1 ? "s" : ""}
+            {selected ? (
+              <><span className="font-medium text-foreground">{STATE_NAME[selected]}</span> · mostrando {shown.length} de {all.length} resort{all.length > 1 ? "s" : ""}</>
+            ) : (
+              <span className="font-medium text-foreground">{initial.curated ? `Seleção ${agencyName ? `da ${agencyName}` : "da agência"}` : "Destaques pelo Brasil"}</span>
+            )}
           </p>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {shown.map((r) => {
@@ -123,6 +134,9 @@ export function AgencyResortsSection({
               return (
                 <li key={r.slug} className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg">
                   <a href={resortHref(r.slug)} className="absolute inset-0 z-10" aria-label={`Ver página do ${name}`} />
+                  {featured.has(r.slug) && (
+                    <span className="absolute left-2 top-2 z-[5] rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">Destaque</span>
+                  )}
                   <div className="wl-resort-logo-box flex h-24 items-center justify-center px-5">
                     {logo ? (
                       <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="wl-resort-logo max-h-14 w-full object-contain transition duration-300 group-hover:scale-105" />
@@ -143,7 +157,7 @@ export function AgencyResortsSection({
           <div className="mt-6 flex justify-center lg:justify-start">
             <Button asChild className="wl-resorts-btn rounded-full">
               <a href={allHref}>
-                {all.length > shown.length ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected]}` : "Ver todos os resorts"}
+                {selected && all.length > shown.length ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected!]}` : "Ver todos os resorts"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
