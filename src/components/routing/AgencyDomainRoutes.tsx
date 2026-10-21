@@ -4,6 +4,12 @@ import { agencySiteHref } from "@/lib/agencyContextLink";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGallery";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
+import { useAgencyResortCuration } from "@/lib/resortCuration";
+
+function CuratedResortsMap({ hostname, ...rest }: { hostname: string } & React.ComponentProps<typeof BrazilResortsMap>) {
+  const { data } = useAgencyResortCuration(hostname);
+  return <BrazilResortsMap {...rest} curation={data} />;
+}
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Outlet, Navigate, useLocation, useParams } from "react-router-dom";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
@@ -278,7 +284,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
             <Route path="/ingressos-orlando" element={<><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></>} />
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
-              <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap {...(resolveSiteProfile(info.hostname).key === "editorialDmc" ? { title: "Explore os resorts do Brasil com a 100 Limites" } : {})} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
+              <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><CuratedResortsMap hostname={info.hostname} {...(resolveSiteProfile(info.hostname).key === "editorialDmc" ? { title: "Explore os resorts do Brasil com a 100 Limites" } : {})} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
             )}
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil/:slug" element={<AgencyResortPage info={info} />} />

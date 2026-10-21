@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { BRAZIL_RESORTS, type BrazilResort } from "./resortsData";
+import { BRAZIL_RESORTS as CATALOG, type BrazilResort } from "./resortsData";
+import { applyCuration, type ResortCuration } from "@/lib/resortCuration";
 import { BRAZIL_STATE_PATHS, BRAZIL_VIEWBOX } from "./brazilStatePaths";
 
 const LOGOS = import.meta.glob("@/assets/resorts-brasil/*.webp", { eager: true, import: "default" }) as Record<string, string>;
@@ -39,19 +40,23 @@ export function BrazilResortsMap({
   onQuote,
   resortHref,
   title = "Explore os resorts do Brasil com a Ju",
+  curation,
 }: {
+  /** Ocultos/destaques definidos pela agência. */
+  curation?: ResortCuration;
   onQuote?: (resort: BrazilResort, stateName: string) => void;
   /** Quando informado, cada card abre a página do resort. */
   resortHref?: (slug: string) => string;
   title?: string;
 }) {
+  const BRAZIL_RESORTS = useMemo(() => (curation ? applyCuration(CATALOG, curation) : CATALOG), [curation]);
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
     BRAZIL_RESORTS.forEach((r) => (c[r.uf] = (c[r.uf] ?? 0) + 1));
     return c;
-  }, []);
+  }, [BRAZIL_RESORTS]);
   const ufsWithResorts = STATES.filter(([uf]) => counts[uf]).sort((a, b) => counts[b[0]] - counts[a[0]]);
   const list = selected ? BRAZIL_RESORTS.filter((r) => r.uf === selected) : BRAZIL_RESORTS;
 
