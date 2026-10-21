@@ -12,7 +12,7 @@ describe("AgencyResortsSection", () => {
     render(<AgencyResortsSection {...props} />);
     expect(screen.getByText("Destaques pelo Brasil")).toBeTruthy();
     expect(screen.getAllByRole("listitem").length).toBe(6);
-    expect(screen.getByRole("button", { name: /^Bahia/ }).getAttribute("aria-pressed")).toBe("false");
+    expect(screen.getByRole("button", { name: /^Bahia, / }).getAttribute("aria-pressed")).toBe("false");
   });
 
   it("filtra ao clicar no estado e desmarca no segundo clique", () => {
