@@ -22,6 +22,8 @@ import logoHhn from "@/assets/universal/Halloween-Horror-Nights.webp.asset.json"
 import logoExpress from "@/assets/universal/Universal-Express.webp.asset.json";
 import logoVip from "@/assets/universal/VIP-Experience.webp.asset.json";
 import juPortrait from "@/assets/universal/ju-universal-globe.png.asset.json";
+import vanessaPortrait from "@/assets/universal/vanessa-universal.jpg.asset.json";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 const LOGOS: Record<UniversalParkId, string> = {
   "universal-studios": logoUsf.url, "islands-of-adventure": logoIoa.url, "epic-universe": logoEpic.url, "volcano-bay": logoVb.url,
@@ -69,6 +71,7 @@ const ErrorText = ({ children }: { children?: string | null }) => children ? <p 
 export function UniversalTicketsConfigurator({ hostname }: { hostname: string }) {
   const { submit, state, error, reset } = useAgencySiteRequest(hostname);
   const isJu = isJuUniversalProfile(hostname);
+  const isMundo = resolveSiteProfile(hostname ?? "").key === "mundoEmCoresBriefing14";
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);
@@ -196,8 +199,14 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
             <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "60% 35%" }} />
           </span>
         )}
-        <div className={isJu ? "text-center sm:text-left" : "w-full text-center"}>
+        {isMundo && (
+          <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
+            <img src={vanessaPortrait.url} alt="Vanessa Figueiredo, da O Mundo em Cores" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "68% 70%" }} />
+          </span>
+        )}
+        <div className={isJu || isMundo ? "text-center sm:text-left" : "w-full text-center"}>
           {isJu && <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>}
+          {isMundo && <p className="text-sm font-semibold text-primary">Oi, eu sou a Vanessa!</p>}
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos encontrar o seu ingresso?</h2>
           <p className="mt-3 text-pretty leading-7 text-muted-foreground">{isJu
             ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano."
