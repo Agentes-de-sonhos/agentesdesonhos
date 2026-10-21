@@ -225,14 +225,19 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   campaignCardPresentation: "photoAbove",
   nav: [
     { label: "Início", to: "/" },
+    { label: "Especialidades", to: "/#campanhas", children: [
+      { label: "Universal Orlando", to: "/universal" },
+      { label: "Xcaret", to: "/xcaret" },
+      { label: "Resorts no Brasil", to: "/resorts-brasil" },
+    ] },
     { label: "Destinos", to: "/#destinos" },
-    { label: "Xcaret", to: "/xcaret" },
-    { label: "Ingressos", to: "/ingressos-orlando" },
-    { label: "Universal", to: "/universal" },
-    { label: "Resorts", to: "/resorts-brasil" },
     { label: "Cruzeiros", to: "/#autoridade" },
-    { label: "Sobre", to: "/#sobre" },
-    { label: "Atendimento", to: "/#atendimento" },
+    { label: "Sobre", to: "/#sobre", children: [
+      { label: "A Vanessa", to: "/#sobre" },
+      { label: "Avaliações do Google", to: "/#avaliacoes" },
+      { label: "Dúvidas frequentes", to: "/#faq" },
+    ] },
+    { label: "Grupo WhatsApp", to: "https://chat.whatsapp.com/BsNGH7VRiILHfPqZhoASUu?mode=gi_t" },
   ],
   sections: {
     dmc: { enabled: false },
