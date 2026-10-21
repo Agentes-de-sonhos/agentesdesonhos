@@ -1458,7 +1458,7 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-steps-card:nth-child(4n+4) .wl-step-num { background-color: #245C81 !important; }
 .wl-mundo .wl-alt-surface > section > div { padding-top: 4.5rem; padding-bottom: 4.5rem; }
 /* Seções que já têm respiro próprio não somam o do bloco interno (padrão: 72px por lado). */
-.wl-mundo .wl-alt-surface > section:is(.py-14, .py-16) > div { padding-top: 0; padding-bottom: 0; }
+.wl-mundo .wl-alt-surface > section.py-14 > div { padding-top: 0; padding-bottom: 0; }
 .wl-mundo #cotacao { background-color: transparent; background-image: none; }
 .wl-mundo .wl-campaign-card { box-shadow: var(--shadow-mundo-card); }
 .wl-mundo .wl-newsletter-card {
@@ -1477,7 +1477,7 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-cta-primary:hover { background-color: hsl(var(--primary) / 0.9); }
 @media (max-width: 767px) {
   .wl-mundo .wl-alt-surface > section > div { padding-top: 3rem; padding-bottom: 3rem; }
-  .wl-mundo .wl-alt-surface > section:is(.py-14, .py-16) > div { padding-top: 0; padding-bottom: 0; }
+  .wl-mundo .wl-alt-surface > section.py-14 > div { padding-top: 0; padding-bottom: 0; }
   .wl-mundo #sobre [class*="border-y-2"] { flex-wrap: wrap; }
 }
 .wl-mundo #rodape {
