@@ -1429,7 +1429,17 @@ body[data-booking-selection-bar] {
   --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F1F6FA 100%);
 }
 .wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
-.wl-mundo .wl-alt-gradient { background-image: var(--wl-mundo-gradient); }
+.wl-mundo .wl-alt-gradient { background-image: linear-gradient(180deg, #FFFFFF 0%, var(--mc-tint, #F1F6FA) 100%); }
+/* Paleta do logotipo: cada faixa em degradê recebe uma cor clarinha, em rodízio. */
+.wl-mundo .wl-alt-gradient:nth-of-type(5n+1) { --mc-tint: #FDF0E6; }
+.wl-mundo .wl-alt-gradient:nth-of-type(5n+2) { --mc-tint: #E8F8FC; }
+.wl-mundo .wl-alt-gradient:nth-of-type(5n+3) { --mc-tint: #FDECEC; }
+.wl-mundo .wl-alt-gradient:nth-of-type(5n+4) { --mc-tint: #EAF3F8; }
+.wl-mundo .wl-alt-gradient:nth-of-type(5n+5) { --mc-tint: #E9F0F5; }
+.wl-mundo .wl-steps-card:nth-child(4n+1) .wl-step-num { background-color: #F69F61 !important; }
+.wl-mundo .wl-steps-card:nth-child(4n+2) .wl-step-num { background-color: #F57A7A !important; }
+.wl-mundo .wl-steps-card:nth-child(4n+3) .wl-step-num { background-color: #3C94BB !important; }
+.wl-mundo .wl-steps-card:nth-child(4n+4) .wl-step-num { background-color: #245C81 !important; }
 .wl-mundo .wl-alt-surface > section > div { padding-top: 4.5rem; padding-bottom: 4.5rem; }
 .wl-mundo #cotacao { background-color: transparent; background-image: none; }
 .wl-mundo .wl-campaign-card { box-shadow: var(--shadow-mundo-card); }
