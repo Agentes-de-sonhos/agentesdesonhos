@@ -110,7 +110,11 @@ export function AppSidebar() {
   const projectsGroup = useMemo(() => isAdsGestao ? { ...APP_PROJECTS_GROUP, items: [] } : filterGroup(APP_PROJECTS_GROUP), [filterGroup, isAdsGestao]);
   const moreGroup = useMemo(() => filterGroup(APP_MORE_GROUP), [filterGroup]);
   const managementItems = useMemo(() => isAdsEssencial ? [] : APP_MANAGEMENT_ITEMS.filter(isPermitted).filter((i) => !(isUpToReservas && i.key === "financeiro")), [isPermitted, isAdsEssencial, isUpToReservas]);
-  const siteGroup = useMemo(() => hasAgencyEntitlement("site_blog") ? filterGroup(APP_SITE_GROUP) : { ...APP_SITE_GROUP, items: [] }, [filterGroup, hasAgencyEntitlement]);
+  const { data: ownsSite = false } = useOwnsAgencySite();
+  const siteGroup = useMemo(() => {
+    const g = filterGroup(APP_SITE_GROUP);
+    return { ...g, items: g.items.filter((i) => (i.key === "site_blog" ? hasAgencyEntitlement("site_blog") : i.key === "site_resorts" ? ownsSite : true)) };
+  }, [filterGroup, hasAgencyEntitlement, ownsSite]);
   const otherItems = useMemo(() => APP_OTHER_ITEMS.filter(isPermitted), [isPermitted]);
 
   const isItemActive = (item: AppSidebarItem) => {

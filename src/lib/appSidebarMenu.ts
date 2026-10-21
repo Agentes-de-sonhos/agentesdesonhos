@@ -116,5 +116,6 @@ export const APP_SITE_GROUP: AppSidebarGroup = {
   icon: Globe,
   items: [
     { key: "site_blog", title: "Blog", url: "/site/blog", icon: BlogIcon, requiredPermission: "site.blog.manage" },
+    { key: "site_resorts", title: "Resorts no Brasil", url: "/site/resorts", icon: Globe },
   ],
 };
