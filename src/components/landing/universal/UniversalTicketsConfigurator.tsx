@@ -201,7 +201,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
         )}
         {isMundo && (
           <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
-            <img src={vanessaPortrait.url} alt="Vanessa Figueiredo, da O Mundo em Cores" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "68% 70%" }} />
+            <img src={vanessaPortrait.url} alt="Vanessa Figueiredo, da O Mundo em Cores" className="absolute inset-0 h-full w-full scale-[1.45] object-cover" style={{ transformOrigin: "62% 70%" }} />
           </span>
         )}
         <div className={isJu || isMundo ? "text-center sm:text-left" : "w-full text-center"}>
