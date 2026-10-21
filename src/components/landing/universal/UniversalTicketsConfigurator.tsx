@@ -22,7 +22,7 @@ import logoHhn from "@/assets/universal/Halloween-Horror-Nights.webp.asset.json"
 import logoExpress from "@/assets/universal/Universal-Express.webp.asset.json";
 import logoVip from "@/assets/universal/VIP-Experience.webp.asset.json";
 import juPortrait from "@/assets/universal/ju-universal-globe.png.asset.json";
-import vanessaPortrait from "@/assets/universal/vanessa-universal.jpg.asset.json";
+import vanessaPortrait from "@/assets/universal/vanessa-epic.png.asset.json";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 const LOGOS: Record<UniversalParkId, string> = {
@@ -201,7 +201,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
         )}
         {isMundo && (
           <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
-            <img src={vanessaPortrait.url} alt="Vanessa Figueiredo, da O Mundo em Cores" className="absolute inset-0 h-full w-full scale-[1.45] object-cover" style={{ transformOrigin: "62% 70%" }} />
+            <img src={vanessaPortrait.url} alt="Vanessa Figueiredo, da O Mundo em Cores" className="absolute inset-0 h-full w-full object-contain" />
           </span>
         )}
         <div className={isJu || isMundo ? "text-center sm:text-left" : "w-full text-center"}>
