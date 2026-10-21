@@ -287,7 +287,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     ctaHref: "/xcaret",
   },
   hero: [
-    { title: "Viagem desenhada para você.", subtitle: "Roteiros sob medida, criados a partir do seu jeito de viajar, com acompanhamento antes, durante e depois.", image: "heroVarenna", order: 1, enabled: true },
+    { title: "Viagem desenhada para você.", subtitle: "Roteiros sob medida, criados a partir do seu jeito de viajar, com acompanhamento antes, durante e depois.", image: "heroMundoDesenhadaVideo", order: 1, enabled: true },
     { title: "Existe uma Europa para cada pessoa.", subtitle: "Desenhamos a sua, no seu ritmo, para você viver a sua própria história.", image: "heroMundoEuropaVideo", order: 2, enabled: true },
     { title: "Viajar em boa companhia.", subtitle: "Grupos acompanhados para quem quer descobrir o mundo com segurança e novas amizades.", image: "heroMundoGrupoVideo", order: 3, enabled: true },
   ],
