@@ -80,6 +80,7 @@ const HERO_VIDEO_BY_IMAGE: Record<string, string> = {
   [paraisoHeroEslovenia.url]: paraisoHeroAurora.url,
   [mundoHeroGrupoVideo.url]: mundoHeroGrupoVideo.url,
   [mundoHeroEuropaVideo.url]: mundoHeroEuropaVideo.url,
+  [mundoHeroDesenhadaVideo.url]: mundoHeroDesenhadaVideo.url,
 };
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
 import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
@@ -106,6 +107,7 @@ import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import mundoHeroGrupoVideo from "@/assets/whitelabel/mundo-hero-grupo.mp4.asset.json";
 import mundoHeroEuropaVideo from "@/assets/whitelabel/mundo-hero-europa.mp4.asset.json";
+import mundoHeroDesenhadaVideo from "@/assets/whitelabel/mundo-hero-desenhada.mp4.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
@@ -147,6 +149,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroSantoriniShip: heroSantoriniShip.url,
   heroMundoGrupoVideo: mundoHeroGrupoVideo.url,
   heroMundoEuropaVideo: mundoHeroEuropaVideo.url,
+  heroMundoDesenhadaVideo: mundoHeroDesenhadaVideo.url,
   heroAirportTraveler: heroAirportTraveler.url,
   heroJuMagicKingdom: heroJuMagicKingdom.url,
   parques: destinoParques,
