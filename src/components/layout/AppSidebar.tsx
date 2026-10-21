@@ -16,6 +16,7 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useAgencyEntitlements } from "@/hooks/useAgencyEntitlements";
 import { canAccessRoute } from "@/lib/routePermissions";
+import { useOwnsAgencySite } from "@/hooks/useOwnsAgencySite";
 import { isMenuUpToReservasAgency, isAdsEssencialGestaoMenuUser, isAdsEssencialMenuUser, isAdsGestaoMenuUser, isItemHiddenForUser, isTrial15MenuUser } from "@/lib/sidebarVisibility";
 import { SIDEBAR_ROW_CLASS, SIDEBAR_ROW_GAP_CLASS } from "@/lib/sidebarAnchor";
 import {
