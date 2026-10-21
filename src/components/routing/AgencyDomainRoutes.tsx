@@ -39,6 +39,7 @@ import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100Lega
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
+import { MUNDO_EM_CORES_XCARET_SLOTS, MUNDO_EM_CORES_XCARET_REWRITES } from "@/lib/adsBriefingPreview";
 const DisneyLandingPage = lazy(() => import("@/pages/whitelabel/DisneyLandingPage"));
 const DisneyHotelPage = lazy(() => import("@/pages/whitelabel/DisneyHotelPage"));
 import { isDisneyPreviewRouteEnabled } from "@/lib/disneyPreviewGate";
@@ -239,6 +240,9 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           {/* Landing institucional standalone, protegida pelo gate e isolada por perfil/hostname. */}
           {resolveSiteProfile(info.hostname).key === "editorialRose" && (
             <Route path="/xcaret" element={<XcaretLandingPage info={info} />} />
+          )}
+          {resolveSiteProfile(info.hostname).key === "mundoEmCoresBriefing14" && (
+            <Route path="/xcaret" element={<XcaretLandingPage info={info} slots={MUNDO_EM_CORES_XCARET_SLOTS} textRewrites={MUNDO_EM_CORES_XCARET_REWRITES} />} />
           )}
           {isUniversalLandingEnabled(info.hostname) && (
             <Route path="/universal" element={<UniversalLandingPage info={info} />} />
