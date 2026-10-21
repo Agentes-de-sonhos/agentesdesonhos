@@ -1429,6 +1429,11 @@ body[data-booking-selection-bar] {
   --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F1F6FA 100%);
 }
 .wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
+/* O Mundo em Cores: vão entre conteúdos de seções ≤ 150px (72px + 72px no desktop). */
+@media (min-width: 768px) {
+  .wl-mundo .wl-alt-surface :is(.md\:py-24, .md\:py-20, .md\:pt-24, .md\:pt-20) { padding-top: 72px; }
+  .wl-mundo .wl-alt-surface :is(.md\:py-24, .md\:py-20, .md\:pb-24, .md\:pb-20) { padding-bottom: 72px; }
+}
 .wl-mundo .wl-alt-gradient { background-image: linear-gradient(180deg, #FFFFFF 0%, var(--mc-tint, #F1F6FA) 100%); }
 /* Paleta do logotipo: cada faixa em degradê recebe uma cor clarinha, em rodízio. */
 .wl-mundo .wl-alt-gradient:nth-of-type(5n+1) { --mc-tint: #FDF0E6; }
