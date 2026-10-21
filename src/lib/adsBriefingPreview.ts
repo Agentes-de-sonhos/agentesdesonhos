@@ -287,7 +287,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     newsletter: { enabled: true, order: 10 },
   },
   heroImage: "europa",
-  heroPresentation: { kicker: "VIAGEM DESENHADA PARA VOCÊ", overlay: "strongLeft", actionsPlacement: "right", titleWeight: "regular" },
+  heroPresentation: { kicker: "VIAGEM DESENHADA PARA VOCÊ", overlay: "none", actionsPlacement: "right", titleWeight: "regular" },
   requestCenter: { title: "Por onde você quer começar?", titlePlacement: "above-card" },
   resortsMap: { enabled: true },
   featuredExperience: {
