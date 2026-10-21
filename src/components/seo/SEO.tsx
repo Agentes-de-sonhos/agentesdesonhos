@@ -24,6 +24,12 @@ interface SEOProps {
   ogType?: "website" | "article" | "profile";
   /** Optional JSON-LD payload (Object or Array). */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** og:site_name override (white-label sites use the agency name). */
+  siteName?: string;
+  /** Alt text for the share image. */
+  imageAlt?: string;
+  /** MIME type of the share image. */
+  imageType?: string;
 }
 
 /**
@@ -41,6 +47,9 @@ export function SEO({
   image,
   ogType = "website",
   jsonLd,
+  siteName = SITE_NAME,
+  imageAlt = "Agentes de Sonhos — Plataforma para agentes de viagens",
+  imageType = "image/png",
 }: SEOProps) {
   const location = useLocation();
   const pathname = location?.pathname ?? "/";
@@ -69,23 +78,23 @@ export function SEO({
 
       {/* Open Graph */}
       <meta property="og:type" content={ogType} />
-      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:site_name" content={siteName} />
       <meta property="og:title" content={finalTitle} />
       <meta property="og:description" content={finalDescription} />
       <meta property="og:url" content={finalCanonical} />
       <meta property="og:locale" content="pt_BR" />
       <meta property="og:image" content={finalImage} />
-      <meta property="og:image:type" content="image/png" />
+      <meta property="og:image:type" content={imageType} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content="Agentes de Sonhos — Plataforma para agentes de viagens" />
+      <meta property="og:image:alt" content={imageAlt} />
 
       {/* Twitter */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={finalTitle} />
       <meta name="twitter:description" content={finalDescription} />
       <meta name="twitter:image" content={finalImage} />
-      <meta name="twitter:image:alt" content="Agentes de Sonhos — Plataforma para agentes de viagens" />
+      <meta name="twitter:image:alt" content={imageAlt} />
 
       {jsonLd ? (
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>

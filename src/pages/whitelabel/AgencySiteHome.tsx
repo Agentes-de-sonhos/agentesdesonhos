@@ -52,6 +52,7 @@ import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProf
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
 import { SEO } from "@/components/seo/SEO";
+import { resolveAgencySharePreview } from "@/lib/agencySharePreview";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
 import heroLuxo from "@/assets/whitelabel/hero-luxo.jpg";
 import heroFae from "@/assets/whitelabel/hero-fae.jpg";
@@ -1798,9 +1799,23 @@ export default function AgencySiteHome({
     }
   };
 
+  const sharePreview = resolveAgencySharePreview(info.hostname);
   return (
     <>
-      {profile.seo && (
+      {sharePreview && !profile.presentation ? (
+        <SEO
+          title={sharePreview.title}
+          exactTitle
+          noindex={noindex}
+          description={sharePreview.description}
+          canonical={sharePreview.canonical}
+          image={sharePreview.image}
+          imageType="image/jpeg"
+          imageAlt={`Logotipo ${sharePreview.siteName}`}
+          siteName={sharePreview.siteName}
+          jsonLd={jsonLd}
+        />
+      ) : profile.seo && (
         <SEO
           title={profile.seo.title}
           exactTitle
