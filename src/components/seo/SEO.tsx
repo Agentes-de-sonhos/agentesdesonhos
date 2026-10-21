@@ -24,6 +24,12 @@ interface SEOProps {
   ogType?: "website" | "article" | "profile";
   /** Optional JSON-LD payload (Object or Array). */
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** og:site_name override (white-label sites use the agency name). */
+  siteName?: string;
+  /** Alt text for the share image. */
+  imageAlt?: string;
+  /** MIME type of the share image. */
+  imageType?: string;
 }
 
 /**
@@ -41,6 +47,9 @@ export function SEO({
   image,
   ogType = "website",
   jsonLd,
+  siteName = SITE_NAME,
+  imageAlt = "Agentes de Sonhos — Plataforma para agentes de viagens",
+  imageType = "image/png",
 }: SEOProps) {
   const location = useLocation();
   const pathname = location?.pathname ?? "/";
