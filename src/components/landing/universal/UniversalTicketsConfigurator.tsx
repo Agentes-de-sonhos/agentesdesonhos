@@ -8,6 +8,7 @@ import { TravelersFields } from "@/components/whitelabel/TravelersFields";
 import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { cn } from "@/lib/utils";
+import { isJuUniversalProfile } from "@/lib/universalLandingAccess";
 import {
   UNIVERSAL_EXTRAS, UNIVERSAL_TICKET_PARKS, allowedExtras, bothClassicParks, buildUniversalRequest, calendarDays,
   effectiveDays, fmtDateBR, hhnEligible, maxDaysFor, monthLabel, normalizeDays, orderParks, parkName, totalDays,
@@ -67,6 +68,7 @@ const ErrorText = ({ children }: { children?: string | null }) => children ? <p 
 
 export function UniversalTicketsConfigurator({ hostname }: { hostname: string }) {
   const { submit, state, error, reset } = useAgencySiteRequest(hostname);
+  const isJu = isJuUniversalProfile(hostname);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);
@@ -177,8 +179,10 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
     return (
       <div className="mx-auto max-w-2xl rounded-xl border border-border bg-card p-8 text-center shadow-sm" role="status">
         <Check className="mx-auto h-10 w-10 text-primary" aria-hidden />
-        <h3 className="mt-4 text-2xl font-semibold">Recebi sua solicitação!</h3>
-        <p className="mt-3 text-pretty leading-7 text-muted-foreground">Vou analisar o seu plano e identificar o ingresso que combina com ele. Em breve entro em contato pelo WhatsApp.</p>
+        <h3 className="mt-4 text-2xl font-semibold">{isJu ? "Recebi sua solicitação!" : "Recebemos sua solicitação!"}</h3>
+        <p className="mt-3 text-pretty leading-7 text-muted-foreground">{isJu
+          ? "Vou analisar o seu plano e identificar o ingresso que combina com ele. Em breve entro em contato pelo WhatsApp."
+          : "Vamos analisar o seu plano e identificar o ingresso que combina com ele. Em breve entraremos em contato pelo WhatsApp."}</p>
         <WhatsappGroupInvite hostname={hostname} className="mt-6" />
       </div>
     );
@@ -187,13 +191,17 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   return (
     <div className="mx-auto max-w-4xl space-y-6" data-testid="universal-configurator">
       <div className="flex flex-col items-center gap-6 rounded-xl bg-card p-6 shadow-sm sm:flex-row md:p-8">
-        <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
-          <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "60% 35%" }} />
-        </span>
-        <div className="text-center sm:text-left">
-          <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>
+        {isJu && (
+          <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
+            <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2.2] object-cover" style={{ transformOrigin: "60% 35%" }} />
+          </span>
+        )}
+        <div className={isJu ? "text-center sm:text-left" : "w-full text-center"}>
+          {isJu && <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>}
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos encontrar o seu ingresso?</h2>
-          <p className="mt-3 text-pretty leading-7 text-muted-foreground">Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano.</p>
+          <p className="mt-3 text-pretty leading-7 text-muted-foreground">{isJu
+            ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano."
+            : "Conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Montamos a cotação com o ingresso certo para o seu plano."}</p>
         </div>
       </div>
 
