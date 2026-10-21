@@ -1429,6 +1429,9 @@ body[data-booking-selection-bar] {
   --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F1F6FA 100%);
 }
 .wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
+/* Botão "Quero entrar no grupo": laranja da placa "VIAGENS" do logo. */
+.wl-mundo .wl-inspiration-cta { background-color: #F69F61; color: #FFFFFF; }
+.wl-mundo .wl-inspiration-cta:hover { background-color: #EE8B45; }
 /* O Mundo em Cores: vão entre conteúdos de seções ≤ 150px (72px + 72px no desktop). */
 @media (min-width: 768px) {
   .wl-mundo .wl-alt-surface :is(.md\:py-24, .md\:py-20, .md\:pt-24, .md\:pt-20) { padding-top: 72px; }

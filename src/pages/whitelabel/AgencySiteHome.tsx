@@ -1709,7 +1709,7 @@ export default function AgencySiteHome({
                       </p>
                       <Button
                         size="lg"
-                        className="mt-8 h-12 w-full rounded-xl bg-primary px-7 text-primary-foreground hover:bg-primary/90 md:w-auto"
+                        className="wl-inspiration-cta mt-8 h-12 w-full rounded-xl bg-primary px-7 text-primary-foreground hover:bg-primary/90 md:w-auto"
                         onClick={() => setInspirationOpen(true)}
                       >
                         {copy.cta ?? "Quero entrar no grupo"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
