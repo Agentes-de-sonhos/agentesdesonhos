@@ -1431,8 +1431,6 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-alt-surface { background-color: hsl(var(--wl-white)); }
 /* O Mundo em Cores: vão entre conteúdos de seções ≤ 150px (72px + 72px no desktop). */
 @media (min-width: 768px) {
-  .wl-mundo .wl-alt-surface > section,
-  .wl-mundo .wl-alt-surface > section > div:first-child { padding-top: min(var(--tw-pt, 999px), 0px); }
   .wl-mundo .wl-alt-surface :is(.md\:py-24, .md\:py-20, .md\:pt-24, .md\:pt-20) { padding-top: 72px; }
   .wl-mundo .wl-alt-surface :is(.md\:py-24, .md\:py-20, .md\:pb-24, .md\:pb-20) { padding-bottom: 72px; }
 }
