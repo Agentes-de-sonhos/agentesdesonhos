@@ -27,6 +27,7 @@ import {
   type OrlandoCategory,
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
+import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { DisneyParkMapTrigger, isParkMapId, type ParkMapId } from "./DisneyParkMapDialog";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -108,7 +109,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   const sectionRef = useRef<HTMLElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const showUniversalPage = resolveSiteProfile(hostname).key === "editorialRose";
+  const showUniversalPage = isUniversalLandingEnabled(hostname);
   const { submit, state, error } = useAgencySiteRequest(hostname);
 
   const [step, setStep] = useState<number | null>(mode_ === "page" ? 0 : null);

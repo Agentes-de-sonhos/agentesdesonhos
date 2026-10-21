@@ -38,6 +38,7 @@ const Limites100LegalPreviewPage = lazy(() => import("@/pages/whitelabel/Limites
 import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
+import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 const DisneyLandingPage = lazy(() => import("@/pages/whitelabel/DisneyLandingPage"));
 const DisneyHotelPage = lazy(() => import("@/pages/whitelabel/DisneyHotelPage"));
 import { isDisneyPreviewRouteEnabled } from "@/lib/disneyPreviewGate";
@@ -239,7 +240,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           {resolveSiteProfile(info.hostname).key === "editorialRose" && (
             <Route path="/xcaret" element={<XcaretLandingPage info={info} />} />
           )}
-          {resolveSiteProfile(info.hostname).key === "editorialRose" && (
+          {isUniversalLandingEnabled(info.hostname) && (
             <Route path="/universal" element={<UniversalLandingPage info={info} />} />
           )}
           {/* Disney: somente Destinos com a Ju e somente em hosts técnicos de prévia (não no domínio real). */}
@@ -278,7 +279,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil/:slug" element={<AgencyResortPage info={info} />} />
             )}
-            {resolveSiteProfile(info.hostname).key === "editorialRose" && (
+            {isUniversalLandingEnabled(info.hostname) && (
               <Route path="/universal/hoteis/:slug" element={<AgencyResortPage info={info} resolve={getUniversalHotelPage} backHref="/universal" kind="Hotel" />} />
             )}
             {isDisneyPreviewRouteEnabled(info.hostname) && (

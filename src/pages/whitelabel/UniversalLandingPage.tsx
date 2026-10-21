@@ -4,6 +4,7 @@ import { ArrowRight, Map as MapIcon, MessageCircle, Ticket } from "lucide-react"
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { agencyContextHref } from "@/lib/agencyContextLink";
 import { siteThemeRootClass } from "@/lib/agencySiteTheme";
+import { isJuUniversalProfile } from "@/lib/universalLandingAccess";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
 import { resolveAgencyHeaderBrandPreset, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
 import { AgencyFooter } from "@/components/whitelabel/AgencySiteLayout";
@@ -27,10 +28,10 @@ const contentWidth = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 const heading = "text-balance text-3xl font-semibold leading-tight text-foreground md:text-5xl";
 const body = "text-pretty text-[16px] leading-7 text-muted-foreground md:text-[17px]";
 
-function WaButton({ label, message, variant = "default", className = "" }: { label: string; message: string; variant?: "default" | "outline" | "secondary"; className?: string }) {
+function WaButton({ label, message, href, variant = "default", className = "" }: { label: string; message: string; href?: string; variant?: "default" | "outline" | "secondary"; className?: string }) {
   return (
     <Button asChild size="lg" variant={variant} className={`h-auto min-h-12 whitespace-normal rounded-md px-6 py-3 text-sm ${className}`}>
-      <a href={xcaretWhatsappUrl(message)} target="_blank" rel="noopener noreferrer">
+      <a href={href ?? xcaretWhatsappUrl(message)} target="_blank" rel="noopener noreferrer">
         <MessageCircle className="mr-2 h-4 w-4 shrink-0" aria-hidden /> {label}
       </a>
     </Button>
@@ -251,7 +252,14 @@ export default function UniversalLandingPage({ info, noindex = false }: { info: 
           <div className={`${contentWidth} max-w-3xl text-center`}>
             <h2 className={heading}>Universal com quem conhece cada detalhe</h2>
             <p className={`mt-5 ${body}`}>Quantos dias reservar, quais parques combinar, quando vale o Express Pass e qual hotel faz sentido para o seu grupo: {agency} ajuda você a planejar a Universal no seu ritmo.</p>
-            <div className="mt-8 flex justify-center"><WaButton label="Planejar minha Universal" message="Olá! Quero planejar minha viagem para a Universal Orlando Resort." /></div>
+            {(() => {
+              const msg = "Olá! Quero planejar minha viagem para a Universal Orlando Resort.";
+              if (isJuUniversalProfile(info.hostname)) return <div className="mt-8 flex justify-center"><WaButton label="Planejar minha Universal" message={msg} /></div>;
+              const d = (info.phone ?? "").replace(/\D/g, "");
+              if (d.length < 10) return <div className="mt-8 flex justify-center"><Button asChild size="lg" className="rounded-md"><a href="#ingressos">Planejar minha Universal</a></Button></div>;
+              const href = `https://wa.me/${d.startsWith("55") ? d : `55${d}`}?text=${encodeURIComponent(msg)}`;
+              return <div className="mt-8 flex justify-center"><WaButton label="Planejar minha Universal" message={msg} href={href} /></div>;
+            })()}
             <p className="mt-10 text-xs text-muted-foreground">{UNIVERSAL_PHOTO_CREDIT}</p>
           </div>
         </section>
