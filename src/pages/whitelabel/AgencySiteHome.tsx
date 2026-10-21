@@ -73,12 +73,13 @@ import paraisoHeroRiviera from "@/assets/whitelabel/paraiso-hero-riviera.mp4.ass
 import paraisoHeroAurora from "@/assets/whitelabel/paraiso-hero-aurora.mp4.asset.json";
 import luxpertsForbesLogo from "@/assets/whitelabel/luxperts-forbes.png.asset.json";
 
-/** Vídeo opcional por foto de slide (a foto vira o poster). Só a Paraíso usa. */
+/** Vídeo opcional por foto de slide (a foto vira o poster). Só Paraíso e O Mundo em Cores usam. */
 const HERO_VIDEO_BY_IMAGE: Record<string, string> = {
   [paraisoHeroAmalfi.url]: paraisoHeroBoraBora.url,
   [paraisoHeroTanzania.url]: paraisoHeroRiviera.url,
   [paraisoHeroEslovenia.url]: paraisoHeroAurora.url,
   [mundoHeroGrupoVideo.url]: mundoHeroGrupoVideo.url,
+  [mundoHeroEuropaVideo.url]: mundoHeroEuropaVideo.url,
 };
 import destinoGastronomia from "@/assets/whitelabel/destino-gastronomia.jpg";
 import destinoBrasil from "@/assets/whitelabel/destino-brasil.jpg";
@@ -104,6 +105,7 @@ import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
 import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import mundoHeroGrupoVideo from "@/assets/whitelabel/mundo-hero-grupo.mp4.asset.json";
+import mundoHeroEuropaVideo from "@/assets/whitelabel/mundo-hero-europa.mp4.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
@@ -144,6 +146,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroVarenna: heroVarenna.url,
   heroSantoriniShip: heroSantoriniShip.url,
   heroMundoGrupoVideo: mundoHeroGrupoVideo.url,
+  heroMundoEuropaVideo: mundoHeroEuropaVideo.url,
   heroAirportTraveler: heroAirportTraveler.url,
   heroJuMagicKingdom: heroJuMagicKingdom.url,
   parques: destinoParques,
