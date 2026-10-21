@@ -147,7 +147,7 @@ export interface AgencyHeroPresentation {
   /** Peso do título dos banners; ausente mantém o peso forte compartilhado. */
   titleWeight?: "regular";
   /** Contraste reforçado à esquerda para fotos claras. */
-  overlay?: "strongLeft";
+  overlay?: "strongLeft" | "none";
 }
 
 export interface AgencySiteProfile {

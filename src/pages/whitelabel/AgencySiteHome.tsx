@@ -1864,6 +1864,7 @@ export default function AgencySiteHome({
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/90 via-primary to-primary/70" />
           )}
+          {profile.heroPresentation?.overlay !== "none" && (
           <div
             className={
               editorial
@@ -1873,11 +1874,15 @@ export default function AgencySiteHome({
                 : "absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25"
             }
           />
-          {editorial && (
+          )}
+          {editorial && profile.heroPresentation?.overlay !== "none" && (
             <div
               aria-hidden="true"
               className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:bg-gradient-to-t md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent"
             />
+          )}
+          {profile.heroPresentation?.overlay === "none" && (
+            <style>{`#topo h1, #topo h1 + *, #topo p { text-shadow: 0 2px 14px hsl(220 12% 7% / 0.55), 0 1px 3px hsl(220 12% 7% / 0.45); }`}</style>
           )}
         </div>
 
