@@ -27,6 +27,10 @@ export const GENERIC_XCARET_SLOTS: XcaretMediaSlots = {
  * "Fotos da Vanessa em Xcaret"), cada uma no MESMO parque da foto que substitui,
  * identificado pela placa visível. Hotel Xcaret México preservado (sem foto
  * comprovada do mesmo hotel).
+ * A foto do monumento "Xcaret México 35 anos" (IMG_1646) aparece de propósito em
+ * dois pontos da mesma página — a foto inferior da galeria de "Atendimento
+ * pessoal" e o fechamento — escolha de Fernando em 22/10/2026. A foto anterior
+ * da galeria (letreiro do Xel-Há, IMG_0749) continua importada para reversão.
  */
 export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
   portraitJuliana: { src: mundoXcaretParque.url, alt: "Vanessa Figueiredo no parque Xcaret, junto à placa Xcaret México", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1656)" },
