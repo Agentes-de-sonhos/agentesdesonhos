@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -60,6 +60,8 @@ export type AgencySiteProfileKey =
   | "bardelliCurated"
   | "dricaPresentation"
   | "bardelliPresentation"
+  /** Rascunho técnico isolado do briefing 19 (Bagagem na Mão); sem domínio público. */
+  | "bagagemNaMaoBriefing19"
 ;
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
@@ -1182,6 +1184,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-17-v1.preview.local": "viajarTirismoBriefing17",
   "drica-presentation.preview.local": "dricaPresentation",
   "bardelli-presentation.preview.local": "bardelliPresentation",
+  /** Host sintético do rascunho briefing-19 — cadastro real sem domínio; nada é vinculado. */
+  "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
   "bardelliviagens.com.br": "bardelliCurated",
   "www.bardelliviagens.com.br": "bardelliCurated",
 };
@@ -1202,6 +1206,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   bardelliCurated: BARDELLI_OFFICIAL_PROFILE,
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
   dricaPresentation: DRICA_PRESENTATION_PROFILE,
+  bagagemNaMaoBriefing19: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
