@@ -63,6 +63,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/gestao/crm/operacoes": "Operações",
   "/gestao/crm/clientes": "Clientes",
   "/gestao/reservas": "Reservas",
+  "/gestao/site/resorts": "Resorts no Brasil",
   "/gestao/financeiro": "Gestão Financeira",
   "/gestao/criar/orcamento": "Novo Orçamento",
   "/gestao/criar/carteira": "Carteira Digital",

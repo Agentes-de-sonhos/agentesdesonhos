@@ -44,6 +44,7 @@ const Suporte = lazy(() => import("@/pages/Suporte"));
 const AgencyReservas = lazy(() => import("@/pages/whitelabel/admin/AgencyReservas"));
 const ProcessoReserva = lazy(() => import("@/pages/ProcessoReserva"));
 const AgencyAdminNotFound = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminNotFound"));
+const ResortsCurationPanel = lazy(() => import("@/pages/site/ResortsCurationPanel"));
 const Community = lazy(() => import("@/pages/Community"));
 
 /** Alias legado /reservas/:id → rota administrativa equivalente. */
@@ -107,6 +108,7 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     ["perfil", Perfil],
     ["minha-conta", MinhaConta],
     ["suporte", Suporte],
+    ["site/resorts", ResortsCurationPanel],
   ];
 
   const aliasPairs: Array<[string, ComponentType]> = [
@@ -127,6 +129,7 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     ["/ferramentas-ia/criar-roteiro/:id", CriarRoteiro],
     ["/ferramentas-ia/modelos-roteiros", ModelosRoteiros],
     ["/reservas", AgencyReservas],
+    ["/site/resorts", ResortsCurationPanel],
   ];
 
   const home = <AgencyAdminHome info={info} />;

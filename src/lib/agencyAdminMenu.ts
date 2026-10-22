@@ -11,6 +11,7 @@ import {
   CalendarDays,
   FileText,
   FolderOpen,
+  Globe,
   Headphones,
   KanbanSquare,
   Map,
@@ -134,6 +135,16 @@ export const MANAGEMENT_ITEMS: MenuItemDef[] = [
     icon: Wallet,
     match: (p) => p === "/gestao/financeiro" || p === "/financeiro",
     permission: "financial.access",
+  },
+];
+
+/** Grupo "Site": só para o dono do site (curadoria é owner-only). */
+export const SITE_ITEMS: MenuItemDef[] = [
+  {
+    label: "Resorts no Brasil",
+    to: "/gestao/site/resorts",
+    icon: Globe,
+    match: (p) => p === "/gestao/site/resorts" || p === "/site/resorts",
   },
 ];
 
