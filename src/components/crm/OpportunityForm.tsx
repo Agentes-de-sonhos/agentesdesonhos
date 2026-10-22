@@ -42,7 +42,7 @@ export const opportunitySchema = z
     end_date: z.date().optional(),
     adults_count: z.number().min(1, "Mínimo 1 adulto"),
     children_count: z.number().min(0, "Não pode ser negativo"),
-    children_ages: z.array(z.number().min(0).max(17)).optional(),
+    children_ages: z.array(z.number().min(0).max(17).optional()).optional(),
     estimated_value: z.number().min(0),
     notes: z.string().optional(),
     assigned_team_member_id: z.string().optional(),
@@ -136,7 +136,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       children_count: data.children_count,
       children_ages: (data.children_ages || [])
         .slice(0, data.children_count)
-        .filter((n) => Number.isFinite(n)),
+        .filter((n): n is number => typeof n === "number" && Number.isFinite(n)),
       passengers_count: totalPassengers,
       estimated_value: data.estimated_value,
       notes: data.notes,
