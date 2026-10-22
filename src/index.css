@@ -1464,15 +1464,19 @@ body[data-booking-selection-bar] {
 .wl-mundo .wl-alt-surface > section.py-14 > div { padding-top: 0; padding-bottom: 0; }
 .wl-mundo #cotacao { background-color: transparent; background-image: none; }
 .wl-mundo .wl-campaign-card { box-shadow: var(--shadow-mundo-card); }
+/* "Receba novidades": foto da asa ao pôr do sol enviada pela agência.
+   Véu em marrom quente (tom do próprio pôr do sol), nunca azul, para manter
+   o texto branco legível sem brigar com a foto. */
 .wl-mundo .wl-newsletter-card {
-  background-color: hsl(var(--primary));
-  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 38%, hsl(var(--primary) / 0.65) 58%, hsl(var(--primary) / 0.05) 100%), url("./assets/mundo-newsletter-signpost.jpg");
+  background-color: #2A1A12;
+  background-image: linear-gradient(to right, #2A1A12 0%, #2A1A12 38%, rgba(42, 26, 18, 0.72) 58%, rgba(42, 26, 18, 0.05) 100%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
   background-size: cover;
-  background-position: right center;
+  background-position: right 40%;
 }
 @media (max-width: 767px) {
   .wl-mundo .wl-newsletter-card {
-    background-image: linear-gradient(to bottom, hsl(var(--primary) / 0.82) 0%, hsl(var(--primary) / 0.94) 100%), url("./assets/mundo-newsletter-signpost.jpg");
+    background-image: linear-gradient(to bottom, rgba(42, 26, 18, 0.78) 0%, rgba(42, 26, 18, 0.92) 100%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
+    background-position: center 34%;
   }
 }
 .wl-mundo :is(h1,h2,h3) { letter-spacing: 0 !important; }
