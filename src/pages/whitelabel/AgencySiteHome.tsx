@@ -162,6 +162,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroMundoGrupoFoto: mundoHeroGrupoFoto.url,
   // Só O Mundo em Cores usa (card Grécia em Boa Companhia).
   mundoGreciaVanessa: mundoGreciaVanessa.url,
+  // Só O Mundo em Cores usa (card Cruzeiros com a NCL).
+  mundoNclDestaque: mundoNclDestaque.url,
   heroMundoDesenhadaVideo: mundoHeroDesenhadaVideo.url,
   // Só O Mundo em Cores usa (slide 1, foto das placas tropicais).
   heroMundoPlacasFoto: mundoHeroPlacasFoto.url,
