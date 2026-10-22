@@ -1,3 +1,4 @@
+import { StandardPopupCard, StandardPopupHeader, standardPopupContentClass } from "@/components/ui/standard-popup";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -22,7 +23,7 @@ import {
   Plus, Trash2, Upload, FileText, Clock, ListChecks, Paperclip,
   Info, Copy, ExternalLink, MessageCircle, ArrowRight, MoreVertical, Save, RotateCcw,
 } from "lucide-react";
-import { Luggage } from "lucide-react";
+import { Luggage, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import {
   useOperationTasks,
@@ -152,26 +153,22 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          "h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto overflow-x-hidden rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-1.5rem)] sm:rounded-lg sm:p-6",
+          "h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto overflow-x-hidden rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-[calc(100vw-1.5rem)] sm:rounded-lg sm:p-6 bg-muted border-0 sm:p-4",
           focused && !focusedWide ? "sm:max-w-[720px]" : "sm:max-w-[1560px] lg:w-[93vw]"
         )}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <DialogHeader>
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <DialogTitle className="text-lg sm:text-xl break-words">
-                {focused ? FOCUSED_SECTION_TITLES[defaultTab] : operation.title || operation.client?.name}
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1 break-words">
-                {focused && (operation.title || operation.client?.name) ? `${operation.title || operation.client?.name} · ` : ""}
-                {operation.client?.name} {operation.destination && `· ${operation.destination}`}
-              </p>
-            </div>
-            <Badge className={`${meta.bg} ${meta.text} ${meta.border} border shrink-0`}>{meta.label}</Badge>
-          </div>
-        </DialogHeader>
+        <StandardPopupCard>
+        <StandardPopupHeader
+          icon={focused ? (defaultTab === "checklist" ? ListChecks : defaultTab === "services" ? Luggage : Briefcase) : Briefcase}
+          title={focused ? FOCUSED_SECTION_TITLES[defaultTab] : operation.title || operation.client?.name}
+          subtitle={<>
+            {focused && (operation.title || operation.client?.name) ? `${operation.title || operation.client?.name} · ` : ""}
+            {operation.client?.name} {operation.destination && `· ${operation.destination}`}
+          </>}
+          rightSlot={<Badge className={`${meta.bg} ${meta.text} ${meta.border} border shrink-0`}>{meta.label}</Badge>}
+        />
 
         <Tabs key={`${operation.id}-${defaultTab}`} defaultValue={defaultTab} className="mt-2">
           {!focused && (
@@ -488,6 +485,7 @@ export function OperationDetailDialog({ operation, open, onOpenChange, defaultTa
             </div>
           </TabsContent>
         </Tabs>
+        </StandardPopupCard>
       </DialogContent>
     </Dialog>
   );

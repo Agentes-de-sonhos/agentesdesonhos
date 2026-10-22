@@ -1,3 +1,5 @@
+import { StandardPopupCard, StandardPopupHeader, standardPopupContentClass } from "@/components/ui/standard-popup";
+import { Download } from "lucide-react";
 /**
  * Importar serviços de um orçamento para os serviços da operação.
  *
@@ -170,14 +172,13 @@ export function ImportQuoteServicesDialog({ operation, open, onOpenChange }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Importar serviços</DialogTitle>
-          <DialogDescription>
-            Escolha um orçamento da sua agência. Os serviços entram nesta operação sem alterar o
-            orçamento original.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto bg-muted border-0 p-3 sm:p-4">
+        <StandardPopupCard className="space-y-4">
+        <StandardPopupHeader
+          icon={Download}
+          title="Importar serviços"
+          subtitle="Escolha um orçamento da sua agência. Os serviços entram nesta operação sem alterar o orçamento original."
+        />
 
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -255,6 +256,7 @@ export function ImportQuoteServicesDialog({ operation, open, onOpenChange }: Pro
             Importar serviços
           </Button>
         </div>
+        </StandardPopupCard>
       </DialogContent>
     </Dialog>
   );

@@ -1,8 +1,9 @@
+import { StandardPopupCard, StandardPopupHeader, standardPopupContentClass } from "@/components/ui/standard-popup";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Maximize2, Minimize2, Download } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2, Download, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -514,19 +515,20 @@ export function KanbanBoard() {
               </DialogTrigger>
             )}
             <DialogContent
-              className="h-[100dvh] max-h-[100dvh] w-screen max-w-none flex flex-col rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-4xl sm:rounded-lg sm:p-6"
+              className="h-[100dvh] max-h-[100dvh] w-screen max-w-none flex flex-col rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-4xl sm:rounded-lg sm:p-6 overflow-y-auto bg-muted border-0 sm:p-4"
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
-              <DialogHeader>
-                <DialogTitle>Nova Oportunidade</DialogTitle>
-                <DialogDescription>
-                  Preencha os dados da oportunidade para adicioná-la ao funil.
-                </DialogDescription>
-              </DialogHeader>
-              <OpportunityForm
-                onSuccess={() => setIsDialogOpen(false)}
-                onCancel={() => setIsDialogOpen(false)}
-              />
+              <StandardPopupCard>
+                <StandardPopupHeader
+                  icon={Target}
+                  title="Nova Oportunidade"
+                  subtitle="Preencha os dados da oportunidade para adicioná-la ao funil."
+                />
+                <OpportunityForm
+                  onSuccess={() => setIsDialogOpen(false)}
+                  onCancel={() => setIsDialogOpen(false)}
+                />
+              </StandardPopupCard>
             </DialogContent>
           </Dialog>
           {canCreateOpp && (
