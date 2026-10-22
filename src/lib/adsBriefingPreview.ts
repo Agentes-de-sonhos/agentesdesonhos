@@ -734,9 +734,11 @@ export const BAGAGEM_NA_MAO_PREVIEW_INFO: AgencyDomainInfo = {
   primary_color: "#27C7C3",
   secondary_color: "#FF9418",
   secondary_auto: false,
-  // Terciária suave derivada automaticamente da primária (contrato brandTheme).
-  tertiary_color: null,
-  tertiary_auto: true,
+  // Terciária suave explícita: com secundária manual, o modo automático do
+  // brandTheme usaria a secundária cheia (#FF9418) como fundo — forte demais.
+  // Valor = deriveTertiaryColor(#27C7C3): primária a ~12% sobre branco.
+  tertiary_color: "#E5F8F8",
+  tertiary_auto: false,
   on_secondary_color: null,
   // Contatos aparecem somente como texto no rodapé; CTAs ficam bloqueados.
   phone: null,
