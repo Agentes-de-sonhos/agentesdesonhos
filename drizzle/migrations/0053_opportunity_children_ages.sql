@@ -1,0 +1,1 @@
+ALTER TABLE public.opportunities ADD COLUMN IF NOT EXISTS children_ages integer[] NOT NULL DEFAULT '{}';

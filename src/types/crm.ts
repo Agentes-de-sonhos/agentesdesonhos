@@ -66,6 +66,7 @@ export interface Opportunity {
   passengers_count: number;
   adults_count: number;
   children_count: number;
+  children_ages?: number[] | null;
   estimated_value: number;
   notes: string | null;
   stage: OpportunityStage;

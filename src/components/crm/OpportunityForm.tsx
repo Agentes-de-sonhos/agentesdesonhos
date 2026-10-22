@@ -42,6 +42,7 @@ export const opportunitySchema = z
     end_date: z.date().optional(),
     adults_count: z.number().min(1, "Mínimo 1 adulto"),
     children_count: z.number().min(0, "Não pode ser negativo"),
+    children_ages: z.array(z.number().min(0).max(17).optional()).optional(),
     estimated_value: z.number().min(0),
     notes: z.string().optional(),
     assigned_team_member_id: z.string().optional(),
@@ -115,6 +116,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       end_date: parseLocalDateSafe(opportunity?.end_date) || undefined,
       adults_count: opportunity?.adults_count ?? opportunity?.passengers_count ?? 1,
       children_count: opportunity?.children_count ?? 0,
+      children_ages: opportunity?.children_ages ?? [],
       estimated_value: opportunity?.estimated_value || 0,
       notes: opportunity?.notes || "",
       assigned_team_member_id: opportunity?.assigned_team_member_id || "__owner__",
@@ -132,6 +134,9 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       end_date: data.end_date ? format(data.end_date, "yyyy-MM-dd") : undefined,
       adults_count: data.adults_count,
       children_count: data.children_count,
+      children_ages: (data.children_ages || [])
+        .slice(0, data.children_count)
+        .filter((n): n is number => typeof n === "number" && Number.isFinite(n)),
       passengers_count: totalPassengers,
       estimated_value: data.estimated_value,
       notes: data.notes,
@@ -333,6 +338,36 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
               </FormItem>
             )}
           />
+          {form.watch("children_count") > 0 && (
+            <div className="md:col-span-2 space-y-2">
+              <p className="text-sm font-medium">Idade das crianças</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {Array.from({ length: Math.min(form.watch("children_count"), 20) }).map((_, i) => {
+                  const ages = form.watch("children_ages") || [];
+                  return (
+                    <label key={i} className="space-y-1 text-xs text-muted-foreground">
+                      <span>Criança {i + 1}</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={17}
+                        placeholder="Idade"
+                        aria-label={`Idade da criança ${i + 1}`}
+                        value={ages[i] ?? ""}
+                        onChange={(e) => {
+                          const next = [...ages];
+                          const v = e.target.value;
+                          next[i] = v === "" ? (undefined as unknown as number) : Math.min(17, Math.max(0, parseInt(v) || 0));
+                          form.setValue("children_ages", next, { shouldDirty: true });
+                        }}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <FormField
             control={form.control}
             name="estimated_value"

@@ -559,7 +559,11 @@ export function OpportunityCard({
                       const children = opportunity.children_count ?? 0;
                       const adultsLabel = `${adults} adulto${adults === 1 ? "" : "s"}`;
                       if (children > 0) {
-                        return `${adultsLabel} + ${children} criança${children === 1 ? "" : "s"}`;
+                        const ages = (opportunity.children_ages || []).slice(0, children);
+                        const agesLabel = ages.length
+                          ? ` (${ages.join(", ")} ano${ages.length === 1 && ages[0] === 1 ? "" : "s"})`
+                          : "";
+                        return `${adultsLabel} + ${children} criança${children === 1 ? "" : "s"}${agesLabel}`;
                       }
                       return adultsLabel;
                     })()}
