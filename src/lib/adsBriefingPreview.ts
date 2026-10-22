@@ -1153,5 +1153,6 @@ export const MUNDO_EM_CORES_XCARET_CARDS = {
   "Tempo para curtir o Caribe": { image: { src: mundoXcaretCardCaribe.url, alt: "Vista aérea do Hotel Xcaret e do mar do Caribe", source: "Acervo de Vanessa Figueiredo (IMG_2903)" }, position: "object-[center_45%]" },
   "Cultura maia: histórias para descobrir": { image: { src: mundoXcaretCardChichen.url, alt: "Selfie em Chichén Itzá diante de El Castillo", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
   "Um México que emociona": { image: { src: mundoXcaretCardMexico.url, alt: "Mariachis se apresentando no espetáculo noturno do Xcaret", source: "Acervo de Vanessa Figueiredo" }, position: "object-center" },
+  "Dias dentro d'água": { image: { src: mundoXcaretCardXelha.url, alt: "Vanessa Figueiredo diante das águas cristalinas do Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
   "__roteiro": { image: { src: mundoXcaretRoteiro.url, alt: "Dias dentro d'água no Xcaret", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
 };
