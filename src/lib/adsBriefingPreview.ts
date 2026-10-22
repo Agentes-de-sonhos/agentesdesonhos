@@ -351,7 +351,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     badge: { value: "29 anos", label: "de experiência no turismo" },
     images: [{ src: mundoEmCoresVanessa.url, alt: "Vanessa Figueiredo em fotografias pessoais de suas viagens, publicadas em seu site oficial", aspect: "square" }],
     mural: { src: mundoEmCoresVanessaMural.url, alt: "Mural de fotos de viagens da Vanessa Figueiredo" },
-    visitedDestinations: { title: "Destinos que já conheci", names: ["Brasil", "Estados Unidos", "Canadá", "México", "Itália", "Suíça", "Espanha", "Portugal", "Inglaterra", "Montenegro", "Croácia", "França", "Argentina", "Chile", "Paraguai", "Bahamas", "República Dominicana", "Colômbia", "Indonésia", "Vaticano"], presentation: "flags" },
+    visitedDestinations: { title: "Destinos que já conheci", names: ["Brasil", "Estados Unidos", "Canadá", "México", "Itália", "Suíça", "Espanha", "Portugal", "Inglaterra", "Montenegro", "Croácia", "França", "Argentina", "Chile", "Paraguai", "Bahamas", "República Dominicana", "Colômbia", "Vaticano", "Eslovênia", "Ilhas Virgens Britânicas"], presentation: "flags" },
 
     showLocation: true,
     ownerName: "Vanessa Figueiredo",

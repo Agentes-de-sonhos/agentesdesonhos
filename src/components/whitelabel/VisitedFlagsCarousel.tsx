@@ -6,13 +6,14 @@ const FLAG_CODES: Record<string, string> = {
   Brasil: "br", "Estados Unidos": "us", Canadá: "ca", México: "mx", Itália: "it", Suíça: "ch",
   Espanha: "es", Portugal: "pt", Inglaterra: "gb-eng", Montenegro: "me", Croácia: "hr", França: "fr",
   Argentina: "ar", Chile: "cl", Paraguai: "py", Bahamas: "bs", "República Dominicana": "do",
-  Colômbia: "co", Indonésia: "id", Vaticano: "va",
+  Colômbia: "co", Indonésia: "id", Vaticano: "va", Eslovênia: "si", "Ilhas Virgens Britânicas": "vg",
 };
 
 /** Compact display labels so every card keeps the same height. */
 const SHORT_LABELS: Record<string, string> = {
   "Estados Unidos": "EUA",
   "República Dominicana": "Rep. Dominicana",
+  "Ilhas Virgens Britânicas": "Ilhas V. Britânicas",
 };
 
 export function VisitedFlagsCarousel({ title, names }: { title: string; names: string[] }) {
