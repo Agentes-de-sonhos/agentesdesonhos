@@ -1468,8 +1468,9 @@ body[data-booking-selection-bar] {
    alinhada à direita, na altura original da faixa. */
 .wl-mundo .wl-newsletter-card {
   background-color: hsl(var(--primary));
-  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 45%, hsl(var(--primary) / 0.6) 62%, hsl(var(--primary) / 0) 75%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
-  background-size: 100% 100%, auto 100%;
+  /* Foto cobre a metade direita inteira (atrás do botão); degradê curto azul → foto. */
+  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 44%, hsl(var(--primary) / 0) 52%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
+  background-size: 100% 100%, 56% auto;
   background-repeat: no-repeat;
   background-position: left top, right center;
 }
