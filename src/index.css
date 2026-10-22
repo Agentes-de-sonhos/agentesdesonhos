@@ -1471,7 +1471,12 @@ body[data-booking-selection-bar] {
   background-color: #2A1A12;
   background-image: linear-gradient(to right, #2A1A12 0%, #2A1A12 38%, rgba(42, 26, 18, 0.72) 58%, rgba(42, 26, 18, 0.05) 100%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
   background-size: cover;
-  background-position: right 36%;
+  background-position: right 32%;
+}
+/* Altura mínima no computador: a foto é vertical e, numa faixa baixa,
+   sobrava só uma fatia fina do céu e da asa. */
+@media (min-width: 768px) {
+  .wl-mundo .wl-newsletter-card { min-height: 440px; }
 }
 /* Botão da faixa: laranja da primeira placa do logotipo (preferência da agência),
    em harmonia com o pôr do sol da foto. */
