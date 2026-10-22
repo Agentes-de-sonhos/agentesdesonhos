@@ -127,6 +127,8 @@ export interface AgencyFooterContent {
   whatsapp?: string;
   /** Oculta a linha de WhatsApp no rodapé sem afetar os demais canais. */
   whatsappHidden?: boolean;
+  /** Texto exibido no link do WhatsApp; sem ele, o número entra no rótulo. */
+  whatsappLabel?: string;
   phone?: string;
   email?: string;
   instagram?: string;

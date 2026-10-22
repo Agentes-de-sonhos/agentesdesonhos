@@ -406,7 +406,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     description: "Viagens personalizadas, cruzeiros, experiências em família e pequenos grupos. Planejamento cuidadoso e uma conversa próxima com a Vanessa, do primeiro contato ao retorno.",
     descriptionHidden: true,
     whatsapp: "(11) 99995-4734",
-    phone: "(11) 99995-4734",
+    // O número não aparece mais no rodapé (pedido do Fernando em 22/10/2026): só o link "WhatsApp".
+    // Número para retorno telefônico: (11) 99995-4734
+    whatsappLabel: "WhatsApp",
     email: "contato@omundoemcores.com.br",
     instagram: "https://www.instagram.com/omundoemcoresviagens",
     instagramLabel: "@omundoemcoresviagens",
