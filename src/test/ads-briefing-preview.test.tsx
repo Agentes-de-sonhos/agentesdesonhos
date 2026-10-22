@@ -12,6 +12,8 @@ import {
   DRICA_VIAGENS_PREVIEW_INFO,
   VIAJAR_TIRISMO_PREVIEW_HOST,
   VIAJAR_TIRISMO_PREVIEW_INFO,
+  BAGAGEM_NA_MAO_PREVIEW_HOST,
+  BAGAGEM_NA_MAO_PREVIEW_INFO,
   resolveAdsPreviewFixture,
 } from "@/lib/adsBriefingPreview";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
@@ -157,6 +159,92 @@ describe("prévia ADS ads-email-test-v1", () => {
       const click = new MouseEvent("click", { cancelable: true, bubbles: true });
       a.dispatchEvent(click);
       expect(click.defaultPrevented).toBe(true);
+    });
+  });
+
+  describe("briefing-19-v1 (Bagagem na Mão Viagens)", () => {
+    it("resolve somente pelo job_id exato", () => {
+      expect(resolveAdsPreviewFixture("briefing-19-v1")?.profile.key).toBe("bagagemNaMaoBriefing19");
+      for (const id of ["briefing-19", "Briefing-19-v1", "briefing-19-v1 ", "briefing-19-v2", "briefing-19-v1/"]) {
+        expect(resolveAdsPreviewFixture(id)).toBeNull();
+      }
+    });
+    it("usa identidade local, host e user_id sintéticos, sem tenant real", () => {
+      const f = resolveAdsPreviewFixture("briefing-19-v1")!;
+      expect(f.info.agency_name).toBe("Bagagem na Mão Viagens");
+      expect(f.info.owner_name).toBe("Márcia Baccarini");
+      expect(BAGAGEM_NA_MAO_PREVIEW_INFO.user_id).toBe("00000000-0000-0000-0000-000000000019");
+      expect(BAGAGEM_NA_MAO_PREVIEW_INFO.agency_slug).toBe("");
+      expect(BAGAGEM_NA_MAO_PREVIEW_INFO.public_slug).toBeNull();
+      expect(BAGAGEM_NA_MAO_PREVIEW_INFO.phone).toBeNull();
+      expect(BAGAGEM_NA_MAO_PREVIEW_INFO.primary_color).toBe("#27C7C3");
+      expect(BAGAGEM_NA_MAO_PREVIEW_INFO.secondary_color).toBe("#FF9418");
+      expect(BAGAGEM_NA_MAO_PREVIEW_HOST.endsWith(".preview.local")).toBe(true);
+      expect(BAGAGEM_NA_MAO_PREVIEW_HOST).not.toContain("bagagemnamao.com.br");
+      expect(resolveSiteProfile(BAGAGEM_NA_MAO_PREVIEW_HOST).key).toBe("bagagemNaMaoBriefing19");
+      expect(resolveSiteProfile("www.bagagemnamao.com.br").key).toBe("classic");
+      expect(resolveSiteProfile("www.destinoscomaju.com.br").key).toBe("editorialRose");
+    });
+    it("mantém ações comerciais desativadas e seções sem dados confirmados desligadas", () => {
+      const f = resolveAdsPreviewFixture("briefing-19-v1")!;
+      const p = f.profile;
+      expect(p.presentation).toBe(true);
+      expect(p.hideConciergeActions).toBe(true);
+      expect(p.visaHome).toBe(false);
+      expect(p.featuredExperience).toBeUndefined();
+      expect(p.dmc).toBeUndefined();
+      expect(p.credentials).toBeUndefined();
+      expect(p.team).toBeUndefined();
+      for (const k of ["offers", "dmc", "team", "testimonials", "avaliacoes", "newsletter", "credentials"] as const) {
+        expect(p.sections?.[k]).toEqual({ enabled: false });
+      }
+      // Sem páginas especiais Xcaret, DMC, Visto ou editorial (ofertas/blog).
+      expect(f.pages?.xcaret).toBeUndefined();
+      expect(f.pages?.visa).toBeUndefined();
+      expect(f.pages?.dmc).toBeUndefined();
+      expect(f.pages?.editorial).toBeUndefined();
+    });
+    it("carrega os contatos públicos somente como texto de rodapé", () => {
+      const p = resolveAdsPreviewFixture("briefing-19-v1")!.profile;
+      expect(p.footer?.whatsapp).toBe("(21) 98855-9515");
+      expect(p.footer?.email).toBe("bagagemnamaoviagens@gmail.com");
+      expect(p.footer?.instagram).toBe("https://www.instagram.com/bagagemnamaoviagens/");
+      expect(p.footer?.legalName).toBe("Bagagem na Mão Viagens Ltda");
+      expect(p.footer?.cnpj).toBe("64.731.514/0001-08");
+      expect(p.footer?.address).toContain("Rua Conde de Bonfim, 211");
+      expect(p.about?.ownerName).toBe("Márcia Baccarini");
+      expect(p.about?.badge?.value).toBe("Desde 2014");
+    });
+    it("em host de produção não renderiza", async () => {
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "agentedesonhoproject.lovable.app" }, writable: true });
+      const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+      renderPreview(
+        <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-19-v1"]}>
+          <Routes><Route path="/ads-briefing-preview/:jobId" element={<Page />} /></Routes>
+        </MemoryRouter>,
+      );
+      expect(await screen.findByText("Página não encontrada")).toBeInTheDocument();
+      expect(document.querySelector('[data-ads-preview="briefing-19-v1"]')).toBeNull();
+    });
+    it("no host técnico renderiza com aviso, noindex e backend bloqueado", async () => {
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
+      const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+      renderPreview(
+        <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-19-v1"]}>
+          <Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes>
+        </MemoryRouter>,
+      );
+      expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
+      expect(document.querySelector('[data-ads-preview="briefing-19-v1"]')).toBeInTheDocument();
+      expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toContain("noindex");
+      const backend = import.meta.env.VITE_SUPABASE_URL as string;
+      if (backend) await expect(window.fetch(`${backend}/rest/v1/profiles`)).rejects.toThrow(/backend desativado/);
+      expect(window.open("https://wa.me/5521988559515")).toBeNull();
+      const form = document.createElement("form");
+      document.body.appendChild(form);
+      const ev = new Event("submit", { cancelable: true, bubbles: true });
+      form.dispatchEvent(ev);
+      expect(ev.defaultPrevented).toBe(true);
     });
   });
 });
