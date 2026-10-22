@@ -528,6 +528,11 @@ export function AgencyFooter({
                 <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {legalPreview ? "Atendimento online em Lisboa, Portugal" : footer?.address ?? location}
               </p>
             )}
+            {footer?.hours && (
+              <p className="mt-3 flex items-start gap-2 whitespace-pre-line text-sm text-[hsl(var(--wl-ink)_/_0.75)]">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> <span>{footer.hours}</span>
+              </p>
+            )}
           </div>
 
           <div>
