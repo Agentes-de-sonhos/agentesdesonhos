@@ -55,6 +55,7 @@ import mundoXcaretCardCaribe from "@/assets/ads-preview/mundo-xcaret-card-caribe
 import mundoXcaretCardChichen from "@/assets/ads-preview/mundo-xcaret-card-chichen.webp.asset.json";
 import mundoXcaretCardMexico from "@/assets/ads-preview/mundo-xcaret-card-mexico.webp.asset.json";
 import mundoXcaretRoteiro from "@/assets/ads-preview/mundo-xcaret-roteiro.webp.asset.json";
+import mundoXcaretCardXelha from "@/assets/ads-preview/mundo-xcaret-card-xelha.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
 import mundoXcaretDrink from "@/assets/ads-preview/mundo-xcaret-drink.webp.asset.json";
