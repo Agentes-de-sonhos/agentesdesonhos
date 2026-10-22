@@ -381,6 +381,7 @@ export function useOpportunities() {
       passengers_count: number;
       adults_count: number;
       children_count: number;
+      children_ages?: number[];
       estimated_value: number;
       notes?: string;
       follow_up_date?: string;

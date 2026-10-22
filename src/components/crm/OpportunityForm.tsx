@@ -116,6 +116,7 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       end_date: parseLocalDateSafe(opportunity?.end_date) || undefined,
       adults_count: opportunity?.adults_count ?? opportunity?.passengers_count ?? 1,
       children_count: opportunity?.children_count ?? 0,
+      children_ages: opportunity?.children_ages ?? [],
       estimated_value: opportunity?.estimated_value || 0,
       notes: opportunity?.notes || "",
       assigned_team_member_id: opportunity?.assigned_team_member_id || "__owner__",
@@ -133,6 +134,9 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
       end_date: data.end_date ? format(data.end_date, "yyyy-MM-dd") : undefined,
       adults_count: data.adults_count,
       children_count: data.children_count,
+      children_ages: (data.children_ages || [])
+        .slice(0, data.children_count)
+        .filter((n) => Number.isFinite(n)),
       passengers_count: totalPassengers,
       estimated_value: data.estimated_value,
       notes: data.notes,
