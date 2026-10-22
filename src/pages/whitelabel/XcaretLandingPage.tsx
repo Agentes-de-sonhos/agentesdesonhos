@@ -310,7 +310,7 @@ function useTextRewrite(ref: React.RefObject<HTMLElement>, rules?: [string, stri
   }, [ref, rules]);
 }
 
-export default function XcaretLandingPage({ info, slots = XCARET_MEDIA_SLOTS, textRewrites, noindex = false }: { info: AgencyDomainInfo; slots?: Slots; textRewrites?: [string, string][]; noindex?: boolean }) {
+export default function XcaretLandingPage({ info, slots = XCARET_MEDIA_SLOTS, textRewrites, cardImages, noindex = false }: { info: AgencyDomainInfo; slots?: Slots; textRewrites?: [string, string][]; cardImages?: Record<string, { image: XcaretImage; position?: string }>; noindex?: boolean }) {
   useAgencySiteThemeOnBody(info.hostname);
   const rootRef = useRef<HTMLDivElement>(null);
   useTextRewrite(rootRef, textRewrites);
@@ -331,7 +331,7 @@ export default function XcaretLandingPage({ info, slots = XCARET_MEDIA_SLOTS, te
             <p>Na Riviera Maya, perto de Playa del Carmen, o universo Xcaret reúne parques, hotéis à beira-mar e experiências que unem natureza, aventura e cultura mexicana.</p>
             <p>Nade por rios subterrâneos, aproveite as águas do Caribe e encerre o dia com o Xcaret México Espectacular, um espetáculo de música, dança e tradições. Entre uma descoberta e outra, tempo para curtir o seu hotel no seu ritmo.</p>
           </SectionIntro>
-          <Carousel opts={{ align: "start" }} className="mx-auto mt-10 max-w-[1120px]" aria-label="Descobertas do universo Xcaret"><CarouselContent>{unifiedCards.map(([title, text, image]) => <CarouselItem key={title} className="basis-[88%] sm:basis-1/2 lg:basis-1/3"><article className="h-full overflow-hidden rounded-md border border-border bg-card"><Photo image={image} className="aspect-[4/3] w-full object-cover" /><div className="p-5"><h3 className="text-pretty text-xl font-semibold">{title}</h3><p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">{text}</p></div></article></CarouselItem>)}</CarouselContent><CarouselPrevious aria-label="Descoberta anterior" className="-left-2 top-[35%] h-11 w-11 md:-left-5"/><CarouselNext aria-label="Próxima descoberta" className="-right-2 top-[35%] h-11 w-11 md:-right-5"/></Carousel>
+          <Carousel opts={{ align: "start" }} className="mx-auto mt-10 max-w-[1120px]" aria-label="Descobertas do universo Xcaret"><CarouselContent>{unifiedCards.map(([title, text, image]) => <CarouselItem key={title} className="basis-[88%] sm:basis-1/2 lg:basis-1/3"><article className="h-full overflow-hidden rounded-md border border-border bg-card"><Photo image={cardImages?.[title]?.image ?? image} className={`aspect-[4/3] w-full object-cover ${cardImages?.[title]?.position ?? ""}`} /><div className="p-5"><h3 className="text-pretty text-xl font-semibold">{title}</h3><p className="mt-2 text-pretty text-sm leading-6 text-muted-foreground">{text}</p></div></article></CarouselItem>)}</CarouselContent><CarouselPrevious aria-label="Descoberta anterior" className="-left-2 top-[35%] h-11 w-11 md:-left-5"/><CarouselNext aria-label="Próxima descoberta" className="-right-2 top-[35%] h-11 w-11 md:-right-5"/></Carousel>
           <p className="mx-auto mt-8 max-w-3xl text-pretty text-center text-base leading-7 text-foreground">Com a Destinos com a Ju, você descobre quais dessas experiências combinam com você e como reuni-las em uma viagem planejada para o seu perfil.</p>
         </div></section>
 

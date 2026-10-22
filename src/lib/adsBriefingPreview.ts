@@ -50,6 +50,8 @@ import mundoXcaretGalF103 from "@/assets/ads-preview/mundo-xcaret-galeria-F103.w
 import xpertsXcaretBadge from "@/assets/whitelabel/xcaret/xperts-xcaret-badge.webp.asset.json";
 import mundoXcaretFechamento from "@/assets/ads-preview/mundo-xcaret-vanessa-35anos.webp.asset.json";
 import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
+import mundoXcaretCardNatureza from "@/assets/ads-preview/mundo-xcaret-card-natureza.webp.asset.json";
+import mundoXcaretCardCaribe from "@/assets/ads-preview/mundo-xcaret-card-caribe.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
 import mundoXcaretMontagem from "@/assets/ads-preview/mundo-xcaret-montagem-home.png.asset.json";
@@ -1139,3 +1141,9 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
 export function resolveAdsPreviewFixture(jobId?: string): AdsBriefingPreviewFixture | null {
   return jobId ? ADS_PREVIEW_FIXTURES[jobId] ?? null : null;
 }
+
+/** O Mundo em Cores: fotos próprias nos cards "Natureza que surpreende" e "Tempo para curtir o Caribe". */
+export const MUNDO_EM_CORES_XCARET_CARDS = {
+  "Natureza que surpreende": { image: { src: mundoXcaretCardNatureza.url, alt: "Vanessa Figueiredo acenando diante das águas cristalinas do parque", source: "Acervo pessoal de Vanessa Figueiredo (IMG_2071)" }, position: "object-[center_52%]" },
+  "Tempo para curtir o Caribe": { image: { src: mundoXcaretCardCaribe.url, alt: "Vista aérea do Hotel Xcaret e do mar do Caribe", source: "Acervo de Vanessa Figueiredo (IMG_2903)" }, position: "object-[center_45%]" },
+};
