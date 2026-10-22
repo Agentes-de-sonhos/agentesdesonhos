@@ -86,6 +86,7 @@ import mundoEmCoresVanessa from "@/assets/ads-preview/mundo-em-cores-vanessa-ofi
 import mundoEmCoresVanessaMural from "@/assets/ads-preview/mundo-em-cores-vanessa-mural.png.asset.json";
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
+import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
 export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
