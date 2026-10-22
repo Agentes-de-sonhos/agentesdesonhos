@@ -34,4 +34,28 @@ describe("Experiência em destaque", () => {
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByRole("button", { name: /Saiba mais sobre este destino/ })).toBeDisabled();
   });
+
+  it("O Mundo em Cores: título e dois parágrafos do texto enviado pela agência", () => {
+    const cfg = resolveSiteProfile("omundoemcores.com.br").featuredExperience!;
+    expect(cfg.title).toBe("Sou uma agente especialista Xcaret");
+    const { container } = render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
+    expect(screen.getByRole("heading", { level: 2 }).textContent).toBe("Sou uma agente especialista Xcaret");
+    const paras = Array.from(container.querySelectorAll("p")).map((p) => p.textContent?.trim());
+    expect(paras).toContain(
+      "Em set/2026, Vanessa foi convidada a integrar o programa Xperts, que seleciona agentes de viagens de todo o Brasil para se tornarem especialistas no destino. Ela passou por uma imersão na Riviera Maya, vivenciou os parques e hotéis do Grupo Xcaret, concluiu a capacitação e recebeu o selo Xperts Xcaret.",
+    );
+    expect(paras).toContain(
+      "Hoje ela usa essa experiência para desenhar viagens que combinem com o seu ritmo, seja em família, entre amigos, a dois ou para celebrar uma data especial.",
+    );
+    expect(screen.getAllByRole("listitem")).toHaveLength(4);
+  });
+
+  it("descrição de um parágrafo continua renderizando um único bloco", () => {
+    const cfg = resolveSiteProfile("destinoscomaju.com.br").featuredExperience!;
+    const { container } = render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
+    const bodyParas = Array.from(container.querySelectorAll("p")).filter((p) =>
+      (p.textContent ?? "").includes(cfg.description),
+    );
+    expect(bodyParas).toHaveLength(1);
+  });
 });

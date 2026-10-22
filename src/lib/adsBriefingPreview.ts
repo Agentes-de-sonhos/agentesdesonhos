@@ -294,8 +294,10 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     enabled: true,
     id: "experiencia-xcaret",
     kicker: "ESPECIALISTA XPERTS XCARET",
-    title: "Vanessa esteve no Xcaret e voltou especialista no destino",
-    description: "A Vanessa visitou recentemente os parques e hotéis Xcaret na Riviera Maya, fez a capacitação oficial e recebeu o selo Xperts Xcaret. Agora usa essa vivência para ajudar você a escolher os parques, hotéis e experiências que combinam com a sua viagem.",
+    // Texto enviado pela agência em 22/10/2026 (usado na íntegra).
+    title: "Sou uma agente especialista Xcaret",
+    description:
+      "Em set/2026, Vanessa foi convidada a integrar o programa Xperts, que seleciona agentes de viagens de todo o Brasil para se tornarem especialistas no destino. Ela passou por uma imersão na Riviera Maya, vivenciou os parques e hotéis do Grupo Xcaret, concluiu a capacitação e recebeu o selo Xperts Xcaret.\n\nHoje ela usa essa experiência para desenhar viagens que combinem com o seu ritmo, seja em família, entre amigos, a dois ou para celebrar uma data especial.",
     // Montagem enviada pela agência (21/10/2026), com o selo já na arte.
     // A galeria Stories anterior está salva em MUNDO_EM_CORES_XCARET_STORIES_GALLERY.
     mainImage: { src: mundoXcaretMontagem.url, alt: "Montagem: Vanessa Figueiredo no letreiro Xcaret México 35 anos, selo Xperts Xcaret 2026 e fotos no Xplor, Xel-Há, nas águas do parque e com vista para o mar do Caribe", fit: "contain" },
