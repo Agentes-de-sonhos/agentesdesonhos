@@ -115,6 +115,7 @@ import mundoHeroDesenhadaVideo from "@/assets/whitelabel/mundo-hero-desenhada.mp
 import mundoHeroPlacasFoto from "@/assets/whitelabel/mundo-hero-placas.png.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import mundoGreciaVanessa from "@/assets/whitelabel/mundo-grecia-vanessa.jpg.asset.json";
+import mundoNclDestaque from "@/assets/whitelabel/mundo-ncl-destaque.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
