@@ -331,7 +331,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
       )}
 
       {revealed >= 6 && (
-        <Step n={sequence.length} title="Receba sua cotação com a Ju" innerRef={(el) => (stepRefs.current[6] = el)}>
+        <Step n={sequence.length} title="Receba sua cotação" innerRef={(el) => (stepRefs.current[6] = el)}>
           <p className="mb-3 text-sm font-semibold">Quer incluir na cotação?</p>
           <div className="grid gap-3 sm:grid-cols-3">
             {UNIVERSAL_EXTRAS.filter((x) => x.id !== "hhn" || eligibleHhn).map((x) => (
