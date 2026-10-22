@@ -112,6 +112,7 @@ import mundoHeroEuropaVideo from "@/assets/whitelabel/mundo-hero-europa.mp4.asse
 import mundoHeroEuropaFoto from "@/assets/whitelabel/mundo-hero-europa-kotor.jpg.asset.json";
 import mundoHeroGrupoFoto from "@/assets/whitelabel/mundo-hero-grupo.png.asset.json";
 import mundoHeroDesenhadaVideo from "@/assets/whitelabel/mundo-hero-desenhada.mp4.asset.json";
+import mundoHeroPlacasFoto from "@/assets/whitelabel/mundo-hero-placas.png.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import mundoGreciaVanessa from "@/assets/whitelabel/mundo-grecia-vanessa.jpg.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
@@ -161,6 +162,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   // Só O Mundo em Cores usa (card Grécia em Boa Companhia).
   mundoGreciaVanessa: mundoGreciaVanessa.url,
   heroMundoDesenhadaVideo: mundoHeroDesenhadaVideo.url,
+  // Só O Mundo em Cores usa (slide 1, foto das placas tropicais).
+  heroMundoPlacasFoto: mundoHeroPlacasFoto.url,
   heroAirportTraveler: heroAirportTraveler.url,
   heroJuMagicKingdom: heroJuMagicKingdom.url,
   parques: destinoParques,
@@ -638,6 +641,9 @@ export default function AgencySiteHome({
     amandaRight: "object-[74%_24%] sm:object-[72%_24%] md:object-[72%_24%]",
     // O Mundo em Cores slide 3: rostos das quatro no topo — ancora no alto.
     mundoGrupoFaces: "object-[80%_28%] md:object-[center_28%]",
+    // O Mundo em Cores slide 1: no celular o recorte horizontal ancora à direita
+    // para as placas permanecerem no quadro; no desktop elas já cabem inteiras.
+    mundoPlacas: "object-[right_center] md:object-center",
   }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`
