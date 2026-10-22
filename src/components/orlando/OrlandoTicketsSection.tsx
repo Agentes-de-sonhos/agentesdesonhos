@@ -110,6 +110,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   const stripRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const showUniversalPage = isUniversalLandingEnabled(hostname);
+  const compactSelection = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br)$/i.test(hostname.replace(/\.$/, ""));
   const { submit, state, error } = useAgencySiteRequest(hostname);
 
   const [step, setStep] = useState<number | null>(mode_ === "page" ? 0 : null);
@@ -284,14 +285,17 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
           <span className="text-sm font-semibold text-foreground">{e.name}</span>
           <span className="text-xs leading-relaxed text-muted-foreground">{e.description}</span>
           <Button type="button" variant="outline" aria-pressed={on} onClick={() => toggle(id)} className="mt-auto w-full">
-            {on && <Check aria-hidden="true" />} {on ? `Remover ${selectionName}` : `Selecionar ${selectionName}`}
+            {on && <Check aria-hidden="true" />} {compactSelection ? "Selecionar" : on ? `Remover ${selectionName}` : `Selecionar ${selectionName}`}
           </Button>
           {on && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3 w-3" /></span>}
         </article>
       );
     }
     return (
-      <button type="button" aria-pressed={on} onClick={() => toggle(id)}
+      <article onClick={compactSelection ? undefined : () => toggle(id)}
+        role={compactSelection ? undefined : "button"} tabIndex={compactSelection ? undefined : 0}
+        aria-pressed={compactSelection ? undefined : on}
+        onKeyDown={compactSelection ? undefined : (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggle(id); } }}
         className={cn("relative flex h-full flex-col gap-1.5 rounded-xl border bg-card p-4 text-left transition",
           on ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50")}>
         {logo ? (
@@ -304,8 +308,11 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
           <span className="text-sm font-semibold text-foreground">{e.name}</span>
         </span>
         <span className="text-xs leading-relaxed text-muted-foreground">{e.description}</span>
+        {compactSelection && <Button type="button" variant="outline" aria-pressed={on} onClick={() => toggle(id)} className="mt-auto w-full">
+          {on && <Check aria-hidden="true" />} Selecionar
+        </Button>}
         {on && <span className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground"><Check className="h-3 w-3" /></span>}
-      </button>
+      </article>
     );
   };
 

@@ -49,7 +49,9 @@ describe("Galeria editorial da página de ingressos", () => {
     fireEvent.click(screen.getByRole("button", { name: "Ainda não sei" }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 2 de 4")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Selecionar Magic Kingdom" }));
+    const magicCard = screen.getByText("Magic Kingdom Park").closest("article");
+    if (!magicCard) throw new Error("Magic Kingdom card missing");
+    fireEvent.click(within(magicCard).getByRole("button", { name: "Selecionar", exact: true }));
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
     expect(screen.getByText("Etapa 3 de 4")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
