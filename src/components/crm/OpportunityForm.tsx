@@ -338,6 +338,36 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
               </FormItem>
             )}
           />
+          {form.watch("children_count") > 0 && (
+            <div className="md:col-span-2 space-y-2">
+              <p className="text-sm font-medium">Idade das crianças</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {Array.from({ length: Math.min(form.watch("children_count"), 20) }).map((_, i) => {
+                  const ages = form.watch("children_ages") || [];
+                  return (
+                    <label key={i} className="space-y-1 text-xs text-muted-foreground">
+                      <span>Criança {i + 1}</span>
+                      <Input
+                        type="number"
+                        min={0}
+                        max={17}
+                        placeholder="Idade"
+                        aria-label={`Idade da criança ${i + 1}`}
+                        value={ages[i] ?? ""}
+                        onChange={(e) => {
+                          const next = [...ages];
+                          const v = e.target.value;
+                          next[i] = v === "" ? (undefined as unknown as number) : Math.min(17, Math.max(0, parseInt(v) || 0));
+                          form.setValue("children_ages", next, { shouldDirty: true });
+                        }}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <FormField
             control={form.control}
             name="estimated_value"
