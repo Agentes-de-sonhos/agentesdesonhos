@@ -39,7 +39,7 @@ export const prettyName = (name: string) =>
 export function BrazilResortsMap({
   onQuote,
   resortHref,
-  title = "Explore os resorts do Brasil com a Ju",
+  title = "Explore os resorts do Brasil",
   curation,
 }: {
   /** Ocultos/destaques definidos pela agência. */
