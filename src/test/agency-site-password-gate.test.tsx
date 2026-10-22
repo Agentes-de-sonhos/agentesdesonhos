@@ -25,8 +25,8 @@ vi.mock("@/lib/agencySitePassword", async (orig) => {
 });
 
 const OWNERS = ["4d5a7157-59b6-4329-8768-7f8895e8ce92"];
-// 100 Limites e Paraíso Viagens foram liberados ao público (sem senha).
-const RELEASED = ["9433421c-2252-4030-acab-135c03ab009e", "d14b95d2-7eeb-4717-bfca-b76482ddfb4f"];
+// 100 Limites, Paraíso Viagens e O Mundo em Cores estão livres de senha.
+const RELEASED = ["9433421c-2252-4030-acab-135c03ab009e", "d14b95d2-7eeb-4717-bfca-b76482ddfb4f", "428500de-552a-411b-9663-71f8bb2e4f37"];
 const FAE_LIKE = "00000000-0000-0000-0000-000000000001";
 
 const info = (user_id: string): AgencyDomainInfo => ({
@@ -66,7 +66,7 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 describe("configuração declarativa", () => {
-  it("protege exatamente os quatro tenants", () => {
+  it("mantém a proteção dos tenants não liberados", () => {
     OWNERS.forEach((o) => expect(isTenantPasswordProtected(o)).toBe(true));
     RELEASED.forEach((o) => expect(isTenantPasswordProtected(o)).toBe(false));
     expect(isTenantPasswordProtected(FAE_LIKE)).toBe(false);
@@ -83,6 +83,17 @@ describe("configuração declarativa", () => {
 });
 
 describe("gate", () => {
+  it("O Mundo em Cores abre sem senha nem validação de token", async () => {
+    const mundo = "428500de-552a-411b-9663-71f8bb2e4f37";
+    expect(isTenantPasswordProtected(mundo)).toBe(false);
+    for (const path of ["/", "/xcaret", "/ingressos"]) {
+      await renderGate(mundo, path);
+      expect(screen.getByTestId("site")).toBeInTheDocument();
+      expect(unlockMock).not.toHaveBeenCalled();
+      expect(verifyMock).not.toHaveBeenCalled();
+      cleanup();
+    }
+  });
   it("outros tenants ficam livres", async () => {
     await renderGate(FAE_LIKE);
     expect(screen.getByTestId("site")).toBeInTheDocument();
