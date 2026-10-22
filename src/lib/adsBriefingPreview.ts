@@ -381,7 +381,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     differentials: { title: "Cuidado que acompanha cada etapa", subtitle: "Escolhas cuidadosas, orientação clara e suporte para viajar com mais tranquilidade." },
     concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Você conversa com a Vanessa, conhece as opções e ajusta os detalhes antes de reservar.", cta: "Conversar com a Vanessa" },
     testimonials: { title: "Histórias de quem já viajou com a Vanessa" },
-    avaliacoes: { kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar com a Vanessa", subtitle: "Avaliações reais de clientes que confiaram à Vanessa o planejamento das suas viagens." },
+    avaliacoes: { kicker: "EXPERIÊNCIAS REAIS", title: "O que os clientes dizem sobre viajar conosco", subtitle: "Avaliações reais de clientes que confiaram à Vanessa o planejamento das suas viagens." },
     faq: { title: "Dúvidas frequentes" },
     newsletter: {
       kicker: "GRUPO DE NOVIDADES NO WHATSAPP",
