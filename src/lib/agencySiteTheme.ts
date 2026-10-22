@@ -42,6 +42,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "www.omundoemcores.com.br": "siteBaseEditorial",
   "briefing-16-v1.preview.local": "siteBaseEditorial",
   "briefing-17-v1.preview.local": "siteBaseEditorial",
+  "briefing-19-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
   "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",
