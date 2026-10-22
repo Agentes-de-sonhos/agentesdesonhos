@@ -1468,11 +1468,13 @@ body[data-booking-selection-bar] {
    alinhada à direita, na altura original da faixa. */
 .wl-mundo .wl-newsletter-card {
   background-color: hsl(var(--primary));
-  /* Foto cobre a metade direita inteira (atrás do botão); degradê curto azul → foto. */
-  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 44%, hsl(var(--primary) / 0) 52%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
-  background-size: 100% 100%, 56% auto;
+  /* Foto um pouco menor (45%), com a ponta da asa inteira visível: o enquadramento
+     ancorado em calc(11.5px - 8vw) mantém ~10% do céu acima da asa em qualquer largura
+     de desktop e ainda cobre o botão. Degradê curto azul → foto. */
+  background-image: linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) 47%, hsl(var(--primary) / 0) 55%), url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
+  background-size: 100% 100%, 45% auto;
   background-repeat: no-repeat;
-  background-position: left top, right center;
+  background-position: left top, right 0 top calc(11.5px - 8vw);
 }
 /* Botão da faixa: laranja da primeira placa do logotipo (preferência da agência),
    em harmonia com o pôr do sol da foto. */
