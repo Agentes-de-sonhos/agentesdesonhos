@@ -636,6 +636,8 @@ export default function AgencySiteHome({
     airportTraveler: "object-[68%_center] md:object-[64%_28%]",
     juMagicKingdom: "object-[74%_center] md:object-[70%_30%]",
     amandaRight: "object-[74%_24%] sm:object-[72%_24%] md:object-[72%_24%]",
+    // O Mundo em Cores slide 3: rostos das quatro no topo — ancora no alto.
+    mundoGrupoFaces: "object-[80%_8%] md:object-[center_6%]",
   }[current.focalPoint ?? ""] ?? "object-center";
   const waHref = wa
     ? `https://wa.me/${wa}?text=${encodeURIComponent(`Olá! Vim pelo site da ${name} e gostaria de um atendimento personalizado.`)}`
