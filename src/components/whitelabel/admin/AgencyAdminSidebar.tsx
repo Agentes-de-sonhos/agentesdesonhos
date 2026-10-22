@@ -25,6 +25,7 @@ import {
   MANAGEMENT_ITEMS,
   PROJECTS_ITEMS,
   PROJECTS_ROOT,
+  SITE_ITEMS,
   USER_ITEMS,
   filterMenuByPermission,
   type MenuItemDef,
@@ -109,6 +110,7 @@ export function AgencyAdminSidebar({
       projectsItems={PROJECTS_ITEMS}
       agendaItem={AGENDA_ITEM}
       managementItems={filterMenuByPermission(managementItems, can)}
+      siteItems={user?.id && user.id === info.user_id ? SITE_ITEMS : []}
       userItems={USER_ITEMS}
       projectsTo={PROJECTS_ROOT}
       projectsActive={isProjectsArea}

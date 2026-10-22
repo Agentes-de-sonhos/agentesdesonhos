@@ -54,6 +54,8 @@ export interface AgencyAdminSidebarViewProps {
   projectsItems: MenuItemDef[];
   agendaItem: MenuItemDef;
   managementItems: MenuItemDef[];
+  /** Grupo "Site" (opcional; vazio = oculto). */
+  siteItems?: MenuItemDef[];
   userItems: MenuItemDef[];
   /** Link do grupo "Meus projetos" quando recolhido + estado ativo do grupo. */
   projectsTo: string;
@@ -80,6 +82,7 @@ export function AgencyAdminSidebarView({
   projectsItems,
   agendaItem,
   managementItems,
+  siteItems = [],
   userItems,
   projectsTo,
   projectsActive,
@@ -471,6 +474,9 @@ export function AgencyAdminSidebarView({
 
             {sectionLabel("Gestão")}
             {managementItems.map((item) => renderItem(item))}
+
+            {siteItems.length > 0 && sectionLabel("Site")}
+            {siteItems.map((item) => renderItem(item))}
           </nav>
           {/* Fade neutro: só quando ainda há itens fora da área visível. */}
           {hasMoreBelow && (
