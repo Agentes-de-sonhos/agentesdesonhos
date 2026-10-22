@@ -60,6 +60,8 @@ export type AgencySiteProfileKey =
   | "bardelliCurated"
   | "dricaPresentation"
   | "bardelliPresentation"
+  /** Rascunho técnico isolado do briefing 19 (Bagagem na Mão); sem domínio público. */
+  | "bagagemNaMaoBriefing19"
 ;
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
