@@ -1,3 +1,5 @@
+import { StandardPopupCard, StandardPopupHeader, standardPopupContentClass } from "@/components/ui/standard-popup";
+import { Briefcase } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -52,13 +54,13 @@ export function CreateOperationDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-lg md:rounded-lg md:p-6">
-        <DialogHeader>
-          <DialogTitle>Nova Operação</DialogTitle>
-          <DialogDescription>
-            Vincule a operação a um cliente e informe os dados da viagem.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="h-[100dvh] max-h-[100dvh] w-screen max-w-none overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-lg md:rounded-lg md:p-6 bg-muted border-0 md:p-4">
+        <StandardPopupCard>
+        <StandardPopupHeader
+          icon={Briefcase}
+          title="Nova Operação"
+          subtitle="Vincule a operação a um cliente e informe os dados da viagem."
+        />
         <div className="space-y-3">
           <div>
             <Label>Cliente *</Label>
@@ -102,6 +104,7 @@ export function CreateOperationDialog({ open, onOpenChange }: Props) {
             </Button>
           </div>
         </div>
+        </StandardPopupCard>
       </DialogContent>
     </Dialog>
   );

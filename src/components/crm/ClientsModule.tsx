@@ -1,3 +1,5 @@
+import { StandardPopupCard, StandardPopupHeader, standardPopupContentClass } from "@/components/ui/standard-popup";
+import { UserRound as UserRound } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -496,15 +498,15 @@ export function ClientsModule() {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
 
 
-          <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-4 overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-lg md:rounded-lg md:p-6">
-            <DialogHeader>
-              <DialogTitle>{editingClient ? "Editar Cliente" : "Novo Cliente"}</DialogTitle>
-              <DialogDescription>
-                {editingClient
-                  ? "Atualize os dados de contato deste cliente."
-                  : "Informe os dados de contato do novo cliente."}
-              </DialogDescription>
-            </DialogHeader>
+          <DialogContent className="flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-4 overflow-y-auto rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] md:h-auto md:max-h-[90vh] md:w-full md:max-w-lg md:rounded-lg md:p-6 bg-muted border-0 md:p-4 md:max-w-xl">
+            <StandardPopupCard>
+            <StandardPopupHeader
+              icon={UserRound}
+              title={editingClient ? "Editar Cliente" : "Novo Cliente"}
+              subtitle={editingClient
+                ? "Atualize os dados de contato deste cliente."
+                : "Informe os dados de contato do novo cliente."}
+            />
             <Tabs key={editingClient?.id ?? "new"} defaultValue="dados">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="dados">Dados Cadastrais</TabsTrigger>
@@ -783,6 +785,7 @@ export function ClientsModule() {
                 )}
               </TabsContent>
             </Tabs>
+            </StandardPopupCard>
           </DialogContent>
         </Dialog>
       </div>
