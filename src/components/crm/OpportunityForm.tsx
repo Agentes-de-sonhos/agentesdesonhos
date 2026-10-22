@@ -42,6 +42,7 @@ export const opportunitySchema = z
     end_date: z.date().optional(),
     adults_count: z.number().min(1, "Mínimo 1 adulto"),
     children_count: z.number().min(0, "Não pode ser negativo"),
+    children_ages: z.array(z.number().min(0).max(17)).optional(),
     estimated_value: z.number().min(0),
     notes: z.string().optional(),
     assigned_team_member_id: z.string().optional(),

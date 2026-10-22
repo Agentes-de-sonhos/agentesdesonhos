@@ -10305,6 +10305,7 @@ export type Database = {
         Row: {
           adults_count: number
           assigned_team_member_id: string | null
+          children_ages: number[]
           children_count: number
           client_id: string
           company_id: string | null
@@ -10330,6 +10331,7 @@ export type Database = {
         Insert: {
           adults_count?: number
           assigned_team_member_id?: string | null
+          children_ages?: number[]
           children_count?: number
           client_id: string
           company_id?: string | null
@@ -10355,6 +10357,7 @@ export type Database = {
         Update: {
           adults_count?: number
           assigned_team_member_id?: string | null
+          children_ages?: number[]
           children_count?: number
           client_id?: string
           company_id?: string | null
