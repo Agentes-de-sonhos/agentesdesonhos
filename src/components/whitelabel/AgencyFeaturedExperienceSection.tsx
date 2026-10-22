@@ -42,7 +42,16 @@ export function AgencyFeaturedExperienceSection({
           >
             {config.title}
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground">{config.description}</p>
+          {/* Parágrafos separados por linha em branco no texto do perfil. */}
+          {config.description
+            .split(/\n{2,}/)
+            .map((p) => p.trim())
+            .filter(Boolean)
+            .map((para) => (
+              <p key={para} className="mt-4 text-base leading-relaxed text-muted-foreground">
+                {para}
+              </p>
+            ))}
           {config.highlights && config.highlights.length > 0 && (
             <ul className="mt-6 grid gap-3 sm:grid-cols-2">
               {config.highlights.map((h) => (
