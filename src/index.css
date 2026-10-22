@@ -1591,3 +1591,7 @@ body[data-booking-selection-bar] {
 .wl-editorial.wl-luxury .wl-qq-submit:hover, .wl-editorial.wl-luxury .wl-qq-submit:focus-visible { background-color: #A8CC44 !important; color: #2D3053 !important; }
 .wl-editorial.wl-luxury .wl-qq-submit:hover svg, .wl-editorial.wl-luxury .wl-qq-submit:focus-visible svg { transform: translateX(3px); }
 @media (prefers-reduced-motion: reduce) { .wl-editorial.wl-luxury .wl-qq-submit:hover svg { transform: none; } }
+
+/* O Mundo em Cores — banner Xcaret sem escurecimento, fotos nítidas */
+.wl-mundo .wl-xcaret-hero-shade { display: none; }
+.wl-mundo #inicio h1, .wl-mundo #inicio h1 + *, .wl-mundo #inicio p { text-shadow: 0 1px 3px rgb(0 0 0 / 0.45), 0 2px 14px rgb(0 0 0 / 0.3); }

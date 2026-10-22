@@ -113,8 +113,8 @@ export function Hero({ slots = XCARET_MEDIA_SLOTS }: { slots?: Slots }) {
           ))}
         </CarouselContent>
       </Carousel>
-      <div className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/20" aria-hidden />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-1/2 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden />
+      <div className="wl-xcaret-hero-shade pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/20" aria-hidden />
+      <div className="wl-xcaret-hero-shade pointer-events-none absolute inset-x-0 bottom-0 -z-[5] h-1/2 bg-gradient-to-t from-foreground/80 to-transparent" aria-hidden />
       <div className={`${contentWidth} pointer-events-none flex flex-1 items-center pb-52 pt-14 md:pb-56 lg:items-start lg:pb-0 lg:pt-14`}>
         <div className="pointer-events-auto max-w-3xl text-background lg:max-w-5xl">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-background/80">Riviera Maya • México</p>
