@@ -112,6 +112,7 @@ import mundoHeroEuropaVideo from "@/assets/whitelabel/mundo-hero-europa.mp4.asse
 import mundoHeroEuropaFoto from "@/assets/whitelabel/mundo-hero-europa-kotor.jpg.asset.json";
 import mundoHeroDesenhadaVideo from "@/assets/whitelabel/mundo-hero-desenhada.mp4.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
+import mundoGreciaVanessa from "@/assets/whitelabel/mundo-grecia-vanessa.jpg.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
@@ -154,6 +155,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroMundoEuropaVideo: mundoHeroEuropaVideo.url,
   // Só O Mundo em Cores usa (slide 2, foto).
   heroMundoEuropaFoto: mundoHeroEuropaFoto.url,
+  // Só O Mundo em Cores usa (card Grécia em Boa Companhia).
+  mundoGreciaVanessa: mundoGreciaVanessa.url,
   heroMundoDesenhadaVideo: mundoHeroDesenhadaVideo.url,
   heroAirportTraveler: heroAirportTraveler.url,
   heroJuMagicKingdom: heroJuMagicKingdom.url,
