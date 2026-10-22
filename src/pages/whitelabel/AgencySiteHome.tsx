@@ -109,6 +109,7 @@ import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import mundoHeroGrupoVideo from "@/assets/whitelabel/mundo-hero-grupo.mp4.asset.json";
 import mundoHeroEuropaVideo from "@/assets/whitelabel/mundo-hero-europa.mp4.asset.json";
+import mundoHeroEuropaFoto from "@/assets/whitelabel/mundo-hero-europa-kotor.jpg.asset.json";
 import mundoHeroDesenhadaVideo from "@/assets/whitelabel/mundo-hero-desenhada.mp4.asset.json";
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
@@ -151,6 +152,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroSantoriniShip: heroSantoriniShip.url,
   heroMundoGrupoVideo: mundoHeroGrupoVideo.url,
   heroMundoEuropaVideo: mundoHeroEuropaVideo.url,
+  // Só O Mundo em Cores usa (slide 2, foto).
+  heroMundoEuropaFoto: mundoHeroEuropaFoto.url,
   heroMundoDesenhadaVideo: mundoHeroDesenhadaVideo.url,
   heroAirportTraveler: heroAirportTraveler.url,
   heroJuMagicKingdom: heroJuMagicKingdom.url,
