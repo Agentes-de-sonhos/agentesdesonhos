@@ -122,6 +122,8 @@ export interface AgencyAuthorityContent {
 
 export interface AgencyFooterContent {
   description?: string;
+  /** Oculta a frase abaixo do logotipo; o horário (se houver) ocupa esse espaço. */
+  descriptionHidden?: boolean;
   whatsapp?: string;
   /** Oculta a linha de WhatsApp no rodapé sem afetar os demais canais. */
   whatsappHidden?: boolean;

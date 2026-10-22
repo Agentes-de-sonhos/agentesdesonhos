@@ -404,6 +404,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   footer: {
     hours: "Horário de atendimento:\nSegunda a sexta: 09:00–18:30\nSábado e domingo: fechado",
     description: "Viagens personalizadas, cruzeiros, experiências em família e pequenos grupos. Planejamento cuidadoso e uma conversa próxima com a Vanessa, do primeiro contato ao retorno.",
+    descriptionHidden: true,
     whatsapp: "(11) 99995-4734",
     phone: "(11) 99995-4734",
     email: "contato@omundoemcores.com.br",

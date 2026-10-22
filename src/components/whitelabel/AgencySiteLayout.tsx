@@ -520,17 +520,20 @@ export function AgencyFooter({
             )}
             {showCadastur(info.hostname) && <CadasturSeal lazy hostname={info.hostname} className="h-11 w-auto object-contain" />}
             </div>
-            <p className="mt-5 max-w-sm whitespace-pre-line text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
-              {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
-            </p>
+            {footer?.descriptionHidden ? null : (
+              <p className="mt-5 max-w-sm whitespace-pre-line text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)]">
+                {footer?.description ?? "Consultoria de viagens com acompanhamento do primeiro contato ao retorno."}
+              </p>
+            )}
+            {/* Com a descrição oculta (opt-in), o horário sobe para o espaço abaixo do logotipo. */}
+            {footer?.hours && (
+              <p className={`${footer?.descriptionHidden ? "mt-5 max-w-sm" : "mt-3"} flex items-start gap-2 whitespace-pre-line text-sm text-[hsl(var(--wl-ink)_/_0.75)]`}>
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> <span>{footer.hours}</span>
+              </p>
+            )}
             {(footer?.address || (footer?.showLocation !== false && location)) && (
               <p className="mt-6 flex items-center gap-2 text-sm text-[hsl(var(--wl-ink)_/_0.75)]">
                 <MapPin className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {legalPreview ? "Atendimento online em Lisboa, Portugal" : footer?.address ?? location}
-              </p>
-            )}
-            {footer?.hours && (
-              <p className="mt-3 flex items-start gap-2 whitespace-pre-line text-sm text-[hsl(var(--wl-ink)_/_0.75)]">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> <span>{footer.hours}</span>
               </p>
             )}
           </div>
