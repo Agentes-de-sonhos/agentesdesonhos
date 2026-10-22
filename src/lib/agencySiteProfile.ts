@@ -1184,6 +1184,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-17-v1.preview.local": "viajarTirismoBriefing17",
   "drica-presentation.preview.local": "dricaPresentation",
   "bardelli-presentation.preview.local": "bardelliPresentation",
+  /** Host sintético do rascunho briefing-19 — cadastro real sem domínio; nada é vinculado. */
+  "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
   "bardelliviagens.com.br": "bardelliCurated",
   "www.bardelliviagens.com.br": "bardelliCurated",
 };
@@ -1204,6 +1206,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   bardelliCurated: BARDELLI_OFFICIAL_PROFILE,
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
   dricaPresentation: DRICA_PRESENTATION_PROFILE,
+  bagagemNaMaoBriefing19: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
