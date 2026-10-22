@@ -1476,14 +1476,13 @@ body[data-booking-selection-bar] {
   background-repeat: no-repeat;
   background-position: left top, right 0 top calc(11.5px - 8vw);
 }
-/* Botão da faixa: laranja da primeira placa do logotipo (preferência da agência),
-   em harmonia com o pôr do sol da foto. */
+/* Botão da faixa: azul-petróleo escolhido pela agência, contraste sobre o pôr do sol. */
 .wl-mundo .wl-newsletter-cta {
-  background-color: #F69F61 !important;
-  border-color: #F69F61 !important;
+  background-color: #075E72 !important;
+  border-color: #075E72 !important;
   color: #FFFFFF !important;
 }
-.wl-mundo .wl-newsletter-cta:hover { background-color: #EE8B45 !important; border-color: #EE8B45 !important; }
+.wl-mundo .wl-newsletter-cta:hover { background-color: #054A5A !important; border-color: #054A5A !important; }
 .wl-mundo .wl-newsletter-cta svg { color: #FFFFFF !important; }
 @media (max-width: 767px) {
   .wl-mundo .wl-newsletter-card {
