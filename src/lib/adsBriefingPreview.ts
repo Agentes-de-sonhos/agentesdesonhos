@@ -30,7 +30,7 @@ export const GENERIC_XCARET_SLOTS: XcaretMediaSlots = {
  */
 export const MUNDO_EM_CORES_XCARET_SLOTS: XcaretMediaSlots = {
   portraitJuliana: { src: mundoXcaretParque.url, alt: "Vanessa Figueiredo no parque Xcaret, junto à placa Xcaret México", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1656)" },
-  trainingPhoto: { src: mundoXcaretXplor.url, alt: "Vanessa Figueiredo na caverna do parque Xplor, junto à pedra Xplor por Xcaret", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0921)" },
+  trainingPhoto: { src: mundoXcaretDrink.url, alt: "Vanessa Figueiredo brindando com um drinque diante do mar do Caribe", source: "Acervo pessoal de Vanessa Figueiredo" },
   julianaExtra: { src: mundoXcaretXelha.url, alt: "Vanessa Figueiredo no letreiro do parque Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo (IMG_0749)" },
   expertBadge: { src: xpertsXcaretBadge.url, alt: "Selo Xperts Xcaret", source: "Selo Xperts Xcaret" },
   julianaAtDestination: { src: mundoXcaretFechamento.url, alt: "Vanessa Figueiredo no letreiro Xcaret México 35 anos", source: "Acervo pessoal de Vanessa Figueiredo (IMG_1646)" },
@@ -54,6 +54,7 @@ import mundoXcaretCardNatureza from "@/assets/ads-preview/mundo-xcaret-card-natu
 import mundoXcaretCardCaribe from "@/assets/ads-preview/mundo-xcaret-card-caribe.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
+import mundoXcaretDrink from "@/assets/ads-preview/mundo-xcaret-drink.webp.asset.json";
 import mundoXcaretMontagem from "@/assets/ads-preview/mundo-xcaret-montagem-home.png.asset.json";
 
 /**
