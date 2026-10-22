@@ -44,7 +44,7 @@ const Suporte = lazy(() => import("@/pages/Suporte"));
 const AgencyReservas = lazy(() => import("@/pages/whitelabel/admin/AgencyReservas"));
 const ProcessoReserva = lazy(() => import("@/pages/ProcessoReserva"));
 const AgencyAdminNotFound = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminNotFound"));
-const ResortsCurationPanel = lazy(() => import("@/pages/ResortsCurationPanel"));
+const ResortsCurationPanel = lazy(() => import("@/pages/site/ResortsCurationPanel"));
 const Community = lazy(() => import("@/pages/Community"));
 
 /** Alias legado /reservas/:id → rota administrativa equivalente. */
