@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Orlando: galeria sem degradê preto e botões “Selecionar” em Ju, 100 Limites e O Mundo em Cores; seleção/desmarcação verificadas nos três sites, sem publicar.
 - [x] Walt Disney World (Destinos com a Ju, prévia): página /disney, ingressos (intenção), 4+2 parques, Disney Springs, eventos incluído/separado, hotéis por categoria oficial e /disney/hoteis/:slug — feito em prévia (host técnico), 31 hospedagens + Lakeshore futuro, envio simulado; fotos de hotel aguardam licença; menu não alterado; sem publicar.
 - [x] Menu Destinos com a Ju: "Universal Orlando Resort" como primeira opção do submenu "Especialidades", antes de Xcaret, apontando para /universal; 57 testes (Ju + regressões de menu dos demais tenants) e build OK, submenu conferido no navegador em 1280/390 com navegação real até a landing; sem publicar.
 - [x] Universal: foto de perfil do configurador trocada pela enviada por Fernando com o globo da Universal (pointer `ju-universal-globe.png`), recorte centrado no rosto conferido em 1280/390, 17 testes e build OK; home da Ju mantém a foto anterior, sem publicar.

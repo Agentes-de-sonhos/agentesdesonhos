@@ -28,6 +28,7 @@ const PHOTOS = [
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
+  const clearPhotos = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br)$/i.test(hostname.replace(/\.$/, ""));
   const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local"].includes(hostname.toLowerCase().replace(/\.$/, ""));
 
   useEffect(() => {
@@ -65,8 +66,10 @@ export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0"}`}
             />
           ))}
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]" />
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent" />
+          {!clearPhotos && <>
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]" />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent" />
+          </>}
         </div>
 
         <div className="relative flex min-h-[420px] flex-col justify-end px-5 pb-8 pt-14 md:min-h-[500px] md:px-10 md:pb-12 md:pt-16">
