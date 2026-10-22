@@ -1180,6 +1180,11 @@ export default function AgencySiteHome({
                   <p className={`${compactSpacing ? "mt-5" : "mt-8"} whitespace-pre-line text-[15px] leading-relaxed text-muted-foreground md:text-base`}>
                     {bio}
                   </p>
+                  {aboutCopy?.tagline && (
+                    <p className={`${compactSpacing ? "mt-4" : "mt-6"} text-sm font-semibold tracking-[0.08em] text-foreground`}>
+                      {aboutCopy.tagline}
+                    </p>
+                  )}
                   {!!aboutCopy?.facts?.length && (
                     <ul className="mt-8 grid gap-3 sm:grid-cols-2">
                       {aboutCopy.facts.map((fact) => (

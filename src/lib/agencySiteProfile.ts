@@ -248,6 +248,8 @@ export interface AgencySiteProfile {
     badge?: { value: string; label?: string };
     /** Fatos institucionais confirmados, apresentados separadamente. */
     facts?: string[];
+    /** Linha de fechamento do texto institucional (ex.: "Consultoria exclusiva · Experiências sob medida"). */
+    tagline?: string;
     /** Personal travel repertoire, informational only; absent renders no strip. */
     visitedDestinations?: { title: string; names: string[]; presentation?: "list" | "flags" };
     /** Oculta o painel de imagem quando não existe retrato real autorizado. */

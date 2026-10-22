@@ -7,8 +7,31 @@ describe("O Mundo em Cores approved isolated presentation", () => {
   it("uses professional experience without inventing a founding date", () => {
     expect(profile.about?.badge).toEqual({ value: "29 anos", label: "de experiência no turismo" });
     expect(profile.about?.title).toBe("Viagens planejadas para o seu jeito de viver o mundo.");
-    expect(JSON.stringify(profile)).not.toMatch(/30 anos|2012|2017|antecipação|curadoria|jornada|Vinculação de domínio/i);
+    // "curadoria" saiu da lista porque a agência escreveu a palavra no texto que enviou em 22/10/2026.
+    expect(JSON.stringify(profile)).not.toMatch(/30 anos|2012|2017|antecipação|jornada|Vinculação de domínio/i);
     expect(profile.about?.text).toContain("Olá, eu sou a Vanessa Figueiredo.");
+  });
+
+  it("usa o texto institucional enviado pela agência em 22/10/2026", () => {
+    const text = profile.about?.text ?? "";
+    expect(text.split("\n\n")).toHaveLength(8);
+    expect(text).toContain(
+      "Há 29 anos transformo sonhos em viagens. Nos últimos 14, faço isso à frente da minha agência, a O Mundo em Cores · Studio de Viagens.",
+    );
+    expect(text).toContain(
+      "Nesse caminho, aprendi que conhecimento não se acumula: se renova. Vivo em constante aprendizado sobre destinos, passeios e novidades, e conquistei certificações como Xcaret Expert, Disney, Universal e de companhias de cruzeiros, entre outras.",
+    );
+    expect(text).toContain(
+      "Cada cliente que volta com os olhos brilhando, cada família que vive um momento inesquecível, cada “foi a viagem da minha vida”... tudo isso volta para mim em bênçãos e alegria. O que eu faço não é só trabalho: é parte de quem eu sou.",
+    );
+    expect(text).toContain("Acredito que cada pessoa é única, com seus gostos e seu jeito de viver o mundo. Assim também devem ser as suas viagens.");
+    expect(text).toContain("Seja bem-vindo(a) à O Mundo em Cores.");
+    expect(text).not.toContain("últimos 16 anos");
+    expect(profile.about?.tagline).toBe("Consultoria exclusiva · Experiências sob medida");
+    // Nenhuma outra agência recebe a linha de fechamento.
+    for (const other of ["www.destinoscomaju.com.br", "100limites.tur.br", "paraisoviagens.com"]) {
+      expect(resolveSiteProfile(other).about?.tagline).toBeUndefined();
+    }
   });
   it("preserves safe synthetic identity and uses opt-in shared visuals", () => {
     expect(profile.alternateSurfaces).toBe(true);
