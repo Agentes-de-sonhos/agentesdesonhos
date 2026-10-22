@@ -569,7 +569,7 @@ export function AgencyFooter({
                   </a>
                 </li>
               ) : null}
-              {(footer?.phone || info.phone) ? (
+              {(!footer?.phoneHidden && (footer?.phone || info.phone)) ? (
                 <li className="flex items-center gap-2 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">
                   <Phone className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" /> {footer?.phone ?? info.phone}
                 </li>

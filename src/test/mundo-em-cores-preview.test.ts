@@ -62,6 +62,7 @@ describe("O Mundo em Cores approved isolated presentation", () => {
     expect(profile.about?.visitedDestinations?.names).toContain("Ilhas Virgens Britânicas");
     // O número não é exibido no rodapé: apenas o link de WhatsApp (pedido do Fernando em 22/10/2026).
     expect(profile.footer?.phone).toBeUndefined();
+    expect(profile.footer?.phoneHidden).toBe(true);
     expect(profile.footer?.whatsapp).toBe("(11) 99995-4734");
     expect(profile.about?.visitedDestinations?.title).toBe("Destinos que já conheci");
     expect(profile.modules?.find(m => m.key === "elas-viajam")?.text).toBe("Experiências de viagem para mulheres. Converse com a Vanessa sobre propostas e próximas saídas.");
