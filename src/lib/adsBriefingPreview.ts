@@ -712,6 +712,158 @@ export const VIAJAR_TIRISMO_PREVIEW_PROFILE: AgencySiteProfile = {
   },
 };
 
+export const BAGAGEM_NA_MAO_PREVIEW_JOB_ID = "briefing-19-v1";
+export const BAGAGEM_NA_MAO_PREVIEW_PATH = `/ads-briefing-preview/${BAGAGEM_NA_MAO_PREVIEW_JOB_ID}`;
+/**
+ * Host sintético exclusivo. A agência real foi localizada no cadastro
+ * (public_slug bagagem-na-mao-viagens), mas NÃO tem agency_public_domains:
+ * esta fixture não usa o user_id real e não cria domínio, conta ou vínculo.
+ */
+export const BAGAGEM_NA_MAO_PREVIEW_HOST = "briefing-19-v1.preview.local";
+
+export const BAGAGEM_NA_MAO_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-000000000019",
+  agency_slug: "",
+  public_slug: null,
+  hostname: BAGAGEM_NA_MAO_PREVIEW_HOST,
+  is_primary: false,
+  agency_name: "Bagagem na Mão Viagens",
+  owner_name: "Márcia Baccarini",
+  logo_url: bagagemNaMaoLogo.url,
+  cover_image_url: null,
+  primary_color: "#27C7C3",
+  secondary_color: "#FF9418",
+  secondary_auto: false,
+  // Terciária suave derivada automaticamente da primária (contrato brandTheme).
+  tertiary_color: null,
+  tertiary_auto: true,
+  on_secondary_color: null,
+  // Contatos aparecem somente como texto no rodapé; CTAs ficam bloqueados.
+  phone: null,
+  city: "Rio de Janeiro",
+  state: "RJ",
+  bio: null,
+  cnpj: "64.731.514/0001-08",
+  whatsapp_group_url: null,
+};
+
+const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", {
+  navDensity: "compact",
+  // Sem página de visto americano nesta prévia.
+  visaHome: false,
+  // Sem dados confirmados de Xcaret: a seção editorial Xcaret não entra.
+  featuredExperience: undefined,
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Especialidades", to: "/#assinatura", children: [
+      { label: "Orlando e parques", to: "/ingressos-orlando" },
+      { label: "Resorts no Brasil", to: "/resorts-brasil" },
+      { label: "Cruzeiros", to: "/#autoridade" },
+    ] },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Dúvidas", to: "/#faq" },
+  ],
+  sections: {
+    dmc: { enabled: false },
+    offers: { enabled: false },
+    credentials: { enabled: false },
+    team: { enabled: false },
+    testimonials: { enabled: false },
+    avaliacoes: { enabled: false },
+    newsletter: { enabled: false },
+  },
+  heroPresentation: {
+    kicker: "UM JEITO NOVO DE VIAJAR · RIO DE JANEIRO · DESDE 2014",
+    overlay: "strongLeft",
+  },
+  hero: [
+    { title: "Seu jeito novo de viajar começa aqui", subtitle: "Viagens sob medida planejadas com escuta e cuidado, do primeiro contato ao retorno.", image: "heroAirportTraveler", order: 1, enabled: true },
+    { title: "Orlando e parques em cada detalhe", subtitle: "Parques, hospedagem e deslocamentos organizados para a família aproveitar cada dia.", image: "orlandoMagicKingdom", order: 2, enabled: true },
+    { title: "Europa e cruzeiros do seu jeito", subtitle: "Roteiros pela Europa e cruzeiros — incluindo Disney Cruise Line — escolhidos para o seu perfil.", image: "heroVarenna", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "UM JEITO NOVO DE VIAJAR",
+    title: "Viagens sob medida, planejadas com escuta e cuidado.",
+    text: "Desde 2014, a Bagagem na Mão Viagens desenha roteiros a partir do perfil de quem viaja: famílias e parques, viagens internacionais, resorts e cruzeiros, com atenção a cada detalhe.",
+  },
+  destinations: [
+    { key: "eua-canada", image: "orlandoMagicKingdom", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Parques, cidades e natureza em roteiros organizados para o ritmo da sua família.", service: "pacotes", enabled: true, order: 1 },
+    { key: "europa", image: "heroVarenna", label: "Europa", title: "Europa do seu jeito", text: "Cidades clássicas e novas descobertas em viagens planejadas no seu ritmo.", service: "pacotes", enabled: true, order: 2 },
+    { key: "resorts-all-inclusive", image: "resort", label: "Resorts", title: "Resorts e all-inclusive", text: "Hospedagens com estrutura completa para descansar e aproveitar sem preocupação.", service: "hospedagem", enabled: true, order: 3 },
+    { key: "parques", image: "parques", label: "Parques e entretenimento", title: "Orlando e parques", text: "Disney, Universal e outras experiências com ingressos, hospedagem e logística combinados.", service: "ingressos", enabled: true, order: 4 },
+    { key: "cruzeiros", image: "cruzeiroDisneyWish", label: "Cruzeiros", title: "Cruzeiros e Disney Cruise Line", text: "Navios, cabines e itinerários comparados para uma viagem no mar do seu jeito.", service: "cruzeiros", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "sob-medida", title: "Viagens sob medida", text: "Roteiros criados a partir das preferências, do ritmo e das prioridades de quem viaja.", service: "pacotes", image: "heroVarenna", enabled: true, order: 1 },
+    { key: "familias-parques", title: "Famílias e parques", text: "Orlando e outras experiências em família, com cada dia pensado para todas as idades.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 2 },
+    { key: "internacionais", title: "Viagens internacionais", text: "Estados Unidos, Canadá, Europa e outros destinos com planejamento completo.", service: "pacotes", image: "europa", enabled: true, order: 3 },
+    { key: "resorts", title: "Resorts e all-inclusive", text: "Hospedagens selecionadas para descansar com conforto e aproveitar cada momento.", service: "hospedagem", image: "resort", enabled: true, order: 4 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação para escolher navio, cabine e itinerário, da Disney Cruise Line a outras companhias.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 5 },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Márcia Baccarini, fundadora e CEO da Bagagem na Mão Viagens.",
+    text: "A Bagagem na Mão Viagens nasceu em 2014 com uma proposta clara: um jeito novo de viajar, com planejamento sob medida e atendimento próximo. À frente da agência, a fundadora e CEO Márcia Baccarini conduz cada viagem com escuta e cuidado.\n\nO atendimento é dedicado a viagens sob medida, famílias e parques e viagens internacionais, com prioridades em Estados Unidos e Canadá, Europa, resorts e all-inclusive, parques e entretenimento e cruzeiros.\n\nDa primeira conversa ao retorno, cada roteiro é desenhado a partir do perfil de quem viaja, com orientação clara em cada escolha.",
+    badge: { value: "Desde 2014", label: "Bagagem na Mão Viagens" },
+    media: "hidden",
+    showLocation: true,
+    ownerName: "Márcia Baccarini",
+  },
+  differentials: [
+    { title: "Escuta de verdade", text: "Cada roteiro começa por uma conversa sobre quem viaja, o ritmo e as prioridades da viagem.", icon: "consultivo" },
+    { title: "Planejamento sob medida", text: "Destinos, hotéis e serviços escolhidos conforme o perfil e o investimento desejado.", icon: "conferido" },
+    { title: "Especialidades claras", text: "Estados Unidos e Canadá, Europa, resorts, parques e cruzeiros com orientação dedicada.", icon: "fornecedores" },
+    { title: "Acompanhamento próximo", text: "Suporte antes, durante e depois da viagem, combinado conforme o serviço contratado.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Uma conversa para entender quem vai viajar, as preferências e o ritmo desejado.",
+    "Curadoria de destinos, hospedagens e serviços alinhados ao perfil da viagem.",
+    "Apresentação clara das opções e ajustes antes das reservas.",
+    "Acompanhamento antes, durante e depois da viagem.",
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "O atendimento começa por uma conversa sobre o perfil dos viajantes, as datas e o que desejam viver. A partir daí, a proposta é montada sob medida." },
+    { q: "Quais são as especialidades da agência?", a: "Viagens sob medida, famílias e parques e viagens internacionais, com prioridades em Estados Unidos e Canadá, Europa, resorts e all-inclusive, parques e entretenimento e cruzeiros." },
+    { q: "A agência planeja viagens para Orlando e parques?", a: "Sim. Parques e entretenimento são uma das ênfases da agência, com organização de ingressos, hospedagem e deslocamentos conforme o ritmo da família." },
+    { q: "Há acompanhamento durante a viagem?", a: "O suporte antes, durante e depois da viagem é combinado conforme o serviço contratado. Converse com a agência para entender como funciona na sua viagem." },
+    { q: "Onde a agência atende?", a: "A Bagagem na Mão Viagens fica na Rua Conde de Bonfim, 211, sala 412, na Tijuca, Rio de Janeiro/RJ, e também atende pelos canais digitais." },
+  ],
+  copy: {
+    destinations: { title: "Destinos para a sua próxima viagem", subtitle: "Estados Unidos e Canadá, Europa, resorts, parques e cruzeiros planejados para o seu perfil." },
+    modules: { title: "Especialidades", subtitle: "Viagens sob medida, famílias e parques, viagens internacionais, resorts e cruzeiros." },
+    differentials: { title: "Um jeito novo de viajar", subtitle: "Escuta, planejamento sob medida e acompanhamento em cada etapa." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Um processo próximo e claro, conduzido pela agência." },
+    faq: { title: "Dúvidas frequentes" },
+  },
+  socialStrip: {
+    title: "Siga-nos nas redes",
+    links: [{ network: "instagram", url: "https://www.instagram.com/bagagemnamaoviagens/" }],
+  },
+  footer: {
+    description: "Viagens sob medida, famílias e parques e viagens internacionais. Um jeito novo de viajar, desde 2014.",
+    whatsapp: "(21) 98855-9515",
+    phone: "(21) 98855-9515",
+    email: "bagagemnamaoviagens@gmail.com",
+    instagram: "https://www.instagram.com/bagagemnamaoviagens/",
+    instagramLabel: "@bagagemnamaoviagens",
+    address: "Rua Conde de Bonfim, 211 — Sala 412 — Tijuca — Rio de Janeiro/RJ",
+    legalName: "Bagagem na Mão Viagens Ltda",
+    cnpj: "64.731.514/0001-08",
+    showLocation: true,
+  },
+  seo: {
+    title: "Prévia para revisão — Bagagem na Mão Viagens",
+    description: "Prévia técnica revisável do site Bagagem na Mão Viagens.",
+  },
+}, "Bagagem na Mão Viagens");
+// Sem páginas especiais Xcaret, DMC Portugal ou Visto nesta prévia.
+delete bagagemNaMaoBaseline.dmc;
+delete bagagemNaMaoBaseline.credentials;
+delete bagagemNaMaoBaseline.team;
+export const BAGAGEM_NA_MAO_PREVIEW_PROFILE: AgencySiteProfile = bagagemNaMaoBaseline;
+
 /**
  * Landing Xcaret na prévia O Mundo em Cores: sem fotos ou selos da Juliana
  * (fotos oficiais dos parques como temporárias) e sem alegações de visita
@@ -970,6 +1122,15 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     notice: "Prévia para revisão — sem publicação · ações desativadas",
     documentTitle: "Prévia para revisão — Viajar Tirismo",
     realAgency: true,
+  },
+  [BAGAGEM_NA_MAO_PREVIEW_JOB_ID]: {
+    jobId: BAGAGEM_NA_MAO_PREVIEW_JOB_ID,
+    info: BAGAGEM_NA_MAO_PREVIEW_INFO,
+    profile: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Bagagem na Mão Viagens",
+    realAgency: true,
+    pages: { resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão Viagens" }, orlandoTickets: true },
   },
 };
 
