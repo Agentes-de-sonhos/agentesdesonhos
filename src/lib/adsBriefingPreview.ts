@@ -272,7 +272,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     { label: "Destinos", to: "/#destinos" },
     { label: "Cruzeiros", to: "/#autoridade" },
     { label: "Sobre", to: "/#sobre", children: [
-      { label: "A Vanessa", to: "/#sobre" },
+      { label: "Quem somos", to: "/#sobre" },
       { label: "Avaliações do Google", to: "/#avaliacoes" },
       { label: "Dúvidas frequentes", to: "/#faq" },
     ] },
