@@ -52,6 +52,8 @@ import mundoXcaretFechamento from "@/assets/ads-preview/mundo-xcaret-vanessa-35a
 import mundoXcaretParque from "@/assets/ads-preview/mundo-xcaret-vanessa-parque.webp.asset.json";
 import mundoXcaretCardNatureza from "@/assets/ads-preview/mundo-xcaret-card-natureza.webp.asset.json";
 import mundoXcaretCardCaribe from "@/assets/ads-preview/mundo-xcaret-card-caribe.webp.asset.json";
+import mundoXcaretCardChichen from "@/assets/ads-preview/mundo-xcaret-card-chichen.webp.asset.json";
+import mundoXcaretRoteiro from "@/assets/ads-preview/mundo-xcaret-roteiro.webp.asset.json";
 import mundoXcaretXelha from "@/assets/ads-preview/mundo-xcaret-vanessa-xelha.webp.asset.json";
 import mundoXcaretXplor from "@/assets/ads-preview/mundo-xcaret-vanessa-xplor.webp.asset.json";
 import mundoXcaretDrink from "@/assets/ads-preview/mundo-xcaret-drink.webp.asset.json";
@@ -1147,4 +1149,6 @@ export function resolveAdsPreviewFixture(jobId?: string): AdsBriefingPreviewFixt
 export const MUNDO_EM_CORES_XCARET_CARDS = {
   "Natureza que surpreende": { image: { src: mundoXcaretCardNatureza.url, alt: "Vanessa Figueiredo acenando diante das águas cristalinas do parque", source: "Acervo pessoal de Vanessa Figueiredo (IMG_2071)" }, position: "object-[center_52%]" },
   "Tempo para curtir o Caribe": { image: { src: mundoXcaretCardCaribe.url, alt: "Vista aérea do Hotel Xcaret e do mar do Caribe", source: "Acervo de Vanessa Figueiredo (IMG_2903)" }, position: "object-[center_45%]" },
+  "Cultura maia: histórias para descobrir": { image: { src: mundoXcaretCardChichen.url, alt: "Selfie em Chichén Itzá diante de El Castillo", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
+  "__roteiro": { image: { src: mundoXcaretRoteiro.url, alt: "Dias dentro d'água no Xcaret", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
 };
