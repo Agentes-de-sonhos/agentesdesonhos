@@ -56,7 +56,10 @@ describe("O Mundo em Cores approved isolated presentation", () => {
       ["Raquel Macario", "minhas viagens sejam leves, agradáveis, com excelentes escolhas"],
     ]);
     expect(profile.about?.images?.[0].src).toContain("/__l5e/assets-v1/");
-    expect(profile.about?.visitedDestinations?.names).toHaveLength(20);
+    expect(profile.about?.visitedDestinations?.names).toHaveLength(21);
+    expect(profile.about?.visitedDestinations?.names).not.toContain("Indonésia");
+    expect(profile.about?.visitedDestinations?.names).toContain("Eslovênia");
+    expect(profile.about?.visitedDestinations?.names).toContain("Ilhas Virgens Britânicas");
     expect(profile.about?.visitedDestinations?.title).toBe("Destinos que já conheci");
     expect(profile.modules?.find(m => m.key === "elas-viajam")?.text).toBe("Experiências de viagem para mulheres. Converse com a Vanessa sobre propostas e próximas saídas.");
     expect(profile.hero?.[0].title).toBe("Viagem desenhada para você.");
