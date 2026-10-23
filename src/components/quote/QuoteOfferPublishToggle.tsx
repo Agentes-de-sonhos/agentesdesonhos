@@ -8,17 +8,30 @@ import { OfferChannelPicker } from "@/components/offers/OfferChannelPicker";
 import { toast } from "sonner";
 
 /**
- * Controle individual do orçamento, com frase positiva.
- * Desmarcado grava `offer_opt_out = true`, que prevalece sobre a agência.
- * Quando a oferta do orçamento já existe, permite escolher as páginas do site.
- * Só aparece para agências com o módulo Ofertas liberado.
+ * Opt-in explícito por orçamento: começa sempre desligado.
+ * Ligar grava `offer_publish_opt_in = true` e `offer_opt_out = false`.
+ * As páginas do site são escolhidas aqui mesmo (`offer_display_channels`)
+ * e copiadas para a oferta quando ela for criada; se já existir, também é atualizada.
  */
-export function QuoteOfferPublishToggle({ quoteId, optOut }: { quoteId?: string; optOut?: boolean | null }) {
+export function QuoteOfferPublishToggle({
+  quoteId,
+  optIn,
+  optOut,
+  channels,
+}: {
+  quoteId?: string;
+  optIn?: boolean | null;
+  optOut?: boolean | null;
+  channels?: string[] | null;
+}) {
   const { enabled } = useOffersEnabled();
   const qc = useQueryClient();
-  const [checked, setChecked] = useState(!optOut);
+  const initial = !!optIn && !optOut;
+  const [checked, setChecked] = useState(initial);
+  const [selected, setSelected] = useState<string[]>(channels?.length ? channels : ["ofertas"]);
   const [saving, setSaving] = useState(false);
-  useEffect(() => setChecked(!optOut), [optOut]);
+  useEffect(() => setChecked(initial), [initial]);
+  useEffect(() => setSelected(channels?.length ? channels : ["ofertas"]), [channels?.join(",")]);
 
   const { data: offer } = useQuery({
     queryKey: ["quote-offer-channels", quoteId],
@@ -40,20 +53,33 @@ export function QuoteOfferPublishToggle({ quoteId, optOut }: { quoteId?: string;
   const onChange = async (value: boolean) => {
     setChecked(value);
     setSaving(true);
-    const { error } = await supabase.from("quotes").update({ offer_opt_out: !value } as any).eq("id", quoteId);
+    const { error } = await supabase
+      .from("quotes")
+      .update({ offer_publish_opt_in: value, offer_opt_out: !value } as any)
+      .eq("id", quoteId);
     setSaving(false);
     if (error) {
       setChecked(!value);
       toast.error("Não foi possível salvar a preferência de oferta.");
+      return;
     }
+    qc.invalidateQueries({ queryKey: ["quote", quoteId] });
   };
 
-  const onChannels = async (channels: string[]) => {
-    if (!offer) return;
+  const onChannels = async (next: string[]) => {
+    const prev = selected;
+    setSelected(next);
     setSaving(true);
-    const { error } = await (supabase as any).from("offers").update({ display_channels: channels }).eq("id", offer.id);
+    const { error } = await supabase.from("quotes").update({ offer_display_channels: next } as any).eq("id", quoteId);
+    let offerError = null;
+    if (!error && offer) {
+      ({ error: offerError } = await (supabase as any).from("offers").update({ display_channels: next }).eq("id", offer.id));
+    }
     setSaving(false);
-    if (error) return toast.error("Não foi possível salvar onde a oferta aparece.");
+    if (error || offerError) {
+      setSelected(prev);
+      return toast.error("Não foi possível salvar onde a oferta aparece.");
+    }
     qc.invalidateQueries({ queryKey: ["quote-offer-channels", quoteId] });
     qc.invalidateQueries({ queryKey: ["offers"] });
   };
@@ -66,7 +92,7 @@ export function QuoteOfferPublishToggle({ quoteId, optOut }: { quoteId?: string;
             Publicar como oferta no site
           </Label>
           <p className="text-xs text-muted-foreground">
-            Quando o orçamento estiver publicado, ele poderá virar uma oferta no site da agência. Dados do cliente nunca são exibidos.
+            Desligado por padrão. Ligue só nos orçamentos que devem virar oferta no site. Dados do cliente nunca são exibidos.
           </p>
         </div>
         <Switch id="quote-offer-publish" checked={checked} disabled={saving} onCheckedChange={onChange} />
@@ -74,11 +100,7 @@ export function QuoteOfferPublishToggle({ quoteId, optOut }: { quoteId?: string;
       {checked && (
         <div className="space-y-1.5 border-t border-border/60 pt-3">
           <p className="text-xs font-medium">Onde exibir no site</p>
-          {offer ? (
-            <OfferChannelPicker value={offer.display_channels?.length ? offer.display_channels : ["ofertas"]} onChange={onChannels} disabled={saving} />
-          ) : (
-            <p className="text-xs text-muted-foreground">Disponível assim que a oferta deste orçamento for criada em Meus Projetos › Ofertas.</p>
-          )}
+          <OfferChannelPicker value={selected} onChange={onChannels} disabled={saving} />
         </div>
       )}
     </div>
