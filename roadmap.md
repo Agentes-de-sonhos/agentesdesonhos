@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Novembro: segunda rodada visual (hero, categorias, ofertas, Radar e CTA), QA desktop/mobile e ações demonstrativas, sem publicação.
+- [x] Novembro: segunda rodada visual (hero, categorias, ofertas, Radar e CTA); 6 testes aprovados, QA 1280/768/390/360 sem overflow, quatro cards/botões alinhados, filtros e diálogos demonstrativos verificados, zero chamadas ao backend; cabeçalho/rodapé preservados, sem publicação.
 - [x] Novembro 2026: campanha visual isolada da O Mundo em Cores, componentes modulares, filtros locais e aviso ilustrativo; 31 testes, QA desktop/390/360, fotos carregadas, CTAs alinhados, zero chamadas ao backend e bloqueio 404 de tenant incorreto/produção; sem banco ou publicação.
 - [x] Orlando: galeria sem degradê preto e botões “Selecionar” em Ju, 100 Limites e O Mundo em Cores; seleção/desmarcação verificadas nos três sites, sem publicar.
 - [x] Walt Disney World (Destinos com a Ju, prévia): página /disney, ingressos (intenção), 4+2 parques, Disney Springs, eventos incluído/separado, hotéis por categoria oficial e /disney/hoteis/:slug — feito em prévia (host técnico), 31 hospedagens + Lakeshore futuro, envio simulado; fotos de hotel aguardam licença; menu não alterado; sem publicar.
