@@ -13,8 +13,9 @@ export function OfferCard({ offer, onSelect }: { offer: CampaignOffer; onSelect:
       {offer.location && <p className="campaign-offer-location"><MapPin aria-hidden="true" />{offer.location}</p>}
       <ul className="campaign-offer-features">{offer.features?.map((feature, index) => { const Icon = featureIcons[index % featureIcons.length]; return <li key={feature}><Icon aria-hidden="true" />{feature}</li>; })}</ul>
       <div className="campaign-offer-bottom">
-        {offer.installments ? <div className="campaign-offer-price"><small>A partir de</small><strong>{offer.installments}x R$ {offer.installmentBRL}</strong><small>Por pessoa + taxas. Valor ilustrativo.</small></div> : <p className="campaign-offer-highlight">{offer.highlight}</p>}
-        <p className="campaign-demo-label">Demonstração · sem contratação</p>
+        {offer.real ? (offer.priceLabel ? <div className="campaign-offer-price"><small>A partir de</small><strong>{offer.priceLabel}</strong>{offer.priceNote && <small>{offer.priceNote}</small>}</div> : <p className="campaign-offer-highlight">{offer.highlight}</p>)
+          : offer.installments ? <div className="campaign-offer-price"><small>A partir de</small><strong>{offer.installments}x R$ {offer.installmentBRL}</strong><small>Por pessoa + taxas. Valor ilustrativo.</small></div> : <p className="campaign-offer-highlight">{offer.highlight}</p>}
+        {!offer.real && <p className="campaign-demo-label">Demonstração · sem contratação</p>}
         <Button className={featured ? "is-featured" : undefined} onClick={() => onSelect(offer)}>{offer.action} <ArrowRight /></Button>
       </div>
     </div>
