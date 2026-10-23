@@ -323,3 +323,5 @@
   .campaign-closing-photo::after { background: linear-gradient(180deg, transparent 55%, hsl(var(--campaign-navy)) 100%); }
   .campaign-closing-channels { border-left: 0; border-top: 1px solid hsl(var(--primary-foreground) / .2); }
 }
+.campaign-offer-highlight { min-height: 64px; display: flex; align-items: center; padding: 10px 12px; border-radius: 10px; background: hsl(var(--campaign-cream)); font-weight: 600; color: hsl(var(--campaign-navy)); }
+.campaign-offer-price { min-height: 64px; }
