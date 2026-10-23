@@ -295,3 +295,11 @@
   .campaign-closing-photo::after { background: linear-gradient(180deg, transparent 55%, hsl(var(--campaign-navy)) 100%); }
   .campaign-closing-channels { grid-template-columns: 1fr; }
 }
+.campaign-hero-inner { padding-top: 132px; min-height: 560px; }
+.november-campaign .campaign-closing-channels button { background: transparent; padding: 0; min-height: 0; border-radius: 0; color: hsl(var(--primary-foreground)); width: 100%; }
+.november-campaign .campaign-closing-channels button:hover { background: transparent; opacity: .85; }
+.november-campaign .campaign-closing-channels small { color: hsl(var(--primary-foreground) / .72); }
+@media (max-width: 720px) {
+  .campaign-hero-inner { padding-top: 96px; }
+  .november-campaign .campaign-closing-photo { display: block; height: 220px; min-height: 220px; }
+}
