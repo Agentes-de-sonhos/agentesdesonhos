@@ -7,8 +7,12 @@ describe("November campaign isolation", () => {
     expect(isNovemberCampaignAllowed("id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app", "?__agency_host=omundoemcores.com.br")).toBe(true);
     expect(isNovemberCampaignAllowed("localhost", "?__agency_host=www.omundoemcores.com.br")).toBe(true);
   });
-  it("rejects production even when a preview override is supplied", () => {
-    for (const host of ["omundoemcores.com.br", "www.omundoemcores.com.br", "agentedesonhosproject.lovable.app", "agentedesonhoproject.lovable.app"]) {
+  it("opens on O Mundo em Cores production domains for approval", () => {
+    expect(isNovemberCampaignAllowed("omundoemcores.com.br", "")).toBe(true);
+    expect(isNovemberCampaignAllowed("www.omundoemcores.com.br", "")).toBe(true);
+  });
+  it("rejects other production hosts even when a preview override is supplied", () => {
+    for (const host of ["destinoscomaju.com.br", "100limites.tur.br", "agentedesonhosproject.lovable.app", "agentedesonhoproject.lovable.app"]) {
       expect(isNovemberCampaignAllowed(host, "?__agency_host=omundoemcores.com.br")).toBe(false);
     }
   });
