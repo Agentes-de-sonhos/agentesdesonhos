@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
-import { Headphones, HeartHandshake, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { Headphones, Plane, ShieldCheck, Tag } from "lucide-react";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { MUNDO_EM_CORES_PREVIEW_INFO, MUNDO_EM_CORES_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 import { isNovemberCampaignAllowed } from "@/lib/novemberCampaignAccess";
@@ -17,10 +17,10 @@ import NotFound from "@/pages/NotFound";
 import "@/styles/november-campaign.css";
 
 const differentials = [
-  { icon: HeartHandshake, title: "Atendimento próximo", text: "Uma conversa sobre o que importa para você." },
-  { icon: SlidersHorizontal, title: "Condições com clareza", text: "Detalhes para avaliar cada possibilidade." },
-  { icon: ShieldCheck, title: "Planejamento cuidadoso", text: "Atenção às informações de cada viagem." },
-  { icon: Headphones, title: "Suporte e orientação", text: "Um contato para suas dúvidas e próximos passos." },
+  { icon: Headphones, title: "Atendimento personalizado", text: "Nossa equipe ajuda você a encontrar a melhor opção." },
+  { icon: Tag, title: "Condições exclusivas", text: "Ofertas selecionadas com nossos parceiros." },
+  { icon: ShieldCheck, title: "Segurança e confiança", text: "Planejamento cuidadoso com uma agência especialista." },
+  { icon: Plane, title: "Suporte em toda a viagem", text: "Do planejamento ao retorno, estamos com você." },
 ];
 
 export default function NovemberCampaignPreview() {
