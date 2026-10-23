@@ -14,6 +14,7 @@ import { filterCampaignOffers, novemberOffers, type CampaignOffer } from "@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import NotFound from "@/pages/NotFound";
+import "@/styles/november-campaign.css";
 
 const differentials = [
   { icon: HeartHandshake, title: "Atendimento próximo", text: "Uma conversa sobre o que importa para você." },
