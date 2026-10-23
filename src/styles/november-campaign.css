@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap");
 /* Campaign tokens are local to this preview, never inherited by other tenants. */
 .november-preview, .november-campaign {
   --background: 0 0% 100%;
