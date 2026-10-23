@@ -275,3 +275,78 @@ describe("Drica complete route security", () => {
     form.remove(); result.unmount();
   });
 });
+
+describe("briefing-20-v1 (Curti Viagens)", () => {
+  const route = (h: string) => {
+    Object.defineProperty(window, "location", { value: { ...window.location, hostname: h }, writable: true });
+  };
+  it("resolve apenas o job_id exato", () => {
+    expect(resolveAdsPreviewFixture("briefing-20-v1")?.profile.key).toBe("curtiViagensBriefing20");
+    for (const id of ["briefing-20", "Briefing-20-v1", "briefing-20-v1 ", "briefing-20-v2", "briefing-20-v1/", "curti-viagens", "curtiviagens"]) {
+      expect(resolveAdsPreviewFixture(id)).toBeNull();
+    }
+  });
+  it("usa identidade sintética e não toca outros perfis", () => {
+    const i = resolveAdsPreviewFixture("briefing-20-v1")!.info;
+    expect(i.user_id).toBe("00000000-0000-0000-0000-000000000020");
+    expect(i.hostname).toBe("briefing-20-v1.preview.local");
+    expect(i.agency_slug).toBe("");
+    expect(i.public_slug).toBeNull();
+    expect(i.is_primary).toBe(false);
+    expect(i.phone).toBeNull();
+    expect(i.primary_color).toBe("#2502FF");
+    expect(i.secondary_color).toBe("#639682");
+    expect(resolveSiteProfile("briefing-20-v1.preview.local").key).toBe("curtiViagensBriefing20");
+    for (const h of ["curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20.preview.local"]) {
+      expect(resolveSiteProfile(h).key).toBe("classic");
+    }
+    expect(resolveSiteProfile(BAGAGEM_NA_MAO_PREVIEW_HOST).key).toBe("bagagemNaMaoBriefing19");
+    expect(resolveSiteProfile("www.destinoscomaju.com.br").key).toBe("editorialRose");
+    expect(resolveSiteProfile("www.omundoemcores.com.br").key).toBe("mundoEmCoresBriefing14");
+  });
+  it("mantém desligado o que não foi confirmado", () => {
+    const f = resolveAdsPreviewFixture("briefing-20-v1")!;
+    const p = f.profile;
+    expect(p.hideConciergeActions).toBe(true);
+    expect(p.visaHome).toBe(false);
+    expect(p.featuredExperience).toBeUndefined();
+    expect(p.dmc).toBeUndefined();
+    expect(p.credentials).toBeUndefined();
+    expect(p.team).toBeUndefined();
+    for (const k of ["offers", "dmc", "team", "testimonials", "avaliacoes", "newsletter", "credentials"] as const) {
+      expect(p.sections?.[k]).toEqual({ enabled: false });
+    }
+    expect(f.pages).toBeUndefined();
+    expect(p.about?.badge?.value).toBe("Desde 2011");
+    expect(p.footer?.cnpj).toBe("35.133.431/0001-00");
+    expect(p.footer?.email).toBe("vendas@curtiviagens.com.br");
+  });
+  it("não renderiza em hosts públicos/reais", async () => {
+    const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+    for (const h of ["curtiviagens.com.br", "agentedesonhoproject.lovable.app", "www.omundoemcores.com.br"]) {
+      route(h);
+      const r = renderPreview(<MemoryRouter initialEntries={["/ads-briefing-preview/briefing-20-v1"]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes></MemoryRouter>);
+      expect(await screen.findByText("Página não encontrada")).toBeInTheDocument();
+      expect(document.querySelector('[data-ads-preview="briefing-20-v1"]')).toBeNull();
+      r.unmount();
+    }
+  });
+  it("no host técnico renderiza com aviso, noindex e ações bloqueadas", async () => {
+    route("localhost");
+    const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+    const r = renderPreview(<MemoryRouter initialEntries={["/ads-briefing-preview/briefing-20-v1"]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes></MemoryRouter>);
+    expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
+    expect(document.querySelector('[data-ads-preview="briefing-20-v1"]')).toBeInTheDocument();
+    expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toContain("noindex");
+    const backend = import.meta.env.VITE_SUPABASE_URL as string;
+    if (backend) await expect(window.fetch(`${backend}/rest/v1/profiles`)).rejects.toThrow(/backend desativado/);
+    expect(window.open("https://wa.me/5511992506672")).toBeNull();
+    const a = document.createElement("a"); a.href = "https://curtiviagens.com.br/"; document.body.append(a);
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+    a.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    const form = document.createElement("form"); document.body.append(form);
+    expect(form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))).toBe(false);
+    form.remove(); a.remove(); r.unmount();
+  });
+});

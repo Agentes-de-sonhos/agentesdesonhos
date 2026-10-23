@@ -98,6 +98,7 @@ import mundoEmCoresVanessaMural from "@/assets/ads-preview/mundo-em-cores-vaness
 import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
+import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
 export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
@@ -882,6 +883,150 @@ delete bagagemNaMaoBaseline.credentials;
 delete bagagemNaMaoBaseline.team;
 export const BAGAGEM_NA_MAO_PREVIEW_PROFILE: AgencySiteProfile = bagagemNaMaoBaseline;
 
+export const CURTI_VIAGENS_PREVIEW_JOB_ID = "briefing-20-v1";
+export const CURTI_VIAGENS_PREVIEW_PATH = `/ads-briefing-preview/${CURTI_VIAGENS_PREVIEW_JOB_ID}`;
+/**
+ * Host sintético exclusivo. A continuidade com o cadastro real foi confirmada
+ * apenas por CNPJ exato (35.133.431/0001-00) + nome CURTI VIAGENS; a fixture
+ * não usa o user_id real e não cria domínio, conta ou vínculo.
+ */
+export const CURTI_VIAGENS_PREVIEW_HOST = "briefing-20-v1.preview.local";
+
+export const CURTI_VIAGENS_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-000000000020",
+  agency_slug: "",
+  public_slug: null,
+  hostname: CURTI_VIAGENS_PREVIEW_HOST,
+  is_primary: false,
+  agency_name: "Curti Viagens",
+  owner_name: "Ricardo Curti",
+  logo_url: curtiViagensLogo.url,
+  cover_image_url: null,
+  primary_color: "#2502FF",
+  secondary_color: "#639682",
+  secondary_auto: false,
+  // Terciária suave: primária a ~12% sobre branco.
+  tertiary_color: "#E5E1FF",
+  tertiary_auto: false,
+  on_secondary_color: null,
+  phone: null,
+  city: "Holambra",
+  state: "SP",
+  bio: null,
+  cnpj: "35.133.431/0001-00",
+  whatsapp_group_url: null,
+};
+
+const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", {
+  navDensity: "compact",
+  visaHome: false,
+  featuredExperience: undefined,
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Especialidades", to: "/#assinatura" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Dúvidas", to: "/#faq" },
+  ],
+  sections: {
+    dmc: { enabled: false },
+    offers: { enabled: false },
+    credentials: { enabled: false },
+    team: { enabled: false },
+    testimonials: { enabled: false },
+    avaliacoes: { enabled: false },
+    newsletter: { enabled: false },
+  },
+  heroPresentation: {
+    kicker: "HOLAMBRA · SP · DESDE 2011",
+    overlay: "strongLeft",
+  },
+  hero: [
+    { title: "Viaje com tranquilidade, nós cuidamos de cada detalhe", subtitle: "Planejamento completo e personalizado para você viver a viagem sem preocupações.", image: "heroAirportTraveler", order: 1, enabled: true },
+    { title: "Memórias em família, de Orlando ao mundo", subtitle: "Roteiro dia a dia para Orlando e orientação próxima para viajar com as crianças.", image: "orlandoMagicKingdom", order: 2, enabled: true },
+    { title: "Europa, resorts e cruzeiros sob medida", subtitle: "Viagens desenhadas para o seu perfil, com suporte durante toda a viagem.", image: "heroVarenna", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "CONSULTORIA COMPLETA DE VIAGENS",
+    title: "Planejamento completo para você viajar com tranquilidade.",
+    text: "A Curti Viagens oferece consultoria completa para diferentes viagens: destinos nacionais, internacionais e roteiros sob medida para casais, famílias com crianças e viajantes de alto padrão, com atendimento próximo e orientação especializada.",
+  },
+  destinations: [
+    { key: "brasil", image: "resort", label: "Brasil", title: "Brasil", text: "Destinos nacionais e resorts escolhidos para o seu estilo de viagem.", service: "pacotes", enabled: true, order: 1 },
+    { key: "caribe-mexico", image: "resort", label: "Caribe e México", title: "Caribe e México", text: "Praias, resorts e all inclusive para descansar com conforto.", service: "hospedagem", enabled: true, order: 2 },
+    { key: "eua-canada", image: "orlandoMagicKingdom", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Orlando, Nova Iorque e outros destinos com planejamento detalhado.", service: "pacotes", enabled: true, order: 3 },
+    { key: "europa", image: "heroVarenna", label: "Europa", title: "Europa", text: "Cidades e paisagens em roteiros personalizados no seu ritmo.", service: "pacotes", enabled: true, order: 4 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: "Navio, cabine e itinerário escolhidos para o perfil de quem viaja.", service: "cruzeiros", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "orlando", title: "Orlando em família", text: "Roteiro dia a dia para aproveitar os parques com tranquilidade e todas as idades.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 1 },
+    { key: "nova-iorque", title: "Nova Iorque", text: "Uma das ênfases da agência, com planejamento completo da viagem.", service: "pacotes", image: "europa", enabled: true, order: 2 },
+    { key: "resorts", title: "Resorts e all inclusive", text: "Hospedagens selecionadas no Brasil, Caribe e México.", service: "hospedagem", image: "resort", enabled: true, order: 3 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação para escolher navio, cabine e itinerário.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 4 },
+    { key: "europa", title: "Europa", text: "Roteiros realmente personalizados pela Europa.", service: "pacotes", image: "heroVarenna", enabled: true, order: 5 },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Ricardo Curti, diretor da Curti Viagens.",
+    text: "A Curti Viagens começou em 2011 organizando grupos para Orlando e, com o tempo, ampliou a atuação para outros destinos no Brasil e no mundo.\n\nSediada em Holambra (SP), a agência atende casais, famílias com crianças e clientes de alto padrão, com consultoria completa para destinos nacionais, internacionais e viagens sob medida.\n\nO atendimento é feito pelo próprio proprietário e especialista, com planejamento detalhado e suporte durante toda a viagem.",
+    badge: { value: "Desde 2011", label: "Curti Viagens" },
+    media: "hidden",
+    showLocation: true,
+    ownerName: "Ricardo Curti",
+  },
+  differentials: [
+    { title: "Atendimento pelo especialista", text: "Você é atendido pelo proprietário da agência, do primeiro contato ao retorno.", icon: "consultivo" },
+    { title: "Roteiros realmente personalizados", text: "Cada viagem é desenhada a partir do perfil, do ritmo e das prioridades de quem viaja.", icon: "conferido" },
+    { title: "Planejamento que antecipa riscos", text: "Detalhes pensados com antecedência, incluindo roteiro dia a dia para Orlando.", icon: "fornecedores" },
+    { title: "Suporte durante toda a viagem", text: "Acompanhamento em viagem, inclusive 24h quando necessário.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Inspiração e definição da viagem a partir do seu perfil.",
+    "Planejamento, orçamento e reservas.",
+    "Orientações pré-embarque para viajar tranquilo.",
+    "Acompanhamento durante a viagem e contato após o retorno.",
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "Começa por uma conversa para entender quem vai viajar e o que deseja viver. Depois vêm o planejamento, o orçamento, as reservas e as orientações antes do embarque." },
+    { q: "Quais destinos a agência atende?", a: "Destinos nacionais, internacionais e viagens sob medida, com prioridade para Brasil, Caribe e México, Estados Unidos e Canadá, Europa, resorts e cruzeiros." },
+    { q: "A agência organiza viagens para Orlando?", a: "Sim. A Curti Viagens começou em 2011 com grupos para Orlando e prepara roteiro dia a dia para a viagem." },
+    { q: "Há suporte durante a viagem?", a: "Sim. Há suporte durante toda a viagem e acompanhamento 24h quando necessário." },
+    { q: "Onde fica a agência?", a: "A Curti Viagens fica em Holambra (SP) e atende também pelos canais digitais." },
+  ],
+  copy: {
+    destinations: { title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Caribe e México, Estados Unidos e Canadá, Europa, resorts e cruzeiros." },
+    modules: { title: "Especialidades", subtitle: "Orlando, Nova Iorque, resorts, cruzeiros e Europa." },
+    differentials: { title: "Por que viajar com a Curti Viagens", subtitle: "Atendimento próximo, planejamento detalhado e suporte do início ao fim." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da inspiração ao retorno", subtitle: "Uma jornada acompanhada em cada etapa." },
+    faq: { title: "Dúvidas frequentes" },
+  },
+  socialStrip: {
+    title: "Siga-nos nas redes",
+    links: [{ network: "instagram", url: "https://www.instagram.com/curtiviagens/" }],
+  },
+  footer: {
+    description: "Consultoria completa de viagens, desde 2011, em Holambra (SP).",
+    whatsapp: "(11) 99250-6672",
+    phone: "(11) 99250-6672",
+    email: "vendas@curtiviagens.com.br",
+    instagram: "https://www.instagram.com/curtiviagens/",
+    instagramLabel: "@curtiviagens",
+    address: "Holambra/SP",
+    legalName: "Ricardo Curti Alves",
+    cnpj: "35.133.431/0001-00",
+    showLocation: true,
+  },
+  seo: {
+    title: "Prévia para revisão — Curti Viagens",
+    description: "Prévia técnica revisável do site Curti Viagens.",
+  },
+}, "Curti Viagens");
+delete curtiViagensBaseline.dmc;
+delete curtiViagensBaseline.credentials;
+delete curtiViagensBaseline.team;
+export const CURTI_VIAGENS_PREVIEW_PROFILE: AgencySiteProfile = curtiViagensBaseline;
+
 /**
  * Landing Xcaret na prévia O Mundo em Cores: sem fotos ou selos da Juliana
  * (fotos oficiais dos parques como temporárias) e sem alegações de visita
@@ -1149,6 +1294,14 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     documentTitle: "Prévia para revisão — Bagagem na Mão Viagens",
     realAgency: true,
     pages: { resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão Viagens" }, orlandoTickets: true },
+  },
+  [CURTI_VIAGENS_PREVIEW_JOB_ID]: {
+    jobId: CURTI_VIAGENS_PREVIEW_JOB_ID,
+    info: CURTI_VIAGENS_PREVIEW_INFO,
+    profile: CURTI_VIAGENS_PREVIEW_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Curti Viagens",
+    realAgency: true,
   },
 };
 
