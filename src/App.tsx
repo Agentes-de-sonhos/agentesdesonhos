@@ -5,6 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { isSiteLabAdminPath } from "@/lib/sitelabModels";
+import { NOVEMBER_CAMPAIGN_PATH } from "@/lib/novemberCampaignAccess";
+const NovemberCampaignPreview = lazy(() => import("@/pages/whitelabel/NovemberCampaignPreview"));
 
 import { AuthProvider } from "@/hooks/useAuth";
 import { SubscriptionProvider } from "@/hooks/useSubscription";
@@ -196,6 +198,11 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // Isolated route before tenant/auth providers: local identity only, no CRM/network.
+  // The page checks the strict preview-host + agency context allowlist; production = 404.
+  if (window.location.pathname.replace(/\/+$/, "") === NOVEMBER_CAMPAIGN_PATH) {
+    return <QueryClientProvider client={queryClient}><TooltipProvider><ErrorBoundary><Suspense fallback={<PageFallback />}><NovemberCampaignPreview /></Suspense></ErrorBoundary></TooltipProvider></QueryClientProvider>;
+  }
   /**
    * GESTÃO DO SITELAB — decidida ANTES de qualquer router do App.
    *
