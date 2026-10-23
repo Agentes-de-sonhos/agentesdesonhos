@@ -1295,6 +1295,14 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     realAgency: true,
     pages: { resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão Viagens" }, orlandoTickets: true },
   },
+  [CURTI_VIAGENS_PREVIEW_JOB_ID]: {
+    jobId: CURTI_VIAGENS_PREVIEW_JOB_ID,
+    info: CURTI_VIAGENS_PREVIEW_INFO,
+    profile: CURTI_VIAGENS_PREVIEW_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Curti Viagens",
+    realAgency: true,
+  },
 };
 
 export function resolveAdsPreviewFixture(jobId?: string): AdsBriefingPreviewFixture | null {
