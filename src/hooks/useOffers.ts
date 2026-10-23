@@ -36,6 +36,7 @@ export interface OfferRow {
   publish_at: string | null;
   expires_at: string | null;
   requests_count: number;
+  display_channels: string[];
   updated_at: string;
 }
 

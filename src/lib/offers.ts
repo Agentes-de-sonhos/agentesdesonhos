@@ -37,6 +37,7 @@ export interface PublicOffer {
   payment_conditions?: string | null;
   publish_at?: string | null;
   expires_at?: string | null;
+  channels?: string[] | null;
 }
 
 /** Campos estruturais sincronizados com o orçamento (podem ser personalizados). */
@@ -247,6 +248,19 @@ export function filterPublicOffers(offers: PublicOffer[], f: OfferFilters): Publ
       (!f.destination || (o.destination ?? "").trim() === f.destination) &&
       (!f.month || monthKey(o.travel_start) === f.month),
   );
+}
+
+/** Páginas do site onde a oferta pode aparecer. */
+export const OFFER_CHANNELS = [
+  { id: "ofertas", label: "Página Ofertas" },
+  { id: "novembro", label: "Oportunidades de Novembro" },
+] as const;
+export type OfferChannel = (typeof OFFER_CHANNELS)[number]["id"];
+
+/** Ofertas sem canais informados (versões antigas) aparecem só em /ofertas. */
+export function offerInChannel(o: { channels?: string[] | null }, channel: OfferChannel): boolean {
+  const list = o.channels?.length ? o.channels : ["ofertas"];
+  return list.includes(channel);
 }
 
 /** Dados principais da oferta encerrada levados para a Central de Solicitações. */
