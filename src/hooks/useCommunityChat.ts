@@ -132,7 +132,8 @@ export function useCommunityChat(activeRoomId?: string) {
       // Return total online count for now
       return { total: data?.length || 0 } as Record<string, number>;
     },
-    refetchInterval: 30000,
+    refetchInterval: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {
