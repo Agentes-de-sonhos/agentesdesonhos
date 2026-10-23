@@ -9,6 +9,7 @@ export function OpportunityRadar({ onSearch }: { onSearch: (selection: RadarSele
   const update = (key: keyof RadarSelection, value: string) => setSelection(previous => ({ ...previous, [key]: value }));
   return <section id="radar" className="campaign-container campaign-radar">
     <div className="campaign-radar-heading"><Radar aria-hidden="true" /><div><p className="campaign-eyebrow">A viagem começa com você</p><h2>Radar de Oportunidades</h2></div></div>
+    <p className="campaign-radar-intro">Pesquise entre as oportunidades disponíveis ou conte com nossa equipe para encontrar sua viagem.</p>
     <form onSubmit={event => { event.preventDefault(); onSearch(selection); setSearched(true); }} className="campaign-radar-form">
       <label>Destino<select aria-label="Destino" value={selection.category} onChange={event => update("category", event.target.value)}><option value="todos">Todos os destinos</option>{campaignCategories.map(category => <option key={category.id} value={category.id}>{category.label}</option>)}</select></label>
       <label>Período<select aria-label="Período" value={selection.period} onChange={event => update("period", event.target.value)}><option value="todos">Tenho flexibilidade</option><option value="novembro-2026">Novembro 2026</option><option value="2027">2027</option></select></label>
