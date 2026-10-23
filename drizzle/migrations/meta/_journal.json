@@ -386,6 +386,13 @@
       "when": 1792780780161,
       "tag": "0054_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1792783021328,
+      "tag": "0055_quote_offer_opt_in_channels",
+      "breakpoints": true
     }
   ]
 }

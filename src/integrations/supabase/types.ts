@@ -12456,7 +12456,9 @@ export type Database = {
           id: string
           installments_count: number | null
           investment_summary_layout: string | null
+          offer_display_channels: string[]
           offer_opt_out: boolean
+          offer_publish_opt_in: boolean
           opportunity_id: string | null
           package_total_amount: number | null
           payment_display_mode: string
@@ -12503,7 +12505,9 @@ export type Database = {
           id?: string
           installments_count?: number | null
           investment_summary_layout?: string | null
+          offer_display_channels?: string[]
           offer_opt_out?: boolean
+          offer_publish_opt_in?: boolean
           opportunity_id?: string | null
           package_total_amount?: number | null
           payment_display_mode?: string
@@ -12550,7 +12554,9 @@ export type Database = {
           id?: string
           installments_count?: number | null
           investment_summary_layout?: string | null
+          offer_display_channels?: string[]
           offer_opt_out?: boolean
+          offer_publish_opt_in?: boolean
           opportunity_id?: string | null
           package_total_amount?: number | null
           payment_display_mode?: string

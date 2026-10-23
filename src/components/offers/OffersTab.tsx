@@ -74,7 +74,7 @@ export function OffersTab() {
 
   const offeredQuoteIds = new Set(offers.map((o) => o.source_quote_id).filter(Boolean));
   const eligibleQuotes = (quotes ?? []).filter(
-    (q: any) => q.status === "published" && !q.offer_opt_out && !offeredQuoteIds.has(q.id),
+    (q: any) => q.status === "published" && q.offer_publish_opt_in && !q.offer_opt_out && !offeredQuoteIds.has(q.id),
   );
 
   const act = async (id: string, action: "publish" | "pause" | "resume" | "end" | "extend", ok: string) => {
