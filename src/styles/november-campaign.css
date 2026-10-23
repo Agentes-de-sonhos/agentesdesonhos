@@ -303,3 +303,25 @@
   .campaign-hero-inner { padding-top: 96px; }
   .november-campaign .campaign-closing-photo { display: block; height: 220px; min-height: 220px; }
 }
+
+/* Round 3 — fidelity refinements */
+.campaign-hero-photo { object-position: 78% 55%; }
+.campaign-hero-veil { background: linear-gradient(90deg, hsl(var(--campaign-navy) / .88) 0%, hsl(var(--campaign-navy) / .66) 32%, hsl(var(--campaign-navy) / .18) 58%, transparent 78%); }
+.campaign-hero h1 span { font-family: "Playfair Display", Georgia, serif; font-style: italic; letter-spacing: -.01em; }
+.november-campaign .campaign-category { height: 250px; border-radius: 14px; overflow: hidden; }
+.campaign-category::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, hsl(var(--campaign-navy) / .85) 100%); pointer-events: none; }
+.campaign-category-caption { z-index: 1; }
+.campaign-category-arrow { width: 34px; height: 34px; }
+.campaign-radar, .campaign-radar-panel { background: hsl(205 55% 95%); border-radius: 22px; }
+.campaign-closing { grid-template-columns: 1.05fr 1.1fr .85fr; }
+.campaign-closing-photo { min-height: 300px; }
+.campaign-closing-photo::after { background: linear-gradient(90deg, transparent 50%, hsl(var(--campaign-navy)) 100%); }
+@media (max-width: 720px) {
+  .november-campaign .campaign-category { flex: 0 0 170px; height: 240px; }
+  .campaign-closing { grid-template-columns: 1fr; }
+  .campaign-closing-photo { min-height: 260px; display: block; }
+  .campaign-closing-photo::after { background: linear-gradient(180deg, transparent 55%, hsl(var(--campaign-navy)) 100%); }
+  .campaign-closing-channels { border-left: 0; border-top: 1px solid hsl(var(--primary-foreground) / .2); }
+}
+.campaign-offer-highlight { min-height: 64px; display: flex; align-items: center; padding: 10px 12px; border-radius: 10px; background: hsl(var(--campaign-cream)); font-weight: 600; color: hsl(var(--campaign-navy)); }
+.campaign-offer-price { min-height: 64px; }
