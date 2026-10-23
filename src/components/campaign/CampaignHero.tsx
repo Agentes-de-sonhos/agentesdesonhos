@@ -23,7 +23,7 @@ export function CampaignHero() {
           <Button asChild size="lg" variant="outline"><a href="#radar">Planejar minha viagem <ArrowRight /></a></Button>
         </div>
       </div>
-      <div className="campaign-black-friday" aria-label="Black Friday: viagens incríveis em novembro"><strong>BLACK FRIDAY</strong><span>viagens incríveis<br />em novembro</span></div>
+      <div className="campaign-black-friday campaign-aproveite" aria-label="Aproveite: viagens incríveis em novembro"><strong>APROVEITE</strong><span>viagens incríveis<br />em novembro</span></div>
     </div>
   </section>;
 }

@@ -325,3 +325,20 @@
 }
 .campaign-offer-highlight { min-height: 64px; display: flex; align-items: center; padding: 10px 12px; border-radius: 10px; background: hsl(var(--campaign-cream)); font-weight: 600; color: hsl(var(--campaign-navy)); }
 .campaign-offer-price { min-height: 64px; }
+
+/* Rodada: fonte do site, degradê bilateral e selo "Aproveite" */
+.november-campaign .campaign-hero h1, .november-campaign .campaign-hero h1 span, .november-campaign .campaign-hero-subtitle, .november-campaign .campaign-closing-copy h2 { font-family: "Manrope", sans-serif !important; font-style: normal; }
+.campaign-hero h1 { font-weight: 800; }
+.campaign-hero h1 span { font-weight: 900; letter-spacing: -.03em !important; }
+.campaign-hero-subtitle { font-weight: 500; font-size: 20px; }
+.campaign-hero-veil { background: linear-gradient(90deg, hsl(210 30% 8% / .78) 0%, hsl(210 30% 8% / .5) 32%, hsl(210 30% 8% / .05) 55%, hsl(210 30% 8% / .1) 68%, hsl(210 30% 8% / .62) 100%); }
+.campaign-aproveite { transform: none; clip-path: none; background: transparent; box-shadow: none; align-self: center; text-align: center; padding: 0; text-shadow: var(--campaign-photo-text-shadow); }
+.campaign-aproveite strong { font-size: 48px; font-weight: 800; letter-spacing: .02em !important; }
+.campaign-aproveite span { font-size: 18px; font-weight: 600; color: hsl(var(--campaign-on-photo)); letter-spacing: .04em !important; }
+@media (max-width: 720px) {
+  .campaign-hero-veil { background: linear-gradient(180deg, hsl(210 30% 8% / .4) 0%, hsl(210 30% 8% / .8) 100%); }
+  .campaign-aproveite { align-self: flex-start; text-align: left; }
+  .campaign-aproveite strong { font-size: 28px; }
+  .campaign-aproveite span { font-size: 12px; }
+  .campaign-aproveite br { display: none; }
+}

@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import NotFound from "@/pages/NotFound";
 import "@/styles/november-campaign.css";
+import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
+import mundoFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
 
 const differentials = [
   { icon: Headphones, title: "Atendimento personalizado", text: "Nossa equipe ajuda você a encontrar a melhor opção." },
@@ -28,6 +30,7 @@ export default function NovemberCampaignPreview() {
   const [period, setPeriod] = useState("todos");
   const [selected, setSelected] = useState<CampaignOffer | null>(null);
   const [contact, setContact] = useState(false);
+  useAgencyFavicon(mundoFavicon.url);
   const allowed = isNovemberCampaignAllowed(window.location.hostname, window.location.search);
   if (!allowed) return <BrowserRouter><NotFound /></BrowserRouter>;
   const onSearch = (selection: RadarSelection) => { setCategory(selection.category); setPeriod(selection.period); };
@@ -37,8 +40,8 @@ export default function NovemberCampaignPreview() {
     if (anchor && !anchor.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); setContact(true); }
   }}>
     <AgencySiteLayout info={{ ...MUNDO_EM_CORES_PREVIEW_INFO, agency_name: "O Mundo em Cores" }} noWhatsapp navOverride={MUNDO_EM_CORES_PREVIEW_PROFILE.nav}>
-      <Helmet><title>Oportunidades de Novembro 2026 | O Mundo em Cores — Prévia</title><meta name="description" content="Prévia visual da campanha de novembro da O Mundo em Cores. Destinos, oportunidades ilustrativas e planejamento de viagens." /><meta name="robots" content="noindex,nofollow" /><meta property="og:title" content="Oportunidades de Novembro | O Mundo em Cores" /><meta property="og:description" content="Prévia visual com oportunidades meramente ilustrativas, sem contratação." /><meta property="og:type" content="website" /><meta name="twitter:card" content="summary_large_image" /></Helmet>
-      <div className="november-campaign"><div className="campaign-preview-strip">Prévia para revisão — sem publicação · ofertas ilustrativas · ações sem envio</div>
+      <Helmet><title>Oportunidades de Novembro | O Mundo em Cores</title><meta name="description" content="Oportunidades de novembro da O Mundo em Cores: destinos incríveis, condições especiais e planejamento de viagens." /><meta name="robots" content="noindex,nofollow" /><meta property="og:title" content="Oportunidades de Novembro | O Mundo em Cores" /><meta property="og:description" content="Destinos incríveis, condições especiais e experiências que ficam para sempre." /><meta property="og:type" content="website" /><meta name="twitter:card" content="summary_large_image" /></Helmet>
+      <div className="november-campaign">
         <CampaignHero /><CategoryRail active={category} onSelect={id => { setCategory(id); setPeriod("todos"); }} />
         <FeaturedOffers offers={offers} onSelect={setSelected} onReset={() => { setCategory("todos"); setPeriod("todos"); }} />
         <OpportunityRadar onSearch={onSearch} />
