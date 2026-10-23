@@ -3,7 +3,7 @@ import cancun from "@/assets/whitelabel/100-limites/destino-cancun.jpg.asset.jso
 import orlando from "@/assets/orlando/editorial/disney-castle.webp.asset.json";
 import europa from "@/assets/whitelabel/destino-europa-neuschwanstein-2.jpg.asset.json";
 import cruise from "@/assets/whitelabel/mundo-ncl-destaque.webp.asset.json";
-import brasil from "@/assets/resorts-brasil/iberostar-praia-do-forte.webp";
+import brasil from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
 
 export const campaignImages = { hero: cancun.url, closing: caribe.url };
 export const campaignCategories = [
@@ -11,7 +11,7 @@ export const campaignCategories = [
   { id: "familia", label: "Família e Orlando", image: orlando.url, alt: "Castelo do Magic Kingdom em Orlando" },
   { id: "europa", label: "Europa", image: europa.url, alt: "Castelo de Neuschwanstein na Europa" },
   { id: "cruzeiros", label: "Cruzeiros", image: cruise.url, alt: "Navio de cruzeiro da NCL" },
-  { id: "brasil", label: "Brasil", image: brasil, alt: "Resort à beira-mar no Brasil" },
+  { id: "brasil", label: "Brasil", image: brasil.url, alt: "Paisagem de resort no Nordeste do Brasil" },
 ] as const;
 export interface CampaignOffer {
   id: string; category: string; title: string; image: string; alt: string;
