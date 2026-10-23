@@ -11,6 +11,7 @@ import { SEO } from "@/components/seo/SEO";
 import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Route, Package, type LucideIcon } from "lucide-react";
 import {
   filterPublicOffers,
+  offerInChannel,
   formatOfferPeriod,
   isProvenPromotion,
   monthLabel,
@@ -188,7 +189,8 @@ export function OfferCard({ offer, href }: { offer: PublicOffer; href: string })
  * à anterior (agências fora do piloto não mudam nada).
  */
 export default function AgencyOffersPage({ info, basePath = "" }: { info: AgencyDomainInfo; basePath?: string }) {
-  const { data: offers = [], isLoading } = usePublicOffers(info.hostname);
+  const { data: allOffers = [], isLoading } = usePublicOffers(info.hostname);
+  const offers = useMemo(() => allOffers.filter((o) => offerInChannel(o, "ofertas")), [allOffers]);
   const [category, setCategory] = useState(ALL);
   const [destination, setDestination] = useState(ALL);
   const [month, setMonth] = useState(ALL);

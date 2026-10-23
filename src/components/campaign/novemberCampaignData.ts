@@ -1,3 +1,4 @@
+import { formatOfferPeriod, offerPricing, type PublicOffer } from "@/lib/offers";
 import caribe from "@/assets/whitelabel/destinos-com-a-ju/destino-caribe-mexico.jpg.asset.json";
 import cancun from "@/assets/whitelabel/100-limites/destino-cancun.jpg.asset.json";
 import orlando from "@/assets/orlando/editorial/disney-castle.webp.asset.json";
@@ -21,6 +22,8 @@ export interface CampaignOffer {
   action: string;
   tag?: string; tagTone?: "gold" | "blue" | "bronze"; location?: string; features?: string[]; highlight?: string;
   discountPercent?: number; installments?: number; installmentBRL?: number;
+  /** Oferta real da agência (vinda de Ofertas), com link para a página pública. */
+  real?: boolean; href?: string; priceLabel?: string; priceNote?: string;
 }
 /** All entries are illustrative; no supplier, availability or booking integration. */
 export const novemberOffers: CampaignOffer[] = [
@@ -30,5 +33,26 @@ export const novemberOffers: CampaignOffer[] = [
   { id: "cruzeiros", category: "cruzeiros", title: "Cruzeiros 2027", image: cruise.url, alt: "Navio de cruzeiro com proa colorida", description: "Vários destinos. Uma nova forma de viajar.", modality: "Consulta personalizada", value: "sob consulta", period: "2027", action: "Solicitar cotação", tag: "SOB CONSULTA", tagTone: "blue", location: "Diversos destinos", features: ["Saídas e roteiros selecionados", "Diversas companhias", "Brasil e exterior"], highlight: "Fale com nossa equipe e receba condições especiais." },
 ];
 export function filterCampaignOffers(offers: CampaignOffer[], category: string, period = "todos") {
-  return offers.filter((offer) => (category === "todos" || offer.category === category) && (period === "todos" || offer.period === period));
+  return offers.filter((offer) => (category === "todos" || offer.category === category || offer.category === "todos") && (period === "todos" || offer.period === period));
+}
+const CATEGORY_MAP: Record<string, string> = { Cruzeiros: "cruzeiros", Resorts: "praias", Ingressos: "familia" };
+/** Converte ofertas reais (marcadas para Oportunidades de Novembro) para o card da campanha. */
+export function campaignOfferFromPublic(o: PublicOffer, fallbackImage: string): CampaignOffer {
+  const p = offerPricing(o);
+  const features = [
+    o.nights ? `${o.nights} noites` : null,
+    formatOfferPeriod(o.travel_start, o.travel_end),
+    ...(o.included_services ?? []).slice(0, 1).map((s) => s.name || s.type),
+  ].filter(Boolean) as string[];
+  return {
+    id: o.slug, real: true, href: `/ofertas/${o.slug}`,
+    category: CATEGORY_MAP[o.category ?? ""] ?? "todos", period: "todos",
+    title: o.title ?? "Oferta", image: o.cover_url || fallbackImage, alt: o.title ?? "Oferta",
+    description: o.description ?? "", modality: o.category ?? "Oferta", value: p.totalLabel,
+    action: "Ver detalhes", tag: (o.category ?? "OFERTA").toUpperCase(), tagTone: "gold",
+    location: o.destination ?? undefined, features,
+    priceLabel: p.mode === "on_request" ? undefined : (p.perPersonLabel ?? p.totalLabel),
+    priceNote: p.installmentsLabel ?? p.totalNote ?? undefined,
+    highlight: p.mode === "on_request" ? "Valor sob consulta. Fale com nossa equipe." : undefined,
+  };
 }

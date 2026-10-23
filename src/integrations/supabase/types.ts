@@ -9541,6 +9541,7 @@ export type Database = {
           customized_fields: string[]
           description: string | null
           destination: string | null
+          display_channels: string[]
           ended_at: string | null
           expires_at: string | null
           gallery: Json
@@ -9582,6 +9583,7 @@ export type Database = {
           customized_fields?: string[]
           description?: string | null
           destination?: string | null
+          display_channels?: string[]
           ended_at?: string | null
           expires_at?: string | null
           gallery?: Json
@@ -9623,6 +9625,7 @@ export type Database = {
           customized_fields?: string[]
           description?: string | null
           destination?: string | null
+          display_channels?: string[]
           ended_at?: string | null
           expires_at?: string | null
           gallery?: Json

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useOffers, type OfferRow } from "@/hooks/useOffers";
 import { OFFER_CATEGORIES, STRUCTURAL_FIELD_LABELS, type OfferIncludedService } from "@/lib/offers";
+import { OfferChannelPicker } from "@/components/offers/OfferChannelPicker";
 
 type Mode = "edit" | "manual" | "import";
 
@@ -106,9 +107,11 @@ export function OfferEditorDialog({
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(false);
 
+  const [channels, setChannels] = useState<string[]>(["ofertas"]);
   useEffect(() => {
     if (!open) return;
     setForm(offer ? fromOffer(offer) : EMPTY);
+    setChannels(offer?.display_channels?.length ? offer.display_channels : ["ofertas"]);
     setReviewed(!!offer?.reviewed_at);
     setImportText("");
     setImportFile(null);
@@ -175,6 +178,7 @@ export function OfferEditorDialog({
       category: form.category,
       price_note: form.price_note.trim() || null,
       compare_at_price: num(form.compare_at_price),
+      display_channels: channels,
     };
     // Campos estruturais só são enviados quando mudam: o banco marca apenas esses como personalizados.
     const structural: Partial<OfferRow> = {
@@ -270,6 +274,10 @@ export function OfferEditorDialog({
             <div className="sm:col-span-2 space-y-1.5">
               <Label>Descrição de vendas</Label>
               <Textarea rows={4} value={form.description} maxLength={2000} onChange={(e) => set("description", e.target.value)} />
+            </div>
+            <div className="sm:col-span-2 space-y-1.5">
+              <Label>Onde exibir no site</Label>
+              <OfferChannelPicker value={channels} onChange={setChannels} />
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <Label>Imagem de capa (link)</Label>
