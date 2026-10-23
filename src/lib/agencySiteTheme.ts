@@ -43,6 +43,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-16-v1.preview.local": "siteBaseEditorial",
   "briefing-17-v1.preview.local": "siteBaseEditorial",
   "briefing-19-v1.preview.local": "siteBaseEditorial",
+  "briefing-20-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
   "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",

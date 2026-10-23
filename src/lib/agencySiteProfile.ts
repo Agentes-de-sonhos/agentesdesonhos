@@ -62,6 +62,8 @@ export type AgencySiteProfileKey =
   | "bardelliPresentation"
   /** Rascunho técnico isolado do briefing 19 (Bagagem na Mão); sem domínio público. */
   | "bagagemNaMaoBriefing19"
+  /** Rascunho técnico isolado do briefing 20 (Curti Viagens); sem domínio público. */
+  | "curtiViagensBriefing20"
 ;
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
@@ -1192,6 +1194,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "bardelli-presentation.preview.local": "bardelliPresentation",
   /** Host sintético do rascunho briefing-19 — cadastro real sem domínio; nada é vinculado. */
   "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
+  /** Host sintético do rascunho briefing-20 — nada é vinculado ao cadastro real. */
+  "briefing-20-v1.preview.local": "curtiViagensBriefing20",
   "bardelliviagens.com.br": "bardelliCurated",
   "www.bardelliviagens.com.br": "bardelliCurated",
 };
@@ -1213,6 +1217,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
   dricaPresentation: DRICA_PRESENTATION_PROFILE,
   bagagemNaMaoBriefing19: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
+  curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
