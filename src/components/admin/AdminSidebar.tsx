@@ -109,6 +109,7 @@ const menuGroups: AdminMenuGroup[] = [
     items: [
       { id: "community", label: "Comunidade", icon: Heart },
       { id: "feedback", label: "Feedback", icon: Star },
+      { id: "feature-survey", label: "Enquete de Ferramentas", icon: Star },
       { id: "tickets", label: "Suporte", icon: Headset },
     ],
   },

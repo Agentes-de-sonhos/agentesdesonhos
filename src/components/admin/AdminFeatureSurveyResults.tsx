@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { SURVEY_STEPS } from "@/components/survey/FeatureUsageSurveyModal";
 import { Users, Trophy, TrendingDown, MessageCircle, Loader2 } from "lucide-react";
 
@@ -27,8 +26,8 @@ export function AdminFeatureSurveyResults() {
       const ids = [...new Set(list.map((r) => r.user_id))];
       const names: Record<string, { name: string; email: string }> = {};
       if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("user_id, full_name, email").in("user_id", ids);
-        (profs as any[] | null)?.forEach((p) => (names[p.user_id] = { name: p.full_name ?? "", email: p.email ?? "" }));
+        const { data: profs } = await supabase.from("profiles").select("user_id, name").in("user_id", ids);
+        (profs as any[] | null)?.forEach((p) => (names[p.user_id] = { name: p.name ?? "", email: "" }));
       }
       return { list, names };
     },
@@ -46,7 +45,6 @@ export function AdminFeatureSurveyResults() {
   const ranked = [...allItems].sort((a, b) => b.count - a.count);
   const visible = step === "all" ? ranked : ranked.filter((i) => i.stepIndex === step);
   const pct = (n: number) => (total ? Math.round((n / total) * 100) : 0);
-  const noneCount = (i: number) => counts[`__none__:${i}`] ?? counts[`__none__${i}`] ?? 0;
 
   const suggestions = (data?.list ?? []).filter((r) => r.suggestion?.trim());
   const filtered = suggestions.filter((r) => {
@@ -112,16 +110,13 @@ export function AdminFeatureSurveyResults() {
               </div>
             </div>
           ))}
-          {step !== "all" && noneCount(step) > 0 && (
-            <Badge variant="secondary">“Não utilizo nenhuma delas”: {noneCount(step)} ({pct(noneCount(step))}%)</Badge>
-          )}
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="space-y-3">
           <CardTitle>Sugestões ({suggestions.length})</CardTitle>
-          <Input placeholder="Buscar por texto, nome ou e-mail" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input placeholder="Buscar por texto ou nome" value={search} onChange={(e) => setSearch(e.target.value)} />
         </CardHeader>
         <CardContent className="space-y-3">
           {filtered.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma sugestão.</p>}
