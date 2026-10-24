@@ -2057,7 +2057,7 @@ export default function AgencySiteHome({
         >
           <div ref={requestCenterRef} className={`relative ${container}`}>
             {profile.requestCenter?.titlePlacement === "above-card" && profile.requestCenter.title && (
-              <h2 className="absolute bottom-full left-6 z-0 mb-0 max-w-[calc(100%-3rem)] translate-y-2 whitespace-nowrap rounded-t-xl rounded-b-none bg-primary px-4 pb-4 pt-2 text-[clamp(0.95rem,4.6vw,1.25rem)] font-bold leading-tight text-primary-foreground md:left-12 md:rounded-t-2xl md:px-5 md:pb-5 md:pt-2.5 md:text-3xl lg:left-14">
+              <h2 className="absolute bottom-full left-6 z-0 mb-0 max-w-[calc(100%-3rem)] translate-y-2 whitespace-nowrap rounded-t-xl rounded-b-none bg-primary px-4 pb-4 pt-2 text-[clamp(0.95rem,4.6vw,1.25rem)] font-semibold leading-tight text-primary-foreground md:left-12 md:rounded-t-2xl md:px-5 md:pb-5 md:pt-2.5 md:text-3xl lg:left-14">
                 {profile.requestCenter.title}
               </h2>
             )}

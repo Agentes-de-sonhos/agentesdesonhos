@@ -1594,3 +1594,7 @@ body[data-booking-selection-bar] {
 /* O Mundo em Cores — banner Xcaret sem escurecimento, fotos nítidas */
 .wl-mundo .wl-xcaret-hero-shade { display: none; }
 .wl-mundo #inicio h1, .wl-mundo #inicio h1 + *, .wl-mundo #inicio p { text-shadow: 0 1px 3px rgb(0 0 0 / 0.45), 0 2px 14px rgb(0 0 0 / 0.3); }
+
+/* O Mundo em Cores: títulos do banner e aba da Central mais leves (Fernando). */
+.wl-editorial.wl-site-base.wl-mundo #topo h1 { font-weight: 600 !important; }
+.wl-editorial.wl-site-base.wl-mundo #cotacao > div > h2 { font-weight: 600 !important; }
