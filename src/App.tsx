@@ -24,6 +24,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { LoadingScreen } from "./components/auth/LoadingScreen";
 import { NewLeadAlertProvider } from "./components/leads/NewLeadAlertProvider";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
+import SurveyPreview from "./pages/SurveyPreview";
 import { WorkspaceGate } from "@/workspace/WorkspaceGate";
 import { AppUpdateModal } from "./components/common/AppUpdateModal";
 import { AgencyDomainGate } from "@/components/routing/AgencyDomainGate";
@@ -313,6 +314,7 @@ const App = () => {
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
             {/* Prévias técnicas ADS: fixtures locais isoladas; só no host id-preview, demais hosts = 404. */}
             <Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} />
+            <Route path="/preview/enquete" element={<SurveyPreview />} />
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
             {/* /sitelab-base/gestao/* é montado fora deste router (ver topo).
