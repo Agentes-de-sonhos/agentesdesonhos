@@ -52,21 +52,21 @@ export const SURVEY_STEPS: Step[] = [
 
 const NONE = "__none__";
 
-export function FeatureUsageSurveyModal() {
+export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean } = {}) {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(preview);
   const [step, setStep] = useState(0);
   const [picked, setPicked] = useState<Record<number, string[]>>({});
   const [suggestion, setSuggestion] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!user || isActiveImpersonatingUser(user.id)) return;
+    if (preview || !user || isActiveImpersonatingUser(user.id)) return;
     let cancelled = false;
     supabase.from("agent_feature_survey_responses").select("id").eq("user_id", user.id).maybeSingle()
       .then(({ data, error }) => { if (!cancelled && !error && !data) setOpen(true); });
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, preview]);
 
   useEffect(() => {
     if (!open) return;
@@ -77,7 +77,7 @@ export function FeatureUsageSurveyModal() {
     return () => { window.removeEventListener("keydown", block, true); document.body.style.overflow = prev; };
   }, [open]);
 
-  if (!open || !user) return null;
+  if (!open || (!user && !preview)) return null;
 
   const current = SURVEY_STEPS[step];
   const sel = picked[step] ?? [];
@@ -92,6 +92,11 @@ export function FeatureUsageSurveyModal() {
   };
 
   const submit = async () => {
+    if (preview || !user) {
+      toast.success("Prévia concluída — nenhuma resposta foi gravada.");
+      setStep(0); setPicked({}); setSuggestion("");
+      return;
+    }
     setSaving(true);
     const selected = Object.values(picked).flat().filter((k) => k !== NONE);
     const { error } = await supabase.from("agent_feature_survey_responses").insert({
