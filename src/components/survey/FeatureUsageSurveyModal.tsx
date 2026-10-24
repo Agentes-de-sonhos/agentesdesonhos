@@ -135,7 +135,7 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-foreground/20"><ClipboardList className="h-4 w-4" /></span>
             <h2 className="text-sm font-bold uppercase tracking-widest">Enquete</h2>
           </div>
-          <p className="mt-4 text-2xl font-bold leading-tight sm:text-3xl">Quais ferramentas você usa no seu dia a dia?</p>
+          <p className="mt-4 whitespace-nowrap text-[clamp(0.95rem,4.2vw,1.75rem)] font-bold leading-tight">Quais ferramentas você usa no seu dia a dia?</p>
           <p className="mt-1 text-base font-medium opacity-90">Marque todas que utiliza.</p>
           <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/20 px-3 py-1 text-xs font-medium">
             <Clock className="h-3.5 w-3.5" /> Leva menos de 2 minutos para responder
