@@ -97,8 +97,8 @@ export default function Dashboard() {
                     variant="ghost"
                     size="icon"
                     className="h-11 w-11 rounded-full bg-muted text-foreground hover:bg-accent sm:h-11 sm:w-11 md:h-9 md:w-9"
-                    aria-label="Meu perfil"
-                    onClick={() => openInternalWindow("/perfil", "Meu perfil")}
+                    aria-label="Minhas Configurações"
+                    onClick={() => openInternalWindow("/perfil", "Minhas Configurações")}
                   >
                     <User className="h-4 w-4" />
                   </Button>

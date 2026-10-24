@@ -133,10 +133,10 @@ describe("menu lateral Agentes de Sonhos", () => {
     expect(desktop).not.toContain("comunidadeItem");
     expect(mobile).not.toContain("comunidadeItem");
     const account = readFileSync("src/components/layout/AppSidebarAccount.tsx", "utf8");
-    expect(account).toContain('{ label: "Meu perfil", to: "/perfil"');
+    expect(account).toContain('{ label: "Minhas Configurações", to: "/perfil"');
     expect(account).toContain('{ label: "Minha conta", to: "/minha-conta"');
     expect(account).toContain('{ label: "Suporte", to: "/suporte"');
-    expect(account.indexOf("Meu perfil")).toBeLessThan(account.indexOf("Minha conta"));
+    expect(account.indexOf("Minhas Configurações")).toBeLessThan(account.indexOf("Minha conta"));
     expect(account.indexOf("Minha conta")).toBeLessThan(account.indexOf("Suporte"));
     expect(account).toContain("DropdownMenuSeparator");
     expect(account).toContain("onSelect={onSignOut}");

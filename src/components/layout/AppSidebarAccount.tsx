@@ -55,7 +55,7 @@ export function AppSidebarAccount({
   const avatarUrl = profile?.avatar_url || member?.avatar_url || undefined;
 
   const accountItems = [
-    { label: "Meu perfil", to: "/perfil", icon: UserRound },
+    { label: "Minhas Configurações", to: "/perfil", icon: UserRound },
     { label: "Minha conta", to: "/minha-conta", icon: Settings },
     { label: "Suporte", to: "/suporte", icon: Headset },
   ];
