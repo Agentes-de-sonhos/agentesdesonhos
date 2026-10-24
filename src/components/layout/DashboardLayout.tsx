@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { SupplierDashboardLayout } from "./supplier/SupplierDashboardLayout";
 import { ContextualTutorialsButton } from "@/components/tutorials/ContextualTutorialsButton";
+import { FeatureUsageSurveyModal } from "@/components/survey/FeatureUsageSurveyModal";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -60,6 +61,9 @@ export function DashboardLayout({ children, flushHorizontal = false }: Dashboard
       
       {/* Monthly Popup (inspirational + events) */}
       <MonthlyPopupModal />
+
+      {/* Mandatory one-time feature usage survey */}
+      <FeatureUsageSurveyModal />
       
       {/* Community Chat Floating Button (Premium only) */}
       <ChatFloatingButton />

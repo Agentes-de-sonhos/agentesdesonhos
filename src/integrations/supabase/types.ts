@@ -1821,6 +1821,33 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_feature_survey_responses: {
+        Row: {
+          completed_at: string
+          id: string
+          selected_features: string[]
+          suggestion: string | null
+          survey_key: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          selected_features?: string[]
+          suggestion?: string | null
+          survey_key?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          selected_features?: string[]
+          suggestion?: string | null
+          survey_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       air_blocks: {
         Row: {
           airline: string
