@@ -112,7 +112,7 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
     const on = sel.includes(key);
     return (
       <button key={key} type="button" onClick={() => toggle(key)} aria-pressed={on}
-        className={`relative flex items-center gap-3 rounded-2xl border-2 p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10" : "border-transparent bg-background hover:border-primary/30"}`}>
+        className={`relative flex items-center gap-3 rounded-2xl border-2 p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10" : "border-transparent bg-card hover:border-primary/30"}`}>
         <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
           <Icon className="h-5 w-5" />
         </span>
@@ -142,7 +142,7 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
           </div>
         </div>
 
-        <div className="bg-muted/60 p-5 sm:p-6">
+        <div className="bg-muted p-5 sm:p-6">
           <div>
             <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
               <span>Etapa {step + 1} de {SURVEY_STEPS.length}</span><span className="font-semibold text-primary">{current.title}</span>
