@@ -358,6 +358,7 @@ export default function MinhaConta() {
               </p>
             </CardContent>
           </Card>
+          </CollapsibleSettingsCard>
         )}
       </div>
 
