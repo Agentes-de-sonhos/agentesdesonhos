@@ -1911,7 +1911,10 @@ export default function AgencySiteHome({
             />
           )}
           {profile.heroPresentation?.overlay === "none" && (
-            <style>{`#topo h1, #topo h1 + *, #topo p { text-shadow: 0 2px 14px hsl(220 12% 7% / 0.55), 0 1px 3px hsl(220 12% 7% / 0.45); }`}</style>
+            <>
+              <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.5)] via-[hsl(220_12%_7%/0.22)] to-transparent md:from-[hsl(220_12%_7%/0.42)] md:via-[hsl(220_12%_7%/0.14)]" />
+              <style>{`#topo h1, #topo h1 + *, #topo p { text-shadow: 0 2px 14px hsl(220 12% 7% / 0.55), 0 1px 3px hsl(220 12% 7% / 0.45); }`}</style>
+            </>
           )}
         </div>
 
@@ -2054,7 +2057,7 @@ export default function AgencySiteHome({
         >
           <div ref={requestCenterRef} className={`relative ${container}`}>
             {profile.requestCenter?.titlePlacement === "above-card" && profile.requestCenter.title && (
-              <h2 className="absolute bottom-full left-4 mb-4 break-words text-pretty text-2xl font-bold leading-tight text-white drop-shadow-[0_2px_12px_hsl(220_12%_7%/0.55)] md:left-6 md:mb-5 md:text-3xl lg:left-8">
+              <h2 className="absolute bottom-full left-4 mb-4 max-w-[calc(100%-2rem)] break-words text-pretty rounded-xl bg-primary px-4 py-2 text-xl font-bold leading-tight text-primary-foreground shadow-lg md:left-6 md:mb-5 md:px-5 md:py-2.5 md:text-3xl lg:left-8">
                 {profile.requestCenter.title}
               </h2>
             )}
