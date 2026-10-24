@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   ClipboardList, FileText, Map, Wallet, Users, ShieldCheck, Filter, Workflow, BadgeDollarSign,
   Receipt, ArrowLeftRight, Globe, ShoppingBag, MessageSquareText, Sparkles, Palette, Zap, IdCard,
-  GraduationCap, Hotel, MapPin, Stamp, Gift, Newspaper, Check, Clock, ArrowLeft, ArrowRight,
+  GraduationCap, Hotel, MapPin, Stamp, Gift, Newspaper, Check, Clock, ArrowLeft, ArrowRight, Ban,
 } from "lucide-react";
 
 type Item = { key: string; label: string; hint?: string; icon: typeof FileText; highlight?: boolean };
@@ -22,7 +22,7 @@ export const SURVEY_STEPS: Step[] = [
   ]},
   { title: "Clientes & Operação", items: [
     { key: "gestao_clientes", label: "Gestão de Clientes", icon: Users },
-    { key: "radar_documentos", label: "Radar de Validade de Documentos", hint: "Passaportes e vistos", icon: ShieldCheck, highlight: true },
+    { key: "radar_documentos", label: "Radar de Validade de Documentos", hint: "Passaportes e vistos", icon: ShieldCheck },
     { key: "funil_oportunidades", label: "Funil de Oportunidades", icon: Filter },
     { key: "funil_operacoes", label: "Funil de Operações", icon: Workflow },
   ]},
@@ -108,21 +108,20 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
     setOpen(false);
   };
 
-  const renderCard = (key: string, label: string, Icon: typeof FileText, hint?: string, highlight?: boolean) => {
+  const renderCard = (key: string, label: string, Icon: typeof FileText, hint?: string) => {
     const on = sel.includes(key);
     return (
       <button key={key} type="button" onClick={() => toggle(key)} aria-pressed={on}
-        className={`relative flex items-center gap-3 rounded-xl border p-3 text-left transition-all ${on ? "border-primary bg-primary/10 shadow-sm" : "border-border bg-muted/40 hover:border-primary/40"}`}>
-        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${on ? "border-primary/40 bg-primary/15 text-primary" : "border-border bg-background text-muted-foreground"}`}>
-          <Icon className="h-4 w-4" />
+        className={`relative flex items-center gap-3 rounded-2xl border-2 p-3.5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${on ? "border-primary bg-primary/10" : "border-transparent bg-card hover:border-primary/30"}`}>
+        <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${on ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
+          <Icon className="h-5 w-5" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-sm font-semibold text-foreground">{label}</span>
           {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
         </span>
-        {highlight && !on && <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase text-accent-foreground">Destaque</span>}
-        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all ${on ? "border-primary bg-primary text-primary-foreground scale-110" : "border-muted-foreground/40"}`}>
-          {on && <Check className="h-3 w-3" />}
+        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-all ${on ? "border-primary bg-primary text-primary-foreground scale-110" : "border-primary/30 bg-background"}`}>
+          {on && <Check className="h-3.5 w-3.5" />}
         </span>
       </button>
     );
@@ -130,36 +129,33 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/50 p-3 backdrop-blur-sm" role="dialog" aria-modal="true">
-      <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-background p-3 shadow-2xl">
-        <div className="rounded-2xl border border-border p-5 sm:p-6">
-          <div className="flex items-start gap-3 border-b border-border pb-4">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary"><ClipboardList className="h-5 w-5" /></span>
-            <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Pesquisa de uso da plataforma</h2>
-              <p className="text-sm text-muted-foreground">Quais ferramentas você usa no seu dia a dia? Marque todas que utiliza.</p>
-            </div>
+      <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-background shadow-2xl">
+        <div className="rounded-t-3xl bg-gradient-to-br from-primary to-primary/70 px-6 pb-6 pt-5 text-primary-foreground">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-foreground/20"><ClipboardList className="h-4 w-4" /></span>
+            <h2 className="text-sm font-bold uppercase tracking-widest">Enquete</h2>
           </div>
-
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-            <Clock className="h-4 w-4 text-primary" /> Leva menos de 2 minutos para responder.
+          <p className="mt-4 text-2xl font-bold leading-tight sm:text-3xl">Quais ferramentas você usa no seu dia a dia?</p>
+          <p className="mt-1 text-base font-medium opacity-90">Marque todas que utiliza.</p>
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/20 px-3 py-1 text-xs font-medium">
+            <Clock className="h-3.5 w-3.5" /> Leva menos de 2 minutos para responder
           </div>
+        </div>
 
-          <div className="mt-4">
+        <div className="bg-muted p-5 sm:p-6">
+          <div>
             <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
-              <span>Etapa {step + 1} de {SURVEY_STEPS.length}</span><span className="text-foreground">{current.title}</span>
+              <span>Etapa {step + 1} de {SURVEY_STEPS.length}</span><span className="font-semibold text-primary">{current.title}</span>
             </div>
             <div className="flex gap-1.5">
-              {SURVEY_STEPS.map((_, i) => <span key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? "bg-primary" : "bg-muted"}`} />)}
+              {SURVEY_STEPS.map((_, i) => <span key={i} className={`h-2 flex-1 rounded-full transition-colors ${i <= step ? "bg-primary" : "bg-primary/15"}`} />)}
             </div>
           </div>
 
-          <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
-            {current.items.map((it) => renderCard(it.key, it.label, it.icon, it.hint, it.highlight))}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            {current.items.map((it) => renderCard(it.key, it.label, it.icon, it.hint))}
+            {renderCard(NONE, "Não utilizo nenhuma delas", Ban)}
           </div>
-          <button type="button" onClick={() => toggle(NONE)}
-            className={`mt-3 text-xs underline-offset-2 hover:underline ${sel.includes(NONE) ? "font-semibold text-primary" : "text-muted-foreground"}`}>
-            {sel.includes(NONE) ? "✓ " : ""}Não utilizo nenhuma destas ainda
-          </button>
 
           {isLast && (
             <div className="mt-5">
