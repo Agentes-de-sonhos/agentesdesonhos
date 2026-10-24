@@ -16015,6 +16015,51 @@ export type Database = {
           },
         ]
       }
+      trip_email_reminder_log: {
+        Row: {
+          kind: string
+          sent_at: string
+          target_date: string
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          kind: string
+          sent_at?: string
+          target_date: string
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          kind?: string
+          sent_at?: string
+          target_date?: string
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      trip_email_reminder_settings: {
+        Row: {
+          departure_days: number
+          return_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          departure_days?: number
+          return_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          departure_days?: number
+          return_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trip_itinerary_activities: {
         Row: {
           created_at: string
