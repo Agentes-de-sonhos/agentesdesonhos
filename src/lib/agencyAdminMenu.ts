@@ -149,7 +149,7 @@ export const SITE_ITEMS: MenuItemDef[] = [
 ];
 
 export const USER_ITEMS: MenuItemDef[] = [
-  { label: "Meu perfil", to: "/gestao/perfil", icon: UserRound },
+  { label: "Minhas Configurações", to: "/gestao/perfil", icon: UserRound },
   { label: "Minha conta", to: "/gestao/minha-conta", icon: UserCog },
   { label: "Suporte", to: "/gestao/suporte", icon: Headphones },
 ];

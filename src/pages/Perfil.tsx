@@ -386,7 +386,7 @@ export default function Perfil() {
 
         <div className="space-y-4">
           {/* Agent Profile Card */}
-          <CollapsibleSettingsCard title="Perfil do Agente" defaultOpen>
+          <CollapsibleSettingsCard title="Perfil do Agente">
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
               <CardTitle className="flex items-center gap-2">
@@ -516,7 +516,7 @@ export default function Perfil() {
           </CollapsibleSettingsCard>
 
           {/* Agency Profile Card */}
-          <CollapsibleSettingsCard title="Perfil da Agência" defaultOpen>
+          <CollapsibleSettingsCard title="Perfil da Agência">
           <Card className="shadow-card">
             <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
               <CardTitle className="flex items-center gap-2">

@@ -41,6 +41,8 @@ const ModelosRoteiros = lazy(() => import("@/pages/ModelosRoteiros"));
 const Perfil = lazy(() => import("@/pages/Perfil"));
 const MinhaConta = lazy(() => import("@/pages/MinhaConta"));
 const Suporte = lazy(() => import("@/pages/Suporte"));
+const AssinaturasComerciais = lazy(() => import("@/pages/AssinaturasComerciais"));
+const ConfiguracoesCarteira = lazy(() => import("@/pages/ConfiguracoesCarteira"));
 const AgencyReservas = lazy(() => import("@/pages/whitelabel/admin/AgencyReservas"));
 const ProcessoReserva = lazy(() => import("@/pages/ProcessoReserva"));
 const AgencyAdminNotFound = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminNotFound"));
@@ -108,6 +110,8 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     ["perfil", Perfil],
     ["minha-conta", MinhaConta],
     ["suporte", Suporte],
+    ["assinaturas-comerciais", AssinaturasComerciais],
+    ["configuracoes/carteira", ConfiguracoesCarteira],
     ["site/resorts", ResortsCurationPanel],
   ];
 
@@ -121,6 +125,8 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     ["/perfil", Perfil],
     ["/minha-conta", MinhaConta],
     ["/suporte", Suporte],
+    ["/assinaturas-comerciais", AssinaturasComerciais],
+    ["/configuracoes/carteira", ConfiguracoesCarteira],
     ["/ferramentas-ia/gerar-orcamento", GerarOrcamento],
     ["/ferramentas-ia/gerar-orcamento/:id", GerarOrcamento],
     ["/ferramentas-ia/trip-wallet", TripWallet],
