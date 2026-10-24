@@ -38,6 +38,7 @@ import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard"
 import { AgencyBrandColorCard } from "@/components/profile/AgencyBrandColorCard";
 import { PublicContentLocaleCard } from "@/components/profile/PublicContentLocaleCard";
 import { TripReminderSettingsCard } from "@/components/profile/TripReminderSettingsCard";
+import { CommercialSignaturesManager } from "@/components/signatures/CommercialSignaturesManager";
 import { CollapsibleSettingsCard } from "@/components/profile/CollapsibleSettingsCard";
 import { TeamPermissionsSettingsCard, NavigationPrefsSettingsCard } from "@/components/profile/AccountPreferencesCards";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -752,14 +753,8 @@ export default function Perfil() {
               Assinaturas Comerciais
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Crie identidades (consultores, vendedores, atendentes) para exibir em Orçamentos,
-              Carteira Digital e Roteiros — sem criar novos usuários ou logins.
-            </p>
-            <Button asChild variant="outline">
-              <Link to="/assinaturas-comerciais">Gerenciar assinaturas</Link>
-            </Button>
+          <CardContent>
+            <CommercialSignaturesManager embedded />
           </CardContent>
         </Card>
         </CollapsibleSettingsCard>
