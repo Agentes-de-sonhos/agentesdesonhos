@@ -388,17 +388,11 @@ export default function Perfil() {
           {/* Agent Profile Card */}
           <CollapsibleSettingsCard title="Perfil do Agente">
           <Card className="shadow-card">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
                 Perfil do Agente
               </CardTitle>
-              {editing !== "agent" && (
-                <Button size="sm" variant="outline" disabled={editing !== null} onClick={() => setEditing("agent")}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar perfil
-                </Button>
-              )}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Avatar Section */}
@@ -499,7 +493,7 @@ export default function Perfil() {
                   </div>
                 </div>
               )}
-              {editing === "agent" && (
+              {editing === "agent" ? (
                 <div className="flex justify-end gap-3">
                   <Button variant="outline" onClick={handleCancel} disabled={saving}>
                     <X className="mr-2 h-4 w-4" />
@@ -510,6 +504,13 @@ export default function Perfil() {
                     Salvar alterações
                   </Button>
                 </div>
+              ) : (
+                <div className="flex justify-end">
+                  <Button size="sm" variant="outline" disabled={editing !== null} onClick={() => setEditing("agent")}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Editar perfil
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -518,17 +519,11 @@ export default function Perfil() {
           {/* Agency Profile Card */}
           <CollapsibleSettingsCard title="Perfil da Agência">
           <Card className="shadow-card">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
+            <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
                 Perfil da Agência
               </CardTitle>
-              {editing !== "agency" && (
-                <Button size="sm" variant="outline" disabled={editing !== null} onClick={() => setEditing("agency")}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar agência
-                </Button>
-              )}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Logo Section */}
@@ -677,7 +672,7 @@ export default function Perfil() {
                   </div>
                 </div>
               )}
-              {editing === "agency" && (
+              {editing === "agency" ? (
                 <div className="flex justify-end gap-3">
                   <Button variant="outline" onClick={handleCancel} disabled={saving}>
                     <X className="mr-2 h-4 w-4" />
@@ -686,6 +681,13 @@ export default function Perfil() {
                   <Button onClick={handleSave} disabled={saving}>
                     {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     Salvar alterações
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex justify-end">
+                  <Button size="sm" variant="outline" disabled={editing !== null} onClick={() => setEditing("agency")}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Editar agência
                   </Button>
                 </div>
               )}

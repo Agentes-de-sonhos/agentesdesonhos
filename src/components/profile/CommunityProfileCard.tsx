@@ -84,12 +84,6 @@ export function CommunityProfileCard() {
             <Users className="h-5 w-5 text-primary" />
             Meu Perfil na Comunidade
           </CardTitle>
-          {!editing && !isLoading && (
-            <Button onClick={startEditing} variant="outline" size="sm">
-              <Edit className="mr-2 h-4 w-4" />
-              Editar perfil da comunidade
-            </Button>
-          )}
         </div>
         <p className="text-sm text-muted-foreground">
           Como você aparece para outros agentes na rede da comunidade
@@ -296,6 +290,14 @@ export function CommunityProfileCard() {
                     <p className="text-sm text-muted-foreground italic">Nenhuma parceria informada</p>
                   )}
                 </div>
+              </div>
+            )}
+            {!editing && (
+              <div className="flex justify-end">
+                <Button onClick={startEditing} variant="outline" size="sm">
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar perfil da comunidade
+                </Button>
               </div>
             )}
           </>
