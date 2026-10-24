@@ -125,7 +125,7 @@ export default function StartDashboard() {
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Meu Perfil</p>
+                  <p>Minhas Configurações</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>

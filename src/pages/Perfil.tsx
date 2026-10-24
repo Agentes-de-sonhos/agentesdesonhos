@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator";
 import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard";
 import { AgencyBrandColorCard } from "@/components/profile/AgencyBrandColorCard";
 import { PublicContentLocaleCard } from "@/components/profile/PublicContentLocaleCard";
+import { TripReminderSettingsCard } from "@/components/profile/TripReminderSettingsCard";
 import { CircularImageCropDialog } from "@/components/media/CircularImageCropDialog";
 import {
   circularImageStoragePaths,
@@ -371,7 +372,7 @@ export default function Perfil() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold text-foreground">
-              Meu Perfil
+              Minhas Configurações
             </h1>
             <p className="mt-2 text-muted-foreground">
               Gerencie suas informações pessoais e da agência
@@ -706,6 +707,8 @@ export default function Perfil() {
               setFormData((prev) => (prev ? ({ ...prev, public_content_locale: loc } as any) : prev));
             }}
           />
+
+          <TripReminderSettingsCard />
         </div>
 
 
