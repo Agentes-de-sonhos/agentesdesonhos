@@ -38,6 +38,9 @@ import { CommunityProfileCard } from "@/components/profile/CommunityProfileCard"
 import { AgencyBrandColorCard } from "@/components/profile/AgencyBrandColorCard";
 import { PublicContentLocaleCard } from "@/components/profile/PublicContentLocaleCard";
 import { TripReminderSettingsCard } from "@/components/profile/TripReminderSettingsCard";
+import { CollapsibleSettingsCard } from "@/components/profile/CollapsibleSettingsCard";
+import { TeamPermissionsSettingsCard, NavigationPrefsSettingsCard } from "@/components/profile/AccountPreferencesCards";
+import { useUserRole } from "@/hooks/useUserRole";
 import { CircularImageCropDialog } from "@/components/media/CircularImageCropDialog";
 import {
   circularImageStoragePaths,
@@ -85,7 +88,8 @@ interface ProfileData {
 export default function Perfil() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState<null | "agent" | "agency">(null);
+  const { isAdmin } = useUserRole();
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
@@ -281,7 +285,7 @@ export default function Perfil() {
       if (error) throw error;
 
       setProfile(formData);
-      setEditing(false);
+      setEditing(null);
       /* Rodapé do menu lateral e cabeçalhos leem esta consulta. */
       void queryClient.invalidateQueries({ queryKey: ["agency-admin-profile"] });
 
@@ -302,7 +306,7 @@ export default function Perfil() {
 
   const handleCancel = () => {
     setFormData(profile);
-    setEditing(false);
+    setEditing(null);
   };
 
   const updateField = (field: keyof ProfileData, value: string) => {
@@ -378,22 +382,23 @@ export default function Perfil() {
               Gerencie suas informações pessoais e da agência
             </p>
           </div>
-          {!editing && (
-            <Button onClick={() => setEditing(true)} variant="outline">
-              <Edit className="mr-2 h-4 w-4" />
-              Editar dados
-            </Button>
-          )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-4">
           {/* Agent Profile Card */}
+          <CollapsibleSettingsCard title="Perfil do Agente" defaultOpen>
           <Card className="shadow-card">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-primary" />
                 Perfil do Agente
               </CardTitle>
+              {editing !== "agent" && (
+                <Button size="sm" variant="outline" disabled={editing !== null} onClick={() => setEditing("agent")}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar perfil
+                </Button>
+              )}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Avatar Section */}
@@ -437,7 +442,7 @@ export default function Perfil() {
 
               <Separator />
 
-              {editing && formData ? (
+              {editing === "agent" && formData ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Nome completo</Label>
@@ -494,16 +499,36 @@ export default function Perfil() {
                   </div>
                 </div>
               )}
+              {editing === "agent" && (
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={handleCancel} disabled={saving}>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSave} disabled={saving}>
+                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    Salvar alterações
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
+          </CollapsibleSettingsCard>
 
           {/* Agency Profile Card */}
+          <CollapsibleSettingsCard title="Perfil da Agência" defaultOpen>
           <Card className="shadow-card">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
               <CardTitle className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-primary" />
                 Perfil da Agência
               </CardTitle>
+              {editing !== "agency" && (
+                <Button size="sm" variant="outline" disabled={editing !== null} onClick={() => setEditing("agency")}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar agência
+                </Button>
+              )}
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Logo Section */}
@@ -558,7 +583,7 @@ export default function Perfil() {
 
               <Separator />
 
-              {editing && formData ? (
+              {editing === "agency" && formData ? (
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Nome da agência</Label>
@@ -652,32 +677,30 @@ export default function Perfil() {
                   </div>
                 </div>
               )}
+              {editing === "agency" && (
+                <div className="flex justify-end gap-3">
+                  <Button variant="outline" onClick={handleCancel} disabled={saving}>
+                    <X className="mr-2 h-4 w-4" />
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleSave} disabled={saving}>
+                    {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    Salvar alterações
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
-        </div>
+          </CollapsibleSettingsCard>
 
-        {/* Save/Cancel buttons when editing */}
-        {editing && (
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={handleCancel} disabled={saving}>
-              <X className="mr-2 h-4 w-4" />
-              Cancelar
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Salvar alterações
-            </Button>
-          </div>
-        )}
+          <TeamPermissionsSettingsCard />
+          <NavigationPrefsSettingsCard />
 
-        {/* Community profile and Visual Identity side by side */}
-        <div className="grid gap-6 lg:grid-cols-2">
+          <CollapsibleSettingsCard title="Meu Perfil na Comunidade">
           <CommunityProfileCard />
+          </CollapsibleSettingsCard>
 
+          <CollapsibleSettingsCard title="Identidade Visual">
           <AgencyBrandColorCard
             initialColor={profile?.agency_primary_color ?? null}
             initialSecondaryColor={profile?.agency_secondary_color ?? null}
@@ -699,7 +722,10 @@ export default function Perfil() {
               setFormData((prev) => (prev ? { ...prev, ...patch } as any : prev));
             }}
           />
+          </CollapsibleSettingsCard>
 
+          {isAdmin && (
+          <CollapsibleSettingsCard title="Idiomas e Materiais do Cliente">
           <PublicContentLocaleCard
             initialLocale={profile?.public_content_locale ?? null}
             onSaved={(loc) => {
@@ -707,12 +733,16 @@ export default function Perfil() {
               setFormData((prev) => (prev ? ({ ...prev, public_content_locale: loc } as any) : prev));
             }}
           />
+          </CollapsibleSettingsCard>
+          )}
 
+          <CollapsibleSettingsCard title="Lembretes por E-mail">
           <TripReminderSettingsCard />
-        </div>
+          </CollapsibleSettingsCard>
 
 
         {/* Assinaturas Comerciais */}
+        <CollapsibleSettingsCard title="Assinaturas Comerciais">
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -730,8 +760,10 @@ export default function Perfil() {
             </Button>
           </CardContent>
         </Card>
+        </CollapsibleSettingsCard>
 
         {/* Configurações da Carteira Digital */}
+        <CollapsibleSettingsCard title="Configurações da Carteira Digital">
         <Card className="shadow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -749,6 +781,8 @@ export default function Perfil() {
             </Button>
           </CardContent>
         </Card>
+        </CollapsibleSettingsCard>
+        </div>
       </div>
 
       {cropSource && (

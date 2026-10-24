@@ -56,7 +56,7 @@ describe("dashboard exclusivo do Agentes de Sonhos", () => {
     expect(dashboard).toContain("<ExchangeRateCard />");
     expect(dashboard).toContain("hidden md:flex");
     expect(dashboard).toContain("<NotificationsDropdown />");
-    expect(dashboard).toContain('openInternalWindow("/perfil", "Meu perfil")');
+    expect(dashboard).toContain('openInternalWindow("/perfil", "Minhas Configurações")');
     expect(dashboard).toContain("onClick={handleLogout}");
     expect(dashboard).toContain("data-dashboard-mobile-header");
     expect(dashboard).toContain('grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-2 sm:px-4');
