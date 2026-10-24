@@ -328,7 +328,7 @@ export function AgencyQuickQuote({
             "grid border-t items-end",
             // Rótulos com a mesma altura reservada em todos os tamanhos: caixas
             // sempre alinhadas, mesmo quando um rótulo quebra em duas linhas.
-            "[&_label]:flex [&_label]:min-h-[2.1rem] [&_label]:items-end",
+            "[&_label]:flex [&_label]:min-h-[2.1rem] [&_label]:items-end [&_label]:justify-start [&_label]:gap-0.5",
             "lg:pb-5 lg:[&_label]:whitespace-nowrap",
             // Revelação progressiva (celular/tablet): só as 2 primeiras linhas até
             // a pessoa começar a preencher; o botão continua sempre visível.
