@@ -249,7 +249,7 @@ const marketingSection: MenuSection = {
 
 const dashboardItem: MenuItem = { key: "inicio", title: "Início", url: "/dashboard", icon: Home };
 const minhaAgendaItem: MenuItem = { key: "agenda", title: "Minha Agenda", url: "/agenda", icon: CalendarDays };
-const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Meu Perfil", url: "/perfil", icon: User };
+const meuPerfilItem: MenuItem = { key: "meu_perfil", title: "Minhas Configurações", url: "/perfil", icon: User };
 const minhaContaMenuItem: MenuItem = { title: "Minha Conta", url: "/minha-conta", icon: User };
 const suporteMenuItem: MenuItem = { title: "Suporte", url: "/suporte", icon: Headset };
 const adminMenuItem: MenuItem = { title: "Administração", url: "/admin", icon: Shield };

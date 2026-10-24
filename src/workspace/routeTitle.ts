@@ -49,7 +49,7 @@ const ROUTE_TITLES: Record<string, string> = {
   "/ferramentas-ia/gerar-orcamento": "Orçamento",
   "/ferramentas-ia/criar-roteiro": "Roteiros",
   "/ferramentas-ia/criar-conteudo": "Legendas, Stories e WhatsApp",
-  "/perfil": "Meu Perfil",
+  "/perfil": "Minhas Configurações",
   "/minha-conta": "Minha Conta",
   "/suporte": "Suporte",
   "/gamificacao": "Gamificação",
