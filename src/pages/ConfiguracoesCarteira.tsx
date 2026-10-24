@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -32,6 +32,7 @@ import {
   Lock,
   Download,
   FileText,
+  ArrowLeft,
 } from "lucide-react";
 import { useAgencyWalletSettings } from "@/hooks/useAgencyWalletSettings";
 import { DEFAULT_WALLET_SETTINGS, WALLET_MODULES, AgencyWalletSettings } from "@/lib/walletSettings";
@@ -56,6 +57,31 @@ export default function ConfiguracoesCarteira() {
   }, [settings]);
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(settings);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const backPath = location.pathname.startsWith("/gestao") ? "/gestao/perfil" : "/perfil";
+  const [leaveOpen, setLeaveOpen] = useState(false);
+
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  const goBack = () => (dirty ? setLeaveOpen(true) : navigate(backPath));
+  const saveAndBack = async () => {
+    try {
+      await save(draft);
+      setLeaveOpen(false);
+      navigate(backPath);
+    } catch (e: any) {
+      toast({ title: "Erro ao salvar", description: e?.message ?? "Tente novamente.", variant: "destructive" });
+    }
+  };
 
   const toggle = (key: keyof AgencyWalletSettings) =>
     setDraft((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -82,6 +108,30 @@ export default function ConfiguracoesCarteira() {
   return (
     <DashboardLayout>
       <div className="container max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <Button variant="ghost" size="sm" className="-ml-2" onClick={goBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar para Minhas Configurações
+        </Button>
+        <AlertDialog open={leaveOpen} onOpenChange={setLeaveOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Salvar antes de voltar?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Você fez alterações que ainda não foram salvas. Deseja salvar antes de voltar para Minhas Configurações?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Continuar editando</AlertDialogCancel>
+              <Button variant="outline" onClick={() => { setLeaveOpen(false); navigate(backPath); }}>
+                Sair sem salvar
+              </Button>
+              <Button onClick={saveAndBack} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Salvar e voltar
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
