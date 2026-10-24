@@ -69,6 +69,8 @@ export function AgencyQuickQuote({
   const editorial = isEditorialTheme(hostname);
   const railWrapRef = useRef<HTMLDivElement | null>(null);
   const [quickErrors, setQuickErrors] = useState<Record<string, string>>({});
+  /** Revela os demais campos assim que a pessoa interage com o formulário. */
+  const [revealed, setRevealed] = useState(false);
   // Microtransição: só entre a validação da primeira etapa e a 1ª abertura do modal.
   const [legsByService, setLegsByService] = useState<Record<string, RouteLeg[]>>({});
   const [agesByService, setAgesByService] = useState<Record<string, string[]>>({});
@@ -321,11 +323,14 @@ export function AgencyQuickQuote({
         <div
           data-testid="wl-initial-grid"
           className={cn(
-            "grid border-t md:items-end",
-            // Desktop: reserva duas linhas de rótulo para que TODOS os labels e
-            // caixas comecem na mesma altura, mesmo em colunas compactas, e
-            // espaço inferior para textos de ajuda ancorados sob o campo.
-            "lg:pb-5 lg:[&_label]:flex lg:[&_label]:min-h-[2.1rem] lg:[&_label]:items-end lg:[&_label]:whitespace-nowrap",
+            "grid border-t items-end",
+            // Rótulos com a mesma altura reservada em todos os tamanhos: caixas
+            // sempre alinhadas, mesmo quando um rótulo quebra em duas linhas.
+            "[&_label]:flex [&_label]:min-h-[2.1rem] [&_label]:items-end",
+            "lg:pb-5 lg:[&_label]:whitespace-nowrap",
+            // Revelação progressiva (celular/tablet): só as 2 primeiras linhas até
+            // a pessoa começar a preencher; o botão continua sempre visível.
+            !revealed && "max-lg:[&>*:nth-child(n+5):not(button)]:hidden",
             editorial ? "gap-4 border-border/70 pt-5 lg:gap-3" : "gap-3 border-border/60 pt-4 lg:gap-2.5",
             initialGridClass(service.key),
           )}
