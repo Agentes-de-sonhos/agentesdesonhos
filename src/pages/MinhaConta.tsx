@@ -42,6 +42,7 @@ import {
 } from "@/workspace/featureFlag";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useTeamQuota } from "@/hooks/useTeamMembers";
+import { CollapsibleSettingsCard } from "@/components/profile/CollapsibleSettingsCard";
 import { TeamMembersDialog } from "@/components/team/TeamMembersDialog";
 
 export default function MinhaConta() {
@@ -166,6 +167,7 @@ export default function MinhaConta() {
         </div>
 
         {/* Plano atual */}
+        <CollapsibleSettingsCard title="Plano atual">
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -276,8 +278,11 @@ export default function MinhaConta() {
           </CardContent>
         </Card>
 
+        </CollapsibleSettingsCard>
+
         {/* Gerenciar assinatura */}
         {isPaid && (
+          <CollapsibleSettingsCard title="Gerenciar assinatura">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

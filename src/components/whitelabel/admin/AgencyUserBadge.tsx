@@ -85,7 +85,7 @@ export function AgencyUserBadge({ agencyName }: { agencyName?: string }) {
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuItem onClick={() => navigate("/gestao/perfil")}>
           <UserCircle className="mr-2 h-4 w-4" />
-          Meu perfil
+          Minhas Configurações
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/gestao/minha-conta")}>
           <Settings className="mr-2 h-4 w-4" />
