@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   ClipboardList, FileText, Map, Wallet, Users, ShieldCheck, Filter, Workflow, BadgeDollarSign,
   Receipt, ArrowLeftRight, Globe, ShoppingBag, MessageSquareText, Sparkles, Palette, Zap, IdCard,
-  GraduationCap, Hotel, MapPin, Stamp, Gift, Newspaper, Check, Clock, ArrowLeft, ArrowRight, Ban,
+  GraduationCap, Hotel, MapPin, Stamp, Gift, Newspaper, Check, Clock, ArrowLeft, ArrowRight, Ban, X,
 } from "lucide-react";
 
 type Item = { key: string; label: string; hint?: string; icon: typeof FileText; highlight?: boolean };
@@ -59,14 +59,28 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
   const [picked, setPicked] = useState<Record<number, string[]>>({});
   const [suggestion, setSuggestion] = useState("");
   const [saving, setSaving] = useState(false);
+  const [confirmSkip, setConfirmSkip] = useState(false);
+  const skipKey = user ? `featureSurveySkipped:${user.id}` : "";
 
   useEffect(() => {
     if (preview || !user || isActiveImpersonatingUser(user.id)) return;
+    try { if (sessionStorage.getItem(`featureSurveySkipped:${user.id}`)) return; } catch { /* ignore */ }
     let cancelled = false;
     supabase.from("agent_feature_survey_responses").select("id").eq("user_id", user.id).maybeSingle()
       .then(({ data, error }) => { if (!cancelled && !error && !data) setOpen(true); });
     return () => { cancelled = true; };
   }, [user, preview]);
+
+  const skip = () => {
+    setConfirmSkip(false);
+    if (preview) {
+      toast("Prévia: a enquete seria fechada e voltaria no próximo acesso.");
+      setStep(0); setPicked({}); setSuggestion("");
+      return;
+    }
+    try { if (skipKey) sessionStorage.setItem(skipKey, "1"); } catch { /* ignore */ }
+    setOpen(false);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -130,7 +144,11 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-foreground/50 p-3 backdrop-blur-sm" role="dialog" aria-modal="true">
       <div className="max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-background shadow-2xl">
-        <div className="rounded-t-3xl bg-gradient-to-br from-primary to-primary/70 px-6 pb-6 pt-5 text-primary-foreground">
+        <div className="relative rounded-t-3xl bg-gradient-to-br from-primary to-primary/70 px-6 pb-6 pt-5 text-primary-foreground">
+          <button type="button" onClick={() => setConfirmSkip(true)} aria-label="Fechar enquete"
+            className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/15 transition-colors hover:bg-primary-foreground/30">
+            <X className="h-4 w-4" />
+          </button>
           <div className="flex items-center gap-2">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-foreground/20"><ClipboardList className="h-4 w-4" /></span>
             <h2 className="text-sm font-bold uppercase tracking-widest">Enquete</h2>
@@ -171,9 +189,25 @@ export function FeatureUsageSurveyModal({ preview = false }: { preview?: boolean
             <Button disabled={sel.length === 0 || saving} onClick={() => (isLast ? submit() : setStep((s) => s + 1))}>
               {isLast ? (saving ? "Enviando..." : <><Check className="mr-1 h-4 w-4" /> Concluir</>) : <>Avançar <ArrowRight className="ml-1 h-4 w-4" /></>}
             </Button>
-          </div>
         </div>
       </div>
+
+      {confirmSkip && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-foreground/40 p-4" role="alertdialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-3xl bg-background p-6 text-center shadow-2xl">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Clock className="h-6 w-6" /></span>
+            <h3 className="mt-4 text-xl font-bold text-foreground">Tem certeza que prefere deixar para depois?</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Sua opinião ajuda a definir as próximas melhorias e ferramentas do sistema. Leva <strong className="text-foreground">menos de 2 minutinhos</strong> para responder!
+            </p>
+            <div className="mt-6 flex flex-col gap-2">
+              <Button onClick={() => setConfirmSkip(false)}>Continuar respondendo (menos de 2 min)</Button>
+              <Button variant="ghost" className="text-muted-foreground" onClick={skip}>Pular por agora</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
     </div>
   );
 }
