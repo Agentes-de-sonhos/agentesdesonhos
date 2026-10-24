@@ -1861,7 +1861,7 @@ export default function AgencySiteHome({
         className={
           editorial
             ? profile.key === "mundoEmCoresBriefing14"
-              ? "relative overflow-hidden pb-14 md:h-[500px] md:pb-16"
+              ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16 lg:h-[500px]"
               : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
@@ -2057,7 +2057,7 @@ export default function AgencySiteHome({
         >
           <div ref={requestCenterRef} className={`relative ${container}`}>
             {profile.requestCenter?.titlePlacement === "above-card" && profile.requestCenter.title && (
-              <h2 className="absolute bottom-full left-9 z-10 mb-0 max-w-[calc(100%-4.5rem)] translate-y-px break-words text-pretty rounded-t-xl rounded-b-none bg-primary px-4 py-2 text-xl font-bold leading-tight text-primary-foreground md:left-12 md:rounded-t-2xl md:px-5 md:py-2.5 md:text-3xl lg:left-14">
+              <h2 className="absolute bottom-full left-6 z-0 mb-0 max-w-[calc(100%-3rem)] translate-y-2 whitespace-nowrap rounded-t-xl rounded-b-none bg-primary px-4 pb-4 pt-2 text-[clamp(0.95rem,4.6vw,1.25rem)] font-bold leading-tight text-primary-foreground md:left-12 md:rounded-t-2xl md:px-5 md:pb-5 md:pt-2.5 md:text-3xl lg:left-14">
                 {profile.requestCenter.title}
               </h2>
             )}
@@ -2079,7 +2079,7 @@ export default function AgencySiteHome({
                 </button>
               </div>
             )}
-            <div ref={quoteCardRef} className="drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
+            <div ref={quoteCardRef} className="relative z-10 drop-shadow-[0_24px_50px_hsl(220_12%_10%/0.22)]">
               <AgencyQuickQuote
                 hostname={hostname}
                 agencyName={name}
