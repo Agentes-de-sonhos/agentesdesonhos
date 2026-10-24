@@ -143,6 +143,7 @@ export function AgencyQuickQuote({
         setAgesByService((prev) => ({ ...prev, [service.key]: syncChildAges(prev[service.key] ?? [], count) }));
       }
       setQuickErrors((prev) => (prev[name] ? { ...prev, [name]: "" } : prev));
+      setRevealed(true);
     },
     [service],
   );
@@ -156,6 +157,7 @@ export function AgencyQuickQuote({
         [service.key]: { ...prev[service.key], [period.start]: next.start, [period.end]: next.end },
       }));
       setQuickErrors((prev) => ({ ...prev, [period.start]: "", [period.end]: "", periodo: "" }));
+      setRevealed(true);
     },
     [service],
   );
