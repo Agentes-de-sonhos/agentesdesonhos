@@ -41,6 +41,7 @@ import { AdminMarketplaceManager } from "@/components/admin/AdminMarketplaceMana
 import { AdminBenefitsManager } from "@/components/admin/AdminBenefitsManager";
 import { AdminRegistrationLinksManager } from "@/components/admin/AdminRegistrationLinksManager";
 import { AdminTicketsManager } from "@/components/admin/AdminTicketsManager";
+import { AdminFeatureSurveyResults } from "@/components/admin/AdminFeatureSurveyResults";
 import { AdminFeedbackManager } from "@/components/admin/AdminFeedbackManager";
 import { AdminUserAnalytics } from "@/components/admin/AdminUserAnalytics";
 import { AdminDriveImportManager } from "@/components/admin/AdminDriveImportManager";
@@ -85,6 +86,7 @@ const TAB_LABELS: Record<string, string> = {
   benefits: "Benefícios",
   community: "Comunidade",
   feedback: "Feedback",
+  "feature-survey": "Enquete de Ferramentas",
   tickets: "Suporte",
   analytics: "Analytics",
   surveys: "Pesquisas",
@@ -210,6 +212,8 @@ function AdminContent({ tab }: { tab: string }) {
       return <AdminRegistrationLinksManager />;
     case "tickets":
       return <AdminTicketsManager />;
+    case "feature-survey":
+      return <AdminFeatureSurveyResults />;
     case "feedback":
       return <AdminFeedbackManager />;
     case "analytics":
