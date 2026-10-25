@@ -233,7 +233,7 @@ export function AgencyRequestCenter({
             <h2 className="text-lg font-semibold text-foreground md:text-xl">Central de Solicitações</h2>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
               Escolha o serviço, conte os detalhes e receba uma proposta personalizada da nossa equipe.
-              Não é uma busca automática: cada pedido é analisado por um consultor.
+              Cada orçamento é feito sob medida, considerando o seu perfil e preferências.
             </p>
           </>
         )}

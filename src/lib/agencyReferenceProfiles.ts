@@ -96,7 +96,7 @@ export const EDITORIAL_DMC: AgencySiteProfile = {
   requestCenter: {
     title: "Por onde você quer começar?",
     titlePlacement: "above-card",
-    notice: "Cada solicitação é analisada pela Amanda, considerando seu perfil, suas preferências e o investimento que você deseja fazer.",
+    notice: "Cada orçamento é feito sob medida, considerando o seu perfil e preferências.",
   },
   randomizeDestinations: true,
   destinations: [
@@ -258,7 +258,7 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
   ],
   requestCenter: {
     title: "Por onde você quer começar?",
-    notice: "Sua solicitação não é processada automaticamente. Cada pedido é analisado com atenção para que as opções realmente façam sentido para a sua viagem.",
+    notice: "Cada orçamento é feito sob medida, considerando o seu perfil e preferências.",
     submitLabel: "Solicitar",
     titlePlacement: "above-card",
   },
