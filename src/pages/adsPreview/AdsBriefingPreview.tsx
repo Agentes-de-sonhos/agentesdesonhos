@@ -137,7 +137,7 @@ export default function AdsBriefingPreview() {
     }
     let body: JSX.Element = <AgencySiteHome info={info} noindex />;
     if (subPath === "ingressos-orlando") {
-      body = <><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></>;
+      body = <div className="wl-orlando-page"><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></div>;
     } else if (subPath === "visto-americano") {
       body = <div data-preview-interactive><UsVisaLandingPage info={info} presentation /></div>;
     } else if (subPath === "dmc-portugal") {
