@@ -84,7 +84,7 @@ export function AgencyFeaturedExperienceSection({
         </div>
 
         {config.gallery && config.gallery.length > 0 ? (
-          <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
+          <div className={`relative ${reverse ? "lg:order-1" : ""} order-2 lg:order-none`}>
             {config.galleryStyle === "stories" ? (
               <AgencyStoriesGallery images={config.gallery} intervalMs={config.galleryIntervalMs} badge={config.badge} />
             ) : (
@@ -92,7 +92,7 @@ export function AgencyFeaturedExperienceSection({
             )}
           </div>
         ) : (
-        <div className={`relative ${reverse ? "lg:order-1" : ""} order-first lg:order-none`}>
+        <div className={`relative ${reverse ? "lg:order-1" : ""} order-2 lg:order-none`}>
           <div
             className={`relative overflow-hidden rounded-3xl ${
               config.mainImage.fit === "contain" ? "bg-transparent" : "aspect-[16/10] bg-muted"
