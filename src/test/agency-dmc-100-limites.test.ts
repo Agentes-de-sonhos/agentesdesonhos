@@ -36,7 +36,7 @@ describe("seção DMC da 100 Limites", () => {
     expect(profile.hero).toHaveLength(2);
     expect(profile.hero?.map((slide) => slide.image)).toEqual(["amanda100Limites", "brasil"]);
     expect(profile.hero?.[0]).toMatchObject({ focalPoint: "amandaRight", textWidth: "narrowLeft" });
-    expect(profile.requestCenter?.notice).toContain("Cada solicitação é analisada pela Amanda");
+    expect(profile.requestCenter?.notice).toContain("Cada orçamento é feito sob medida");
     expect(profile.destinations?.map((destination) => destination.title)).toEqual([
       "Brasil e Nordeste", "Europa e Portugal", "Orlando e parques", "Caribe e México", "América do Sul",
     ]);

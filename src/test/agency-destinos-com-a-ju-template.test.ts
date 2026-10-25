@@ -103,7 +103,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     const requestCenter = resolveSiteProfile(JU_HOSTS[0]).requestCenter;
     expect(requestCenter).toEqual({
       title: "Por onde você quer começar?",
-      notice: "Sua solicitação não é processada automaticamente. Cada pedido é analisado com atenção para que as opções realmente façam sentido para a sua viagem.",
+      notice: "Cada orçamento é feito sob medida, considerando o seu perfil e preferências.",
       submitLabel: "Solicitar",
       titlePlacement: "above-card",
     });

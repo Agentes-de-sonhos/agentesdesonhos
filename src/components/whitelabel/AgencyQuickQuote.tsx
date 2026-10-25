@@ -377,7 +377,7 @@ export function AgencyQuickQuote({
         )}
 
         <p className={editorial ? "mt-4 text-[13px] leading-relaxed text-muted-foreground" : "mt-3 text-xs text-muted-foreground"}>
-          {copy?.notice ?? "Não é uma busca automática: cada pedido é analisado por um consultor da equipe."}
+          {copy?.notice ?? "Cada orçamento é feito sob medida, considerando o seu perfil e preferências."}
         </p>
       </div>
 
