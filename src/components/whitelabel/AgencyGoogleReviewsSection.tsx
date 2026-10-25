@@ -161,6 +161,8 @@ export function AgencyGoogleReviewsSection({
               <GoogleG className="h-6 w-6" />
             </div>
           )}
+          </div>
+          {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
         </div>
 
         {data ? (
