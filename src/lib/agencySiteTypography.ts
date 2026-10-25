@@ -8,7 +8,7 @@
 export const AGENCY_SECTION_HEADING_CLASS = "mb-8 w-full md:mb-10";
 
 export const AGENCY_SECTION_TITLE_CLASS =
-  "w-full break-words text-pretty text-3xl font-extrabold leading-[1.12] text-foreground md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]";
+  "w-full break-words text-pretty text-3xl font-semibold leading-[1.12] text-left text-foreground md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]";
 
 export const AGENCY_SECTION_SUBTITLE_CLASS =
   "mt-4 w-full max-w-5xl break-words text-pretty text-[15px] leading-relaxed text-muted-foreground md:text-base";
@@ -33,3 +33,6 @@ export const AGENCY_CARD_TITLE_CLASS =
 
 export const AGENCY_CARD_DESCRIPTION_CLASS =
   "break-words text-pretty leading-relaxed";
+/** Chapéu (nome da seção) obrigatório acima de todo título de seção. */
+export const AGENCY_SECTION_EYEBROW_CLASS =
+  "wl-kicker mb-3 text-left text-[11px] font-bold uppercase tracking-[0.18em] text-primary";

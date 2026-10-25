@@ -53,7 +53,7 @@ export function AgencyDmcSection({
             </p>
             <h2
               id="dmc-agencias-title"
-              className="mt-6 max-w-xl text-4xl font-extrabold leading-[1.08] md:text-5xl"
+              className="mt-6 max-w-xl text-3xl font-semibold leading-[1.12] md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]"
             >
               {config.title}
             </h2>
