@@ -1608,9 +1608,9 @@ body[data-booking-selection-bar] {
   .wl-editorial .wl-alt-gradient,
   .wl-editorial .wl-soft-gradient,
   .wl-editorial .wl-soft-gradient-footer,
-  .wl-editorial .wl-alt-surface,
+  .wl-editorial .wl-alt-surface:not(.wl-presentation-dark),
   .wl-mundo .wl-alt-gradient,
-  .wl-mundo .wl-alt-surface,
+  .wl-mundo .wl-alt-surface:not(.wl-presentation-dark),
   .wl-alt-gradient,
   .wl-soft-gradient {
     background-color: hsl(0 0% 100%) !important;
