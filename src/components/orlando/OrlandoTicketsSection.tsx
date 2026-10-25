@@ -33,7 +33,7 @@ import { DisneyParkMapTrigger, isParkMapId, type ParkMapId } from "./DisneyParkM
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { ArrowRight as ArrowRight } from "lucide-react";
-import nextStepBg from "@/assets/orlando-next-step-bg.webp.asset.json";
+import nextStepBg from "@/assets/orlando-next-step-bg-full.webp.asset.json";
 import ticketsHand from "@/assets/orlando-tickets-hand.webp.asset.json";
 
 const CARD_LOGOS: Record<string, string> = {
