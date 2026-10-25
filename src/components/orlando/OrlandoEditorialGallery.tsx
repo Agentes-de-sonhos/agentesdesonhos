@@ -66,9 +66,14 @@ export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${i === slide ? "opacity-100" : "opacity-0"}`}
             />
           ))}
-          {!clearPhotos && <>
+          {!clearPhotos ? <>
             <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[hsl(220_12%_7%/0.96)] via-[hsl(220_12%_7%/0.7)] to-[hsl(220_12%_7%/0.12)] md:from-[hsl(220_12%_7%/0.94)] md:via-[hsl(220_12%_7%/0.58)] md:to-[hsl(220_12%_7%/0.06)]" />
             <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[hsl(220_12%_7%/0.6)] via-[hsl(220_12%_7%/0.28)] to-[hsl(220_12%_7%/0.18)] md:from-[hsl(220_12%_7%/0.45)] md:via-transparent md:to-transparent" />
+          </> : <>
+            {/* Mobile: soft bottom-up scrim behind the text block only. */}
+            <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-[75%] bg-gradient-to-t from-[hsl(220_12%_5%/0.85)] via-[hsl(220_12%_5%/0.45)] to-transparent md:hidden" />
+            {/* Desktop: localized bottom-left scrim (text area), rest of photo untouched. */}
+            <div aria-hidden="true" className="absolute inset-0 hidden md:block" style={{ background: "radial-gradient(ellipse 65% 60% at 0% 100%, hsl(220 12% 5% / 0.82) 0%, hsl(220 12% 5% / 0.5) 45%, transparent 100%)" }} />
           </>}
         </div>
 
