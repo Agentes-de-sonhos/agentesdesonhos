@@ -24,8 +24,9 @@ const EssyaTurComingSoon = lazy(() => import("@/pages/whitelabel/EssyaTurComingS
 const MundoEmCoresComingSoon = lazy(() => import("@/pages/whitelabel/MundoEmCoresComingSoon"));
 const BardelliViagensComingSoon = lazy(() => import("@/pages/whitelabel/BardelliViagensComingSoon"));
 
+/** Mesma camada fixa em todas as etapas do 1º carregamento: o logo nunca muda de posição. */
 const Spinner = () => (
-  <div className="min-h-screen flex items-center justify-center">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
     <AgencyBrandSpinner size="lg" />
   </div>
 );
