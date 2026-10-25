@@ -1147,8 +1147,8 @@ export default function AgencySiteHome({
           const years = aboutCopy ? null : bio.match(/\+?\s?(\d{1,2})\s*anos/i)?.[1] ?? null;
           return (
             <section key={key} id="sobre" className="bg-background">
-              <div className={`${container} grid items-center gap-10 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-16 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
-                <div className="min-w-0">
+              <div className={`${container} grid gap-8 ${aboutCopy?.media === "hidden" ? "" : "md:grid-cols-[1.05fr_0.95fr]"} md:gap-x-16 md:gap-y-0 ${compactSpacing ? "pt-14 pb-8 md:pt-24 md:pb-12" : "py-14 md:py-24"}`}>
+                <div className="order-1 min-w-0 md:order-none md:col-start-1 md:row-start-1 md:self-end">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
@@ -1191,6 +1191,8 @@ export default function AgencySiteHome({
                       {aboutCopy.tagline}
                     </p>
                   )}
+                </div>
+                <div className="order-3 min-w-0 -mt-4 md:order-none md:col-start-1 md:row-start-2 md:mt-0 md:self-start">
                   {!!aboutCopy?.facts?.length && (
                     <ul className="mt-8 grid gap-3 sm:grid-cols-2">
                       {aboutCopy.facts.map((fact) => (
@@ -1222,7 +1224,7 @@ export default function AgencySiteHome({
                     </div>
                   )}
                 </div>
-                {aboutCopy?.media !== "hidden" && <div className="grid gap-4">
+                {aboutCopy?.media !== "hidden" && <div className="order-2 grid gap-4 md:order-none md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
                   {aboutCopy?.mural ? (
                     <AgencyPhotoMural src={aboutCopy.mural.src} alt={aboutCopy.mural.alt} />
                   ) : aboutCopy?.images?.length ? (
