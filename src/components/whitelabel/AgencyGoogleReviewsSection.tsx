@@ -140,32 +140,29 @@ export function AgencyGoogleReviewsSection({
 
   return (
     <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
-      <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
-        <div className="flex w-full min-w-0 flex-col gap-6">
-          <div className="min-w-0">
+      <div className={`${container} ${compactSpacing ? "pt-8 pb-10 md:pt-10 md:pb-14" : "py-10 md:py-14"}`}>
+        <div className="flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+          <div className="min-w-0 flex-1">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
             <h2
               id="avaliacoes-title"
-              className={`mt-4 ${AGENCY_SECTION_TITLE_CLASS} lg:whitespace-nowrap lg:text-[clamp(1.75rem,2.45vw,2.5rem)]`}
+              className={`mt-3 ${AGENCY_SECTION_TITLE_CLASS} lg:text-[clamp(1.75rem,2.45vw,2.5rem)]`}
             >
               {copy?.title ?? "O que dizem nossos viajantes"}
             </h2>
             {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
           </div>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            {data && data.rating != null ? (
-              <div data-testid="google-rating-summary" className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border/60 bg-background px-5 py-4 shadow-sm">
-                <span className="text-lg font-extrabold uppercase tracking-wide text-foreground">{ratingLabel(data.rating)}</span>
-                <Stars value={data.rating} className="h-5 w-5" />
-                <span className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong>
-                  {data.total != null && <> · Com base em <strong className="text-foreground">{data.total.toLocaleString("pt-BR")} avaliações</strong></>}
-                </span>
-                <GoogleG className="h-6 w-6" />
-              </div>
-            ) : <span />}
-          </div>
-
+          {data && data.rating != null && (
+            <div data-testid="google-rating-summary" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 self-start rounded-2xl border border-border/60 bg-background px-5 py-4 shadow-sm lg:self-end">
+              <span className="text-lg font-extrabold uppercase tracking-wide text-foreground">{ratingLabel(data.rating)}</span>
+              <Stars value={data.rating} className="h-5 w-5" />
+              <span className="text-sm text-muted-foreground">
+                <strong className="text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong>
+                {data.total != null && <> · Com base em <strong className="text-foreground">{data.total.toLocaleString("pt-BR")} avaliações</strong></>}
+              </span>
+              <GoogleG className="h-6 w-6" />
+            </div>
+          )}
         </div>
 
         {data ? (
