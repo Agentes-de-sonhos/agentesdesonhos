@@ -133,6 +133,7 @@ import {
   AGENCY_SECTION_HEADING_CLASS,
   AGENCY_SECTION_SUBTITLE_CLASS,
   AGENCY_SECTION_TITLE_CLASS,
+  AGENCY_SECTION_EYEBROW_CLASS,
 } from "@/lib/agencySiteTypography";
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
@@ -401,14 +402,18 @@ function SectionHeading({
   title,
   subtitle,
   editorial,
+  eyebrow,
 }: {
   title: string;
   subtitle?: string;
   editorial?: boolean;
+  eyebrow?: string;
 }) {
+  const kicker = eyebrow ? <p className={AGENCY_SECTION_EYEBROW_CLASS}>{eyebrow}</p> : null;
   if (editorial) {
     return (
       <div className={AGENCY_SECTION_HEADING_CLASS}>
+        {kicker}
         <h2 className={AGENCY_SECTION_TITLE_CLASS}>{title}</h2>
         {subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{subtitle}</p>}
       </div>
@@ -416,6 +421,7 @@ function SectionHeading({
   }
   return (
     <div className={AGENCY_SECTION_HEADING_CLASS}>
+      {kicker}
       <h2 className="w-full break-words text-pretty text-2xl font-semibold leading-tight text-foreground md:text-3xl">{title}</h2>
       <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
       {subtitle && <p className="mt-4 w-full max-w-5xl break-words text-pretty text-muted-foreground">{subtitle}</p>}
@@ -678,7 +684,8 @@ export default function AgencySiteHome({
           >
             <div className={editorial ? `${container} py-14 md:py-24` : undefined}>
             <SectionHeading
-              title={copy.title ?? "Destaques"}
+              eyebrow={copy.kicker ?? "DESTAQUES"}
+                title={copy.title ?? "Destaques"}
               subtitle={copy.subtitle ?? "Três formas de começar agora o planejamento da sua próxima viagem."}
               editorial={editorial}
             />
@@ -808,16 +815,7 @@ export default function AgencySiteHome({
         if (!authority) return null;
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
-            {authority.sectionLabel ? (
-              <div className={`${container} pt-14 md:pt-20`}>
-                <div className="flex items-center justify-center gap-4 md:gap-6">
-                  <span className="h-px w-12 bg-background/30 md:w-24" aria-hidden="true" />
-                  <h2 className="text-center text-2xl font-extrabold uppercase tracking-[0.28em] text-background md:text-4xl">{authority.sectionLabel}</h2>
-                  <span className="h-px w-12 bg-background/30 md:w-24" aria-hidden="true" />
-                </div>
-              </div>
-            ) : null}
-            <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
+                        <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
               {authority.videos?.length ? (
                 <AuthorityVideoGallery
                   items={authority.videos.map((v) => ({
@@ -836,8 +834,8 @@ export default function AgencySiteHome({
               )}
 
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.kicker}</p>
-                <h2 className="mt-4 text-3xl font-extrabold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.sectionLabel ?? "Cruzeiros"}</p>
+                <h2 className="mt-4 text-3xl font-semibold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
                 <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-background/80 md:text-base">
                   {authority.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
                 </div>
@@ -929,7 +927,8 @@ export default function AgencySiteHome({
             <section key={key} id="campanhas" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
               <div className={`${container} py-14 md:py-24`}>
                 <SectionHeading
-                  title={copy.title ?? "Experiências e campanhas"}
+                  eyebrow={copy.kicker ?? "EXPERIÊNCIAS E ROTEIROS"}
+                title={copy.title ?? "Experiências e campanhas"}
                   subtitle={copy.subtitle ?? "Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."}
                   editorial
                 />
@@ -953,6 +952,7 @@ export default function AgencySiteHome({
           <section key={key} id="campanhas" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
+                eyebrow={copy.kicker ?? "EXPERIÊNCIAS E ROTEIROS"}
                 title={copy.title ?? "Experiências e campanhas"}
                 subtitle={copy.subtitle ?? "Temas que a nossa equipe acompanha de perto. Escolha um e conte os detalhes."}
               />
@@ -984,6 +984,7 @@ export default function AgencySiteHome({
           <section key={key} id="ofertas" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
               <div className="max-w-2xl">
+                <p className={AGENCY_SECTION_EYEBROW_CLASS}>OPORTUNIDADES</p>
                 <h2 className="text-2xl font-semibold text-foreground md:text-3xl">Ofertas selecionadas</h2>
                 <div className="mt-2 h-1 w-fit min-w-16 rounded-full bg-primary/70" />
                 <p className="mt-4 text-muted-foreground">
@@ -1030,7 +1031,8 @@ export default function AgencySiteHome({
             <section id="destinos" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
-                  title={copy.title ?? "Descubra o seu próximo destino"}
+                  eyebrow={copy.kicker ?? "DESTINOS"}
+                title={copy.title ?? "Descubra o seu próximo destino"}
                   subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
                   editorial
                 />
@@ -1098,6 +1100,7 @@ export default function AgencySiteHome({
           <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
+                eyebrow={copy.kicker ?? "DESTINOS"}
                 title={copy.title ?? "Descubra o seu próximo destino"}
                 subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
               />
@@ -1150,11 +1153,11 @@ export default function AgencySiteHome({
                     {aboutCopy?.kicker ?? "Quem planeja a sua viagem"}
                   </p>
                   {aboutCopy?.title ? (
-                    <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                    <h2 className="mt-4 text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">
                       {aboutCopy.title}
                     </h2>
                   ) : (
-                    <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                    <h2 className="mt-4 text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">
                       Sobre a <BrandText>{name}</BrandText>
                     </h2>
                   )}
@@ -1320,7 +1323,8 @@ export default function AgencySiteHome({
             <section key={key} id="diferenciais" className="wl-soft-gradient bg-[hsl(var(--wl-sand))]">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
-                  title={copy.title ?? "Diferenciais"}
+                  eyebrow={copy.kicker ?? "POR QUE VIAJAR CONOSCO"}
+                title={copy.title ?? "Diferenciais"}
                   subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
                   editorial
                 />
@@ -1363,7 +1367,8 @@ export default function AgencySiteHome({
         return (
           <section key={key} id="diferenciais" className="mx-auto max-w-6xl px-4 py-14 md:py-16">
             <SectionHeading
-              title={copy.title ?? "Diferenciais"}
+              eyebrow={copy.kicker ?? "POR QUE VIAJAR CONOSCO"}
+                title={copy.title ?? "Diferenciais"}
               subtitle={copy.subtitle ?? "O que muda quando a viagem é planejada com quem acompanha cada detalhe."}
             />
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -1390,7 +1395,7 @@ export default function AgencySiteHome({
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {copy.kicker ?? "Gente cuidando de gente"}
                   </p>
-                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                  <h2 className="mt-4 text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">
                     {copy.title ?? "Atendimento humano"}
                   </h2>
                   <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-muted-foreground md:text-base">
@@ -1529,6 +1534,7 @@ export default function AgencySiteHome({
           <section key={key} id="equipe" className="bg-background">
             <div className={editorial ? `${container} py-14 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}>
               <SectionHeading
+                eyebrow={copy.kicker ?? "EQUIPE"}
                 title={copy.title ?? "Equipe e consultores"}
                 subtitle={copy.subtitle}
                 editorial={editorial}
@@ -1569,6 +1575,7 @@ export default function AgencySiteHome({
           <section key={key} id="depoimentos" className="bg-background">
             <div className={editorial ? `${container} py-14 md:py-24` : "mx-auto max-w-6xl px-4 py-14 md:py-16"}>
               <SectionHeading
+                eyebrow={copy.kicker ?? "DEPOIMENTOS"}
                 title={copy.title ?? "Depoimentos"}
                 subtitle={copy.subtitle}
                 editorial={editorial}
@@ -1653,7 +1660,7 @@ export default function AgencySiteHome({
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
                     {copy.kicker ?? "Antes de solicitar"}
                   </p>
-                  <h2 className="mt-4 text-3xl font-extrabold leading-tight text-foreground md:text-[2.6rem]">
+                  <h2 className="mt-4 text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">
                     {copy.title ?? "Perguntas frequentes"}
                   </h2>
                   <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
@@ -1702,7 +1709,8 @@ export default function AgencySiteHome({
         return (
           <section key={key} id="faq" className="border-y border-border/60 bg-muted/30">
              <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
-              <SectionHeading title={copy.title ?? "Perguntas frequentes"} />
+              <SectionHeading eyebrow={copy.kicker ?? "ANTES DE SOLICITAR"}
+                title={copy.title ?? "Perguntas frequentes"} />
               <Accordion type="single" collapsible className="w-full">
                 {faq.map((item, index) => (
                   <AccordionItem key={item.q} value={`faq-${index}`}>
@@ -1731,7 +1739,7 @@ export default function AgencySiteHome({
                       <p className="wl-kicker inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red,var(--primary)))]">
                         <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
-                      <h2 className="mt-4 text-pretty text-3xl font-extrabold leading-[1.1] text-[hsl(var(--wl-ink))] md:text-[clamp(2rem,3vw,2.6rem)]">
+                      <h2 className="mt-4 text-pretty text-3xl font-semibold leading-[1.1] text-[hsl(var(--wl-ink))] md:text-[clamp(2rem,3vw,2.6rem)]">
                         {copy.title ?? "Receba novidades e oportunidades"}
                       </h2>
                       <p className="mt-5 max-w-xl text-pretty text-[15px] leading-relaxed text-[hsl(var(--wl-ink)_/_0.75)] md:text-base">
@@ -1767,7 +1775,7 @@ export default function AgencySiteHome({
                       <p className="wl-kicker inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                         <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
-                       <h2 className={`mt-4 w-full break-words text-pretty text-3xl font-extrabold leading-[1.12] text-white md:leading-[1.08] ${copy.titleSingleLine ? "lg:whitespace-nowrap md:text-[clamp(1.75rem,2.35vw,2.35rem)]" : "md:text-[clamp(2.25rem,3.25vw,2.75rem)]"}`}>
+                       <h2 className={`mt-4 w-full break-words text-pretty text-3xl font-semibold leading-[1.12] text-white md:leading-[1.08] ${copy.titleSingleLine ? "lg:whitespace-nowrap md:text-[clamp(1.75rem,2.35vw,2.35rem)]" : "md:text-[clamp(2.25rem,3.25vw,2.75rem)]"}`}>
                          {copy.title ?? "Receba novidades e oportunidades"}
                       </h2>
 
