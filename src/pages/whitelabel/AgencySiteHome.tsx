@@ -2142,7 +2142,8 @@ export default function AgencySiteHome({
           );
           if (index === 0 && editorial) {
             return (
-              <div key={`${section.key}-offset`} className={gradient ? "wl-alt-gradient" : "bg-card"} style={{ paddingTop: bottomOverlap }}>
+              // 100 Limites: faixa sob o solicitador sempre branca pura.
+              <div key={`${section.key}-offset`} className={gradient && profile.key !== "editorialDmc" ? "wl-alt-gradient" : "bg-card"} style={{ paddingTop: bottomOverlap }}>
 
                 {tagged}
               </div>

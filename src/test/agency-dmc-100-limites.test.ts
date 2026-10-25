@@ -139,7 +139,7 @@ describe("seção DMC da 100 Limites", () => {
       expect(keys).toEqual(["dmc", "destinations", "orlando", "highlights", "resorts", "about", "differentials", "concierge", "faq", "newsletter"]);
     }
     expect(homeSource).toContain('gradient ? "wl-alt-gradient" : "bg-card"');
-    expect(homeSource).toContain('key={`${section.key}-offset`} className={gradient ? "wl-alt-gradient" : "bg-card"}');
+    expect(homeSource).toContain('key={`${section.key}-offset`} className={gradient && profile.key !== "editorialDmc" ? "wl-alt-gradient" : "bg-card"}');
     for (const host of ["destinoscomaju.com.br", "paraisoviagens.com", "casanovatur.com.br"]) {
       expect(resolveSiteProfile(host).alternateSurfaces).not.toBe(true);
     }
