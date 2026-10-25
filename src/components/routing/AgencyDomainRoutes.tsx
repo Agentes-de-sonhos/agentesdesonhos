@@ -286,7 +286,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
             <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />
             <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
-            <Route path="/ingressos-orlando" element={<><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></>} />
+            <Route path="/ingressos-orlando" element={<div className="wl-orlando-page"><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></div>} />
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><CuratedResortsMap hostname={info.hostname} {...(resolveSiteProfile(info.hostname).key === "editorialDmc" ? { title: "Explore os resorts do Brasil com a 100 Limites" } : {})} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />
             )}
