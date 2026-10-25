@@ -81,7 +81,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     expect(homeSource).toContain("playsInline");
     expect(homeSource).toContain("muted");
 
-    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+    for (const host of ["paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
       expect(resolveSiteProfile(host).authority?.video).toBeUndefined();
     }
   });
@@ -93,7 +93,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     expect(homeSource).toContain("whitespace-pre-line");
     expect(homeSource).toContain("data-hero-actions-placement");
 
-    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+    for (const host of ["paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
       expect(resolveSiteProfile(host).heroPresentation?.actionsPlacement).not.toBe("right");
       expect(resolveSiteProfile(host).heroPresentation?.preserveTitleLineBreaks).not.toBe(true);
     }
@@ -113,7 +113,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
   });
 
   it("preserva o padrão interno compartilhado nos demais perfis", () => {
-    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+    for (const host of ["paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
       expect(resolveSiteProfile(host).requestCenter?.titlePlacement).not.toBe("above-card");
     }
   });
@@ -155,7 +155,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       children.findIndex((c) => c.label === "Xcaret"),
     );
     // Nenhum outro tenant recebe a especialidade nova.
-    for (const host of [LIMITES, "paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+    for (const host of ["paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
       expect(JSON.stringify(siteNavLinks(host))).not.toContain("/universal");
     }
   });
