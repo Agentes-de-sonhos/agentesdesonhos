@@ -91,9 +91,10 @@ export const EDITORIAL_DMC: AgencySiteProfile = {
   ],
   heroPresentation: {
     kicker: "AGÊNCIA DE VIAGENS · BRASIL E MUNDO",
-    cta: { label: "Solicitar minha viagem", service: "pacotes" },
   },
   requestCenter: {
+    title: "Por onde você quer começar?",
+    titlePlacement: "above-card",
     notice: "Cada solicitação é analisada pela Amanda, considerando seu perfil, suas preferências e o investimento que você deseja fazer.",
   },
   randomizeDestinations: true,
