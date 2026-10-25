@@ -74,7 +74,7 @@ export const EDITORIAL_DMC: AgencySiteProfile = {
   hero: [
     {
       title: "Atendimento próximo em cada etapa da viagem",
-      subtitle: "Conte com Amanda Larini para planejar, esclarecer dúvidas e acompanhar sua viagem, do primeiro contato ao retorno.",
+      subtitle: "Planejamento e suporte do primeiro contato ao retorno.",
       image: "amanda100Limites",
       focalPoint: "amandaRight",
       textWidth: "narrowLeft",
@@ -83,7 +83,7 @@ export const EDITORIAL_DMC: AgencySiteProfile = {
     },
     {
       title: "Sua agência de viagens para o Brasil e o mundo",
-      subtitle: "Atendimento personalizado com a Amanda Larini, do planejamento ao retorno, com o melhor equilíbrio entre experiência e investimento.",
+      subtitle: "Atendimento personalizado, com equilíbrio entre experiência e investimento.",
       image: "brasil",
       order: 2,
       enabled: true,
