@@ -842,7 +842,7 @@ export default function AgencySiteHome({
                   {authority.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
                 </div>
               </div>
-              <div className="order-3 md:order-none md:col-start-2 md:row-start-2 md:self-start">
+              <div className="order-3 flex justify-center md:order-none md:col-start-2 md:row-start-2 md:block md:self-start">
                 <Button size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openRequest(authority.service)}>
                   {authority.cta} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
