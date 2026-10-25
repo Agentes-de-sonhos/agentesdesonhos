@@ -684,7 +684,7 @@ export default function AgencySiteHome({
           >
             <div className={editorial ? `${container} py-14 md:py-24` : undefined}>
             <SectionHeading
-              eyebrow={copy.kicker ?? "DESTAQUES"}
+              eyebrow={copy.kicker ?? "EXPERIÊNCIAS E ROTEIROS"}
                 title={copy.title ?? "Destaques"}
               subtitle={copy.subtitle ?? "Três formas de começar agora o planejamento da sua próxima viagem."}
               editorial={editorial}
