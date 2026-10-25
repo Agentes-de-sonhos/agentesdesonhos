@@ -16,7 +16,7 @@ describe("seção DMC da 100 Limites", () => {
       expect(dmc?.presentation?.imageUrl).toContain("dmc-acolhimento-lisboa.jpg");
       expect(dmc?.title).toBe("DMC em Portugal");
       expect(dmc?.kicker).toBe("TAMBÉM EM PORTUGAL · DMC");
-      expect(dmc?.cta).toBe("Solicitar orçamento em Portugal");
+      expect(dmc?.cta).toBe("Conhecer serviços em Portugal");
       expect(dmc?.services.map((service) => service.label)).toEqual([
         "Transfers privativos",
         "Passeios e experiências",
