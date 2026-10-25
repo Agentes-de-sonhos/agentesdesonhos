@@ -340,8 +340,9 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   return (
     <section ref={sectionRef} id="ingressos-orlando" className="scroll-mt-24 bg-background py-14 md:py-20">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 ref={headingRef} tabIndex={-1} className="text-3xl font-semibold text-foreground outline-none md:text-4xl">
+        <div className="w-full text-left">
+          <p className="wl-kicker mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Ingressos e parques</p>
+          <h2 ref={headingRef} tabIndex={-1} className="w-full break-words text-pretty text-3xl font-semibold leading-[1.12] text-foreground outline-none md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]">
             {step === null || state === "success" ? ORLANDO_SECTION.title : STEPS[step]}
           </h2>
           <p className="mt-3 text-muted-foreground">

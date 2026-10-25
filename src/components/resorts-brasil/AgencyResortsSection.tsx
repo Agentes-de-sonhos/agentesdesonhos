@@ -44,8 +44,8 @@ export function AgencyResortsSection({
     <div className="w-full">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary wl-kicker">Resorts no Brasil</p>
-          <h2 className="mt-3 font-display text-3xl text-foreground md:text-4xl">{title}</h2>
+          <p className="wl-kicker text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Resorts no Brasil</p>
+          <h2 className="mt-3 w-full break-words text-pretty text-3xl font-semibold leading-[1.12] text-foreground md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]">{title}</h2>
           <p className="mt-3 max-w-xl text-muted-foreground">
             {visible.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
           </p>
