@@ -32,7 +32,9 @@ export function AgencyFeaturedExperienceSection({
       data-testid="featured-experience"
     >
       <div className={`${container} grid items-center gap-10 lg:grid-cols-[2fr_3fr] lg:gap-14`}>
-        <div className={reverse ? "lg:order-2" : undefined}>
+        {/* Celular: chapéu, título, descrição → fotos → destaques e botão. */}
+        <div className={`contents lg:block ${reverse ? "lg:order-2" : ""}`}>
+          <div className="order-1 lg:order-none">
           {config.kicker && (
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">{config.kicker}</p>
           )}
@@ -42,7 +44,6 @@ export function AgencyFeaturedExperienceSection({
           >
             {config.title}
           </h2>
-          {/* Parágrafos separados por linha em branco no texto do perfil. */}
           {config.description
             .split(/\n{2,}/)
             .map((p) => p.trim())
@@ -52,8 +53,10 @@ export function AgencyFeaturedExperienceSection({
                 {para}
               </p>
             ))}
+          </div>
+          <div className="order-3 lg:order-none">
           {config.highlights && config.highlights.length > 0 && (
-            <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+            <ul className="grid gap-3 sm:grid-cols-2 lg:mt-6">
               {config.highlights.map((h) => (
                 <li key={h} className="flex items-start gap-2 text-sm text-foreground">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
@@ -77,6 +80,7 @@ export function AgencyFeaturedExperienceSection({
               )}
             </div>
           )}
+          </div>
         </div>
 
         {config.gallery && config.gallery.length > 0 ? (

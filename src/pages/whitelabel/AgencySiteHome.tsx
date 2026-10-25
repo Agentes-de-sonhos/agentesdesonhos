@@ -1963,7 +1963,7 @@ export default function AgencySiteHome({
           <h1
             className={
                editorial
-                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "md:whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""} ${current.textWidth === "narrowLeft" ? "lg:max-w-[38ch] lg:flex-none" : ""}`
+                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "md:whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""} ${current.textWidth === "narrowLeft" ? "lg:max-w-[38ch] lg:flex-none" : ""} ${!profile.heroPresentation?.preserveTitleLineBreaks && current.title?.includes("\n") ? "whitespace-pre-line" : ""}`
                  : "line-clamp-2 w-full max-w-5xl break-words text-pretty text-[1.625rem] font-semibold leading-[1.12] md:line-clamp-none tracking-tight text-primary-foreground md:text-6xl"
             }
           >
