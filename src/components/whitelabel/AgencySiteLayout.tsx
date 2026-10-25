@@ -4,7 +4,34 @@ import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/age
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
 import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown, Clock } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
+/**
+ * Ao chegar na Home vinda de outra página com âncora (ex.: /#ingressos-orlando),
+ * espera a seção ser montada e rola até ela, descontando o cabeçalho fixo.
+ */
+function useHashScroll() {
+  const { pathname, hash } = useLocation();
+  useEffect(() => {
+    const id = decodeURIComponent((hash || "").replace(/^#/, ""));
+    if (!id) return;
+    let tries = 0;
+    let timer = 0;
+    const tick = () => {
+      const el = document.getElementById(id);
+      if (el) {
+        const header = document.querySelector("header");
+        const offset = (header?.getBoundingClientRect().height ?? 0) + 8;
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
+        return;
+      }
+      if (++tries < 60) timer = window.setTimeout(tick, 100);
+    };
+    timer = window.setTimeout(tick, 60);
+    return () => window.clearTimeout(timer);
+  }, [pathname, hash]);
+}
 import { BrandText } from "@/components/ui/brand-text";
 import { Button } from "@/components/ui/button";
 import {
@@ -703,6 +730,7 @@ export function AgencySiteLayout({
   /** Exclusivo do SiteLab Base (apresentação comercial). */
   navOverride?: AgencySiteNavItem[];
 }) {
+  useHashScroll();
   // Propaga o tema do tenant para o `body`, para que Dialog/Popover/Select/
   // Calendar renderizados em portal herdem os tokens da agência.
   useAgencySiteThemeOnBody(info.hostname);
