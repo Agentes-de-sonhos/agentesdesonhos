@@ -266,7 +266,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           <Route
             element={
               <AgencySiteLayout info={info} noWhatsapp>
-                <Outlet />
+                <Suspense fallback={<ContentFallback />}><Outlet /></Suspense>
               </AgencySiteLayout>
             }
           >
@@ -277,7 +277,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           <Route
             element={
               <AgencySiteLayout info={info}>
-                <Outlet />
+                <Suspense fallback={<ContentFallback />}><Outlet /></Suspense>
               </AgencySiteLayout>
             }
           >
