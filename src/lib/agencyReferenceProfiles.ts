@@ -91,6 +91,7 @@ export const EDITORIAL_DMC: AgencySiteProfile = {
   ],
   heroPresentation: {
     kicker: "AGÊNCIA DE VIAGENS · BRASIL E MUNDO",
+    titleWeight: "regular",
   },
   requestCenter: {
     title: "Por onde você quer começar?",
