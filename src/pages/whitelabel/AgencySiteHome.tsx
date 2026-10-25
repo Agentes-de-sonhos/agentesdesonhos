@@ -1014,7 +1014,7 @@ export default function AgencySiteHome({
                       {d.label}
                     </span>
                     <h3 className="mt-3 text-lg font-semibold text-primary-foreground">{d.title}</h3>
-                    <p className="mt-1 text-sm text-primary-foreground/85">{d.text}</p>
+                    <p className="mt-1 hidden text-sm text-primary-foreground/85 md:block">{d.text}</p>
                   </div>
                 </a>
               ))}
@@ -1069,7 +1069,7 @@ export default function AgencySiteHome({
                           {d.title}
                         </h3>
                         {i === 0 && (
-                          <p className={`mt-2 w-full max-w-2xl text-sm text-background/80 ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
+                          <p className={`mt-2 hidden w-full max-w-2xl text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
                         <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
                           Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
@@ -1124,7 +1124,7 @@ export default function AgencySiteHome({
                         {d.label}
                       </span>
                       <h3 className="mt-3 text-lg font-semibold text-primary-foreground">{d.title}</h3>
-                      <p className="mt-1 text-sm text-primary-foreground/85">{d.text}</p>
+                      <p className="mt-1 hidden text-sm text-primary-foreground/85 md:block">{d.text}</p>
                       <span className="mt-3 inline-flex items-center text-sm font-medium text-primary-foreground">
                         Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" />
                       </span>
