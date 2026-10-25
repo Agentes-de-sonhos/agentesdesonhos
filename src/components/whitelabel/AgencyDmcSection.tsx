@@ -1,6 +1,7 @@
 import {
   ArrowRight, Bus, Compass, Handshake, MapPinned, MessageCircle, Sparkles, UserRound, Users,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import type { AgencyDmcConfig } from "@/lib/agencySiteConfig";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
@@ -47,8 +48,7 @@ export function AgencyDmcSection({
       >
         <div className={`${siteContainer(true)} grid items-center gap-12 py-20 md:py-24 lg:grid-cols-[1.05fr_0.95fr]`}>
           <div>
-            <p className={`wl-kicker inline-flex items-center gap-2 border-b pb-2 text-[11px] font-bold tracking-[0.18em] ${lightSurface ? "border-border text-foreground/80" : "border-background/25 text-background/85"}`}>
-              <Handshake className="wl-accent-icon h-3.5 w-3.5" aria-hidden="true" />
+            <p className="wl-kicker text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)]">
               {config.kicker}
             </p>
             <h2
@@ -74,26 +74,15 @@ export function AgencyDmcSection({
             </ul>
 
             <div className="mt-9 flex flex-wrap items-center gap-4">
-              {href ? (
-                <Button
-                  asChild
-                  size="lg"
-                  className="wl-dmc-cta h-12 rounded-lg px-6 text-[15px] font-semibold text-card [&_svg]:text-card"
-                >
-                  <a href={href} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />
-                    {config.cta}
-                  </a>
-                </Button>
-              ) : (
-                <Button
-                  size="lg"
-                  className="wl-dmc-cta h-12 rounded-lg px-6 text-[15px] font-semibold text-card [&_svg]:text-card"
-                  onClick={onFallbackContact}
-                >
+              <Button
+                asChild
+                size="lg"
+                className="wl-dmc-cta h-12 rounded-lg px-6 text-[15px] font-semibold text-card [&_svg]:text-card"
+              >
+                <Link to="/dmc-portugal">
                   {config.cta} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                </Button>
-              )}
+                </Link>
+              </Button>
             </div>
 
             <p className={`mt-5 max-w-xl text-[13px] ${lightSurface ? "text-muted-foreground" : "text-background/60"}`}>{config.note}</p>

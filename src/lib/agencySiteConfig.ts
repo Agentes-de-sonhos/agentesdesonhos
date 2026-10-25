@@ -397,7 +397,7 @@ export const DMC_BY_HOSTNAME: Record<string, AgencyDmcConfig> = (() => {
       { key: "roteiros", label: "Roteiros personalizados" },
       { key: "acompanhamento", label: "Acompanhamento local" },
     ],
-    cta: "Solicitar orçamento em Portugal",
+    cta: "Conhecer serviços em Portugal",
     whatsappMessage:
       "Olá, Amanda! Gostaria de solicitar um orçamento de serviços da DMC em Portugal.",
     note: "Cuidamos dos seus passageiros em parceria com sua agência, respeitando o relacionamento que você construiu com eles.",
