@@ -140,38 +140,35 @@ export function AgencyGoogleReviewsSection({
 
   return (
     <section ref={ref} id="avaliacoes" aria-labelledby="avaliacoes-title" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
-      <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
-        <div className="flex w-full min-w-0 flex-col gap-6">
-          <div className="min-w-0">
+      <div className={`${container} ${compactSpacing ? "pt-8 pb-10 md:pt-10 md:pb-14" : "py-10 md:py-14"}`}>
+        <div className="flex w-full min-w-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+          <div className="min-w-0 flex-1">
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">{copy?.kicker ?? "Avaliações no Google"}</p>
             <h2
               id="avaliacoes-title"
-              className={`mt-4 ${AGENCY_SECTION_TITLE_CLASS} lg:whitespace-nowrap lg:text-[clamp(1.75rem,2.45vw,2.5rem)]`}
+              className={`mt-3 ${AGENCY_SECTION_TITLE_CLASS} lg:text-[clamp(1.75rem,2.45vw,2.5rem)]`}
             >
               {copy?.title ?? "O que dizem nossos viajantes"}
             </h2>
             {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
           </div>
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            {data && data.rating != null ? (
-              <div data-testid="google-rating-summary" className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border/60 bg-background px-5 py-4 shadow-sm">
-                <span className="text-lg font-extrabold uppercase tracking-wide text-foreground">{ratingLabel(data.rating)}</span>
-                <Stars value={data.rating} className="h-5 w-5" />
-                <span className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong>
-                  {data.total != null && <> · Com base em <strong className="text-foreground">{data.total.toLocaleString("pt-BR")} avaliações</strong></>}
-                </span>
-                <GoogleG className="h-6 w-6" />
-              </div>
-            ) : <span />}
-          </div>
-
+          {data && data.rating != null && (
+            <div data-testid="google-rating-summary" className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 self-start rounded-2xl border border-border/60 bg-background px-5 py-4 shadow-sm lg:self-end">
+              <span className="text-lg font-extrabold uppercase tracking-wide text-foreground">{ratingLabel(data.rating)}</span>
+              <Stars value={data.rating} className="h-5 w-5" />
+              <span className="text-sm text-muted-foreground">
+                <strong className="text-foreground">{data.rating.toLocaleString("pt-BR", { minimumFractionDigits: 1 })}</strong>
+                {data.total != null && <> · Com base em <strong className="text-foreground">{data.total.toLocaleString("pt-BR")} avaliações</strong></>}
+              </span>
+              <GoogleG className="h-6 w-6" />
+            </div>
+          )}
         </div>
 
         {data ? (
           <Carousel
             opts={{ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" }}
-            className="mt-10"
+            className="mt-6 md:mt-8"
             aria-label="Galeria de avaliações"
           >
             <CarouselContent className="-ml-5">
@@ -181,46 +178,48 @@ export function AgencyGoogleReviewsSection({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="mt-6 flex flex-col-reverse items-stretch gap-4 md:flex-row md:items-center md:justify-between">
-              {googleUrl ? (
-                <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
-                  <a href={googleUrl} target="_blank" rel="noopener noreferrer">
-                    Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
-                  </a>
-                </Button>
-              ) : <span />}
+            <div className="mt-5 flex flex-col items-stretch gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col items-stretch gap-3 md:flex-row md:items-center md:gap-5">
+                {googleUrl && (
+                  <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
+                    <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+                      Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+                    </a>
+                  </Button>
+                )}
+                {illustrative ? (
+                  <p className="text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Textos fictícios, sem nota ou integração com o Google.</p>
+                ) : (
+                  <div className="flex flex-col gap-0.5 text-muted-foreground">
+                    <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">Google Maps</p>
+                    {data.attributions.length > 0 && (
+                      <p className="font-sans text-[12px]">
+                        Dados também fornecidos por:{" "}
+                        {data.attributions.map((a, i) => (
+                          <span key={`${a.provider}-${i}`}>
+                            {i > 0 && ", "}
+                            {a.providerUri ? (
+                              <a href={a.providerUri} target="_blank" rel="noopener noreferrer" className="hover:underline">{a.provider}</a>
+                            ) : a.provider}
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                    <p className="font-sans text-[12px]">Avaliações exibidas na ordem de relevância definida pelo Google Maps.</p>
+                  </div>
+                )}
+              </div>
               <div className="flex items-center justify-center gap-3 md:justify-end">
                 <CarouselPrevious className="static h-11 w-11 translate-y-0" />
                 <CarouselNext className="static h-11 w-11 translate-y-0" />
               </div>
             </div>
-
           </Carousel>
         ) : (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-52 rounded-2xl" />)}
           </div>
         )}
-
-        {illustrative ? <p className="mt-6 text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Textos fictícios, sem nota ou integração com o Google.</p> : <div className={`${compactSpacing ? "mt-4" : "mt-6"} flex flex-col gap-1 text-muted-foreground`}>
-          <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
-            Google Maps
-          </p>
-          {data && data.attributions.length > 0 && (
-            <p className="font-sans text-[12px]">
-              Dados também fornecidos por:{" "}
-              {data.attributions.map((a, i) => (
-                <span key={`${a.provider}-${i}`}>
-                  {i > 0 && ", "}
-                  {a.providerUri ? (
-                    <a href={a.providerUri} target="_blank" rel="noopener noreferrer" className="hover:underline">{a.provider}</a>
-                  ) : a.provider}
-                </span>
-              ))}
-            </p>
-          )}
-          <p className="font-sans text-[12px]">Avaliações exibidas na ordem de relevância definida pelo Google Maps.</p>
-        </div>}
       </div>
     </section>
   );
