@@ -1601,3 +1601,19 @@ body[data-booking-selection-bar] {
 
 /* Página dedicada de ingressos de Orlando: fundo branco em todos os sites. */
 .wl-orlando-page { --background: 0 0% 100%; background-color: hsl(0 0% 100%); }
+
+/* Mobile (< 768px): seções em degradê ficam com fundo branco puro (Fernando).
+   Fundos sólidos (navy, cards, banners) não são afetados; tablet/desktop intactos. */
+@media (max-width: 767.98px) {
+  .wl-editorial .wl-alt-gradient,
+  .wl-editorial .wl-soft-gradient,
+  .wl-editorial .wl-soft-gradient-footer,
+  .wl-editorial .wl-alt-surface:not(.wl-presentation-dark),
+  .wl-mundo .wl-alt-gradient,
+  .wl-mundo .wl-alt-surface:not(.wl-presentation-dark),
+  .wl-alt-gradient,
+  .wl-soft-gradient {
+    background-color: hsl(0 0% 100%) !important;
+    background-image: none !important;
+  }
+}
