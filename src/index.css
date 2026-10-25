@@ -1617,3 +1617,12 @@ body[data-booking-selection-bar] {
     background-image: none !important;
   }
 }
+
+/* Mobile: O Mundo em Cores sem degradês por seção (vence as regras :has acima). */
+@media (max-width: 767.98px) {
+  .wl-editorial.wl-mundo .wl-alt-surface:not(.wl-presentation-dark):is(:has(> #destinos), :has(> #resorts), :has(> #diferenciais), :has(> #faq), :has(> #atendimento)),
+  .wl-editorial.wl-mundo .wl-alt-surface.wl-alt-gradient:not(.wl-presentation-dark) {
+    background-color: hsl(0 0% 100%) !important;
+    background-image: none !important;
+  }
+}
