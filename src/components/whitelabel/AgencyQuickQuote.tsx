@@ -325,7 +325,9 @@ export function AgencyQuickQuote({
         <div
           data-testid="wl-initial-grid"
           className={cn(
-            "grid border-t items-end",
+            // Celular/tablet: alinha pelo topo para que textos de ajuda (ex.: "Dias")
+            // não empurrem o campo vizinho para baixo; desktop segue linha única.
+            "grid border-t items-start lg:items-end",
             // Rótulos com a mesma altura reservada em todos os tamanhos: caixas
             // sempre alinhadas, mesmo quando um rótulo quebra em duas linhas.
             "[&_label]:flex [&_label]:min-h-[2.1rem] [&_label]:items-end [&_label]:justify-start [&_label]:gap-0.5",
