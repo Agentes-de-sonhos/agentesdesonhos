@@ -793,11 +793,11 @@ export default function AgencySiteHome({
         return (
           <section key={key} id="assinatura" className="bg-background">
             <div className={`${container} ${compactSpacing ? "pt-16 pb-8 md:pt-24 md:pb-12" : "py-16 md:py-24"}`}>
-              <div className="mx-auto max-w-3xl text-center">
+              <div className="w-full text-left">
                 <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--brand-primary)] wl-kicker">
                   {s.kicker}
                 </p>
-                <h2 className="mt-6 text-3xl leading-tight text-foreground md:text-[2.9rem]">
+                <h2 className="mt-3 w-full break-words text-pretty text-3xl font-semibold leading-[1.12] text-foreground md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]">
                   {s.title}
                 </h2>
                 <div className="mx-auto mt-8 h-px w-16 bg-foreground/20" />
