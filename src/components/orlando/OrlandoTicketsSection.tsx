@@ -32,6 +32,9 @@ import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite
 import { DisneyParkMapTrigger, isParkMapId, type ParkMapId } from "./DisneyParkMapDialog";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { ArrowRight as ArrowRight } from "lucide-react";
+import nextStepBg from "@/assets/orlando-next-step-bg.webp.asset.json";
+import ticketsHand from "@/assets/orlando-tickets-hand.webp.asset.json";
 
 const CARD_LOGOS: Record<string, string> = {
   disney: disneyLogo.url, universal: universalLogo.url, seaworld: seaworldLogo.url, "busch-gardens": buschLogo.url, "united-parks": unitedParksLogo.url,
@@ -437,22 +440,23 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                 <Button type="button" variant="outline" size="icon" aria-label="Próximo" onClick={() => scrollStrip(1)}><ChevronRight className="h-4 w-4" /></Button>
               </div>
             </div>
-            {(hostname === "drica-presentation.preview.local" || hostname === "bardelli-presentation.preview.local" || hostname === "briefing-14-v1.preview.local" || /(^|\.)(100limites\.tur\.br|destinoscomaju\.com\.br|omundoemcores\.com\.br)$/i.test(hostname.replace(/\.$/, ""))) ? (
-              <div className="mt-6 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 md:flex-row md:items-center md:justify-between md:p-8">
-                <div className="max-w-2xl">
+            <div className="relative mt-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+              <img src={nextStepBg.url} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-right" loading="lazy" />
+              <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/80 to-background/10 md:bg-gradient-to-r md:from-background/95 md:via-background/70 md:to-transparent" />
+              <div className="relative grid items-center gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:min-h-[300px]">
+                <div className="p-6 pb-0 md:p-10 md:pr-4">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Próximo passo</p>
-                  <h3 className="mt-1 text-xl font-semibold text-foreground md:text-2xl">Quantos dias você precisa para aproveitar Orlando?</h3>
-                  <p className="mt-2 text-muted-foreground">Conte quais parques e experiências você quer viver. Nossa equipe calcula o tempo ideal para o seu ritmo e envia o orçamento completo dos ingressos.</p>
+                  <h3 className="mt-2 text-2xl font-semibold leading-tight text-foreground md:text-[2rem]">Quantos dias você precisa para aproveitar Orlando?</h3>
+                  <p className="mt-3 text-muted-foreground md:text-lg">Conte quais parques e experiências você quer viver. Nossa equipe calcula o tempo ideal para o seu ritmo e envia o orçamento completo dos ingressos.</p>
                 </div>
-                <Button asChild size="lg" className="shrink-0"><a href={agencySiteHref("/ingressos-orlando")}>Calcular meus dias e solicitar ingressos</a></Button>
+                <div className="relative flex min-h-[260px] items-end justify-center md:h-full md:min-h-[300px] md:justify-start">
+                  <img src={ticketsHand.url} alt="Mão segurando ingressos de parques de Orlando" loading="lazy" className="pointer-events-none h-[250px] w-auto object-contain object-bottom md:absolute md:bottom-0 md:left-0 md:h-[290px]" />
+                  <Button asChild size="lg" className="absolute bottom-5 left-1/2 w-[calc(100%-3rem)] -translate-x-1/2 rounded-xl shadow-lg md:bottom-8 md:left-auto md:right-6 md:w-auto md:translate-x-0">
+                    <a href={agencySiteHref("/ingressos-orlando")}>Calcular meus dias e solicitar ingressos <ArrowRight className="ml-2 h-4 w-4" /></a>
+                  </Button>
+                </div>
               </div>
-            ) : (
-            <div className="mx-auto mt-10 max-w-2xl rounded-2xl border border-border bg-card p-6 text-center md:p-8">
-              <h3 className="text-xl font-semibold text-foreground">{ORLANDO_SECTION.cta_title}</h3>
-              <p className="mt-2 text-muted-foreground">{ORLANDO_SECTION.cta_description}</p>
-              <Button asChild size="lg" className="mt-5"><a href={agencySiteHref("/ingressos-orlando")}>{ORLANDO_SECTION.cta_label}</a></Button>
             </div>
-            )}
           </>
         ) : (
           <div className="mt-8">
