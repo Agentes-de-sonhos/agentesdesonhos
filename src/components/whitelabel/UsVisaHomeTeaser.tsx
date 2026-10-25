@@ -55,7 +55,7 @@ export function UsVisaHomeTeaser({ presentation = false }: { presentation?: bool
             width={1024}
             height={768}
             loading="lazy"
-            className="aspect-[1.46/1] w-full rounded-2xl object-cover"
+            className="hidden aspect-[1.46/1] w-full rounded-2xl object-cover md:block"
           />
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
@@ -68,6 +68,15 @@ export function UsVisaHomeTeaser({ presentation = false }: { presentation?: bool
               Escolha a cidade e consulte a espera para a próxima entrevista de visto de turismo e negócios (B1/B2).
               {presentation ? "Atendimento e condições a confirmar com a agência." : "A Amanda orienta você em cada etapa."}
             </p>
+            <img
+              src={visaPassportImg}
+              alt=""
+              aria-hidden="true"
+              width={1024}
+              height={768}
+              loading="lazy"
+              className="mt-6 aspect-[1.46/1] w-full rounded-2xl object-cover md:hidden"
+            />
             {fee !== null && (
               <p className="mt-4 text-sm text-foreground/75">
                 Taxa consular: <strong className="text-foreground">US$ {fee}</strong> por pessoa.

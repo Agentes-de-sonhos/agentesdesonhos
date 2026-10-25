@@ -60,6 +60,12 @@ export function AgencyDmcSection({
             <p className={`mt-6 max-w-xl text-[15px] leading-relaxed md:text-base ${lightSurface ? "text-muted-foreground" : "text-background/75"}`}>
               {config.text}
             </p>
+            <img
+              src={config.presentation?.imageUrl ?? destinoEuropa}
+              alt=""
+              loading="lazy"
+              className="mt-8 h-[300px] w-full rounded-xl object-cover object-center lg:hidden"
+            />
 
             <ul className={`mt-9 max-w-xl divide-y border-y ${lightSurface ? "divide-border border-border" : "divide-background/12 border-background/12"}`}>
               {config.services.map((s) => {
@@ -88,7 +94,7 @@ export function AgencyDmcSection({
             <p className={`mt-5 max-w-xl text-[13px] ${lightSurface ? "text-muted-foreground" : "text-background/60"}`}>{config.note}</p>
           </div>
 
-          <div className="relative overflow-hidden rounded-xl">
+          <div className="relative hidden overflow-hidden rounded-xl lg:block">
             <img
               src={config.presentation?.imageUrl ?? destinoEuropa}
               alt=""
