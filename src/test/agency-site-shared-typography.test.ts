@@ -25,14 +25,16 @@ describe("tipografia compartilhada dos sites white label", () => {
     expect(AGENCY_SECTION_SUBTITLE_CLASS).not.toContain("max-w-2xl");
   });
 
-  it("amplia o texto do hero no desktop sem impor quebra rígida no mobile", () => {
+  it("limita título e subtítulo do hero a 2 linhas só no mobile", () => {
     expect(AGENCY_HERO_COPY_CLASS).toContain("md:max-w-[82%]");
     expect(AGENCY_HERO_TITLE_CLASS).toContain("max-w-[30ch]");
     expect(AGENCY_HERO_SUBTITLE_CLASS).toContain("max-w-[72rem]");
+    for (const classes of [AGENCY_HERO_TITLE_CLASS, AGENCY_HERO_SUBTITLE_CLASS]) {
+      expect(classes).toContain("line-clamp-2");
+      expect(classes).toContain("md:line-clamp-none");
+    }
     for (const classes of [
       AGENCY_HERO_COPY_CLASS,
-      AGENCY_HERO_TITLE_CLASS,
-      AGENCY_HERO_SUBTITLE_CLASS,
       AGENCY_SECTION_TITLE_CLASS,
       AGENCY_SECTION_SUBTITLE_CLASS,
       AGENCY_CARD_TITLE_CLASS,

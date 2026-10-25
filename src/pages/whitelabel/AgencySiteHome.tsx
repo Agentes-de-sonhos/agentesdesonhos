@@ -1945,12 +1945,12 @@ export default function AgencySiteHome({
             }`}
           >
           {editorial ? (
-            <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white [&_svg]:text-white">
+            <p className="mb-4 inline-flex max-w-full items-center gap-2 whitespace-nowrap text-[clamp(9px,2.6vw,11px)] font-bold uppercase tracking-[0.12em] md:mb-5 md:tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
                {profile.heroPresentation?.kicker ?? (location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens")}
             </p>
           ) : (
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
+            <p className="mb-4 inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens"}
             </p>
@@ -1959,8 +1959,8 @@ export default function AgencySiteHome({
           <h1
             className={
                editorial
-                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""} ${current.textWidth === "narrowLeft" ? "lg:max-w-[38ch] lg:flex-none" : ""}`
-                 : "w-full max-w-5xl break-words text-pretty text-3xl font-semibold leading-[1.1] tracking-tight text-primary-foreground md:text-6xl"
+                 ? `${profile.heroPresentation?.titleWeight === "regular" ? AGENCY_HERO_TITLE_LIGHT_CLASS : AGENCY_HERO_TITLE_CLASS} ${profile.heroPresentation?.preserveTitleLineBreaks ? "md:whitespace-pre-line md:max-w-none md:text-[clamp(2.25rem,3.3vw,3rem)] lg:flex-1" : ""} ${current.textWidth === "narrowLeft" ? "lg:max-w-[38ch] lg:flex-none" : ""}`
+                 : "line-clamp-2 w-full max-w-5xl break-words text-pretty text-[1.625rem] font-semibold leading-[1.12] md:line-clamp-none tracking-tight text-primary-foreground md:text-6xl"
             }
           >
             {current.title}
@@ -1980,7 +1980,7 @@ export default function AgencySiteHome({
             className={
                editorial
                  ? AGENCY_HERO_SUBTITLE_CLASS
-                 : "mt-4 w-full max-w-5xl break-words text-pretty text-base text-primary-foreground/85 md:text-lg"
+                 : "mt-3 line-clamp-2 w-full max-w-5xl break-words text-pretty text-[14px] leading-snug text-primary-foreground/85 md:mt-4 md:line-clamp-none md:text-lg"
             }
           >
             {current.subtitle}
