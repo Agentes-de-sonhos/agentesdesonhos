@@ -168,7 +168,7 @@ export function AgencyGoogleReviewsSection({
         {data ? (
           <Carousel
             opts={{ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" }}
-            className="mt-10"
+            className="mt-6 md:mt-8"
             aria-label="Galeria de avaliações"
           >
             <CarouselContent className="-ml-5">
@@ -178,46 +178,48 @@ export function AgencyGoogleReviewsSection({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="mt-6 flex flex-col-reverse items-stretch gap-4 md:flex-row md:items-center md:justify-between">
-              {googleUrl ? (
-                <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
-                  <a href={googleUrl} target="_blank" rel="noopener noreferrer">
-                    Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
-                  </a>
-                </Button>
-              ) : <span />}
+            <div className="mt-5 flex flex-col items-stretch gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex flex-col items-stretch gap-3 md:flex-row md:items-center md:gap-5">
+                {googleUrl && (
+                  <Button asChild variant="outline" size="lg" className="w-full md:w-auto">
+                    <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+                      Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+                    </a>
+                  </Button>
+                )}
+                {illustrative ? (
+                  <p className="text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Textos fictícios, sem nota ou integração com o Google.</p>
+                ) : (
+                  <div className="flex flex-col gap-0.5 text-muted-foreground">
+                    <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">Google Maps</p>
+                    {data.attributions.length > 0 && (
+                      <p className="font-sans text-[12px]">
+                        Dados também fornecidos por:{" "}
+                        {data.attributions.map((a, i) => (
+                          <span key={`${a.provider}-${i}`}>
+                            {i > 0 && ", "}
+                            {a.providerUri ? (
+                              <a href={a.providerUri} target="_blank" rel="noopener noreferrer" className="hover:underline">{a.provider}</a>
+                            ) : a.provider}
+                          </span>
+                        ))}
+                      </p>
+                    )}
+                    <p className="font-sans text-[12px]">Avaliações exibidas na ordem de relevância definida pelo Google Maps.</p>
+                  </div>
+                )}
+              </div>
               <div className="flex items-center justify-center gap-3 md:justify-end">
                 <CarouselPrevious className="static h-11 w-11 translate-y-0" />
                 <CarouselNext className="static h-11 w-11 translate-y-0" />
               </div>
             </div>
-
           </Carousel>
         ) : (
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Carregando avaliações">
             {[0, 1, 2].map((i) => <Skeleton key={i} className="h-52 rounded-2xl" />)}
           </div>
         )}
-
-        {illustrative ? <p className="mt-6 text-sm text-muted-foreground">Avaliação ilustrativa — exemplo de apresentação. Textos fictícios, sem nota ou integração com o Google.</p> : <div className={`${compactSpacing ? "mt-4" : "mt-6"} flex flex-col gap-1 text-muted-foreground`}>
-          <p translate="no" className="font-sans text-[13px] font-normal text-foreground" data-testid="google-maps-attribution">
-            Google Maps
-          </p>
-          {data && data.attributions.length > 0 && (
-            <p className="font-sans text-[12px]">
-              Dados também fornecidos por:{" "}
-              {data.attributions.map((a, i) => (
-                <span key={`${a.provider}-${i}`}>
-                  {i > 0 && ", "}
-                  {a.providerUri ? (
-                    <a href={a.providerUri} target="_blank" rel="noopener noreferrer" className="hover:underline">{a.provider}</a>
-                  ) : a.provider}
-                </span>
-              ))}
-            </p>
-          )}
-          <p className="font-sans text-[12px]">Avaliações exibidas na ordem de relevância definida pelo Google Maps.</p>
-        </div>}
       </div>
     </section>
   );
