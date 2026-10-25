@@ -71,11 +71,15 @@ function DmcLegacyRedirect({ anchor }: { anchor: string }) {
   return <Navigate replace to={{ pathname: "/dmc-portugal", search, hash: `#${anchor}` }} />;
 }
 
+/** Mesma camada fixa do 1º carregamento (AgencyDomainGate): o logo não salta. */
 const Fallback = () => (
-  <div className="min-h-[60vh] flex items-center justify-center">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
     <AgencyBrandSpinner size="lg" />
   </div>
 );
+
+/** Navegação interna: cabeçalho/rodapé ficam; só a área do conteúdo aguarda, sem logo. */
+const ContentFallback = () => <div className="min-h-[60vh]" aria-busy="true" />;
 
 function AgencyCardRoute({ info }: { info: AgencyDomainInfo }) {
   const { cardSlug } = useParams();
@@ -262,7 +266,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           <Route
             element={
               <AgencySiteLayout info={info} noWhatsapp>
-                <Outlet />
+                <Suspense fallback={<ContentFallback />}><Outlet /></Suspense>
               </AgencySiteLayout>
             }
           >
@@ -273,7 +277,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           <Route
             element={
               <AgencySiteLayout info={info}>
-                <Outlet />
+                <Suspense fallback={<ContentFallback />}><Outlet /></Suspense>
               </AgencySiteLayout>
             }
           >
