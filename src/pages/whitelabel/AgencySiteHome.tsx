@@ -815,7 +815,8 @@ export default function AgencySiteHome({
         if (!authority) return null;
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
-                        <div className={`${container} grid items-center gap-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-16 md:py-24`}>
+            <div className={`${container} grid items-center gap-x-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-x-16 md:py-24`}>
+              <div className="order-2 mt-8 md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:mt-0">
               {authority.videos?.length ? (
                 <AuthorityVideoGallery
                   items={authority.videos.map((v) => ({
@@ -832,13 +833,16 @@ export default function AgencySiteHome({
                   image={DESTINATION_IMAGES[authority.image ?? "cruzeiro"]}
                 />
               )}
+              </div>
 
-              <div>
+              <div className="order-1 md:order-none md:col-start-2 md:row-start-1 md:self-end">
                 <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">{authority.sectionLabel ?? "Cruzeiros"}</p>
                 <h2 className="mt-4 text-3xl font-semibold leading-tight text-background md:text-[2.6rem]">{authority.title}</h2>
                 <div className="mt-6 space-y-4 text-[15px] leading-relaxed text-background/80 md:text-base">
                   {authority.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
                 </div>
+              </div>
+              <div className="order-3 md:order-none md:col-start-2 md:row-start-2 md:self-start">
                 <Button size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => openRequest(authority.service)}>
                   {authority.cta} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -848,8 +852,8 @@ export default function AgencySiteHome({
               <div className={`${container} pb-16 md:pb-24`}>
                 <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
                 <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 md:gap-5">
-                  {authority.companies.items.map((c) => (
-                    <li key={c.name} className="flex aspect-[3/2] items-center justify-center overflow-hidden rounded-2xl bg-background p-3 shadow-lg ring-1 ring-background/10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl">
+                  {authority.companies.items.map((c, i, arr) => (
+                    <li key={c.name} className={`flex aspect-[3/2] items-center justify-center overflow-hidden rounded-2xl bg-background p-3 shadow-lg ring-1 ring-background/10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl ${arr.length % 2 === 1 && i === arr.length - 1 ? "col-span-2 mx-auto w-[calc(50%-0.5rem)] sm:col-span-1 sm:mx-0 sm:w-auto" : ""}`}>
                       <img src={c.logo} alt={`Logotipo da ${c.name}`} loading="lazy" decoding="async" className="h-full w-full object-contain" />
                     </li>
                   ))}
