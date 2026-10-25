@@ -1069,7 +1069,7 @@ export default function AgencySiteHome({
                           {d.title}
                         </h3>
                         {i === 0 && (
-                          <p className={`mt-2 w-full max-w-2xl text-sm text-background/80 ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
+                          <p className={`mt-2 hidden w-full max-w-2xl text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
                         <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
                           Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
