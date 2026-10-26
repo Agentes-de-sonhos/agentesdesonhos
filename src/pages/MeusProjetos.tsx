@@ -82,6 +82,8 @@ interface ProjectItem {
   name: string;
   destination: string;
   date: string;
+  startDate?: string | null;
+  endDate?: string | null;
   status: "draft" | "published";
   type: ProjectType;
   clientName?: string | null;
@@ -113,6 +115,8 @@ function normalizeItems(
       name: q.client_name || "Sem nome",
       destination: q.destination || "—",
       date: q.created_at,
+      startDate: q.start_date ?? null,
+      endDate: q.end_date ?? null,
       status: q.status === "published" ? "published" : "draft",
       type: "quote" as const,
       rawStatus: q.status ?? null,
@@ -123,6 +127,8 @@ function normalizeItems(
       name: t.client_name || "Sem nome",
       destination: t.destination || "—",
       date: t.created_at,
+      startDate: t.start_date ?? null,
+      endDate: t.end_date ?? null,
       status: t.status === "active" ? "published" : "draft",
       type: "trip" as const,
       rawStatus: t.status ?? null,
@@ -183,12 +189,25 @@ function normalizeText(v: string): string {
     .trim();
 }
 
-function formatDate(dateStr: string) {
-  try {
-    return format(new Date(dateStr), "dd/MM/yyyy", { locale: ptBR });
-  } catch {
-    return "—";
+function parseYmd(v?: string | null): Date | null {
+  if (!v) return null;
+  const [y, m, d] = v.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
+
+/** Período da viagem + noites (ex.: "10/11/2026 — 17/11/2026 · 7 noites"). */
+export function formatTripPeriod(start?: string | null, end?: string | null): string {
+  const s = parseYmd(start);
+  const e = parseYmd(end);
+  if (!s && !e) return "Datas a definir";
+  const f = (d: Date) => format(d, "dd/MM/yyyy", { locale: ptBR });
+  if (s && e) {
+    const nights = Math.round((e.getTime() - s.getTime()) / 86400000);
+    const label = nights > 0 ? ` · ${nights} ${nights === 1 ? "noite" : "noites"}` : "";
+    return `${f(s)} — ${f(e)}${label}`;
   }
+  return f((s ?? e)!);
 }
 
 function StatusBadge({ status }: { status: ProjectItem["status"] }) {
@@ -500,7 +519,7 @@ export default function MeusProjetos() {
               </span>
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {formatDate(item.date)}
+                {formatTripPeriod(item.startDate, item.endDate)}
               </span>
             </div>
           </div>
