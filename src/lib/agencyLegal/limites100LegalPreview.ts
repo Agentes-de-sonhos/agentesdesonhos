@@ -50,7 +50,7 @@ export const LIMITES100_LEGAL_PENDING: string[] = [
   "Pessoa jurídica operadora da plataforma Agentes de Sonhos e link da política própria da plataforma: não confirmados — a Política cita apenas o nome da plataforma.",
   "Lista completa de prestadores tecnológicos (hospedagem, e-mail, mensagens, analytics etc.): não confirmada — a Política cita somente categorias.",
   "Mecanismos de transferência internacional de dados: não confirmados — a cláusula descreve apenas o envio necessário a fornecedores e autoridades do destino, sem declarar mecanismo.",
-  "Cookies: o site carrega o Google Tag Manager (GTM-5LBKQWFT) antes de qualquer escolha do visitante e o conteúdo desse contêiner é desconhecido. Não há painel de Configurações de Cookies; a Política não afirma bloqueio prévio e o link de preferências não foi criado.",
+  "Cookies: o Google Tag Manager foi removido de todo o site (26/10/2026); não há rastreadores de terceiros carregados. Se algum for adicionado no futuro, será necessário aviso de cookies.",
   "Encarregado (DPO): não há encarregado divulgado — o canal de privacidade é o e-mail, sem atribuir cargo a Amanda Larini.",
   "Pagamentos: processamento direto ou integrado (no site, em faturas ou links) ainda precisa de confirmação; a cláusula descreve apenas condições informadas na proposta e canais oficiais.",
   "Dados detalhados de documentos de passageiros: fluxo específico da agência não confirmado — lista detalhada omitida.",
