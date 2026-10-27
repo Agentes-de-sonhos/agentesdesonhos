@@ -65,6 +65,9 @@ import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInputFromProfile, brandThemeStyle, pickBrandProfile } from "@/lib/brandTheme";
 import { resolvePublicAgencyUserId, usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { publicAirportText } from "@/lib/airportDisplay";
+
+// Descrição/observações dos serviços: 17% da terciária sobre branco (todas as agências).
+const SERVICE_NOTE_BOX_STYLE = { background: "color-mix(in srgb, var(--brand-tertiary, #f4f4f5) 17%, #ffffff)" } as const;
 import { AirlineLogo } from "@/components/shared/AirlineLogo";
 
 function getServiceLabel(service: QuoteService): string {
@@ -458,9 +461,11 @@ function FlightBody({ data }: { data: any }) {
       </div>
 
       {data.notes && (
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-          <FormattedText>{data.notes}</FormattedText>
-        </p>
+        <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <FormattedText>{data.notes}</FormattedText>
+          </p>
+        </div>
       )}
     </div>
   );
@@ -600,9 +605,11 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
         </div>
       )}
       {data.notes && (
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-          <FormattedText>{data.notes}</FormattedText>
-        </p>
+        <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <FormattedText>{data.notes}</FormattedText>
+          </p>
+        </div>
       )}
     </div>
   );
@@ -643,9 +650,11 @@ function CarBody({ data }: { data: any }) {
         <div className="text-xs text-muted-foreground">{data.days} {pluralize(publicLocale, data.days, { one: t("dailyRateOne"), other: t("dailyRateOther") })}</div>
       )}
       {data.notes && (
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-          <FormattedText>{data.notes}</FormattedText>
-        </p>
+        <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <FormattedText>{data.notes}</FormattedText>
+          </p>
+        </div>
       )}
     </div>
   );
@@ -672,9 +681,11 @@ function TransferBody({ data }: { data: any }) {
           : formatDateShort(data.date)}
       </div>
       {data.notes && (
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-          <FormattedText>{data.notes}</FormattedText>
-        </p>
+        <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <FormattedText>{data.notes}</FormattedText>
+          </p>
+        </div>
       )}
     </div>
   );
@@ -736,9 +747,11 @@ function InsuranceBody({ data }: { data: any }) {
     <div className="space-y-3">
       <PeriodBody title={data.provider} sub={data.coverage ? `${t("cobertura")}: ${data.coverage}` : undefined} data={data} />
       {data.notes && (
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-          <FormattedText>{data.notes}</FormattedText>
-        </p>
+        <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <FormattedText>{data.notes}</FormattedText>
+          </p>
+        </div>
       )}
     </div>
   );
@@ -760,9 +773,11 @@ function CruiseBody({ data, service, quote }: { data: any; service?: QuoteServic
         formatValue={(v) => formatCurrency(v)}
       />
       {data.notes && (
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-          <FormattedText>{data.notes}</FormattedText>
-        </p>
+        <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            <FormattedText>{data.notes}</FormattedText>
+          </p>
+        </div>
       )}
     </div>
   );
@@ -1034,14 +1049,14 @@ function CollapsibleServiceCard({
             </div>
           )}
           {expanded && service.description && (
-            <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+            <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 <FormattedText>{service.description}</FormattedText>
               </p>
             </div>
           )}
           {expanded && service.service_type === "attraction" && (service.service_data as any)?.notes && (
-            <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+            <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
               <p className="text-sm leading-relaxed italic whitespace-pre-wrap">
                 <FormattedText>{(service.service_data as any).notes}</FormattedText>
               </p>
