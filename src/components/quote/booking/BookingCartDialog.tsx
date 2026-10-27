@@ -89,24 +89,30 @@ export function BookingCartDialog() {
         onOpenChange={(v) => (cart.submitting ? null : cart.setCartOpen(v))}
       >
         <DialogContent
-          className="box-border flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0 sm:h-auto sm:max-h-[92dvh] sm:w-[94vw] sm:max-w-[min(1100px,94vw)] sm:rounded-2xl"
+          className="box-border flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-muted p-0 sm:h-auto sm:max-h-[92dvh] sm:w-[94vw] sm:max-w-[min(1100px,94vw)] sm:rounded-2xl"
           data-booking-cart-dialog="true"
         >
-          <DialogHeader className="shrink-0 space-y-1 border-b border-border/50 px-5 py-4 text-left sm:px-6">
-            <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <ShoppingCart className="h-5 w-5 text-primary" aria-hidden="true" />
-              {success ? t("requestSentToAgency") : t("myBookingRequestTitle")}
-            </DialogTitle>
-            <DialogDescription>
-              {success
-                ? t("agencyWillReconfirm")
-                : hasLinkedClient
-                  ? t("reviewServicesConfirm")
-                  : t("reviewServicesContact")}
-            </DialogDescription>
+          <DialogHeader className="shrink-0 space-y-0 border-b border-border bg-card px-5 py-4 pr-12 text-left sm:px-6">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10">
+                <ShoppingCart className="h-5 w-5 text-primary" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <DialogTitle className="text-base font-semibold sm:text-lg">
+                  {success ? t("requestSentToAgency") : t("myBookingRequestTitle")}
+                </DialogTitle>
+                <DialogDescription>
+                  {success
+                    ? t("agencyWillReconfirm")
+                    : hasLinkedClient
+                      ? t("reviewServicesConfirm")
+                      : t("reviewServicesContact")}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-5 py-4 sm:px-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6">
             {success ? (
               <div className="mx-auto max-w-xl space-y-4">
                 <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
@@ -186,7 +192,7 @@ export function BookingCartDialog() {
                             return (
                               <li
                                 key={entry.service.id}
-                                className="flex w-full min-w-0 flex-wrap items-start gap-3 rounded-xl border border-border/50 bg-muted/20 p-3"
+                                className="flex w-full min-w-0 flex-wrap items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
                                 data-cart-item={entry.service.id}
                               >
                                 <ServiceDigestCompact service={entry.service} withThumb />
@@ -237,7 +243,7 @@ export function BookingCartDialog() {
                   })}
                 </div>
 
-                <div className="min-w-0 space-y-4 lg:rounded-2xl lg:border lg:border-border/50 lg:bg-muted/20 lg:p-4">
+                <div className="min-w-0 space-y-4 self-start rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5 [&_input]:bg-muted/60">
                   <div className="grid gap-3 sm:grid-cols-2">
                     {!hasLinkedClient && (
                       <>
