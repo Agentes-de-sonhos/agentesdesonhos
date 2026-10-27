@@ -92,9 +92,10 @@ export function BookingCartLauncher() {
           <ShoppingCart className="h-6 w-6" aria-hidden="true" />
           <span
             className={cn(
-              "absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-card px-1 text-[11px] font-bold text-primary shadow ring-1 ring-primary/30",
+              "absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold shadow ring-1 ring-primary/30",
               pulse && "animate-scale-in",
             )}
+            style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}
             data-booking-cart-badge="mobile"
           >
             {cart.count}
