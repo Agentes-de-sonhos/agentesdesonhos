@@ -954,7 +954,7 @@ function CollapsibleServiceCard({
             )}
           </div>
           {summary && (
-            <span className="text-xs opacity-70 font-medium break-words whitespace-pre-wrap text-left">
+            <span className="text-xs font-medium break-words whitespace-pre-wrap text-left">
               {summary}
             </span>
           )}
