@@ -3206,45 +3206,53 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             </button>
           </div>
         ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
         {canAddMore && (
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            aria-label="Enviar foto do computador"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors h-24 w-32"
           >
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-            <span className="text-xs">{uploading ? "Otimizando..." : "Do computador"}</span>
-          </button>
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
+            {uploading ? "Otimizando..." : "Do computador"}
+          </Button>
+        )}
+        {canAddMore && (
+          <AgencyLibraryPicker
+            existingUrls={imageUrls}
+            maxSelectable={MAX_IMAGES_PER_SERVICE - imageUrls.length}
+            onAdd={handleGooglePhotosSelected}
+          />
+        )}
+        {placeId && (
+          <div className="contents [&>div]:basis-full">
+            <GoogleHotelPhotos
+              placeId={placeId}
+              onPhotosSelected={handleGooglePhotosSelected}
+              onPhotoRemoved={handleGooglePhotoRemoved}
+              existingUrls={imageUrls}
+              autoShow={placeKind === 'attraction' || placeKind === 'other_service'}
+              {...(placeKind === 'attraction' ? { loadingLabel: 'Buscando fotos do local...', buttonLabel: undefined } : {})}
+              {...(placeKind === 'other_service'
+                ? {
+                    loadingLabel: 'Buscando fotos do local...',
+                    headingLabel: 'Fotos sugeridas',
+                    maxPhotos: 5,
+                    autoSelectFirst: true,
+                  }
+                : {})}
+            />
+          </div>
         )}
       </div>
-      {canAddMore && (
-        <AgencyLibraryPicker
-          existingUrls={imageUrls}
-          maxSelectable={MAX_IMAGES_PER_SERVICE - imageUrls.length}
-          onAdd={handleGooglePhotosSelected}
-        />
-      )}
       {statusLine}
       <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} />
-      {placeId && (
-        <GoogleHotelPhotos
-          placeId={placeId}
-          onPhotosSelected={handleGooglePhotosSelected}
-                onPhotoRemoved={handleGooglePhotoRemoved}
-          existingUrls={imageUrls}
-          autoShow={placeKind === 'attraction' || placeKind === 'other_service'}
-          {...(placeKind === 'attraction' ? { loadingLabel: 'Buscando fotos do local...', buttonLabel: undefined } : {})}
-          {...(placeKind === 'other_service'
-            ? {
-                loadingLabel: 'Buscando fotos do local...',
-                headingLabel: 'Fotos sugeridas',
-                maxPhotos: 5,
-                autoSelectFirst: true,
-              }
-            : {})}
-        />
-      )}
+
       {(placeKind === 'attraction' || (!!photoQuery && photoQuery.trim().length >= 2)) && (
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
