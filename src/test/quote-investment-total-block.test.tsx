@@ -24,9 +24,8 @@ describe("fundo do investimento é branco (todas as agências)", () => {
 
   it("bloco Investimento Total da Viagem (layouts novos) também é branco", () => {
     const src = readFileSync("src/components/quote/PublicInvestmentSummary.tsx", "utf8");
-    const block = src.slice(src.indexOf("Investimento Total da Viagem") - 400, src.indexOf("Investimento Total da Viagem") + 200);
-    expect(block).toMatch(/border border-primary\/25 bg-white p-6 sm:p-7/);
-    expect(block).not.toMatch(/bg-primary\/\[0\.05\]/);
+    expect(src).toMatch(/rounded-2xl border border-primary\/25 bg-white p-6 sm:p-7/);
+    expect(src).not.toMatch(/bg-primary\/\[0\.05\]/);
   });
 });
 
