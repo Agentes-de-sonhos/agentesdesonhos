@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
+import { useToolSharePreview } from "@/lib/toolSharePreview";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
 import { buildQuoteSectionLayout, visibleSectionGroups } from "@/lib/quoteSections";
@@ -1443,6 +1444,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     ]) ?? agentProfile;
   const brandInput = agencyBrandInputFromProfile(brandProfile as any);
   useAgencyBrandTheme(brandInput);
+  useToolSharePreview(quote ? {
+    kind: "quote",
+    destination: quote.destination,
+    clientName: quote.client_name,
+    agencyName: (brandProfile as any)?.agency_name ?? null,
+    startDate: quote.start_date,
+    endDate: quote.end_date,
+    coverImage: ((quote as any).destination_intro_images || [])[0] || resolvedHeroFallback || null,
+    agencyLogo: (brandProfile as any)?.agency_logo_url ?? null,
+  } : null);
 
   const loaderLogo = (brandProfile as any)?.agency_logo_url ?? null;
   const showBrandLoader = useBrandLoaderHold(isLoading, loaderLogo);

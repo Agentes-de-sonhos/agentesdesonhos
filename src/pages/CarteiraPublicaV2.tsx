@@ -2,6 +2,7 @@ import { buildSquareIcon } from "@/lib/squareIcon";
 import { AgencyBrandLoader } from "@/components/public/AgencyBrandLoader";
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
+import { useToolSharePreview } from "@/lib/toolSharePreview";
 import { useParams } from "react-router-dom";
 import { Loader2, Lock, Eye, EyeOff, ShieldAlert, AlertTriangle, ChevronDown, ChevronUp, Plane, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -340,6 +341,17 @@ export default function CarteiraPublicaV2({
   const MAX_ATTEMPTS = 5;
   const [tripStartDate, setTripStartDate] = useState<string | null>(null);
   const [grantExpired, setGrantExpired] = useState(false);
+  const [shareTrip, setShareTrip] = useState<any>(null);
+  useToolSharePreview(shareTrip ? {
+    kind: "wallet",
+    destination: shareTrip.destination,
+    clientName: shareTrip.client_name,
+    agencyName: (branding as any)?.agency_name ?? null,
+    startDate: shareTrip.start_date,
+    endDate: shareTrip.end_date,
+    coverImage: shareTrip.cover_image_url ?? null,
+    agencyLogo: (branding as any)?.agency_logo_url ?? null,
+  } : null);
 
   useEffect(() => {
     setOgMeta(GENERIC_PUBLIC_META.wallet);
@@ -400,6 +412,7 @@ export default function CarteiraPublicaV2({
         const result = data as any;
         if (result?.agent_profile) setBranding(result.agent_profile as AgentProfile);
         if (result?.trip?.start_date) setTripStartDate(result.trip.start_date as string);
+        if (result?.trip) setShareTrip(result.trip);
       });
     // Try remembered password first (if any), fallback to empty probe
     const remembered = getRememberedPassword(accessCode);
