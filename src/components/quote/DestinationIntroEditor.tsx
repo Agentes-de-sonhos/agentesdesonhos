@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { shouldAutoSuggestIntro } from "@/lib/quoteInitialSetup";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { AgencyLibraryPicker } from "@/components/image-library/AgencyLibraryPicker";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
 import { MediaOverlayActions, MediaOverlayButton } from "@/components/shared/MediaOverlayActions";
 
@@ -105,10 +106,10 @@ export function DestinationIntroSwitch({
 
   return (
     <div className="flex items-center gap-2">
-      <Label htmlFor="show-destination-header" className="cursor-pointer text-xs font-medium sm:text-sm">
-        Exibir apresentação do destino
-      </Label>
       <Switch id="show-destination-header" checked={enabled} onCheckedChange={handleToggle} />
+      <Label htmlFor="show-destination-header" className="cursor-pointer text-xs font-medium sm:text-sm">
+        {enabled ? "Ocultar apresentação do destino" : "Exibir apresentação do destino"}
+      </Label>
     </div>
   );
 }
@@ -611,20 +612,6 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
             <h4 className="text-sm font-semibold text-foreground">Descrição do destino</h4>
             <div className="flex items-center gap-1">
               <Button
-                variant="outline"
-                size="sm"
-                onClick={onGenerate}
-                disabled={isGenerating || isFetchingPhotos}
-                className="h-7 gap-1.5 text-xs"
-              >
-                {isGenerating || isFetchingPhotos ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3.5 w-3.5" />
-                )}
-                Gerar com IA
-              </Button>
-              <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setTextOpen(true)}
@@ -647,15 +634,31 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
               <p className="text-sm italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
             )}
           </div>
+          <div className="mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onGenerate}
+              disabled={isGenerating || isFetchingPhotos}
+              className="h-7 gap-1.5 text-xs"
+            >
+              {isGenerating || isFetchingPhotos ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="h-3.5 w-3.5" />
+              )}
+              Gerar novamente com IA
+            </Button>
+          </div>
         </section>
       </div>
 
-      <div className="flex justify-end border-t border-border pt-3" data-testid="destination-visibility-action">
+      <div className="flex justify-start border-t border-border pt-3" data-testid="destination-visibility-action">
         <div className="flex items-center gap-2">
-          <Label htmlFor="show-destination-inline" className="cursor-pointer text-xs font-medium sm:text-sm">
-            Exibir apresentação do destino
-          </Label>
           <Switch id="show-destination-inline" checked={enabled} onCheckedChange={onToggle} />
+          <Label htmlFor="show-destination-inline" className="cursor-pointer text-xs font-medium sm:text-sm">
+            {enabled ? "Ocultar apresentação do destino" : "Exibir apresentação do destino"}
+          </Label>
         </div>
       </div>
 
@@ -710,28 +713,16 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
               className="gap-2"
             >
               {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-              Adicionar imagem
+              Do computador
             </Button>
+            <AgencyLibraryPicker existingUrls={images} maxSelectable={20} onAdd={onAddGooglePhotos} />
             <InternetPhotosPicker
               query={destination}
               purpose="destination"
               existingUrls={images}
               onPick={onAddGooglePhotos}
-              triggerLabel="Buscar fotos da internet"
+              triggerLabel="Buscar fotos na web"
             />
-          </div>
-
-          <div className="flex gap-2 items-center">
-            <Link2 className="h-4 w-4 text-muted-foreground shrink-0" />
-            <Input
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="Cole uma URL de imagem..."
-              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddByUrl(); } }}
-            />
-            <Button size="sm" variant="secondary" onClick={handleAddByUrl} disabled={!urlInput.trim()}>
-              Adicionar
-            </Button>
           </div>
 
           {images.length > 0 ? (
