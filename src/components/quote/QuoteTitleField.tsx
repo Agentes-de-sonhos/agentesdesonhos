@@ -67,7 +67,7 @@ export function QuoteTitleField({ quote, onUpdated }: { quote: Quote; onUpdated?
     <div
       data-testid="quote-title-field"
       data-pending={pending ? "true" : "false"}
-      className={cn("border border-border/70 bg-card p-3 rounded-lg", pending && INITIAL_SETUP_HIGHLIGHT_CLASS)}
+      className="border border-border/70 bg-card p-3 rounded-lg"
     >
       <div className="flex min-w-0 items-center gap-2 text-sm">
         <Plane className="h-4 w-4 shrink-0 text-sky-500" />

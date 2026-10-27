@@ -1637,8 +1637,6 @@ export default function GerarOrcamento() {
         }}
         renderInitial={() => {
 
-          const coverPending =
-            isInitialSetupItemPending(quote as any, "cover") || isInitialSetupItemPending(quote as any, "intro");
           return (
           <div className="space-y-5">
             <section
@@ -1664,11 +1662,7 @@ export default function GerarOrcamento() {
                 quote={quote}
                 onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
               />
-              <div
-                data-testid="quote-cover-block"
-                data-pending={coverPending ? "true" : "false"}
-                className={coverPending ? INITIAL_SETUP_HIGHLIGHT_CLASS + " p-2" : undefined}
-              >
+              <div data-testid="quote-cover-block">
               <DestinationIntroEditor
                 embedded
                 quoteId={quote.id}
@@ -1676,7 +1670,7 @@ export default function GerarOrcamento() {
                 showIntro={(quote as any).show_destination_intro !== false}
                 introText={(quote as any).destination_intro_text || null}
                 introImages={(quote as any).destination_intro_images || []}
-                onUpdate={() => {}}
+                onUpdate={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
               />
               </div>
             </section>
