@@ -3214,7 +3214,7 @@ function ServiceImageUpload({ imageUrls, onImageUrlsChange, isUploading, placeId
             className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-border px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 transition-colors h-24 w-32"
           >
             {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-            <span className="text-xs">{uploading ? "Otimizando..." : "Adicionar"}</span>
+            <span className="text-xs">{uploading ? "Otimizando..." : "Do computador"}</span>
           </button>
         )}
       </div>

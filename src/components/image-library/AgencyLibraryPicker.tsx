@@ -101,17 +101,19 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
         className={triggerClassName || "h-8 gap-1.5 text-xs"}
         onClick={() => setOpen(true)}
         disabled={disabled || maxSelectable <= 0}
-        aria-label="Biblioteca da agência"
+        aria-label="Adicionar por link da web"
       >
-        <Library className="h-3.5 w-3.5" />
-        Biblioteca da agência
+        <Link2 className="h-3.5 w-3.5" />
+        Adicionar por link da web
       </Button>
       <Dialog open={open} onOpenChange={(v) => (v ? setOpen(true) : close())}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
-            <DialogTitle>Biblioteca da agência</DialogTitle>
+            <DialogTitle>Adicionar por link da web</DialogTitle>
             <DialogDescription>
-              {maxSelectable <= 1 ? "Escolha 1 foto para este serviço." : `Escolha até ${maxSelectable} fotos para este serviço.`}
+              Cole o link de uma imagem da internet para adicionar ao serviço. As imagens ficam salvas automaticamente na biblioteca da sua agência para reutilizar quando quiser.
+              {" "}
+              {maxSelectable <= 1 ? "Escolha 1 foto." : `Escolha até ${maxSelectable} fotos.`}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 sm:flex-row">
