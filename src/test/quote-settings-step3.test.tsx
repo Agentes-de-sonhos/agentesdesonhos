@@ -188,11 +188,10 @@ describe("Passo 1 — configuração inicial", () => {
   it("a ação de IA fica dentro do cartão da descrição", () => {
     const gridStart = destinationSource.indexOf('data-testid="destination-cover-grid"');
     const descriptionStart = destinationSource.indexOf("Descrição do destino", gridStart);
-    const aiAction = destinationSource.indexOf("Gerar com IA", descriptionStart);
     const surface = destinationSource.indexOf('data-testid="destination-description-surface"', descriptionStart);
+    const aiAction = destinationSource.indexOf("Gerar novamente com IA", surface);
     expect(gridStart).toBeGreaterThan(-1);
-    expect(aiAction).toBeGreaterThan(descriptionStart);
-    expect(aiAction).toBeLessThan(surface);
+    expect(aiAction).toBeGreaterThan(surface);
     expect(destinationSource).not.toContain("Gerar descrição com IA");
   });
 

@@ -216,14 +216,13 @@ describe("Editor de orçamento reorganizado", () => {
     expect(destination).not.toMatch(/Descrição do destino[\s\S]{0,180}h-1 w-full rounded-full bg-sky-500/);
   });
 
-  it("mantém IA dentro da descrição e a chave no rodapé direito", () => {
-    const descriptionStart = destination.indexOf("Descrição do destino");
+  it("mantém IA abaixo da descrição e a chave no rodapé esquerdo", () => {
     const descriptionEnd = destination.indexOf('data-testid="destination-description-surface"');
-    const aiButton = destination.indexOf("Gerar com IA", descriptionStart);
-    expect(aiButton).toBeGreaterThan(descriptionStart);
-    expect(aiButton).toBeLessThan(descriptionEnd);
+    const aiButton = destination.indexOf("Gerar novamente com IA", descriptionEnd);
+    expect(aiButton).toBeGreaterThan(descriptionEnd);
     expect(destination).toContain('data-testid="destination-visibility-action"');
-    expect(destination).toContain("flex justify-end border-t");
+    expect(destination).toContain("flex justify-start border-t");
+    expect(destination).toContain("Ocultar apresentação do destino");
     expect(destination).toContain("Exibir apresentação do destino");
   });
 
