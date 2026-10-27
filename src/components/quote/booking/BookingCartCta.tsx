@@ -37,7 +37,7 @@ export function BookingCartCta() {
             size="lg"
             variant={submitted ? "outline" : "default"}
             className="min-h-[48px] w-full gap-2 sm:w-auto hover:brightness-95"
-            style={submitted ? undefined : { background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}
+            style={submitted ? undefined : { background: "var(--brand-primary)", color: "var(--brand-on-primary, hsl(var(--primary-foreground)))" }}
             onClick={cart.openCart}
           >
             {submitted ? (
@@ -47,7 +47,7 @@ export function BookingCartCta() {
             )}
             {submitted ? t("viewMyRequest") : t("viewMyCart")}
             {!submitted && (
-              <Badge variant="secondary" className="text-[11px]" data-booking-cta-badge="true">
+              <Badge variant="secondary" className="text-[11px] border-0" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }} data-booking-cta-badge="true">
                 {cart.count}
               </Badge>
             )}

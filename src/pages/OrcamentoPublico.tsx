@@ -98,13 +98,13 @@ function getServiceIcon(service: QuoteService): React.ReactNode {
  * pictograma permanece na primária sobre a pastilha clara.
  */
 const SERVICE_HEADER_STYLE: React.CSSProperties = {
-  background: "var(--brand-tertiary)",
-  color: "var(--brand-on-tertiary, hsl(var(--foreground)))",
+  background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
+  color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
 };
 
 const SERVICE_ICON_STYLE: React.CSSProperties = {
   background: "var(--brand-tertiary)",
-  color: "var(--brand-on-tertiary, hsl(var(--foreground)))",
+  color: "#000000",
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
