@@ -164,7 +164,7 @@ function getServiceSummary(service: QuoteService): string {
       // Subtítulo só quando a empresa foi informada; nunca repetir a descrição.
       if (data.company_name) return data.company_name;
       if (data.custom_title?.trim()) return "";
-      const firstLine = (data.description || "").split("\n")[0].trim();
+      const firstLine = descriptionToPlainText(data.description || "").split("\n")[0].trim();
       return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || t("svc_other"));
     }
     default: return t("svc_default");
