@@ -29,6 +29,7 @@ import { PublicDocumentViewer } from "@/components/quote/PublicDocumentViewer";
 import { canPreviewInline, SIGNED_URL_TTL_SECONDS } from "@/lib/publicDocumentViewer";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
+import { descriptionToPlainText } from "@/lib/richDescription";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
 import { includedIconComponent, includedIconLabel, sanitizeIncludedIconId } from "@/lib/includedIcons";
@@ -164,7 +165,7 @@ function getServiceSummary(service: QuoteService): string {
       // Subtítulo só quando a empresa foi informada; nunca repetir a descrição.
       if (data.company_name) return data.company_name;
       if (data.custom_title?.trim()) return "";
-      const firstLine = (data.description || "").split("\n")[0].trim();
+      const firstLine = descriptionToPlainText(data.description || "").split("\n")[0].trim();
       return firstLine.length > 80 ? firstLine.slice(0, 77) + "..." : (firstLine || t("svc_other"));
     }
     default: return t("svc_default");

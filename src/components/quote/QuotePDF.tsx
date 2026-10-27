@@ -533,7 +533,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
             break;
           }
           case "circuit": summary = data.circuit_name || "Circuito"; break;
-          case "other": summary = data.company_name || (data.description || "").split("\n")[0].slice(0, 80) || t("svc_other"); break;
+          case "other": summary = data.company_name || descriptionToPlainText(data.description || "").split("\n")[0].slice(0, 80) || t("svc_other"); break;
         }
         // PDF: usar APENAS a primeira imagem cadastrada para economizar espaço vertical
         const allImages = ([
