@@ -67,7 +67,8 @@ export function BookingCartLauncher() {
         {...{ [BOOKING_CART_TARGET_ATTR]: "desktop" }}
         aria-label={t("openMyBookingRequest")}
         title={t("myBookingRequestTooltip")}
-        className="fixed right-4 top-[4.5rem] z-40 hidden items-center gap-2 rounded-full border border-border/60 bg-card/95 px-4 py-2.5 text-sm font-semibold text-foreground shadow-lg backdrop-blur transition-colors hover:border-primary/60 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:inline-flex"
+        style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}
+        className="fixed right-4 top-[4.5rem] z-40 hidden items-center gap-2 rounded-full border border-border/60 px-4 py-2.5 text-sm font-semibold shadow-lg transition-[filter] hover:brightness-95 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:inline-flex"
       >
         <span className="relative inline-flex">
           <ShoppingCart className="h-5 w-5" aria-hidden="true" />

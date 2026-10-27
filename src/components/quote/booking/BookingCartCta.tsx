@@ -36,7 +36,8 @@ export function BookingCartCta() {
             type="button"
             size="lg"
             variant={submitted ? "outline" : "default"}
-            className="min-h-[48px] w-full gap-2 sm:w-auto"
+            className="min-h-[48px] w-full gap-2 sm:w-auto hover:brightness-95"
+            style={submitted ? undefined : { background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}
             onClick={cart.openCart}
           >
             {submitted ? (

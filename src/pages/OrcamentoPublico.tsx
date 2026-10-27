@@ -98,12 +98,13 @@ function getServiceIcon(service: QuoteService): React.ReactNode {
  * pictograma permanece na primária sobre a pastilha clara.
  */
 const SERVICE_HEADER_STYLE: React.CSSProperties = {
-  background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
-  color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
+  background: "var(--brand-tertiary)",
+  color: "var(--brand-on-tertiary, hsl(var(--foreground)))",
 };
 
 const SERVICE_ICON_STYLE: React.CSSProperties = {
-  color: "var(--brand-primary, hsl(var(--primary)))",
+  background: "var(--brand-tertiary)",
+  color: "var(--brand-on-tertiary, hsl(var(--foreground)))",
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -919,7 +920,7 @@ function CollapsibleServiceCard({
     <>
       <div className="flex items-center gap-3">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-sm"
+          className="flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ring-black/10"
           style={SERVICE_ICON_STYLE}
         >
           {getServiceIcon(service)}
@@ -928,7 +929,7 @@ function CollapsibleServiceCard({
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
             {service.option_label && (
-              <Badge variant="secondary" className="text-xs gap-1 bg-white/60">
+              <Badge variant="secondary" className="text-xs gap-1 ring-1 ring-black/10" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
                 <Tag className="h-3 w-3" />
                 {service.option_label}
               </Badge>
@@ -1030,15 +1031,15 @@ function CollapsibleServiceCard({
             </div>
           )}
           {expanded && service.description && (
-            <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
-              <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">
+            <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 <FormattedText>{service.description}</FormattedText>
               </p>
             </div>
           )}
           {expanded && service.service_type === "attraction" && (service.service_data as any)?.notes && (
-            <div className="rounded-lg border-l-2 border-primary/40 bg-muted/30 px-4 py-3">
-              <p className="text-sm text-foreground/80 leading-relaxed italic whitespace-pre-wrap">
+            <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+              <p className="text-sm leading-relaxed italic whitespace-pre-wrap">
                 <FormattedText>{(service.service_data as any).notes}</FormattedText>
               </p>
             </div>
@@ -1099,7 +1100,8 @@ function BookingServiceActionRow({
     <div
       data-booking-action-row
       data-attached={attached ? "true" : "false"}
-      className={`flex w-full items-center justify-end gap-2 bg-primary/[0.07] px-4 ${
+      style={{ background: "var(--brand-tertiary)" }}
+      className={`flex w-full items-center justify-end gap-2 px-4 ${
         attached ? "pb-3.5 pt-1" : "border-t-2 border-primary/25 py-3.5"
       }`}
     >
@@ -1729,7 +1731,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   <div key={i} className="flex items-center snap-start" role="listitem">
                     {/* Largura calculada para mostrar 3 itens inteiros + ~50% do 4º no mobile */}
                     <div className="flex flex-col items-center gap-1.5 w-[28vw] max-w-[110px] shrink-0 sm:w-auto sm:min-w-[110px]">
-                      <div className="h-11 w-11 rounded-full bg-white border border-border shadow-sm flex items-center justify-center text-primary">
+                      <div className="h-11 w-11 rounded-full border border-border shadow-sm flex items-center justify-center" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
                         {n.icon}
                       </div>
                       <span className="text-[11px] sm:text-xs font-medium text-foreground/80 text-center leading-tight">{n.label}</span>
@@ -1996,7 +1998,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   </div>
                 </div>
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-full rounded-2xl bg-white border border-primary/20 shadow-sm px-6 sm:px-8 py-5 sm:py-6 text-center">
+                  <div className="w-full rounded-2xl border border-primary/20 shadow-sm px-6 sm:px-8 py-5 sm:py-6 text-center" style={{ background: "var(--brand-tertiary)" }}>
                     {primaryDisplay}
                   </div>
                   {secondaryDisplay && <div className="mt-3">{secondaryDisplay}</div>}
