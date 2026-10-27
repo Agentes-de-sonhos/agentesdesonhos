@@ -29,6 +29,7 @@ import { PublicDocumentViewer } from "@/components/quote/PublicDocumentViewer";
 import { canPreviewInline, SIGNED_URL_TTL_SECONDS } from "@/lib/publicDocumentViewer";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
+import { descriptionToPlainText } from "@/lib/richDescription";
 import { splitFlightLegs } from "@/lib/flightSegments";
 import { resolveWhatsIncludedItems, effectiveIncludedIconId } from "@/lib/whatsIncluded";
 import { includedIconComponent, includedIconLabel, sanitizeIncludedIconId } from "@/lib/includedIcons";
