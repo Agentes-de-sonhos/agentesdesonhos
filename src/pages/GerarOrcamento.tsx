@@ -1636,7 +1636,7 @@ export default function GerarOrcamento() {
           await Promise.all([handleSavePaymentConfig(), handleSaveValidity()]);
         }}
         renderInitial={() => {
-          const initialSetupPending = pendingInitialSetup(quote as any);
+
           const coverPending =
             isInitialSetupItemPending(quote as any, "cover") || isInitialSetupItemPending(quote as any, "intro");
           return (
