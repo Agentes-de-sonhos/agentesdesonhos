@@ -173,13 +173,13 @@ export function MultiDestinationInput({ value, onChange, layout = "stacked" }: M
           <div className="flex flex-wrap gap-2 pt-1">
             <Badge variant="secondary" className="gap-1">
               <Star className="h-3 w-3 fill-current" />
-              {primary.trim() || "Principal"}
+              {primary.trim() ? fullLabel(primary.trim()) : "Principal"}
             </Badge>
             {additional.map((dest, i) => {
               const realIdx = i + 1;
               return (
                 <Badge key={`${dest}-${realIdx}`} variant="outline" className="gap-1 pl-2 pr-1 py-1">
-                  <span>{dest}</span>
+                  <span>{fullLabel(dest)}</span>
                   <button
                     type="button"
                     onClick={() => moveUp(realIdx)}
@@ -233,13 +233,13 @@ export function MultiDestinationInput({ value, onChange, layout = "stacked" }: M
         <div className="flex flex-wrap gap-2 pt-1">
           <Badge variant="secondary" className="gap-1">
             <Star className="h-3 w-3 fill-current" />
-            {primary.trim() || "Principal"}
+            {primary.trim() ? fullLabel(primary.trim()) : "Principal"}
           </Badge>
           {additional.map((dest, i) => {
             const realIdx = i + 1;
             return (
               <Badge key={`${dest}-${realIdx}`} variant="outline" className="gap-1 pl-2 pr-1 py-1">
-                <span>{dest}</span>
+                <span>{fullLabel(dest)}</span>
                 <button
                   type="button"
                   onClick={() => moveUp(realIdx)}
