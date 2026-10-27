@@ -95,15 +95,18 @@ function getServiceIcon(service: QuoteService): React.ReactNode {
  * Cabeçalho do serviço no orçamento WEB: mantém o degradê histórico do
  * sistema, agora entre as cores primária e secundária da agência. Texto e
  * controles usam a cor configurada para leitura sobre a secundária; o
- * pictograma permanece na primária sobre a pastilha clara.
+ * pictograma fica sobre uma pastilha branca, padrão para todas as agências.
  */
 const SERVICE_HEADER_STYLE: React.CSSProperties = {
   background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
   color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
 };
 
+// Pastilha do ícone do título de cada serviço: fundo branco padrão para todas
+// as agências (o PDF já usava branco); a cor da marca segue nas bordas e no
+// degradê do cabeçalho.
 const SERVICE_ICON_STYLE: React.CSSProperties = {
-  background: "var(--brand-tertiary)",
+  background: "#ffffff",
   color: "#000000",
 };
 
@@ -1730,7 +1733,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   <div key={i} className="flex items-center snap-start" role="listitem">
                     {/* Largura calculada para mostrar 3 itens inteiros + ~50% do 4º no mobile */}
                     <div className="flex flex-col items-center gap-1.5 w-[28vw] max-w-[110px] shrink-0 sm:w-auto sm:min-w-[110px]">
-                      <div className="h-11 w-11 rounded-full border border-border shadow-sm flex items-center justify-center" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+                      <div className="h-11 w-11 rounded-full border border-border shadow-sm flex items-center justify-center" style={{ background: "#ffffff", color: "hsl(var(--foreground))" }}>
                         {n.icon}
                       </div>
                       <span className="text-[11px] sm:text-xs font-medium text-foreground/80 text-center leading-tight">{n.label}</span>
