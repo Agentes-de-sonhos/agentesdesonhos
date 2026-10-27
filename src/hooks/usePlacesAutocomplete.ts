@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { searchCitiesPtBr } from "@/lib/citySearchPtBr";
 
 export type PlaceType = "city" | "hotel" | "restaurant" | "car_rental" | "attraction" | "general";
 
@@ -63,10 +64,8 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
       // Para campos de Destino (cidade), usamos a base própria de cidades
       // (tabela public.cities). Google Places NÃO é utilizado neste caso.
       if (optionsRef.current?.placeType === "city") {
-        const { data, error } = await supabase.rpc("search_cities", {
-          q: input.trim(),
-          max_results: 10,
-        });
+        const data = await searchCitiesPtBr(input.trim(), 10);
+        const error = null;
         if (!error && Array.isArray(data)) {
           const preds: PlacePrediction[] = data.map((row: {
             id: number;
