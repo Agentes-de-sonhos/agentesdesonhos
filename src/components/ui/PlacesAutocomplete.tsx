@@ -86,7 +86,7 @@ export const PlacesAutocomplete = forwardRef<HTMLInputElement, PlacesAutocomplet
         )}
 
         {showDropdown && predictions.length > 0 && (
-          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+          <div className="absolute z-50 top-full left-0 right-0 min-w-[18rem] w-max max-w-[min(24rem,90vw)] mt-1 bg-popover border border-border rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto">
             {predictions.map((p) => {
               const PredIcon = p.matched_type ? Icon : MapPin;
               return (

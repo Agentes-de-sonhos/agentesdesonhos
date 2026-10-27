@@ -8,7 +8,7 @@
  *                 nome do aeroporto ou código IATA);
  *  - `port`    -> base curada de portos de embarque (`src/lib/cruisePorts.ts`).
  */
-import { supabase } from "@/integrations/supabase/client";
+import { searchCitiesPtBr } from "@/lib/citySearchPtBr";
 import { searchAirports } from "@/lib/airports";
 import { searchCruisePorts } from "@/lib/cruisePorts";
 
@@ -31,8 +31,7 @@ interface CityRow {
 }
 
 async function searchCities(query: string, limit: number): Promise<LocationSuggestion[]> {
-  const { data, error } = await supabase.rpc("search_cities", { q: query, max_results: limit });
-  if (error || !Array.isArray(data)) return [];
+  const data = await searchCitiesPtBr(query, limit);
   return (data as CityRow[]).map((row) => {
     const secondary = [row.admin_name, row.country].filter(Boolean).join(", ");
     return {
