@@ -66,8 +66,8 @@ import { agencyBrandInputFromProfile, brandThemeStyle, pickBrandProfile } from "
 import { resolvePublicAgencyUserId, usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { publicAirportText } from "@/lib/airportDisplay";
 
-// Descrição/observações dos serviços: 12% da terciária sobre branco (todas as agências).
-const SERVICE_NOTE_BOX_STYLE = { background: "color-mix(in srgb, var(--brand-tertiary, #f4f4f5) 12%, #ffffff)" } as const;
+// Descrição/observações dos serviços: 6% da terciária sobre branco (todas as agências).
+const SERVICE_NOTE_BOX_STYLE = { background: "color-mix(in srgb, var(--brand-tertiary, #f4f4f5) 6%, #ffffff)" } as const;
 import { AirlineLogo } from "@/components/shared/AirlineLogo";
 
 function getServiceLabel(service: QuoteService): string {
