@@ -42,6 +42,14 @@ export function MultiDestinationInput({ value, onChange, layout = "stacked" }: M
   const destinations = [primary.trim(), ...additional].filter(Boolean);
   // Always render at least one input (the "principal").
   const [draft, setDraft] = useState("");
+  // Nome completo (cidade, estado, país) exibido após selecionar uma sugestão.
+  // O valor salvo continua sendo só o nome da cidade (compatível com o restante).
+  const [labels, setLabels] = useState<Record<string, string>>({});
+  const [primarySelected, setPrimarySelected] = useState<string | null>(null);
+  const fullLabel = (name: string) => labels[name] || name;
+  const rememberLabel = (name: string, secondary?: string) => {
+    if (secondary) setLabels((prev) => ({ ...prev, [name]: `${name}, ${secondary}` }));
+  };
 
   const update = (next: string[]) => onChange(joinDestinations(next));
 
@@ -87,11 +95,30 @@ export function MultiDestinationInput({ value, onChange, layout = "stacked" }: M
 
   const isRow = layout === "row";
 
-  const primaryField = (
+  const showPrimaryLocked = !!primarySelected && primarySelected === primary.trim();
+
+  const primaryField = showPrimaryLocked ? (
+    <div className="flex h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-sm">
+      <span className="min-w-0 flex-1 truncate" title={fullLabel(primary.trim())}>{fullLabel(primary.trim())}</span>
+      <button
+        type="button"
+        onClick={() => { setPrimarySelected(null); handleSelectPrimary(""); }}
+        className="shrink-0 rounded-full p-0.5 text-muted-foreground hover:text-foreground"
+        title="Limpar destino"
+        aria-label="Limpar destino"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  ) : (
     <PlacesAutocomplete
       value={primary}
       onChange={handleSelectPrimary}
-      onPlaceSelect={(pred) => handleSelectPrimary(pred.name)}
+      onPlaceSelect={(pred) => {
+        rememberLabel(pred.name, pred.secondary);
+        setPrimarySelected(pred.name.trim());
+        handleSelectPrimary(pred.name);
+      }}
       placeType="city"
       placeholder="Ex: Paris, França"
       fetchDetailsOnSelect={false}
@@ -105,6 +132,7 @@ export function MultiDestinationInput({ value, onChange, layout = "stacked" }: M
       onPlaceSelect={(pred) => {
         const v = pred.name.trim();
         if (!v) return;
+        rememberLabel(v, pred.secondary);
         if (destinations.some((d) => d.toLowerCase() === v.toLowerCase())) {
           setDraft("");
           return;
