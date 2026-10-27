@@ -9,6 +9,7 @@ import { ServiceDocumentsCard, type ServiceDocumentsAccess } from "./ServiceDocu
 import { publicFlightRoute, publicFlightSegments } from "@/lib/publicWalletFlight";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
 import { publicAirportText } from "@/lib/airportDisplay";
+import { AirlineLogo } from "@/components/shared/AirlineLogo";
 import { tWallet } from "@/i18n/publicMaterials/wallet";
 import { tPublicFlight } from "@/i18n/publicMaterials/flights";
 import { formatPublicShortDate, type PublicLocale } from "@/i18n/publicMaterials/locale";
@@ -65,7 +66,7 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
       {segments.map((seg, i) => <section key={i} className="rounded-2xl border border-border bg-card p-4 sm:p-5" aria-label={`${t("fldVoo")} ${i + 1}`}>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary">{seg.segment_type === "volta" ? t("segVolta") : seg.segment_type === "conexao" ? t("segConexao") : t("fldIda")}{seg.flight_date ? ` · ${date(seg.flight_date)}` : ""}</span>
-          <span className="text-sm font-semibold">{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>
+          <span className="inline-flex items-center gap-2 text-sm font-semibold"><AirlineLogo airline={seg.airline || data.main_airline || data.airline} flightNumber={seg.flight_number} />{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>
         </div>
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 sm:gap-4">
           <div className="min-w-0 max-w-[5.5rem] sm:w-32 sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.departure_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.origin_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.origin_city || ""}</p></div>

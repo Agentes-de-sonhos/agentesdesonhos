@@ -64,6 +64,7 @@ import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInputFromProfile, brandThemeStyle, pickBrandProfile } from "@/lib/brandTheme";
 import { resolvePublicAgencyUserId, usePublicAgencyBrand } from "@/lib/usePublicAgencyBrand";
 import { publicAirportText } from "@/lib/airportDisplay";
+import { AirlineLogo } from "@/components/shared/AirlineLogo";
 
 function getServiceLabel(service: QuoteService): string {
   if (service.service_type === "other") {
@@ -425,7 +426,7 @@ function FlightBody({ data }: { data: any }) {
       {/* Header: airline + route */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-base font-semibold text-foreground tracking-tight truncate">{data.airline || t("airlineDefault")}</div>
+          <div className="flex items-center gap-2 text-base font-semibold text-foreground tracking-tight min-w-0"><AirlineLogo airline={data.airline} flightNumber={data.flight_number} /><span className="truncate">{data.airline || t("airlineDefault")}</span></div>
           <div className="text-xs text-muted-foreground mt-0.5">
             <span className="font-medium text-foreground/80">{data.origin_city}</span>
             <span className="mx-1.5 opacity-50">→</span>

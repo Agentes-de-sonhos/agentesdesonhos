@@ -166,3 +166,23 @@ export function suggestAirlines(query: string, limit = 8): string[] {
   }
   return [...starts, ...contains].slice(0, limit);
 }
+// Resolve a 2-letter IATA code from a code, commercial name or flight number.
+export function resolveAirlineIata(value?: string | null, flightNumber?: string | null): string | null {
+  const v = String(value || "").trim();
+  const upper = v.toUpperCase();
+  if (/^[A-Z0-9]{2}$/.test(upper) && AIRLINES[upper]) return upper;
+  const name = AIRLINES[upper] || v;
+  if (name) {
+    const lower = name.toLowerCase();
+    const hit = Object.entries(AIRLINES).find(([k, n]) => k.length === 2 && n.toLowerCase() === lower)
+      || Object.entries(AIRLINES).find(([k, n]) => k.length === 2 && lower.length > 3 && (lower.includes(n.toLowerCase()) || n.toLowerCase().includes(lower)));
+    if (hit) return hit[0];
+  }
+  const fn = String(flightNumber || "").trim().toUpperCase().match(/^([A-Z0-9]{2})\s?\d/);
+  if (fn && AIRLINES[fn[1]]) return fn[1];
+  return null;
+}
+
+export function airlineLogoUrl(iata: string): string {
+  return `https://images.kiwi.com/airlines/64x64/${iata}.png`;
+}
