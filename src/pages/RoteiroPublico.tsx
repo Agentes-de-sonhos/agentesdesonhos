@@ -201,10 +201,11 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
         })
       );
 
-      const mappedItinerary: Itinerary & { days: ItineraryDay[] } = {
+      const mappedItinerary: Itinerary & { days: ItineraryDay[]; clientName?: string | null } = {
         id: itineraryData.id,
         userId: itineraryData.user_id,
         destination: itineraryData.destination,
+        clientName: (itineraryData as any).client_name ?? null,
         startDate: itineraryData.start_date,
         endDate: itineraryData.end_date,
         travelersCount: itineraryData.travelers_count,
