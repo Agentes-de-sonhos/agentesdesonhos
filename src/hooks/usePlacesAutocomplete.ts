@@ -77,7 +77,11 @@ export function usePlacesAutocomplete(options?: UsePlacesAutocompleteOptions) {
             lat: number | null;
             lng: number | null;
           }) => {
-            const secondary = [row.admin_name, row.country].filter(Boolean).join(", ");
+            let country = row.country;
+            try {
+              if (row.iso2) country = new Intl.DisplayNames(["pt-BR"], { type: "region" }).of(row.iso2) || row.country;
+            } catch { /* mantém nome original */ }
+            const secondary = [row.admin_name, country].filter(Boolean).join(", ");
             return {
               place_id: `city:${row.id}`,
               name: row.name,
