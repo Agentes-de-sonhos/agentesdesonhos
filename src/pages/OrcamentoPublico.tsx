@@ -98,13 +98,13 @@ function getServiceIcon(service: QuoteService): React.ReactNode {
  * pictograma permanece na primária sobre a pastilha clara.
  */
 const SERVICE_HEADER_STYLE: React.CSSProperties = {
-  background: "var(--brand-tertiary)",
-  color: "var(--brand-on-tertiary, hsl(var(--foreground)))",
+  background: "linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%)",
+  color: "var(--brand-on-secondary, hsl(var(--primary-foreground)))",
 };
 
 const SERVICE_ICON_STYLE: React.CSSProperties = {
   background: "var(--brand-tertiary)",
-  color: "var(--brand-on-tertiary, hsl(var(--foreground)))",
+  color: "#000000",
 };
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -1100,8 +1100,7 @@ function BookingServiceActionRow({
     <div
       data-booking-action-row
       data-attached={attached ? "true" : "false"}
-      style={{ background: "var(--brand-tertiary)" }}
-      className={`flex w-full items-center justify-end gap-2 px-4 ${
+      className={`flex w-full items-center justify-end gap-2 bg-white px-4 ${
         attached ? "pb-3.5 pt-1" : "border-t-2 border-primary/25 py-3.5"
       }`}
     >
