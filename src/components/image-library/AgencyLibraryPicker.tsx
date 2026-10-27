@@ -118,6 +118,24 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
           </DialogHeader>
           <div className="flex flex-col gap-2 sm:flex-row">
             <div className="relative flex-1">
+              <Link2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={newUrl}
+                onChange={(e) => { setNewUrl(e.target.value); setUrlError(null); }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void addByUrl(); } }}
+                placeholder="Cole o link da imagem (https://...)"
+                className="pl-8"
+                aria-label="Link da nova foto"
+              />
+            </div>
+            <Button type="button" variant="outline" onClick={() => void addByUrl()} disabled={!newUrl.trim() || adding} className="gap-1.5">
+              {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              Adicionar foto
+            </Button>
+          </div>
+          {urlError && <p className="text-xs text-destructive" role="alert">{urlError}</p>}
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome" className="pl-8" aria-label="Buscar por nome" />
             </div>
@@ -130,31 +148,13 @@ export function AgencyLibraryPicker({ existingUrls, maxSelectable, onAdd, disabl
               </SelectContent>
             </Select>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <div className="relative flex-1">
-              <Link2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                value={newUrl}
-                onChange={(e) => { setNewUrl(e.target.value); setUrlError(null); }}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void addByUrl(); } }}
-                placeholder="Colar link de uma nova foto (https://...)"
-                className="pl-8"
-                aria-label="Link da nova foto"
-              />
-            </div>
-            <Button type="button" variant="outline" onClick={() => void addByUrl()} disabled={!newUrl.trim() || adding} className="gap-1.5">
-              {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-              Adicionar por link
-            </Button>
-          </div>
-          {urlError && <p className="text-xs text-destructive" role="alert">{urlError}</p>}
           <div className="flex-1 overflow-y-auto min-h-[200px]" data-testid="library-picker-grid">
             {images.isLoading ? (
               <div className="flex h-40 items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
             ) : visible.length === 0 ? (
               <p className="py-10 text-center text-sm text-muted-foreground">
                 {(images.data || []).length === 0
-                  ? "A biblioteca ainda está vazia. Cole o link de uma foto acima para adicioná-la."
+                  ? "Você ainda não possui fotos salvas na biblioteca. Cole um link acima para adicionar sua primeira foto."
                   : "Nenhuma imagem encontrada."}
               </p>
             ) : (

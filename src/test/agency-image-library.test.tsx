@@ -137,7 +137,7 @@ describe("UI", () => {
   it("seleção respeita o limite e copia a URL ao serviço", async () => {
     const onAdd = vi.fn();
     render(wrap(<AgencyLibraryPicker existingUrls={[]} maxSelectable={1} onAdd={onAdd} />));
-    fireEvent.click(screen.getByRole("button", { name: "Biblioteca da agência" }));
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar por link da web" }));
     await waitFor(() => screen.getByRole("button", { name: "Selecionar Praia" }));
     fireEvent.click(screen.getByRole("button", { name: "Selecionar Praia" }));
     fireEvent.click(screen.getByRole("button", { name: "Selecionar Hotel" }));
