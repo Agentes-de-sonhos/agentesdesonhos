@@ -342,7 +342,7 @@ export function HotelPhotoGallery({
             disabled={atLimit || uploading}
           >
             {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImageIcon className="h-3.5 w-3.5" />}
-            {uploading ? "Enviando…" : "Enviar foto"}
+            {uploading ? "Enviando…" : "Do computador"}
           </Button>
           <AgencyLibraryPicker
             existingUrls={active}
