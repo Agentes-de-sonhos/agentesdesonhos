@@ -1970,7 +1970,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
           return (
             <section
-              className="rounded-2xl border border-primary/25 bg-primary/[0.05] p-6 sm:p-7 animate-fade-up"
+              className="rounded-2xl border border-primary/25 bg-white p-6 sm:p-7 animate-fade-up"
               aria-labelledby="investimento-total-title"
             >
               <div className="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center gap-5 md:gap-8">
@@ -1997,7 +1997,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                   </div>
                 </div>
                 <div className="flex flex-col items-center text-center">
-                  <div className="w-full rounded-2xl border border-primary/20 shadow-sm px-6 sm:px-8 py-5 sm:py-6 text-center" style={{ background: "var(--brand-tertiary)" }}>
+                  <div className="w-full rounded-2xl border border-primary/20 bg-white shadow-sm px-6 sm:px-8 py-5 sm:py-6 text-center">
                     {primaryDisplay}
                   </div>
                   {secondaryDisplay && <div className="mt-3">{secondaryDisplay}</div>}

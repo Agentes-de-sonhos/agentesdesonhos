@@ -373,7 +373,7 @@ export function PublicInvestmentSummary({
       )}
 
       {showTotalCard && (
-        <div className="mt-5 rounded-2xl border border-primary/25 bg-primary/[0.05] p-6 sm:p-7">
+        <div className="mt-5 rounded-2xl border border-primary/25 bg-white p-6 sm:p-7">
           <div className="flex flex-col items-center text-center">
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm" aria-hidden="true">
               <Wallet className="h-5 w-5" />
