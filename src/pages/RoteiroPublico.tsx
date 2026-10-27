@@ -2,6 +2,7 @@ import { AgencyBrandLoader, useBrandLoaderHold } from "@/components/public/Agenc
 import { useEffect, useState } from "react";
 import { BrandText } from "@/components/ui/brand-text";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
+import { useToolSharePreview } from "@/lib/toolSharePreview";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { parseLocalDate } from "@/lib/dateParsing";
@@ -123,6 +124,18 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
       (pickBrandProfile([agentProfile as any, itineraryBrand as any]) ?? agentProfile) as any,
     ),
   );
+
+  const shareBrand = (pickBrandProfile([agentProfile as any, itineraryBrand as any]) ?? agentProfile) as any;
+  useToolSharePreview(itinerary ? {
+    kind: "itinerary",
+    destination: itinerary.destination,
+    clientName: (itinerary as any).clientName ?? null,
+    agencyName: shareBrand?.agency_name ?? null,
+    startDate: itinerary.startDate,
+    endDate: itinerary.endDate,
+    coverImage: itinerary.coverImageUrl || itinerary.destinationIntroImages?.[0] || null,
+    agencyLogo: shareBrand?.agency_logo_url ?? null,
+  } : null);
 
   // Weather + timezone (hook must be called unconditionally before any early return)
   const weatherDestination = itinerary?.destination;
