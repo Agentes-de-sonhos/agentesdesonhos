@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   computeQuoteTotalState,
   hidesIndividualAmounts,
@@ -7,6 +8,28 @@ import {
 } from "@/lib/quotePricing";
 
 const services = [{ amount: 10000 }, { amount: 8450 }];
+
+describe("fundo do investimento é branco (todas as agências)", () => {
+  it("bloco Investimento Total do orçamento público usa fundo branco, sem cor da agência", () => {
+    const src = readFileSync("src/pages/OrcamentoPublico.tsx", "utf8");
+    const block = src.slice(
+      src.indexOf('aria-labelledby="investimento-total-title"') - 200,
+      src.indexOf("Commercial CTA block"),
+    );
+    expect(block).toMatch(/rounded-2xl border border-primary\/25 bg-white p-6 sm:p-7 animate-fade-up/);
+    expect(block).toMatch(/border-primary\/20 bg-white shadow-sm/);
+    expect(block).not.toMatch(/var\(--brand-tertiary\)/);
+    expect(block).not.toMatch(/bg-primary\/\[0\.05\]/);
+  });
+
+  it("bloco Investimento Total da Viagem (layouts novos) também é branco", () => {
+    const src = readFileSync("src/components/quote/PublicInvestmentSummary.tsx", "utf8");
+    const block = src.slice(src.indexOf("Investimento Total da Viagem") - 400, src.indexOf("Investimento Total da Viagem") + 200);
+    expect(block).toMatch(/border border-primary\/25 bg-white p-6 sm:p-7/);
+    expect(block).not.toMatch(/bg-primary\/\[0\.05\]/);
+  });
+});
+
 
 describe("bloco Valor total do orçamento", () => {
   it("calcula automaticamente a soma dos serviços sem escolha prévia", () => {
