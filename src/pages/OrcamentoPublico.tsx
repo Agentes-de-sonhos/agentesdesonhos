@@ -1100,8 +1100,7 @@ function BookingServiceActionRow({
     <div
       data-booking-action-row
       data-attached={attached ? "true" : "false"}
-      style={{ background: "var(--brand-tertiary)" }}
-      className={`flex w-full items-center justify-end gap-2 px-4 ${
+      className={`flex w-full items-center justify-end gap-2 bg-white px-4 ${
         attached ? "pb-3.5 pt-1" : "border-t-2 border-primary/25 py-3.5"
       }`}
     >
