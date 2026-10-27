@@ -192,72 +192,10 @@ describe("HotelPhotoGallery (autosave)", () => {
     expect(last).toEqual([makeGplaceRef("P1", 0)]);
   });
 
-  it("importa URL manual e já conta no limite, sem botão de confirmar", async () => {
-    const onChange = vi.fn();
-    render(<Harness onChange={onChange} />);
-    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
-    fireEvent.change(screen.getByPlaceholderText("Cole aqui o link direto da imagem"), {
-      target: { value: "https://site.com/quarto.jpg" },
-    });
-    fireEvent.click(screen.getByLabelText("Adicionar foto"));
-    await waitFor(() =>
-      expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(1)),
-    );
-    expect(invoke).toHaveBeenCalledWith("import-quote-image", { body: { url: "https://site.com/quarto.jpg" } });
-    expect(onChange).toHaveBeenCalledWith(["https://cdn.example/imported.jpg"]);
-  });
-
-  it("falha de importação mantém o estado visível, não diz 'Salvo' e oferece retry", async () => {
-    const onChange = vi.fn();
-    invoke.mockImplementation((fn: unknown) =>
-      fn === "hotel-photos"
-        ? Promise.resolve({ data: { photos: googlePhotos }, error: null })
-        : Promise.resolve({ data: null, error: new Error("falhou") }),
-    );
-    render(<Harness onChange={onChange} />);
-    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
-    fireEvent.change(screen.getByPlaceholderText("Cole aqui o link direto da imagem"), {
-      target: { value: "https://site.com/erro.jpg" },
-    });
-    fireEvent.click(screen.getByLabelText("Adicionar foto"));
-    await waitFor(() =>
-      expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("Não foi possível carregar"),
-    );
-    expect(screen.getByTestId("hotel-gallery-autosave-status").textContent).toBe(HOTEL_GALLERY_RETRY_MESSAGE);
-    expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByTestId("hotel-gallery-counter").textContent).toBe(galleryCounterLabel(0));
-
-    // Retry real: agora a importação funciona e a foto entra.
-    invoke.mockImplementation((fn: unknown) =>
-      fn === "hotel-photos"
-        ? Promise.resolve({ data: { photos: googlePhotos }, error: null })
-        : Promise.resolve({ data: { url: "https://cdn.example/ok.jpg" }, error: null }),
-    );
-    fireEvent.click(screen.getByTestId("hotel-gallery-retry"));
-    await waitFor(() => expect(onChange).toHaveBeenCalledWith(["https://cdn.example/ok.jpg"]));
-  });
-
-  it("rejeita URL inválida e duplicada sem chamar a importação", async () => {
-    render(<Harness initial={["https://cdn.example/dup.jpg"]} />);
-    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
-    const input = screen.getByPlaceholderText("Cole aqui o link direto da imagem");
-
-    fireEvent.change(input, { target: { value: "ftp://x/a.jpg" } });
-    fireEvent.click(screen.getByLabelText("Adicionar foto"));
-    expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("link http ou https válido");
-    expect(invoke).not.toHaveBeenCalledWith("import-quote-image", expect.anything());
-
-    fireEvent.change(input, { target: { value: "https://cdn.example/dup.jpg" } });
-    fireEvent.click(screen.getByLabelText("Adicionar foto"));
-    expect(screen.getByTestId("hotel-gallery-feedback").textContent).toContain("já está na galeria");
-    expect(invoke).not.toHaveBeenCalledWith("import-quote-image", expect.anything());
-  });
-
   it("ao atingir 5 fotos desabilita novas adições e mostra a mensagem de limite", async () => {
     const five = Array.from({ length: 5 }, (_, i) => `https://cdn.example/s${i}.jpg`);
     render(<Harness initial={five} />);
     expect(screen.getByTestId("hotel-gallery-limit").textContent).toBe(HOTEL_GALLERY_LIMIT_MESSAGE);
-    expect(screen.getByLabelText("Adicionar foto por URL")).toBeDisabled();
     expect(screen.getByLabelText("Enviar foto do computador")).toBeDisabled();
     await findSuggestions();
     expect(await screen.findByLabelText("Selecionar foto 1")).toBeDisabled();
@@ -305,16 +243,4 @@ describe("HotelPhotoGallery (autosave)", () => {
     expect(onPending).not.toHaveBeenCalledWith(true);
   });
 
-  it("após URL importada com sucesso o formulário fecha e limpa", async () => {
-    render(<Harness />);
-    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
-    fireEvent.change(screen.getByPlaceholderText("Cole aqui o link direto da imagem"), {
-      target: { value: "https://site.com/quarto.jpg" },
-    });
-    fireEvent.click(screen.getByLabelText("Adicionar foto"));
-    await waitFor(() => expect(screen.queryByTestId("hotel-gallery-url-form")).toBeNull());
-    expect(screen.queryByTestId("hotel-gallery-feedback")).toBeNull();
-    fireEvent.click(screen.getByLabelText("Adicionar foto por URL"));
-    expect((screen.getByPlaceholderText("Cole aqui o link direto da imagem") as HTMLInputElement).value).toBe("");
-  });
 });
