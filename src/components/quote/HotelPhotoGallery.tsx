@@ -304,34 +304,8 @@ export function HotelPhotoGallery({
 
       <div className="space-y-3">
         {!placeId && hotelSearch}
-        {placeId && (
-          <GoogleHotelPhotos
-            placeId={placeId}
-            onPhotosSelected={handleGoogleSelected}
-            onPhotoRemoved={handleRemove}
-            existingUrls={active}
-            hideCounter
-            disabled={atLimit}
-            headingLabel={HOTEL_GALLERY_SUGGESTIONS_TITLE}
-            buttonLabel="Buscar fotos do Google"
-            loadingLabel="Buscando sugestões do Google…"
-            requestTrigger={googleRequestTrigger}
-          />
-        )}
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-8 gap-1.5 text-xs"
-            aria-label="Adicionar foto por URL"
-            onClick={() => setUrlOpen((v) => !v)}
-            disabled={atLimit}
-          >
-            <Link2 className="h-3.5 w-3.5" />
-            Adicionar foto por URL
-          </Button>
           <Button
             type="button"
             variant="outline"
@@ -350,6 +324,22 @@ export function HotelPhotoGallery({
             onAdd={(urls) => urls.forEach((u) => tryAdd(u))}
             disabled={atLimit}
           />
+          {placeId && (
+            <div className="contents [&>div]:basis-full">
+              <GoogleHotelPhotos
+                placeId={placeId}
+                onPhotosSelected={handleGoogleSelected}
+                onPhotoRemoved={handleRemove}
+                existingUrls={active}
+                hideCounter
+                disabled={atLimit}
+                headingLabel={HOTEL_GALLERY_SUGGESTIONS_TITLE}
+                buttonLabel="Buscar fotos do Google"
+                loadingLabel="Buscando sugestões do Google…"
+                requestTrigger={googleRequestTrigger}
+              />
+            </div>
+          )}
           {status === "error" && retryRef.current && (
             <Button
               type="button"
@@ -365,41 +355,6 @@ export function HotelPhotoGallery({
           )}
         </div>
 
-        {urlOpen && (
-          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3" data-testid="hotel-gallery-url-form">
-            <Input
-              value={urlValue}
-              onChange={(e) => setUrlValue(e.target.value)}
-              placeholder={HOTEL_GALLERY_URL_PLACEHOLDER}
-              aria-label="Link direto da imagem"
-              disabled={urlLoading}
-            />
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                size="sm"
-                className="h-8 gap-1.5 text-xs"
-                onClick={handleAddUrl}
-                disabled={urlLoading || atLimit}
-                aria-label="Adicionar foto"
-              >
-                {urlLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-                {urlLoading ? "Importando…" : "Adicionar foto"}
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs"
-                onClick={() => { setUrlOpen(false); setUrlValue(""); }}
-                disabled={urlLoading}
-                aria-label="Fechar adição por URL"
-              >
-                Cancelar
-              </Button>
-            </div>
-          </div>
-        )}
 
         <input
           ref={fileRef}

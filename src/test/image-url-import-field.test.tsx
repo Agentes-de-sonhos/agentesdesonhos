@@ -144,6 +144,6 @@ describe("integração no formulário de Ingressos", () => {
 
   it("preserva as ações existentes de upload e fotos sugeridas", () => {
     expect(forms).toContain('triggerLabel="Buscar fotos sugeridas"');
-    expect(forms).toContain('<span className="text-xs">{uploading ? "Otimizando..." : "Adicionar"}</span>');
+    expect(forms).toContain('{uploading ? "Otimizando..." : "Do computador"}');
   });
 });
