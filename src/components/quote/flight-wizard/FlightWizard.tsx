@@ -3,7 +3,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   ArrowLeft, ArrowRight, CalendarIcon, Check, ChevronLeft, ExternalLink,
-  Plane, Plus, SkipForward, Trash2, Save, Sparkles, AlertCircle,
+  Plane, Plus, SkipForward, Trash2, Save, Sparkles, AlertCircle, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
 import { PlacesAutocomplete } from "@/components/ui/PlacesAutocomplete";
 import { suggestAirlines } from "@/lib/airlines";
-import { searchAirportsSync, type AirportSuggestion } from "@/lib/airports";
+import { searchAirportsSync, getAirportSync, type AirportSuggestion } from "@/lib/airports";
 import { useAirports } from "@/hooks/useAirports";
 import { cn } from "@/lib/utils";
 import { useFormDraft } from "@/hooks/usePersistedState";
@@ -160,11 +160,10 @@ function AirportInput({
 }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   const { loaded } = useAirports();
   const [open, setOpen] = useState(false);
-  const [focused, setFocused] = useState(false);
-  const [query, setQuery] = useState<string>(value || "");
+  const [query, setQuery] = useState<string>("");
+  // Quando há um aeroporto escolhido, o campo mostra o nome completo + X.
+  const [selected, setSelected] = useState<boolean>(!!value);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => { setQuery(value || ""); }, [value]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -175,44 +174,63 @@ function AirportInput({
   }, []);
 
   const suggestions: AirportSuggestion[] = useMemo(
-    () => loaded ? searchAirportsSync(query, 8) : [],
-    [query, loaded]
+    () => loaded && !selected ? searchAirportsSync(query, 8) : [],
+    [query, loaded, selected]
   );
 
-  // Hide list if the query exactly matches a 3-letter IATA already selected.
-  const isExactIata = /^[A-Za-z]{3}$/.test(query.trim()) && suggestions.some(
-    s => s.iata.toLowerCase() === query.trim().toLowerCase() && s.iata === (value || "").toUpperCase()
-  );
-  const showList = open && focused && suggestions.length > 0 && !isExactIata;
+  const code = (value || "").toUpperCase();
+  const info = loaded && code ? getAirportSync(code) : undefined;
+  const selectedLabel = info ? `${code} · ${info.city} (${info.name})` : code;
+  const display = selected && value ? selectedLabel : query;
+  const showList = open && !selected && suggestions.length > 0;
+
+  const clear = () => {
+    onChange("");
+    setQuery("");
+    setSelected(false);
+    setOpen(false);
+  };
 
   return (
     <div ref={containerRef} className="relative">
       <Input
         placeholder={placeholder}
-        value={query}
+        value={display}
+        title={selected ? selectedLabel : undefined}
         onChange={(e) => {
           const v = e.target.value;
+          setSelected(false);
           setQuery(v);
           setOpen(true);
-          // Only propagate as IATA when user typed exactly a 3-letter code
           if (/^[A-Za-z]{3}$/.test(v.trim())) onChange(v.trim().toUpperCase());
-          else if (v.trim() === "") onChange("");
+          else if (v.trim() === "" || value) onChange("");
         }}
-        onFocus={() => { setFocused(true); setOpen(true); }}
-        onBlur={() => setFocused(false)}
+        onFocus={() => setOpen(true)}
         autoComplete="off"
+        className={cn((selected || query) && "pr-8", "truncate")}
       />
+      {(selected && value) || query ? (
+        <button
+          type="button"
+          aria-label="Limpar aeroporto"
+          onClick={clear}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : null}
       {showList && (
-        <div className="absolute z-50 mt-1 w-full rounded-md border border-border bg-popover shadow-md max-h-72 overflow-y-auto">
+        <div className="absolute z-50 mt-1 w-full min-w-[16rem] rounded-md border border-border bg-popover shadow-md max-h-72 overflow-y-auto">
           {suggestions.map((s) => (
             <button
               key={s.iata + s.name}
               type="button"
               className="w-full text-left px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground border-b border-border/40 last:border-b-0"
-              onMouseDown={(e) => {
-                e.preventDefault();
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
                 onChange(s.iata);
-                setQuery(s.iata);
+                setQuery("");
+                setSelected(true);
                 setOpen(false);
               }}
             >
