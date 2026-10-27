@@ -27,9 +27,10 @@ export function InlineBookingAction({
     return (
       <div
         className={cn(
-          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-border/60 bg-card px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground",
+          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-black/10 px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wide",
           className,
         )}
+        style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}
         data-booking-inline-action="locked"
         data-service-id={service.id}
         title={t("includedInProposal")}
