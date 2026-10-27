@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Check, Pencil, Plane, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Pencil, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import {
   INITIAL_SETUP_HIGHLIGHT_CLASS,
   isInitialSetupItemPending,
-  suggestQuoteTitle,
+  defaultQuoteTitle,
 } from "@/lib/quoteInitialSetup";
 import type { Quote } from "@/types/quote";
 
@@ -27,7 +27,8 @@ export function QuoteTitleField({ quote, onUpdated }: { quote: Quote; onUpdated?
   const { toast } = useToast();
 
   const pending = isInitialSetupItemPending(quote as any, "title");
-  const suggestion = suggestQuoteTitle(quote as any);
+  const fallback = defaultQuoteTitle(quote as any);
+  const autoSaved = useRef<string | null>(null);
 
   const save = async (value: string) => {
     const val = value.trim() || null;
@@ -43,6 +44,24 @@ export function QuoteTitleField({ quote, onUpdated }: { quote: Quote; onUpdated?
     setEditing(false);
     toast({ title: "Título atualizado" });
   };
+
+  // Sem título: grava automaticamente o padrão "Viagem para {destino} {ano}".
+  useEffect(() => {
+    if (current || !fallback || autoSaved.current === quote.id) return;
+    autoSaved.current = quote.id;
+    void supabase
+      .from("quotes")
+      .update({ trip_title: fallback } as any)
+      .eq("id", quote.id)
+      .is("trip_title", null)
+      .then(({ error }) => {
+        if (!error) {
+          queryClient.invalidateQueries({ queryKey: ["quote", quote.id] });
+          onUpdated?.();
+        }
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quote.id, current, fallback]);
 
   return (
     <div
@@ -83,7 +102,7 @@ export function QuoteTitleField({ quote, onUpdated }: { quote: Quote; onUpdated?
                 setEditing(true);
               }}
             >
-              {current || <span className="font-normal italic text-muted-foreground">Adicione um título</span>}
+              {current || fallback || <span className="font-normal italic text-muted-foreground">Adicione um título</span>}
             </span>
             <Button
               variant="ghost"
@@ -100,23 +119,6 @@ export function QuoteTitleField({ quote, onUpdated }: { quote: Quote; onUpdated?
           </>
         )}
       </div>
-      {pending && suggestion ? (
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-7 text-xs"
-            data-testid="quote-title-suggestion"
-            disabled={saving}
-            onClick={() => void save(suggestion)}
-          >
-            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-sky-500" />
-            Usar sugestão: {suggestion}
-          </Button>
-          <span className="text-[11px] text-muted-foreground">Você pode editar depois.</span>
-        </div>
-      ) : null}
     </div>
   );
 }

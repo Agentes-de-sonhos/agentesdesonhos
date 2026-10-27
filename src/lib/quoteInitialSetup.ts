@@ -95,6 +95,14 @@ export function suggestQuoteTitle(quote: {
   return parts.join(" · ");
 }
 
+/** Título padrão do orçamento: "Viagem para {destino} {ano da viagem}". */
+export function defaultQuoteTitle(quote: { destination?: string | null; start_date?: string | null }): string | null {
+  const destination = (quote?.destination || "").trim();
+  if (!destination) return null;
+  const year = /^\d{4}/.exec(quote?.start_date || "")?.[0];
+  return year ? `Viagem para ${destination} ${year}` : `Viagem para ${destination}`;
+}
+
 /**
  * Uma sugestão automática de descrição por criação de orçamento: evita chamadas
  * repetidas à IA em rerenders. O retry continua disponível pelo botão.

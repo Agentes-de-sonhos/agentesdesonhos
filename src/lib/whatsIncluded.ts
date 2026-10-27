@@ -10,33 +10,24 @@ import {
   type IncludedIconId,
 } from "@/lib/includedIcons";
 
+/** Ordem e rótulos do resumo: só o tipo de serviço, sem nomes de hotel/cidade. */
+export const WHATS_INCLUDED_TYPE_LABELS: Array<[string, string]> = [
+  ["flight", "Passagens aéreas"],
+  ["hotel", "Hospedagem"],
+  ["car_rental", "Locação de carro"],
+  ["transfer", "Transfer"],
+  ["attraction", "Ingressos"],
+  ["insurance", "Seguro viagem"],
+  ["cruise", "Cruzeiro"],
+  ["rail_transport", "Transporte ferroviário"],
+  ["circuit", "Circuitos"],
+  ["other", "Outros serviços"],
+];
+
 export function computeAutoWhatsIncluded(quote: any): string[] {
   const services: any[] = quote?.services || [];
   const types = new Set(services.map((s) => s.service_type));
-  const out: string[] = [];
-
-  const hotel = services.find((s) => s.service_type === "hotel");
-  if (hotel?.service_data) {
-    const meal = String(hotel.service_data.meal_plan || "").toLowerCase();
-    const ai = meal.includes("all") || meal.includes("inclu");
-    out.push(
-      `${hotel.service_data.hotel_name || "Hospedagem selecionada"}${ai ? " • All Inclusive" : ""}`
-    );
-  }
-
-  const flight = services.find((s) => s.service_type === "flight");
-  if (flight?.service_data) {
-    out.push(
-      `Voos${flight.service_data.origin_city ? ` saindo de ${flight.service_data.origin_city}` : ""}`
-    );
-  }
-
-  if (types.has("car_rental")) out.push("Carro à disposição");
-  if (types.has("transfer")) out.push("Transfers privativos inclusos");
-  if (types.has("attraction")) out.push("Experiências e passeios selecionados");
-  if (types.has("insurance")) out.push("Seguro viagem incluso");
-  if (types.has("cruise")) out.push("Cruzeiro reservado");
-
+  const out = WHATS_INCLUDED_TYPE_LABELS.filter(([t]) => types.has(t)).map(([, label]) => label);
   if (out.length === 0) out.push("Roteiro personalizado pela sua agência");
   return out;
 }
