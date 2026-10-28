@@ -1318,3 +1318,22 @@ export const MUNDO_EM_CORES_XCARET_CARDS = {
   "Dias dentro d'água": { image: { src: mundoXcaretCardXelha.url, alt: "Vanessa Figueiredo diante das águas cristalinas do Xel-Há", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
   "__roteiro": { image: { src: mundoXcaretRoteiro.url, alt: "Dias dentro d'água no Xcaret", source: "Acervo pessoal de Vanessa Figueiredo" }, position: "object-center" },
 };
+
+/* ------------------------------------------------------------------ */
+/* Drica Viagens — perfil OFICIAL (dricaviagens.com.br).               */
+/* Aprovado por Fernando (28/10/2026): igual à apresentação completa,  */
+/* sem modo apresentação e sem avisos de demonstração.                 */
+/* ------------------------------------------------------------------ */
+export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
+  ...DRICA_PRESENTATION_PROFILE,
+  key: "dricaOfficial",
+  presentation: false,
+  copy: {
+    ...DRICA_PRESENTATION_PROFILE.copy,
+    newsletter: {
+      ...(DRICA_PRESENTATION_PROFILE.copy?.newsletter ?? { kicker: "", title: "", subtitle: "", cta: "" }),
+      subtitle: "Destinos em alta como Japão, Marrocos, Albânia, Vietnã e Nordeste do Brasil.",
+    },
+  } as AgencySiteProfile["copy"],
+  seo: { title: "Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins." },
+};

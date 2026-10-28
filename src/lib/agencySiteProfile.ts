@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -59,6 +59,7 @@ export type AgencySiteProfileKey =
   /** Bardelli Viagens — padrão ouro (São Paulo/SP), prévia em /preview. */
   | "bardelliCurated"
   | "dricaPresentation"
+  | "dricaOfficial"
   | "bardelliPresentation"
   /** Rascunho técnico isolado do briefing 19 (Bagagem na Mão); sem domínio público. */
   | "bagagemNaMaoBriefing19"
@@ -1196,6 +1197,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
   /** Host sintético do rascunho briefing-20 — nada é vinculado ao cadastro real. */
   "briefing-20-v1.preview.local": "curtiViagensBriefing20",
+  "dricaviagens.com.br": "dricaOfficial",
+  "www.dricaviagens.com.br": "dricaOfficial",
   "bardelliviagens.com.br": "bardelliCurated",
   "www.bardelliviagens.com.br": "bardelliCurated",
 };
@@ -1216,6 +1219,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   bardelliCurated: BARDELLI_OFFICIAL_PROFILE,
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
   dricaPresentation: DRICA_PRESENTATION_PROFILE,
+  dricaOfficial: DRICA_OFFICIAL_PROFILE,
   bagagemNaMaoBriefing19: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
 };

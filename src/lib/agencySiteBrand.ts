@@ -44,6 +44,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "www.omundoemcores.com.br": mundoEmCoresLogo.url,
   /** Briefing 16 — logo autorizado, limitado ao host sintético da prévia. */
   "briefing-16-v1.preview.local": dricaViagensLogo.url,
+  "dricaviagens.com.br": dricaViagensLogo.url,
+  "www.dricaviagens.com.br": dricaViagensLogo.url,
   /** Briefing 17 — logo enviado, limitado ao host sintético da prévia. */
   "briefing-17-v1.preview.local": viajarTirismoLogo.url,
   /** Briefing 19 — logo enviado, limitado ao host sintético da prévia. */
@@ -86,6 +88,8 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "omundoemcores.com.br",
   "www.omundoemcores.com.br",
   "briefing-16-v1.preview.local",
+  "dricaviagens.com.br",
+  "www.dricaviagens.com.br",
   "briefing-17-v1.preview.local",
   "briefing-19-v1.preview.local",
   "briefing-20-v1.preview.local",
@@ -208,6 +212,8 @@ const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
   "drica-presentation.preview.local": DRICA_HEADER_BRAND_PRESET,
   "dricaviagens.rio": DRICA_HEADER_BRAND_PRESET,
   "www.dricaviagens.rio": DRICA_HEADER_BRAND_PRESET,
+  "dricaviagens.com.br": DRICA_HEADER_BRAND_PRESET,
+  "www.dricaviagens.com.br": DRICA_HEADER_BRAND_PRESET,
 };
 
 export function normalizeBrandHost(hostname?: string | null): string {
