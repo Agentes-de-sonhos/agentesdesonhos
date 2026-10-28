@@ -43,6 +43,7 @@ const TermosDeUso = lazy(() => import("@/pages/TermosDeUso"));
 const Limites100LegalPreviewPage = lazy(() => import("@/pages/whitelabel/Limites100LegalPreviewPage"));
 import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
+const CircuitTourPage = lazy(() => import("@/pages/whitelabel/CircuitTourPage"));
 const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 import { MUNDO_EM_CORES_XCARET_SLOTS, MUNDO_EM_CORES_XCARET_REWRITES, MUNDO_EM_CORES_XCARET_CARDS } from "@/lib/adsBriefingPreview";
@@ -271,6 +272,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             }
           >
             <Route path="/ofertas/:slug" element={<AgencyOfferDetail info={info} />} />
+            <Route path="/circuitos/:slug" element={<CircuitTourPage info={info} />} />
           </Route>
 
           {/* Todas as demais rotas mantêm o chrome atual do site white label. */}
