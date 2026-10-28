@@ -1561,6 +1561,7 @@ body[data-booking-selection-bar] {
 
 /* Drica: faixa de cruzeiros em azul-marinho (vence o reset transparente da superfície alternada). */
 .wl-drica .wl-alt-surface > #autoridade { background-color: hsl(var(--wl-navy)) !important; background-image: none !important; }
+.wl-drica #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: hsl(var(--primary-foreground)); }
 .wl-drica [role="grid"] { margin-top: 0.25rem; }
 
 @media (max-width: 767px) {
