@@ -64,7 +64,7 @@ export function isAdsEssencialMenuUser(isAdmin: boolean, plan: string | null | u
 
 // ADS Essencial + Gestão (2 ou 5 usuários): tudo menos a seção OUTRAS.
 export function isAdsEssencialGestaoMenuUser(isAdmin: boolean, plan: string | null | undefined): boolean {
-  return !isAdmin && (plan === "ads_essencial_gestao" || plan === "ads_essencial_gestao_equipe");
+  return !isAdmin && plan === "ads_essencial_gestao";
 }
 
 // ADS Gestão / Gestão Equipe: só GESTÃO e Agenda (sem Criar novo, Meus projetos e OUTRAS).

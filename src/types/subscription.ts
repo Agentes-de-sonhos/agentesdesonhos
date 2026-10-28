@@ -114,7 +114,7 @@ export const PLAN_FEATURES: Record<SubscriptionPlan, Feature[]> = {
   ads_gestao: ['crm_basic', 'financial', 'agenda', 'community'],
   ads_gestao_equipe: ['crm_basic', 'financial', 'agenda', 'community'],
   ads_essencial_gestao: ['quote_generator', 'itinerary', 'trip_wallet', 'crm_basic', 'financial', 'agenda', 'community'],
-  ads_essencial_gestao_equipe: ['quote_generator', 'itinerary', 'trip_wallet', 'crm_basic', 'financial', 'agenda', 'community'],
+  ads_essencial_gestao_equipe: ALL_FEATURES,
 };
 
 export const PLAN_LABELS: Record<SubscriptionPlan, string> = {
@@ -165,7 +165,7 @@ export const AI_LIMITS: Record<SubscriptionPlan, number> = {
   ads_gestao: 0,
   ads_gestao_equipe: 0,
   ads_essencial_gestao: 0,
-  ads_essencial_gestao_equipe: 0,
+  ads_essencial_gestao_equipe: 1000,
 };
 
 export const FEATURE_LABELS: Record<Feature, string> = {
