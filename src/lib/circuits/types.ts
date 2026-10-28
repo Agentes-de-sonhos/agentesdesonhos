@@ -12,6 +12,8 @@ export interface CircuitDay {
 
 export interface CircuitTour {
   slug: string;
+  /** Perfis de site que podem abrir o circuito; ausente = todos. */
+  profiles?: string[];
   badge: string;
   title: string;
   code?: string;

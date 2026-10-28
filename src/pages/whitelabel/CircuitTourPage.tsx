@@ -190,7 +190,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
 
 export default function CircuitTourPage({ info }: { info: AgencyDomainInfo }) {
   const { slug } = useParams();
-  const circuit = findCircuit(slug);
+  const circuit = findCircuit(slug, info.hostname);
   if (!circuit) return <div className={`${wrap} py-24 text-center text-muted-foreground`}>Circuito não encontrado.</div>;
   return <CircuitTourView info={info} circuit={circuit} />;
 }
