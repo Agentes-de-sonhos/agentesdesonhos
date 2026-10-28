@@ -174,9 +174,9 @@ export function BrazilResortsMap({
                   />
                   {n > 0 && (
                     <g className="pointer-events-none">
-                      <circle cx={shape.cx} cy={shape.cy} r={17} className={active ? "fill-background" : "fill-primary"} />
+                      <circle cx={shape.cx} cy={shape.cy} r={17} className="fill-black" />
                       <text x={shape.cx} y={shape.cy} dy="0.35em" textAnchor="middle" fontSize={15} fontWeight={700}
-                        className={active ? "fill-primary" : "fill-primary-foreground"}>{n}</text>
+                        className="fill-white">{n}</text>
                     </g>
                   )}
                 </g>
@@ -265,9 +265,9 @@ export function BrazilResortsMap({
                     {resortHref && (
                       <a href={resortHref(r.slug)} className="absolute inset-0 z-10" aria-label={`Ver página do ${name}`} />
                     )}
-                    <div className="flex h-32 items-center justify-center bg-card px-6">
+                    <div className="flex h-40 items-center justify-center bg-card px-6">
                       {logo ? (
-                        <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="max-h-20 w-full object-contain transition duration-300 group-hover:scale-105" />
+                        <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="max-h-28 w-full object-contain transition duration-300 group-hover:scale-105" />
                       ) : (
                         <span className="text-center font-display text-lg text-foreground">{name}</span>
                       )}
