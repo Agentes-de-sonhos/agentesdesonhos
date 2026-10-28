@@ -137,9 +137,9 @@ export function AgencyResortsSection({
                   {featured.has(r.slug) && (
                     <span className="absolute left-2 top-2 z-[5] rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">Destaque</span>
                   )}
-                  <div className="wl-resort-logo-box flex h-24 items-center justify-center px-5">
+                  <div className="wl-resort-logo-box flex h-32 items-center justify-center px-5">
                     {logo ? (
-                      <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="wl-resort-logo max-h-14 w-full object-contain transition duration-300 group-hover:scale-105" />
+                      <img src={logo} alt={`Logotipo ${name}`} loading="lazy" className="wl-resort-logo max-h-24 w-full object-contain transition duration-300 group-hover:scale-105" />
                     ) : (
                       <span className="text-center font-display text-base text-foreground">{name}</span>
                     )}
