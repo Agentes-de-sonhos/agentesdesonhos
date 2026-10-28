@@ -581,6 +581,7 @@ export const DRICA_VIAGENS_PREVIEW_PROFILE: AgencySiteProfile = {
     legalName: "Maralba Viagens e Turismo Ltda",
     cnpj: "11.636.130/0001-31",
     showLocation: true,
+    hours: "Segunda a sexta, das 9h às 18h",
   },
   seo: {
     title: "Prévia para revisão — Drica Viagens",

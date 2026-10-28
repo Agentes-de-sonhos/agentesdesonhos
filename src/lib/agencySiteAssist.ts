@@ -70,9 +70,21 @@ export const DEFAULT_ASSIST: AgencyAssistConfig = {
   offlineText: "Deixe seu recado que nossa equipe entra em contato no início do próximo expediente.",
 };
 
+const DRICA_ASSIST: AgencyAssistConfig = {
+  hours: { days: [1, 2, 3, 4, 5], startMinute: 9 * 60, endMinute: 18 * 60 },
+  onlineLabel: "Atendimento",
+  offlineLabel: "Atendimento",
+  hoursLabel: "de segunda a sexta, das 9h às 18h",
+  offlineTitle: "Atendimento encerrado no momento",
+  offlineText: "Deixe seu recado que nossa equipe entra em contato no início do próximo expediente.",
+};
+
 /** Hosts com atendimento programado (root e www da mesma agência). */
 const ASSIST_BY_HOST: Record<string, AgencyAssistConfig> = {
   "destinoscomaju.com.br": DESTINOS_ASSIST,
+  "dricaviagens.com.br": DRICA_ASSIST,
+  "drica-presentation.preview.local": DRICA_ASSIST,
+  "briefing-16-v1.preview.local": DRICA_ASSIST,
 };
 
 function normalizeHost(hostname?: string | null): string {
