@@ -1558,6 +1558,9 @@ body[data-booking-selection-bar] {
 .wl-drica [role="option"]:is(:focus,[data-highlighted],[data-state="checked"]) svg { color: #ffffff; }
 .wl-drica .text-muted-foreground { color: hsl(222 30% 28%); }
 .wl-drica .rdp-head_cell, .wl-drica [role="grid"] th { color: hsl(222 40% 20%) !important; font-weight: 600; }
+
+/* Drica: faixa de cruzeiros em azul-marinho (vence o reset transparente da superfície alternada). */
+.wl-drica .wl-alt-surface > #autoridade { background-color: hsl(var(--wl-navy)) !important; background-image: none !important; }
 .wl-drica [role="grid"] { margin-top: 0.25rem; }
 
 @media (max-width: 767px) {
