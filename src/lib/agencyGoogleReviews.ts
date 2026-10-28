@@ -44,6 +44,8 @@ const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
   "www.100limites.tur.br": CEM_LIMITES,
   "dricaviagens.rio": DRICA_VIAGENS,
   "www.dricaviagens.rio": DRICA_VIAGENS,
+  "dricaviagens.com.br": DRICA_VIAGENS,
+  "www.dricaviagens.com.br": DRICA_VIAGENS,
   "drica-presentation.preview.local": DRICA_VIAGENS,
 };
 

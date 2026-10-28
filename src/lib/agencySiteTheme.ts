@@ -45,6 +45,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-19-v1.preview.local": "siteBaseEditorial",
   "briefing-20-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
+  "dricaviagens.com.br": "siteBaseEditorial",
+  "www.dricaviagens.com.br": "siteBaseEditorial",
   "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",
   "www.bardelliviagens.com.br": "siteBaseEditorial",
@@ -99,7 +101,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
     // O Mundo em Cores: acabamento claro próprio, só no host da prévia.
     const h = normalizeHost(hostname);
     const extra =
-      h === "drica-presentation.preview.local"
+      h === "drica-presentation.preview.local" || h === "dricaviagens.com.br" || h === "www.dricaviagens.com.br"
         ? " wl-drica"
         : h === "briefing-14-v1.preview.local" || h === "omundoemcores.com.br" || h === "www.omundoemcores.com.br"
         ? " wl-mundo"
