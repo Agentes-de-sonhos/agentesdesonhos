@@ -1106,7 +1106,11 @@ const DRICA_PRESENTATION_NAV = (dricaBaseline.nav ?? [])
 export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   ...dricaBaseline, navDensity: "compact", randomizeDestinations: false,
   visaHome: false, featuredExperience: undefined,
-  sections: { ...dricaBaseline.sections, dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false } },
+  // Ordem pedida por Fernando (28/10/2026); demais seções mantêm a ordem base.
+  sections: { ...dricaBaseline.sections, dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
+    signature: { enabled: true, order: 1 }, destinations: { enabled: true, order: 2 }, modules: { enabled: true, order: 3 },
+    orlando: { enabled: true, order: 4 }, authority: { enabled: true, order: 5 }, resorts: { enabled: true, order: 6 },
+    highlights: { enabled: true, order: 7 } },
   nav: DRICA_PRESENTATION_NAV,
   heroPresentation: { ...dricaBaseline.heroPresentation, kicker: "DRICA VIAGENS · ONLINE, DO RIO DE JANEIRO · DESDE 2010" },
   hero: [

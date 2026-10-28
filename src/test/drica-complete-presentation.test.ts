@@ -13,7 +13,8 @@ describe("Drica — apresentação integral isolada", () => {
     for (const id of ["drica-completa", "Drica-completa-v1", "drica-completa-v1/", "drica-completa-v1 "]) expect(resolveAdsPreviewFixture(id)).toBeNull();
   });
   it("mantém seções ativas e composição integral", () => {
-    const expected = GOLD_STANDARD_SECTION_ORDER.filter((k) => !["dmc", "credentials", "team"].includes(k));
+    const head = ["signature", "destinations", "modules", "orlando", "authority", "resorts", "highlights"];
+    const expected = [...head, ...GOLD_STANDARD_SECTION_ORDER.filter((k) => !["dmc", "credentials", "team", ...head].includes(k))];
     expect(resolveSections(p.sections).map(s => s.key)).toEqual(expected);
     expect(p.hero).toHaveLength(3); expect(p.modules).toHaveLength(6);
     expect(p.requestCenter).toBeDefined(); expect(p.destinations).toHaveLength(5);
