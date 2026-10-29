@@ -316,6 +316,8 @@ export interface AgencyDestination {
   label: string;
   text: string;
   service: string;
+  /** Link opcional para uma página interna (ex.: circuito); substitui o pedido de proposta. */
+  href?: string;
   enabled: boolean;
   order: number;
 }
