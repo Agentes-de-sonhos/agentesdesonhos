@@ -42,25 +42,10 @@ function SportsPackagesBanner({ onRequest }: { onRequest: (p: SportsEventChoice)
   const p = SPORTS_PACKAGES[i];
   return (
     <div className="relative mt-10 overflow-hidden rounded-md border border-border bg-card shadow-sm" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carrossel" aria-label="Pacotes esportivos à venda">
-      <div key={p.key} className="grid animate-in fade-in duration-500 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <button type="button" onClick={() => onRequest(p)} className="block bg-muted" aria-label={`Ver pacote ${p.title}`}>
-          <img src={p.image} alt={p.title} className="h-72 w-full object-cover object-top md:h-[460px]" />
+      <div key={p.key} className="animate-in fade-in duration-500">
+        <button type="button" onClick={() => onRequest(p)} className="block w-full bg-muted" aria-label={`Ver pacote ${p.title}`}>
+          <img src={p.image} alt={p.title} className="h-auto w-full object-contain" />
         </button>
-        <div className="flex flex-col justify-center p-6 md:p-10">
-          <span className="self-start rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{p.badge} · à venda</span>
-          <h3 className="mt-4 text-2xl font-semibold text-foreground md:text-3xl">{p.title}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{p.subtitle}</p>
-          <div className="mt-5 space-y-2 text-sm text-foreground">
-            <p className="flex gap-2"><CalendarDays className="h-4 w-4 shrink-0 text-primary" aria-hidden />{p.fixedDate}</p>
-            <p className="flex gap-2"><MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden />{p.place}</p>
-          </div>
-          <p className="mt-5 text-xl font-semibold text-foreground">{p.price}</p>
-          <p className="text-sm text-muted-foreground">{p.priceNote}</p>
-          <button type="button" onClick={() => onRequest(p)} className="mt-6 inline-flex items-center gap-2 self-start rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90">
-            Ver pacote e solicitar <ArrowRight className="h-4 w-4" aria-hidden />
-          </button>
-          <p className="mt-4 text-xs text-muted-foreground">Valores e disponibilidade sujeitos a alteração sem aviso prévio.</p>
-        </div>
       </div>
       <button type="button" onClick={() => setI((i - 1 + n) % n)} aria-label="Pacote anterior" className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 text-foreground shadow"><ChevronLeft className="h-5 w-5" /></button>
       <button type="button" onClick={() => setI((i + 1) % n)} aria-label="Próximo pacote" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 text-foreground shadow"><ChevronRight className="h-5 w-5" /></button>
