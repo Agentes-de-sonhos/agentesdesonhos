@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, BedDouble, Car, ShieldCheck, Headphones, ChevronLeft, ChevronRight, CalendarDays, MapPin } from "lucide-react";
+import { ArrowRight, BedDouble, Car, ShieldCheck, Headphones, ChevronLeft, ChevronRight } from "lucide-react";
 import libertadores from "@/assets/whitelabel/sports/libertadores-2026-v2.png.asset.json";
 import sulamericana from "@/assets/whitelabel/sports/sulamericana-2026-v2.png.asset.json";
 import londres from "@/assets/whitelabel/sports/classicos-londrinos-2027.jpg.asset.json";
