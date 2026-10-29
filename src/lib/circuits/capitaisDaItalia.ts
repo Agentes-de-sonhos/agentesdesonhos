@@ -7,6 +7,7 @@ const SUNDAYS = (m: string, d: number[]) => ({ month: m, days: d });
 export const CAPITAIS_DA_ITALIA: CircuitTour = {
   slug: "capitais-da-italia",
   profiles: ["dricaOfficial", "dricaPresentation"],
+  enhancedPresentation: true,
   badge: "Circuito rodoviário · Saídas aos domingos",
   title: "Capitais da Itália",
   code: "2600208",
@@ -40,16 +41,16 @@ export const CAPITAIS_DA_ITALIA: CircuitTour = {
   hotels: [
     { city: "Roma", options: ["Hotéis previstos informados pela operadora"] },
     { city: "Florença", options: ["Hotéis previstos informados pela operadora"] },
-    { city: "Veneza (região de Mestre)", options: ["Hotéis previstos informados pela operadora"] },
+    { city: "Veneza (região de Mestre)", overnightCity: "Veneza", options: ["Hotéis previstos informados pela operadora"] },
   ],
   hotelsNote: "A lista de hotéis previstos é enviada junto com a cotação.",
   itinerary: [
-    { day: 1, weekday: "Domingo", title: "Roma", description: "Bem-vindos! Traslado ao hotel e tempo livre. À tarde, as informações sobre o início do circuito ficam nos cartazes da recepção do hotel." },
-    { day: 2, weekday: "Segunda-feira", title: "Roma", meals: ["Café da manhã"], description: "Visita guiada de três horas combinando passeio a pé pela Roma Imperial e tour de ônibus: Arco de Constantino, exterior do Coliseu, Fóruns Imperiais, Circo Máximo, Termas de Caracala, Santa Maria Maior, Pirâmide Céstia e Castelo de Santo Ângelo. Término no Vaticano por volta das 11h, com visita opcional aos Museus Vaticanos e Capela Sistina. À noite, traslado ao bairro de Trastevere; retorno ao hotel por volta das 20h30." },
-    { day: 3, weekday: "Terça-feira", title: "Roma", meals: ["Café da manhã"], description: "Dia livre para continuar aproveitando a Cidade Eterna." },
-    { day: 4, weekday: "Quarta-feira", title: "Roma → Florença", meals: ["Café da manhã"], description: "Travessia dos Apeninos até Florença, direto ao Mirante Michelangelo. Depois, visita com guia local ao centro histórico: Duomo, Ponte Vecchio e Piazza della Signoria. Tempo livre." },
-    { day: 5, weekday: "Quinta-feira", title: "Florença → Veneza", meals: ["Café da manhã"], description: "Saída cedo rumo ao norte. Em Veneza, traslado de barco ao centro e visita a pé pela Praça de São Marcos. Hospedagem na região de Mestre." },
-    { day: 6, weekday: "Sexta-feira", title: "Veneza → Rávena → Assis → Roma", meals: ["Café da manhã"], description: "Em Rávena, mausoléu de Gala Placídia e Basílica de São Vital. Em Assis, visita à Basílica de São Francisco com padre franciscano ou guia local. Chegada a Roma no fim do dia." },
+    { day: 1, overnightCity: "Roma", weekday: "Domingo", title: "Roma", description: "Bem-vindos! Traslado ao hotel e tempo livre. À tarde, as informações sobre o início do circuito ficam nos cartazes da recepção do hotel." },
+    { day: 2, overnightCity: "Roma", weekday: "Segunda-feira", title: "Roma", meals: ["Café da manhã"], description: "Visita guiada de três horas combinando passeio a pé pela Roma Imperial e tour de ônibus: Arco de Constantino, exterior do Coliseu, Fóruns Imperiais, Circo Máximo, Termas de Caracala, Santa Maria Maior, Pirâmide Céstia e Castelo de Santo Ângelo. Término no Vaticano por volta das 11h, com visita opcional aos Museus Vaticanos e Capela Sistina. À noite, traslado ao bairro de Trastevere; retorno ao hotel por volta das 20h30." },
+    { day: 3, overnightCity: "Roma", weekday: "Terça-feira", title: "Roma", meals: ["Café da manhã"], description: "Dia livre para continuar aproveitando a Cidade Eterna." },
+    { day: 4, overnightCity: "Florença", weekday: "Quarta-feira", title: "Roma → Florença", meals: ["Café da manhã"], description: "Travessia dos Apeninos até Florença, direto ao Mirante Michelangelo. Depois, visita com guia local ao centro histórico: Duomo, Ponte Vecchio e Piazza della Signoria. Tempo livre." },
+    { day: 5, overnightCity: "Veneza", weekday: "Quinta-feira", title: "Florença → Veneza", meals: ["Café da manhã"], description: "Saída cedo rumo ao norte. Em Veneza, traslado de barco ao centro e visita a pé pela Praça de São Marcos. Hospedagem na região de Mestre." },
+    { day: 6, overnightCity: "Roma", weekday: "Sexta-feira", title: "Veneza → Rávena → Assis → Roma", meals: ["Café da manhã"], description: "Em Rávena, mausoléu de Gala Placídia e Basílica de São Vital. Em Assis, visita à Basílica de São Francisco com padre franciscano ou guia local. Chegada a Roma no fim do dia." },
     { day: 7, weekday: "Sábado", title: "Roma", meals: ["Café da manhã"], description: "Após o café da manhã, fim dos serviços." },
   ],
   departures: [

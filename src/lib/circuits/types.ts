@@ -8,12 +8,16 @@ export interface CircuitDay {
   title: string;
   meals?: string[];
   description: string;
+  /** City where this day ends with accommodation; absent on the final day. */
+  overnightCity?: string;
 }
 
 export interface CircuitTour {
   slug: string;
   /** Perfis de site que podem abrir o circuito; ausente = todos. */
   profiles?: string[];
+  /** Opt-in to the enhanced presentation and existing agency request flow. */
+  enhancedPresentation?: boolean;
   badge: string;
   title: string;
   code?: string;
@@ -30,7 +34,7 @@ export interface CircuitTour {
   priceNote: string;
   inclusions: { icon: CircuitInclusionIcon; title: string; text: string }[];
   highlights: string[];
-  hotels: { city: string; options: string[] }[];
+  hotels: { city: string; overnightCity?: string; options: string[] }[];
   hotelsNote?: string;
   itinerary: CircuitDay[];
   departures: { month: string; days: number[] }[];
