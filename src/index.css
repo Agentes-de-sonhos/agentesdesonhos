@@ -1652,3 +1652,6 @@ body[data-booking-selection-bar] {
     background-image: none !important;
   }
 }
+/* Drica: dia escolhido no calendário em azul (vence as variáveis de marca). */
+.wl-drica .rdp-day_selected:not(.day-range-middle), .wl-drica .rdp-button[aria-selected="true"]:not(.day-range-middle) { background-color: #336687 !important; color: #fff !important; }
+.wl-drica .rdp-button.day-range-middle[aria-selected="true"] { background-color: #dbe7ef !important; color: #1b3445 !important; }
