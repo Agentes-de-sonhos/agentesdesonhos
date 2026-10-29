@@ -272,7 +272,6 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     ] },
     { label: "Destinos", to: "/#destinos" },
     { label: "Cruzeiros", to: "/#autoridade" },
-    { label: "Eventos esportivos", to: "/#esportes" },
     { label: "Sobre", to: "/#sobre", children: [
       { label: "Quem somos", to: "/#sobre" },
       { label: "Avaliações do Google", to: "/#avaliacoes" },
