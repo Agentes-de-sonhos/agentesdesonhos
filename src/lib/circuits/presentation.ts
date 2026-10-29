@@ -45,8 +45,12 @@ export interface CircuitContact {
 
 export function validCircuitContact(contact: CircuitContact): boolean {
   const phone = contact.phone.replace(/\D/g, "");
+  const email = contact.email.trim();
+  const phoneOk = /^[1-9]{2}\d{8,9}$/.test(phone);
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  // Pelo menos um contato; o que for preenchido precisa ser válido.
   return contact.name.trim().split(/\s+/).length >= 2 && contact.name.trim().length >= 3
-    && /^[1-9]{2}\d{8,9}$/.test(phone) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email)
+    && (phoneOk || emailOk) && (!phone || phoneOk) && (!email || emailOk)
     && Number.isInteger(contact.adults) && contact.adults >= 1 && contact.adults <= 30
     && Number.isInteger(contact.children) && contact.children >= 0 && contact.children <= 12
     && contact.consent;
@@ -56,7 +60,7 @@ export function circuitRequestPayload(circuit: CircuitTour, date: string, contac
   return {
     service_key: "pacotes", service_label: `Circuito — ${circuit.title}`,
     lead_name: contact.name.trim(), lead_phone: contact.phone, lead_email: contact.email.trim(),
-    preferred_channel: "whatsapp", destination: circuit.cities.join(", "),
+    preferred_channel: contact.phone.replace(/\D/g, "") ? "whatsapp" : "email", destination: circuit.cities.join(", "),
     summary: `${circuit.title} (${circuit.code ?? circuit.slug}) · Saída: ${date} · ${contact.adults} adulto(s), ${contact.children} criança(s) · Origem: Site / Roteiro / Saídas garantidas`,
     notes: contact.notes.trim(), consent: contact.consent, consent_version: "v1", honeypot,
     details: { circuito_slug: circuit.slug, circuito_codigo: circuit.code ?? "", circuito_nome: circuit.title,

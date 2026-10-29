@@ -18,7 +18,10 @@ describe("regras do circuito", () => {
   it("exige consentimento", () => { expect(validCircuitContact(contact)).toBe(true); expect(validCircuitContact({ ...contact, consent: false })).toBe(false); });
   it("exige pelo menos um adulto", () => expect(validCircuitContact({ ...contact, adults: 0 })).toBe(false));
   it("rejeita email inválido", () => expect(validCircuitContact({ ...contact, email: "inválido" })).toBe(false));
-  it("exige WhatsApp com DDD", () => expect(validCircuitContact({ ...contact, phone: "99999-9999" })).toBe(false));
+  it("rejeita WhatsApp sem DDD", () => expect(validCircuitContact({ ...contact, phone: "99999-9999" })).toBe(false));
+  it("aceita só WhatsApp", () => expect(validCircuitContact({ ...contact, email: "" })).toBe(true));
+  it("aceita só e-mail", () => expect(validCircuitContact({ ...contact, phone: "" })).toBe(true));
+  it("exige ao menos um contato", () => expect(validCircuitContact({ ...contact, phone: "", email: "" })).toBe(false));
 });
 import { tourismRate as _tr, upcomingDepartures as _ud } from "@/lib/circuits/presentation";
 describe("câmbio turismo e meses futuros", () => {
