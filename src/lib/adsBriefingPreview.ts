@@ -7,6 +7,7 @@ import { buildGoldStandardProfile } from "@/lib/goldStandardSiteTemplate";
 import { EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
 import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
+import dricaNewsletterLondon from "@/assets/presentation/drica/london-newsletter.jpg";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
@@ -1172,12 +1173,12 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
     destinations: { title: "Destaques da Drica Viagens", subtitle: "Seu próximo destino pode ser o melhor capítulo da sua história." },
     modules: { title: "Tudo para a sua viagem", subtitle: "Roteiros, pacotes, cruzeiros, seguros e ingressos para parques temáticos." },
     differentials: { title: "O capricho de cada detalhe", subtitle: "Experiências únicas e encantadoras para colecionar momentos e memórias." },
-    newsletter: { kicker: "NOVIDADES DRICA VIAGENS", title: "Está pronto para o seu próximo cartão de embarque?", subtitle: "Destinos em alta como Japão, Marrocos, Albânia, Vietnã e Nordeste do Brasil. Formulário de demonstração: nenhum dado é enviado ou cadastrado.", cta: "Conhecer novidades" },
+    newsletter: { kicker: "NOVIDADES DRICA VIAGENS", title: "Está pronto para o seu próximo cartão de embarque?", subtitle: "Receba novidades, oportunidades e roteiros exclusivos da Drica Viagens diretamente no seu WhatsApp ou e-mail.", cta: "Quero receber novidades" },
     avaliacoes: { kicker: "AVALIAÇÕES NO GOOGLE", title: "O que dizem os clientes da Drica", subtitle: "Avaliações reais publicadas no perfil da Drica Viagens no Google." },
   },
   // Rodapé enxuto pedido por Fernando (29/10/2026): sem descrição, horário, cidade e telefone.
   footer: { ...DRICA_VIAGENS_PREVIEW_PROFILE.footer, descriptionHidden: true, hours: undefined, showLocation: false, phoneHidden: true, whatsappLabel: "Fale Conosco" },
-  newsletterMedia: { src: bardelliNewsletterPhoto, alt: "Praia de águas claras — imagem ilustrativa de viagem" },
+  newsletterMedia: { src: dricaNewsletterLondon, alt: "Tower Bridge iluminada ao entardecer em Londres" },
   socialStrip: { title: "Encontre a Drica no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/dricaviagens" }] },
   seo: { title: "Apresentação completa — Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins. Apresentação técnica sem envios." },
 };
@@ -1345,7 +1346,6 @@ export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
     ...DRICA_PRESENTATION_PROFILE.copy,
     newsletter: {
       ...(DRICA_PRESENTATION_PROFILE.copy?.newsletter ?? { kicker: "", title: "", subtitle: "", cta: "" }),
-      subtitle: "Destinos em alta como Japão, Marrocos, Albânia, Vietnã e Nordeste do Brasil.",
     },
   } as AgencySiteProfile["copy"],
   seo: { title: "Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins." },

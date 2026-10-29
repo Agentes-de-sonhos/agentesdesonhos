@@ -1654,3 +1654,14 @@ body[data-booking-selection-bar] {
 /* Drica: dia escolhido no calendário em azul (vence as variáveis de marca). */
 .wl-drica .rdp-day_selected:not(.day-range-middle), .wl-drica .rdp-button[aria-selected="true"]:not(.day-range-middle) { background-color: #336687 !important; color: #fff !important; }
 .wl-drica .rdp-button.day-range-middle[aria-selected="true"] { background-color: #dbe7ef !important; color: #1b3445 !important; }
+/* Drica: "Receba novidades" em azul do logotipo fundindo em degradê com a foto à direita. */
+.wl-drica .wl-newsletter-card { background-color: #336687 !important; background-image: none !important; border-color: transparent !important; position: relative; }
+.wl-drica .wl-newsletter-card > div > div:last-child::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to right, #336687 0%, rgb(51 102 135 / 0.55) 35%, rgb(51 102 135 / 0) 70%); }
+.wl-drica .wl-newsletter-card h2 { color: #fff !important; }
+.wl-drica .wl-newsletter-card p { color: rgb(255 255 255 / 0.85) !important; }
+.wl-drica .wl-newsletter-card .wl-kicker, .wl-drica .wl-newsletter-card .wl-kicker svg { color: #fff !important; }
+.wl-drica .wl-newsletter-card .wl-inspiration-cta { background-color: #fff !important; color: #336687 !important; }
+.wl-drica .wl-newsletter-card .wl-inspiration-cta:hover { background-color: rgb(255 255 255 / 0.9) !important; }
+@media (max-width: 767px) {
+  .wl-drica .wl-newsletter-card > div > div:last-child::before { background: linear-gradient(to bottom, #336687 0%, rgb(51 102 135 / 0) 50%); }
+}
