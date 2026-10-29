@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Capitais da Itália: cidades/noites reais, câmbio integrado, timeline aberta, efeitos sutis e solicitador por saída; verificar CRM/e-mail/WhatsApp e telas, sem publicar.
 - [x] Liberar plano completo ADS R$ 197 no servidor para todos os assinantes: migration 0058 aplicada (recursos, 1.000 usos de IA, reservas/PJ), 32 testes aprovados, legenda real gerada e exibida na sessão de Bárbara e gate de reservas confirmado; preservar R$ 167, cobranças e isolamento. Sem publicação da aplicação; demais fluxos de ferramentas não exercitados individualmente.
 - [x] Novembro: segunda rodada visual (hero, categorias, ofertas, Radar e CTA); 6 testes aprovados, QA 1280/768/390/360 sem overflow, quatro cards/botões alinhados, filtros e diálogos demonstrativos verificados, zero chamadas ao backend; cabeçalho/rodapé preservados, sem publicação.
 - [x] Novembro 2026: campanha visual isolada da O Mundo em Cores, componentes modulares, filtros locais e aviso ilustrativo; 31 testes, QA desktop/390/360, fotos carregadas, CTAs alinhados, zero chamadas ao backend e bloqueio 404 de tenant incorreto/produção; sem banco ou publicação.
