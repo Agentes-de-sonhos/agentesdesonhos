@@ -1115,7 +1115,7 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   // Ordem pedida por Fernando (29/10/2026); "Tudo para a sua viagem" desativada.
   sections: { ...dricaBaseline.sections, dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
     signature: { enabled: true, order: 1 }, destinations: { enabled: true, order: 2 }, highlights: { enabled: true, order: 3 },
-    orlando: { enabled: true, order: 4 }, authority: { enabled: true, order: 5 }, resorts: { enabled: true, order: 6 },
+    orlando: { enabled: true, order: 4 }, authority: { enabled: true, order: 5 }, sports: { enabled: true, order: 5.5 }, resorts: { enabled: true, order: 6 },
     modules: { enabled: false } },
   hideConciergeActions: true,
   nav: DRICA_PRESENTATION_NAV,

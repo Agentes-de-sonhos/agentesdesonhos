@@ -1567,9 +1567,8 @@ body[data-booking-selection-bar] {
 .wl-drica .wl-alt-surface > #autoridade { background-color: hsl(var(--wl-navy)) !important; background-image: none !important; }
 .wl-drica #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: hsl(var(--primary-foreground)); }
 .wl-drica [role="grid"] { margin-top: 0.25rem; }
-/* Drica (29/10/2026): degradê padrão em todas as seções (exceto cruzeiros) e no rodapé. */
+/* Drica (29/10/2026): alternância branco ↔ degradê; rodapé sempre em degradê. */
 .wl-editorial.wl-site-base.wl-drica { --wl-sand: 204 25% 94%; }
-.wl-drica .wl-alt-surface:not(:has(> #autoridade)) { background-color: hsl(var(--wl-sand)); background-image: linear-gradient(to bottom, hsl(0 0% 100%), hsl(var(--wl-sand))); }
 /* Logotipo maior no rodapé. */
 .wl-drica #rodape img[alt^="Logo"] { height: 7.5rem; max-width: 380px; }
 @media (min-width: 768px) { .wl-drica #rodape img[alt^="Logo"] { height: 9rem; max-width: 440px; } }
