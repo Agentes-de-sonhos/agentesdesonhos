@@ -1553,6 +1553,8 @@ body[data-booking-selection-bar] {
   --secondary-foreground: 204 30% 15%; --accent: 340 25% 96%;
 }
 .wl-editorial.wl-site-base.wl-drica :is(h1,h2,h3,h4) { font-family: inherit; font-weight: 700; letter-spacing: 0; }
+/* Títulos de seção da Drica no mesmo peso/espaçamento da Destinos com a Ju (600, -0.02em). */
+.wl-editorial.wl-site-base.wl-drica section h2 { font-weight: 600; letter-spacing: -0.02em; }
 /* Contraste do solicitador (Drica): opção em foco = azul + texto branco; datas e calendário legíveis. */
 .wl-drica [role="option"]:is(:focus,[data-highlighted],[data-state="checked"]) { background-color: #336687 !important; color: #ffffff !important; }
 .wl-drica [role="option"]:is(:focus,[data-highlighted],[data-state="checked"]) svg { color: #ffffff; }
