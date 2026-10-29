@@ -75,8 +75,6 @@ export function AgencySportsEventsSection({ container, onRequest }: { container:
           </p>
         </div>
 
-        <SportsPackagesBanner onRequest={onRequest} />
-
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {SPORTS_EVENTS.map((e) => (
             <article key={e.key} className="group flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-sm">
@@ -94,6 +92,8 @@ export function AgencySportsEventsSection({ container, onRequest }: { container:
             </article>
           ))}
         </div>
+
+        <div className="mt-12"><SportsPackagesBanner onRequest={onRequest} /></div>
 
         <div className="mt-12 grid gap-6 rounded-md border border-border bg-card p-6 sm:grid-cols-2 lg:grid-cols-4 md:p-8">
           {PILLARS.map(({ icon: Icon, title, text }) => (
