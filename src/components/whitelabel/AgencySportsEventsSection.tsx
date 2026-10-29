@@ -10,7 +10,7 @@ import {
   AGENCY_SECTION_HEADING_CLASS,
   AGENCY_SECTION_SUBTITLE_CLASS,
   AGENCY_SECTION_TITLE_CLASS,
-} from "@/lib/agencySectionHeading";
+} from "@/lib/agencySiteTypography";
 
 /** Turismo esportivo: eventos e pilares (opt-in por perfil, seção "sports"). */
 export const SPORTS_EVENTS = [

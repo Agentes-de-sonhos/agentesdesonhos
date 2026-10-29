@@ -5,6 +5,7 @@ import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarous
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { useAgencyResortCuration } from "@/lib/resortCuration";
+import { AgencySportsEventsSection } from "@/components/whitelabel/AgencySportsEventsSection";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -1624,6 +1625,9 @@ export default function AgencySiteHome({
             </div>
           </section>
         );
+
+      case "sports":
+        return <AgencySportsEventsSection key={key} container={container} onRequest={() => openRequest("ingressos")} />;
 
       case "orlando":
         return (
