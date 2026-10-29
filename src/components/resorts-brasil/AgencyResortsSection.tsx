@@ -54,7 +54,7 @@ export function AgencyResortsSection({
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
         {/* Mapa + botão único */}
-        <div className="order-last flex flex-col items-center gap-6 lg:order-none">
+        <div className="flex flex-col items-center gap-6">
         <svg viewBox={BRAZIL_VIEWBOX} className="mx-auto block h-auto w-full max-w-sm lg:max-w-md" role="group" aria-label="Mapa do Brasil por estado">
           {STATES.map(([uf, name]) => {
             const shape = BRAZIL_STATE_PATHS[uf];
