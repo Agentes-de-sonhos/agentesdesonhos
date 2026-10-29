@@ -8,7 +8,7 @@ export const CAPITAIS_DA_ITALIA: CircuitTour = {
   slug: "capitais-da-italia",
   profiles: ["dricaOfficial", "dricaPresentation"],
   enhancedPresentation: true,
-  badge: "Circuito rodoviário · Saídas aos domingos",
+  badge: "Saídas aos domingos",
   title: "Capitais da Itália",
   code: "2600208",
   operator: "Europamundo",
