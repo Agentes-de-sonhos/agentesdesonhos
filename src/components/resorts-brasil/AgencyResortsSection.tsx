@@ -50,13 +50,11 @@ export function AgencyResortsSection({
             {visible.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
           </p>
         </div>
-        <Button asChild variant="outline" className="wl-resorts-btn hidden rounded-full md:inline-flex">
-          <a href={allHref}>Ver todos os resorts <ArrowRight className="ml-2 h-4 w-4" /></a>
-        </Button>
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
-        {/* Mapa (desktop) */}
+        {/* Mapa + botão único */}
+        <div className="flex flex-col items-center gap-6">
         <svg viewBox={BRAZIL_VIEWBOX} className="mx-auto block h-auto w-full max-w-sm lg:max-w-md" role="group" aria-label="Mapa do Brasil por estado">
           {STATES.map(([uf, name]) => {
             const shape = BRAZIL_STATE_PATHS[uf];
@@ -99,6 +97,13 @@ export function AgencyResortsSection({
             );
           })}
         </svg>
+          <Button asChild className="wl-resorts-btn rounded-full">
+            <a href={allHref}>
+              {selected && all.length > MAX_CARDS ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected!]}` : "Ver todos os resorts"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        </div>
 
         {/* Estados (celular) */}
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Escolher estado">
@@ -154,14 +159,6 @@ export function AgencyResortsSection({
               );
             })}
           </ul>
-          <div className="mt-6 flex justify-center lg:justify-start">
-            <Button asChild className="wl-resorts-btn rounded-full">
-              <a href={allHref}>
-                {selected && all.length > shown.length ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected!]}` : "Ver todos os resorts"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          </div>
         </div>
       </div>
     </div>
