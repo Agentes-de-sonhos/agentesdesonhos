@@ -1629,7 +1629,7 @@ export default function AgencySiteHome({
         );
 
       case "sports":
-        return <AgencySportsEventsSection key={key} container={container} onRequest={setSportsEvent} />;
+        return <div key={key}><AgencySportsEventsSection container={container} onRequest={setSportsEvent} /><AgencySportsRequestDialog hostname={hostname} event={sportsEvent} onClose={() => setSportsEvent(null)} /></div>;
 
       case "orlando":
         return (
