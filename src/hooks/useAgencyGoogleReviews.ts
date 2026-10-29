@@ -16,13 +16,22 @@ export function useAgencyGoogleReviews(hostname: string, active: boolean) {
     retry: false,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("google-place-reviews", {
-        body: { hostname },
-      });
-      if (error) throw new Error("unavailable");
-      const mapped = mapGooglePlaceReviews(data);
-      if (!mapped) throw new Error("unavailable");
-      return mapped;
+      // fetch direto: 404 ({enabled:false}) é estado normal, não erro de tela
+      const base = import.meta.env.VITE_SUPABASE_URL;
+      const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      let res: Response;
+      try {
+        res = await fetch(`${base}/functions/v1/google-place-reviews`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: key, Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ hostname }),
+        });
+      } catch {
+        return null;
+      }
+      if (!res.ok) return null;
+      const data = await res.json().catch(() => null);
+      return mapGooglePlaceReviews(data) ?? null;
     },
   });
 }
