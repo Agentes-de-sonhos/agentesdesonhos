@@ -25,7 +25,7 @@ import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.json";
 import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
-import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens.png.asset.json";
+import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.json";
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
