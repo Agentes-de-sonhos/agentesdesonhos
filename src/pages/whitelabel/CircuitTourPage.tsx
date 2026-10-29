@@ -111,7 +111,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           <p className={eyebrow}>Experiências</p>
           <h2 className={h2}>Destaques da viagem</h2>
           <ul className="mt-6 space-y-3">
-            {c.highlights.map((h) => <li key={h} className="circuit-highlight flex gap-3"><Star className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><span>{h}</span></li>)}
+            {c.highlights.map((h) => <li key={h} className="circuit-highlight flex gap-3"><Star className="mt-0.5 h-5 w-5 shrink-0 text-primary" /><span data-text={h}>{h}</span></li>)}
           </ul>
         </div>
         <div>

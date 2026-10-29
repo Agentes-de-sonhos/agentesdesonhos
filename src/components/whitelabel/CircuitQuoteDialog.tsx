@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { circuitRequestPayload, validCircuitContact, type CircuitContact } from "@/lib/circuits/presentation";
 import type { CircuitTour } from "@/lib/circuits";
+import { agencySiteHref } from "@/lib/agencyContextLink";
 
 const emptyContact = (): CircuitContact => ({ name: "", phone: "", email: "", adults: 1, children: 0, notes: "", consent: false });
 const maskPhone = (raw: string) => {
@@ -54,7 +55,7 @@ export function CircuitQuoteDialog({ hostname, circuit, departure, onClose }: { 
           <div className="grid grid-cols-2 gap-4"><PassengerStepper label="Adultos" value={contact.adults} min={1} max={30} onChange={value => change("adults", value)} /><PassengerStepper label="Crianças" value={contact.children} min={0} max={12} onChange={value => change("children", value)} /></div>
           <div><Label htmlFor="circuit-notes">Observações (opcional)</Label><Textarea id="circuit-notes" maxLength={2000} value={contact.notes} onChange={event => change("notes", event.target.value)} className="mt-2" /></div>
           <div className="hidden" aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={event => setHoneypot(event.target.value)} /></div>
-          <div className="flex items-start gap-3"><Checkbox id="circuit-consent" checked={contact.consent} onCheckedChange={value => change("consent", value === true)} /><Label htmlFor="circuit-consent" className="text-sm font-normal leading-6">Concordo com o envio dos meus dados para que a agência entre em contato comigo sobre este orçamento, conforme a <a href="/politicasdeprivacidade" target="_blank" rel="noopener noreferrer" className="text-primary underline">Política de Privacidade</a>.</Label></div>
+          <div className="flex items-start gap-3"><Checkbox id="circuit-consent" checked={contact.consent} onCheckedChange={value => change("consent", value === true)} /><Label htmlFor="circuit-consent" className="text-sm font-normal leading-6">Concordo com o envio dos meus dados para que a agência entre em contato comigo sobre este orçamento, conforme a <a href={agencySiteHref("/politicasdeprivacidade")} target="_blank" rel="noopener noreferrer" className="text-primary underline">Política de Privacidade</a>.</Label></div>
         </fieldset>
         {presentation && <p role="status" className="text-sm text-muted-foreground">Apresentação: nenhum dado será enviado.</p>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
