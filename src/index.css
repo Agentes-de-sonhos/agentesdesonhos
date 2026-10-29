@@ -1567,6 +1567,18 @@ body[data-booking-selection-bar] {
 .wl-drica .wl-alt-surface > #autoridade { background-color: hsl(var(--wl-navy)) !important; background-image: none !important; }
 .wl-drica #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: hsl(var(--primary-foreground)); }
 .wl-drica [role="grid"] { margin-top: 0.25rem; }
+/* Drica (29/10/2026): degradê padrão em todas as seções (exceto cruzeiros) e no rodapé. */
+.wl-editorial.wl-site-base.wl-drica { --wl-sand: 204 25% 94%; }
+.wl-drica .wl-alt-surface:not(:has(> #autoridade)) { background-color: hsl(var(--wl-sand)); background-image: linear-gradient(to bottom, hsl(0 0% 100%), hsl(var(--wl-sand))); }
+/* Logotipo maior no rodapé. */
+.wl-drica #rodape img[alt^="Logo"] { height: 7.5rem; max-width: 380px; }
+@media (min-width: 768px) { .wl-drica #rodape img[alt^="Logo"] { height: 9rem; max-width: 440px; } }
+/* Botão "Ver todos os resorts" no azul do logotipo. */
+.wl-drica .wl-resorts-btn { background-color: #336687 !important; border-color: #336687 !important; color: #fff !important; }
+.wl-drica .wl-resorts-btn:hover { background-color: #2a5470 !important; }
+/* Solicitador: "Selecione a data" em azul; calendário sem vermelho, datas com contraste. */
+.wl-drica #cotacao button[aria-haspopup="dialog"].text-muted-foreground { color: #336687 !important; }
+.wl-drica { --brand-range-edge: #336687; --brand-on-primary: #ffffff; --brand-range-fill: #dbe7ef; --brand-on-tertiary: #1b3445; }
 
 @media (max-width: 767px) {
   [data-ads-preview="drica-completa-v1"] #topo [data-hero-actions-placement] { padding-bottom: 2.5rem; }
