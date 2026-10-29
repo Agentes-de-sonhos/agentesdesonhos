@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, TrendingUp, TrendingDown, Minus, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { fetchExchangeRates } from "@/lib/exchangeRates";
 import {
   Tooltip,
   TooltipContent,
@@ -8,30 +9,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-interface ExchangeRate {
-  code: string;
-  symbol: string;
-  rate: number;
-  variation?: number;
-}
-
 export function ExchangeRateCard() {
   const { data: rates, isLoading, isError } = useQuery({
     queryKey: ["exchange-rates"],
-    queryFn: async (): Promise<ExchangeRate[]> => {
-      // Fetch both rates in parallel
-      const [usdRes, eurRes] = await Promise.all([
-        fetch("https://api.frankfurter.dev/v1/latest?from=USD&to=BRL"),
-        fetch("https://api.frankfurter.dev/v1/latest?from=EUR&to=BRL"),
-      ]);
-      if (!usdRes.ok || !eurRes.ok) throw new Error("Failed to fetch rates");
-      const [usdData, eurData] = await Promise.all([usdRes.json(), eurRes.json()]);
-
-      return [
-        { code: "USD", symbol: "$", rate: usdData.rates.BRL },
-        { code: "EUR", symbol: "€", rate: eurData.rates.BRL },
-      ];
-    },
+    queryFn: fetchExchangeRates,
     staleTime: 1000 * 60 * 60,
     refetchInterval: 1000 * 60 * 60,
     retry: 2,
