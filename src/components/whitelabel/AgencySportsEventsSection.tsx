@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, BedDouble, Car, ShieldCheck, Headphones, ChevronLeft, ChevronRight, CalendarDays, MapPin } from "lucide-react";
-import libertadores from "@/assets/whitelabel/sports/libertadores-2026.jpg.asset.json";
-import sulamericana from "@/assets/whitelabel/sports/sulamericana-2026.jpg.asset.json";
+import libertadores from "@/assets/whitelabel/sports/libertadores-2026-v2.png.asset.json";
+import sulamericana from "@/assets/whitelabel/sports/sulamericana-2026-v2.png.asset.json";
 import londres from "@/assets/whitelabel/sports/classicos-londrinos-2027.jpg.asset.json";
 import type { SportsEventChoice } from "@/components/whitelabel/AgencySportsRequestDialog";
 import f1 from "@/assets/whitelabel/sports/f1.jpg";
