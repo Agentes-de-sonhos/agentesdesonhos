@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fxRateUrl, isValidRate } from "@/lib/fxConversion";
-import { circuitNights, circuitMoney, convertCircuitPrice, circuitDepartureDate } from "@/lib/circuits/presentation";
+import { circuitNights, circuitMoney, convertCircuitPrice, circuitDepartureDate, tourismRate, upcomingDepartures } from "@/lib/circuits/presentation";
 import { CircuitQuoteDialog } from "@/components/whitelabel/CircuitQuoteDialog";
 import { CircuitTimeline } from "@/components/whitelabel/CircuitTimeline";
 import "./circuit-tour.css";
 import { useParams } from "react-router-dom";
-import { BedDouble, Bus, CalendarDays, Clock, Compass, Download, Hotel, MapPin, MessageCircle, Plane, Star, UserRound, Utensils } from "lucide-react";
+import { ChevronLeft, ChevronRight, BedDouble, Bus, CalendarDays, Clock, Compass, Download, Hotel, MapPin, MessageCircle, Plane, Star, UserRound, Utensils } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -43,7 +43,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
     },
     staleTime: 60 * 60 * 1000, refetchInterval: 60 * 60 * 1000, refetchOnWindowFocus: false, retry: 1,
   });
-  const converted = enhanced && !fxError ? convertCircuitPrice(c.fromPrice, fx?.rate) : undefined;
+  const converted = enhanced && !fxError ? convertCircuitPrice(c.fromPrice, tourismRate(fx?.rate)) : undefined;
+  const upcoming = upcomingDepartures(c.departures);
+  const monthsRef = useRef<HTMLDivElement>(null);
+  const scrollMonths = (dir: 1 | -1) => { const el = monthsRef.current; if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" }); };
   const scrollToDepartures = () => document.getElementById("saidas-garantidas")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   const allDays = c.itinerary.map((d) => `d${d.day}`);
   const price = enhanced ? circuitMoney(converted ?? c.fromPrice, converted == null ? c.currency : "BRL") : formatCircuitPrice(c.fromPrice, c.currency);
@@ -81,7 +84,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <aside className="h-fit rounded-2xl border border-border bg-card p-6 shadow-sm md:sticky md:top-24">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">A partir de</p>
           <p className="mt-1 text-4xl font-semibold text-primary">{price}</p>
-          {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio utilizado: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {fx.rate.toLocaleString("pt-BR", { maximumFractionDigits: 10 })}</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
+          {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} (comercial + 4%)</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
           {c.singleSupplement != null && <p className="mt-1 text-sm text-muted-foreground">Suplemento individual: {formatCircuitPrice(c.singleSupplement, c.currency)}</p>}
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>
           {enhanced ? <Button size="lg" className="mt-5 w-full" onClick={scrollToDepartures}><MessageCircle className="mr-2 h-4 w-4" />Solicitar orçamento</Button> : <><Button asChild size="lg" className="mt-5 w-full"><a href={waHref(info, c)} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />Solicitar cotação</a></Button><Button variant="outline" size="lg" className="mt-2 w-full" onClick={() => window.print()}><Download className="mr-2 h-4 w-4" />Baixar roteiro</Button></>}
@@ -160,20 +163,42 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
 
       {/* Saídas */}
       <section id="saidas-garantidas" className={`${wrap} scroll-mt-24 py-14`}>
-        <p className={eyebrow}>Calendário</p>
-        <h2 className={h2}>Saídas garantidas</h2>
+        <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
+        <h2 className={h2}>{enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas"}</h2>
+        {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento com a {info.agency_name ?? "agência"}.</p>}
+        {enhanced ? (
+          <div className="relative mt-6">
+            <div className="mb-3 flex justify-end gap-2">
+              <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+              <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)}><ChevronRight className="h-4 w-4" /></Button>
+            </div>
+            <div ref={monthsRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {upcoming.map((m) => (
+                <div key={m.month} className="w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
+                  <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {m.days.map((d) => (
+                      <Button key={d} variant="ghost" className="h-10 w-10 bg-primary/10 p-0 text-primary hover:bg-primary hover:text-primary-foreground" aria-label={`Solicitar orçamento: ${d} de ${m.month}`} onClick={() => setDeparture({ date: circuitDepartureDate(m.month, d), label: `${d} de ${m.month}` })}>{d}</Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {c.departures.map((m) => (
             <div key={m.month} className="rounded-2xl border border-border bg-card p-4">
               <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {m.days.map((d) => (
-                  enhanced ? <Button key={d} variant="ghost" className="h-10 w-10 bg-primary/10 p-0 text-primary hover:bg-primary hover:text-primary-foreground" aria-label={`Solicitar orçamento: ${d} de ${m.month}`} onClick={() => setDeparture({ date: circuitDepartureDate(m.month, d), label: `${d} de ${m.month}` })}>{d}</Button> : <a key={d} href={waHref(info, c, ` com saída em ${d} de ${m.month}`)} target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground">{d}</a>
+                  <a key={d} href={waHref(info, c, ` com saída em ${d} de ${m.month}`)} target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground">{d}</a>
                 ))}
               </div>
             </div>
           ))}
         </div>
+        )}
         {c.departuresNote && <p className="mt-3 text-sm text-muted-foreground">{c.departuresNote}</p>}
       </section>
 

@@ -9,6 +9,24 @@ export function convertCircuitPrice(value: number, rate?: number): number | unde
   return isValidRate(rate) ? convertWithRate(value, rate, "TO_BRL") : undefined;
 }
 
+/** Acréscimo sobre o câmbio comercial para aproximar do câmbio turismo. */
+export const TOURISM_FX_MARKUP = 0.04;
+export const tourismRate = (commercial?: number): number | undefined =>
+  isValidRate(commercial) ? Math.round(commercial * (1 + TOURISM_FX_MARKUP) * 10000) / 10000 : undefined;
+
+/** Mantém só meses com algum domingo de hoje em diante (e só esses dias). */
+export function upcomingDepartures(departures: CircuitTour["departures"], today: Date = new Date()) {
+  const t = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+  return departures
+    .map(m => ({ ...m, days: m.days.filter(d => {
+      const iso = circuitDepartureDate(m.month, d);
+      if (!iso) return true;
+      const [y, mo, da] = iso.split("-").map(Number);
+      return new Date(y, mo - 1, da).getTime() >= t;
+    }) }))
+    .filter(m => m.days.length > 0);
+}
+
 export const circuitMoney = (value: number, currency: CircuitTour["currency"]) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 
