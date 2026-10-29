@@ -1163,7 +1163,7 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
     { q: "O atendimento é presencial?", a: "A Drica é uma agência online, baseada no Rio de Janeiro, e atende por WhatsApp, telefone, e-mail ou videochamada." },
   ],
   copy: { ...dricaBaseline.copy, ...DRICA_VIAGENS_PREVIEW_PROFILE.copy,
-    destinations: { title: "Destaques da Drica", subtitle: "Seu próximo destino pode ser o melhor capítulo da sua história." },
+    destinations: { title: "Destaques da Drica Viagens", subtitle: "Seu próximo destino pode ser o melhor capítulo da sua história." },
     modules: { title: "Tudo para a sua viagem", subtitle: "Roteiros, pacotes, cruzeiros, seguros e ingressos para parques temáticos." },
     differentials: { title: "O capricho de cada detalhe", subtitle: "Experiências únicas e encantadoras para colecionar momentos e memórias." },
     newsletter: { kicker: "NOVIDADES DRICA VIAGENS", title: "Está pronto para o seu próximo cartão de embarque?", subtitle: "Destinos em alta como Japão, Marrocos, Albânia, Vietnã e Nordeste do Brasil. Formulário de demonstração: nenhum dado é enviado ou cadastrado.", cta: "Conhecer novidades" },
