@@ -1652,8 +1652,11 @@ body[data-booking-selection-bar] {
   }
 }
 /* Drica: dia escolhido no calendário em azul (vence as variáveis de marca). */
+.wl-drica .rdp-button:not([aria-selected="true"]):not([disabled]):hover { background-color: #eef4f8 !important; color: #1b3445 !important; }
+.wl-drica .rdp td:has([aria-selected="true"]) { background-color: #dbe7ef !important; }
+.wl-drica .rdp td:has(.day-outside[aria-selected="true"]) { background-color: transparent !important; }
 .wl-drica .rdp-day_selected:not(.day-range-middle), .wl-drica .rdp-button[aria-selected="true"]:not(.day-range-middle) { background-color: #336687 !important; color: #fff !important; }
-.wl-drica .rdp-button.day-range-middle[aria-selected="true"] { background-color: #dbe7ef !important; color: #1b3445 !important; }
+.wl-drica .rdp-button.day-range-middle[aria-selected="true"], .wl-drica .rdp-button.day-range-middle[aria-selected="true"]:hover { background-color: #dbe7ef !important; color: #1b3445 !important; border-radius: 0 !important; }
 /* Drica: "Receba novidades" em azul do logotipo fundindo em degradê com a foto à direita. */
 .wl-drica .wl-newsletter-card { background-color: #336687 !important; background-image: none !important; border-color: transparent !important; position: relative; }
 .wl-drica .wl-newsletter-card > div > div:last-child::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to right, #336687 0%, rgb(51 102 135 / 0.55) 35%, rgb(51 102 135 / 0) 70%); }
