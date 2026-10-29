@@ -39,11 +39,11 @@ export const CAPITAIS_DA_ITALIA: CircuitTour = {
     "Coliseu, Fóruns Imperiais e Vaticano",
   ],
   hotels: [
-    { city: "Roma", options: ["Hotéis previstos informados pela operadora"] },
-    { city: "Florença", options: ["Hotéis previstos informados pela operadora"] },
-    { city: "Veneza (região de Mestre)", overnightCity: "Veneza", options: ["Hotéis previstos informados pela operadora"] },
+    { city: "Roma", options: ["Ergife Palace Hotel 4★", "Aran Park 4★", "Grand Hotel Fleming 4★"] },
+    { city: "Florença", options: ["Nilhotel 4★", "Raffaello Hotel 4★", "Novotel Firenze Nord 4★"] },
+    { city: "Veneza (região de Mestre)", overnightCity: "Veneza", options: ["Hotel Lugano Torretta 4★", "Hotel Delfino 4★", "Novotel Mestre Castellana 4★"] },
   ],
-  hotelsNote: "A lista de hotéis previstos é enviada junto com a cotação.",
+  hotelsNote: "Hotéis previstos de categoria 4 estrelas ou similares, sujeitos à confirmação final no voucher da operadora.",
   itinerary: [
     { day: 1, overnightCity: "Roma", weekday: "Domingo", title: "Chegada a Roma", description: "Bem-vindos à Itália! Chegada, traslado ao hotel e tempo livre. À tarde, você recebe as informações sobre o início do circuito, diretamente ou nos cartazes da recepção do hotel, onde também fica o telefone de assistência. O check-in costuma ser a partir das 14h; para ter o quarto antes, vale reservar uma noite extra antes do circuito." },
     { day: 2, overnightCity: "Roma", weekday: "Segunda-feira", title: "Roma: visita guiada e Trastevere", meals: ["Café da manhã"], description: "Pela manhã, visita guiada de cerca de três horas pela Cidade Eterna, de ônibus: Arco de Constantino, exterior do Coliseu, Circo Máximo, Termas de Caracala, Basílica de Santa Maria Maior, Arquibasílica de São João de Latrão, Pirâmide Céstia e Castelo de Santo Ângelo. O passeio termina por volta das 11h no Vaticano. Opcionais oferecidos pelo guia: Museus Vaticanos e Capela Sistina, ou um passeio a pé pelas praças e fontes da Roma Barroca. Tarde livre. Às 18h, traslado incluído ao bairro de Trastevere, com seus pequenos restaurantes e clima autêntico; retorno ao hotel por volta das 20h30." },
