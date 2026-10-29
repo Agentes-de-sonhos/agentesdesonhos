@@ -1,11 +1,12 @@
 import type { CircuitTour } from "./types";
+import { convertWithRate, isValidRate } from "@/lib/fxConversion";
 
 export function circuitNights(circuit: CircuitTour, city: string): number {
   return circuit.itinerary.filter(day => day.overnightCity === city).length;
 }
 
 export function convertCircuitPrice(value: number, rate?: number): number | undefined {
-  return typeof rate === "number" && Number.isFinite(rate) && rate > 0 ? value * rate : undefined;
+  return isValidRate(rate) ? convertWithRate(value, rate, "TO_BRL") : undefined;
 }
 
 export const circuitMoney = (value: number, currency: CircuitTour["currency"]) =>
