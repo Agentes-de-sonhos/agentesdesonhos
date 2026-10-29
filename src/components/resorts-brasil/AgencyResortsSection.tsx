@@ -50,13 +50,11 @@ export function AgencyResortsSection({
             {visible.length} resorts em {ufs.length} estados. Clique em um estado no mapa para ver as opções.
           </p>
         </div>
-        <Button asChild variant="outline" className="wl-resorts-btn hidden rounded-full md:inline-flex">
-          <a href={allHref}>Ver todos os resorts <ArrowRight className="ml-2 h-4 w-4" /></a>
-        </Button>
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start">
-        {/* Mapa (desktop) */}
+        {/* Mapa + botão único */}
+        <div className="order-last flex flex-col items-center gap-6 lg:order-none">
         <svg viewBox={BRAZIL_VIEWBOX} className="mx-auto block h-auto w-full max-w-sm lg:max-w-md" role="group" aria-label="Mapa do Brasil por estado">
           {STATES.map(([uf, name]) => {
             const shape = BRAZIL_STATE_PATHS[uf];
@@ -154,14 +152,6 @@ export function AgencyResortsSection({
               );
             })}
           </ul>
-          <div className="mt-6 flex justify-center lg:justify-start">
-            <Button asChild className="wl-resorts-btn rounded-full">
-              <a href={allHref}>
-                {selected && all.length > shown.length ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected!]}` : "Ver todos os resorts"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          </div>
         </div>
       </div>
     </div>
