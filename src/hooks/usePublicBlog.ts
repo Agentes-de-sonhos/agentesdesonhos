@@ -34,14 +34,21 @@ export interface PublicBlogPost {
   settings: { cta_title?: string | null; cta_text?: string | null } | null;
 }
 
+// fetch direto: blog desativado responde 404 e isso é um estado normal, não um erro.
 async function call<T>(body: Record<string, unknown>): Promise<T | null> {
-  const { data, error } = await supabase.functions.invoke("public-blog", { body });
-  if (error) {
-    const status = (error as any)?.context?.status;
-    if (status === 404) return null;
-    throw error;
-  }
-  return data as T;
+  const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/public-blog`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    },
+    body: JSON.stringify(body),
+  }).catch(() => null);
+  if (!res) throw new Error("Blog indisponível");
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error("Blog indisponível");
+  return (await res.json()) as T;
 }
 
 /** Status público: o link "Blog" só aparece com recurso ativo E conteúdo publicado. */
