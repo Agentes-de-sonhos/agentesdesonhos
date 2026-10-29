@@ -19,6 +19,8 @@ const PLACE_BY_HOSTNAME: Record<string, string> = {
   "www.100limites.tur.br": "ChIJja6jcMrwnUYR1bK8iqexXQg",
   "dricaviagens.rio": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
   "www.dricaviagens.rio": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
+  "dricaviagens.com.br": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
+  "www.dricaviagens.com.br": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
   "drica-presentation.preview.local": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
 };
 
