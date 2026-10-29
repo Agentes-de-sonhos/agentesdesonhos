@@ -500,7 +500,7 @@ export function AgencyFooter({
      */
     // 100 Limites: mesmo acabamento limpo da Destinos com a Ju, sobre o degradê bege.
     // Bardelli (apresentação): mesmo rodapé em degradê branco → cinza claro do tema.
-    const sandPlainFooter = profile.key === "editorialDmc" || profile.key === "bardelliPresentation" || profile.key === "dricaPresentation";
+    const sandPlainFooter = profile.key === "editorialDmc" || profile.key === "bardelliPresentation" || profile.key === "dricaPresentation" || profile.key === "dricaOfficial";
     const legalPreview = isLimites100LegalPreviewActive(info.hostname);
     const plainFooter = profile.key === "editorialRose" || sandPlainFooter;
     const footerShellClass = sandPlainFooter

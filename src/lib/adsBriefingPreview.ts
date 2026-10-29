@@ -1101,9 +1101,14 @@ export const DRICA_PRESENTATION_INFO: AgencyDomainInfo = {
   user_id: "00000000-0000-0000-0000-00000000dc01", cnpj: "11.636.130/0001-31",
 };
 const dricaBaseline = buildGoldStandardProfile("dricaPresentation", {}, "Drica Viagens");
-const DRICA_PRESENTATION_NAV = (dricaBaseline.nav ?? [])
-  .filter((l) => l.to !== "/visto-americano" && l.to !== "/dmc-portugal")
-  .map((l) => l.children ? { ...l, children: l.children.filter((c) => c.to !== "/xcaret") } : l);
+// Menu pedido por Fernando (29/10/2026): Sobre | Destaques | Orlando | Cruzeiros | Resorts.
+const DRICA_PRESENTATION_NAV = [
+  { label: "Sobre", to: "/#sobre" },
+  { label: "Destaques", to: "/#destinos" },
+  { label: "Orlando", to: "/#ingressos-orlando" },
+  { label: "Cruzeiros", to: "/#autoridade" },
+  { label: "Resorts", to: "/#resorts" },
+];
 export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   ...dricaBaseline, navDensity: "compact", randomizeDestinations: false,
   visaHome: false, featuredExperience: undefined,

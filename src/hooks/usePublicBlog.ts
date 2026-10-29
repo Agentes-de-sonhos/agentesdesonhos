@@ -52,11 +52,14 @@ export function usePublicBlogStatus(hostname?: string | null) {
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: false,
-    queryFn: async () =>
-      (await call<{ enabled: boolean; has_posts: boolean }>({ action: "status", hostname })) ?? {
-        enabled: false,
-        has_posts: false,
-      },
+    // Blog desativado (404) ou indisponível: apenas oculta o link, nunca quebra o site.
+    queryFn: async () => {
+      try {
+        return (await call<{ enabled: boolean; has_posts: boolean }>({ action: "status", hostname })) ?? { enabled: false, has_posts: false };
+      } catch {
+        return { enabled: false, has_posts: false };
+      }
+    },
   });
 }
 
