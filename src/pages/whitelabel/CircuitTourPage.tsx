@@ -160,20 +160,42 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
 
       {/* Saídas */}
       <section id="saidas-garantidas" className={`${wrap} scroll-mt-24 py-14`}>
-        <p className={eyebrow}>Calendário</p>
-        <h2 className={h2}>Saídas garantidas</h2>
+        <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
+        <h2 className={h2}>{enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas"}</h2>
+        {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento com a {info.agencyName ?? "agência"}.</p>}
+        {enhanced ? (
+          <div className="relative mt-6">
+            <div className="mb-3 flex justify-end gap-2">
+              <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)}><ChevronLeft className="h-4 w-4" /></Button>
+              <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)}><ChevronRight className="h-4 w-4" /></Button>
+            </div>
+            <div ref={monthsRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {upcoming.map((m) => (
+                <div key={m.month} className="w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
+                  <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {m.days.map((d) => (
+                      <Button key={d} variant="ghost" className="h-10 w-10 bg-primary/10 p-0 text-primary hover:bg-primary hover:text-primary-foreground" aria-label={`Solicitar orçamento: ${d} de ${m.month}`} onClick={() => setDeparture({ date: circuitDepartureDate(m.month, d), label: `${d} de ${m.month}` })}>{d}</Button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {c.departures.map((m) => (
             <div key={m.month} className="rounded-2xl border border-border bg-card p-4">
               <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {m.days.map((d) => (
-                  enhanced ? <Button key={d} variant="ghost" className="h-10 w-10 bg-primary/10 p-0 text-primary hover:bg-primary hover:text-primary-foreground" aria-label={`Solicitar orçamento: ${d} de ${m.month}`} onClick={() => setDeparture({ date: circuitDepartureDate(m.month, d), label: `${d} de ${m.month}` })}>{d}</Button> : <a key={d} href={waHref(info, c, ` com saída em ${d} de ${m.month}`)} target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground">{d}</a>
+                  <a key={d} href={waHref(info, c, ` com saída em ${d} de ${m.month}`)} target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary transition hover:bg-primary hover:text-primary-foreground">{d}</a>
                 ))}
               </div>
             </div>
           ))}
         </div>
+        )}
         {c.departuresNote && <p className="mt-3 text-sm text-muted-foreground">{c.departuresNote}</p>}
       </section>
 
