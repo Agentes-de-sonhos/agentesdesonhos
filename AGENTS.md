@@ -1,4 +1,5 @@
 # Architecture rules
+- Subscription access changes must update the shared server feature, AI-quota and reservation-owner gates together while retaining caller checks and team permissions; do not add user-specific Edge Function bypasses. Why: the paid plan remains consistent across tools without weakening tenant isolation.
 - Campaign stage-one previews mount before tenant/auth providers, use existing local agency identity and shared header/footer, and allow only the exact technical preview host plus explicit tenant context; campaign actions/filtering remain local. Why: no live-domain exposure or CRM/network side effects, without modifying existing agency routes.
 - Flight/hotel cards and opt-in styles: public-only. Why: protects admin, other services and secure access.
 - Magic Kingdom maps: on-demand same-origin iframe, CDN image pointers, origin-checked Escape; at 100% full column width and natural height (iframe owns scroll). Why: height containment shrank the approved map.
