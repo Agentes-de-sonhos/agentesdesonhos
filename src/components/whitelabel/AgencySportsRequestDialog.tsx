@@ -10,7 +10,7 @@ import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { validCircuitContact, type CircuitContact } from "@/lib/circuits/presentation";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 
-export interface SportsEventChoice { key: string; title: string }
+export interface SportsEventChoice { key: string; title: string; fixedDate?: string; place?: string; image?: string; includes?: readonly string[]; price?: string; priceNote?: string }
 
 const maskPhone = (raw: string) => {
   const d = raw.replace(/\D/g, "").slice(0, 11);
@@ -30,7 +30,7 @@ export function AgencySportsRequestDialog({ hostname, event, onClose }: { hostna
   const [honeypot, setHoneypot] = useState("");
   const sending = useRef(false);
   const presentation = hostname.endsWith(".preview.local") || hostname.endsWith(".demo.local");
-  useEffect(() => { if (event) { setStep(1); setDate(""); setContact(empty()); setHoneypot(""); reset(); } }, [event, reset]);
+  useEffect(() => { if (event) { setStep(1); setDate(event.fixedDate ?? ""); setContact(empty()); setHoneypot(""); reset(); } }, [event, reset]);
   const change = <K extends keyof CircuitContact>(k: K, v: CircuitContact[K]) => setContact(c => ({ ...c, [k]: v }));
   const today = new Date().toISOString().slice(0, 10);
 
@@ -39,9 +39,15 @@ export function AgencySportsRequestDialog({ hostname, event, onClose }: { hostna
       <DialogHeader><DialogTitle>Solicitar orçamento</DialogTitle><DialogDescription><span className="block font-semibold text-foreground">{event?.title}</span></DialogDescription></DialogHeader>
       {state === "success" ? <div role="status" className="py-6 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-primary" /><h3 className="mt-4 text-xl font-semibold">Solicitação enviada com sucesso!</h3><p className="mt-3 text-muted-foreground">Recebemos seu pedido para {event?.title}. Nossa equipe entrará em contato em breve.</p><Button className="mt-6" onClick={onClose}>Fechar</Button></div>
       : step === 1 ? <form className="space-y-4" onSubmit={e => { e.preventDefault(); if (date) setStep(2); }}>
+          {event?.fixedDate ? <div className="space-y-3">
+            {event.image && <img src={event.image} alt={event.title} className="max-h-72 w-full rounded-md object-cover object-top" />}
+            <p className="text-sm text-foreground"><strong>{event.fixedDate}</strong>{event.place ? ` · ${event.place}` : ""}</p>
+            {event.includes && <ul className="grid gap-1 text-sm text-muted-foreground sm:grid-cols-2">{event.includes.map(i => <li key={i}>• {i}</li>)}</ul>}
+            {event.price && <p className="rounded-md bg-muted/40 p-3 text-sm"><span className="font-semibold text-foreground">{event.price}</span>{event.priceNote ? <span className="block text-muted-foreground">{event.priceNote}</span> : null}</p>}
+          </div> : <>
           <div><Label>Evento</Label><Input value={event?.title ?? ""} readOnly className="mt-2 bg-muted/40" /></div>
-          <div><Label htmlFor="sport-date">Data do evento</Label><Input id="sport-date" type="date" min={today} required value={date} onChange={e => setDate(e.target.value)} className="mt-2" /></div>
-          <div><Label htmlFor="sport-notes">Observações (opcional)</Label><Textarea id="sport-notes" maxLength={2000} placeholder="Ex.: local da corrida ou do jogo, setor preferido, hospedagem…" value={contact.notes} onChange={e => change("notes", e.target.value)} className="mt-2" /></div>
+          <div><Label htmlFor="sport-date">Data do evento</Label><Input id="sport-date" type="date" min={today} required value={date} onChange={e => setDate(e.target.value)} className="mt-2" /></div></>}
+          <div><Label htmlFor="sport-notes">Observações (opcional)</Label><Textarea id="sport-notes" maxLength={2000} placeholder={event?.fixedDate ? "Ex.: tipo de quarto, cidade de saída, dúvidas…" : "Ex.: local da corrida ou do jogo, setor preferido, hospedagem…"} value={contact.notes} onChange={e => change("notes", e.target.value)} className="mt-2" /></div>
           <Button type="submit" size="lg" className="w-full" disabled={!date}>Continuar</Button>
         </form>
       : <form className="space-y-4" onSubmit={async e => {
@@ -55,7 +61,7 @@ export function AgencySportsRequestDialog({ hostname, event, onClose }: { hostna
               preferred_channel: contact.phone.replace(/\D/g, "") ? "whatsapp" : "email",
               summary: `${event.title} · Data: ${date} · ${contact.adults} adulto(s), ${contact.children} criança(s) · Origem: Site / Eventos esportivos`,
               notes: contact.notes.trim(), consent: contact.consent, consent_version: "v1", honeypot,
-              details: { evento: event.title, evento_chave: event.key, data: date, adultos: contact.adults, criancas: contact.children, origem: "Site / Eventos esportivos" },
+              details: { evento: event.title, evento_chave: event.key, data: date, adultos: contact.adults, criancas: contact.children, origem: "Site / Eventos esportivos", ...(event.fixedDate ? { pacote: event.title, local: event.place, preco_divulgado: event.price } : {}) },
             });
           } finally { sending.current = false; }
         }}>
