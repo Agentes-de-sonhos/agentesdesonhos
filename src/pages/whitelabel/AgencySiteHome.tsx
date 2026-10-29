@@ -1,6 +1,7 @@
 import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
 import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
 import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
+import capitaisItaliaHero from "@/assets/circuits/capitais-italia-hero.jpg";
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
@@ -145,6 +146,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   resort: destinoResort,
   cruzeiro: destinoCruzeiro,
   europa: destinoEuropa,
+  capitaisItalia: capitaisItaliaHero,
   europaCastelo: destinoEuropaCastelo.url,
   caribeMexico: destinoCaribeMexico.url,
   orlandoMagicKingdom: destinoOrlandoMk.url,
@@ -1044,11 +1046,15 @@ export default function AgencySiteHome({
                   editorial
                 />
                 <div className="-mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 md:mx-0 md:grid md:auto-rows-[236px] md:grid-cols-3 md:gap-5 md:overflow-visible md:px-0 md:pb-0">
-                  {destinations.map((d, i) => (
-                    <button
+                  {destinations.map((d, i) => {
+                    const Card = (d.href ? "a" : "button") as "a";
+                    const cardProps = d.href
+                      ? { href: agencySiteHref(d.href) }
+                      : { type: "button" as const, onClick: () => openRequest(d.service) };
+                    return (
+                    <Card
                       key={d.key}
-                      type="button"
-                      onClick={() => openRequest(d.service)}
+                      {...(cardProps as Record<string, unknown>)}
                       className={`group relative w-[80vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[58vw] md:w-auto ${
                         i === 0
                           ? "md:col-span-2 md:row-span-2"
@@ -1079,11 +1085,12 @@ export default function AgencySiteHome({
                           <p className={`mt-2 hidden w-full max-w-2xl text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
                         <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
-                          Solicitar proposta <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                          {d.href ? "Ver circuito" : "Solicitar proposta"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                         </span>
                       </div>
-                    </button>
-                  ))}
+                    </Card>
+                    );
+                  })}
                 </div>
                 {(copy.note || copy.extraCta) && (
                   <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
