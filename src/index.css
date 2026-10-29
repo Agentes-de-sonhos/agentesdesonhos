@@ -1555,6 +1555,8 @@ body[data-booking-selection-bar] {
 .wl-editorial.wl-site-base.wl-drica :is(h1,h2,h3,h4) { font-family: inherit; font-weight: 700; letter-spacing: 0; }
 /* Títulos de seção da Drica no mesmo peso/espaçamento da Destinos com a Ju (600, -0.02em). */
 .wl-editorial.wl-site-base.wl-drica section h2 { font-weight: 600; letter-spacing: -0.02em; }
+/* Título do banner principal leve, igual à Destinos com a Ju (peso 400). */
+.wl-editorial.wl-site-base.wl-drica #topo h1 { font-weight: 400; letter-spacing: -0.02em; }
 /* Contraste do solicitador (Drica): opção em foco = azul + texto branco; datas e calendário legíveis. */
 .wl-drica [role="option"]:is(:focus,[data-highlighted],[data-state="checked"]) { background-color: #336687 !important; color: #ffffff !important; }
 /* Mapa de resorts: bolinhas de contagem no azul da Drica (Fernando, 29/10/2026). */
