@@ -84,7 +84,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <aside className="h-fit rounded-2xl border border-border bg-card p-6 shadow-sm md:sticky md:top-24">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">A partir de</p>
           <p className="mt-1 text-4xl font-semibold text-primary">{price}</p>
-          {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })} (comercial + 4%)</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
+          {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
           {c.singleSupplement != null && <p className="mt-1 text-sm text-muted-foreground">Suplemento individual: {formatCircuitPrice(c.singleSupplement, c.currency)}</p>}
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>
           {enhanced ? <Button size="lg" className="mt-5 w-full" onClick={scrollToDepartures}><MessageCircle className="mr-2 h-4 w-4" />Solicitar orçamento</Button> : <><Button asChild size="lg" className="mt-5 w-full"><a href={waHref(info, c)} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />Solicitar cotação</a></Button><Button variant="outline" size="lg" className="mt-2 w-full" onClick={() => window.print()}><Download className="mr-2 h-4 w-4" />Baixar roteiro</Button></>}
@@ -168,10 +168,8 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento com a {info.agency_name ?? "agência"}.</p>}
         {enhanced ? (
           <div className="relative mt-6">
-            <div className="mb-3 flex justify-end gap-2">
-              <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)}><ChevronLeft className="h-4 w-4" /></Button>
-              <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)}><ChevronRight className="h-4 w-4" /></Button>
-            </div>
+            <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-card shadow-md hover:bg-primary hover:text-primary-foreground sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>
+            <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-card shadow-md hover:bg-primary hover:text-primary-foreground sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>
             <div ref={monthsRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {upcoming.map((m) => (
                 <div key={m.month} className="w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
