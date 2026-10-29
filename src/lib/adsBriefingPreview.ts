@@ -1107,7 +1107,7 @@ const DRICA_PRESENTATION_NAV = [
   { label: "Destaques", to: "/#destinos" },
   { label: "Orlando", to: "/#ingressos-orlando" },
   { label: "Cruzeiros", to: "/#autoridade" },
-  { label: "Eventos esportivos", to: "/#esportes" },
+  { label: "Eventos Esportivos", to: "/#esportes" },
   { label: "Resorts", to: "/#resorts" },
 ];
 export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
