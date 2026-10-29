@@ -97,6 +97,13 @@ export function AgencyResortsSection({
             );
           })}
         </svg>
+          <Button asChild className="wl-resorts-btn rounded-full">
+            <a href={allHref}>
+              {selected && all.length > MAX_CARDS ? `Ver todos os ${all.length} resorts de ${STATE_NAME[selected!]}` : "Ver todos os resorts"}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </a>
+          </Button>
+        </div>
 
         {/* Estados (celular) */}
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:hidden [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Escolher estado">
