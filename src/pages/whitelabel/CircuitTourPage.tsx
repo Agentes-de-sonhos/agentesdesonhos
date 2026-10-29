@@ -67,7 +67,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
       </section>
 
       {/* Resumo + preço */}
-      <section className={`${wrap} grid gap-8 py-10 md:grid-cols-[1fr_380px]`}>
+      <section className="wl-alt-gradient"><div className={`${wrap} grid gap-8 py-10 md:grid-cols-[1fr_380px]`}>
         <div>
           <div className="flex flex-wrap gap-2">
             {[
@@ -89,10 +89,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>
           {enhanced ? <Button size="lg" className="mt-5 w-full" onClick={scrollToDepartures}><MessageCircle className="mr-2 h-4 w-4" />Solicitar orçamento</Button> : <><Button asChild size="lg" className="mt-5 w-full"><a href={waHref(info, c)} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />Solicitar cotação</a></Button><Button variant="outline" size="lg" className="mt-2 w-full" onClick={() => window.print()}><Download className="mr-2 h-4 w-4" />Baixar roteiro</Button></>}
         </aside>
-      </section>
+      </div></section>
 
       {/* Inclusões */}
-      <section className="bg-muted/40 py-14">
+      <section className="bg-card py-14">
         <div className={wrap}>
           <p className={eyebrow}>O que está incluído</p>
           <h2 className={h2}>Serviços incluídos</h2>
@@ -109,7 +109,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
       </section>
 
       {/* Destaques + hotéis */}
-      <section className={`${wrap} grid gap-10 py-14 md:grid-cols-2`}>
+      <section className="wl-alt-gradient"><div className={`${wrap} grid gap-10 py-14 md:grid-cols-2`}>
         <div>
           <p className={eyebrow}>Experiências</p>
           <h2 className={h2}>Destaques da viagem</h2>
@@ -130,10 +130,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           </div>
           {c.hotelsNote && <p className="mt-2 text-xs text-muted-foreground">{c.hotelsNote}</p>}
         </div>
-      </section>
+      </div></section>
 
       {/* Roteiro */}
-      <section className="bg-muted/40 py-14">
+      <section className="bg-card py-14">
         <div className={wrap}>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div><p className={eyebrow}>Dia a dia</p><h2 className={h2}>Roteiro</h2></div>
@@ -162,7 +162,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
       </section>
 
       {/* Saídas */}
-      <section id="saidas-garantidas" className={`${wrap} scroll-mt-24 py-14`}>
+      <section id="saidas-garantidas" className="wl-alt-gradient scroll-mt-24"><div className={`${wrap} py-14`}>
         <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
         <h2 className={h2}>{enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas"}</h2>
         {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento com a {info.agency_name ?? "agência"}.</p>}
@@ -198,10 +198,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         </div>
         )}
         {c.departuresNote && <p className="mt-3 text-sm text-muted-foreground">{c.departuresNote}</p>}
-      </section>
+      </div></section>
 
       {/* Notas + FAQ */}
-      <section className="bg-muted/40 py-14">
+      <section className="bg-card py-14">
         <div className={`${wrap} grid gap-10 md:grid-cols-2`}>
           {c.notes?.length ? (
             <div>
