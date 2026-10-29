@@ -6,6 +6,7 @@ import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { useAgencyResortCuration } from "@/lib/resortCuration";
 import { AgencySportsEventsSection } from "@/components/whitelabel/AgencySportsEventsSection";
+import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/whitelabel/AgencySportsRequestDialog";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -561,6 +562,7 @@ export default function AgencySiteHome({
 
   const [service, setService] = useState(REQUEST_SERVICES[0].key);
   const [requestOpen, setRequestOpen] = useState(false);
+  const [sportsEvent, setSportsEvent] = useState<SportsEventChoice | null>(null);
   // Captação de leads da seção editorial "Receba inspirações" (template compartilhado).
   const [inspirationOpen, setInspirationOpen] = useState(false);
   const requestCenterRef = useRef<HTMLDivElement | null>(null);
@@ -1627,7 +1629,7 @@ export default function AgencySiteHome({
         );
 
       case "sports":
-        return <AgencySportsEventsSection key={key} container={container} onRequest={() => openRequest("ingressos")} />;
+        return <AgencySportsEventsSection key={key} container={container} onRequest={setSportsEvent} />;
 
       case "orlando":
         return (

@@ -29,7 +29,7 @@ const PILLARS = [
   { icon: Headphones, title: "Pacote sob medida", text: "Viagem personalizada, do planejamento ao retorno." },
 ];
 
-export function AgencySportsEventsSection({ container, onRequest }: { container: string; onRequest: () => void }) {
+export function AgencySportsEventsSection({ container, onRequest }: { container: string; onRequest: (event: { key: string; title: string }) => void }) {
   return (
     <section id="esportes" className="scroll-mt-32 md:scroll-mt-36">
       <div className={`${container} py-14 md:py-24`}>
@@ -51,7 +51,7 @@ export function AgencySportsEventsSection({ container, onRequest }: { container:
               <div className="flex flex-1 flex-col p-6">
                 <h3 className="text-lg font-semibold text-foreground">{e.title}</h3>
                 <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{e.text}</p>
-                <button type="button" onClick={onRequest} className="mt-5 inline-flex items-center gap-2 self-start text-sm font-semibold text-primary hover:underline">
+                <button type="button" onClick={() => onRequest({ key: e.key, title: e.title })} className="mt-5 inline-flex items-center gap-2 self-start text-sm font-semibold text-primary hover:underline">
                   Solicitar orçamento <ArrowRight className="h-4 w-4" aria-hidden />
                 </button>
               </div>
