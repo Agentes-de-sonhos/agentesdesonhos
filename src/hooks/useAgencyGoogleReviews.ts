@@ -26,11 +26,12 @@ export function useAgencyGoogleReviews(hostname: string, active: boolean) {
           body: JSON.stringify({ hostname }),
         });
       } catch {
-        return null;
+        throw new Error("unavailable");
       }
-      if (!res.ok) return null;
-      const data = await res.json().catch(() => null);
-      return mapGooglePlaceReviews(data) ?? null;
+      const data = res.ok ? await res.json().catch(() => null) : null;
+      const mapped = mapGooglePlaceReviews(data);
+      if (!mapped) throw new Error("unavailable");
+      return mapped;
     },
   });
 }

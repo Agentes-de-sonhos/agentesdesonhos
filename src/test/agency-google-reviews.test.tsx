@@ -28,7 +28,14 @@ const review = (i: number, extra: Record<string, unknown> = {}) => ({
   ...extra,
 });
 
-beforeEach(() => invoke.mockReset());
+beforeEach(() => {
+  invoke.mockReset();
+  vi.stubGlobal("fetch", async (_u: string, init: { body: string }) => {
+    const r = await invoke("google-place-reviews", { body: JSON.parse(init.body) });
+    if (r.error || !r.data) return new Response("{}", { status: 404 });
+    return new Response(JSON.stringify(r.data), { status: 200 });
+  });
+});
 
 describe("servidor google-place-reviews", () => {
   const src = readFileSync(resolve(__dirname, "../../supabase/functions/google-place-reviews/index.ts"), "utf8");
