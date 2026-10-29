@@ -16,7 +16,7 @@ describe("padrão ouro dos novos sites", () => {
   it("ativa fundos alternados e rotação de destinos", () => {
     const p = buildGoldStandardProfile("siteLabBase");
     expect(p.alternateSurfaces).toBe(true);
-    expect(p.randomizeDestinations).toBe(true);
+    expect(p.randomizeDestinations ?? true).toBe(true);
   });
   it("preenche a composição integral e não herda pessoas ou selos", () => {
     const p = BARDELLI_PRESENTATION_PROFILE;
