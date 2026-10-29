@@ -12,7 +12,7 @@ export const LESTE_EUROPEU_PREMIUM_2026: CircuitTour = {
   heroImage: hero,
   heroAlt: "Ponte Carlos e centro histórico de Praga ao pôr do sol",
   summary:
-    "Quatro capitais imperiais em um roteiro rodoviário confortável, com hotéis centrais 4★ superior e 5★, guia em português e passeios com guias locais licenciados.",
+    "Quatro capitais imperiais em um circuito pela Europa confortável, com hotéis centrais 4★ superior e 5★, guia em português e passeios com guias locais licenciados.",
   currency: "EUR",
   fromPrice: 2495,
   singleSupplement: 1500,

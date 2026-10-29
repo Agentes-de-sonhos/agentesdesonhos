@@ -545,8 +545,8 @@ export default function AgencySiteHome({
   }, [profile, labPresentation?.modules]);
   const destinations = useMemo(() => {
     const list = resolveDestinations(undefined, profile.destinations);
-    if (!profile.randomizeDestinations || list.length < 2) return list;
-    // Sorteio único por carregamento: a ordem permanece estável durante a leitura.
+    if (list.length < 2) return list;
+    // Padrão para todos os sites: sorteio a cada visita, estável durante a leitura.
     const shuffled = [...list];
     for (let i = shuffled.length - 1; i > 0; i -= 1) {
       const j = Math.floor(Math.random() * (i + 1));

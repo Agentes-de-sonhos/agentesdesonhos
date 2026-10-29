@@ -1137,7 +1137,7 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   destinations: [
     { key: "orlando", image: "orlandoMagicKingdom", label: "Famílias e parques", title: "Orlando completo", text: "Disney, Universal, SeaWorld e muito mais, com ingressos, hospedagem e grupos organizados.", service: "ingressos", enabled: true, order: 1 },
     { key: "londres-paris", image: "dricaLondon", label: "Clássicos", title: "Londres e Paris", text: "Clássicos londrinos e o charme parisiense em um roteiro no seu ritmo — inspiração para 2027.", service: "pacotes", enabled: true, order: 2 },
-    { key: "capitais-da-italia", image: "capitaisItalia", label: "Circuito rodoviário", title: "Capitais da Itália", text: "Roma, Florença e Veneza em uma semana, com passagem por Rávena e Assis.", service: "pacotes", href: "/circuitos/capitais-da-italia", enabled: true, order: 3 },
+    { key: "capitais-da-italia", image: "capitaisItalia", label: "Circuito pela Europa", title: "Capitais da Itália", text: "Roma, Florença e Veneza em uma semana, com passagem por Rávena e Assis.", service: "pacotes", href: "/circuitos/capitais-da-italia", enabled: true, order: 3 },
     { key: "leste-europeu", image: "dricaPrague", label: "História", title: "Berlim e Leste Europeu", text: "Cidades históricas, arte e cultura conectadas por uma logística bem planejada.", service: "pacotes", enabled: true, order: 4 },
     { key: "africa-sul-namibia", image: "safari", label: "Aventura", title: "África do Sul e Namíbia", text: "Safáris, desertos e paisagens extraordinárias em uma viagem que fica para sempre.", service: "pacotes", enabled: true, order: 5 },
   ],
