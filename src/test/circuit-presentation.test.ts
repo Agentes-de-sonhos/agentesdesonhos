@@ -20,3 +20,11 @@ describe("regras do circuito", () => {
   it("rejeita email inválido", () => expect(validCircuitContact({ ...contact, email: "inválido" })).toBe(false));
   it("exige WhatsApp com DDD", () => expect(validCircuitContact({ ...contact, phone: "99999-9999" })).toBe(false));
 });
+import { tourismRate as _tr, upcomingDepartures as _ud } from "@/lib/circuits/presentation";
+describe("câmbio turismo e meses futuros", () => {
+  it("aplica 4% sobre o comercial", () => { expect(_tr(6)).toBe(6.24); });
+  it("oculta meses e domingos passados", () => {
+    const r = _ud([{ month: "Outubro 2026", days: [4, 25] }, { month: "Novembro 2026", days: [1, 8] }], new Date(2026, 9, 29));
+    expect(r).toEqual([{ month: "Novembro 2026", days: [1, 8] }]);
+  });
+});
