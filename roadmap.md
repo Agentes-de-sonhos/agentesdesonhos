@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Liberar plano completo ADS R$ 197 no servidor para todos os assinantes: recursos, cota de 1.000 usos de IA, reservas/PJ e validação de acesso; preservar R$ 167, cobranças e isolamento.
 - [x] Novembro: segunda rodada visual (hero, categorias, ofertas, Radar e CTA); 6 testes aprovados, QA 1280/768/390/360 sem overflow, quatro cards/botões alinhados, filtros e diálogos demonstrativos verificados, zero chamadas ao backend; cabeçalho/rodapé preservados, sem publicação.
 - [x] Novembro 2026: campanha visual isolada da O Mundo em Cores, componentes modulares, filtros locais e aviso ilustrativo; 31 testes, QA desktop/390/360, fotos carregadas, CTAs alinhados, zero chamadas ao backend e bloqueio 404 de tenant incorreto/produção; sem banco ou publicação.
 - [x] Orlando: galeria sem degradê preto e botões “Selecionar” em Ju, 100 Limites e O Mundo em Cores; seleção/desmarcação verificadas nos três sites, sem publicar.
