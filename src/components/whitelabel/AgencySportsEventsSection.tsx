@@ -1,4 +1,9 @@
-import { ArrowRight, BedDouble, Car, ShieldCheck, Headphones } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, BedDouble, Car, ShieldCheck, Headphones, ChevronLeft, ChevronRight, CalendarDays, MapPin } from "lucide-react";
+import libertadores from "@/assets/whitelabel/sports/libertadores-2026.jpg.asset.json";
+import sulamericana from "@/assets/whitelabel/sports/sulamericana-2026.jpg.asset.json";
+import londres from "@/assets/whitelabel/sports/classicos-londrinos-2027.jpg.asset.json";
+import type { SportsEventChoice } from "@/components/whitelabel/AgencySportsRequestDialog";
 import f1 from "@/assets/whitelabel/sports/f1.jpg";
 import football from "@/assets/whitelabel/sports/football.jpg";
 import nfl from "@/assets/whitelabel/sports/nfl.jpg";
@@ -22,6 +27,50 @@ export const SPORTS_EVENTS = [
   { key: "motogp", badge: "Motociclismo", title: "MotoGP", text: "Os melhores pilotos do mundo em disputas emocionantes de velocidade.", image: motogp },
 ] as const;
 
+/** Pacotes à venda divulgados no banner rotativo (dados das artes enviadas pela agência). */
+export const SPORTS_PACKAGES: (SportsEventChoice & { badge: string; subtitle: string; image: string })[] = [
+  { key: "libertadores-2026", badge: "Copa Libertadores", title: "Final da Libertadores 2026", subtitle: "Palmeiras na grande final · pacote com ingresso categoria 2", fixedDate: "26 a 29/11/2026 · final em 28/11", place: "Montevidéu, Uruguai · Estádio Centenário", image: libertadores.url, includes: ["Voo fretado direto Azul saindo de São Paulo", "3 noites de hospedagem 4★ ou similar", "Café da manhã", "Traslados aeroporto e para o jogo", "Ingresso categoria 2", "Kit torcedor", "Equipe no destino", "Seguro viagem"], price: "A partir de 10x de R$ 1.709,26", priceNote: "ou R$ 16.237,97 no PIX · por pessoa · apartamento duplo" },
+  { key: "sulamericana-2026", badge: "Copa Sul-Americana", title: "Final da Sul-Americana 2026", subtitle: "Atlético Mineiro na grande final · pacote com ingresso categoria 2", fixedDate: "20 a 22/11/2026 · final em 21/11", place: "Barranquilla, Colômbia · Estádio Metropolitano Roberto Meléndez", image: sulamericana.url, includes: ["Voo Avianca", "2 noites de hospedagem 4★", "Ingresso categoria 2", "Traslados", "Seguro viagem"], price: "A partir de 10x de R$ 1.067,80", priceNote: "ou R$ 10.678,00 por pessoa · apartamento triplo · saída de São Paulo" },
+  { key: "classicos-londrinos-2027", badge: "Premier League", title: "Clássicos Londrinos 2027", subtitle: "Especial Carnaval · 2 jogos do Manchester City (Fulham × Man City 06/02 e Tottenham × Man City 10/02, sujeitos à confirmação)", fixedDate: "05 a 12/02/2027", place: "Londres, Inglaterra · 7 noites em Kensington", image: londres.url, includes: ["Voos Iberia", "7 noites de hospedagem 4★", "2 ingressos oficiais", "Traslados privativos", "City tour + London Eye"], price: "A partir de 6x de R$ 3.761,89", priceNote: "ou R$ 22.571,34 por pessoa + taxas de embarque" },
+];
+
+function SportsPackagesBanner({ onRequest }: { onRequest: (p: SportsEventChoice) => void }) {
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const n = SPORTS_PACKAGES.length;
+  useEffect(() => { if (paused) return; const t = setInterval(() => setI(v => (v + 1) % n), 7000); return () => clearInterval(t); }, [paused, n]);
+  const p = SPORTS_PACKAGES[i];
+  return (
+    <div className="relative mt-10 overflow-hidden rounded-md border border-border bg-card shadow-sm" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carrossel" aria-label="Pacotes esportivos à venda">
+      <div key={p.key} className="grid animate-in fade-in duration-500 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <button type="button" onClick={() => onRequest(p)} className="block bg-muted" aria-label={`Ver pacote ${p.title}`}>
+          <img src={p.image} alt={p.title} className="h-72 w-full object-cover object-top md:h-[460px]" />
+        </button>
+        <div className="flex flex-col justify-center p-6 md:p-10">
+          <span className="self-start rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-primary">{p.badge} · à venda</span>
+          <h3 className="mt-4 text-2xl font-semibold text-foreground md:text-3xl">{p.title}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{p.subtitle}</p>
+          <div className="mt-5 space-y-2 text-sm text-foreground">
+            <p className="flex gap-2"><CalendarDays className="h-4 w-4 shrink-0 text-primary" aria-hidden />{p.fixedDate}</p>
+            <p className="flex gap-2"><MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden />{p.place}</p>
+          </div>
+          <p className="mt-5 text-xl font-semibold text-foreground">{p.price}</p>
+          <p className="text-sm text-muted-foreground">{p.priceNote}</p>
+          <button type="button" onClick={() => onRequest(p)} className="mt-6 inline-flex items-center gap-2 self-start rounded-md bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90">
+            Ver pacote e solicitar <ArrowRight className="h-4 w-4" aria-hidden />
+          </button>
+          <p className="mt-4 text-xs text-muted-foreground">Valores e disponibilidade sujeitos a alteração sem aviso prévio.</p>
+        </div>
+      </div>
+      <button type="button" onClick={() => setI((i - 1 + n) % n)} aria-label="Pacote anterior" className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 text-foreground shadow"><ChevronLeft className="h-5 w-5" /></button>
+      <button type="button" onClick={() => setI((i + 1) % n)} aria-label="Próximo pacote" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 text-foreground shadow"><ChevronRight className="h-5 w-5" /></button>
+      <div className="absolute bottom-3 right-4 flex gap-2">
+        {SPORTS_PACKAGES.map((x, k) => <button key={x.key} type="button" onClick={() => setI(k)} aria-label={`Ir para ${x.title}`} aria-current={k === i} className={`h-2.5 rounded-full transition-all ${k === i ? "w-6 bg-primary" : "w-2.5 bg-muted-foreground/40"}`} />)}
+      </div>
+    </div>
+  );
+}
+
 const PILLARS = [
   { icon: ShieldCheck, title: "Ingressos oficiais", text: "Ingressos garantidos para jogos e finais." },
   { icon: BedDouble, title: "Hospedagem próxima", text: "Hotéis perto dos estádios e circuitos." },
@@ -29,7 +78,7 @@ const PILLARS = [
   { icon: Headphones, title: "Pacote sob medida", text: "Viagem personalizada, do planejamento ao retorno." },
 ];
 
-export function AgencySportsEventsSection({ container, onRequest }: { container: string; onRequest: (event: { key: string; title: string }) => void }) {
+export function AgencySportsEventsSection({ container, onRequest }: { container: string; onRequest: (event: SportsEventChoice) => void }) {
   return (
     <section id="esportes" className="scroll-mt-32 md:scroll-mt-36">
       <div className={`${container} py-14 md:py-24`}>
@@ -41,11 +90,13 @@ export function AgencySportsEventsSection({ container, onRequest }: { container:
           </p>
         </div>
 
+        <SportsPackagesBanner onRequest={onRequest} />
+
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {SPORTS_EVENTS.map((e) => (
             <article key={e.key} className="group flex flex-col overflow-hidden rounded-md border border-border bg-card shadow-sm">
               <div className="relative overflow-hidden">
-                <img src={e.image} alt={e.title} width={1024} height={768} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03]" />
+                <img src={e.image} alt={e.title} width={1024} height={768} loading="lazy" className="aspect-[8/3] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03]" />
                 <span className="absolute left-3 top-3 rounded-full bg-background/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-foreground">{e.badge}</span>
               </div>
               <div className="flex flex-1 flex-col p-6">
