@@ -103,7 +103,7 @@ export function resolveSections(
  * Mapeamento central em `AgencySiteHome` — nunca imports espalhados.
  */
 export type AgencyImageSlot =
-  | "dricaLondon" | "dricaJapan" | "dricaPrague"
+  | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
   | "heroVarenna" | "heroSantoriniShip" | "heroMundoGrupoVideo" | "heroMundoEuropaVideo" | "heroMundoEuropaFoto" | "heroMundoGrupoFoto" | "mundoGreciaVanessa" | "mundoNclDestaque" | "heroMundoDesenhadaVideo" | "heroMundoPlacasFoto" | "heroAirportTraveler" | "heroJuMagicKingdom"
