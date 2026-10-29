@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
 import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
 import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
@@ -1629,7 +1630,7 @@ export default function AgencySiteHome({
         );
 
       case "sports":
-        return <div key={key}><AgencySportsEventsSection container={container} onRequest={setSportsEvent} /><AgencySportsRequestDialog hostname={hostname} event={sportsEvent} onClose={() => setSportsEvent(null)} /></div>;
+        return <Fragment key={key}><AgencySportsEventsSection container={container} onRequest={setSportsEvent} /><AgencySportsRequestDialog hostname={hostname} event={sportsEvent} onClose={() => setSportsEvent(null)} /></Fragment>;
 
       case "orlando":
         return (
