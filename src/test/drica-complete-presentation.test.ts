@@ -15,7 +15,7 @@ describe("Drica — apresentação integral isolada", () => {
   it("mantém seções ativas e composição integral", () => {
     const head = ["signature", "destinations", "highlights", "orlando", "authority", "resorts"];
     const expected = [...head, ...GOLD_STANDARD_SECTION_ORDER.filter((k) => !["dmc", "credentials", "team", "modules", ...head].includes(k))];
-    expect(p.hero.map((h) => h.image)).toEqual(["dricaLondon", "orlandoMagicKingdom", "dricaJapan"]);
+    expect(p.hero.map((h) => h.image)).toEqual(["heroVarenna", "orlandoMagicKingdom", "dricaJapan"]);
     expect(p.hideConciergeActions).toBe(true);
     expect(resolveSections(p.sections).map(s => s.key)).toEqual(expected);
     expect(p.hero).toHaveLength(3); expect(p.modules).toHaveLength(6);

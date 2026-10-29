@@ -1122,7 +1122,7 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   nav: DRICA_PRESENTATION_NAV,
   heroPresentation: { ...dricaBaseline.heroPresentation, kicker: "DRICA VIAGENS · ONLINE, DO RIO DE JANEIRO · DESDE 2010" },
   hero: [
-    { title: "Seu próximo destino pode ser o melhor capítulo da sua história", subtitle: "Roteiros personalizados, pacotes, cruzeiros, seguros e ingressos, com segurança e suporte antes, durante e depois da viagem.", image: "dricaLondon", order: 1, enabled: true },
+    { title: "Seu próximo destino pode ser o melhor capítulo da sua história", subtitle: "Roteiros personalizados, pacotes, cruzeiros, seguros e ingressos, com segurança e suporte antes, durante e depois da viagem.", image: "heroVarenna", order: 1, enabled: true },
     { title: "Orlando completo: parques, shows e grupos", subtitle: "Ingressos para Disney, Universal, SeaWorld e Broadway, além de viagens em grupo para Orlando planejadas em cada detalhe.", image: "orlandoMagicKingdom", order: 2, enabled: true },
     { title: "Você já imaginou onde os seus sonhos podem te levar?", subtitle: "De Londres ao Japão, da Itália à África do Sul e Namíbia: experiências únicas para colecionar momentos e memórias.", image: "dricaJapan", order: 3, enabled: true },
   ],
