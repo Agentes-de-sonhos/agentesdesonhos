@@ -1107,16 +1107,17 @@ const DRICA_PRESENTATION_NAV = (dricaBaseline.nav ?? [])
 export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
   ...dricaBaseline, navDensity: "compact", randomizeDestinations: false,
   visaHome: false, featuredExperience: undefined,
-  // Ordem pedida por Fernando (28/10/2026); demais seções mantêm a ordem base.
+  // Ordem pedida por Fernando (29/10/2026); "Tudo para a sua viagem" desativada.
   sections: { ...dricaBaseline.sections, dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
-    signature: { enabled: true, order: 1 }, destinations: { enabled: true, order: 2 }, modules: { enabled: true, order: 3 },
+    signature: { enabled: true, order: 1 }, destinations: { enabled: true, order: 2 }, highlights: { enabled: true, order: 3 },
     orlando: { enabled: true, order: 4 }, authority: { enabled: true, order: 5 }, resorts: { enabled: true, order: 6 },
-    highlights: { enabled: true, order: 7 } },
+    modules: { enabled: false } },
+  hideConciergeActions: true,
   nav: DRICA_PRESENTATION_NAV,
   heroPresentation: { ...dricaBaseline.heroPresentation, kicker: "DRICA VIAGENS · ONLINE, DO RIO DE JANEIRO · DESDE 2010" },
   hero: [
-    { title: "Seu próximo destino pode ser o melhor capítulo da sua história", subtitle: "Roteiros personalizados, pacotes, cruzeiros, seguros e ingressos, com segurança e suporte antes, durante e depois da viagem.", image: "orlandoMagicKingdom", order: 1, enabled: true },
-    { title: "Orlando completo: parques, shows e grupos", subtitle: "Ingressos para Disney, Universal, SeaWorld e Broadway, além de viagens em grupo para Orlando planejadas em cada detalhe.", image: "cruzeiroDisneyWish", order: 2, enabled: true },
+    { title: "Seu próximo destino pode ser o melhor capítulo da sua história", subtitle: "Roteiros personalizados, pacotes, cruzeiros, seguros e ingressos, com segurança e suporte antes, durante e depois da viagem.", image: "dricaLondon", order: 1, enabled: true },
+    { title: "Orlando completo: parques, shows e grupos", subtitle: "Ingressos para Disney, Universal, SeaWorld e Broadway, além de viagens em grupo para Orlando planejadas em cada detalhe.", image: "orlandoMagicKingdom", order: 2, enabled: true },
     { title: "Você já imaginou onde os seus sonhos podem te levar?", subtitle: "De Londres ao Japão, da Itália à África do Sul e Namíbia: experiências únicas para colecionar momentos e memórias.", image: "dricaJapan", order: 3, enabled: true },
   ],
   signature: { kicker: "NÓS ACREDITAMOS EM MÁGICA", title: "E em fazer mágica, unindo paixões e misturando possibilidades.", text: "De um lado, o esporte; de outro, a felicidade. Criamos experiências únicas e encantadoras para que você colecione momentos e memórias. Afinal, a vida deve ser vivida e vista de forma mágica. E aí, está pronto para o seu próximo cartão de embarque?" },

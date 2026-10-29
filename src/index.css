@@ -1557,6 +1557,8 @@ body[data-booking-selection-bar] {
 .wl-editorial.wl-site-base.wl-drica section h2 { font-weight: 600; letter-spacing: -0.02em; }
 /* Contraste do solicitador (Drica): opção em foco = azul + texto branco; datas e calendário legíveis. */
 .wl-drica [role="option"]:is(:focus,[data-highlighted],[data-state="checked"]) { background-color: #336687 !important; color: #ffffff !important; }
+/* Mapa de resorts: bolinhas de contagem no azul da Drica (Fernando, 29/10/2026). */
+.wl-drica svg[aria-label="Mapa do Brasil por estado"] circle { fill: #336687 !important; }
 .wl-drica [role="option"]:is(:focus,[data-highlighted],[data-state="checked"]) svg { color: #ffffff; }
 .wl-drica .text-muted-foreground { color: hsl(222 30% 28%); }
 .wl-drica .rdp-head_cell, .wl-drica [role="grid"] th { color: hsl(222 40% 20%) !important; font-weight: 600; }

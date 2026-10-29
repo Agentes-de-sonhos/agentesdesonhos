@@ -13,8 +13,10 @@ describe("Drica — apresentação integral isolada", () => {
     for (const id of ["drica-completa", "Drica-completa-v1", "drica-completa-v1/", "drica-completa-v1 "]) expect(resolveAdsPreviewFixture(id)).toBeNull();
   });
   it("mantém seções ativas e composição integral", () => {
-    const head = ["signature", "destinations", "modules", "orlando", "authority", "resorts", "highlights"];
-    const expected = [...head, ...GOLD_STANDARD_SECTION_ORDER.filter((k) => !["dmc", "credentials", "team", ...head].includes(k))];
+    const head = ["signature", "destinations", "highlights", "orlando", "authority", "resorts"];
+    const expected = [...head, ...GOLD_STANDARD_SECTION_ORDER.filter((k) => !["dmc", "credentials", "team", "modules", ...head].includes(k))];
+    expect(p.hero.map((h) => h.image)).toEqual(["dricaLondon", "orlandoMagicKingdom", "dricaJapan"]);
+    expect(p.hideConciergeActions).toBe(true);
     expect(resolveSections(p.sections).map(s => s.key)).toEqual(expected);
     expect(p.hero).toHaveLength(3); expect(p.modules).toHaveLength(6);
     expect(p.requestCenter).toBeDefined(); expect(p.destinations).toHaveLength(5);
