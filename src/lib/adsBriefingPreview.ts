@@ -1175,7 +1175,8 @@ export const DRICA_PRESENTATION_PROFILE: AgencySiteProfile = {
     newsletter: { kicker: "NOVIDADES DRICA VIAGENS", title: "Está pronto para o seu próximo cartão de embarque?", subtitle: "Destinos em alta como Japão, Marrocos, Albânia, Vietnã e Nordeste do Brasil. Formulário de demonstração: nenhum dado é enviado ou cadastrado.", cta: "Conhecer novidades" },
     avaliacoes: { kicker: "AVALIAÇÕES NO GOOGLE", title: "O que dizem os clientes da Drica", subtitle: "Avaliações reais publicadas no perfil da Drica Viagens no Google." },
   },
-  footer: DRICA_VIAGENS_PREVIEW_PROFILE.footer,
+  // Rodapé enxuto pedido por Fernando (29/10/2026): sem descrição, horário, cidade e telefone.
+  footer: { ...DRICA_VIAGENS_PREVIEW_PROFILE.footer, descriptionHidden: true, hours: undefined, showLocation: false, phoneHidden: true, whatsappLabel: "Fale Conosco" },
   newsletterMedia: { src: bardelliNewsletterPhoto, alt: "Praia de águas claras — imagem ilustrativa de viagem" },
   socialStrip: { title: "Encontre a Drica no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/dricaviagens" }] },
   seo: { title: "Apresentação completa — Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins. Apresentação técnica sem envios." },
