@@ -1148,10 +1148,7 @@ const karibuBaseline = buildGoldStandardProfile("karibuBriefing21", {
     concierge: { kicker: "COMO FUNCIONA", title: "Do primeiro contato ao pós-venda", subtitle: "Uma jornada acompanhada em cada etapa." },
     faq: { title: "Dúvidas frequentes" },
   },
-  socialStrip: {
-    title: "Siga a Karibu Viagens",
-    links: [{ network: "instagram", url: "https://www.instagram.com/" }],
-  },
+  // Instagram informado só pelo nome ("Karibu Viagens"), sem @ confirmado: sem link.
   footer: {
     description: "Cruzeiros, destinos internacionais e nacionais, desde 2011, em Guarulhos (SP).",
     whatsapp: "(11) 94757-7307",
