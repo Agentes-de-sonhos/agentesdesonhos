@@ -32,9 +32,63 @@ export interface AgencyRequestRow {
   created_at: string;
 }
 
-/** Link direto para a oportunidade no CRM (a autorização é validada na tela). */
-export function opportunityDeepLink(opportunityId: string | null): string {
+/**
+ * Link direto para a oportunidade no CRM (a autorização é validada na tela).
+ * Com `agencyHost` (domínio real da agência, ativo e com portal de gestão),
+ * aponta para o CRM do próprio site; caso contrário, usa o app principal.
+ */
+export function opportunityDeepLink(opportunityId: string | null, agencyHost?: string | null): string {
+  const host = normalizeAgencyHost(agencyHost);
+  if (host) {
+    const base = `https://${host}/gestao/crm/funil`;
+    return opportunityId ? `${base}?opportunity=${opportunityId}` : base;
+  }
   return opportunityId ? `${APP_BASE}/crm?opportunity=${opportunityId}` : `${APP_BASE}/crm`;
+}
+
+/** Só domínios públicos reais; prévias/testes técnicos caem no app principal. */
+export function normalizeAgencyHost(raw?: string | null): string | null {
+  const host = (raw || "").trim().toLowerCase().replace(/:\d+$/, "");
+  if (!host || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(host)) return null;
+  if (/(\.local|\.lovable\.app|\.lovableproject\.com|localhost)$/.test(host)) return null;
+  if (host.endsWith("agentesdesonhos.com.br")) return null;
+  return host;
+}
+
+/**
+ * Resolve, por solicitação, o domínio da agência para o link do CRM. Só vale
+ * quando o hostname de origem pertence à MESMA agência dona da solicitação,
+ * está ativo e tem o portal de gestão habilitado. Qualquer falha → fallback.
+ */
+// deno-lint-ignore no-explicit-any
+async function resolveAgencyHosts(supabase: any, requestIds: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (requestIds.length === 0) return out;
+  try {
+    const { data: reqs } = await supabase
+      .from("agency_site_requests")
+      .select("id, hostname, agency_user_id")
+      .in("id", requestIds);
+    const list = ((reqs ?? []) as Array<{ id: string; hostname: string | null; agency_user_id: string | null }>)
+      .map((r) => ({ ...r, host: normalizeAgencyHost(r.hostname) }))
+      .filter((r) => r.host && r.agency_user_id);
+    if (list.length === 0) return out;
+    const { data: domains } = await supabase
+      .from("agency_public_domains")
+      .select("hostname, user_id, is_active, admin_portal_enabled")
+      .in("hostname", [...new Set(list.map((r) => r.host as string))]);
+    const ok = new Set(
+      ((domains ?? []) as Array<{ hostname: string; user_id: string; is_active: boolean; admin_portal_enabled: boolean }>)
+        .filter((d) => d.is_active && d.admin_portal_enabled)
+        .map((d) => `${d.hostname.toLowerCase()}|${d.user_id}`),
+    );
+    for (const r of list) {
+      if (ok.has(`${r.host}|${r.agency_user_id}`)) out.set(r.id, r.host as string);
+    }
+  } catch (e) {
+    console.error(`[agency-request-emails] host-resolve-error err=${(e as Error).message}`);
+  }
+  return out;
 }
 
 function detailRows(details: Record<string, string> | null): Array<[string, string]> {
