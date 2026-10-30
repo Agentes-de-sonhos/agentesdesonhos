@@ -100,6 +100,8 @@ import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
+import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
+import { deriveTertiaryColor } from "@/lib/brandTheme";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
 export const ADS_PREVIEW_PATH = `/ads-briefing-preview/${ADS_PREVIEW_JOB_ID}`;
@@ -1029,6 +1031,146 @@ delete curtiViagensBaseline.credentials;
 delete curtiViagensBaseline.team;
 export const CURTI_VIAGENS_PREVIEW_PROFILE: AgencySiteProfile = curtiViagensBaseline;
 
+export const KARIBU_PREVIEW_JOB_ID = "briefing-21-v1";
+export const KARIBU_PREVIEW_PATH = `/ads-briefing-preview/${KARIBU_PREVIEW_JOB_ID}`;
+/**
+ * Host sintético exclusivo. A busca exata por CNPJ feita pela automação não
+ * encontrou perfil cadastrado: nenhuma associação por nome, nenhum user_id
+ * real, domínio, conta ou tenant. Vinculação futura ao cadastro real PENDENTE.
+ */
+export const KARIBU_PREVIEW_HOST = "briefing-21-v1.preview.local";
+
+export const KARIBU_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-000000000021",
+  agency_slug: "",
+  public_slug: null,
+  hostname: KARIBU_PREVIEW_HOST,
+  is_primary: false,
+  agency_name: "Karibu Viagens e Turismo",
+  owner_name: "Roseli Monteiro da Silva",
+  logo_url: karibuLogo.url,
+  cover_image_url: null,
+  primary_color: "#394F76",
+  secondary_color: "#39C2D4",
+  secondary_auto: false,
+  // Terciária suave derivada da primária pelo helper compartilhado.
+  tertiary_color: deriveTertiaryColor("#394F76"),
+  tertiary_auto: false,
+  on_secondary_color: null,
+  phone: null,
+  city: "Guarulhos",
+  state: "SP",
+  bio: null,
+  cnpj: null,
+  whatsapp_group_url: null,
+};
+
+const karibuBaseline = buildGoldStandardProfile("karibuBriefing21", {
+  navDensity: "compact",
+  visaHome: false,
+  featuredExperience: undefined,
+  nav: [
+    { label: "Início", to: "/" },
+    { label: "Especialidades", to: "/#assinatura" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Sobre", to: "/#sobre" },
+    { label: "Dúvidas", to: "/#faq" },
+  ],
+  sections: {
+    dmc: { enabled: false },
+    offers: { enabled: false },
+    credentials: { enabled: false },
+    team: { enabled: false },
+    testimonials: { enabled: false },
+    avaliacoes: { enabled: false },
+    newsletter: { enabled: false },
+  },
+  heroPresentation: {
+    kicker: "GUARULHOS · SP · DESDE 2011",
+    overlay: "strongLeft",
+  },
+  hero: [
+    { title: "Segurança e suporte antes, durante e depois da viagem", subtitle: "Planejamento detalhado e acompanhamento próximo em cada etapa.", image: "heroAirportTraveler", order: 1, enabled: true },
+    { title: "Cruzeiros escolhidos com cuidado", subtitle: "Orientação para navio, cabine e itinerário de acordo com quem viaja.", image: "cruzeiro", order: 2, enabled: true },
+    { title: "Do Nordeste à Europa, passando por Orlando", subtitle: "Destinos nacionais e internacionais com atendimento pela proprietária.", image: "heroVarenna", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "CRUZEIROS · INTERNACIONAIS · NACIONAIS",
+    title: "Segurança e suporte antes, durante e depois da viagem.",
+    text: "A Karibu Viagens e Turismo atende públicos diversos em cruzeiros, destinos internacionais e destinos nacionais, com planejamento detalhado, suporte durante a viagem e acompanhamento pós-venda.",
+  },
+  destinations: [
+    { key: "brasil", image: "resort", label: "Brasil", title: "Brasil e Nordeste", text: "Destinos nacionais, com atenção especial ao Nordeste.", service: "pacotes", enabled: true, order: 1 },
+    { key: "europa", image: "heroVarenna", label: "Europa", title: "Europa", text: "Roteiros planejados em detalhe para conhecer a Europa.", service: "pacotes", enabled: true, order: 2 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: "Navio, cabine e itinerário escolhidos para o perfil de quem viaja.", service: "cruzeiros", enabled: true, order: 3 },
+    { key: "america-do-sul", image: "europa", label: "América do Sul", title: "América do Sul", text: "Destinos sul-americanos com planejamento e suporte.", service: "pacotes", enabled: true, order: 4 },
+    { key: "eua-canada", image: "orlandoMagicKingdom", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Orlando e outros destinos norte-americanos com planejamento detalhado.", service: "pacotes", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "cruzeiros", title: "Cruzeiros", text: "Uma das especialidades da agência, com orientação em cada escolha.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 1 },
+    { key: "orlando", title: "Orlando", text: "Planejamento da viagem aos parques com suporte antes e durante a viagem.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 2 },
+    { key: "nordeste", title: "Nordeste", text: "Destinos nacionais com atendimento próximo.", service: "pacotes", image: "resort", enabled: true, order: 3 },
+    { key: "europa", title: "Europa", text: "Destinos internacionais com planejamento detalhado.", service: "pacotes", image: "heroVarenna", enabled: true, order: 4 },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM",
+    title: "Roseli Monteiro da Silva, diretora da Karibu Viagens.",
+    text: "A Karibu Viagens e Turismo atua desde 2011 em Guarulhos (SP), com cruzeiros, destinos internacionais e destinos nacionais.\n\nO atendimento é feito pela própria diretora e proprietária, de forma mista conforme a viagem: por WhatsApp, por e-mail ou presencialmente.\n\nQuando surge algum imprevisto, a agência acompanha a situação junto aos fornecedores envolvidos e mantém o viajante informado, antes, durante e depois da viagem.",
+    badge: { value: "Desde 2011", label: "Karibu Viagens" },
+    media: "hidden",
+    showLocation: true,
+    ownerName: "Roseli Monteiro da Silva",
+  },
+  differentials: [
+    { title: "Atendimento pela proprietária", text: "Você é atendido pela diretora e especialista da agência.", icon: "consultivo" },
+    { title: "Planejamento detalhado", text: "Cada etapa da viagem é organizada com antecedência.", icon: "conferido" },
+    { title: "Suporte durante a viagem", text: "Acompanhamento junto aos fornecedores enquanto você viaja.", icon: "acompanhamento" },
+    { title: "Acompanhamento pós-venda", text: "O contato continua depois do retorno.", icon: "fornecedores" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa inicial por WhatsApp, e-mail ou presencialmente.",
+    "Planejamento detalhado, orçamento e reservas.",
+    "Suporte durante a viagem, com acompanhamento junto aos fornecedores.",
+    "Acompanhamento pós-venda após o retorno.",
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "O atendimento é misto, conforme a viagem: por WhatsApp, por e-mail ou presencialmente, feito pela diretora e proprietária." },
+    { q: "Quais destinos a agência atende?", a: "Cruzeiros, destinos internacionais e nacionais, com prioridade para Brasil, Europa, América do Sul, Estados Unidos e Canadá." },
+    { q: "Há suporte durante a viagem?", a: "Sim. A agência oferece suporte durante a viagem e acompanha a situação junto aos fornecedores quando necessário." },
+    { q: "E depois que eu voltar?", a: "A Karibu faz acompanhamento pós-venda após o retorno." },
+    { q: "Onde fica a agência?", a: "A Karibu Viagens fica em Guarulhos (SP) e atende também pelos canais digitais." },
+  ],
+  copy: {
+    destinations: { title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Europa, cruzeiros, América do Sul, Estados Unidos e Canadá." },
+    modules: { title: "Especialidades", subtitle: "Cruzeiros, Orlando, Nordeste e Europa." },
+    differentials: { title: "Por que viajar com a Karibu", subtitle: "Segurança e suporte antes, durante e depois da viagem." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Do primeiro contato ao pós-venda", subtitle: "Uma jornada acompanhada em cada etapa." },
+    faq: { title: "Dúvidas frequentes" },
+  },
+  socialStrip: {
+    title: "Siga a Karibu Viagens",
+    links: [{ network: "instagram", url: "https://www.instagram.com/" }],
+  },
+  footer: {
+    description: "Cruzeiros, destinos internacionais e nacionais, desde 2011, em Guarulhos (SP).",
+    whatsapp: "(11) 94757-7307",
+    phone: "(11) 94757-7307",
+    email: "roseli_mtbr@hotmail.com",
+    instagramLabel: "Karibu Viagens",
+    address: "Guarulhos/SP",
+    showLocation: true,
+  },
+  seo: {
+    title: "Prévia para revisão — Karibu Viagens e Turismo",
+    description: "Prévia técnica revisável do site Karibu Viagens e Turismo.",
+  },
+}, "Karibu Viagens e Turismo");
+delete karibuBaseline.dmc;
+delete karibuBaseline.credentials;
+delete karibuBaseline.team;
+export const KARIBU_PREVIEW_PROFILE: AgencySiteProfile = karibuBaseline;
+
 /**
  * Landing Xcaret na prévia O Mundo em Cores: sem fotos ou selos da Juliana
  * (fotos oficiais dos parques como temporárias) e sem alegações de visita
@@ -1315,6 +1457,14 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     profile: CURTI_VIAGENS_PREVIEW_PROFILE,
     notice: "Prévia para revisão — sem publicação · ações desativadas",
     documentTitle: "Prévia para revisão — Curti Viagens",
+    realAgency: true,
+  },
+  [KARIBU_PREVIEW_JOB_ID]: {
+    jobId: KARIBU_PREVIEW_JOB_ID,
+    info: KARIBU_PREVIEW_INFO,
+    profile: KARIBU_PREVIEW_PROFILE,
+    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    documentTitle: "Prévia para revisão — Karibu Viagens e Turismo",
     realAgency: true,
   },
 };

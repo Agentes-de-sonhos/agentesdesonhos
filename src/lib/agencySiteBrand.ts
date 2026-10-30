@@ -23,6 +23,7 @@ import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
+import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
 import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.json";
 import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
 import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.json";
@@ -52,6 +53,7 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   /** Briefing 19 — logo enviado, limitado ao host sintético da prévia. */
   "briefing-19-v1.preview.local": bagagemNaMaoLogo.url,
   "briefing-20-v1.preview.local": curtiViagensLogo.url,
+  "briefing-21-v1.preview.local": karibuLogo.url,
   "bardelliviagens.com.br": bardelliLogo.url,
   "www.bardelliviagens.com.br": bardelliLogo.url,
 };
@@ -100,6 +102,7 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "briefing-17-v1.preview.local",
   "briefing-19-v1.preview.local",
   "briefing-20-v1.preview.local",
+  "briefing-21-v1.preview.local",
   "bardelliviagens.com.br",
   "www.bardelliviagens.com.br",
 ]);
