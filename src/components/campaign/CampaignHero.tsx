@@ -19,10 +19,6 @@ export function CampaignHero() {
         <h1 id="campaign-title">Oportunidades de <span>Novembro</span></h1>
         <p className="campaign-hero-subtitle">Destinos incríveis, condições especiais e experiências que ficam para sempre.</p>
         <ul className="campaign-hero-highlights">{highlights.map(item => <li key={item.text}><item.icon aria-hidden="true" /><span>{item.text}</span></li>)}</ul>
-        <div className="campaign-hero-actions">
-          <Button asChild size="lg"><a href="#oportunidades">Ver oportunidades <ArrowRight /></a></Button>
-          <Button asChild size="lg" variant="outline"><a href="#radar">Planejar minha viagem <ArrowRight /></a></Button>
-        </div>
       </div>
       <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" className="campaign-emblem" width={1254} height={1254} />
     </div>
