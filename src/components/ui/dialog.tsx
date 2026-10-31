@@ -38,10 +38,12 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
     /** Esconde o X padrão quando o conteúdo já traz o próprio fechar. */
     hideClose?: boolean;
+    /** Classes extras do fundo escuro (ex.: opacidade própria). */
+    overlayClassName?: string;
   }
->(({ className, children, hideClose = false, ...props }, ref) => (
+>(({ className, children, hideClose = false, overlayClassName, ...props }, ref) => (
   <ScopedDialogPortal>
-    <DialogOverlay />
+    <DialogOverlay className={overlayClassName} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
