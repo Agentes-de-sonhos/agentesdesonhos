@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import art from "@/assets/whitelabel/mundo-planejar-popup-v2.png.asset.json";
+import art from "@/assets/whitelabel/mundo-planejar-popup-v3.png.asset.json";
 import type { CampaignOffer } from "./novemberCampaignData";
 
 /** WhatsApp oficial da O Mundo em Cores (rodapé do site). */
@@ -19,9 +19,9 @@ export function PlanChoiceDialog({ offer, onClose, onBuyOnline }: { offer: Campa
       <DialogDescription className="sr-only">Escolha entre comprar online ou falar com a Vanessa pelo WhatsApp.</DialogDescription>
       {offer && <div className="relative overflow-hidden rounded-[28px] shadow-2xl">
         <img src={art.url} alt="Vanessa apresentando duas opções: Compre Online ou Fale Comigo" className="block h-auto w-full" />
-        <button type="button" aria-label="Compre Agora" className={hot} style={{ left: "5%", top: "57%", width: "25.5%", height: "8.5%" }} onClick={() => onBuyOnline(offer)} />
-        <button type="button" aria-label="Fale Comigo pelo WhatsApp" className={hot} style={{ left: "69.7%", top: "59.3%", width: "25.5%", height: "8.5%" }} onClick={() => { window.open(offerWhatsappUrl(offer), "_blank", "noopener"); onClose(); }} />
-        <button type="button" aria-label="Fechar" className={hot} style={{ left: "93.5%", top: "1.5%", width: "5%", height: "7%" }} onClick={onClose} />
+        <button type="button" aria-label="Compre Agora" className={hot} style={{ left: "6.2%", top: "56.9%", width: "24.5%", height: "8.6%" }} onClick={() => onBuyOnline(offer)} />
+        <button type="button" aria-label="Fale Comigo pelo WhatsApp" className={hot} style={{ left: "70.4%", top: "58.9%", width: "22.4%", height: "8.6%" }} onClick={() => { window.open(offerWhatsappUrl(offer), "_blank", "noopener"); onClose(); }} />
+        <button type="button" aria-label="Fechar" className={hot} style={{ left: "93.6%", top: "1.6%", width: "5%", height: "7.2%" }} onClick={onClose} />
       </div>}
     </DialogContent>
   </Dialog>;
