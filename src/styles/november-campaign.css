@@ -358,3 +358,7 @@
   .campaign-hero h1 { font-size: 48px; }
   .campaign-hero h1 span { font-size: 76px; }
 }
+@media (min-width: 768px) {
+  .campaign-hero-inner { align-items: flex-start; }
+  .campaign-emblem { align-self: flex-start; top: 0; }
+}
