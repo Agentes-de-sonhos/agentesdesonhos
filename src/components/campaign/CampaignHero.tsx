@@ -1,6 +1,7 @@
 import { ArrowRight, CreditCard, Plane, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { campaignImages } from "./novemberCampaignData";
+import emblem from "@/assets/campaign/november-emblem.png.asset.json";
 
 const highlights = [
   { icon: Plane, text: "Destinos selecionados para novembro" },
@@ -23,7 +24,7 @@ export function CampaignHero() {
           <Button asChild size="lg" variant="outline"><a href="#radar">Planejar minha viagem <ArrowRight /></a></Button>
         </div>
       </div>
-      <div className="campaign-black-friday campaign-aproveite" aria-label="Aproveite: viagens incríveis em novembro"><strong>APROVEITE</strong><span>viagens incríveis<br />em novembro</span></div>
+      <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" className="campaign-emblem" width={1254} height={1254} />
     </div>
   </section>;
 }

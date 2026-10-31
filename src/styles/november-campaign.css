@@ -342,3 +342,11 @@
   .campaign-aproveite span { font-size: 12px; }
   .campaign-aproveite br { display: none; }
 }
+
+/* Emblema + degradê preto 50% nas duas laterais */
+.campaign-hero-veil { background: linear-gradient(90deg, rgb(0 0 0 / .5) 0%, transparent 35%, transparent 65%, rgb(0 0 0 / .5) 100%) !important; }
+.campaign-emblem { align-self: center; width: 300px; height: auto; flex-shrink: 0; filter: drop-shadow(0 10px 24px rgb(0 0 0 / .35)); }
+@media (max-width: 767px) {
+  .campaign-hero-veil { background: linear-gradient(90deg, rgb(0 0 0 / .5) 0%, rgb(0 0 0 / .3) 50%, rgb(0 0 0 / .5) 100%) !important; }
+  .campaign-emblem { align-self: flex-start; width: 150px; }
+}
