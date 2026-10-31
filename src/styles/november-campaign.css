@@ -350,3 +350,11 @@
   .campaign-hero-veil { background: linear-gradient(90deg, rgb(0 0 0 / .8) 0%, rgb(0 0 0 / .3) 50%, rgb(0 0 0 / .8) 100%) !important; }
   .campaign-emblem { align-self: flex-start; width: 150px; position: relative; left: -40px; top: -10px; }
 }
+
+/* Ajuste: degradê até o fim do texto, bloco mais alto, títulos menores */
+@media (min-width: 768px) {
+  .campaign-hero-veil { background: linear-gradient(90deg, rgb(0 0 0 / .8) 0%, rgb(0 0 0 / .6) 38%, transparent 55%, transparent 65%, rgb(0 0 0 / .8) 100%) !important; }
+  .campaign-hero-inner { padding-top: 96px; }
+  .campaign-hero h1 { font-size: 48px; }
+  .campaign-hero h1 span { font-size: 76px; }
+}
