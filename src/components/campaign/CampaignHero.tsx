@@ -1,5 +1,4 @@
-import { ArrowRight, CreditCard, Plane, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CreditCard, Plane, ShieldCheck } from "lucide-react";
 import { campaignImages } from "./novemberCampaignData";
 import emblem from "@/assets/campaign/november-emblem.png.asset.json";
 
