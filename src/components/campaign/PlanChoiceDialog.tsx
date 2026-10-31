@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import art from "@/assets/whitelabel/mundo-planejar-popup-v2.png.asset.json";
+import art from "@/assets/whitelabel/mundo-planejar-popup-v3.png.asset.json";
 import type { CampaignOffer } from "./novemberCampaignData";
 
 /** WhatsApp oficial da O Mundo em Cores (rodapé do site). */
