@@ -16,6 +16,7 @@ import { offerInChannel } from "@/lib/offers";
 import { campaignImages } from "@/components/campaign/novemberCampaignData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { PlanChoiceDialog } from "@/components/campaign/PlanChoiceDialog";
 import NotFound from "@/pages/NotFound";
 import "@/styles/november-campaign.css";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -33,6 +34,7 @@ export default function NovemberCampaignPreview() {
   const [period, setPeriod] = useState("todos");
   const [selected, setSelected] = useState<CampaignOffer | null>(null);
   const [contact, setContact] = useState(false);
+  const [choice, setChoice] = useState<CampaignOffer | null>(null);
   useAgencyFavicon(mundoFavicon.url);
   const { data: publicOffers = [] } = usePublicOffers("omundoemcores.com.br");
   const realOffers = useMemo(() => publicOffers.filter(o => offerInChannel(o, "novembro")).map(o => campaignOfferFromPublic(o, campaignImages.hero)), [publicOffers]);
@@ -41,7 +43,8 @@ export default function NovemberCampaignPreview() {
   if (!allowed) return <BrowserRouter><NotFound /></BrowserRouter>;
   const onSearch = (selection: RadarSelection) => { setCategory(selection.category); setPeriod(selection.period); };
   const offers = filterCampaignOffers(hasReal ? realOffers : novemberOffers, category, period);
-  const onSelectOffer = (offer: CampaignOffer) => { if (offer.real && offer.href) window.location.assign(offer.href); else setSelected(offer); };
+  const onSelectOffer = (offer: CampaignOffer) => setChoice(offer);
+  const onBuyOnline = (offer: CampaignOffer) => { setChoice(null); if (offer.real && offer.href) window.location.assign(offer.href); else setSelected(offer); };
   return <BrowserRouter><div className="november-preview" onClickCapture={event => {
     const anchor = event.target instanceof Element ? event.target.closest("a") : null;
     if (anchor && !anchor.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); setContact(true); }
@@ -57,5 +60,6 @@ export default function NovemberCampaignPreview() {
       </div>
     </AgencySiteLayout>
     <Dialog open={!!selected || contact} onOpenChange={open => { if (!open) { setSelected(null); setContact(false); } }}><DialogContent className="november-campaign campaign-dialog"><DialogHeader><DialogTitle>{selected?.title ?? "Planejar minha viagem"}</DialogTitle><DialogDescription>Esta é uma demonstração visual. Nenhuma solicitação foi enviada e não há contratação disponível.</DialogDescription></DialogHeader>{selected && <><p className="campaign-offer-value">{selected.value}</p><p>Ofertas e valores meramente ilustrativos nesta prévia. Não disponíveis para contratação.</p></>}<Button onClick={() => { setSelected(null); setContact(false); }}>Continuar explorando</Button></DialogContent></Dialog>
+    <PlanChoiceDialog offer={choice} onClose={() => setChoice(null)} onBuyOnline={onBuyOnline} />
   </div></BrowserRouter>;
 }
