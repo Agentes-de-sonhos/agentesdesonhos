@@ -345,10 +345,10 @@
 
 /* Emblema + degradê preto 80% nas duas laterais */
 .campaign-hero-veil { background: linear-gradient(90deg, rgb(0 0 0 / .8) 0%, transparent 35%, transparent 65%, rgb(0 0 0 / .8) 100%) !important; }
-.campaign-emblem { align-self: center; width: 300px; height: auto; flex-shrink: 0; position: relative; left: -40px; top: -10px; filter: drop-shadow(0 10px 24px rgb(0 0 0 / .35)); }
+.campaign-emblem { align-self: center; width: 225px; height: auto; flex-shrink: 0; position: relative; left: -40px; top: -10px; filter: drop-shadow(0 10px 24px rgb(0 0 0 / .35)); }
 @media (max-width: 767px) {
   .campaign-hero-veil { background: linear-gradient(90deg, rgb(0 0 0 / .8) 0%, rgb(0 0 0 / .3) 50%, rgb(0 0 0 / .8) 100%) !important; }
-  .campaign-emblem { align-self: flex-start; width: 150px; position: relative; left: -40px; top: -10px; }
+  .campaign-emblem { align-self: flex-start; width: 112px; position: relative; left: -40px; top: -10px; }
 }
 
 /* Ajuste: degradê até o fim do texto, bloco mais alto, títulos menores */
