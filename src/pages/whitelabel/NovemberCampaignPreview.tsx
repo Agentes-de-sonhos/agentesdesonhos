@@ -41,7 +41,8 @@ export default function NovemberCampaignPreview() {
   if (!allowed) return <BrowserRouter><NotFound /></BrowserRouter>;
   const onSearch = (selection: RadarSelection) => { setCategory(selection.category); setPeriod(selection.period); };
   const offers = filterCampaignOffers(hasReal ? realOffers : novemberOffers, category, period);
-  const onSelectOffer = (offer: CampaignOffer) => { if (offer.real && offer.href) window.location.assign(offer.href); else setSelected(offer); };
+  const onSelectOffer = (offer: CampaignOffer) => setChoice(offer);
+  const onBuyOnline = (offer: CampaignOffer) => { setChoice(null); if (offer.real && offer.href) window.location.assign(offer.href); else setSelected(offer); };
   return <BrowserRouter><div className="november-preview" onClickCapture={event => {
     const anchor = event.target instanceof Element ? event.target.closest("a") : null;
     if (anchor && !anchor.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); setContact(true); }
