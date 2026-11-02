@@ -1,6 +1,6 @@
 /** Modelo declarativo único para circuitos pela Europa. Cadastre um novo circuito
  * criando um arquivo de dados e registrando-o em `src/lib/circuits/index.ts`. */
-export type CircuitInclusionIcon = "hotel" | "tours" | "meals" | "bus" | "transfer" | "guide";
+export type CircuitInclusionIcon = "hotel" | "tours" | "meals" | "bus" | "transfer" | "guide" | "boat" | "flight";
 
 export interface CircuitDay {
   day: number;

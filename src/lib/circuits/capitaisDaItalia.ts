@@ -27,7 +27,7 @@ export const CAPITAIS_DA_ITALIA: CircuitTour = {
     { icon: "hotel", title: "6 noites de hospedagem", text: "Hotéis previstos com café da manhã tipo buffet." },
     { icon: "transfer", title: "Traslado de chegada", text: "Recepção e traslado ao hotel em Roma." },
     { icon: "tours", title: "Visitas panorâmicas", text: "Roma, Florença, Veneza e Assis." },
-    { icon: "transfer", title: "Barco em Veneza", text: "Tronchetto / Praça de São Marcos / Tronchetto." },
+    { icon: "boat", title: "Barco em Veneza", text: "Tronchetto / Praça de São Marcos / Tronchetto." },
     { icon: "transfer", title: "Traslados especiais", text: "Traslado noturno ao Trastevere, em Roma, e ao Piazzale Michelangelo, em Florença." },
     { icon: "tours", title: "Entradas incluídas", text: "Fábrica de cristal de Murano, em Veneza, e Basílica de São Francisco, em Assis." },
     { icon: "guide", title: "Seguro básico de viagem", text: "Não atende ao Tratado de Schengen: é necessário contratar um seguro viagem à parte." },
