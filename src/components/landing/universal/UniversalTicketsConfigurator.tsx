@@ -73,7 +73,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   const { submit, state, error, reset } = useAgencySiteRequest(hostname);
   const isJu = isJuUniversalProfile(hostname);
   const isMundo = resolveSiteProfile(hostname ?? "").key === "mundoEmCoresBriefing14";
-  const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20"].includes(resolveSiteProfile(hostname ?? "").key as string);
+  const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20", "essyaCurtiPreview", "essyaOfficial"].includes(resolveSiteProfile(hostname ?? "").key as string);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);

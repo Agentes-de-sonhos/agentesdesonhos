@@ -76,7 +76,7 @@ describe("tipografia compartilhada dos sites white label", () => {
     expect(resolveSiteProfile("destinoscomaju.com.br").destinations?.[0].title).toBe("Europa no seu ritmo");
     expect(resolveSiteTheme("destinoscomaju.com.br")).toBe("roseEditorial");
     expect(resolveSiteTheme("paraisoviagens.com")).toBe("luxuryEditorial");
-    expect(resolveSiteTheme("www.essyatur.com.br")).toBe("essyaEditorial");
+    expect(resolveSiteTheme("www.essyatur.com.br")).toBe("siteBaseEditorial");
     expect(resolveSiteTheme("100limites.tur.br")).toBe("travelEditorial");
   });
 });

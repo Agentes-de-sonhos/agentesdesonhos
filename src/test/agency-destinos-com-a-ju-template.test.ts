@@ -81,7 +81,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     expect(homeSource).toContain("playsInline");
     expect(homeSource).toContain("muted");
 
-    for (const host of ["paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+    for (const host of ["paraisoviagens.com", "sitelab.local"]) {
       expect(resolveSiteProfile(host).authority?.video).toBeUndefined();
     }
   });
@@ -113,7 +113,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
   });
 
   it("preserva o padrão interno compartilhado nos demais perfis", () => {
-    for (const host of ["paraisoviagens.com", "www.essyatur.com.br", "sitelab.local"]) {
+    for (const host of ["paraisoviagens.com", "sitelab.local"]) {
       expect(resolveSiteProfile(host).requestCenter?.titlePlacement).not.toBe("above-card");
     }
   });

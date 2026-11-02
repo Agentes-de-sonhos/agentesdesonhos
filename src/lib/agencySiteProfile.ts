@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -70,6 +70,8 @@ export type AgencySiteProfileKey =
   | "karibuBriefing21"
   /** Prévia Essyatur na estrutura da Curti (host sintético). */
   | "essyaCurtiPreview"
+  /** Essyatur — site oficial em essyatur.com.br (estrutura da Curti). */
+  | "essyaOfficial"
 ;
 
 /** Seção editorial curta de posicionamento (genérica, reutilizável). */
@@ -150,6 +152,8 @@ export interface AgencyFooterContent {
   cnpj?: string;
   /** Exibe a cidade/UF do cadastro quando não há endereço editorial. */
   showLocation?: boolean;
+  /** Mantém os itens legais visíveis, mas sem clique (opt-in por tenant). */
+  legalLinksDisabled?: boolean;
 }
 
 
@@ -1187,7 +1191,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "sitelab.local": "siteLabBase",
   /** Host técnico de prévia da Casa Nova Tur (o domínio real não é vinculado). */
   "casanovatur.demo.local": "casaNovaCurated",
-  "www.essyatur.com.br": "essyaCurated",
+  "essyatur.com.br": "essyaOfficial",
+  "www.essyatur.com.br": "essyaOfficial",
   /** Host sintético da prévia ADS — nunca aponta para tenants reais. */
   "ads-email-test-v1.demo.local": "adsEmailTestV1",
   /** Host sintético do rascunho briefing-14 — domínio público ainda não vinculado. */
@@ -1237,6 +1242,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   curtiViagensOfficial: CURTI_VIAGENS_OFFICIAL_PROFILE,
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
+  essyaOfficial: ESSYA_OFFICIAL_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
