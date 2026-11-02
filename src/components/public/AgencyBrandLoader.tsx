@@ -34,7 +34,7 @@ export function AgencyBrandLoader({ logoUrl, agencyName, cacheKey, className }: 
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-background",
+        "fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-[hsl(0_0%_100%)]",
         className,
       )}
       role="status"

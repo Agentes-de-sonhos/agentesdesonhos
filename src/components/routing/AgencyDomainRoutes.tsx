@@ -74,7 +74,7 @@ function DmcLegacyRedirect({ anchor }: { anchor: string }) {
 
 /** Mesma camada fixa do 1º carregamento (AgencyDomainGate): o logo não salta. */
 const Fallback = () => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-[hsl(0_0%_100%)]">
     <AgencyBrandSpinner size="lg" />
   </div>
 );
