@@ -7,6 +7,7 @@ const FLAG_CODES: Record<string, string> = {
   Espanha: "es", Portugal: "pt", Inglaterra: "gb-eng", Montenegro: "me", Croácia: "hr", França: "fr",
   Argentina: "ar", Chile: "cl", Paraguai: "py", Bahamas: "bs", "República Dominicana": "do",
   Colômbia: "co", Indonésia: "id", Vaticano: "va", Eslovênia: "si", "Ilhas Virgens Britânicas": "vg",
+  Jamaica: "jm", Cuba: "cu", Aruba: "aw", Holanda: "nl", Suécia: "se", Finlândia: "fi", Uruguai: "uy", "Costa Rica": "cr",
 };
 
 /** Compact display labels so every card keeps the same height. */
