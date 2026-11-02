@@ -123,7 +123,7 @@ import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santor
 import mundoGreciaVanessa from "@/assets/whitelabel/mundo-grecia-vanessa.jpg.asset.json";
 import mundoNclDestaque from "@/assets/whitelabel/mundo-ncl-destaque.webp.asset.json";
 import curtiHolambra from "@/assets/whitelabel/curti/holambra.png.asset.json";
-import essyaMural from "@/assets/whitelabel/essya-mural-destinos.jpg.asset.json";
+import essyaMural from "@/assets/whitelabel/essya-mural-destinos-topo.jpg.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
