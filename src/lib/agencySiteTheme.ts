@@ -36,7 +36,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "www.faeviagens.com.br": "faeEditorial",
   "sitelab.local": "siteBaseEditorial",
   "casanovatur.demo.local": "casaNovaEditorial",
-  "www.essyatur.com.br": "essyaEditorial",
+  "essyatur.com.br": "siteBaseEditorial",
+  "www.essyatur.com.br": "siteBaseEditorial",
   "briefing-14-v1.preview.local": "siteBaseEditorial",
   "omundoemcores.com.br": "siteBaseEditorial",
   "www.omundoemcores.com.br": "siteBaseEditorial",
@@ -116,6 +117,8 @@ export function siteThemeRootClass(hostname?: string | null): string {
           : h === "briefing-20-v1.preview.local" || h === "curtiviagens.com.br" || h === "www.curtiviagens.com.br"
           ? " wl-curti"
           : h === "essya-curti-v1.preview.local"
+          ? " wl-curti wl-essya-curti"
+          : h === "essyatur.com.br" || h === "www.essyatur.com.br"
           ? " wl-curti wl-essya-curti"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;

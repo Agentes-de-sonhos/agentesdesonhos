@@ -467,12 +467,16 @@ export function AgencyFooter({
               {footer?.cnpj && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.85)]">CNPJ {footer.cnpj}</li>}
               {legalLinks.map((l) => (
                 <li key={l.to}>
-                  <a
-                    href={agencySiteHref(l.to)}
-                    className="inline-block py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
-                  >
-                    {l.label}
-                  </a>
+                  {footer?.legalLinksDisabled ? (
+                    <span aria-disabled="true" className="inline-block cursor-default select-none py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.55)]">{l.label}</span>
+                  ) : (
+                    <a
+                      href={agencySiteHref(l.to)}
+                      className="inline-block py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                    >
+                      {l.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -500,7 +504,7 @@ export function AgencyFooter({
      */
     // 100 Limites: mesmo acabamento limpo da Destinos com a Ju, sobre o degradê bege.
     // Bardelli (apresentação): mesmo rodapé em degradê branco → cinza claro do tema.
-    const sandPlainFooter = profile.key === "editorialDmc" || profile.key === "bardelliPresentation" || profile.key === "dricaPresentation" || profile.key === "dricaOfficial" || profile.key === "curtiViagensBriefing20" || profile.key === "curtiViagensOfficial";
+    const sandPlainFooter = profile.key === "editorialDmc" || profile.key === "bardelliPresentation" || profile.key === "dricaPresentation" || profile.key === "dricaOfficial" || profile.key === "curtiViagensBriefing20" || profile.key === "curtiViagensOfficial" || profile.key === "essyaCurtiPreview" || profile.key === "essyaOfficial";
     const legalPreview = isLimites100LegalPreviewActive(info.hostname);
     const plainFooter = profile.key === "editorialRose" || sandPlainFooter;
     const footerShellClass = sandPlainFooter
@@ -643,12 +647,16 @@ export function AgencyFooter({
               {footer?.cnpj && <li className="text-[15px] text-[hsl(var(--wl-ink)_/_0.8)]">CNPJ {footer.cnpj}</li>}
               {legalLinks.map((l) => (
                 <li key={l.to}>
-                  <a
-                    href={agencySiteHref(l.to)}
-                    className="inline-block py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
-                  >
-                    {l.label}
-                  </a>
+                  {footer?.legalLinksDisabled ? (
+                    <span aria-disabled="true" className="inline-block cursor-default select-none py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.55)]">{l.label}</span>
+                  ) : (
+                    <a
+                      href={agencySiteHref(l.to)}
+                      className="inline-block py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
+                    >
+                      {l.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>

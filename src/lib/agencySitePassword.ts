@@ -13,9 +13,7 @@ import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 
 /** Ativar/desativar aqui. owner user_id → rótulo interno. */
-export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
-  "4d5a7157-59b6-4329-8768-7f8895e8ce92": "Essyatur",
-};
+export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {};
 
 export const SITE_UNLOCK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
