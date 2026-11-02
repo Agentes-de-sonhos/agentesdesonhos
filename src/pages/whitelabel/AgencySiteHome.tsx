@@ -1,4 +1,5 @@
 import curtiCaribeCancun from "@/assets/whitelabel/curti-caribe-cancun.png.asset.json";
+import curtiFozIguacu from "@/assets/whitelabel/curti/curti-foz-iguacu.png.asset.json";
 import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
 import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
 import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
