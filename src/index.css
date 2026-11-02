@@ -1535,7 +1535,14 @@ body[data-booking-selection-bar] {
   letter-spacing: -0.02em;
 }
 
+/* Curti Viagens: faixa de cruzeiros no azul royal do logotipo (#2502FF), texto branco. */
+.wl-curti .wl-alt-surface > #autoridade { background-color: #2502FF !important; background-image: none !important; }
+.wl-curti #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: #E5E1FF !important; }
+.wl-curti #autoridade button.bg-primary { background-color: #FFFFFF !important; color: #2502FF !important; }
+.wl-curti #autoridade button.bg-primary:hover { background-color: #E5E1FF !important; }
+
 /* Complete technical presentations only: preserve the reference dark cruise band
+
    against the shared alternating-surface reset; clip off-canvas carousels. */
 :is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) { overflow-x: clip; }
 :is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) .wl-presentation-dark > #autoridade {
