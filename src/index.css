@@ -1555,7 +1555,7 @@ body[data-booking-selection-bar] {
 .wl-curti .wl-newsletter-card h2 { color: #fff !important; }
 .wl-curti .wl-newsletter-card p:not(:first-child) { color: rgb(255 255 255 / 0.8) !important; }
 .wl-curti .wl-newsletter-card .wl-kicker, .wl-curti .wl-newsletter-card .wl-kicker svg { color: #fff !important; }
-.wl-curti .wl-newsletter-cta { background-color: #2502FF !important; border: 1px solid rgb(255 255 255 / 0.85) !important; color: #fff !important; }
+.wl-curti .wl-newsletter-cta { background-color: #2502FF !important; border: 0 !important; box-shadow: none !important; outline: none !important; color: #fff !important; }
 .wl-curti .wl-newsletter-cta svg { color: #fff !important; }
 .wl-curti .wl-newsletter-cta:hover { filter: brightness(0.95); }
 .wl-curti .wl-resorts-btn { background-color: #4A7564 !important; color: #fff !important; }
