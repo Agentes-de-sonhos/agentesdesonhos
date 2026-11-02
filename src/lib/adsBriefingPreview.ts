@@ -1595,7 +1595,7 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
     media: "default",
     mediaAlign: "title",
     image: "resort",
-    images: [{ src: essyaCristiane.url, alt: "Cristiane Serro Azul, sócia administradora da Essyatur", position: "center 30%" }],
+    images: [{ src: essyaCristiane.url, alt: "Cristiane Serro Azul, sócia administradora da Essyatur", position: "center 45%" }],
     visitedDestinations: { title: "Países que eu conheci", names: ["Argentina", "Chile", "Estados Unidos", "Inglaterra", "México", "República Dominicana", "Jamaica", "Cuba", "Aruba", "Espanha", "Itália", "França", "Holanda", "Suécia", "Finlândia", "Uruguai", "Costa Rica", "Paraguai"], presentation: "flags" },
     showLocation: true,
     ownerName: "Cristiane Serro Azul",
