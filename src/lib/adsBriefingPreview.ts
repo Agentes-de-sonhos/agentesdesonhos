@@ -977,7 +977,7 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     { key: "caribe-mexico", image: "curtiCaribe", label: "Caribe", title: "Caribe", text: "Praias, resorts e all inclusive para descansar com conforto.", service: "hospedagem", enabled: true, order: 2 },
     { key: "eua-canada", image: "orlandoMagicKingdom", label: "Estados Unidos • Florida", title: "Orlando e Miami", text: "Parques, compras e praias da Flórida com planejamento detalhado.", service: "pacotes", enabled: true, order: 3 },
     { key: "europa", image: "heroVarenna", label: "Europa", title: "Europa", text: "Cidades e paisagens em roteiros personalizados no seu ritmo.", service: "pacotes", enabled: true, order: 4 },
-    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: "Navio, cabine e itinerário escolhidos para o perfil de quem viaja.", service: "cruzeiros", enabled: true, order: 5 },
+    { key: "cruzeiros", image: "curtiCruzeiros", label: "Cruzeiros", title: "Cruzeiros", text: "Navio, cabine e itinerário escolhidos para o perfil de quem viaja.", service: "cruzeiros", enabled: true, order: 5 },
   ],
   modules: [
     { key: "orlando", title: "Orlando em família", text: "Roteiro dia a dia para aproveitar os parques com tranquilidade e todas as idades.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 1 },
