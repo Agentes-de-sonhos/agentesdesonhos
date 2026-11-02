@@ -1538,7 +1538,8 @@ body[data-booking-selection-bar] {
 /* Curti Viagens: faixa de cruzeiros em verde sálvia escuro (#4A7564), texto branco. */
 .wl-curti .wl-alt-surface > #autoridade { background-color: #4A7564 !important; background-image: none !important; }
 .wl-curti #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: #FFFFFF !important; }
-.wl-curti #autoridade button.bg-primary { background-color: #FFFFFF !important; color: #2502FF !important; }
+.wl-curti #autoridade button.bg-primary { background-color: #FFFFFF !important; color: #000000 !important; }
+.wl-curti #autoridade button.bg-primary :is(svg, span, *) { color: #000000 !important; stroke: currentColor; }
 .wl-curti #autoridade button.bg-primary:hover { background-color: #EEF5F2 !important; }
 /* Curti: degradê ultra suave nas seções e no rodapé (todas as páginas). */
 .wl-editorial.wl-site-base.wl-curti { --wl-sand: 245 60% 98.4%; --brand-tertiary: hsl(245 60% 98.4%); }
