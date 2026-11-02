@@ -6,6 +6,7 @@ import certLimites from "@/assets/whitelabel/certificado-cadastur-100-limites.jp
 import certMundo from "@/assets/whitelabel/certificado-cadastur-o-mundo-em-cores.jpg.asset.json";
 import certParaiso from "@/assets/paraiso/certificado-cadastur.pdf.asset.json";
 import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.jpg.asset.json";
+import certCurti from "@/assets/whitelabel/certificado-cadastur-curti.pdf.asset.json";
 
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null) {
@@ -14,8 +15,8 @@ export function cadasturCertificateFor(hostname?: string | null) {
   if (h === "briefing-14-v1.preview.local" || /(^|\.)omundoemcores\.com\.br$/i.test(h)) return { url: certMundo.url, agency: "O Mundo em Cores" };
   if (/(^|\.)paraisoviagens\.com$/i.test(h)) return { url: certParaiso.url, agency: "Paraíso Viagens" };
   if (/100limites/i.test(h)) return { url: certLimites.url, agency: "100 Limites" };
-  // Curti Viagens: selo sem certificado até o PDF chegar (url vazia = só o selo).
-  if (h === "briefing-20-v1.preview.local") return { url: "", agency: "Curti Viagens" };
+  // Curti Viagens: site oficial e prévia técnica compartilham o certificado real (PDF 35.133.431/0001-00).
+  if (/(^|\.)curtiviagens\.com\.br$/i.test(h) || h === "briefing-20-v1.preview.local") return { url: certCurti.url, agency: "Curti Viagens" };
   return null;
 }
 
