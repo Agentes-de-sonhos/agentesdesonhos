@@ -47,6 +47,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "curtiviagens.com.br": "siteBaseEditorial",
   "www.curtiviagens.com.br": "siteBaseEditorial",
   "briefing-21-v1.preview.local": "siteBaseEditorial",
+  "essya-curti-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
   "dricaviagens.com.br": "siteBaseEditorial",
   "www.dricaviagens.com.br": "siteBaseEditorial",
@@ -114,6 +115,8 @@ export function siteThemeRootClass(hostname?: string | null): string {
           ? " wl-bardelli"
           : h === "briefing-20-v1.preview.local" || h === "curtiviagens.com.br" || h === "www.curtiviagens.com.br"
           ? " wl-curti"
+          : h === "essya-curti-v1.preview.local"
+          ? " wl-curti wl-essya-curti"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
   }

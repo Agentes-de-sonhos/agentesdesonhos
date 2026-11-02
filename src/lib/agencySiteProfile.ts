@@ -1204,6 +1204,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "www.curtiviagens.com.br": "curtiViagensOfficial",
   /** Host sintético do rascunho briefing-21 — sem cadastro encontrado por CNPJ; nada vinculado. */
   "briefing-21-v1.preview.local": "karibuBriefing21",
+  "essya-curti-v1.preview.local": "essyaCurtiPreview",
   "dricaviagens.com.br": "dricaOfficial",
   "www.dricaviagens.com.br": "dricaOfficial",
   "bardelliviagens.com.br": "bardelliCurated",
@@ -1231,6 +1232,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
   curtiViagensOfficial: CURTI_VIAGENS_OFFICIAL_PROFILE,
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,
+  essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
 };
 
 function normalizeHost(hostname?: string | null): string {
