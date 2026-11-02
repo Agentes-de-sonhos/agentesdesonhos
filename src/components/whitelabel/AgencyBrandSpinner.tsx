@@ -12,6 +12,7 @@ import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-lo
 import curtiLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
+import essyaLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
 const CEM_LIMITES_MARK =
@@ -30,10 +31,16 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "curtiviagens.com.br": curtiLogo.url,
   "www.curtiviagens.com.br": curtiLogo.url,
   "briefing-20-v1.preview.local": curtiLogo.url,
+  "essyatur.com.br": essyaLogo.url,
+  "www.essyatur.com.br": essyaLogo.url,
+  "essya-curti-v1.preview.local": essyaLogo.url,
 };
 
 /** Logo só na home e nos links públicos (carteira/orçamento/roteiro); demais páginas carregam sem animação. */
-const HOME_AND_PUBLIC_ONLY = new Set(["curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local"]);
+const HOME_AND_PUBLIC_ONLY = new Set([
+  "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local",
+  "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local",
+]);
 
 /** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
 const BREATHE_HOSTNAMES = new Set([
