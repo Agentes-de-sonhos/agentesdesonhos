@@ -126,6 +126,7 @@ import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storef
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
+import { presentationBlogPosts } from "@/lib/presentationBlogPosts";
 import {
   AGENCY_CARD_DESCRIPTION_CLASS,
   AGENCY_CARD_TITLE_CLASS,
@@ -791,6 +792,31 @@ export default function AgencySiteHome({
           </>
         );
         }
+
+      case "blog": {
+        const posts = presentationBlogPosts(hostname);
+        if (!posts?.length) return null;
+        return (
+          <section key={key} id="blog" className="bg-background">
+            <div className={`${container} py-14 md:py-20`}>
+              <SectionHeading eyebrow="BLOG" title="Ideias e dicas para a sua próxima viagem" subtitle="Inspirações para planejar com tranquilidade." editorial={editorial} />
+              <div className="grid gap-6 md:grid-cols-3">
+                {posts.map((p) => (
+                  <a key={p.slug} href={agencySiteHref(`/blog/${p.slug}`)} className="group overflow-hidden rounded-lg border bg-card">
+                    <img src={p.image} alt={p.title} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <div className="p-6">
+                      <h3 className="text-xl font-semibold text-foreground">{p.title}</h3>
+                      <p className="mt-3 leading-relaxed text-muted-foreground">{p.text}</p>
+                      <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--brand-primary)]">Ler artigo <ArrowRight className="h-4 w-4" /></span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+              <div className="mt-8"><Button asChild variant="outline"><a href={agencySiteHref("/blog")}>Ver todos os artigos</a></Button></div>
+            </div>
+          </section>
+        );
+      }
 
       case "signature": {
         const s = profile.signature;

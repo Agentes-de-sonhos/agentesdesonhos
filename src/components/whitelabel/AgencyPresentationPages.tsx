@@ -9,10 +9,11 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import beach from "@/assets/whitelabel/100-limites/destino-fernando-noronha.jpg.asset.json";
 import portugal from "@/assets/whitelabel/100-limites/pt-sintra.jpg";
 import { XCARET_IMAGES } from "@/components/landing/xcaret/content";
+import { presentationBlogPosts } from "@/lib/presentationBlogPosts";
 
 /** Local-only editorial continuity; no blog or offers records are created. */
 export function AgencyPresentationPages({ page, info }: { page: string; info: AgencyDomainInfo }) {
-  const posts = info.hostname === "drica-presentation.preview.local" ? [
+  const posts = presentationBlogPosts(info.hostname) ?? (info.hostname === "drica-presentation.preview.local" ? [
     { slug: "orlando-no-seu-ritmo", title: "Orlando para todas as gerações", text: "Parques, pausas e hotéis escolhidos com atenção ao ritmo de crianças, adultos e viajantes 60+.", image: orlando.url },
     { slug: "londres-e-turismo-esportivo", title: "Londres: cultura e turismo esportivo", text: "Combine descobertas pela cidade com o interesse pelo esporte e deslocamentos bem planejados.", image: dricaLondon.url },
     { slug: "japao-sob-medida", title: "Japão: tradição e novas descobertas", text: "Cidades, cultura e hospedagens conectadas em uma viagem sob medida, com curadoria criteriosa.", image: dricaJapan.url },
@@ -20,7 +21,7 @@ export function AgencyPresentationPages({ page, info }: { page: string; info: Ag
     { slug: "orlando-no-seu-ritmo", title: "Orlando no ritmo da sua família", text: "Parques, pausas e dias livres para aproveitar cada experiência.", image: XCARET_IMAGES.xelHa.src },
     { slug: "portugal-para-descobrir", title: "Portugal: cidades e paisagens para descobrir", text: "Uma inspiração para combinar cultura, gastronomia e tempo livre.", image: portugal },
     { slug: "ferias-a-beira-mar", title: "Férias à beira-mar", text: "O descanso também merece um lugar especial no seu roteiro.", image: beach.url },
-  ];
+  ]);
   const offers = page === "ofertas";
   const post = posts.find(item => page === `blog/${item.slug}`);
   const profile = resolveSiteProfile(info.hostname);

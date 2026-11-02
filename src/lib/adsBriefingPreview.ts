@@ -930,9 +930,12 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     { label: "Especialidades", to: "/#assinatura" },
     { label: "Destinos", to: "/#destinos" },
     { label: "Sobre", to: "/#sobre" },
+    { label: "Blog", to: "/blog" },
     { label: "Dúvidas", to: "/#faq" },
   ],
   sections: {
+    // Blog na 3ª posição: banner/cotação → assinatura → blog.
+    blog: { enabled: true, order: 0.7 },
     dmc: { enabled: false },
     offers: { enabled: false },
     credentials: { enabled: false },
