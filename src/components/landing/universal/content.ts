@@ -9,6 +9,8 @@ import parkEpic from "@/assets/universal/park-epic.webp.asset.json";
 import parkVb from "@/assets/universal/park-vb.webp.asset.json";
 import cwMain from "@/assets/universal/cw-main.webp.asset.json";
 import evHhn from "@/assets/universal/ev-hhn.webp.asset.json";
+import evGrinchmas from "@/assets/universal/grinchmas.png.asset.json";
+import evMardiGras from "@/assets/universal/mardi-gras.png.asset.json";
 import hHelios from "@/assets/universal/h-helios.webp.asset.json";
 import hPortofino from "@/assets/universal/h-portofino.webp.asset.json";
 import hHardrock from "@/assets/universal/h-hardrock.webp.asset.json";
@@ -61,8 +63,8 @@ export const UNIVERSAL_CITYWALK = {
 
 export const UNIVERSAL_EVENTS = [
   { title: "Halloween Horror Nights", period: "Setembro a novembro", image: evHhn.url, alt: "Halloween Horror Nights", description: "O famoso evento noturno de terror da Universal, com casas mal-assombradas, zonas de sustos e shows. Indicado para adultos e adolescentes.", separateTicket: true },
-  { title: "Festas de fim de ano", period: "Novembro a dezembro", description: "Grinchmas, decoração natalina no mundo de Harry Potter e o desfile de fim de ano com balões da Macy's transformam os parques no fim do ano.", separateTicket: false },
-  { title: "Universal Mardi Gras", period: "Fevereiro a abril", description: "Desfile com carros alegóricos, colares, gastronomia inspirada em Nova Orleans e shows em noites selecionadas.", separateTicket: false },
+  { title: "Festas de fim de ano", period: "Novembro a dezembro", image: evGrinchmas.url, alt: "Grinchmas: Grinch com roupa de Papai Noel diante da árvore de Natal", description: "Grinchmas, decoração natalina no mundo de Harry Potter e o desfile de fim de ano com balões da Macy's transformam os parques no fim do ano.", separateTicket: false },
+  { title: "Universal Mardi Gras", period: "Fevereiro a abril", image: evMardiGras.url, alt: "Desfile do Universal Mardi Gras com artistas e carros alegóricos coloridos", description: "Desfile com carros alegóricos, colares, gastronomia inspirada em Nova Orleans e shows em noites selecionadas.", separateTicket: false },
 ];
 
 export const UNIVERSAL_HOTELS = [
