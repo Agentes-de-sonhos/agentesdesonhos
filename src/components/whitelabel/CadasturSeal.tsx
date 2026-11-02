@@ -41,9 +41,7 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
     return <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={`shrink-0 ${className}`} />;
   }
 
-  const tip = certificate.agency === "Curti Viagens"
-    ? "Curti Viagens, uma Agência de Viagens licenciada pelo Ministério do Turismo"
-    : null;
+  const tip = `${certificate.agency}, uma Agência de Viagens licenciada pelo Ministério do Turismo`;
 
   return (
     <>
