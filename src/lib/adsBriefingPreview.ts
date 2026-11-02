@@ -1589,9 +1589,9 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
   },
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
-    title: "Cristiane Serro Azul, consultoria pessoal e bagagem de quem conhece o mundo.",
-    text: "À frente da Essyatur, Cristiane Serro Azul reúne mais de uma década de experiência no turismo e, desde 2025, conduz sua agência própria com um propósito claro: oferecer uma consultoria de viagens próxima, atenta e sem intermediários.\n\nCom 18 países já conhecidos pelas Américas, pelo Caribe e pela Europa, ela planeja cada roteiro com a segurança de quem já viveu na prática deslocamentos, conexões e hospedagens. Cada indicação para famílias, casais ou pequenos grupos une essa vivência ao cuidado com o seu investimento.\n\nVocê não é atendido por uma central: do primeiro desenho do roteiro ao embarque e ao retorno para casa, é a própria Cristiane quem cuida de cada detalhe e acompanha a sua viagem pelo WhatsApp, inclusive em qualquer imprevisto.",
-    badge: { value: "+10 anos", label: "de experiência no turismo" },
+    title: "Consultoria pessoal e bagagem de quem já conheceu 18 países",
+    text: "À frente da Essyatur desde 2025, Cristiane reúne mais de uma década de experiência no turismo e conduz sua própria agência com um propósito claro: oferecer uma consultoria de viagens próxima, atenta e personalizada.\n\nCom 18 países visitados pelas Américas, pelo Caribe e pela Europa, ela planeja roteiros com base no que conhece na prática: deslocamentos, conexões e hospedagens. Assim, cada viagem é pensada com atenção aos detalhes e ao perfil de quem viaja.\n\nDa criação do roteiro ao embarque e ao retorno, Cristiane acompanha cada etapa e fica disponível pelo WhatsApp para orientar você, inclusive diante de imprevistos.",
+    badge: { value: "+10 ANOS", label: "de experiência no turismo" },
     media: "default",
     mediaAlign: "title",
     image: "resort",
