@@ -24,6 +24,7 @@ import logoVip from "@/assets/universal/VIP-Experience.webp.asset.json";
 import juPortrait from "@/assets/universal/ju-universal-globe.png.asset.json";
 import vanessaPortrait from "@/assets/universal/vanessa-epic.png.asset.json";
 import ricardoPortrait from "@/assets/universal/ricardo-curti-universal.png.asset.json";
+import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 const LOGOS: Record<UniversalParkId, string> = {
@@ -73,7 +74,9 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   const { submit, state, error, reset } = useAgencySiteRequest(hostname);
   const isJu = isJuUniversalProfile(hostname);
   const isMundo = resolveSiteProfile(hostname ?? "").key === "mundoEmCoresBriefing14";
-  const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20", "essyaCurtiPreview", "essyaOfficial"].includes(resolveSiteProfile(hostname ?? "").key as string);
+  const profileKey = resolveSiteProfile(hostname ?? "").key as string;
+  const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20"].includes(profileKey);
+  const isEssya = ["essyaCurtiPreview", "essyaOfficial"].includes(profileKey);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);
@@ -211,14 +214,22 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
             <img src={ricardoPortrait.url} alt="Ricardo Curti, da Curti Viagens, na Universal Orlando" className="absolute inset-0 h-full w-full object-cover" />
           </span>
         )}
-        <div className={isJu || isMundo || isCurti ? "text-center sm:text-left" : "w-full text-center"}>
+        {isEssya && (
+          <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
+            <img src={essyaCristiane.url} alt="Cristiane Serro Azul, da Essyatur" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "center 45%" }} />
+          </span>
+        )}
+        <div className={isJu || isMundo || isCurti || isEssya ? "text-center sm:text-left" : "w-full text-center"}>
           {isJu && <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>}
           {isMundo && <p className="text-sm font-semibold text-primary">Oi, eu sou a Vanessa!</p>}
           {isCurti && <p className="text-sm font-semibold text-primary">Oi, eu sou o Ricardo!</p>}
+          {isEssya && <p className="text-sm font-semibold text-primary">Oi, eu sou a Cristiane.</p>}
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos encontrar o seu ingresso?</h2>
           <p className="mt-3 text-pretty leading-7 text-muted-foreground">{isJu
             ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano."
-            : "Conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Montamos a cotação com o ingresso certo para o seu plano."}</p>
+            : isEssya
+              ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano."
+              : "Conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Montamos a cotação com o ingresso certo para o seu plano."}</p>
         </div>
       </div>
 
