@@ -961,6 +961,7 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
   heroPresentation: {
     kicker: "HOLAMBRA · SP · DESDE 2011",
     overlay: "strongLeft",
+    titleWeight: "regular",
   },
   hero: [
     { title: "Viaje com tranquilidade, nós cuidamos de cada detalhe", subtitle: "Planejamento completo e personalizado para você viver a viagem sem preocupações.", image: "heroAirportTraveler", order: 1, enabled: true },

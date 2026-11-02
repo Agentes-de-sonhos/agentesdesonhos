@@ -110,6 +110,8 @@ export function siteThemeRootClass(hostname?: string | null): string {
           ? " wl-bardelli wl-bardelli-official"
           : h === "bardelli-presentation.preview.local"
           ? " wl-bardelli"
+          : h === "briefing-20-v1.preview.local"
+          ? " wl-curti"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
   }

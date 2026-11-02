@@ -1529,6 +1529,12 @@ body[data-booking-selection-bar] {
   font-weight: 700;
 }
 
+/* Curti Viagens: títulos sem serifa, mesmo padrão da Destinos com a Ju. */
+.wl-editorial.wl-site-base.wl-curti :is(h1,h2,h3,h4) {
+  font-family: 'Manrope', 'Inter', system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+}
+
 /* Complete technical presentations only: preserve the reference dark cruise band
    against the shared alternating-surface reset; clip off-canvas carousels. */
 :is([data-ads-preview="bardelli-completa-v1"], [data-ads-preview="drica-completa-v1"]) { overflow-x: clip; }
