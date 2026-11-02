@@ -1738,3 +1738,4 @@ body[data-booking-selection-bar] {
 .wl-essya-curti .wl-resorts-btn { background-color: #164F76 !important; }
 .wl-essya-curti .wl-resorts-btn:hover { background-color: #0F3A58 !important; }
 .wl-essya-curti .wl-steps-card .wl-step-num { color: #164F76 !important; }
+.wl-essya-curti img[src*="essya-mural-destinos-topo"] { object-position: center top !important; background-color: #0C2D43; }
