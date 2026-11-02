@@ -1739,3 +1739,15 @@ body[data-booking-selection-bar] {
 .wl-essya-curti .wl-resorts-btn:hover { background-color: #0F3A58 !important; }
 .wl-essya-curti .wl-steps-card .wl-step-num { color: #164F76 !important; }
 .wl-essya-curti img[src*="essya-mural-destinos-topo"] { object-position: center top !important; background-color: #0C2D43; }
+/* Banner principal Essyatur: degradê esquerda→direita suavizado (legibilidade mantida por sombra nos textos) */
+.wl-essya-curti #topo div[class*="bg-gradient-to-r"] {
+  background-image: linear-gradient(to right, hsl(220 12% 7% / 0.8), hsl(220 12% 7% / 0.48) 42%, hsl(220 12% 7% / 0.03) 100%) !important;
+}
+@media (min-width: 768px) {
+  .wl-essya-curti #topo div[class*="bg-gradient-to-r"] {
+    background-image: linear-gradient(to right, hsl(220 12% 7% / 0.72), hsl(220 12% 7% / 0.4) 40%, hsl(220 12% 7% / 0) 100%) !important;
+  }
+}
+.wl-essya-curti #topo h1,
+.wl-essya-curti #topo h1 + *,
+.wl-essya-curti #topo p { text-shadow: 0 2px 14px hsl(220 12% 7% / 0.55), 0 1px 3px hsl(220 12% 7% / 0.45); }
