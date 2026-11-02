@@ -1544,6 +1544,7 @@ body[data-booking-selection-bar] {
 .wl-editorial.wl-site-base.wl-curti { --wl-sand: 245 60% 98.4%; --brand-tertiary: hsl(245 60% 98.4%); }
 .wl-curti #rodape { background-image: linear-gradient(to bottom, #FFFFFF 0%, hsl(245 60% 98.4%) 100%) !important; background-color: hsl(245 60% 98.4%) !important; }
 .wl-curti #rodape > div:last-child { background-color: hsl(245 60% 98.4%) !important; }
+.wl-curti #rodape :is(p, span, a, li, h3, h4, small, address) { color: hsl(var(--foreground)) !important; }
 /* Curti: mapa do Brasil — estados em verde sálvia, números e seleção em azul royal. */
 .wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region] path { fill: #CDE8F7 !important; }
 .wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:hover path { fill: #A9D7F0 !important; }
