@@ -26,7 +26,7 @@ const BardelliViagensComingSoon = lazy(() => import("@/pages/whitelabel/Bardelli
 
 /** Mesma camada fixa em todas as etapas do 1º carregamento: o logo nunca muda de posição. */
 const Spinner = () => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-[hsl(0_0%_100%)]">
     <AgencyBrandSpinner size="lg" />
   </div>
 );
