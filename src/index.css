@@ -1711,3 +1711,5 @@ body[data-booking-selection-bar] {
 /* Curti: banner principal com degradê preto mais suave, preservando a leitura do texto. */
 .wl-curti #topo > div:first-child > div.absolute.inset-0 { opacity: 0.72; }
 .wl-curti #topo h1, .wl-curti #topo h1 ~ p { text-shadow: 0 2px 12px hsl(220 12% 7% / 0.45); }
+/* Curti: itens do menu em uma única linha. */
+.wl-curti header nav a { white-space: nowrap; }
