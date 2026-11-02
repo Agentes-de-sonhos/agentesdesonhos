@@ -7,6 +7,7 @@ import certMundo from "@/assets/whitelabel/certificado-cadastur-o-mundo-em-cores
 import certParaiso from "@/assets/paraiso/certificado-cadastur.pdf.asset.json";
 import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.jpg.asset.json";
 import certCurti from "@/assets/whitelabel/certificado-cadastur-curti.jpg.asset.json";
+import certEssya from "@/assets/whitelabel/certificado-cadastur-essyatur.jpg.asset.json";
 
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null) {
@@ -17,6 +18,8 @@ export function cadasturCertificateFor(hostname?: string | null) {
   if (/100limites/i.test(h)) return { url: certLimites.url, agency: "100 Limites" };
   // Curti Viagens: site oficial e prévia técnica compartilham o certificado real (PDF 35.133.431/0001-00).
   if (/(^|\.)curtiviagens\.com\.br$/i.test(h) || h === "briefing-20-v1.preview.local") return { url: certCurti.url, agency: "Curti Viagens" };
+  // Essyatur: certificado real (CNPJ 63.501.397/0001-15, válido 05/11/2025 a 05/11/2027).
+  if (/(^|\.)essyatur\.com\.br$/i.test(h) || h === "essya-curti-v1.preview.local") return { url: certEssya.url, agency: "Essyatur" };
   return null;
 }
 

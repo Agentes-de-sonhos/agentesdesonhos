@@ -102,6 +102,7 @@ import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png.asset.json";
 import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
+import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
 import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
@@ -1563,7 +1564,7 @@ export const ESSYA_CURTI_PREVIEW_INFO: AgencyDomainInfo = {
   tertiary_color: "#E3EDF4",
   city: "São Paulo",
   state: "SP",
-  cnpj: null,
+  cnpj: "63.501.397/0001-15",
   whatsapp_group_url: null,
 };
 
@@ -1575,7 +1576,7 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
     // Avaliações da Curti não podem aparecer como sendo da Essyatur.
     avaliacoes: { enabled: false },
   },
-  heroPresentation: { ...CURTI_VIAGENS_PREVIEW_PROFILE.heroPresentation, kicker: "SÃO PAULO · SP · DESDE 2020" },
+  heroPresentation: { ...CURTI_VIAGENS_PREVIEW_PROFILE.heroPresentation, kicker: "SÃO PAULO · SP · +10 ANOS DE EXPERIÊNCIA" },
   hero: [
     { title: "Viaje com segurança e um roteiro feito para você", subtitle: "Atendimento próximo e personalizado, com suporte antes, durante e depois da viagem.", image: "curtiHolambra", order: 1, enabled: true },
     { title: "Orlando, cruzeiros e experiências para toda a família", subtitle: "Planejamento cuidadoso para famílias com crianças, famílias multigeracionais e casais.", image: "orlandoMagicKingdom", order: 2, enabled: true },
@@ -1589,10 +1590,11 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
   about: {
     kicker: "SOBRE A ESSYATUR",
     title: "Cristiane Serro Azul e um atendimento feito por especialistas.",
-    text: "À frente da Essyatur, Cristiane Serro Azul, sócia administradora, atende pessoalmente os clientes, com os sócios, desde 2020.\n\nA vivência frequente nos destinos vendidos e as capacitações especializadas orientam cada indicação.\n\nEm qualquer imprevisto, o responsável acompanha o caso até a solução.",
-    badge: { value: "Desde 2020", label: "Essyatur" },
+    text: "À frente da Essyatur, Cristiane Serro Azul, sócia administradora, reúne mais de 10 anos de experiência em viagens e, desde 2025, atende pessoalmente os clientes na agência própria, com os sócios.\n\nA vivência frequente nos destinos vendidos e as capacitações especializadas orientam cada indicação.\n\nEm qualquer imprevisto, o responsável acompanha o caso até a solução.",
+    badge: { value: "+10 anos", label: "de experiência" },
     media: "default",
     image: "resort",
+    images: [{ src: essyaCristiane.url, alt: "Cristiane Serro Azul, sócia administradora da Essyatur" }],
     showLocation: true,
     ownerName: "Cristiane Serro Azul",
   },
@@ -1628,13 +1630,15 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
     links: [{ network: "instagram", url: "https://www.instagram.com/essyatur" }],
   },
   footer: {
-    description: "Atendimento próximo e viagens personalizadas, desde 2020, em São Paulo (SP).",
+    description: "Mais de 10 anos de experiência em viagens e agência própria desde 2025, em São Paulo (SP).",
     whatsapp: "(11) 96494-2210",
     phone: "(11) 96494-2210",
     email: "contato@essyatur.com.br",
     instagram: "https://www.instagram.com/essyatur",
     instagramLabel: "@essyatur",
-    address: "São Paulo/SP",
+    address: "Rua Matias Roxo, 300 — Apto 11, Bloco A — Vila Leopoldina — São Paulo/SP — CEP 05089-040",
+    legalName: "Essya Viagens e Turismo Ltda",
+    cnpj: "63.501.397/0001-15",
     showLocation: true,
   },
   seo: { title: "Prévia para revisão — Essyatur", description: "Prévia técnica do site Essyatur na estrutura da Curti Viagens." },
