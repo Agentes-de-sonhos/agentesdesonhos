@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, KARIBU_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -65,6 +65,7 @@ export type AgencySiteProfileKey =
   | "bagagemNaMaoBriefing19"
   /** Rascunho técnico isolado do briefing 20 (Curti Viagens); sem domínio público. */
   | "curtiViagensBriefing20"
+  | "curtiViagensOfficial"
   /** Rascunho técnico isolado do briefing 21 (Karibu); sem domínio público, vínculo pendente. */
   | "karibuBriefing21"
 ;
@@ -1199,6 +1200,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
   /** Host sintético do rascunho briefing-20 — nada é vinculado ao cadastro real. */
   "briefing-20-v1.preview.local": "curtiViagensBriefing20",
+  "curtiviagens.com.br": "curtiViagensOfficial",
+  "www.curtiviagens.com.br": "curtiViagensOfficial",
   /** Host sintético do rascunho briefing-21 — sem cadastro encontrado por CNPJ; nada vinculado. */
   "briefing-21-v1.preview.local": "karibuBriefing21",
   "dricaviagens.com.br": "dricaOfficial",
@@ -1226,6 +1229,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   dricaOfficial: DRICA_OFFICIAL_PROFILE,
   bagagemNaMaoBriefing19: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
+  curtiViagensOfficial: CURTI_VIAGENS_OFFICIAL_PROFILE,
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,
 };
 

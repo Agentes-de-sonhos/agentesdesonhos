@@ -297,7 +297,8 @@ describe("briefing-20-v1 (Curti Viagens)", () => {
     expect(i.primary_color).toBe("#2502FF");
     expect(i.secondary_color).toBe("#639682");
     expect(resolveSiteProfile("briefing-20-v1.preview.local").key).toBe("curtiViagensBriefing20");
-    for (const h of ["curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20.preview.local"]) {
+    expect(resolveSiteProfile("curtiviagens.com.br").key).toBe("curtiViagensOfficial");
+    for (const h of ["briefing-20.preview.local"]) {
       expect(resolveSiteProfile(h).key).toBe("classic");
     }
     expect(resolveSiteProfile(BAGAGEM_NA_MAO_PREVIEW_HOST).key).toBe("bagagemNaMaoBriefing19");
