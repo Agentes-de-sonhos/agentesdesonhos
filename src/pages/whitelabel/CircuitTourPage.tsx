@@ -6,7 +6,7 @@ import { CircuitQuoteDialog } from "@/components/whitelabel/CircuitQuoteDialog";
 import { CircuitTimeline } from "@/components/whitelabel/CircuitTimeline";
 import "./circuit-tour.css";
 import { useParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, BedDouble, Bus, CalendarDays, Clock, Compass, Download, Hotel, MapPin, MessageCircle, Plane, Star, UserRound, Utensils } from "lucide-react";
+import { ChevronLeft, ChevronRight, BedDouble, Bus, CalendarDays, Clock, Car, Compass, Download, Hotel, Ship, MapPin, MessageCircle, Plane, Star, UserRound, Utensils } from "lucide-react";
 import { SEO } from "@/components/seo/SEO";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -15,7 +15,7 @@ import { findCircuit, formatCircuitPrice, type CircuitTour } from "@/lib/circuit
 import type { CircuitInclusionIcon } from "@/lib/circuits/types";
 
 const ICONS: Record<CircuitInclusionIcon, typeof Hotel> = {
-  hotel: BedDouble, tours: Compass, meals: Utensils, bus: Bus, transfer: Plane, guide: UserRound,
+  hotel: BedDouble, tours: Compass, meals: Utensils, bus: Bus, transfer: Car, guide: UserRound, boat: Ship, flight: Plane,
 };
 const wrap = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
 const eyebrow = "text-xs font-semibold uppercase tracking-[0.18em] text-primary";
