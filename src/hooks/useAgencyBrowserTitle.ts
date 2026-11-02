@@ -13,6 +13,10 @@ const BROWSER_TITLE_BY_HOSTNAME: Record<string, string> = {
   "www.omundoemcores.com.br": "O Mundo em Cores",
   "bardelliviagens.com.br": "Bardelli Viagens",
   "www.bardelliviagens.com.br": "Bardelli Viagens",
+  "curtiviagens.com.br": "Curti Viagens",
+  "www.curtiviagens.com.br": "Curti Viagens",
+  "dricaviagens.com.br": "Drica Viagens",
+  "www.dricaviagens.com.br": "Drica Viagens",
 };
 
 function normalizeHostname(hostname?: string | null): string {
