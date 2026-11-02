@@ -100,6 +100,7 @@ import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
+import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png.asset.json";
 import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
@@ -991,7 +992,8 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     title: "Ricardo Curti, diretor da Curti Viagens.",
     text: "A Curti Viagens começou em 2013 organizando grupos para Orlando e, com o tempo, ampliou a atuação para outros destinos no Brasil e no mundo.\n\nSediada em Holambra (SP), a agência atende casais, famílias com crianças e clientes de alto padrão, com consultoria completa para destinos nacionais, internacionais e viagens sob medida.\n\nO atendimento é feito pelo próprio proprietário e especialista, com planejamento detalhado e suporte durante toda a viagem.",
     badge: { value: "Desde 2013", label: "Curti Viagens" },
-    media: "hidden",
+    media: "default",
+    images: [{ src: curtiRicardoEpcot.url, alt: "Ricardo Curti, diretor da Curti Viagens, no Epcot em Orlando" }],
     showLocation: true,
     ownerName: "Ricardo Curti",
   },
