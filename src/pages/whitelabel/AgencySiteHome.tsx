@@ -1,4 +1,5 @@
 import curtiCaribeCancun from "@/assets/whitelabel/curti-caribe-cancun.png.asset.json";
+import curtiFozIguacu from "@/assets/whitelabel/curti/curti-foz-iguacu.png.asset.json";
 import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
 import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
 import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
@@ -152,8 +153,9 @@ const DESTINATION_IMAGES: Record<string, string> = {
   capitaisItalia: capitaisItaliaHero,
   europaCastelo: destinoEuropaCastelo.url,
   caribeMexico: destinoCaribeMexico.url,
-  // Só Curti Viagens usa (card Caribe).
+  // Só Curti Viagens usa (cards Caribe e Brasil).
   curtiCaribe: curtiCaribeCancun.url,
+  curtiBrasil: curtiFozIguacu.url,
   orlandoMagicKingdom: destinoOrlandoMk.url,
   portugalBelem: slPortugal.url,
   fernandoNoronha: slNoronha.url,
