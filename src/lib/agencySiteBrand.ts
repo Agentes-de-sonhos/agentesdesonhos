@@ -28,6 +28,7 @@ import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.jso
 import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
 import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.json";
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
+import curtiFavicon from "@/assets/whitelabel/favicon-curti-viagens.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
@@ -81,6 +82,9 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
   "dricaviagens.rio": dricaFavicon.url,
   "www.dricaviagens.rio": dricaFavicon.url,
   "drica-presentation.preview.local": dricaFavicon.url,
+  "curtiviagens.com.br": curtiFavicon.url,
+  "www.curtiviagens.com.br": curtiFavicon.url,
+  "briefing-20-v1.preview.local": curtiFavicon.url,
   "briefing-16-v1.preview.local": dricaFavicon.url,
 };
 
