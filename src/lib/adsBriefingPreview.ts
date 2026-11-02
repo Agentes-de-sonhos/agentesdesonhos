@@ -1593,6 +1593,7 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
     text: "À frente da Essyatur, Cristiane Serro Azul, sócia administradora, reúne mais de 10 anos de experiência em viagens e, desde 2025, atende pessoalmente os clientes na agência própria, com os sócios.\n\nA vivência frequente nos destinos vendidos e as capacitações especializadas orientam cada indicação.\n\nEm qualquer imprevisto, o responsável acompanha o caso até a solução.",
     badge: { value: "+10 anos", label: "de experiência" },
     media: "default",
+    mediaAlign: "title",
     image: "resort",
     images: [{ src: essyaCristiane.url, alt: "Cristiane Serro Azul, sócia administradora da Essyatur" }],
     showLocation: true,

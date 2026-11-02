@@ -1273,7 +1273,7 @@ export default function AgencySiteHome({
                     </div>
                   )}
                 </div>
-                {aboutCopy?.media !== "hidden" && <div className="order-2 grid gap-4 md:order-none md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
+                {aboutCopy?.media !== "hidden" && <div className={`order-2 grid gap-4 md:order-none md:col-start-2 md:row-span-2 md:row-start-1 ${aboutCopy?.mediaAlign === "title" ? "md:self-stretch md:pt-[2.6rem] md:[&>div]:h-full md:[&_figure]:h-full" : "md:self-center"}`}>
                   {aboutCopy?.mural ? (
                     <AgencyPhotoMural src={aboutCopy.mural.src} alt={aboutCopy.mural.alt} />
                   ) : aboutCopy?.images?.length ? (
@@ -1289,6 +1289,8 @@ export default function AgencySiteHome({
                             className={`w-full object-cover ${
                               image.aspect === "square"
                                 ? "aspect-square"
+                                : aboutCopy.images!.length === 1 && aboutCopy.mediaAlign === "title"
+                                ? "aspect-[4/5] md:aspect-auto md:h-full"
                                 : aboutCopy.images!.length === 1
                                 ? "aspect-[4/5] md:aspect-[3/4]"
                                 : index === 0

@@ -270,6 +270,8 @@ export interface AgencySiteProfile {
     visitedDestinations?: { title: string; names: string[]; presentation?: "list" | "flags" };
     /** Oculta o painel de imagem quando não existe retrato real autorizado. */
     media?: "default" | "hidden";
+    /** "title": no desktop, a foto começa na linha do título e acompanha a altura do texto. */
+    mediaAlign?: "title";
     /** Exibe a cidade/UF do cadastro sob o texto institucional. */
     showLocation?: boolean;
     /** Nome exibido em "Atendimento com"; ausente mantém o nome do cadastro. */
