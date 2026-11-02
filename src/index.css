@@ -1552,8 +1552,8 @@ body[data-booking-selection-bar] {
 .wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-active] path { fill: #4A7564 !important; }
 .wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:not([data-active]) circle { fill: #4A7564 !important; }
 /* Curti: grupo de WhatsApp no padrão 100 Limites (degradê escuro + foto da asa). */
-.wl-curti .wl-newsletter-card { background-color: #2502FF !important; background-image: linear-gradient(to right, #2502FF 0%, #1A0499 30%, rgb(11 8 32 / 0.45) 55%, rgb(11 8 32 / 0) 80%), url("./assets/100limites-newsletter-wing.jpg") !important; background-size: cover !important; background-position: right center !important; }
-@media (max-width: 767px) { .wl-curti .wl-newsletter-card { background-image: linear-gradient(to bottom, rgb(37 2 255 / 0.8) 0%, rgb(11 8 32 / 0.6) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; } }
+.wl-curti .wl-newsletter-card { background-color: #121212 !important; background-image: linear-gradient(to right, #121212 0%, rgb(18 18 18 / 0.92) 32%, rgb(18 18 18 / 0.45) 58%, rgb(18 18 18 / 0) 82%), url("./assets/100limites-newsletter-wing.jpg") !important; background-size: cover !important; background-position: right center !important; }
+@media (max-width: 767px) { .wl-curti .wl-newsletter-card { background-image: linear-gradient(to bottom, rgb(18 18 18 / 0.82) 0%, rgb(18 18 18 / 0.6) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; } }
 .wl-curti .wl-newsletter-card h2 { color: #fff !important; }
 .wl-curti .wl-newsletter-card p:not(:first-child) { color: rgb(255 255 255 / 0.8) !important; }
 .wl-curti .wl-newsletter-card .wl-kicker, .wl-curti .wl-newsletter-card .wl-kicker svg { color: #fff !important; }
