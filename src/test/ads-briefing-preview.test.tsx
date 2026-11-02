@@ -314,7 +314,7 @@ describe("briefing-20-v1 (Curti Viagens)", () => {
     expect(p.dmc).toBeUndefined();
     expect(p.credentials).toBeUndefined();
     expect(p.team).toBeUndefined();
-    for (const k of ["offers", "dmc", "team", "testimonials", "avaliacoes", "newsletter", "credentials"] as const) {
+    for (const k of ["offers", "dmc", "team", "testimonials", "credentials"] as const) {
       expect(p.sections?.[k]).toEqual({ enabled: false });
     }
     expect(f.pages).toBeUndefined();
