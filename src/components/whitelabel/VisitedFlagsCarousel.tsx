@@ -38,7 +38,7 @@ export function VisitedFlagsCarousel({ title, names }: { title: string; names: s
   }, [paused]);
 
   return (
-    <div className="mt-4 w-full min-w-0 border-t border-border pt-4" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+    <div className="mt-2 w-full min-w-0" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
       <h3 className="text-base font-semibold text-foreground">{title}</h3>
       <div className="mt-3 flex items-center gap-2">
         <button type="button" aria-label="Países anteriores" onClick={() => scroll(-1)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-border bg-background text-primary transition hover:bg-primary hover:text-primary-foreground">
