@@ -1535,11 +1535,22 @@ body[data-booking-selection-bar] {
   letter-spacing: -0.02em;
 }
 
-/* Curti Viagens: faixa de cruzeiros no azul royal do logotipo (#2502FF), texto branco. */
-.wl-curti .wl-alt-surface > #autoridade { background-color: #2502FF !important; background-image: none !important; }
-.wl-curti #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: #E5E1FF !important; }
+/* Curti Viagens: faixa de cruzeiros no verde sálvia do logotipo (#639682), texto branco. */
+.wl-curti .wl-alt-surface > #autoridade { background-color: #639682 !important; background-image: none !important; }
+.wl-curti #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: #FFFFFF !important; }
 .wl-curti #autoridade button.bg-primary { background-color: #FFFFFF !important; color: #2502FF !important; }
-.wl-curti #autoridade button.bg-primary:hover { background-color: #E5E1FF !important; }
+.wl-curti #autoridade button.bg-primary:hover { background-color: #EEF5F2 !important; }
+/* Curti: degradê ultra suave nas seções e no rodapé (todas as páginas). */
+.wl-editorial.wl-site-base.wl-curti { --wl-sand: 245 60% 98.4%; --brand-tertiary: hsl(245 60% 98.4%); }
+.wl-curti #rodape { background-image: linear-gradient(to bottom, #FFFFFF 0%, hsl(245 60% 98.4%) 100%) !important; background-color: hsl(245 60% 98.4%) !important; }
+.wl-curti #rodape > div:last-child { background-color: hsl(245 60% 98.4%) !important; }
+/* Curti: mapa do Brasil — estados em verde sálvia, números e seleção em azul royal. */
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region] path { fill: rgb(99 150 130 / 0.32) !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:hover path { fill: rgb(99 150 130 / 0.6) !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-active] path { fill: #2502FF !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:not([data-active]) circle { fill: #2502FF !important; }
+.wl-curti .wl-resorts-btn { background-color: #2502FF !important; color: #fff !important; }
+.wl-curti .wl-resorts-btn:hover { background-color: #639682 !important; }
 
 /* Complete technical presentations only: preserve the reference dark cruise band
 
