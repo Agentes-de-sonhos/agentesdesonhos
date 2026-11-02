@@ -24,6 +24,7 @@ import logoVip from "@/assets/universal/VIP-Experience.webp.asset.json";
 import juPortrait from "@/assets/universal/ju-universal-globe.png.asset.json";
 import vanessaPortrait from "@/assets/universal/vanessa-epic.png.asset.json";
 import ricardoPortrait from "@/assets/universal/ricardo-curti-universal.png.asset.json";
+import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 const LOGOS: Record<UniversalParkId, string> = {
@@ -73,7 +74,9 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   const { submit, state, error, reset } = useAgencySiteRequest(hostname);
   const isJu = isJuUniversalProfile(hostname);
   const isMundo = resolveSiteProfile(hostname ?? "").key === "mundoEmCoresBriefing14";
-  const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20", "essyaCurtiPreview", "essyaOfficial"].includes(resolveSiteProfile(hostname ?? "").key as string);
+  const profileKey = resolveSiteProfile(hostname ?? "").key as string;
+  const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20"].includes(profileKey);
+  const isEssya = ["essyaCurtiPreview", "essyaOfficial"].includes(profileKey);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);
