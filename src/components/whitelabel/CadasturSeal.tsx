@@ -6,7 +6,7 @@ import certLimites from "@/assets/whitelabel/certificado-cadastur-100-limites.jp
 import certMundo from "@/assets/whitelabel/certificado-cadastur-o-mundo-em-cores.jpg.asset.json";
 import certParaiso from "@/assets/paraiso/certificado-cadastur.pdf.asset.json";
 import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.jpg.asset.json";
-import certCurti from "@/assets/whitelabel/certificado-cadastur-curti.pdf.asset.json";
+import certCurti from "@/assets/whitelabel/certificado-cadastur-curti.jpg.asset.json";
 
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null) {
