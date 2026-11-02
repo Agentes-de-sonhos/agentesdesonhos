@@ -101,6 +101,7 @@ import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asse
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png.asset.json";
+import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
@@ -1538,4 +1539,112 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
   key: "curtiViagensOfficial",
   presentation: false,
   seo: { title: "Curti Viagens", description: "Curti Viagens: consultoria completa de viagens em Holambra (SP), desde 2013." },
+};
+
+/* ------------------------------------------------------------------ */
+/* Essya Tur — prévia "estrutura Curti" (Fernando, 02/11/2026).        */
+/* Cópia integral da estrutura/fotos da Curti Viagens; troca apenas    */
+/* logo, cores (azul #164F76 + amarelo #FDC700), contatos e os textos  */
+/* que já existiam no perfil da Essyatur. Host sintético: o site real  */
+/* essyatur.com.br não muda.                                           */
+/* ------------------------------------------------------------------ */
+export const ESSYA_CURTI_PREVIEW_JOB_ID = "essya-curti-v1";
+export const ESSYA_CURTI_PREVIEW_HOST = "essya-curti-v1.preview.local";
+
+export const ESSYA_CURTI_PREVIEW_INFO: AgencyDomainInfo = {
+  ...CURTI_VIAGENS_PREVIEW_INFO,
+  user_id: "00000000-0000-0000-0000-000000000022",
+  hostname: ESSYA_CURTI_PREVIEW_HOST,
+  agency_name: "Essyatur",
+  owner_name: "Cristiane Serro Azul",
+  logo_url: essyaTurLogo.url,
+  primary_color: "#164F76",
+  secondary_color: "#FDC700",
+  tertiary_color: "#E3EDF4",
+  city: "São Paulo",
+  state: "SP",
+  cnpj: null,
+  whatsapp_group_url: null,
+};
+
+export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
+  ...CURTI_VIAGENS_PREVIEW_PROFILE,
+  key: "essyaCurtiPreview",
+  sections: {
+    ...CURTI_VIAGENS_PREVIEW_PROFILE.sections,
+    // Avaliações da Curti não podem aparecer como sendo da Essyatur.
+    avaliacoes: { enabled: false },
+  },
+  heroPresentation: { ...CURTI_VIAGENS_PREVIEW_PROFILE.heroPresentation, kicker: "SÃO PAULO · SP · DESDE 2020" },
+  hero: [
+    { title: "Viaje com segurança e um roteiro feito para você", subtitle: "Atendimento próximo e personalizado, com suporte antes, durante e depois da viagem.", image: "curtiHolambra", order: 1, enabled: true },
+    { title: "Orlando, cruzeiros e experiências para toda a família", subtitle: "Planejamento cuidadoso para famílias com crianças, famílias multigeracionais e casais.", image: "orlandoMagicKingdom", order: 2, enabled: true },
+    { title: "Viagens sob medida, do primeiro contato ao retorno", subtitle: "Você fala direto com quem planeja a sua viagem, pelo WhatsApp.", image: "heroVarenna", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "ESSYATUR",
+    title: "Atendimento próximo para viagens realmente personalizadas.",
+    text: "Cada viagem começa por uma conversa: quem viaja, o que desejam viver e o equilíbrio certo entre qualidade e investimento. A partir daí, a Essyatur desenha o roteiro e acompanha cada etapa.",
+  },
+  about: {
+    kicker: "SOBRE A ESSYATUR",
+    title: "Cristiane Serro Azul e um atendimento feito por especialistas.",
+    text: "À frente da Essyatur, Cristiane Serro Azul, sócia administradora, atende pessoalmente os clientes, com os sócios, desde 2020.\n\nA vivência frequente nos destinos vendidos e as capacitações especializadas orientam cada indicação.\n\nEm qualquer imprevisto, o responsável acompanha o caso até a solução.",
+    badge: { value: "Desde 2020", label: "Essyatur" },
+    media: "default",
+    image: "resort",
+    showLocation: true,
+    ownerName: "Cristiane Serro Azul",
+  },
+  differentials: [
+    { title: "Atendimento por especialista", text: "Você fala direto com quem planeja a sua viagem, sem intermediários.", icon: "consultivo" },
+    { title: "Roteiros realmente personalizados", text: "Cada roteiro nasce do perfil de quem viaja, nunca de um pacote pronto.", icon: "fornecedores" },
+    { title: "Curadoria criteriosa", text: "Hotéis, serviços e experiências escolhidos com critério e vivência nos destinos.", icon: "conferido" },
+    { title: "Suporte durante toda a viagem", text: "Antes, durante e depois: imprevistos acompanhados até a solução.", icon: "acompanhamento" },
+  ],
+  faq: [
+    { q: "Como funciona o atendimento?", a: "O atendimento é feito diretamente pela proprietária e sócios, pelo WhatsApp. Entendemos o seu perfil, apresentamos uma proposta personalizada e acompanhamos toda a viagem." },
+    { q: "Vocês planejam viagens para famílias com crianças?", a: "Sim. Famílias com crianças e famílias multigeracionais estão entre as especialidades da Essyatur, incluindo Orlando e parques." },
+    { q: "E se acontecer um imprevisto durante a viagem?", a: "O responsável pela sua viagem acompanha o caso até a solução. O suporte vale antes, durante e depois da viagem." },
+    { q: "Quais destinos vocês atendem?", a: "Orlando, cruzeiros, Europa, América do Sul, Caribe e México, além de Brasil, Estados Unidos e Canadá." },
+    { q: "Como começo a planejar?", a: "Envie uma solicitação pelo formulário do site ou fale pelo WhatsApp contando a ideia inicial da viagem." },
+  ],
+  copy: {
+    ...CURTI_VIAGENS_PREVIEW_PROFILE.copy,
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Por que viajar com a Essyatur", subtitle: "Segurança e suporte em cada etapa." },
+    newsletter: {
+      kicker: "GRUPO DE NOVIDADES NO WHATSAPP",
+      title: "Receba novidades e oportunidades",
+      subtitle: "Informe seu nome, WhatsApp e e-mail. Depois de enviar, você será direcionado para o grupo de WhatsApp da Essyatur, com novidades, oportunidades e dicas de viagem.",
+      cta: "Quero entrar no grupo",
+    },
+  } as AgencySiteProfile["copy"],
+  inspirationDialog: {
+    ...CURTI_VIAGENS_PREVIEW_PROFILE.inspirationDialog,
+    description: "Preencha seus dados. Ao confirmar, você será direcionado automaticamente para o grupo de WhatsApp da Essyatur.",
+  } as AgencySiteProfile["inspirationDialog"],
+  socialStrip: {
+    title: "Siga-nos nas redes",
+    links: [{ network: "instagram", url: "https://www.instagram.com/essyatur" }],
+  },
+  footer: {
+    description: "Atendimento próximo e viagens personalizadas, desde 2020, em São Paulo (SP).",
+    whatsapp: "(11) 96494-2210",
+    phone: "(11) 96494-2210",
+    email: "contato@essyatur.com.br",
+    instagram: "https://www.instagram.com/essyatur",
+    instagramLabel: "@essyatur",
+    address: "São Paulo/SP",
+    showLocation: true,
+  },
+  seo: { title: "Prévia para revisão — Essyatur", description: "Prévia técnica do site Essyatur na estrutura da Curti Viagens." },
+};
+
+ADS_PREVIEW_FIXTURES[ESSYA_CURTI_PREVIEW_JOB_ID] = {
+  jobId: ESSYA_CURTI_PREVIEW_JOB_ID,
+  info: ESSYA_CURTI_PREVIEW_INFO,
+  profile: ESSYA_CURTI_PREVIEW_PROFILE,
+  notice: "Prévia para revisão — sem publicação · ações desativadas",
+  documentTitle: "Prévia para revisão — Essyatur",
+  realAgency: true,
 };

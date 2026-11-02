@@ -14,6 +14,7 @@ const destinosComAJuHeaderLogo = destinosComAJuLogo;
 import destinosComAJuFavicon from "@/assets/whitelabel/favicon-destinos-com-a-ju.png.asset.json";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import paraisoFavicon from "@/assets/whitelabel/favicon-paraiso-viagens.png.asset.json";
+import essyaLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import essyaFavicon from "@/assets/whitelabel/favicon-essya-tur.png.asset.json";
 import limitesFavicon from "@/assets/whitelabel/favicon-100-limites-2.png.asset.json";
 import faeLogo from "@/assets/whitelabel/logo-fae-viagens.png.asset.json";
@@ -57,6 +58,7 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "curtiviagens.com.br": curtiViagensLogo.url,
   "www.curtiviagens.com.br": curtiViagensLogo.url,
   "briefing-21-v1.preview.local": karibuLogo.url,
+  "essya-curti-v1.preview.local": essyaLogo.url,
   "bardelliviagens.com.br": bardelliLogo.url,
   "www.bardelliviagens.com.br": bardelliLogo.url,
 };
@@ -72,6 +74,7 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
   /** Bússola dourada oficial da Essya Tur (aba do navegador). */
   "essyatur.com.br": essyaFavicon.url,
   "www.essyatur.com.br": essyaFavicon.url,
+  "essya-curti-v1.preview.local": essyaFavicon.url,
   "bardelliviagens.com.br": bardelliFavicon.url,
   "www.bardelliviagens.com.br": bardelliFavicon.url,
   "omundoemcores.com.br": mundoEmCoresFavicon.url,
