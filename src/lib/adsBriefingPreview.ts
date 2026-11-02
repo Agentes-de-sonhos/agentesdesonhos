@@ -927,13 +927,12 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
   featuredExperience: undefined,
   nav: [
     { label: "Início", to: "/" },
-    { label: "Destinos", to: "/#destinos" },
-    { label: "Ingressos", to: "/ingressos-orlando" },
-    { label: "Cruzeiros", to: "/#autoridade" },
-    { label: "Resorts", to: "/#resorts" },
     { label: "Sobre", to: "/#sobre" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Parques Orlando", to: "/ingressos-orlando" },
+    { label: "Cruzeiros", to: "/#autoridade" },
+    { label: "Resorts Brasil", to: "/#resorts" },
     { label: "Blog", to: "/blog" },
-    { label: "Dúvidas", to: "/#faq" },
   ],
   sections: {
     // Ordem pedida por Fernando (02/11/2026).

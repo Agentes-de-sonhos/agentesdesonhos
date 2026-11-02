@@ -1705,3 +1705,9 @@ body[data-booking-selection-bar] {
 }
 /* Drica: dia de hoje com contorno discreto (sem fundo escuro). */
 .wl-drica .rdp-button.bg-accent:not([aria-selected="true"]) { background-color: transparent !important; box-shadow: inset 0 0 0 1px #336687; color: #1b3445 !important; }
+
+/* Curti: "Como funciona" — círculos brancos com número azul royal. */
+.wl-curti .wl-steps-card .wl-step-num { background-color: #FFFFFF !important; color: #2502FF !important; }
+/* Curti: banner principal com degradê preto mais suave, preservando a leitura do texto. */
+.wl-curti #topo > div:first-child > div.absolute.inset-0 { opacity: 0.72; }
+.wl-curti #topo h1, .wl-curti #topo h1 ~ p { text-shadow: 0 2px 12px hsl(220 12% 7% / 0.45); }
