@@ -318,7 +318,7 @@ describe("briefing-20-v1 (Curti Viagens)", () => {
       expect(p.sections?.[k]).toEqual({ enabled: false });
     }
     expect(f.pages).toBeUndefined();
-    expect(p.about?.badge?.value).toBe("Desde 2011");
+    expect(p.about?.badge?.value).toBe("Desde 2013");
     expect(p.footer?.cnpj).toBe("35.133.431/0001-00");
     expect(p.footer?.email).toBe("vendas@curtiviagens.com.br");
   });

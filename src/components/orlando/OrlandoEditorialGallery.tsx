@@ -29,7 +29,7 @@ export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
   const clearPhotos = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br)$/i.test(hostname.replace(/\.$/, ""));
-  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local"].includes(hostname.toLowerCase().replace(/\.$/, ""));
+  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local", "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local"].includes(hostname.toLowerCase().replace(/\.$/, ""));
 
   useEffect(() => {
     if (!allowed || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
