@@ -9,6 +9,8 @@ import { Loader2 } from "lucide-react";
 import { normalizeBrandHost } from "@/lib/agencySiteBrand";
 import destinosComAJuSymbol from "@/assets/whitelabel/simbolo-destinos-com-a-ju.png.asset.json";
 import mundoEmCoresLogo from "@/assets/ads-preview/mundo-em-cores-briefing-14-logo.png.asset.json";
+import curtiLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
+import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
@@ -25,12 +27,19 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "omundoemcores.com.br": mundoEmCoresLogo.url,
   "www.omundoemcores.com.br": mundoEmCoresLogo.url,
   "briefing-14-v1.preview.local": mundoEmCoresLogo.url,
+  "curtiviagens.com.br": curtiLogo.url,
+  "www.curtiviagens.com.br": curtiLogo.url,
+  "briefing-20-v1.preview.local": curtiLogo.url,
 };
+
+/** Logo só na home e nos links públicos (carteira/orçamento/roteiro); demais páginas carregam sem animação. */
+const HOME_AND_PUBLIC_ONLY = new Set(["curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local"]);
 
 /** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
 const BREATHE_HOSTNAMES = new Set([
   "paraisoviagens.com", "www.paraisoviagens.com",
   "omundoemcores.com.br", "www.omundoemcores.com.br", "briefing-14-v1.preview.local",
+  ...HOME_AND_PUBLIC_ONLY,
 ]);
 
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
@@ -65,6 +74,11 @@ export function AgencyBrandSpinner({
   size = "md",
   fallbackClassName = "h-8 w-8 animate-spin text-primary",
 }: AgencyBrandSpinnerProps) {
+  const ctxHost = resolveContextHostname(hostname);
+  if (HOME_AND_PUBLIC_ONLY.has(ctxHost) && typeof window !== "undefined") {
+    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    if (path !== "/" && !isAgencyPublicToolPath(path)) return <span aria-busy="true" />;
+  }
   const mark = resolveAgencySpinnerMark(hostname);
   if (!mark) return <Loader2 className={fallbackClassName} aria-hidden="true" />;
 
