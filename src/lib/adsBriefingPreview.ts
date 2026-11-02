@@ -1037,7 +1037,7 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
   },
   socialStrip: {
     title: "Siga-nos nas redes",
-    links: [{ network: "instagram", url: "https://www.instagram.com/curtiviagens/" }],
+    links: [{ network: "instagram", url: "https://www.instagram.com/curtiviagens/" }, { network: "facebook", url: "https://www.facebook.com/curtiviagens/" }],
   },
   footer: {
     description: "Consultoria completa de viagens, desde 2013, em Holambra (SP).",
