@@ -103,7 +103,7 @@ describe("gate", () => {
     }
   });
   it("outros tenants ficam livres", async () => {
-    await renderGate(FAE_LIKE);
+    await renderGate("00000000-0000-0000-0000-000000000002");
     expect(screen.getByTestId("site")).toBeInTheDocument();
   });
   it("rota excluída não bloqueia tenant protegido", async () => {
