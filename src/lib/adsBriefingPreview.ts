@@ -1633,11 +1633,14 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
   footer: {
     description: "Mais de 10 anos de experiência em viagens e agência própria desde 2025, em São Paulo (SP).",
     whatsapp: "(11) 96494-2210",
+    whatsappLabel: "Falar no WhatsApp",
     phone: "(11) 96494-2210",
+    phoneHidden: true,
     email: "contato@essyatur.com.br",
     instagram: "https://www.instagram.com/essyatur",
     instagramLabel: "@essyatur",
-    address: "Rua Matias Roxo, 300 — Apto 11, Bloco A — Vila Leopoldina — São Paulo/SP — CEP 05089-040",
+    address: "Vila Leopoldina, São Paulo, SP",
+    legalLinksDisabled: true,
     legalName: "Essya Viagens e Turismo Ltda",
     cnpj: "63.501.397/0001-15",
     showLocation: true,
@@ -1652,4 +1655,30 @@ ADS_PREVIEW_FIXTURES[ESSYA_CURTI_PREVIEW_JOB_ID] = {
   notice: "Prévia para revisão — sem publicação · ações desativadas",
   documentTitle: "Prévia para revisão — Essyatur",
   realAgency: true,
+};
+
+/* ------------------------------------------------------------------ */
+/* Essyatur — perfil OFICIAL (essyatur.com.br). Aprovado por Fernando  */
+/* (02/11/2026): mesma estrutura/fotos da prévia "Curti"; rodapé sem   */
+/* número de telefone, endereço enxuto (bairro/cidade/UF) e links de   */
+/* Política de Privacidade/Termos de Uso visíveis, mas sem clique.     */
+/* Sem grupo de WhatsApp cadastrado: o formulário grava o lead e       */
+/* confirma o contato, sem prometer redirecionamento.                  */
+/* ------------------------------------------------------------------ */
+export const ESSYA_OFFICIAL_PROFILE: AgencySiteProfile = {
+  ...ESSYA_CURTI_PREVIEW_PROFILE,
+  key: "essyaOfficial",
+  presentation: false,
+  copy: {
+    ...ESSYA_CURTI_PREVIEW_PROFILE.copy,
+    newsletter: {
+      ...ESSYA_CURTI_PREVIEW_PROFILE.copy.newsletter,
+      subtitle: "Informe seu nome, WhatsApp e e-mail. Depois de enviar, nossa equipe confirma o seu contato pelo WhatsApp.",
+    },
+  } as AgencySiteProfile["copy"],
+  inspirationDialog: {
+    ...ESSYA_CURTI_PREVIEW_PROFILE.inspirationDialog,
+    description: "Preencha seus dados. Ao confirmar, nossa equipe entra em contato pelo WhatsApp.",
+  } as AgencySiteProfile["inspirationDialog"],
+  seo: { title: "Essyatur", description: "Essyatur: consultoria de viagens sob medida em São Paulo (SP), com mais de 10 anos de experiência." },
 };
