@@ -1709,7 +1709,9 @@ body[data-booking-selection-bar] {
 
 /* Curti: "Como funciona" — círculos brancos com número azul royal. */
 .wl-curti .wl-steps-card .wl-step-num { background-color: #FFFFFF !important; color: #2502FF !important; }
-.wl-curti .wl-steps-card { background-color: #0B0820 !important; background-image: linear-gradient(135deg, #2502FF 0%, #12063F 60%, #0B0820 100%) !important; }
+/* Curti: "Como funciona" — padrão 100 Limites: imagem de fundo com degradê azul→preto por cima. */
+.wl-curti .wl-steps-card { background-color: #0B0820 !important; background-image: linear-gradient(to right, #2502FF 0%, #2502FF 30%, #12063F 52%, rgb(11 8 32 / 0.55) 74%, rgb(11 8 32 / 0.15) 100%), url("./assets/100limites-steps-planning.jpg") !important; background-size: cover !important; background-position: right center !important; }
+@media (max-width: 767px) { .wl-curti .wl-steps-card { background-image: linear-gradient(to bottom, rgb(37 2 255 / 0.88) 0%, rgb(18 6 63 / 0.85) 55%, rgb(11 8 32 / 0.78) 100%), url("./assets/100limites-steps-planning.jpg") !important; background-position: center 30% !important; } }
 /* Curti: banner principal com degradê preto mais suave, preservando a leitura do texto. */
 .wl-curti #topo > div:first-child > div.absolute.inset-0 { opacity: 0.72; }
 .wl-curti #topo h1, .wl-curti #topo h1 ~ p { text-shadow: 0 2px 12px hsl(220 12% 7% / 0.45); }
