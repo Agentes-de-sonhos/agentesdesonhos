@@ -35,6 +35,11 @@ const MUNDO_EM_CORES: GoogleReviewsHostConfig = {
   placeId: "ChIJTZfsEsVfzpQRxxTEgPrUi30",
 };
 
+const CURTI_VIAGENS: GoogleReviewsHostConfig = {
+  label: "Curti Viagens",
+  placeId: "ChIJIayUCNDvyJQRPPvUIISIZbg",
+};
+
 const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
   "omundoemcores.com.br": MUNDO_EM_CORES,
   "www.omundoemcores.com.br": MUNDO_EM_CORES,
@@ -47,6 +52,7 @@ const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
   "dricaviagens.com.br": DRICA_VIAGENS,
   "www.dricaviagens.com.br": DRICA_VIAGENS,
   "drica-presentation.preview.local": DRICA_VIAGENS,
+  "briefing-20-v1.preview.local": CURTI_VIAGENS,
 };
 
 export function resolveGoogleReviewsConfig(hostname: string | null | undefined) {

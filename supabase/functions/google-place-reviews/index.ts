@@ -22,6 +22,7 @@ const PLACE_BY_HOSTNAME: Record<string, string> = {
   "dricaviagens.com.br": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
   "www.dricaviagens.com.br": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
   "drica-presentation.preview.local": "ChIJtcpG9uG2W48RfGhKmSu3ImM",
+  "briefing-20-v1.preview.local": "ChIJIayUCNDvyJQRPPvUIISIZbg",
 };
 
 const FIELD_MASK = "id,displayName,rating,userRatingCount,googleMapsUri,reviews,attributions";
