@@ -14,6 +14,8 @@ export function cadasturCertificateFor(hostname?: string | null) {
   if (h === "briefing-14-v1.preview.local" || /(^|\.)omundoemcores\.com\.br$/i.test(h)) return { url: certMundo.url, agency: "O Mundo em Cores" };
   if (/(^|\.)paraisoviagens\.com$/i.test(h)) return { url: certParaiso.url, agency: "Paraíso Viagens" };
   if (/100limites/i.test(h)) return { url: certLimites.url, agency: "100 Limites" };
+  // Curti Viagens: selo sem certificado até o PDF chegar (url vazia = só o selo).
+  if (h === "briefing-20-v1.preview.local") return { url: "", agency: "Curti Viagens" };
   return null;
 }
 
@@ -33,6 +35,10 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
       window.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  if (!certificate.url) {
+    return <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={`shrink-0 ${className}`} />;
+  }
 
   return (
     <>

@@ -1018,7 +1018,6 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
   copy: {
     destinations: { title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Caribe e México, Estados Unidos e Canadá, Europa, resorts e cruzeiros." },
     modules: { title: "Especialidades", subtitle: "Orlando, Nova Iorque, resorts, cruzeiros e Europa." },
-    differentials: { title: "Por que viajar com a Curti Viagens", subtitle: "Atendimento próximo, planejamento detalhado e suporte do início ao fim." },
     concierge: { kicker: "COMO FUNCIONA", title: "Da inspiração ao retorno", subtitle: "Uma jornada acompanhada em cada etapa." },
     faq: { kicker: "ANTES DE SOLICITAR", title: "Dúvidas frequentes" },
     differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Por que viajar com a Curti Viagens", subtitle: "Atendimento próximo, planejamento detalhado e suporte do início ao fim." },
