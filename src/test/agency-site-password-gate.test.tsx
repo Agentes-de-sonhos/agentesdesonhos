@@ -7,6 +7,7 @@ import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import {
   isPasswordExemptPath,
   isTenantPasswordProtected,
+  PASSWORD_PROTECTED_TENANTS,
   readStoredUnlock,
   saveUnlock,
   unlockStorageKey,
