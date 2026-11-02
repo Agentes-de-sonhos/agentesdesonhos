@@ -41,8 +41,13 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
     return <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={`shrink-0 ${className}`} />;
   }
 
+  const tip = certificate.agency === "Curti Viagens"
+    ? "Curti Viagens, uma Agência de Viagens licenciada pelo Ministério do Turismo"
+    : null;
+
   return (
     <>
+      <span className="group relative inline-flex shrink-0">
       <button
         type="button"
         onClick={() => setOpen(true)}
@@ -51,6 +56,16 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
       >
         <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={className} />
       </button>
+      {tip && (
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border bg-popover px-4 py-2.5 text-center text-sm leading-snug text-popover-foreground opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
+        >
+          <span className="block font-semibold text-primary">Certificado CADASTUR</span>
+          {tip}
+        </span>
+      )}
+      </span>
       {open &&
         createPortal(
           <div
