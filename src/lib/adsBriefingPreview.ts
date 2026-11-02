@@ -1578,7 +1578,7 @@ export const ESSYA_CURTI_PREVIEW_PROFILE: AgencySiteProfile = {
   },
   heroPresentation: { ...CURTI_VIAGENS_PREVIEW_PROFILE.heroPresentation, kicker: "SÃO PAULO · SP · +10 ANOS DE EXPERIÊNCIA" },
   hero: [
-    { title: "Viaje com segurança e um roteiro feito para você", subtitle: "Atendimento próximo e personalizado, com suporte antes, durante e depois da viagem.", image: "curtiHolambra", order: 1, enabled: true },
+    { title: "Viaje com segurança e um roteiro feito para você", subtitle: "Atendimento próximo e personalizado, com suporte antes, durante e depois da viagem.", image: "essyaMural", order: 1, enabled: true },
     { title: "Orlando, cruzeiros e experiências para toda a família", subtitle: "Planejamento cuidadoso para famílias com crianças, famílias multigeracionais e casais.", image: "orlandoMagicKingdom", order: 2, enabled: true },
     { title: "Viagens sob medida, do primeiro contato ao retorno", subtitle: "Você fala direto com quem planeja a sua viagem, pelo WhatsApp.", image: "heroVarenna", order: 3, enabled: true },
   ],
