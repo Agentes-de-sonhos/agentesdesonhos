@@ -108,7 +108,7 @@ export function resolveSections(
 export type AgencyImageSlot =
   | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
-  | "caribeMexico" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
+  | "caribeMexico" | "curtiCaribe" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
   | "heroVarenna" | "heroSantoriniShip" | "heroMundoGrupoVideo" | "heroMundoEuropaVideo" | "heroMundoEuropaFoto" | "heroMundoGrupoFoto" | "mundoGreciaVanessa" | "mundoNclDestaque" | "heroMundoDesenhadaVideo" | "heroMundoPlacasFoto" | "heroAirportTraveler" | "heroJuMagicKingdom" | "curtiHolambra"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago" | "paraisoTanzania" | "paraisoEslovenia"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
