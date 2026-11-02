@@ -1718,3 +1718,23 @@ body[data-booking-selection-bar] {
 .wl-curti #topo h1, .wl-curti #topo h1 ~ p { text-shadow: 0 2px 12px hsl(220 12% 7% / 0.45); }
 /* Curti: itens do menu em uma única linha. */
 .wl-curti header nav a { white-space: nowrap; }
+
+/* ===== Essyatur — prévia na estrutura Curti (essya-curti-v1.preview.local) =====
+   Mesmas regras da Curti, trocando azul royal/verde por azul #164F76 e amarelo #FDC700. */
+.wl-editorial.wl-site-base.wl-curti.wl-essya-curti { --wl-sand: 205 45% 97.5%; --brand-tertiary: hsl(205 45% 97.5%); }
+.wl-essya-curti .wl-alt-surface > #autoridade { background-color: #164F76 !important; }
+.wl-essya-curti #autoridade button.bg-primary { background-color: #FDC700 !important; }
+.wl-essya-curti #autoridade button.bg-primary:hover { background-color: #EBB800 !important; }
+.wl-essya-curti #rodape { background-image: linear-gradient(to bottom, #FFFFFF 0%, hsl(205 45% 97.5%) 100%) !important; background-color: hsl(205 45% 97.5%) !important; }
+.wl-essya-curti #rodape > div:last-child { background-color: hsl(205 45% 97.5%) !important; }
+.wl-essya-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region] path { fill: #D6E6F0 !important; }
+.wl-essya-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:hover path { fill: #B5D1E3 !important; }
+.wl-essya-curti svg[aria-label="Mapa do Brasil por estado"] g[data-active] path { fill: #164F76 !important; }
+.wl-essya-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:not([data-active]) circle { fill: #164F76 !important; }
+.wl-essya-curti .wl-newsletter-card { background-color: #164F76 !important; background-image: linear-gradient(to right, #164F76 0%, #0F3A58 30%, rgb(8 20 32 / 0.45) 55%, rgb(8 20 32 / 0) 80%), url("./assets/100limites-newsletter-wing.jpg") !important; }
+@media (max-width: 767px) { .wl-essya-curti .wl-newsletter-card { background-image: linear-gradient(to bottom, rgb(22 79 118 / 0.85) 0%, rgb(8 20 32 / 0.6) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; } }
+.wl-essya-curti .wl-newsletter-cta { background-color: #FDC700 !important; color: #0F2A3D !important; }
+.wl-essya-curti .wl-newsletter-cta svg { color: #0F2A3D !important; }
+.wl-essya-curti .wl-resorts-btn { background-color: #164F76 !important; }
+.wl-essya-curti .wl-resorts-btn:hover { background-color: #0F3A58 !important; }
+.wl-essya-curti .wl-steps-card .wl-step-num { color: #164F76 !important; }
