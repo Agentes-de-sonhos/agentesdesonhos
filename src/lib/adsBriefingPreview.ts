@@ -973,7 +973,7 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     text: "A Curti Viagens oferece consultoria completa para diferentes viagens: destinos nacionais, internacionais e roteiros sob medida para casais, famílias com crianças e viajantes de alto padrão, com atendimento próximo e orientação especializada.",
   },
   destinations: [
-    { key: "brasil", image: "curtiBrasil", label: "Brasil", title: "Viagens de norte ao Sul pelo Brasil", text: "Destinos nacionais e resorts escolhidos para o seu estilo de viagem.", service: "pacotes", enabled: true, order: 1 },
+    { key: "brasil", image: "curtiBrasil", label: "Brasil", title: "Viagens de norte ao sul", text: "Destinos nacionais e resorts escolhidos para o seu estilo de viagem.", service: "pacotes", enabled: true, order: 1 },
     { key: "caribe-mexico", image: "curtiCaribe", label: "Caribe", title: "Caribe", text: "Praias, resorts e all inclusive para descansar com conforto.", service: "hospedagem", enabled: true, order: 2 },
     { key: "eua-canada", image: "orlandoMagicKingdom", label: "Estados Unidos • Florida", title: "Orlando e Miami", text: "Parques, compras e praias da Flórida com planejamento detalhado.", service: "pacotes", enabled: true, order: 3 },
     { key: "europa", image: "heroVarenna", label: "Europa", title: "Europa", text: "Cidades e paisagens em roteiros personalizados no seu ritmo.", service: "pacotes", enabled: true, order: 4 },
