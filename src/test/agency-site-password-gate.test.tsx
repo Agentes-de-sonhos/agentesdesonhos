@@ -24,10 +24,13 @@ vi.mock("@/lib/agencySitePassword", async (orig) => {
   };
 });
 
-const OWNERS = ["4d5a7157-59b6-4329-8768-7f8895e8ce92"];
+// A Essyatur (4d5a7157-…) saiu do ar protegido ao publicar o site oficial (02/11/2026);
+// o teste usa um tenant sintético injetado em PASSWORD_PROTECTED_TENANTS.
+const OWNERS = [FAE_LIKE];
 // 100 Limites, Paraíso Viagens e O Mundo em Cores estão livres de senha.
 const RELEASED = ["9433421c-2252-4030-acab-135c03ab009e", "d14b95d2-7eeb-4717-bfca-b76482ddfb4f", "428500de-552a-411b-9663-71f8bb2e4f37"];
 const FAE_LIKE = "00000000-0000-0000-0000-000000000001";
+import { PASSWORD_PROTECTED_TENANTS } from "@/lib/agencySitePassword";
 
 const info = (user_id: string): AgencyDomainInfo => ({
   user_id,
@@ -59,11 +62,15 @@ async function renderGate(userId: string, path = "/") {
 }
 
 beforeEach(() => {
+  PASSWORD_PROTECTED_TENANTS[FAE_LIKE] = "Tenant de teste";
   localStorage.clear();
   unlockMock.mockReset();
   verifyMock.mockReset();
 });
-afterEach(() => cleanup());
+afterEach(() => {
+  delete PASSWORD_PROTECTED_TENANTS[FAE_LIKE];
+  cleanup();
+});
 
 describe("configuração declarativa", () => {
   it("mantém a proteção dos tenants não liberados", () => {
