@@ -1517,3 +1517,11 @@ export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
   } as AgencySiteProfile["copy"],
   seo: { title: "Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins." },
 };
+
+/* Curti Viagens — perfil OFICIAL (curtiviagens.com.br). Aprovado por Fernando (02/11/2026). */
+export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
+  ...CURTI_VIAGENS_PREVIEW_PROFILE,
+  key: "curtiViagensOfficial",
+  presentation: false,
+  seo: { title: "Curti Viagens", description: "Curti Viagens: consultoria completa de viagens em Holambra (SP), desde 2011." },
+};

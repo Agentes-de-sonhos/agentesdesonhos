@@ -53,6 +53,8 @@ const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
   "www.dricaviagens.com.br": DRICA_VIAGENS,
   "drica-presentation.preview.local": DRICA_VIAGENS,
   "briefing-20-v1.preview.local": CURTI_VIAGENS,
+  "curtiviagens.com.br": CURTI_VIAGENS,
+  "www.curtiviagens.com.br": CURTI_VIAGENS,
 };
 
 export function resolveGoogleReviewsConfig(hostname: string | null | undefined) {

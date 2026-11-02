@@ -44,6 +44,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-17-v1.preview.local": "siteBaseEditorial",
   "briefing-19-v1.preview.local": "siteBaseEditorial",
   "briefing-20-v1.preview.local": "siteBaseEditorial",
+  "curtiviagens.com.br": "siteBaseEditorial",
+  "www.curtiviagens.com.br": "siteBaseEditorial",
   "briefing-21-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
   "dricaviagens.com.br": "siteBaseEditorial",
@@ -110,7 +112,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
           ? " wl-bardelli wl-bardelli-official"
           : h === "bardelli-presentation.preview.local"
           ? " wl-bardelli"
-          : h === "briefing-20-v1.preview.local"
+          : h === "briefing-20-v1.preview.local" || h === "curtiviagens.com.br" || h === "www.curtiviagens.com.br"
           ? " wl-curti"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
