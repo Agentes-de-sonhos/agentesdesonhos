@@ -1545,10 +1545,19 @@ body[data-booking-selection-bar] {
 .wl-curti #rodape { background-image: linear-gradient(to bottom, #FFFFFF 0%, hsl(245 60% 98.4%) 100%) !important; background-color: hsl(245 60% 98.4%) !important; }
 .wl-curti #rodape > div:last-child { background-color: hsl(245 60% 98.4%) !important; }
 /* Curti: mapa do Brasil — estados em verde sálvia, números e seleção em azul royal. */
-.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region] path { fill: rgb(99 150 130 / 0.32) !important; }
-.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:hover path { fill: rgb(99 150 130 / 0.6) !important; }
-.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-active] path { fill: #2502FF !important; }
-.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:not([data-active]) circle { fill: #2502FF !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region] path { fill: rgb(37 2 255 / 0.18) !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:hover path { fill: rgb(37 2 255 / 0.32) !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-active] path { fill: #639682 !important; }
+.wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:not([data-active]) circle { fill: #639682 !important; }
+/* Curti: grupo de WhatsApp no padrão 100 Limites (degradê escuro + foto da asa). */
+.wl-curti .wl-newsletter-card { background-color: hsl(0 0% 7%) !important; background-image: linear-gradient(to right, hsl(0 0% 7%) 0%, hsl(0 0% 7%) 35%, hsl(0 0% 7% / 0.6) 60%, hsl(0 0% 7% / 0.1) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; background-size: cover !important; background-position: right center !important; }
+@media (max-width: 767px) { .wl-curti .wl-newsletter-card { background-image: linear-gradient(to bottom, hsl(0 0% 7% / 0.75) 0%, hsl(0 0% 7% / 0.9) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; } }
+.wl-curti .wl-newsletter-card h2 { color: #fff !important; }
+.wl-curti .wl-newsletter-card p:not(:first-child) { color: rgb(255 255 255 / 0.8) !important; }
+.wl-curti .wl-newsletter-card .wl-kicker, .wl-curti .wl-newsletter-card .wl-kicker svg { color: #9CC7B6 !important; }
+.wl-curti .wl-newsletter-cta { background-color: #639682 !important; border-color: #639682 !important; color: #fff !important; }
+.wl-curti .wl-newsletter-cta svg { color: #fff !important; }
+.wl-curti .wl-newsletter-cta:hover { filter: brightness(0.95); }
 .wl-curti .wl-resorts-btn { background-color: #2502FF !important; color: #fff !important; }
 .wl-curti .wl-resorts-btn:hover { background-color: #639682 !important; }
 

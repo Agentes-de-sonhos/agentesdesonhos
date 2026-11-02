@@ -119,6 +119,7 @@ import mundoHeroPlacasFoto from "@/assets/whitelabel/mundo-hero-placas.png.asset
 import heroSantoriniShip from "@/assets/whitelabel/destinos-com-a-ju/hero-santorini-navio.webp.asset.json";
 import mundoGreciaVanessa from "@/assets/whitelabel/mundo-grecia-vanessa.jpg.asset.json";
 import mundoNclDestaque from "@/assets/whitelabel/mundo-ncl-destaque.webp.asset.json";
+import curtiHolambra from "@/assets/whitelabel/curti/holambra.png.asset.json";
 import heroAirportTraveler from "@/assets/whitelabel/destinos-com-a-ju/hero-viajante-aeroporto.webp.asset.json";
 import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
@@ -174,6 +175,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   // Só O Mundo em Cores usa (slide 1, foto das placas tropicais).
   heroMundoPlacasFoto: mundoHeroPlacasFoto.url,
   heroAirportTraveler: heroAirportTraveler.url,
+  curtiHolambra: curtiHolambra.url,
   heroJuMagicKingdom: heroJuMagicKingdom.url,
   parques: destinoParques,
   safari: destinoSafari,
