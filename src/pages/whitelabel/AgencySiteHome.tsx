@@ -153,8 +153,9 @@ const DESTINATION_IMAGES: Record<string, string> = {
   capitaisItalia: capitaisItaliaHero,
   europaCastelo: destinoEuropaCastelo.url,
   caribeMexico: destinoCaribeMexico.url,
-  // Só Curti Viagens usa (card Caribe).
+  // Só Curti Viagens usa (cards Caribe e Brasil).
   curtiCaribe: curtiCaribeCancun.url,
+  curtiBrasil: curtiFozIguacu.url,
   orlandoMagicKingdom: destinoOrlandoMk.url,
   portugalBelem: slPortugal.url,
   fernandoNoronha: slNoronha.url,
