@@ -1292,7 +1292,7 @@ export default function AgencySiteHome({
                               image.aspect === "square"
                                 ? "aspect-square"
                                 : aboutCopy.images!.length === 1 && aboutCopy.mediaAlign === "title" && aboutCopy.visitedDestinations?.presentation === "flags"
-                                ? "aspect-[4/3]"
+                                ? "aspect-[5/4]"
                                 : aboutCopy.images!.length === 1 && aboutCopy.mediaAlign === "title"
                                 ? "aspect-[4/5] md:aspect-auto md:h-full"
                                 : aboutCopy.images!.length === 1
