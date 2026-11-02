@@ -1535,8 +1535,8 @@ body[data-booking-selection-bar] {
   letter-spacing: -0.02em;
 }
 
-/* Curti Viagens: faixa de cruzeiros no verde sálvia do logotipo (#639682), texto branco. */
-.wl-curti .wl-alt-surface > #autoridade { background-color: #639682 !important; background-image: none !important; }
+/* Curti Viagens: faixa de cruzeiros em verde sálvia escuro (#4A7564), texto branco. */
+.wl-curti .wl-alt-surface > #autoridade { background-color: #4A7564 !important; background-image: none !important; }
 .wl-curti #autoridade [class*="text-[hsl(var(--wl-red))]"] { color: #FFFFFF !important; }
 .wl-curti #autoridade button.bg-primary { background-color: #FFFFFF !important; color: #2502FF !important; }
 .wl-curti #autoridade button.bg-primary:hover { background-color: #EEF5F2 !important; }
