@@ -1551,8 +1551,8 @@ body[data-booking-selection-bar] {
 .wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-active] path { fill: #4A7564 !important; }
 .wl-curti svg[aria-label="Mapa do Brasil por estado"] g[data-region]:not([data-active]) circle { fill: #4A7564 !important; }
 /* Curti: grupo de WhatsApp no padrão 100 Limites (degradê escuro + foto da asa). */
-.wl-curti .wl-newsletter-card { background-color: #0B0820 !important; background-image: linear-gradient(to right, #0B0820 0%, #12063F 30%, rgb(37 2 255 / 0.7) 60%, rgb(37 2 255 / 0.1) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; background-size: cover !important; background-position: right center !important; }
-@media (max-width: 767px) { .wl-curti .wl-newsletter-card { background-image: linear-gradient(to bottom, rgb(11 8 32 / 0.85) 0%, rgb(37 2 255 / 0.75) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; } }
+.wl-curti .wl-newsletter-card { background-color: #2502FF !important; background-image: linear-gradient(to right, #2502FF 0%, #1A0499 30%, rgb(11 8 32 / 0.75) 60%, rgb(11 8 32 / 0.15) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; background-size: cover !important; background-position: right center !important; }
+@media (max-width: 767px) { .wl-curti .wl-newsletter-card { background-image: linear-gradient(to bottom, rgb(37 2 255 / 0.85) 0%, rgb(11 8 32 / 0.85) 100%), url("./assets/100limites-newsletter-wing.jpg") !important; } }
 .wl-curti .wl-newsletter-card h2 { color: #fff !important; }
 .wl-curti .wl-newsletter-card p:not(:first-child) { color: rgb(255 255 255 / 0.8) !important; }
 .wl-curti .wl-newsletter-card .wl-kicker, .wl-curti .wl-newsletter-card .wl-kicker svg { color: #fff !important; }
@@ -1709,7 +1709,7 @@ body[data-booking-selection-bar] {
 
 /* Curti: "Como funciona" — círculos brancos com número azul royal. */
 .wl-curti .wl-steps-card .wl-step-num { background-color: #FFFFFF !important; color: #2502FF !important; }
-.wl-curti .wl-steps-card { background-color: #0B0820 !important; background-image: linear-gradient(135deg, #0B0820 0%, #12063F 45%, #2502FF 100%) !important; }
+.wl-curti .wl-steps-card { background-color: #0B0820 !important; background-image: linear-gradient(135deg, #2502FF 0%, #12063F 60%, #0B0820 100%) !important; }
 /* Curti: banner principal com degradê preto mais suave, preservando a leitura do texto. */
 .wl-curti #topo > div:first-child > div.absolute.inset-0 { opacity: 0.72; }
 .wl-curti #topo h1, .wl-curti #topo h1 ~ p { text-shadow: 0 2px 12px hsl(220 12% 7% / 0.45); }
