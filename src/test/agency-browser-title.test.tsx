@@ -13,8 +13,8 @@ describe("títulos da aba dos sites white-label", () => {
     ["www.destinoscomaju.com.br", "Destinos com a Ju"],
     ["paraisoviagens.com", "Paraiso Viagens"],
     ["www.paraisoviagens.com", "Paraiso Viagens"],
-    ["essyatur.com.br", "Essya Tur Viagens"],
-    ["www.essyatur.com.br", "Essya Tur Viagens"],
+    ["essyatur.com.br", "Essyatur"],
+    ["www.essyatur.com.br", "Essyatur"],
   ])("resolve %s sem afetar o conteúdo", (hostname, title) => {
     expect(resolveAgencyBrowserTitle(hostname)).toBe(title);
   });
@@ -26,7 +26,7 @@ describe("títulos da aba dos sites white-label", () => {
   it("aplica e restaura o título ao navegar", () => {
     document.title = "Título anterior";
     const { unmount } = renderHook(() => useAgencyBrowserTitle("www.essyatur.com.br"));
-    expect(document.title).toBe("Essya Tur Viagens");
+    expect(document.title).toBe("Essyatur");
     unmount();
     expect(document.title).toBe("Título anterior");
   });

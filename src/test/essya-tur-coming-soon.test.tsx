@@ -19,14 +19,14 @@ describe("Essyatur — white label em www.essyatur.com.br", () => {
   });
 
   it("perfil, tema e menu próprios só para o hostname da Essyatur", () => {
-    expect(resolveSiteProfile(HOST).key).toBe("essyaCurated");
+    expect(resolveSiteProfile(HOST).key).toBe("essyaOfficial");
     expect(isEditorialTheme(HOST)).toBe(true);
     expect(siteThemeRootClass(HOST)).toContain("wl-essya");
     expect(siteNavLinks(HOST).map((l) => l.label)).toEqual([
-      "Início", "Sobre a Essyatur", "Experiências", "Serviços",
-      "Inspirações", "Dúvidas Frequentes", "Contato", "Área do Cliente",
+      "Início", "Sobre", "Destinos", "Parques Orlando",
+      "Cruzeiros", "Resorts Brasil", "Blog",
     ]);
-    expect(resolveSiteProfile("100limites.tur.br").key).not.toBe("essyaCurated");
+    expect(resolveSiteProfile("100limites.tur.br").key).not.toBe("essyaOfficial");
     expect(siteNavLinks("exemplo.com.br").map((l) => l.label)).not.toContain("Sobre a Essyatur");
   });
 
