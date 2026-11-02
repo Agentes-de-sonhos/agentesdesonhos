@@ -174,7 +174,11 @@ export default function AgencyAdminLogin({
               <img
                 src={logoUrl}
                 alt={agencyName}
-                className="h-14 max-w-[180px] object-contain"
+                className={
+                  hostname.replace(/^www\./, "").includes("essyatur")
+                    ? "h-28 max-w-[360px] object-contain"
+                    : "h-14 max-w-[180px] object-contain"
+                }
               />
             ) : (
               <div
