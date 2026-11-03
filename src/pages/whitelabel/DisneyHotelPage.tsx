@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Bus, ChevronRight, ExternalLink, MapPin, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, Bus, ChevronRight, ExternalLink, MapPin, Sparkles, Star } from "lucide-react";
 import { HotelGallery } from "@/components/hotel-page/HotelGallery";
 import { ReviewsCarousel, Stars } from "@/components/hotel-page/HotelDetailsView";
 import googleData from "@/components/landing/disney/disneyHotelsGoogleData.json";
