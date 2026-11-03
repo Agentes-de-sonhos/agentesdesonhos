@@ -19,6 +19,7 @@
 - Image library: agency-scoped in SQL, links after service save; hotel photos safe-match on open, confirm ambiguity. Why: no orphans/wrong hotel.
 - Bardelli official profile reuses the gold-standard baseline without presentation/demo or unconfirmed blocks, palette via scoped `wl-bardelli-official`; go-live only in `agencySiteStatus`. Why: real tenant never inherits illustrative content.
 - Wallet modules: trip > owner agency > system (SQL). Why: isolation.
+- Public wallet slug gates accept legacy profile aliases or active domains through the shared agency-owner matcher, without changing password, lockout or team checks. Why: existing wallets remain valid on an agency's own domain without cross-tenant access.
 - Contextual video lessons: `contextual_tutorials` keyed by normalized route (`tutorialContextKey`, ids → `:id`) + per-user `contextual_tutorial_views`; button mounted once in `DashboardLayout`, hidden when a page has no videos. Why: videos without code changes.
 - Quote AI pilot (`quote-ai-compose`): off unless secrets `QUOTE_AI_PILOT_ENABLED=true` + caller auth id in `QUOTE_AI_PILOT_ALLOWED_USER_IDS` (roles grant nothing); UI via read-only `status` mode on preview hosts only, pending services in sessionStorage (`quoteAiPending`) applied after quote creation with confirm; quota reserved pre-inference in `daily_feature_usage`, fail closed; PDFs as text only. Why: bounded owner test.
 

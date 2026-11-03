@@ -414,6 +414,13 @@
       "when": 1793280867697,
       "tag": "0058_ads_197_full_platform_access",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1793667781812,
+      "tag": "0059_wallet_active_domain_slug_compatibility",
+      "breakpoints": true
     }
   ]
 }
