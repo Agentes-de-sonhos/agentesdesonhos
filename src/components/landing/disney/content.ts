@@ -1,4 +1,4 @@
-import castle from "@/assets/orlando/editorial/disney-castle.webp.asset.json";
+import { DISNEY_PARK_PHOTOS } from "./photos";
 import logoMk from "@/assets/orlando/parks/park-magic-kingdom.asset.json";
 import logoEpcot from "@/assets/orlando/parks/park-epcot.asset.json";
 import logoHs from "@/assets/orlando/parks/park-hollywood-studios.asset.json";
@@ -20,12 +20,12 @@ export const DISNEY_LOGOS: Record<DisneyThemeParkId | DisneyWaterParkId, string>
 };
 
 export interface DisneyHeroSlide { park: DisneyThemeParkId; kicker: string; title: string; subtitle: string; image?: string; alt?: string }
-/** Só o Magic Kingdom tem foto já existente no projeto (castelo, fonte de imprensa Disney). Os demais usam o logotipo, sem foto inventada. */
+/** Fotos oficiais do site Walt Disney World. */
 export const DISNEY_HERO: DisneyHeroSlide[] = [
-  { park: "magic-kingdom", kicker: "Magic Kingdom Park", title: "A fantasia clássica da Disney", subtitle: "O Castelo da Cinderela, atrações icônicas e o encanto das noites no parque.", image: castle.url, alt: "Castelo da Cinderela no Magic Kingdom Park" },
-  { park: "epcot", kicker: "EPCOT", title: "Culturas, descoberta e festivais", subtitle: "World Showcase, atrações de ciência e imaginação e festivais ao longo do ano." },
-  { park: "hollywood-studios", kicker: "Disney's Hollywood Studios", title: "Entre no mundo do cinema", subtitle: "Star Wars: Galaxy's Edge, Toy Story Land e espetáculos noturnos." },
-  { park: "animal-kingdom", kicker: "Disney's Animal Kingdom Theme Park", title: "Natureza, animais e aventura", subtitle: "Pandora, safáris e expedições em um parque dedicado aos animais." },
+  { park: "magic-kingdom", kicker: "Magic Kingdom Park", title: "A fantasia clássica da Disney", subtitle: "O Castelo da Cinderela, atrações icônicas e o encanto das noites no parque.", image: DISNEY_PARK_PHOTOS["magic-kingdom"].url, alt: "Castelo da Cinderela no Magic Kingdom Park" },
+  { park: "epcot", kicker: "EPCOT", title: "Culturas, descoberta e festivais", subtitle: "World Showcase, atrações de ciência e imaginação e festivais ao longo do ano.", image: DISNEY_PARK_PHOTOS.epcot.url, alt: "Spaceship Earth no EPCOT" },
+  { park: "hollywood-studios", kicker: "Disney's Hollywood Studios", title: "Entre no mundo do cinema", subtitle: "Star Wars: Galaxy's Edge, Toy Story Land e espetáculos noturnos.", image: DISNEY_PARK_PHOTOS["hollywood-studios"].url, alt: "The Twilight Zone Tower of Terror no Disney's Hollywood Studios" },
+  { park: "animal-kingdom", kicker: "Disney's Animal Kingdom Theme Park", title: "Natureza, animais e aventura", subtitle: "Pandora, safáris e expedições em um parque dedicado aos animais.", image: DISNEY_PARK_PHOTOS["animal-kingdom"].url, alt: "Tree of Life no Disney's Animal Kingdom" },
 ];
 
 export interface DisneyPark { id: DisneyThemeParkId | DisneyWaterParkId; name: string; description: string; highlights: string[]; source: string }
