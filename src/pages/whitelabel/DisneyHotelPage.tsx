@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { AlertTriangle, ArrowLeft, Bus, ChevronRight, ExternalLink, MapPin, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, Bus, ChevronRight, ExternalLink, MapPin, Sparkles, Star } from "lucide-react";
 import { HotelGallery } from "@/components/hotel-page/HotelGallery";
 import { ReviewsCarousel, Stars } from "@/components/hotel-page/HotelDetailsView";
 import googleData from "@/components/landing/disney/disneyHotelsGoogleData.json";
@@ -105,7 +105,6 @@ export default function DisneyHotelPage({ info }: { info: AgencyDomainInfo }) {
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-muted-foreground">{DISNEY_HOTEL_BENEFITS.map((b) => <li key={b}>• {b}</li>)}</ul>
               </section>
             )}
-            {hotel.notice && <p className="flex gap-2 rounded-md border border-border bg-muted/50 p-4 text-sm text-muted-foreground"><AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />{hotel.notice}</p>}
           </div>
           <aside className="space-y-6">
             <section className="overflow-hidden rounded-2xl border border-border bg-card">
