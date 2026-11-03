@@ -28,6 +28,7 @@ import {
 } from "./orlandoCatalog";
 import { disneyMin, estimate, getExperience, tripCalendarDays, universalMin } from "./orlandoPlanning";
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
+import { isDisneyPreviewRouteEnabled } from "@/lib/disneyPreviewGate";
 import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { DisneyParkMapTrigger, isParkMapId, type ParkMapId } from "./DisneyParkMapDialog";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -113,6 +114,11 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   const stripRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const showUniversalPage = isUniversalLandingEnabled(hostname);
+  const showDisneyPage = isDisneyPreviewRouteEnabled(hostname ?? "");
+  const landingHref = (id: string): string | null =>
+    id === "universal" && showUniversalPage ? agencySiteHref("/universal")
+      : id === "disney" && showDisneyPage ? agencySiteHref("/disney")
+      : null;
   const compactSelection = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br)$/i.test(hostname.replace(/\.$/, ""));
   const { submit, state, error } = useAgencySiteRequest(hostname);
 
@@ -382,6 +388,10 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                         <DisneyParkMapTrigger park={c.id === "legoland" ? "legoland-florida" : c.id === "ksc" ? "kennedy-space-center" : "icon-park"} className="h-full w-full">
                           <img src={CARD_LOGOS[c.id]} alt={`Logotipo ${c.title}`} draggable={false} loading="lazy" className="max-h-16 max-w-full object-contain" />
                         </DisneyParkMapTrigger>
+                      ) : CARD_LOGOS[c.id] && landingHref(c.id) ? (
+                        <a href={landingHref(c.id)!} aria-label={`Saiba mais sobre ${c.title}`} className="flex h-full w-full items-center justify-center">
+                          <img src={CARD_LOGOS[c.id]} alt={`Logotipo ${c.title}`} draggable={false} loading="lazy" className="max-h-16 max-w-full object-contain" />
+                        </a>
                       ) : CARD_LOGOS[c.id] ? (
                         <img src={CARD_LOGOS[c.id]} alt={`Logotipo ${c.title}`} draggable={false} loading="lazy" className="max-h-16 max-w-full object-contain" />
                       ) : null}
@@ -389,7 +399,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                     <h3 className="mt-4 text-base font-semibold text-foreground">{c.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.description}</p>
                     {(CARD_PARKS[c.id] ?? []).some((p) => PARK_LOGOS[p]) && (
-                      <div className={cn("pt-4", showUniversalPage && c.id === "universal" ? "" : "mt-auto")}>
+                      <div className={cn("pt-4", landingHref(c.id) ? "" : "mt-auto")}>
                         <Dialog>
                           <DialogTrigger asChild>
                             <button type="button" className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground underline-offset-4 transition hover:text-primary hover:underline">
@@ -422,9 +432,9 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                         </div>
                       </div>
                     )}
-                    {showUniversalPage && c.id === "universal" && (
+                    {landingHref(c.id) && (
                       <Button asChild variant="outline" className="mt-auto w-full translate-y-0">
-                        <a href={agencySiteHref("/universal")} className="mt-4">Saiba mais</a>
+                        <a href={landingHref(c.id)!} className="mt-4">Saiba mais</a>
                       </Button>
                     )}
                     {STRIP_EXPLORE_MAPS[c.id] && (
