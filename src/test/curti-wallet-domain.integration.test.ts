@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { createClient } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 
