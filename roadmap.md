@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Corrigir todas as carteiras Curti: compatibilidade do slug do domínio com links legados, preservando senha e isolamento; validar RPCs e abertura real.
 - [x] Capitais da Itália: noites reais, câmbio `fx-rate`, timeline aberta, efeitos sutis e solicitador por saída; 31 testes e telas 1280/768/390/360 aprovados, pedido real vinculado ao CRM Drica, e-mail/WhatsApp agência aceitos pelos serviços; limitações em docs/validacao-capitais-italia-ajustes.md, sem publicar.
 - [x] Liberar plano completo ADS R$ 197 no servidor para todos os assinantes: migration 0058 aplicada (recursos, 1.000 usos de IA, reservas/PJ), 32 testes aprovados, legenda real gerada e exibida na sessão de Bárbara e gate de reservas confirmado; preservar R$ 167, cobranças e isolamento. Sem publicação da aplicação; demais fluxos de ferramentas não exercitados individualmente.
 - [x] Novembro: segunda rodada visual (hero, categorias, ofertas, Radar e CTA); 6 testes aprovados, QA 1280/768/390/360 sem overflow, quatro cards/botões alinhados, filtros e diálogos demonstrativos verificados, zero chamadas ao backend; cabeçalho/rodapé preservados, sem publicação.
