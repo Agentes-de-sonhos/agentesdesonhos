@@ -40,6 +40,10 @@ import {
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
+import { NovemberHomeTeaser } from "@/components/campaign/NovemberHomeTeaser";
+
+/** Seção sintética (só O Mundo em Cores), fora do catálogo de seções. */
+const NOVEMBER_TEASER_KEY = "novemberTeaser" as AgencySectionKey;
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyVisaConsultSection } from "@/components/whitelabel/AgencyVisaConsultSection";
 import { UsVisaHomeTeaser } from "@/components/whitelabel/UsVisaHomeTeaser";
@@ -548,7 +552,13 @@ export default function AgencySiteHome({
       typeof dmcOverride === "object"
         ? { ...dmcOverride, enabled: (dmcOverride.enabled ?? true) && !!dmc }
         : { enabled: !!dmc && dmcOverride !== false };
-    return resolveSections(overrides);
+    const resolved = resolveSections(overrides);
+    // O Mundo em Cores: resumo das Oportunidades de Novembro logo antes do Xcaret.
+    if (profile.key === "mundoEmCoresBriefing14") {
+      const at = resolved.findIndex((s) => s.key === "modules");
+      if (at >= 0) resolved.splice(at, 0, { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" });
+    }
+    return resolved;
   }, [dmc, profile, labPresentation?.sections]);
   const modules = useMemo(() => {
     const list = resolveModules(undefined, profile.modules);
@@ -676,6 +686,16 @@ export default function AgencySiteHome({
     : null;
 
   const renderSection = (key: AgencySectionKey) => {
+    if (key === NOVEMBER_TEASER_KEY) {
+      return (
+        <NovemberHomeTeaser
+          key={key}
+          hostname="omundoemcores.com.br"
+          container={container}
+          heading={<SectionHeading eyebrow="OPORTUNIDADES DE NOVEMBRO" title="Condições e roteiros selecionados para este mês" subtitle="Destaques da semana para viajar ainda em 2026 ou planejar 2027 com antecedência." editorial={editorial} />}
+        />
+      );
+    }
     switch (key) {
       case "dmc":
         if (!dmc) return null;
