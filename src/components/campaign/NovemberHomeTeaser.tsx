@@ -12,8 +12,10 @@ const FALLBACK_CATEGORIES = ["praias", "cruzeiros", "familia"] as const;
 
 /**
  * Resumo da página Oportunidades de Novembro na Home da O Mundo em Cores.
- * Mostra até 4 ofertas reais marcadas para "novembro", em uma única linha no
- * desktop; sem ofertas, mostra categorias da campanha (nunca fictícias).
+ * Mostra até 4 ofertas reais marcadas para "novembro": galeria deslizante
+ * (passar o dedo) no mobile com o botão "Ver todas as ofertas" logo após a
+ * última oferta; grade em linha única no desktop. Sem ofertas, mostra
+ * categorias da campanha (nunca fictícias).
  */
 export function NovemberHomeTeaser({ hostname, container, heading }: { hostname: string; container: string; heading: ReactNode }) {
   const { data: publicOffers = [] } = usePublicOffers(hostname);
@@ -32,10 +34,11 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
           <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" width={1254} height={1254} className="hidden h-auto w-36 shrink-0 self-center md:block lg:w-44" />
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Mobile: galeria horizontal deslizante (passar o dedo); sm+: grade */}
+        <div className="mt-8 -mx-4 grid snap-x snap-mandatory grid-flow-col auto-cols-[78%] gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:snap-none sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
           {offers.length
             ? offers.map((offer) => (
-                <a key={offer.id} href={pageHref} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+                <a key={offer.id} href={pageHref} className="group snap-center overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
                   {offer.imageOnly ? (
                     <img src={offer.image} alt={offer.alt} loading="lazy" className="block h-auto w-full" />
                   ) : (
@@ -56,7 +59,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
             : FALLBACK_CATEGORIES.map((id) => {
                 const cat = campaignCategories.find((c) => c.id === id)!;
                 return (
-                  <a key={id} href={pageHref} className="group relative block overflow-hidden rounded-2xl">
+                  <a key={id} href={pageHref} className="group relative block snap-center overflow-hidden rounded-2xl">
                     <img src={cat.image} alt={cat.alt} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent" />
                     <span className="absolute bottom-4 left-5 right-5 flex items-center justify-between text-lg font-semibold text-background">
@@ -66,6 +69,11 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
                 );
               })}
         </div>
+
+        {/* Mobile: botão logo depois da última oferta da galeria */}
+        <Button asChild variant="outline" className="mt-5 w-full sm:hidden">
+          <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
+        </Button>
 
         <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 lg:flex-row lg:items-center">
@@ -78,7 +86,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
             </div>
             <Button asChild className="shrink-0 self-start lg:self-auto"><a href={radarHref}>Ativar Radar de Oportunidades</a></Button>
           </div>
-          <Button asChild variant="outline" className="shrink-0 self-start md:self-auto">
+          <Button asChild variant="outline" className="hidden shrink-0 self-start md:inline-flex">
             <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
           </Button>
         </div>
