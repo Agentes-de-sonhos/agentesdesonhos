@@ -9559,11 +9559,13 @@ export type Database = {
         Row: {
           agency_owner_id: string
           base_pax: number | null
+          campaign_category: string | null
           category: string
           compare_at_price: number | null
           cover_url: string | null
           created_at: string
           created_by: string | null
+          cta_url: string | null
           currency: string
           customized_fields: string[]
           description: string | null
@@ -9573,6 +9575,7 @@ export type Database = {
           expires_at: string | null
           gallery: Json
           id: string
+          image_only: boolean
           included_services: Json
           last_synced_at: string | null
           max_installments: number | null
@@ -9601,11 +9604,13 @@ export type Database = {
         Insert: {
           agency_owner_id: string
           base_pax?: number | null
+          campaign_category?: string | null
           category?: string
           compare_at_price?: number | null
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          cta_url?: string | null
           currency?: string
           customized_fields?: string[]
           description?: string | null
@@ -9615,6 +9620,7 @@ export type Database = {
           expires_at?: string | null
           gallery?: Json
           id?: string
+          image_only?: boolean
           included_services?: Json
           last_synced_at?: string | null
           max_installments?: number | null
@@ -9643,11 +9649,13 @@ export type Database = {
         Update: {
           agency_owner_id?: string
           base_pax?: number | null
+          campaign_category?: string | null
           category?: string
           compare_at_price?: number | null
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
+          cta_url?: string | null
           currency?: string
           customized_fields?: string[]
           description?: string | null
@@ -9657,6 +9665,7 @@ export type Database = {
           expires_at?: string | null
           gallery?: Json
           id?: string
+          image_only?: boolean
           included_services?: Json
           last_synced_at?: string | null
           max_installments?: number | null

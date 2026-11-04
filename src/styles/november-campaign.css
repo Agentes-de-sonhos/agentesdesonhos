@@ -362,3 +362,14 @@
   .campaign-hero-inner { align-items: flex-start; }
   .campaign-emblem { align-self: flex-start; top: 0; }
 }
+
+/* Reposicionamento do selo (desktop, tablet e mobile) */
+@media (min-width: 1025px) {
+  .campaign-emblem { left: -220px; top: 40px; }
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  .campaign-emblem { width: 170px; left: -60px; top: 20px; }
+}
+@media (max-width: 767px) {
+  .campaign-emblem { left: 0; top: 0; align-self: center; margin: 0 auto 8px; width: 120px; }
+}
