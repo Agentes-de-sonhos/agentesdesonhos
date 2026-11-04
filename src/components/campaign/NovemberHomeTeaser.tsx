@@ -33,7 +33,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
           </Button>
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {offers.length
             ? offers.map((offer) => (
                 <a key={offer.id} href={pageHref} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
