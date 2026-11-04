@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -69,6 +69,7 @@ export type AgencySiteProfileKey =
   /** Rascunho técnico isolado do briefing 21 (Karibu); sem domínio público, vínculo pendente. */
   | "karibuBriefing21"
   | "pristurBriefing22"
+  | "arenaBriefing23"
   /** Prévia Essyatur na estrutura da Curti (host sintético). */
   | "essyaCurtiPreview"
   /** Essyatur — site oficial em essyatur.com.br (estrutura da Curti). */
@@ -1217,6 +1218,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   /** Host sintético do rascunho briefing-21 — sem cadastro encontrado por CNPJ; nada vinculado. */
   "briefing-21-v1.preview.local": "karibuBriefing21",
   "briefing-22-v1.preview.local": "pristurBriefing22",
+  "briefing-23-v1.preview.local": "arenaBriefing23",
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
   "dricaviagens.com.br": "dricaOfficial",
   "www.dricaviagens.com.br": "dricaOfficial",
@@ -1246,6 +1248,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   curtiViagensOfficial: CURTI_VIAGENS_OFFICIAL_PROFILE,
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,
   pristurBriefing22: PRISTUR_PREVIEW_PROFILE,
+  arenaBriefing23: ARENA_PREVIEW_PROFILE,
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
   essyaOfficial: ESSYA_OFFICIAL_PROFILE,
 };

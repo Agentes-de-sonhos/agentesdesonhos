@@ -104,6 +104,7 @@ import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png
 import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
 import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
+import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
@@ -1795,4 +1796,112 @@ ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID] = {
   jobId: PRISTUR_PREVIEW_JOB_ID, info: PRISTUR_PREVIEW_INFO, profile: PRISTUR_PREVIEW_PROFILE,
   notice: "Pristur Viagens · prévia técnica · marca e paleta pendentes · imagens genéricas · vinculação pendente · sem envios ou publicação",
   documentTitle: "Prévia para revisão — Pristur Viagens", realAgency: true,
+};
+
+/* Arena Travel Group: local-only fixture (briefing-23-v1). No unambiguous
+ * account match; synthetic identity, no tenant/domain/permission link. */
+export const ARENA_PREVIEW_JOB_ID = "briefing-23-v1";
+export const ARENA_PREVIEW_HOST = "briefing-23-v1.preview.local";
+export const ARENA_PREVIEW_PATH = `/ads-briefing-preview/${ARENA_PREVIEW_JOB_ID}`;
+export const ARENA_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad23",
+  agency_slug: "", public_slug: null, is_primary: false,
+  hostname: ARENA_PREVIEW_HOST,
+  agency_name: "ARENA TRAVEL GROUP", owner_name: "Rafael Souza",
+  logo_url: arenaLogo.url, cover_image_url: null,
+  // Paleta informada: preto e branco; terciário neutro claro derivado só para legibilidade.
+  primary_color: "#000000", secondary_color: "#000000",
+  tertiary_color: "#F4F4F4", secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: "#FFFFFF", phone: null, city: "Florianópolis", state: "SC",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const ARENA_PREVIEW_PROFILE = buildGoldStandardProfile("arenaBriefing23", {
+  navDensity: "compact", visaHome: false, featuredExperience: undefined,
+  dmc: undefined, credentials: undefined, team: undefined,
+  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+  sections: {
+    dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
+    testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
+    newsletter: { enabled: false }, authority: { enabled: false },
+  },
+  nav: [
+    { label: "Início", to: "/" }, { label: "Especialidades", to: "/#assinatura" },
+    { label: "Destinos", to: "/#destinos" }, { label: "Resorts", to: "/#resorts" },
+    { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+  ],
+  heroPresentation: { kicker: "FLORIANÓPOLIS · SC · DESDE 2024", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "ARENA TRAVEL GROUP", subtitle: "Consultoria completa para diferentes viagens, com atendimento e suporte do início ao fim.", image: "europa", order: 1, enabled: true },
+    { title: "Grupos e viagens acompanhadas", subtitle: "Para grupos de amigos e famílias com crianças. Imagem genérica de inspiração.", image: "grupos", order: 2, enabled: true },
+    { title: "Resorts e all-inclusive", subtitle: "Descanso planejado com orientação em cada etapa. Imagem genérica de inspiração.", image: "resort", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "GRUPOS · INTERNACIONAIS · SOB MEDIDA",
+    title: "Consultoria completa para diferentes viagens",
+    text: "Conhecimento profundo de destinos e produtos, com atendimento e suporte do início ao fim. Grupos e viagens acompanhadas, destinos internacionais e viagens sob medida orientam o trabalho da ARENA TRAVEL GROUP.",
+  },
+  destinations: [
+    { key: "resorts", image: "resort", label: "Resorts e all-inclusive", title: "Resorts e all-inclusive", text: "Uma das prioridades da agência para famílias e grupos. Imagem genérica de inspiração.", service: "hospedagem", enabled: true, order: 1 },
+    { key: "europa", image: "europa", label: "Europa", title: "Europa", text: "Destinos internacionais planejados sob medida. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 2 },
+    { key: "ski", image: "escandinavia", label: "Neve", title: "Viagens de ski", text: "Viagens de ski entre as prioridades da agência. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 3 },
+    { key: "grupos", image: "grupos", label: "Grupos", title: "Grupos e viagens acompanhadas", text: "Para grupos de amigos e famílias com crianças. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 4 },
+  ],
+  modules: [
+    { key: "resorts", title: "Resorts e all-inclusive", text: "Descanso com planejamento e suporte.", image: "resort", service: "hospedagem", enabled: true, order: 1 },
+    { key: "europa", title: "Europa", text: "Roteiros internacionais sob medida. Imagem genérica.", image: "europa", service: "pacotes", enabled: true, order: 2 },
+    { key: "ski", title: "Viagens de ski", text: "Destinos de neve para grupos e famílias. Imagem genérica.", image: "escandinavia", service: "pacotes", enabled: true, order: 3 },
+    { key: "grupos", title: "Grupos e viagens acompanhadas", text: "Grupos de amigos e famílias com crianças. Imagem genérica.", image: "grupos", service: "pacotes", enabled: true, order: 4 },
+  ],
+  highlights: [
+    { title: "Grupos de amigos", text: "Viagens em grupo e acompanhadas estão entre as especialidades da agência.", service: "pacotes", cta: "Planejar em grupo" },
+    { title: "Famílias com crianças", text: "Planejamento para famílias, com orientação do início ao fim.", service: "pacotes", cta: "Planejar em família" },
+    { title: "Viagens sob medida", text: "Destinos internacionais pensados para cada perfil de viajante.", service: "pacotes", cta: "Planejar minha viagem" },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Rafael Souza, sócio proprietário",
+    text: "Após a carreira profissional no futebol e experiências de morar e viajar pelo mundo, Rafael Souza passou a ajudar amigos e familiares a planejar suas viagens.\n\nDessa vivência nasceu, em 2024, a ARENA TRAVEL GROUP, em Florianópolis (SC), para oferecer orientação e suporte em cada etapa da viagem.\n\nA agência reúne vivência frequente em destinos, conhecimento local, capacitações e parcerias com fornecedores, com foco em grupos e viagens acompanhadas, destinos internacionais e viagens sob medida.",
+    badge: { value: "Desde 2024", label: "ARENA TRAVEL GROUP" }, media: "hidden", showLocation: true, ownerName: "Rafael Souza",
+  },
+  differentials: [
+    { title: "Conhecimento de destinos", text: "Vivência frequente em destinos e conhecimento local.", icon: "conferido" },
+    { title: "Capacitações e fornecedores", text: "Capacitações e parcerias com fornecedores para orientar as escolhas.", icon: "fornecedores" },
+    { title: "Consultoria completa", text: "Planejamento, orçamento e reservas para diferentes viagens.", icon: "consultivo" },
+    { title: "Suporte do início ao fim", text: "Orientação pré-embarque, acompanhamento durante a viagem e pós-retorno.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa pelo WhatsApp, e-mail ou telefone sobre a viagem.",
+    "Planejamento, orçamento e reservas.",
+    "Orientação pré-embarque.",
+    "Acompanhamento durante a viagem e pós-retorno.",
+  ],
+  faq: [
+    { q: "Quem é responsável pela agência?", a: "Rafael Souza, sócio proprietário da ARENA TRAVEL GROUP." },
+    { q: "Desde quando a agência atua?", a: "A ARENA TRAVEL GROUP iniciou suas atividades em 2024, em Florianópolis (SC)." },
+    { q: "Quais são as especialidades?", a: "Grupos e viagens acompanhadas, destinos internacionais e viagens sob medida." },
+    { q: "Para quem são as viagens?", a: "Principalmente grupos de amigos e famílias com crianças." },
+    { q: "Quais são os destinos prioritários?", a: "Resorts e all-inclusive, Europa e viagens de ski." },
+    { q: "Como funciona o atendimento?", a: "Pelo WhatsApp, e-mail e telefone, com planejamento, orçamento e reservas, orientação pré-embarque, acompanhamento durante a viagem e pós-retorno." },
+    { q: "Quais são os canais de contato?", a: "WhatsApp 47 99269-0807, e-mail arenatravel@arenatravelgroup.com.br e Instagram @arenatravelgroup." },
+  ],
+  copy: {
+    modules: { kicker: "PRIORIDADES", title: "Destaques da ARENA TRAVEL GROUP", subtitle: "Resorts e all-inclusive, Europa, ski e grupos." },
+    destinations: { kicker: "DESTINOS", title: "Destinos para a sua próxima viagem", subtitle: "Imagens genéricas de inspiração." },
+    highlights: { kicker: "PERFIS", title: "Viagens para cada grupo", subtitle: "Grupos de amigos, famílias com crianças e viagens sob medida." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Orientação e suporte em cada etapa", subtitle: "Conhecimento de destinos e produtos." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Do planejamento ao retorno", subtitle: "Atendimento pelo WhatsApp, e-mail e telefone." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Sobre a ARENA TRAVEL GROUP" },
+  },
+  footer: {
+    description: "Consultoria completa de viagens em Florianópolis (SC), desde 2024. Atendimento e suporte do início ao fim.",
+    phone: "WhatsApp 47 99269-0807", email: "arenatravel@arenatravelgroup.com.br",
+    instagram: "https://www.instagram.com/arenatravelgroup/", instagramLabel: "@arenatravelgroup",
+    address: "Florianópolis/SC", showLocation: true, legalLinksDisabled: true,
+  },
+  seo: { title: "Prévia para revisão — ARENA TRAVEL GROUP", description: "Prévia técnica da ARENA TRAVEL GROUP; sem envios ou publicação." },
+}, "ARENA TRAVEL GROUP");
+ADS_PREVIEW_FIXTURES[ARENA_PREVIEW_JOB_ID] = {
+  jobId: ARENA_PREVIEW_JOB_ID, info: ARENA_PREVIEW_INFO, profile: ARENA_PREVIEW_PROFILE,
+  notice: "prévia técnica para revisão · vinculação de conta pendente · sem envios ou publicação",
+  documentTitle: "Prévia para revisão — ARENA TRAVEL GROUP", realAgency: true,
 };
