@@ -13,6 +13,7 @@ import {
   type Choice3, type DisneyThemeParkId, type DisneyWaterParkId, type PeriodMode,
 } from "@/lib/disneyTickets";
 import { DISNEY_EVENTS, DISNEY_LOGOS, DISNEY_WATER_CALENDAR_URL, EVENT_STATUS_LABEL } from "./content";
+import { isJuUniversalProfile } from "@/lib/universalLandingAccess";
 import juPortrait from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-magic-kingdom.png.asset.json";
 
 const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
@@ -62,6 +63,7 @@ type StepId = "pick" | "period" | "days" | "hopper" | "water" | "summary" | "con
 
 export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
   const { submit, state, error, reset, simulated } = useDisneyPreviewRequest(hostname);
+  const isJu = isJuUniversalProfile(hostname);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);
@@ -170,8 +172,8 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
           </>
         ) : (
           <>
-            <h3 className="mt-4 text-2xl font-semibold">Recebi sua solicitação!</h3>
-            <p className="mt-3 leading-7 text-muted-foreground">Vou analisar seu plano e confirmar o ingresso, a validade e as condições para as suas datas. Em breve entro em contato pelo WhatsApp.</p>
+            <h3 className="mt-4 text-2xl font-semibold">{isJu ? "Recebi sua solicitação!" : "Recebemos sua solicitação!"}</h3>
+            <p className="mt-3 leading-7 text-muted-foreground">{isJu ? "Vou analisar seu plano e confirmar o ingresso, a validade e as condições para as suas datas. Em breve entro em contato pelo WhatsApp." : "Vamos analisar seu plano e confirmar o ingresso, a validade e as condições para as suas datas. Em breve entraremos em contato pelo WhatsApp."}</p>
           </>
         )}
       </div>
@@ -181,13 +183,13 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
   return (
     <div className="mx-auto max-w-4xl space-y-6" data-testid="disney-configurator">
       <div className="flex flex-col items-center gap-6 rounded-xl bg-card p-6 shadow-sm sm:flex-row md:p-8">
-        <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
+        {isJu && <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
           <img src={juPortrait.url} alt="Juliana Neves Sanches, da Destinos com a Ju" className="absolute inset-0 h-full w-full scale-[2] object-cover" style={{ objectPosition: "92.7% 50%", transformOrigin: "50% 11%" }} />
-        </span>
-        <div className="text-center sm:text-left">
-          <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>
+        </span>}
+        <div className={isJu ? "text-center sm:text-left" : "w-full text-center"}>
+          {isJu && <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>}
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos planejar seus ingressos Disney?</h2>
-          <p className="mt-3 leading-7 text-muted-foreground">Me conte o que você quer viver no Walt Disney World. Eu indico a opção de ingresso para a cotação e confirmo produto, validade e preço para as suas datas.</p>
+          <p className="mt-3 leading-7 text-muted-foreground">{isJu ? "Me conte o que você quer viver no Walt Disney World. Eu indico a opção de ingresso para a cotação e confirmo produto, validade e preço para as suas datas." : "Conte o que você quer viver no Walt Disney World. Indicamos a opção de ingresso para a cotação e confirmamos produto, validade e preço para as suas datas."}</p>
         </div>
       </div>
       {simulated && <p className="rounded-md border border-dashed border-border bg-muted/50 p-3 text-center text-xs text-muted-foreground">Prévia: os envios deste formulário são simulados e não chegam ao CRM.</p>}
@@ -356,7 +358,7 @@ export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
           <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           <label className="mt-6 flex items-start gap-3 text-sm leading-6 text-muted-foreground">
             <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-1" aria-label="Autorizo o contato" />
-            Autorizo a Destinos com a Ju a entrar em contato sobre esta cotação.
+            {isJu ? "Autorizo a Destinos com a Ju a entrar em contato sobre esta cotação." : "Autorizo a agência a entrar em contato sobre esta cotação."}
           </label>
           <Err>{errs.contact}</Err>
           {state === "error" && (

@@ -258,7 +258,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
           {isUniversalLandingEnabled(info.hostname) && (
             <Route path="/universal" element={<UniversalLandingPage info={info} />} />
           )}
-          {/* Disney: somente Destinos com a Ju e somente em hosts técnicos de prévia (não no domínio real). */}
+          {/* Disney: liberada para todas as agências. */}
           {isDisneyPreviewRouteEnabled(info.hostname) && (
             <Route path="/disney" element={<DisneyLandingPage info={info} />} />
           )}

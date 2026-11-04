@@ -1,10 +1,8 @@
-import { isTechnicalPreviewHost } from "@/lib/agencyDomains";
-import { resolveSiteProfile } from "@/lib/agencySiteProfile";
-
 /**
- * A experiência Disney existe apenas em PRÉVIA: perfil Destinos com a Ju (editorialRose)
- * acessado por host técnico (editor/preview/local com `?__agency_host`). O domínio real nunca a expõe.
+ * Páginas Disney (/disney e /disney/hoteis/:slug) liberadas para todas as agências white-label,
+ * em domínio real e em prévia. Conteúdo pessoal da Ju fica restrito ao perfil dela no configurador.
  */
-export function isDisneyPreviewRouteEnabled(agencyHostname: string, browserHostname = typeof window !== "undefined" ? window.location.hostname : ""): boolean {
-  return resolveSiteProfile(agencyHostname).key === "editorialRose" && isTechnicalPreviewHost(browserHostname);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function isDisneyPreviewRouteEnabled(_agencyHostname: string, _browserHostname?: string): boolean {
+  return true;
 }
