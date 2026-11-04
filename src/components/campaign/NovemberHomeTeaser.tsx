@@ -57,7 +57,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
             : FALLBACK_CATEGORIES.map((id) => {
                 const cat = campaignCategories.find((c) => c.id === id)!;
                 return (
-                  <a key={id} href={pageHref} className="group relative block overflow-hidden rounded-2xl">
+                  <a key={id} href={pageHref} className="group relative block snap-center overflow-hidden rounded-2xl">
                     <img src={cat.image} alt={cat.alt} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent" />
                     <span className="absolute bottom-4 left-5 right-5 flex items-center justify-between text-lg font-semibold text-background">
