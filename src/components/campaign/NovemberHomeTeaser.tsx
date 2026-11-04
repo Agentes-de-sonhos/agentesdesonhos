@@ -68,6 +68,11 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
               })}
         </div>
 
+        {/* Mobile: botão logo depois da última oferta da galeria */}
+        <Button asChild variant="outline" className="mt-5 w-full sm:hidden">
+          <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
+        </Button>
+
         <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 lg:flex-row lg:items-center">
             <div className="flex items-start gap-4">
