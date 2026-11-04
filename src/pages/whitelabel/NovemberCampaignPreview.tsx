@@ -8,7 +8,7 @@ import { isNovemberCampaignAllowed } from "@/lib/novemberCampaignAccess";
 import { CampaignHero } from "@/components/campaign/CampaignHero";
 import { CategoryRail } from "@/components/campaign/CategoryRail";
 import { FeaturedOffers } from "@/components/campaign/FeaturedOffers";
-import { OpportunityRadar, type RadarSelection } from "@/components/campaign/OpportunityRadar";
+import { OpportunityRadar } from "@/components/campaign/OpportunityRadar";
 import { ClosingCTA } from "@/components/campaign/ClosingCTA";
 import { campaignOfferFromPublic, filterCampaignOffers, novemberOffers, type CampaignOffer } from "@/components/campaign/novemberCampaignData";
 import { usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
@@ -41,7 +41,6 @@ export default function NovemberCampaignPreview() {
   const hasReal = realOffers.length > 0;
   const allowed = isNovemberCampaignAllowed(window.location.hostname, window.location.search);
   if (!allowed) return <BrowserRouter><NotFound /></BrowserRouter>;
-  const onSearch = (selection: RadarSelection) => { setCategory(selection.category); setPeriod(selection.period); };
   const offers = filterCampaignOffers(hasReal ? realOffers : novemberOffers, category, period);
   const onSelectOffer = (offer: CampaignOffer) => {
     // Oferta por imagem sem link: WhatsApp direto, já identificando a oferta.
@@ -63,7 +62,7 @@ export default function NovemberCampaignPreview() {
       <div className="november-campaign">
         <CampaignHero /><CategoryRail active={category} onSelect={id => { setCategory(id); setPeriod("todos"); }} />
         <FeaturedOffers real={hasReal} offers={offers} onSelect={onSelectOffer} onReset={() => { setCategory("todos"); setPeriod("todos"); }} />
-        <OpportunityRadar onSearch={onSearch} />
+        <OpportunityRadar hostname="omundoemcores.com.br" />
         <section className="campaign-differentials"><div className="campaign-container campaign-differential-grid">{differentials.map(item => <div className="campaign-differential" key={item.title}><item.icon aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.text}</p></div></div>)}</div></section>
         <ClosingCTA onContact={() => setContact(true)} />
       </div>
