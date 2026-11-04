@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { agencySiteHref } from "@/lib/agencyContextLink";
+import emblem from "@/assets/campaign/november-emblem.png.asset.json";
 import { campaignCategories, campaignImages, campaignOfferFromPublic } from "./novemberCampaignData";
 
 export const NOVEMBER_PAGE = "/oportunidades-novembro";
@@ -28,9 +29,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
       <div className={`${container} py-14 md:py-20`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0 flex-1 [&>div]:mb-0">{heading}</div>
-          <Button asChild variant="outline" className="shrink-0 self-start md:self-auto">
-            <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
-          </Button>
+          <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" width={1254} height={1254} loading="lazy" className="hidden h-auto w-36 shrink-0 self-center md:block lg:w-44" />
         </div>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -68,15 +67,20 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
               })}
         </div>
 
-        <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 md:flex-row md:items-center md:justify-between md:p-7">
-          <div className="flex items-start gap-4">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Compass aria-hidden="true" /></span>
-            <p className="text-pretty text-[15px] leading-relaxed text-muted-foreground">
-              <strong className="block text-base text-foreground">Não encontrou o destino ou a data que procurava?</strong>
-              Ative o Radar de Oportunidades e nossa equipe busca condições para o seu destino, período e orçamento.
-            </p>
+        <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 lg:flex-row lg:items-center">
+            <div className="flex items-start gap-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Compass aria-hidden="true" /></span>
+              <p className="text-[15px] leading-relaxed text-muted-foreground">
+                <strong className="block text-base text-foreground">Não encontrou o destino ou a data que procurava?</strong>
+                Ative o Radar de Oportunidades e nossa equipe busca condições<br className="hidden md:inline" /> para o seu destino, período e orçamento.
+              </p>
+            </div>
+            <Button asChild className="shrink-0 self-start lg:self-auto"><a href={radarHref}>Ativar Radar de Oportunidades</a></Button>
           </div>
-          <Button asChild className="shrink-0"><a href={radarHref}>Ativar Radar de Oportunidades</a></Button>
+          <Button asChild variant="outline" className="shrink-0 self-start md:self-auto">
+            <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
+          </Button>
         </div>
       </div>
     </section>
