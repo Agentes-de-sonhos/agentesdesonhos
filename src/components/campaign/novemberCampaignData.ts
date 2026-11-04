@@ -8,7 +8,7 @@ import heroBungalows from "@/assets/campaign/november-hero-bungalows.jpg";
 import coliseu from "@/assets/campaign/november-coliseu.jpg";
 import iguacu from "@/assets/campaign/november-iguacu.jpg";
 
-export const campaignImages = { hero: heroBungalows, closing: traveler };
+export const campaignImages = { hero: heroBungalows, closing: closingConsultant.url };
 export const campaignCategories = [
   { id: "praias", label: "Praias e Resorts", image: caribe.url, alt: "Mar turquesa no Caribe" },
   { id: "familia", label: "Família e Orlando", image: orlando.url, alt: "Castelo do Magic Kingdom em Orlando" },
