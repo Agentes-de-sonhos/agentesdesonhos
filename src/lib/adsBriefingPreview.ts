@@ -1683,3 +1683,116 @@ export const ESSYA_OFFICIAL_PROFILE: AgencySiteProfile = {
   } as AgencySiteProfile["inspirationDialog"],
   seo: { title: "Essyatur", description: "Essyatur: consultoria de viagens sob medida em São Paulo (SP), com mais de 10 anos de experiência." },
 };
+
+/* Pristur: local-only fixture. The authenticated briefing matched a profile
+ * without a public domain; no identifier or association is imported here. */
+export const PRISTUR_PREVIEW_JOB_ID = "briefing-22-v1";
+export const PRISTUR_PREVIEW_HOST = "briefing-22-v1.preview.local";
+export const PRISTUR_PREVIEW_PATH = `/ads-briefing-preview/${PRISTUR_PREVIEW_JOB_ID}`;
+export const PRISTUR_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad22",
+  agency_slug: "", public_slug: null, is_primary: false,
+  hostname: PRISTUR_PREVIEW_HOST,
+  agency_name: "Pristur Viagens", owner_name: "Priscila Vasconcelos",
+  logo_url: null, cover_image_url: null,
+  // Shared wl-site-base neutral fallbacks (222 47% 11%, 240 12% 97%),
+  // not an official palette. Explicit values prevent platform-blue fallback.
+  primary_color: "#0F1729", secondary_color: "#0F1729",
+  tertiary_color: "#F6F6F8", secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const PRISTUR_PREVIEW_PROFILE = buildGoldStandardProfile("pristurBriefing22", {
+  textualWordmark: true,
+  navDensity: "compact", visaHome: false, featuredExperience: undefined,
+  dmc: undefined, credentials: undefined, team: undefined,
+  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+  sections: {
+    dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
+    testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
+    newsletter: { enabled: false }, authority: { enabled: false },
+  },
+  nav: [
+    { label: "Início", to: "/" }, { label: "Especialidades", to: "/#assinatura" },
+    { label: "Destinos", to: "/#destinos" }, { label: "Parques Orlando", to: "/#ingressos-orlando" },
+    { label: "Resorts", to: "/#resorts" }, { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+  ],
+  heroPresentation: { kicker: "SÃO PAULO · SP · DESDE 2009", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "Pristur Viagens", subtitle: "Consultoria completa e planejamento para você viajar tranquilo, no Brasil e pelo mundo.", image: "orlandoMagicKingdom", order: 1, enabled: true },
+    { title: "Orlando e parques em família", subtitle: "Parques e entretenimento entre as prioridades para a sua próxima viagem.", image: "parques", order: 2, enabled: true },
+    { title: "Brasil, resorts e all-inclusive", subtitle: "Inspirações de descanso e destinos nacionais com planejamento para quem vai viajar.", image: "resort", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "FAMÍLIAS · PARQUES · NACIONAIS · INTERNACIONAIS",
+    title: "Consultoria completa para diferentes tipos de viagem",
+    text: "Desde 2009, a Pristur Viagens reúne consultoria e planejamento para o cliente viajar tranquilo. Famílias e parques, viagens nacionais e internacionais orientam as escolhas de destinos e experiências.",
+  },
+  destinations: [
+    { key: "eua-canada", image: "orlandoMagicKingdom", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Destinos prioritários para viagens internacionais, com destaque para Orlando e parques.", service: "pacotes", enabled: true, order: 1 },
+    { key: "brasil", image: "brasil", label: "Brasil", title: "Destinos nacionais", text: "Diferentes formas de conhecer o Brasil com consultoria e planejamento.", service: "pacotes", enabled: true, order: 2 },
+    { key: "resorts", image: "resort", label: "Resorts e all-inclusive", title: "Resorts no Brasil", text: "Hospedagens e experiências de descanso entre os destaques da Pristur.", service: "hospedagem", enabled: true, order: 3 },
+    { key: "gramado", image: "brasil", label: "Serra Gaúcha", title: "Gramado", text: "Gramado está entre os destaques para a próxima viagem nacional. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 4 },
+    { key: "caribe", image: "caribeMexico", label: "Caribe", title: "Caribe", text: "Destinos caribenhos e possibilidades de all-inclusive para o seu planejamento.", service: "pacotes", enabled: true, order: 5 },
+  ],
+  modules: [
+    { key: "orlando", title: "Orlando e parques", text: "Parques e entretenimento para viagens em família.", image: "orlandoMagicKingdom", service: "ingressos", enabled: true, order: 1 },
+    { key: "resorts", title: "Resorts no Brasil", text: "Descanso e all-inclusive entre as prioridades da viagem.", image: "resort", service: "hospedagem", enabled: true, order: 2 },
+    { key: "gramado", title: "Gramado", text: "Um dos destaques nacionais da Pristur. Imagem genérica de inspiração.", image: "brasil", service: "pacotes", enabled: true, order: 3 },
+    { key: "caribe", title: "Caribe", text: "Inspirações de destinos internacionais e all-inclusive.", image: "caribeMexico", service: "pacotes", enabled: true, order: 4 },
+    { key: "brasil", title: "Viagens nacionais", text: "Consultoria completa para conhecer diferentes destinos no Brasil.", image: "litoral", service: "pacotes", enabled: true, order: 5 },
+    { key: "internacionais", title: "Estados Unidos e Canadá", text: "Prioridades internacionais no planejamento da sua viagem.", image: "parques", service: "pacotes", enabled: true, order: 6 },
+  ],
+  highlights: [
+    { title: "Viagens em família", text: "Famílias e parques estão entre as especialidades da Pristur.", service: "pacotes", cta: "Planejar em família" },
+    { title: "Descanso em resorts", text: "Resorts no Brasil e all-inclusive entre os destaques para viajar.", service: "hospedagem", cta: "Planejar meu descanso" },
+    { title: "Parques e entretenimento", text: "Orlando e parques como inspiração para a próxima viagem.", service: "ingressos", cta: "Planejar os parques" },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Priscila Vasconcelos, fundadora e consultora",
+    text: "A Pristur Viagens atua desde 2009 com consultoria completa para diferentes tipos de viagem. Priscila Vasconcelos é a fundadora e consultora, responsável por um posicionamento voltado ao planejamento para o cliente viajar tranquilo.\n\nFamílias e parques, viagens nacionais e internacionais compõem as especialidades da agência. Estados Unidos e Canadá, Brasil, resorts e all-inclusive, parques e entretenimento estão entre as prioridades.\n\nOrlando e parques, resorts no Brasil, Gramado, Caribe e destinos nacionais são destaques para inspirar a próxima viagem. Em São Paulo (SP), a Pristur apresenta seus canais de atendimento pelo WhatsApp e por e-mail.",
+    badge: { value: "Desde 2009", label: "Pristur Viagens" }, media: "hidden", showLocation: true, ownerName: "Priscila Vasconcelos",
+  },
+  differentials: [
+    { title: "Consultoria completa", text: "Planejamento para diferentes tipos de viagem.", icon: "consultivo" },
+    { title: "Famílias e parques", text: "Uma das especialidades que orientam a escolha de destinos e entretenimento.", icon: "conferido" },
+    { title: "Brasil e mundo", text: "Viagens nacionais e internacionais, com prioridade para Brasil, Estados Unidos e Canadá.", icon: "fornecedores" },
+    { title: "Planejar para viajar tranquilo", text: "Um posicionamento centrado no planejamento da viagem do cliente.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa sobre o tipo de viagem e as prioridades do cliente.",
+    "Consultoria sobre destinos nacionais, internacionais, parques ou resorts.",
+    "Planejamento das escolhas para a viagem.",
+    "Organização do planejamento para o cliente viajar tranquilo.",
+  ],
+  faq: [
+    { q: "Quem é responsável pela Pristur?", a: "Priscila Vasconcelos é a fundadora e consultora da Pristur Viagens." },
+    { q: "Desde quando a agência atua?", a: "A Pristur Viagens atua desde 2009." },
+    { q: "Quais são as especialidades?", a: "Famílias e parques, viagens nacionais e internacionais." },
+    { q: "Quais são os destinos prioritários?", a: "Estados Unidos e Canadá, Brasil, resorts e all-inclusive, parques e entretenimento." },
+    { q: "Orlando e Gramado fazem parte dos destaques?", a: "Sim. Orlando e parques, resorts no Brasil, Gramado, Caribe e destinos nacionais são os destaques informados pela Pristur." },
+    { q: "Como funciona a consultoria?", a: "A proposta é oferecer consultoria completa para diferentes tipos de viagem, com planejamento para o cliente viajar tranquilo." },
+    { q: "Quais são os canais de atendimento?", a: "WhatsApp 11 98301-7038 e e-mail consultoriapristurviagens@gmail.com. A agência está em São Paulo/SP e no Instagram como @priturismo." },
+  ],
+  copy: {
+    modules: { kicker: "ESPECIALIDADES", title: "Destaques da Pristur Viagens", subtitle: "Orlando, resorts, Gramado, Caribe e destinos nacionais." },
+    destinations: { kicker: "DESTINOS", title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Estados Unidos e Canadá, Caribe, parques e all-inclusive." },
+    highlights: { kicker: "INSPIRAÇÕES", title: "Diferentes formas de viajar", subtitle: "Família, descanso e entretenimento no seu planejamento." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "O jeito Pristur de planejar", subtitle: "Consultoria completa para o cliente viajar tranquilo." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da ideia ao planejamento", subtitle: "Uma conversa sobre a viagem e suas prioridades." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Sobre a Pristur e suas viagens" },
+  },
+  footer: {
+    description: "Consultoria completa de viagens desde 2009. Planejamento para viajar tranquilo.",
+    phone: "WhatsApp 11 98301-7038", email: "consultoriapristurviagens@gmail.com",
+    instagram: "https://www.instagram.com/priturismo/", instagramLabel: "@priturismo",
+    address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true,
+  },
+  seo: { title: "Prévia para revisão — Pristur Viagens", description: "Prévia técnica da Pristur Viagens. Marca e paleta pendentes; sem envios ou publicação." },
+}, "Pristur Viagens");
+ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID] = {
+  jobId: PRISTUR_PREVIEW_JOB_ID, info: PRISTUR_PREVIEW_INFO, profile: PRISTUR_PREVIEW_PROFILE,
+  notice: "Pristur Viagens · prévia técnica · marca e paleta pendentes · imagens genéricas · vinculação pendente · sem envios ou publicação",
+  documentTitle: "Prévia para revisão — Pristur Viagens", realAgency: true,
+};
