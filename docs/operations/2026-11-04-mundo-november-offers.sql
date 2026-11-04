@@ -12,7 +12,7 @@ BEGIN
     category, price_mode, image_only, campaign_category, display_channels, expires_at
   )
   SELECT owner_id, 'manual', v.slug, 'published', v.title, v.description,
-    'https://www.omundoemcores.com.br/offers/mundo-em-cores/' || v.slug || '.webp',
+    'https://raw.githubusercontent.com/Agentes-de-sonhos/agentesdesonhos/dd78b9e4e21cfcdc3c62cd5a7b301fe015c26339/public/offers/mundo-em-cores/' || v.slug || '.webp',
     'Pacotes', 'on_request', true, 'europa', ARRAY['novembro'],
     '2026-12-01 00:00:00-03'::timestamptz
   FROM (VALUES
@@ -25,4 +25,6 @@ BEGIN
     SELECT 1 FROM public.offers o WHERE o.agency_owner_id=owner_id AND o.slug=v.slug
   );
 END $$;
+-- Pin approved assets to their immutable GitHub commit, independent of hosting deploys.
+UPDATE public.offers SET cover_url = 'https://raw.githubusercontent.com/Agentes-de-sonhos/agentesdesonhos/dd78b9e4e21cfcdc3c62cd5a7b301fe015c26339/public/offers/mundo-em-cores/' || slug || '.webp' WHERE agency_owner_id = public.offer_owner_for_host('omundoemcores.com.br') AND slug IN ('cinque-terre-novembro-2026', 'passeios-porto-novembro-2026');
 COMMIT;
