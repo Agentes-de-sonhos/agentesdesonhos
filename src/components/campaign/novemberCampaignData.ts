@@ -3,7 +3,7 @@ import caribe from "@/assets/whitelabel/destinos-com-a-ju/destino-caribe-mexico.
 import cancun from "@/assets/whitelabel/100-limites/destino-cancun.jpg.asset.json";
 import orlando from "@/assets/orlando/editorial/disney-castle.webp.asset.json";
 import cruise from "@/assets/whitelabel/mundo-ncl-destaque.webp.asset.json";
-import traveler from "@/assets/campaign/november-traveler.jpg";
+import closingConsultant from "@/assets/campaign/november-closing-consultant.png.asset.json";
 import heroBungalows from "@/assets/campaign/november-hero-bungalows.jpg";
 import coliseu from "@/assets/campaign/november-coliseu.jpg";
 import iguacu from "@/assets/campaign/november-iguacu.jpg";
