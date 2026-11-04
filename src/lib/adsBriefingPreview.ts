@@ -2014,3 +2014,117 @@ ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID] = {
   notice: "prévia para revisão · sem publicação · ações desativadas",
   documentTitle: "Prévia para revisão — Innovati Travel", realAgency: true,
 };
+
+/* Shopping Viagens: local-only fixture (briefing-25-v1). The authenticated
+ * briefing matched a profile without a public domain; no identifier or
+ * association is imported. Logo and palette pending: textual wordmark and
+ * shared neutral tokens only. */
+export const SHOPPING_PREVIEW_JOB_ID = "briefing-25-v1";
+export const SHOPPING_PREVIEW_HOST = "briefing-25-v1.preview.local";
+export const SHOPPING_PREVIEW_PATH = `/ads-briefing-preview/${SHOPPING_PREVIEW_JOB_ID}`;
+export const SHOPPING_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad25",
+  agency_slug: "", public_slug: null, is_primary: false,
+  hostname: SHOPPING_PREVIEW_HOST,
+  agency_name: "Shopping Viagens", owner_name: "Cristina Vale",
+  logo_url: null, cover_image_url: null,
+  // Shared wl-site-base neutral fallbacks, not an official palette.
+  primary_color: "#0F1729", secondary_color: "#0F1729",
+  tertiary_color: "#F6F6F8", secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const SHOPPING_PREVIEW_PROFILE = buildGoldStandardProfile("shoppingBriefing25", {
+  textualWordmark: true,
+  navDensity: "compact", visaHome: false, featuredExperience: undefined,
+  dmc: undefined, credentials: undefined, team: undefined,
+  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+  sections: {
+    dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
+    testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
+    newsletter: { enabled: false }, authority: { enabled: false },
+  },
+  nav: [
+    { label: "Início", to: "/" }, { label: "Sob medida", to: "/#assinatura" },
+    { label: "Destinos", to: "/#destinos" }, { label: "Cruzeiros", to: "/#cruzeiros" },
+    { label: "Resorts", to: "/#resorts" }, { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+  ],
+  heroPresentation: { kicker: "SÃO PAULO · SP · DESDE 2002", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "Shopping Viagens", subtitle: "Planejamento completo para você viajar com tranquilidade.", image: "europa", order: 1, enabled: true },
+    { title: "Europa, Itália e cruzeiros", subtitle: "Viagens sob medida com planejamento detalhado. Imagem genérica de inspiração.", image: "cruzeiro", order: 2, enabled: true },
+    { title: "Caribe, México e resorts", subtitle: "Resorts e all inclusive com orientação e atendimento próximo. Imagem genérica de inspiração.", image: "resort", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "VIAGENS SOB MEDIDA · DESDE 2002",
+    title: "Consultoria completa para diferentes viagens",
+    text: "Desde 2002, a Shopping Viagens planeja viagens sob medida para quem quer viajar sem se preocupar com nada e valoriza orientação e atendimento próximo.",
+  },
+  destinations: [
+    { key: "europa", image: "europa", label: "Europa", title: "Europa e Itália", text: "Europa entre as prioridades, com destaque para a Itália. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 1 },
+    { key: "caribe", image: "litoral", label: "Caribe e México", title: "Caribe e México", text: "Destinos caribenhos e mexicanos planejados sob medida. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 2 },
+    { key: "brasil", image: "brasil", label: "Brasil", title: "Brasil e Nordeste", text: "Viagens pelo Brasil, com destaque para os resorts no Nordeste.", service: "pacotes", enabled: true, order: 3 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: "Cruzeiros entre os detalhes prioritários do planejamento.", service: "cruzeiros", enabled: true, order: 4 },
+    { key: "resorts", image: "resort", label: "Resorts", title: "Resorts e all inclusive", text: "Descanso com planejamento completo, do Nordeste ao Caribe.", service: "hospedagem", enabled: true, order: 5 },
+    { key: "eua", image: "parques", label: "América do Norte", title: "Estados Unidos", text: "Estados Unidos entre os destinos prioritários. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 6 },
+  ],
+  modules: [
+    { key: "cruzeiros", title: "Cruzeiros", text: "Um dos detalhes prioritários da Shopping Viagens.", image: "cruzeiro", service: "cruzeiros", enabled: true, order: 1 },
+    { key: "italia", title: "Itália", text: "Destaque europeu nas viagens sob medida. Imagem genérica de inspiração.", image: "europa", service: "pacotes", enabled: true, order: 2 },
+    { key: "nordeste", title: "Resorts no Nordeste", text: "Resorts e all inclusive no Brasil.", image: "resort", service: "hospedagem", enabled: true, order: 3 },
+    { key: "caribe", title: "Caribe", text: "Inspirações caribenhas para a próxima viagem. Imagem genérica.", image: "litoral", service: "pacotes", enabled: true, order: 4 },
+    { key: "eua", title: "Estados Unidos", text: "Destino prioritário no planejamento. Imagem genérica.", image: "parques", service: "pacotes", enabled: true, order: 5 },
+    { key: "brasil", title: "Brasil", text: "Diferentes destinos nacionais planejados sob medida.", image: "brasil", service: "pacotes", enabled: true, order: 6 },
+  ],
+  highlights: [
+    { title: "Viagens sob medida", text: "Cada viagem planejada conforme as necessidades do cliente.", service: "pacotes", cta: "Planejar minha viagem" },
+    { title: "Cruzeiros", text: "Cruzeiros entre os destaques do planejamento.", service: "cruzeiros", cta: "Planejar meu cruzeiro" },
+    { title: "Resorts e all inclusive", text: "Descanso no Nordeste, no Caribe e no México.", service: "hospedagem", cta: "Planejar meu descanso" },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Cristina Vale, fundadora",
+    text: "A Shopping Viagens atua desde 2002, em São Paulo (SP), com consultoria completa para diferentes viagens. Cristina Vale, fundadora, é a responsável pelo atendimento.\n\nA especialidade são as viagens sob medida, com planejamento completo para o cliente viajar com tranquilidade. Europa, Caribe e México, Brasil, cruzeiros, resorts e all inclusive estão entre as prioridades.\n\nO planejamento detalhado antecipa riscos e necessidades, apoiado pela vivência pessoal frequente nos destinos vendidos. A equipe compartilhada mantém a continuidade das informações, e o responsável habitual acompanha eventuais incidentes até a solução.",
+    badge: { value: "Desde 2002", label: "Shopping Viagens" }, media: "hidden", showLocation: true, ownerName: "Cristina Vale",
+  },
+  differentials: [
+    { title: "Planejamento detalhado", text: "Antecipa riscos e necessidades da viagem.", icon: "consultivo" },
+    { title: "Vivência nos destinos", text: "Vivência pessoal frequente nos destinos vendidos.", icon: "conferido" },
+    { title: "Continuidade no atendimento", text: "Equipe compartilhada com continuidade das informações.", icon: "fornecedores" },
+    { title: "Acompanhamento até a solução", text: "O responsável habitual acompanha incidentes até a solução.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa por WhatsApp, telefone, e-mail ou atendimento presencial.",
+    "Planejamento detalhado da viagem sob medida.",
+    "Orçamento e reservas.",
+    "Acompanhamento pelo responsável habitual em caso de incidentes, até a solução.",
+  ],
+  faq: [
+    { q: "Quem é responsável pelo atendimento?", a: "Cristina Vale, fundadora da Shopping Viagens." },
+    { q: "Desde quando a agência atua?", a: "A Shopping Viagens atua desde 2002, em São Paulo/SP." },
+    { q: "Qual é a especialidade?", a: "Viagens sob medida, com consultoria completa para diferentes viagens." },
+    { q: "Quais são os destinos prioritários?", a: "Europa, Caribe e México, Brasil, cruzeiros, resorts e all inclusive — com destaque para cruzeiros, Itália, resorts no Nordeste, Caribe e Estados Unidos." },
+    { q: "Como funciona o atendimento?", a: "Planejamento, orçamento e reservas, com equipe compartilhada que mantém a continuidade das informações. O responsável habitual acompanha incidentes até a solução." },
+    { q: "Quais são os canais de atendimento?", a: "WhatsApp 11 94714-8466, telefone 11 2096-7777, e-mail info@shoppingviagens.com.br, atendimento presencial e Instagram @shoppingviagens." },
+  ],
+  copy: {
+    modules: { kicker: "DESTAQUES", title: "Destaques da Shopping Viagens", subtitle: "Cruzeiros, Itália, resorts no Nordeste, Caribe e Estados Unidos." },
+    destinations: { kicker: "DESTINOS", title: "Destinos para a sua próxima viagem", subtitle: "Europa, Caribe e México, Brasil, cruzeiros e resorts." },
+    highlights: { kicker: "INSPIRAÇÕES", title: "Diferentes formas de viajar", subtitle: "Planejamento completo para viajar com tranquilidade." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "O jeito Shopping Viagens de planejar", subtitle: "Orientação e atendimento próximo do início ao fim." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Do planejamento à solução", subtitle: "Planejamento, orçamento, reservas e acompanhamento." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Sobre a Shopping Viagens" },
+  },
+  footer: {
+    description: "Viagens sob medida desde 2002. Planejamento completo para viajar com tranquilidade.",
+    phone: "WhatsApp 11 94714-8466 · Telefone 11 2096-7777", email: "info@shoppingviagens.com.br",
+    instagram: "https://www.instagram.com/shoppingviagens/", instagramLabel: "@shoppingviagens",
+    address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true,
+  },
+  seo: { title: "Prévia para revisão — Shopping Viagens", description: "Prévia técnica da Shopping Viagens. Logotipo e paleta pendentes; sem publicação." },
+}, "Shopping Viagens");
+ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID] = {
+  jobId: SHOPPING_PREVIEW_JOB_ID, info: SHOPPING_PREVIEW_INFO, profile: SHOPPING_PREVIEW_PROFILE,
+  notice: "prévia técnica para revisão · logotipo e paleta pendentes · imagens genéricas · sem publicação",
+  documentTitle: "Prévia para revisão — Shopping Viagens", realAgency: true,
+};
