@@ -33,9 +33,9 @@ describe("Arena briefing-23-v1", () => {
     expect(ARENA_PREVIEW_PROFILE.footer?.legalName).toBeUndefined();
     expect(ARENA_PREVIEW_PROFILE.footer?.address).toBe("Florianópolis/SC");
   });
-  it("uses the shared neutral theme and only a textual wordmark", () => {
-    expect(ARENA_PREVIEW_INFO.logo_url).toBeNull();
-    expect(ARENA_PREVIEW_PROFILE.textualWordmark).toBe(true);
+  it("uses the supplied logo and black/white palette", () => {
+    expect(ARENA_PREVIEW_INFO.logo_url).toMatch(/^\/__l5e\/assets-v1\//);
+    expect(ARENA_PREVIEW_INFO.primary_color).toBe("#000000");
     expect(resolveSiteTheme(ARENA_PREVIEW_HOST)).toBe("siteBaseEditorial");
     expect(siteThemeRootClass(ARENA_PREVIEW_HOST)).toBe(siteThemeRootClass("sitelab.local"));
   });
@@ -47,13 +47,14 @@ describe("Arena briefing-23-v1", () => {
     expect(ARENA_PREVIEW_PROFILE.hideConciergeActions).toBe(true);
   });
   it("retains the authorized founding year and public contacts", () => {
-    expect(ARENA_PREVIEW_PROFILE.about?.badge?.value).toBe("Desde 2009");
-    expect(ARENA_PREVIEW_PROFILE.about?.ownerName).toBe("Priscila Vasconcelos");
-    expect(ARENA_PREVIEW_PROFILE.footer?.phone).toBe("WhatsApp 11 98301-7038");
-    expect(ARENA_PREVIEW_PROFILE.footer?.email).toBe("consultoriapristurviagens@gmail.com");
-    expect(ARENA_PREVIEW_PROFILE.footer?.instagramLabel).toBe("@priturismo");
+    expect(ARENA_PREVIEW_PROFILE.about?.badge?.value).toBe("Desde 2024");
+    expect(ARENA_PREVIEW_PROFILE.about?.ownerName).toBe("Rafael Souza");
+    expect(ARENA_PREVIEW_PROFILE.footer?.phone).toBe("WhatsApp 47 99269-0807");
+    expect(ARENA_PREVIEW_PROFILE.footer?.email).toBe("arenatravel@arenatravelgroup.com.br");
+    expect(ARENA_PREVIEW_PROFILE.footer?.instagramLabel).toBe("@arenatravelgroup");
   });
   it("leaves existing fixture and official profile resolutions intact", () => {
+    expect(resolveAdsPreviewFixture("briefing-22-v1")?.profile.key).toBe("pristurBriefing22");
     expect(resolveAdsPreviewFixture("briefing-21-v1")?.profile.key).toBe("karibuBriefing21");
     expect(resolveSiteProfile("curtiviagens.com.br").key).toBe("curtiViagensOfficial");
     expect(resolveSiteProfile("essyatur.com.br").key).toBe("essyaOfficial");
