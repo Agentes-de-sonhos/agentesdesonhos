@@ -48,6 +48,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "curtiviagens.com.br": "siteBaseEditorial",
   "www.curtiviagens.com.br": "siteBaseEditorial",
   "briefing-21-v1.preview.local": "siteBaseEditorial",
+  "briefing-22-v1.preview.local": "siteBaseEditorial",
   "essya-curti-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
   "dricaviagens.com.br": "siteBaseEditorial",

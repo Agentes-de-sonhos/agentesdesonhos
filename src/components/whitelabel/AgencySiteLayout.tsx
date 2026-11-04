@@ -124,7 +124,9 @@ export function AgencyBrandBar({
           className={`${siteContainer(true)} flex items-center justify-between gap-6 ${headerBrand.headerClassName}`}
         >
           <Link to={resolveSiteProfile(info.hostname).presentation ? agencySiteHref("/") : agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
-            {headerLogoUrl ? (
+            {resolveSiteProfile(info.hostname).textualWordmark ? (
+              <span className="text-lg font-semibold text-foreground md:text-xl"><BrandText>{name}</BrandText></span>
+            ) : headerLogoUrl ? (
               <img
                 src={headerLogoUrl}
                 alt={`Logo ${name}`}
@@ -612,7 +614,7 @@ export function AgencyFooter({
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] text-[hsl(var(--wl-ink)_/_0.8)] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
                   >
                     <Mail className="h-4 w-4 shrink-0 text-[hsl(var(--wl-ink)_/_0.7)]" aria-hidden="true" />
-                    <span className="whitespace-nowrap">{footer?.email ?? contacts.email}</span>
+                    <span className={profile.textualWordmark ? "min-w-0 break-all" : "whitespace-nowrap"}>{footer?.email ?? contacts.email}</span>
                   </a>
                 </li>
               ) : null}
