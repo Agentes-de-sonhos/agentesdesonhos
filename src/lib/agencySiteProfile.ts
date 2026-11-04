@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE, INNOVATI_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE, INNOVATI_PREVIEW_PROFILE, SHOPPING_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -69,6 +69,7 @@ export type AgencySiteProfileKey =
   /** Rascunho técnico isolado do briefing 21 (Karibu); sem domínio público, vínculo pendente. */
   | "karibuBriefing21"
   | "pristurBriefing22"
+  | "shoppingBriefing25"
   | "arenaBriefing23"
   | "innovatiBriefing24"
   /** Prévia Essyatur na estrutura da Curti (host sintético). */
@@ -1221,6 +1222,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-22-v1.preview.local": "pristurBriefing22",
   "briefing-23-v1.preview.local": "arenaBriefing23",
   "briefing-24-v1.preview.local": "innovatiBriefing24",
+  "briefing-25-v1.preview.local": "shoppingBriefing25",
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
   "dricaviagens.com.br": "dricaOfficial",
   "www.dricaviagens.com.br": "dricaOfficial",
@@ -1252,6 +1254,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   pristurBriefing22: PRISTUR_PREVIEW_PROFILE,
   arenaBriefing23: ARENA_PREVIEW_PROFILE,
   innovatiBriefing24: INNOVATI_PREVIEW_PROFILE,
+  shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
   essyaOfficial: ESSYA_OFFICIAL_PROFILE,
 };
