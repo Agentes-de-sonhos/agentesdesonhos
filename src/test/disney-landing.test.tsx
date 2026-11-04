@@ -85,11 +85,8 @@ describe("catálogo Disney", () => {
 });
 
 describe("isolamento e prévia", () => {
-  it("rota só para Destinos com a Ju em host técnico", () => {
-    expect(isDisneyPreviewRouteEnabled("destinoscomaju.com.br", "localhost")).toBe(true);
-    expect(isDisneyPreviewRouteEnabled("destinoscomaju.com.br", "id-preview--x.lovable.app")).toBe(true);
-    expect(isDisneyPreviewRouteEnabled("destinoscomaju.com.br", "destinoscomaju.com.br")).toBe(false);
-    for (const h of ["100limites.tur.br", "bardelliviagens.com.br", "omundoemcores.com.br", "casanovatur.com.br"]) expect(isDisneyPreviewRouteEnabled(h, "localhost")).toBe(false);
+  it("rota liberada para todas as agências, inclusive no domínio real", () => {
+    for (const h of ["destinoscomaju.com.br", "100limites.tur.br", "bardelliviagens.com.br", "omundoemcores.com.br"]) expect(isDisneyPreviewRouteEnabled(h, h)).toBe(true);
   });
   it("na prévia o envio é simulado e não chama o backend", async () => {
     const { result } = renderHook(() => useDisneyPreviewRequest("destinoscomaju.com.br"));
