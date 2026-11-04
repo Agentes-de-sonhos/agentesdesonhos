@@ -6,6 +6,11 @@ const featureIcons = [Plane, CalendarDays, Star];
 
 export function OfferCard({ offer, onSelect }: { offer: CampaignOffer; onSelect: (offer: CampaignOffer) => void }) {
   const featured = !!offer.installments;
+  if (offer.imageOnly) return <article className="campaign-offer campaign-offer-image-only">
+    <button type="button" className="block w-full cursor-pointer" aria-label={`${offer.title} — ${offer.ctaUrl ? "ver opções" : "falar no WhatsApp"}`} onClick={() => onSelect(offer)}>
+      <img src={offer.image} alt={offer.alt} loading="lazy" className="block h-auto w-full" />
+    </button>
+  </article>;
   return <article className="campaign-offer">
     <div className="campaign-offer-photo"><img src={offer.image} alt={offer.alt} loading="lazy" /><span className={`campaign-offer-tag tone-${offer.tagTone ?? "blue"}`}>{offer.tag ?? offer.modality}</span></div>
     <div className="campaign-offer-body">

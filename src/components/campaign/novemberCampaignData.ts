@@ -24,6 +24,8 @@ export interface CampaignOffer {
   discountPercent?: number; installments?: number; installmentBRL?: number;
   /** Oferta real da agência (vinda de Ofertas), com link para a página pública. */
   real?: boolean; href?: string; priceLabel?: string; priceNote?: string;
+  /** Oferta por imagem: card mostra só a arte; ctaUrl opcional de compra online. */
+  imageOnly?: boolean; ctaUrl?: string;
 }
 /** All entries are illustrative; no supplier, availability or booking integration. */
 export const novemberOffers: CampaignOffer[] = [
@@ -38,6 +40,14 @@ export function filterCampaignOffers(offers: CampaignOffer[], category: string, 
 const CATEGORY_MAP: Record<string, string> = { Cruzeiros: "cruzeiros", Resorts: "praias", Ingressos: "familia" };
 /** Converte ofertas reais (marcadas para Oportunidades de Novembro) para o card da campanha. */
 export function campaignOfferFromPublic(o: PublicOffer, fallbackImage: string): CampaignOffer {
+  if (o.image_only) {
+    return {
+      id: o.slug, real: true, imageOnly: true, ctaUrl: o.cta_url ?? undefined,
+      category: o.campaign_category || "todos", period: "todos",
+      title: o.title ?? "Oferta", image: o.cover_url || fallbackImage, alt: o.title ?? "Oferta",
+      description: "", modality: "Oferta", value: "", action: "Quero esta oferta",
+    };
+  }
   const p = offerPricing(o);
   const features = [
     o.nights ? `${o.nights} noites` : null,
@@ -46,7 +56,7 @@ export function campaignOfferFromPublic(o: PublicOffer, fallbackImage: string): 
   ].filter(Boolean) as string[];
   return {
     id: o.slug, real: true, href: `/ofertas/${o.slug}`,
-    category: CATEGORY_MAP[o.category ?? ""] ?? "todos", period: "todos",
+    category: o.campaign_category || (CATEGORY_MAP[o.category ?? ""] ?? "todos"), period: "todos",
     title: o.title ?? "Oferta", image: o.cover_url || fallbackImage, alt: o.title ?? "Oferta",
     description: o.description ?? "", modality: o.category ?? "Oferta", value: p.totalLabel,
     action: "Ver detalhes", tag: (o.category ?? "OFERTA").toUpperCase(), tagTone: "gold",

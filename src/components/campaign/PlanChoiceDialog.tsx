@@ -6,7 +6,8 @@ import type { CampaignOffer } from "./novemberCampaignData";
 export const MUNDO_WHATSAPP = "5511999954734";
 
 export function offerWhatsappUrl(offer: CampaignOffer): string {
-  const text = `Olá, Vanessa! Vi a oferta "${offer.title}" nas Oportunidades de Novembro e gostaria de saber mais.`;
+  const code = offer.real ? ` (código ${offer.id})` : "";
+  const text = `Olá, Vanessa! Vi a oferta "${offer.title}"${code} nas Oportunidades de Novembro e gostaria de saber mais.`;
   return `https://wa.me/${MUNDO_WHATSAPP}?text=${encodeURIComponent(text)}`;
 }
 
