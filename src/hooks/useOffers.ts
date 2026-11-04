@@ -37,6 +37,12 @@ export interface OfferRow {
   expires_at: string | null;
   requests_count: number;
   display_channels: string[];
+  /** Oferta por imagem (flyer pronto): card mostra só a arte. */
+  image_only?: boolean;
+  /** Link opcional de compra online (https). Sem link → WhatsApp direto. */
+  cta_url?: string | null;
+  /** Filtro da campanha de novembro: praias | familia | europa | cruzeiros | brasil. */
+  campaign_category?: string | null;
   updated_at: string;
 }
 

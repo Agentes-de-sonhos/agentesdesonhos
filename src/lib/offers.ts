@@ -38,6 +38,9 @@ export interface PublicOffer {
   publish_at?: string | null;
   expires_at?: string | null;
   channels?: string[] | null;
+  image_only?: boolean;
+  cta_url?: string | null;
+  campaign_category?: string | null;
 }
 
 /** Campos estruturais sincronizados com o orçamento (podem ser personalizados). */
