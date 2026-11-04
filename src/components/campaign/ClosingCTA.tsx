@@ -8,10 +8,10 @@ const channels = [
   { icon: Mail, title: "Receba por e-mail", text: "As melhores opções no seu e-mail" },
 ];
 
-export function ClosingCTA({ onContact }: { onContact: () => void }) {
+export function ClosingCTA({ onContact, onWhatsapp }: { onContact: () => void; onWhatsapp: () => void }) {
   return <section className="campaign-closing">
     <div className="campaign-closing-photo"><img src={campaignImages.closing} alt="Imagem ilustrativa de uma consultora de viagens apresentando um litoral; não representa a equipe" width={1280} height={1024} loading="lazy" /></div>
-    <div className="campaign-closing-copy"><p className="campaign-kicker">Planejando uma viagem incrível?</p><h2>Não encontrou a viagem ideal?</h2><p>Podemos criar uma proposta personalizada de acordo com seus interesses, período e orçamento.</p><Button size="lg" onClick={onContact}>Solicitar atendimento <ArrowRight /></Button><small>Atendimento demonstrativo nesta prévia · sem envio</small></div>
-    <ul className="campaign-closing-channels">{channels.map(item => <li key={item.title}><button type="button" onClick={onContact}><item.icon aria-hidden="true" /><span><strong>{item.title}</strong><small>{item.text}</small></span></button></li>)}</ul>
+    <div className="campaign-closing-copy"><p className="campaign-kicker">Planejando uma viagem incrível?</p><h2>Não encontrou a viagem ideal?</h2><p>Podemos criar uma proposta personalizada de acordo com seus interesses, período e orçamento.</p><Button size="lg" onClick={onContact}>Solicitar atendimento <ArrowRight /></Button></div>
+    <ul className="campaign-closing-channels">{channels.map((item, index) => <li key={item.title}><Button variant="ghost" type="button" onClick={index === 0 ? onWhatsapp : onContact}><item.icon aria-hidden="true" /><span><strong>{item.title}</strong><small>{item.text}</small></span></Button></li>)}</ul>
   </section>;
 }
