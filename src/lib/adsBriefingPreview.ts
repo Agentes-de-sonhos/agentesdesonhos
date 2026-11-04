@@ -285,7 +285,6 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
       { label: "Avaliações do Google", to: "/#avaliacoes" },
       { label: "Dúvidas frequentes", to: "/#faq" },
     ] },
-    { label: "Grupo WhatsApp", to: "https://chat.whatsapp.com/BsNGH7VRiILHfPqZhoASUu?mode=gi_t" },
   ],
   sections: {
     dmc: { enabled: false },

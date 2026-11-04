@@ -13,7 +13,7 @@ import { AgencySportsEventsSection } from "@/components/whitelabel/AgencySportsE
 import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/whitelabel/AgencySportsRequestDialog";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
-import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Plane, BedDouble, Car, Bus, Ticket, ShieldCheck, Ship, Compass,
@@ -424,7 +424,7 @@ function SectionHeading({
   editorial,
   eyebrow,
 }: {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   editorial?: boolean;
   eyebrow?: string;
@@ -692,7 +692,7 @@ export default function AgencySiteHome({
           key={key}
           hostname="omundoemcores.com.br"
           container={container}
-          heading={<SectionHeading eyebrow="OPORTUNIDADES DE NOVEMBRO" title="Condições e roteiros selecionados para este mês" subtitle="Destaques da semana para viajar ainda em 2026 ou planejar 2027 com antecedência." editorial={editorial} />}
+          heading={<SectionHeading eyebrow="OPORTUNIDADES DE NOVEMBRO" title={<>Condições e roteiros selecionados<br />para este mês</>} subtitle="Destaques da semana para viajar ainda em 2026 ou planejar 2027 com antecedência." editorial={editorial} />}
         />
       );
     }
