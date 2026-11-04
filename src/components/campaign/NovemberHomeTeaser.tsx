@@ -32,10 +32,11 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
           <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" width={1254} height={1254} className="hidden h-auto w-36 shrink-0 self-center md:block lg:w-44" />
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Mobile: galeria horizontal deslizante (passar o dedo); sm+: grade */}
+        <div className="mt-8 -mx-4 grid snap-x snap-mandatory grid-flow-col auto-cols-[78%] gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:snap-none sm:auto-cols-auto sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-4">
           {offers.length
             ? offers.map((offer) => (
-                <a key={offer.id} href={pageHref} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+                <a key={offer.id} href={pageHref} className="group snap-center overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
                   {offer.imageOnly ? (
                     <img src={offer.image} alt={offer.alt} loading="lazy" className="block h-auto w-full" />
                   ) : (
