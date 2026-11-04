@@ -11,6 +11,6 @@ export function FeaturedOffers({ offers, onSelect, onReset, real = false }: { of
     </div>
     <p className="campaign-disclaimer"><Info aria-hidden="true" /><span>{real ? "Valores e disponibilidade sujeitos a alteração até a confirmação da reserva." : "Ofertas e valores meramente ilustrativos nesta prévia. Não disponíveis para contratação."}</span></p>
     <div className="campaign-offer-grid">{offers.map(offer => <OfferCard key={offer.id} offer={offer} onSelect={onSelect} />)}</div>
-    {!offers.length && <div className="campaign-empty" role="status"><p>Nenhum exemplo para esta combinação.</p><Button variant="outline" onClick={onReset}><RotateCcw />Ver todas as oportunidades</Button></div>}
+    {!offers.length && <div className="campaign-empty" role="status"><p>Nenhuma oferta disponível nesta seleção. Deixe seu destino no Radar de Oportunidades abaixo.</p><Button variant="outline" onClick={onReset}><RotateCcw />Ver todas as oportunidades</Button></div>}
   </section>;
 }

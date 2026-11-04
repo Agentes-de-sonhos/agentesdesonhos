@@ -3,20 +3,21 @@ import { Helmet } from "react-helmet-async";
 import { BrowserRouter } from "react-router-dom";
 import { Headphones, Plane, ShieldCheck, Tag } from "lucide-react";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
-import { MUNDO_EM_CORES_PREVIEW_INFO, MUNDO_EM_CORES_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { MUNDO_EM_CORES_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
+import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
+import { agencySiteHref } from "@/lib/agencyContextLink";
 import { isNovemberCampaignAllowed } from "@/lib/novemberCampaignAccess";
 import { CampaignHero } from "@/components/campaign/CampaignHero";
 import { CategoryRail } from "@/components/campaign/CategoryRail";
 import { FeaturedOffers } from "@/components/campaign/FeaturedOffers";
 import { OpportunityRadar } from "@/components/campaign/OpportunityRadar";
 import { ClosingCTA } from "@/components/campaign/ClosingCTA";
-import { campaignOfferFromPublic, filterCampaignOffers, novemberOffers, type CampaignOffer } from "@/components/campaign/novemberCampaignData";
+import { campaignOfferFromPublic, filterCampaignOffers, type CampaignOffer } from "@/components/campaign/novemberCampaignData";
 import { usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { campaignImages } from "@/components/campaign/novemberCampaignData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { PlanChoiceDialog, offerWhatsappUrl } from "@/components/campaign/PlanChoiceDialog";
+import { PlanChoiceDialog, offerWhatsappUrl, MUNDO_WHATSAPP } from "@/components/campaign/PlanChoiceDialog";
 import NotFound from "@/pages/NotFound";
 import "@/styles/november-campaign.css";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -32,16 +33,14 @@ const differentials = [
 export default function NovemberCampaignPreview() {
   const [category, setCategory] = useState("todos");
   const [period, setPeriod] = useState("todos");
-  const [selected, setSelected] = useState<CampaignOffer | null>(null);
   const [contact, setContact] = useState(false);
   const [choice, setChoice] = useState<CampaignOffer | null>(null);
   useAgencyFavicon(mundoFavicon.url);
   const { data: publicOffers = [] } = usePublicOffers("omundoemcores.com.br");
   const realOffers = useMemo(() => publicOffers.filter(o => offerInChannel(o, "novembro")).map(o => campaignOfferFromPublic(o, campaignImages.hero)), [publicOffers]);
-  const hasReal = realOffers.length > 0;
   const allowed = isNovemberCampaignAllowed(window.location.hostname, window.location.search);
   if (!allowed) return <BrowserRouter><NotFound /></BrowserRouter>;
-  const offers = filterCampaignOffers(hasReal ? realOffers : novemberOffers, category, period);
+  const offers = filterCampaignOffers(realOffers, category, period);
   const onSelectOffer = (offer: CampaignOffer) => {
     // Oferta por imagem sem link: WhatsApp direto, já identificando a oferta.
     if (offer.imageOnly && !offer.ctaUrl) { window.open(offerWhatsappUrl(offer), "_blank", "noopener"); return; }
@@ -50,24 +49,20 @@ export default function NovemberCampaignPreview() {
   const onBuyOnline = (offer: CampaignOffer) => {
     setChoice(null);
     if (offer.imageOnly && offer.ctaUrl) window.open(offer.ctaUrl, "_blank", "noopener");
-    else if (offer.real && offer.href) window.location.assign(offer.href);
-    else setSelected(offer);
+    else if (offer.real && offer.href) window.location.assign(agencySiteHref(offer.href));
   };
-  return <BrowserRouter><div className="november-preview" onClickCapture={event => {
-    const anchor = event.target instanceof Element ? event.target.closest("a") : null;
-    if (anchor && !anchor.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); setContact(true); }
-  }}>
-    <AgencySiteLayout info={{ ...MUNDO_EM_CORES_PREVIEW_INFO, agency_name: "O Mundo em Cores" }} noWhatsapp navOverride={MUNDO_EM_CORES_PREVIEW_PROFILE.nav}>
-      <Helmet><title>Oportunidades de Novembro | O Mundo em Cores</title><meta name="description" content="Oportunidades de novembro da O Mundo em Cores: destinos incríveis, condições especiais e planejamento de viagens." /><meta name="robots" content="noindex,nofollow" /><meta property="og:title" content="Oportunidades de Novembro | O Mundo em Cores" /><meta property="og:description" content="Destinos incríveis, condições especiais e experiências que ficam para sempre." /><meta property="og:type" content="website" /><meta name="twitter:card" content="summary_large_image" /></Helmet>
+  return <BrowserRouter><div className="november-preview">
+    <AgencySiteLayout info={{ ...MUNDO_EM_CORES_PREVIEW_INFO, hostname: "omundoemcores.com.br", agency_name: "O Mundo em Cores", phone: MUNDO_WHATSAPP }}>
+      <Helmet><title>Oportunidades de Novembro | O Mundo em Cores</title><meta name="description" content="Oportunidades de novembro da O Mundo em Cores: destinos incríveis, condições especiais e planejamento de viagens." /><meta property="og:title" content="Oportunidades de Novembro | O Mundo em Cores" /><meta property="og:description" content="Destinos incríveis, condições especiais e experiências que ficam para sempre." /><meta property="og:type" content="website" /><meta name="twitter:card" content="summary_large_image" /></Helmet>
       <div className="november-campaign">
         <CampaignHero /><CategoryRail active={category} onSelect={id => { setCategory(id); setPeriod("todos"); }} />
-        <FeaturedOffers real={hasReal} offers={offers} onSelect={onSelectOffer} onReset={() => { setCategory("todos"); setPeriod("todos"); }} />
+        <FeaturedOffers real offers={offers} onSelect={onSelectOffer} onReset={() => { setCategory("todos"); setPeriod("todos"); }} />
         <OpportunityRadar hostname="omundoemcores.com.br" />
         <section className="campaign-differentials"><div className="campaign-container campaign-differential-grid">{differentials.map(item => <div className="campaign-differential" key={item.title}><item.icon aria-hidden="true" /><div><h3>{item.title}</h3><p>{item.text}</p></div></div>)}</div></section>
-        <ClosingCTA onContact={() => setContact(true)} />
+        <ClosingCTA onContact={() => setContact(true)} onWhatsapp={() => window.open(`https://wa.me/${MUNDO_WHATSAPP}?text=${encodeURIComponent("Olá! Vi as Oportunidades de Novembro e gostaria de planejar uma viagem com a O Mundo em Cores.")}`, "_blank", "noopener")} />
       </div>
     </AgencySiteLayout>
-    <Dialog open={!!selected || contact} onOpenChange={open => { if (!open) { setSelected(null); setContact(false); } }}><DialogContent className="november-campaign campaign-dialog"><DialogHeader><DialogTitle>{selected?.title ?? "Planejar minha viagem"}</DialogTitle><DialogDescription>Esta é uma demonstração visual. Nenhuma solicitação foi enviada e não há contratação disponível.</DialogDescription></DialogHeader>{selected && <><p className="campaign-offer-value">{selected.value}</p><p>Ofertas e valores meramente ilustrativos nesta prévia. Não disponíveis para contratação.</p></>}<Button onClick={() => { setSelected(null); setContact(false); }}>Continuar explorando</Button></DialogContent></Dialog>
+    <Dialog open={contact} onOpenChange={setContact}><DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl"><DialogHeader><DialogTitle>Planejar minha viagem</DialogTitle><DialogDescription>Solicite uma proposta à O Mundo em Cores.</DialogDescription></DialogHeader>{contact && <AgencyRequestCenter hostname="omundoemcores.com.br" agencyName="O Mundo em Cores" initialService="pacotes" variant="plain" hideHeading />}</DialogContent></Dialog>
     <PlanChoiceDialog offer={choice} onClose={() => setChoice(null)} onBuyOnline={onBuyOnline} />
   </div></BrowserRouter>;
 }
