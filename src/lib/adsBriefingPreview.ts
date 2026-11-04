@@ -105,6 +105,7 @@ import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
 import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
+import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
@@ -1904,4 +1905,112 @@ ADS_PREVIEW_FIXTURES[ARENA_PREVIEW_JOB_ID] = {
   jobId: ARENA_PREVIEW_JOB_ID, info: ARENA_PREVIEW_INFO, profile: ARENA_PREVIEW_PROFILE,
   notice: "prévia técnica para revisão · vinculação de conta pendente · sem envios ou publicação",
   documentTitle: "Prévia para revisão — ARENA TRAVEL GROUP", realAgency: true,
+};
+
+/* Innovati Travel: local-only fixture (briefing-24-v1). A CNPJ match exists
+ * (public_slug innovati-travel) but no active public domain; nothing is linked
+ * here — synthetic identity, no tenant/domain/permission/database write. */
+export const INNOVATI_PREVIEW_JOB_ID = "briefing-24-v1";
+export const INNOVATI_PREVIEW_HOST = "briefing-24-v1.preview.local";
+export const INNOVATI_PREVIEW_PATH = `/ads-briefing-preview/${INNOVATI_PREVIEW_JOB_ID}`;
+export const INNOVATI_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad24",
+  agency_slug: "", public_slug: null, is_primary: false,
+  hostname: INNOVATI_PREVIEW_HOST,
+  agency_name: "Innovati Travel", owner_name: "Jussara Beraldes",
+  logo_url: innovatiLogo.url, cover_image_url: null,
+  // Paleta informada: azul #254F86 e laranja #F98D0D; terciário claro derivado do azul.
+  primary_color: "#254F86", secondary_color: "#F98D0D",
+  tertiary_color: "#EEF3F9", secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: "#1A1A1A", phone: null, city: "Franco da Rocha", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+const INSP = "Imagem genérica de inspiração.";
+export const INNOVATI_PREVIEW_PROFILE = buildGoldStandardProfile("innovatiBriefing24", {
+  navDensity: "compact", visaHome: false, featuredExperience: undefined,
+  dmc: undefined, credentials: undefined, team: undefined,
+  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+  sections: {
+    dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
+    testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
+    newsletter: { enabled: false }, authority: { enabled: false },
+  },
+  nav: [
+    { label: "Início", to: "/" }, { label: "Especialidades", to: "/#assinatura" },
+    { label: "Destinos", to: "/#destinos" }, { label: "Resorts", to: "/#resorts" },
+    { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+  ],
+  heroPresentation: { kicker: "FRANCO DA ROCHA · SP · DESDE 2023", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "Innovati Travel", subtitle: "Consultoria personalizada, roteiros sob medida e acompanhamento próximo.", image: "parques", order: 1, enabled: true },
+    { title: "Cruzeiros", subtitle: `Com destaque para a MSC. ${INSP}`, image: "cruzeiro", order: 2, enabled: true },
+    { title: "Resorts e all-inclusive", subtitle: `Viagens em família com planejamento detalhado. ${INSP}`, image: "resort", order: 3, enabled: true },
+  ],
+  signature: {
+    kicker: "FAMÍLIA · SOB MEDIDA · ACOMPANHAMENTO",
+    title: "Consultoria personalizada para viagens em família",
+    text: "Roteiros sob medida e acompanhamento próximo. Orlando e parques temáticos, cruzeiros, resorts, Brasil, Estados Unidos e Canadá orientam o trabalho da Innovati Travel.",
+  },
+  destinations: [
+    { key: "orlando", image: "parques", label: "Orlando", title: "Orlando e parques temáticos", text: `Parques temáticos para toda a família. ${INSP}`, service: "pacotes", enabled: true, order: 1 },
+    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: `Com destaque para a MSC. ${INSP}`, service: "cruzeiros", enabled: true, order: 2 },
+    { key: "resorts", image: "resort", label: "Resorts", title: "Resorts e all-inclusive", text: `Descanso planejado em detalhes. ${INSP}`, service: "hospedagem", enabled: true, order: 3 },
+    { key: "brasil", image: "litoral", label: "Brasil", title: "Brasil: Sul e Nordeste", text: `Destinos nacionais sob medida. ${INSP}`, service: "pacotes", enabled: true, order: 4 },
+  ],
+  modules: [
+    { key: "orlando", title: "Orlando e parques temáticos", text: "Planejamento detalhado para a família.", image: "parques", service: "pacotes", enabled: true, order: 1 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Com destaque para a MSC. Imagem genérica.", image: "cruzeiro", service: "cruzeiros", enabled: true, order: 2 },
+    { key: "eua", title: "Estados Unidos e Canadá", text: "Roteiros sob medida e experiências esportivas nos EUA. Imagem genérica.", image: "grupos", service: "pacotes", enabled: true, order: 3 },
+    { key: "brasil", title: "Brasil: Sul e Nordeste", text: "Viagens nacionais personalizadas. Imagem genérica.", image: "brasil", service: "pacotes", enabled: true, order: 4 },
+  ],
+  highlights: [
+    { title: "Viagens em família", text: "Planejamento detalhado e recomendações personalizadas.", service: "pacotes", cta: "Planejar em família" },
+    { title: "Roteiros sob medida", text: "Cada viagem pensada para o perfil de quem viaja.", service: "pacotes", cta: "Planejar minha viagem" },
+    { title: "Experiências esportivas nos EUA", text: "Entre as especialidades da agência.", service: "pacotes", cta: "Saber mais" },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Jussara Beraldes, fundadora e consultora",
+    text: "A Innovati Travel atua desde 2023 em Franco da Rocha (SP), com consultoria personalizada, viagens em família, roteiros sob medida e acompanhamento próximo.\n\nJussara Beraldes, fundadora e consultora, conduz o atendimento humano e o planejamento detalhado de cada viagem.\n\nAs especialidades incluem Orlando e parques temáticos, cruzeiros (com destaque para a MSC), resorts e all-inclusive, Brasil (Sul e Nordeste), Estados Unidos e Canadá e experiências esportivas nos EUA.",
+    badge: { value: "Desde 2023", label: "Innovati Travel" }, media: "hidden", showLocation: true, ownerName: "Jussara Beraldes",
+  },
+  differentials: [
+    { title: "Atendimento humano", text: "Conversa próxima com quem planeja a viagem.", icon: "consultivo" },
+    { title: "Planejamento detalhado", text: "Cada etapa da viagem organizada com cuidado.", icon: "conferido" },
+    { title: "Recomendações personalizadas", text: "Sugestões pensadas para o perfil de cada viajante.", icon: "fornecedores" },
+    { title: "Suporte antes, durante e depois", text: "Acompanhamento em todas as fases da viagem.", icon: "acompanhamento" },
+  ],
+  hideConciergeActions: true,
+  conciergeSteps: [
+    "Conversa sobre a viagem pelo WhatsApp ou e-mail.",
+    "Planejamento detalhado e recomendações personalizadas.",
+    "Roteiro sob medida e organização da viagem.",
+    "Suporte antes, durante e depois da viagem.",
+  ],
+  faq: [
+    { q: "Quem é responsável pela agência?", a: "Jussara Beraldes, fundadora e consultora da Innovati Travel." },
+    { q: "Desde quando a agência atua?", a: "A Innovati Travel atua desde 2023, em Franco da Rocha (SP)." },
+    { q: "Quais são as especialidades?", a: "Orlando e parques temáticos, cruzeiros (com destaque para MSC), resorts e all-inclusive, Brasil (Sul e Nordeste), Estados Unidos e Canadá e experiências esportivas nos EUA." },
+    { q: "Como é o atendimento?", a: "Atendimento humano, planejamento detalhado, recomendações personalizadas e suporte antes, durante e depois da viagem." },
+    { q: "Quais são os canais de contato?", a: "WhatsApp (11) 91857-8547, e-mail innovatitravel@gmail.com e Instagram @innovatitravel." },
+  ],
+  copy: {
+    modules: { kicker: "ESPECIALIDADES", title: "Destaques da Innovati Travel", subtitle: "Orlando, cruzeiros, EUA e Canadá e Brasil." },
+    destinations: { kicker: "DESTINOS", title: "Destinos para a sua próxima viagem", subtitle: "Imagens genéricas de inspiração." },
+    highlights: { kicker: "PERFIS", title: "Viagens pensadas para você", subtitle: "Família, roteiros sob medida e experiências esportivas." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Acompanhamento próximo em cada etapa", subtitle: "Atendimento humano e planejamento detalhado." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Do planejamento ao retorno", subtitle: "Suporte antes, durante e depois." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Sobre a Innovati Travel" },
+  },
+  footer: {
+    description: "Consultoria personalizada de viagens em Franco da Rocha (SP), desde 2023. Roteiros sob medida e acompanhamento próximo.",
+    phone: "WhatsApp (11) 91857-8547", email: "innovatitravel@gmail.com",
+    instagram: "https://www.instagram.com/innovatitravel/", instagramLabel: "@innovatitravel",
+    address: "Franco da Rocha/SP", showLocation: true, legalLinksDisabled: true,
+  },
+  seo: { title: "Prévia para revisão — Innovati Travel", description: "Prévia técnica da Innovati Travel; sem publicação e com ações desativadas." },
+}, "Innovati Travel");
+ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID] = {
+  jobId: INNOVATI_PREVIEW_JOB_ID, info: INNOVATI_PREVIEW_INFO, profile: INNOVATI_PREVIEW_PROFILE,
+  notice: "prévia para revisão · sem publicação · ações desativadas",
+  documentTitle: "Prévia para revisão — Innovati Travel", realAgency: true,
 };
