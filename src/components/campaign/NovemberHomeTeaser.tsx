@@ -11,13 +11,13 @@ const FALLBACK_CATEGORIES = ["praias", "cruzeiros", "familia"] as const;
 
 /**
  * Resumo da página Oportunidades de Novembro na Home da O Mundo em Cores.
- * Mostra até 3 ofertas reais marcadas para "novembro"; sem ofertas, mostra
- * categorias da campanha (nunca ofertas ou valores fictícios).
+ * Mostra até 4 ofertas reais marcadas para "novembro", em uma única linha no
+ * desktop; sem ofertas, mostra categorias da campanha (nunca fictícias).
  */
 export function NovemberHomeTeaser({ hostname, container, heading }: { hostname: string; container: string; heading: ReactNode }) {
   const { data: publicOffers = [] } = usePublicOffers(hostname);
   const offers = useMemo(
-    () => publicOffers.filter((o) => offerInChannel(o, "novembro")).slice(0, 3).map((o) => campaignOfferFromPublic(o, campaignImages.hero)),
+    () => publicOffers.filter((o) => offerInChannel(o, "novembro")).slice(0, 4).map((o) => campaignOfferFromPublic(o, campaignImages.hero)),
     [publicOffers],
   );
   const pageHref = agencySiteHref(`${NOVEMBER_PAGE}#oportunidades`);
@@ -33,7 +33,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
           </Button>
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {offers.length
             ? offers.map((offer) => (
                 <a key={offer.id} href={pageHref} className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
