@@ -29,7 +29,7 @@ import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.jso
 import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
 import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.json";
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
-import curtiFavicon from "@/assets/whitelabel/favicon-curti-viagens.png.asset.json";
+import curtiFavicon from "@/assets/whitelabel/favicon-curti-viagens-2.png.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "destinoscomaju.com.br": destinosComAJuLogo.url,
