@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Sparkles, FileText, MoreHorizontal, Loader2, Tag, AlertTriangle, Inbox, Link2 } from "lucide-react";
+import { Plus, Sparkles, FileText, MoreHorizontal, Loader2, Tag, AlertTriangle, Inbox, Link2, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
 import { useQuotes } from "@/hooks/useQuotes";
 import { useOffers, useOfferRequests, useOfferSettings, type OfferRow } from "@/hooks/useOffers";
 import { OfferEditorDialog } from "@/components/offers/OfferEditorDialog";
+import { ImageOfferDialog } from "@/components/offers/ImageOfferDialog";
 import {
   OFFER_STATUS_LABELS,
   effectiveOfferStatus,
@@ -47,6 +48,7 @@ export function OffersTab() {
   const [filter, setFilter] = useState<OfferPanelFilter | "requests">("active");
   const [editor, setEditor] = useState<{ mode: "edit" | "manual" | "import"; offer?: OfferRow | null } | null>(null);
   const [pickQuote, setPickQuote] = useState(false);
+  const [imageEditor, setImageEditor] = useState<{ offer: OfferRow | null } | null>(null);
 
   const { data: siteHost } = useQuery({
     queryKey: ["offer-site-host", agencyOwnerId],
@@ -167,6 +169,7 @@ export function OffersTab() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" size="sm" onClick={() => setPickQuote(true)}><FileText className="mr-1.5 h-4 w-4" /> A partir de orçamento</Button>
           <Button variant="outline" size="sm" onClick={() => setEditor({ mode: "import" })}><Sparkles className="mr-1.5 h-4 w-4" /> Importar com IA</Button>
+          <Button variant="outline" size="sm" onClick={() => setImageEditor({ offer: null })}><ImagePlus className="mr-1.5 h-4 w-4" /> Oferta por imagem</Button>
           <Button size="sm" onClick={() => setEditor({ mode: "manual" })}><Plus className="mr-1.5 h-4 w-4" /> Nova oferta</Button>
         </div>
       </div>
@@ -228,7 +231,7 @@ export function OffersTab() {
                         <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Ações da oferta"><MoreHorizontal className="h-4 w-4" /></Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setEditor({ mode: "edit", offer: o })}>Editar</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => (o.image_only ? setImageEditor({ offer: o }) : setEditor({ mode: "edit", offer: o }))}>Editar</DropdownMenuItem>
                         {(o.eff === "draft" || o.eff === "expired" || o.eff === "ended") && (
                           <DropdownMenuItem onClick={() => act(o.id, "publish", "Oferta publicada.")}>{o.eff === "draft" ? "Publicar" : "Republicar"}</DropdownMenuItem>
                         )}
@@ -251,7 +254,7 @@ export function OffersTab() {
                   </div>
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Badge variant={o.eff === "published" ? "default" : "secondary"} className="text-[10px]">{OFFER_STATUS_LABELS[o.eff]}</Badge>
-                    <Badge variant="outline" className="text-[10px]">{o.origin === "quote" ? "Orçamento" : o.origin === "import" ? "Importada" : "Manual"}</Badge>
+                    <Badge variant="outline" className="text-[10px]">{o.image_only ? "Imagem" : o.origin === "quote" ? "Orçamento" : o.origin === "import" ? "Importada" : "Manual"}</Badge>
                     {o.customized_fields.length > 0 && <Badge variant="outline" className="text-[10px]">{o.customized_fields.length} personalizado(s)</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -273,6 +276,7 @@ export function OffersTab() {
         mode={editor?.mode ?? "manual"}
         offer={editor?.offer ?? null}
       />
+      <ImageOfferDialog open={!!imageEditor} onOpenChange={(v) => !v && setImageEditor(null)} offer={imageEditor?.offer ?? null} />
 
       <Dialog open={pickQuote} onOpenChange={setPickQuote}>
         <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">

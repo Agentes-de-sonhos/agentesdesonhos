@@ -16,7 +16,7 @@ import { offerInChannel } from "@/lib/offers";
 import { campaignImages } from "@/components/campaign/novemberCampaignData";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { PlanChoiceDialog } from "@/components/campaign/PlanChoiceDialog";
+import { PlanChoiceDialog, offerWhatsappUrl } from "@/components/campaign/PlanChoiceDialog";
 import NotFound from "@/pages/NotFound";
 import "@/styles/november-campaign.css";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -43,8 +43,17 @@ export default function NovemberCampaignPreview() {
   if (!allowed) return <BrowserRouter><NotFound /></BrowserRouter>;
   const onSearch = (selection: RadarSelection) => { setCategory(selection.category); setPeriod(selection.period); };
   const offers = filterCampaignOffers(hasReal ? realOffers : novemberOffers, category, period);
-  const onSelectOffer = (offer: CampaignOffer) => setChoice(offer);
-  const onBuyOnline = (offer: CampaignOffer) => { setChoice(null); if (offer.real && offer.href) window.location.assign(offer.href); else setSelected(offer); };
+  const onSelectOffer = (offer: CampaignOffer) => {
+    // Oferta por imagem sem link: WhatsApp direto, já identificando a oferta.
+    if (offer.imageOnly && !offer.ctaUrl) { window.open(offerWhatsappUrl(offer), "_blank", "noopener"); return; }
+    setChoice(offer);
+  };
+  const onBuyOnline = (offer: CampaignOffer) => {
+    setChoice(null);
+    if (offer.imageOnly && offer.ctaUrl) window.open(offer.ctaUrl, "_blank", "noopener");
+    else if (offer.real && offer.href) window.location.assign(offer.href);
+    else setSelected(offer);
+  };
   return <BrowserRouter><div className="november-preview" onClickCapture={event => {
     const anchor = event.target instanceof Element ? event.target.closest("a") : null;
     if (anchor && !anchor.getAttribute("href")?.startsWith("#")) { event.preventDefault(); event.stopPropagation(); setContact(true); }
