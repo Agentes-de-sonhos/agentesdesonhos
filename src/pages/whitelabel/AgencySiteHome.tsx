@@ -424,7 +424,7 @@ function SectionHeading({
   editorial,
   eyebrow,
 }: {
-  title: string;
+  title: ReactNode;
   subtitle?: string;
   editorial?: boolean;
   eyebrow?: string;
@@ -692,7 +692,7 @@ export default function AgencySiteHome({
           key={key}
           hostname="omundoemcores.com.br"
           container={container}
-          heading={<SectionHeading eyebrow="OPORTUNIDADES DE NOVEMBRO" title="Condições e roteiros selecionados para este mês" subtitle="Destaques da semana para viajar ainda em 2026 ou planejar 2027 com antecedência." editorial={editorial} />}
+          heading={<SectionHeading eyebrow="OPORTUNIDADES DE NOVEMBRO" title={<>Condições e roteiros selecionados<br />para este mês</>} subtitle="Destaques da semana para viajar ainda em 2026 ou planejar 2027 com antecedência." editorial={editorial} />}
         />
       );
     }
