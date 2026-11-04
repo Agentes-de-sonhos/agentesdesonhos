@@ -373,3 +373,6 @@
 @media (max-width: 767px) {
   .campaign-emblem { left: 0; top: 0; align-self: center; margin: 0 auto 8px; width: 120px; }
 }
+@media (max-width: 640px) {
+  .campaign-closing-photo img { object-position: left top; }
+}
