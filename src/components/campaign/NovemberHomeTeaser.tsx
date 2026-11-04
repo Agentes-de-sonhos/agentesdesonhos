@@ -84,7 +84,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
             </div>
             <Button asChild className="shrink-0 self-start lg:self-auto"><a href={radarHref}>Ativar Radar de Oportunidades</a></Button>
           </div>
-          <Button asChild variant="outline" className="shrink-0 self-start md:self-auto">
+          <Button asChild variant="outline" className="hidden shrink-0 self-start md:inline-flex">
             <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
           </Button>
         </div>
