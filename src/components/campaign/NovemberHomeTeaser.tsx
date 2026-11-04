@@ -11,8 +11,8 @@ const FALLBACK_CATEGORIES = ["praias", "cruzeiros", "familia"] as const;
 
 /**
  * Resumo da página Oportunidades de Novembro na Home da O Mundo em Cores.
- * Mostra até 3 ofertas reais marcadas para "novembro"; sem ofertas, mostra
- * categorias da campanha (nunca ofertas ou valores fictícios).
+ * Mostra até 4 ofertas reais marcadas para "novembro", em uma única linha no
+ * desktop; sem ofertas, mostra categorias da campanha (nunca fictícias).
  */
 export function NovemberHomeTeaser({ hostname, container, heading }: { hostname: string; container: string; heading: ReactNode }) {
   const { data: publicOffers = [] } = usePublicOffers(hostname);
