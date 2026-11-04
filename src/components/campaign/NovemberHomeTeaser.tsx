@@ -29,7 +29,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
       <div className={`${container} py-14 md:py-20`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="min-w-0 flex-1 [&>div]:mb-0">{heading}</div>
-          <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" width={1254} height={1254} loading="lazy" className="hidden h-auto w-36 shrink-0 self-center md:block lg:w-44" />
+          <img src={emblem.url} alt="Aproveite ofertas incríveis em novembro" width={1254} height={1254} className="hidden h-auto w-36 shrink-0 self-center md:block lg:w-44" />
         </div>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
