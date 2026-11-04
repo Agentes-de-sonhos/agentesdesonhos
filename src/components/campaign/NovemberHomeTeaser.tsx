@@ -27,7 +27,7 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
     <section id="ofertas-novembro" className="scroll-mt-24">
       <div className={`${container} py-14 md:py-20`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          {heading}
+          <div className="min-w-0 flex-1 [&>div]:mb-0">{heading}</div>
           <Button asChild variant="outline" className="shrink-0 self-start md:self-auto">
             <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
           </Button>

@@ -272,6 +272,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   campaignCardPresentation: "photoAbove",
   nav: [
     { label: "Início", to: "/" },
+    { label: "Ofertas Novembro", to: "/oportunidades-novembro" },
     { label: "Especialidades", to: "/#campanhas", children: [
       { label: "Universal Orlando", to: "/universal" },
       { label: "Xcaret", to: "/xcaret" },
