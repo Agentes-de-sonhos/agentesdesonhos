@@ -397,9 +397,9 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                       ) : null}
                     </div>
                     <h3 className="mt-4 text-base font-semibold text-foreground">{c.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.description}</p>
+                    <p className="mt-2 min-h-[4.5rem] text-sm leading-relaxed text-muted-foreground">{c.description}</p>
                     {(CARD_PARKS[c.id] ?? []).some((p) => PARK_LOGOS[p]) && (
-                      <div className={cn("pt-4", landingHref(c.id) ? "" : "mt-auto")}>
+                      <div className="pt-4">
                         <Dialog>
                           <DialogTrigger asChild>
                             <button type="button" className="mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground underline-offset-4 transition hover:text-primary hover:underline">
@@ -432,15 +432,18 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                         </div>
                       </div>
                     )}
-                    {landingHref(c.id) && (
-                      <Button asChild variant="outline" className="mt-auto w-full translate-y-0">
-                        <a href={landingHref(c.id)!} className="mt-4">Saiba mais</a>
-                      </Button>
-                    )}
-                    {STRIP_EXPLORE_MAPS[c.id] && (
-                      <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} ariaLabel={`Explorar o mapa de ${c.title}`} className="absolute inset-x-0 bottom-[52px] mx-auto flex h-10 w-fit items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-5 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
-                        Explore
-                      </DisneyParkMapTrigger>
+                    {(landingHref(c.id) || STRIP_EXPLORE_MAPS[c.id]) && (
+                      <div className="mt-auto pt-4">
+                        {landingHref(c.id) ? (
+                          <Button asChild variant="outline" className="w-full">
+                            <a href={landingHref(c.id)!}>Saiba mais</a>
+                          </Button>
+                        ) : (
+                          <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} ariaLabel={`Explorar o mapa de ${c.title}`} className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
+                            Explorar mapa
+                          </DisneyParkMapTrigger>
+                        )}
+                      </div>
                     )}
                   </article>
                 ))}
