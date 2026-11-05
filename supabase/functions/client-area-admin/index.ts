@@ -42,17 +42,35 @@ const BASE_HEADERS = {
   'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
 }
 
-const corsFor = (origin: string | null): Record<string, string> => {
+const corsFor = (origin: string | null, agencyPortalOk = false): Record<string, string> => {
   const host = hostFromOrigin(origin)
-  const allowed = !host ? '*' : isPlatformOriginHost(host) ? String(origin) : ''
+  const allowed = !host ? '*' : (isPlatformOriginHost(host) || agencyPortalOk) ? String(origin) : ''
   return { ...BASE_HEADERS, 'Access-Control-Allow-Origin': allowed || 'null' }
+}
+
+/** Domínio White Label ativo com portal de gestão habilitado (painel da agência). */
+async function isAgencyAdminPortalHost(host: string | null): Promise<boolean> {
+  if (!host) return false
+  const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+  const { data } = await admin
+    .from('agency_public_domains')
+    .select('id')
+    .eq('hostname', host)
+    .eq('is_active', true)
+    .eq('admin_portal_enabled', true)
+    .maybeSingle()
+  return !!data
 }
 
 const randomBytes = (size: number) => crypto.getRandomValues(new Uint8Array(size))
 
 Deno.serve(async (req) => {
   const originHeader = req.headers.get('origin')
-  const corsHeaders = corsFor(originHeader)
+  const originHost = hostFromOrigin(originHeader)
+  const agencyPortalOk = !!originHost && !isPlatformOriginHost(originHost)
+    ? await isAgencyAdminPortalHost(originHost).catch(() => false)
+    : false
+  const corsHeaders = corsFor(originHeader, agencyPortalOk)
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), {
@@ -62,8 +80,7 @@ Deno.serve(async (req) => {
 
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
-  const originHost = hostFromOrigin(originHeader)
-  if (originHost && !isPlatformOriginHost(originHost)) {
+  if (originHost && !isPlatformOriginHost(originHost) && !agencyPortalOk) {
     return json({ error: 'Origem não autorizada.' }, 403)
   }
 
