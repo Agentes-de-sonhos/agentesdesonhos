@@ -104,7 +104,15 @@ export function ClientAreaAccessSection({ clientId, clientName, clientEmail }: P
         body: { client_id: clientId, ...payload },
       });
       if (error) {
-        const detail = (data as any)?.error;
+        let detail = (data as any)?.error as string | undefined;
+        const ctx = (error as any)?.context;
+        if (!detail && ctx && typeof ctx.clone === "function") {
+          try {
+            detail = (await ctx.clone().json())?.error;
+          } catch {
+            /* mantém fallback */
+          }
+        }
         throw new Error(detail || "Não foi possível concluir a operação.");
       }
       if ((data as any)?.error) throw new Error((data as any).error);
