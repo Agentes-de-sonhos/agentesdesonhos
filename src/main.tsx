@@ -136,15 +136,17 @@ import { canonicalAgencySiteRedirectUrl } from "@/lib/agencySlugRouting";
 
 const root = document.getElementById("root");
 
-const isArenaHome =
-  ["arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(window.location.hostname) &&
-  window.location.pathname === "/";
+const homeBrands: Record<string, { name: string; logo: string; logoBackground?: string }> = {
+  "arenatravelgroup.com.br": { name: "Arena Travel Group", logo: "/arena-travel-group/logo.jpeg" },
+  "innovati.tur.br": { name: "Innovati Travel", logo: "/innovati-travel/logo.png", logoBackground: "#fff" },
+};
+const homeBrand = homeBrands[window.location.hostname.replace(/^www\./, "")];
 
-if (root && isArenaHome) {
-  document.title = "Arena Travel Group";
+if (root && homeBrand && window.location.pathname === "/") {
+  document.title = homeBrand.name;
   createRoot(root).render(
     <main style={{ minHeight: "100svh", display: "grid", placeContent: "center", justifyItems: "center", gap: "1.5rem", padding: "2rem", background: "#000", color: "#fff", textAlign: "center" }}>
-      <h1><img src="/arena-travel-group/logo.jpeg" alt="Arena Travel Group" style={{ width: "min(72vw, 340px)", height: "auto" }} /></h1>
+      <h1 style={homeBrand.logoBackground ? { backgroundColor: homeBrand.logoBackground, padding: "1rem", borderRadius: "0.75rem" } : undefined}><img src={homeBrand.logo} alt={homeBrand.name} style={{ width: "min(72vw, 340px)", height: "auto" }} /></h1>
       <p>Nosso novo site está chegando.</p>
     </main>
   );
