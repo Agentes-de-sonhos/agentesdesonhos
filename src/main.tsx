@@ -136,7 +136,19 @@ import { canonicalAgencySiteRedirectUrl } from "@/lib/agencySlugRouting";
 
 const root = document.getElementById("root");
 
-if (root) {
+const isArenaHome =
+  ["arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(window.location.hostname) &&
+  window.location.pathname === "/";
+
+if (root && isArenaHome) {
+  document.title = "Arena Travel Group";
+  createRoot(root).render(
+    <main style={{ minHeight: "100svh", display: "grid", placeContent: "center", justifyItems: "center", gap: "1.5rem", padding: "2rem", background: "#fff", color: "#21252a", textAlign: "center" }}>
+      <h1><img src="/arena-travel-group/logo.jpeg" alt="Arena Travel Group" style={{ width: "min(72vw, 340px)", height: "auto" }} /></h1>
+      <p>Nosso novo site está chegando.</p>
+    </main>
+  );
+} else if (root) {
   createRoot(root).render(
     <HelmetProvider>
       <App />
