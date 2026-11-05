@@ -18300,6 +18300,7 @@ export type Database = {
           status: string
         }[]
       }
+      same_agency_as: { Args: { _owner: string }; Returns: boolean }
       save_card_capture_via_token: {
         Args: { _data: Json; _token: string }
         Returns: string
