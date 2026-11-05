@@ -143,7 +143,7 @@ const isArenaHome =
 if (root && isArenaHome) {
   document.title = "Arena Travel Group";
   createRoot(root).render(
-    <main style={{ minHeight: "100svh", display: "grid", placeContent: "center", justifyItems: "center", gap: "1.5rem", padding: "2rem", background: "#fff", color: "#21252a", textAlign: "center" }}>
+    <main style={{ minHeight: "100svh", display: "grid", placeContent: "center", justifyItems: "center", gap: "1.5rem", padding: "2rem", background: "#000", color: "#fff", textAlign: "center" }}>
       <h1><img src="/arena-travel-group/logo.jpeg" alt="Arena Travel Group" style={{ width: "min(72vw, 340px)", height: "auto" }} /></h1>
       <p>Nosso novo site está chegando.</p>
     </main>
