@@ -5,13 +5,15 @@
       "mime_part": "1",
       "supplier_reference": "ID 13992070",
       "slug": "costa-amalfitana-inesquecivel-novembro-2026",
-      "status": "artwork_reviewed"
+      "status": "ready_to_publish",
+      "asset_commit": "e334521b4befe5973d84820fa1a214ab5affb994"
     },
     {
       "mime_part": "2",
       "supplier_reference": "Peru, saída 2027-04-02",
       "slug": "peru-maravilhas-incas-novembro-2026",
-      "status": "artwork_reviewed"
+      "status": "ready_to_publish",
+      "asset_commit": "e334521b4befe5973d84820fa1a214ab5affb994"
     }
   ]
 }
