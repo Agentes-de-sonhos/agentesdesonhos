@@ -421,6 +421,13 @@
       "when": 1793667781812,
       "tag": "0059_wallet_active_domain_slug_compatibility",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "7",
+      "when": 1793843279837,
+      "tag": "0060_media_library_agency_isolation",
+      "breakpoints": true
     }
   ]
 }
