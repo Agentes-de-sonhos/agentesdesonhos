@@ -1,5 +1,4 @@
 /* Scoped port of the approved Harmony preview stylesheet (harmony-approved-source.zip). Every rule lives under .csp. */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
 .csp{--navy:var(--agency-secondary,#142f3d);--teal:var(--agency-primary,#216d73);--cream:var(--agency-surface,#f5f3ee);--on-primary:var(--agency-on-primary,#fff);--on-secondary:var(--agency-on-secondary,#fff);--muted:#657278;--line:#dce1df}
 .csp *{box-sizing:border-box}
 .csp{scroll-padding-top:90px}
