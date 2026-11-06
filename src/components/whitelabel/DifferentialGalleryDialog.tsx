@@ -33,7 +33,7 @@ export function DifferentialGalleryDialog({ open, onOpenChange, title, items }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl gap-4 p-4 sm:p-6">
+      <DialogContent data-preview-interactive className="max-w-5xl gap-4 p-4 sm:p-6">
         <div className="flex items-baseline justify-between gap-4 pr-8">
           <DialogTitle className="text-lg font-semibold">{title}</DialogTitle>
           <span className="text-sm text-muted-foreground">{index + 1} / {total}</span>
