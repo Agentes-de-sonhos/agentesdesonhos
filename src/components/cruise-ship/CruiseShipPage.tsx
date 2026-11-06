@@ -417,9 +417,32 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
       <dialog ref={techRef} id="techDialog" aria-labelledby="techTitle" onClick={backdropClose}>
         <button className="close" aria-label="Fechar ficha técnica" onClick={() => closeDialog(techRef.current)}>×</button>
-        <div className="eyebrow">{ship.shipName.toUpperCase()}</div>
-        <h2 id="techTitle">{ship.tech.title}</h2>
-        <div className="tech-content"><p><strong>{ship.tech.paragraphs[0]}</strong>{ship.tech.paragraphs.slice(1).map((p) => <span key={p}><br />{p}</span>)}</p></div>
+        <header className="tech-header">
+          <div className="eyebrow">{ship.shipName.toUpperCase()}</div>
+          <h2 id="techTitle">{ship.tech.title}</h2>
+          {ship.tech.subtitle && <p>{ship.tech.subtitle}</p>}
+        </header>
+        {ship.tech.facts?.length ? (
+          <dl className="tech-facts">
+            {ship.tech.facts.map((fact) => (
+              <div className="tech-fact" key={fact.label}>
+                <dt>{fact.label}</dt>
+                <dd>{fact.value}</dd>
+                {fact.detail && <dd className="tech-fact-detail">{fact.detail}</dd>}
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <div className="tech-content">{ship.tech.paragraphs.map((p) => <p key={p}>{p}</p>)}</div>
+        )}
+        {ship.tech.notes?.length ? (
+          <aside className="tech-notes" aria-label="Observações sobre os dados">
+            <h3>Sobre estes dados</h3>
+            {ship.tech.notes.map((note) => (
+              <p key={note.title}><strong>{note.title}.</strong> {note.text}</p>
+            ))}
+          </aside>
+        ) : null}
       </dialog>
 
       <a className="mobile-cta button" href="#csp-orcamento" onClick={scrollTo("csp-orcamento")}>Solicitar orçamento ↗</a>
