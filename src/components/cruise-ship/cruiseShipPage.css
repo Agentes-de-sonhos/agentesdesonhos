@@ -320,3 +320,4 @@
 .csp.csp.csp .csp-success{align-self:center}
 .csp.csp.csp .csp-success h3{font-size:24px;margin:0 0 10px}
 .csp.csp.csp dialog{position:fixed;margin:auto}
+.csp.csp.csp section[id]{scroll-margin-top:calc(var(--csp-sticky-top,0px) + 90px)}
