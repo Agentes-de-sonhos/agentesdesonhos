@@ -71,5 +71,11 @@ export interface CruiseShipContent {
     geography: string; // GeoJSON URL
   };
   quote: { eyebrow: string; titleA: string; titleB: string; textA: string; textB: string };
-  tech: { title: string; paragraphs: string[] };
+  tech: {
+    title: string;
+    subtitle?: string;
+    facts?: { label: string; value: string; detail?: string }[];
+    notes?: { title: string; text: string }[];
+    paragraphs: string[];
+  };
 }
