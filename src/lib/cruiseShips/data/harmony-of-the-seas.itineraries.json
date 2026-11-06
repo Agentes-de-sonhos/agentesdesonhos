@@ -1,0 +1,883 @@
+{
+  "checkedAt": "2026-11-06",
+  "from": "2026-11-06",
+  "to": "2027-12-31",
+  "scope": "Saídas encontradas em calendários públicos; não equivale a inventário completo ou disponibilidade em tempo real.",
+  "sailings": [
+    {
+      "date": "2026-11-10",
+      "n": 4,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-11-14",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-11-21",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Nassau",
+        "CocoCay",
+        "San Juan",
+        "Puerto Plata",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-11-28",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-12-05",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-12-12",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "Nassau",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-12-19",
+      "n": 4,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-12-23",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2026-12-30",
+      "n": 6,
+      "ports": [
+        "Port Canaveral",
+        "Nassau",
+        "Falmouth",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2026.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-01-05",
+      "n": 4,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-january-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-01-09",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "Nassau",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-january-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-01-16",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-january-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-01-23",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-january-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-01-28",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Cozumel",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-january-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-02-02",
+      "n": 4,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-february-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-02-06",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "Nassau",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-february-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-02-13",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-february-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-02-18",
+      "n": 2,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-february-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-02-20",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-february-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-02-25",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-february-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-03-02",
+      "n": 4,
+      "ports": [
+        "Port Canaveral",
+        "Nassau",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-march-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-03-06",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "Puerto Plata",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-march-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-03-13",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "San Juan",
+        "Samaná",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-march-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-03-20",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Kitts",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-march-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-03-27",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-march-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-04-03",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Kitts",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-april-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-04-10",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Cozumel",
+        "Nassau",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-april-2027.html",
+      "status": "official_checked",
+      "officialSource": "https://www.royalcaribbean.com/itinerary/7-night-eastern-caribbean-perfect-day-from-orlando-porto-canaveral-on-harmony-HM07E526",
+      "checkedAt": "2026-11-06"
+    },
+    {
+      "date": "2027-04-17",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-april-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-04-24",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Cozumel",
+        "Falmouth",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-april-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-05-01",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-may-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-05-08",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Roatán",
+        "Cozumel",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-may-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-05-15",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-may-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-05-22",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Falmouth",
+        "Cozumel",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-may-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-05-29",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-may-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-06-03",
+      "n": 2,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-june-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-06-05",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Roatán",
+        "Cozumel",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-june-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-06-12",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-june-2027.html",
+      "status": "conflict"
+    },
+    {
+      "date": "2027-06-19",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Roatán",
+        "Cozumel",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-june-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-06-26",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-june-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-07-03",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-july-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-07-08",
+      "n": 2,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-july-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-07-10",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Kitts",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-july-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-07-17",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Roatán",
+        "Cozumel",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-july-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-07-24",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-july-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-07-31",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Roatán",
+        "Cozumel",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-july-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-08-07",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "St. Thomas",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-august-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-08-14",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Cozumel",
+        "Costa Maya",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-august-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-08-21",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-august-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-08-28",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "Nassau",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-august-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-09-02",
+      "n": 2,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-september-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-09-04",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-september-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-09-11",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Roatán",
+        "Cozumel",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-september-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-09-18",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-september-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-09-25",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-september-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-10-02",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-october-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-10-09",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Cozumel",
+        "Roatán",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-october-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-10-16",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Thomas",
+        "San Juan",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-october-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-10-23",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "Costa Maya",
+        "Cozumel",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-october-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-10-30",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "St. Maarten",
+        "St. Thomas",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-october-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-11-06",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Cozumel",
+        "CocoCay",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-11-13",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-11-20",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Cozumel",
+        "Costa Maya",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-11-27",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-november-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-12-04",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "Cozumel",
+        "Costa Maya",
+        "CocoCay",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-12-11",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-12-18",
+      "n": 5,
+      "ports": [
+        "Port Canaveral",
+        "Costa Maya",
+        "Nassau",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-12-23",
+      "n": 7,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "St. Thomas",
+        "St. Maarten",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2027.html",
+      "status": "published"
+    },
+    {
+      "date": "2027-12-30",
+      "n": 9,
+      "ports": [
+        "Port Canaveral",
+        "CocoCay",
+        "San Juan",
+        "St. Maarten",
+        "St. Kitts",
+        "St. Thomas",
+        "Port Canaveral"
+      ],
+      "source": "https://www.icruise.com/ships/royal-caribbean-cruises-harmony-of-the-seas-cruise-itineraries-december-2027.html",
+      "status": "conflict"
+    }
+  ]
+}
