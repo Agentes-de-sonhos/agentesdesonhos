@@ -119,6 +119,20 @@ export const HARMONY_OF_THE_SEAS: CruiseShipContent = {
   },
   tech: {
     title: "Ficha técnica do navio",
+    subtitle: "Conheça os números e a estrutura do Harmony of the Seas.",
+    facts: [
+      { label: "Classe do navio", value: "Oasis", detail: "Royal Caribbean International" },
+      { label: "Decks", value: "18", detail: "16 destinados aos passageiros" },
+      { label: "Capacidade máxima publicada", value: "6.780", detail: "Hóspedes, conforme a configuração" },
+      { label: "Em ocupação dupla", value: "≈ 5.479", detail: "Hóspedes" },
+      { label: "Piscinas", value: "4", detail: "Além de 10 hidromassagens" },
+      { label: "Opções gastronômicas", value: "20+", detail: "Espaços gratuitos e pagos" },
+    ],
+    notes: [
+      { title: "Sobre a capacidade", text: "A lotação efetiva depende da configuração das cabines e da operação." },
+      { title: "Tripulação", text: "A Royal publica números diferentes em materiais de épocas distintas. Por isso, não apresentamos um efetivo atual como confirmado." },
+      { title: "Piscinas e gastronomia", text: "Piscinas e hidromassagens conforme Royal Caribbean Incentives. Gastronomia conforme a apresentação do navio renovado, incluindo espaços de diferentes tipos." },
+    ],
     paragraphs: [
       "Classe Oasis · 18 decks totais, 16 para passageiros.",
       "Capacidade publicada: até 6.780 hóspedes; aproximadamente 5.479 em ocupação dupla. A lotação efetiva depende das cabines e da operação.",
