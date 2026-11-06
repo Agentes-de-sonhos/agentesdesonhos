@@ -259,6 +259,10 @@ export interface AgencyDifferential {
   text: string;
   /** Semantic icon slot (resolved by the presentation layer, never repeated). */
   icon: "consultivo" | "conferido" | "acompanhamento" | "fornecedores";
+  /** Opt-in: round photo replacing the icon. */
+  avatar?: { src: string; alt: string };
+  /** Opt-in: credentials gallery opened in a modal. */
+  gallery?: { label: string; items: { src: string; alt: string }[] };
 }
 
 export const DEFAULT_DIFFERENTIALS: AgencyDifferential[] = [
