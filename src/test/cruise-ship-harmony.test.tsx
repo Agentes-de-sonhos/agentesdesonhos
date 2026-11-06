@@ -85,8 +85,7 @@ describe("Harmony route page", () => {
   });
 
   it("submits once through the existing site-request hook with the route chosen on the map", async () => {
-    let resolve!: (v: unknown) => void;
-    submit.mockImplementation(() => new Promise((r) => { resolve = r; }));
+    submit.mockResolvedValue({ success: true });
     renderAt("/cruzeiros/royal-caribbean/harmony-of-the-seas");
     fireEvent.click(screen.getByRole("button", { name: "Quero orçamento deste roteiro" }));
     fireEvent.change(screen.getByPlaceholderText("Como podemos chamar você?"), { target: { value: "Maria Souza" } });
@@ -99,6 +98,5 @@ describe("Harmony route page", () => {
     expect(payload.service_key).toBe("cruzeiros");
     expect(payload.details.regiao).toBe("Bahamas");
     expect(payload.details.ordem_escalas).toMatch(/^Port Canaveral → /);
-    resolve({ success: true });
   });
 });
