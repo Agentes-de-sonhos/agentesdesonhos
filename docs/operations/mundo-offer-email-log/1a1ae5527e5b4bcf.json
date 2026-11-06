@@ -1,0 +1,19 @@
+{
+  "gmail_message_id": "1a1ae5527e5b4bcf",
+  "validated_sender": true,
+  "validated_recipient": true,
+  "validated_subject": true,
+  "items": [
+    {
+      "attachment": "image0.jpeg",
+      "slug": "the-fives-riviera-maya-novembro-2026",
+      "status": "artwork_reviewed"
+    },
+    {
+      "attachment": "image1.jpeg",
+      "slug": "ponta-verde-maceio-abril-2027",
+      "status": "pending_clarification",
+      "reason": "15 x 187 = 2805; source email and flyer total 2817. Need corrected installment or total."
+    }
+  ]
+}
