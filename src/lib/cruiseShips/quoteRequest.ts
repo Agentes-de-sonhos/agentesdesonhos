@@ -27,10 +27,12 @@ export function validCruiseQuote(f: CruiseQuoteForm): boolean {
   const email = f.email.trim();
   const phoneOk = /^[1-9]{2}\d{8,9}$/.test(phone);
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const ages = f.ages.split(",").map(a => a.trim());
+  const agesOk = f.children === 0 || (ages.length === f.children && ages.every(a => /^(?:[0-9]|1[0-7])$/.test(a)));
   return f.name.trim().length >= 3 && phoneOk && (!email || emailOk)
     && Number.isInteger(f.adults) && f.adults >= 1 && f.adults <= 20
     && Number.isInteger(f.children) && f.children >= 0 && f.children <= 10
-    && (f.children === 0 || f.ages.trim().length > 0)
+    && agesOk
     && f.consent;
 }
 
@@ -57,8 +59,8 @@ export function describeRoute(sel: CruiseRouteSelection, homePort: string): { ro
 export function cruiseQuotePayload(ship: CruiseShipContent, sel: CruiseRouteSelection, f: CruiseQuoteForm, honeypot: string) {
   const homePort = sel.group?.variants[0]?.ports[0] ?? "";
   const r = describeRoute(sel, homePort);
-  const pax = `${f.adults} adulto(s), ${f.children} criança(s)${f.children ? ` (idades: ${f.ages.trim()})` : ""}`;
-  const period = f.period ? monthName(f.period) : "";
+  const pax = `${f.adults} adulto(s), ${f.children} criança(s)${f.children ? ` (idades na viagem: ${f.ages.split(",").map(a => a.trim() === "0" ? "menos de 1 ano" : `${a.trim()} anos`).join(", ")})` : ""}`;
+  const period = f.period ? monthName(f.period) : "Ainda não definido";
   const parts = [
     `Cruzeiro: ${ship.shipName} · ${ship.lineName}`,
     `Roteiro: ${r.route}`,
@@ -92,7 +94,7 @@ export function cruiseQuotePayload(ship: CruiseShipContent, sel: CruiseRouteSele
       ordem_escalas: r.order,
       meses_saidas: r.months,
       data_saida: sel.date ?? "",
-      periodo_desejado: f.period,
+      periodo_desejado: f.period || "Ainda não definido",
       cabine: f.cabin || HELP_LABEL,
       adultos: f.adults,
       criancas: f.children,
