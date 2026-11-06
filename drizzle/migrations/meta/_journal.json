@@ -428,6 +428,13 @@
       "when": 1793843279837,
       "tag": "0060_media_library_agency_isolation",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "7",
+      "when": 1793998575582,
+      "tag": "0061_founder_quote_booking_eligibility",
+      "breakpoints": true
     }
   ]
 }
