@@ -40,6 +40,11 @@ async function fetchNewest(placeId: string, key: string) {
       return null;
     }
     const list = (Array.isArray(d.result?.reviews) ? d.result.reviews : []).slice(0, 5);
+    // Ordem sorteada a cada visita entre as 5 mais recentes.
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
     return list.map((x: any) => ({
       authorAttribution: { displayName: x?.author_name ?? null, uri: x?.author_url ?? null, photoUri: x?.profile_photo_url ?? null },
       rating: x?.rating ?? null,
