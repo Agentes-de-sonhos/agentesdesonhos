@@ -48,6 +48,7 @@ import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyVisaConsultSection } from "@/components/whitelabel/AgencyVisaConsultSection";
 import { UsVisaHomeTeaser } from "@/components/whitelabel/UsVisaHomeTeaser";
 import { AgencyCampaignRail } from "@/components/whitelabel/AgencyCampaignRail";
+import { DifferentialGalleryDialog } from "@/components/whitelabel/DifferentialGalleryDialog";
 import { AgencyInspirationDialog } from "@/components/whitelabel/AgencyInspirationDialog";
 import { AgencyGoogleReviewsSection } from "@/components/whitelabel/AgencyGoogleReviewsSection";
 import { isGoogleReviewsEnabled } from "@/lib/agencyGoogleReviews";
@@ -1410,14 +1411,22 @@ export default function AgencySiteHome({
                     const Icon = DIFFERENTIAL_ICONS[d.icon] ?? CheckCircle2;
                     return (
                       <li key={d.title} className="flex gap-5 border-t border-foreground/10 pt-6">
-                        <Icon
-                          className="mt-1 h-7 w-7 shrink-0 text-primary wl-accent-icon"
-                          aria-hidden="true"
-                          strokeWidth={1.6}
-                        />
+                        {d.avatar ? (
+                          <img src={d.avatar.src} alt={d.avatar.alt} loading="lazy"
+                            className="h-16 w-16 shrink-0 rounded-full border-2 border-primary/30 object-cover object-top shadow-sm" />
+                        ) : (
+                          <Icon
+                            className="mt-1 h-7 w-7 shrink-0 text-primary wl-accent-icon"
+                            aria-hidden="true"
+                            strokeWidth={1.6}
+                          />
+                        )}
                         <div>
                           <h3 className="text-lg font-bold text-foreground">{d.title}</h3>
                           <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{d.text}</p>
+                          {d.gallery && d.gallery.items.length > 0 && (
+                            <DifferentialGalleryButton title={d.title} gallery={d.gallery} />
+                          )}
                         </div>
                       </li>
                     );
@@ -2269,6 +2278,19 @@ export default function AgencySiteHome({
         submitLabel={profile.inspirationDialog?.submitLabel}
         notice={profile.inspirationDialog?.notice}
       />
+    </>
+  );
+}
+
+function DifferentialGalleryButton({ title, gallery }: { title: string; gallery: { label: string; items: { src: string; alt: string }[] } }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}
+        className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 hover:underline">
+        {gallery.label} ({gallery.items.length}) <ArrowRight className="h-4 w-4" aria-hidden="true" />
+      </button>
+      <DifferentialGalleryDialog open={open} onOpenChange={setOpen} title={title} items={gallery.items} />
     </>
   );
 }
