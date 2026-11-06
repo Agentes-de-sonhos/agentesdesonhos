@@ -6,6 +6,7 @@ import type { CruiseShipContent } from "@/lib/cruiseShips/types";
 import { buildItineraryGroups, dateLabel, variantCalls, variantMonths, type ItineraryGroup } from "@/lib/cruiseShips/itineraryGroups";
 import { cruiseQuotePayload, HELP_LABEL, validCruiseQuote, type CruiseQuoteForm } from "@/lib/cruiseShips/quoteRequest";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
+import { Input } from "@/components/ui/input";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 
 /**
@@ -352,18 +353,18 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             <form onSubmit={onSubmit} noValidate={false} aria-label="Solicitar orçamento">
               <fieldset disabled={state === "submitting"} className="csp-fieldset">
                 <div className="form-grid">
-                  <label>Seu nome<input name="nome" autoComplete="name" required maxLength={200} placeholder="Como podemos chamar você?" value={form.name} onChange={(e) => change("name", e.target.value)} /></label>
-                  <label>WhatsApp<input name="telefone" type="tel" autoComplete="tel-national" required placeholder="DDD + número" value={form.phone} onChange={(e) => change("phone", maskPhone(e.target.value))} /></label>
+                  <label>Nome completo<Input name="nome" autoComplete="name" required maxLength={200} placeholder="Digite seu nome completo" value={form.name} onChange={(e) => change("name", e.target.value)} /></label>
+                  <label>WhatsApp com DDD<Input name="telefone" type="tel" autoComplete="tel-national" required placeholder="(11) 99999-9999" value={form.phone} onChange={(e) => change("phone", maskPhone(e.target.value))} /></label>
                   <label>E-mail (opcional)<input name="email" type="email" autoComplete="email" maxLength={200} value={form.email} onChange={(e) => change("email", e.target.value)} /></label>
                   <div className="csp-travel-period">
                     <span className="csp-field-label">Quando deseja viajar?</span>
                     <div className="csp-period-grid">
                       <select aria-label="Mês da viagem" value={travelMonth} disabled={undecided} onChange={e => changeTravelPeriod(e.target.value, travelYear)}>
-                        <option value="">Mês</option>
+                        <option value="">Selecione o mês</option>
                         {monthLabels.map((m, i) => <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>)}
                       </select>
                       <select aria-label="Ano da viagem" value={travelYear} disabled={undecided} onChange={e => changeTravelPeriod(travelMonth, e.target.value)}>
-                        <option value="">Ano</option>
+                        <option value="">Selecione o ano</option>
                         {travelYears.map(y => <option key={y} value={y}>{y}</option>)}
                       </select>
                     </div>
