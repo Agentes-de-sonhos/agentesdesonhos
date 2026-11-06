@@ -309,7 +309,7 @@
 }
 .csp.csp.csp .media-credit{font-size:11px;letter-spacing:0;line-height:1.6;padding:13px 0;color:var(--muted)}
 /* Integration additions (real request flow inside the agency site). */
-.csp{text-align:left}
+.csp{text-align:left;padding-bottom:clamp(40px,5vw,72px)}
 .csp.csp.csp .anchors{top:var(--csp-sticky-top,0)}
 .csp.csp.csp .csp-fieldset{border:0;margin:0;padding:0;min-width:0}
 .csp.csp.csp .csp-consent{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.6;color:var(--muted);margin:0 0 20px}
