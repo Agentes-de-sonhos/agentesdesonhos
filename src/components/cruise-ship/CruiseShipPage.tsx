@@ -173,6 +173,28 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   /* ---------------- Quote (real CRM flow) ---------------- */
   const { state, error, submit, reset } = useAgencySiteRequest(hostname);
   const [form, setForm] = useState<CruiseQuoteForm>(emptyForm);
+  const [travelMonth, setTravelMonth] = useState("");
+  const [travelYear, setTravelYear] = useState("");
+  const [undecided, setUndecided] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const travelYears = Array.from({ length: 5 }, (_, i) => currentYear + i);
+  const monthLabels = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const childAges = form.children ? form.ages.split(",") : [];
+  const changeChildren = (raw: string) => {
+    const count = Math.min(10, Math.max(0, Math.floor(Number(raw) || 0)));
+    setForm(f => ({ ...f, children: count, ages: Array.from({ length: count }, (_, i) => f.ages.split(",")[i] ?? "").join(",") }));
+  };
+  const changeChildAge = (index: number, value: string) => {
+    setForm(f => {
+      const ages = Array.from({ length: f.children }, (_, i) => f.ages.split(",")[i] ?? "");
+      ages[index] = value;
+      return { ...f, ages: ages.join(",") };
+    });
+  };
+  const changeTravelPeriod = (month: string, year: string) => {
+    setTravelMonth(month); setTravelYear(year);
+    setForm(f => ({ ...f, period: month && year ? year + "-" + month : "" }));
+  };
   const [routeChoice, setRouteChoice] = useState<string>("");
   const [routeVariant, setRouteVariant] = useState<number | null>(null);
   const [routeDate, setRouteDate] = useState<string>("");
@@ -185,7 +207,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
         .map((s) => s.date).sort()
     : [];
   const change = <K extends keyof CruiseQuoteForm>(k: K, v: CruiseQuoteForm[K]) => setForm((f) => ({ ...f, [k]: v }));
-  const canSubmit = validCruiseQuote(form) && state !== "submitting" && !presentation;
+  const canSubmit = (undecided || (!travelMonth && !travelYear) || (!!travelMonth && !!travelYear)) && validCruiseQuote(form) && state !== "submitting" && !presentation;
 
   const quoteThisRoute = () => {
     if (!group) return;
@@ -203,7 +225,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
       await submit(cruiseQuotePayload(ship, { group: chosenGroup, variantIndex: chosenGroup ? routeVariant : null, date: routeDate || null }, form, honeypot));
     } finally { inFlight.current = false; }
   };
-  const newRequest = () => { setForm(emptyForm()); setRouteChoice(""); setRouteVariant(null); setRouteDate(""); reset(); };
+  const newRequest = () => { setForm(emptyForm()); setTravelMonth(""); setTravelYear(""); setUndecided(false); setRouteChoice(""); setRouteVariant(null); setRouteDate(""); reset(); };
 
   const cur = pic >= 0 ? photos[pic] : null;
   const anchors: [string, string][] = [["csp-sobre", "O navio"], ["csp-experiencia", "Experiências"], ["csp-cabines", "Cabines"], ["csp-roteiros", "Roteiros"]];
@@ -333,7 +355,21 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                   <label>Seu nome<input name="nome" autoComplete="name" required maxLength={200} placeholder="Como podemos chamar você?" value={form.name} onChange={(e) => change("name", e.target.value)} /></label>
                   <label>WhatsApp<input name="telefone" type="tel" autoComplete="tel-national" required placeholder="DDD + número" value={form.phone} onChange={(e) => change("phone", maskPhone(e.target.value))} /></label>
                   <label>E-mail (opcional)<input name="email" type="email" autoComplete="email" maxLength={200} value={form.email} onChange={(e) => change("email", e.target.value)} /></label>
-                  <label>Quando deseja viajar?<input name="periodo" type="month" min="2026-11" value={form.period} onChange={(e) => change("period", e.target.value)} /></label>
+                  <div className="csp-travel-period">
+                    <span className="csp-field-label">Quando deseja viajar?</span>
+                    <div className="csp-period-grid">
+                      <select aria-label="Mês da viagem" value={travelMonth} disabled={undecided} onChange={e => changeTravelPeriod(e.target.value, travelYear)}>
+                        <option value="">Mês</option>
+                        {monthLabels.map((m, i) => <option key={m} value={String(i + 1).padStart(2, "0")}>{m}</option>)}
+                      </select>
+                      <select aria-label="Ano da viagem" value={travelYear} disabled={undecided} onChange={e => changeTravelPeriod(travelMonth, e.target.value)}>
+                        <option value="">Ano</option>
+                        {travelYears.map(y => <option key={y} value={y}>{y}</option>)}
+                      </select>
+                    </div>
+                    <label className="csp-undecided"><input type="checkbox" checked={undecided} onChange={e => { setUndecided(e.target.checked); if (e.target.checked) changeTravelPeriod("", ""); }} />Ainda não decidi</label>
+                    {!undecided && (!!travelMonth !== !!travelYear) && <p className="note">Selecione o mês e o ano.</p>}
+                  </div>
                   <label>Roteiro de interesse<select name="roteiro" value={routeChoice} onChange={(e) => { setRouteChoice(e.target.value); setRouteVariant(null); setRouteDate(""); }}>
                     <option value="">{HELP_LABEL}</option>
                     {groups.map((g) => <option key={g.id} value={g.id}>{g.region} · {g.n} noites · {g.title}</option>)}
@@ -351,12 +387,21 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                     </select></label>
                   )}
                   <label>Adultos<input type="number" min={1} max={20} name="adultos" required value={form.adults} onChange={(e) => change("adults", Math.max(0, Math.floor(Number(e.target.value) || 0)))} /></label>
-                  <label>Crianças<input type="number" min={0} max={10} name="criancas" required value={form.children} onChange={(e) => change("children", Math.max(0, Math.floor(Number(e.target.value) || 0)))} /></label>
-                  {form.children > 0 && <label>Idades das crianças<input name="idades" required placeholder="Ex.: 5 e 9 anos" value={form.ages} onChange={(e) => change("ages", e.target.value)} /></label>}
+                  <label>Crianças<input type="number" min={0} max={10} name="criancas" required value={form.children} onChange={(e) => changeChildren(e.target.value)} /></label>
                   <label>Preferência de cabine<select name="cabine" value={form.cabin} onChange={(e) => change("cabin", e.target.value)}>
                     <option value="">{HELP_LABEL}</option>
                     {ship.cabins.items.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
                   </select></label>
+                  {form.children > 0 && <div className="csp-child-ages">
+                    <p>Idade das crianças na data da viagem</p>
+                    <div className="csp-age-grid">{Array.from({ length: form.children }, (_, i) => (
+                      <label key={i}>Criança {i + 1}<select name={`idade_crianca_${i + 1}`} required value={childAges[i] ?? ""} onChange={e => changeChildAge(i, e.target.value)}>
+                        <option value="">Selecione a idade</option>
+                        <option value="0">Menos de 1 ano</option>
+                        {Array.from({ length: 17 }, (_, age) => age + 1).map(age => <option key={age} value={age}>{age} {age === 1 ? "ano" : "anos"}</option>)}
+                      </select></label>
+                    ))}</div>
+                  </div>}
                 </div>
                 <div hidden aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} /></div>
                 <label className="csp-consent"><input type="checkbox" checked={form.consent} onChange={(e) => change("consent", e.target.checked)} /><span>Concordo com o envio dos meus dados para que a agência entre em contato comigo sobre este orçamento, conforme a <a href={agencySiteHref("/politicasdeprivacidade")}>Política de Privacidade</a>.</span></label>
