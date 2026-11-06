@@ -1046,6 +1046,7 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     { title: "Suporte durante toda a viagem", text: "Acompanhamento em viagem, inclusive 24h quando necessário.", icon: "acompanhamento" },
   ],
   hideConciergeActions: true,
+  conciergeNumberedCards: true,
   conciergeSteps: [
     "Inspiração e definição da viagem a partir do seu perfil.",
     "Planejamento, orçamento e reservas.",
