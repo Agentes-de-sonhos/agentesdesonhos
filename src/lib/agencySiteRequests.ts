@@ -671,3 +671,10 @@ export function buildDetailsPayload(service: RequestService, raw_values: Service
   }
   return out;
 }
+
+/** Serviços oferecidos apenas como complemento ("adicionar mais um serviço"), nunca na seleção principal. */
+export const COMPLEMENT_ONLY_SERVICES = ["transfer"] as const;
+/** Serviços exibidos na seleção principal (barra e Central de Solicitações) de todas as agências. */
+export const PRIMARY_REQUEST_SERVICES: RequestService[] = REQUEST_SERVICES.filter(
+  (s) => !(COMPLEMENT_ONLY_SERVICES as readonly string[]).includes(s.key),
+);

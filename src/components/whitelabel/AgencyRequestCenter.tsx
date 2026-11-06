@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  REQUEST_SERVICES, CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
+  REQUEST_SERVICES, PRIMARY_REQUEST_SERVICES, CONTACT_CHANNELS, CONTACT_TIMES, EMPTY_CONTACT,
   buildDetailsPayload, buildRequestSummary, describeServiceValues,
   initialServiceValues, mergeServiceValues, resolveDestination, serviceByKey,
   validateContactStep, validateServiceStep,
@@ -252,7 +252,7 @@ export function AgencyRequestCenter({
             aria-label="Serviços disponíveis"
             className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-none border-b-0 bg-transparent p-0 [scrollbar-width:thin]"
           >
-            {REQUEST_SERVICES.map((item) => {
+            {PRIMARY_REQUEST_SERVICES.map((item) => {
               const Icon = SERVICE_ICONS[item.key] ?? Compass;
               return (
                 <TabsTrigger
