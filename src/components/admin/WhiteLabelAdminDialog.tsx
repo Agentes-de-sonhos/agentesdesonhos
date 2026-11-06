@@ -58,6 +58,7 @@ interface WhiteLabelStatus {
   subscription_is_active: boolean;
   expires_at: string | null;
   is_premium: boolean;
+  is_booking_plan_eligible?: boolean;
   is_current: boolean;
   has_active_domain: boolean;
   primary_hostname: string | null;
@@ -80,7 +81,7 @@ const PLANS = [
 /**
  * Área administrativa do White Label.
  *
- * Fonte de verdade ÚNICA (servidor): assinatura Premium ativa e vigente +
+ * Fonte de verdade ÚNICA (servidor): assinatura Premium ou Fundador ativa e vigente +
  * pelo menos um domínio White Label ativo. Não existem flags paralelas.
  * Quando a agência é elegível, a solicitação de reserva é habilitada
  * automaticamente em todos os orçamentos (atuais e futuros).
@@ -167,7 +168,7 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
 
   const reasons: string[] = [];
   if (status) {
-    if (!status.is_premium) reasons.push("plano não é Premium");
+    if (!(status.is_booking_plan_eligible ?? status.is_premium)) reasons.push("plano não é Premium ou Fundador");
     else if (!status.subscription_is_active) reasons.push("assinatura inativa");
     else if (!status.is_current) reasons.push("assinatura vencida");
     if (!status.has_active_domain) reasons.push("nenhum domínio White Label ativo");
@@ -182,7 +183,7 @@ export function WhiteLabelAdminDialog({ open, onOpenChange, userId, userName }: 
             White Label — {status?.agency_name || userName}
           </DialogTitle>
           <DialogDescription>
-            A elegibilidade é calculada no servidor: assinatura <strong>Premium ativa e vigente</strong>{" "}
+            A elegibilidade é calculada no servidor: assinatura <strong>Premium ou Fundador ativa e vigente</strong>{" "}
             + pelo menos um <strong>domínio ativo</strong>. Agências elegíveis recebem a solicitação de
             reserva ativada automaticamente em todos os orçamentos.
           </DialogDescription>
