@@ -1,4 +1,5 @@
 # Architecture rules
+- Quote booking eligibility is computed by the shared agency server gate; admin status exposes plan eligibility separately from the literal premium label. Why: historical plans can qualify without changing subscriptions or caller/team checks.
 - Subscription access changes must update the shared server feature, AI-quota and reservation-owner gates together while retaining caller checks and team permissions; do not add user-specific Edge Function bypasses. Why: the paid plan remains consistent across tools without weakening tenant isolation.
 - Mundo home shows a synthetic `novemberTeaser` section (inserted before `modules`, real "novembro" offers only, links to the campaign page). November campaign mounts before tenant/auth providers, retains Mundo-only host/context gates and shared header/footer, uses published November offers without illustrative fallback and shared agency request submissions. Synthetic ADS fixtures remain blocked. Why: functional agency campaign without changing other tenants or exposing fictional prices.
 - Flight/hotel cards and opt-in styles: public-only. Why: protects admin, other services and secure access.

@@ -17311,6 +17311,10 @@ export type Database = {
           stage_id: string
         }[]
       }
+      booking_request_plan_eligible: {
+        Args: { _plan: string }
+        Returns: boolean
+      }
       booking_request_start_review: {
         Args: { p_request_id: string }
         Returns: Json

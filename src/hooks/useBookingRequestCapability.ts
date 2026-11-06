@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
  * Capacidade efetiva de "Solicitação de reserva pelo orçamento web".
  *
  * A regra é resolvida SEMPRE no servidor
- * (`current_agency_can_use_booking_requests`): assinatura Premium ativa da
+ * (`current_agency_can_use_booking_requests`): assinatura Premium ou Fundador ativa da
  * agência resolvida + site White Label ativo. A UI apenas reflete o resultado;
  * o banco revalida na ativação por orçamento e no envio público.
  */
