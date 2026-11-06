@@ -205,7 +205,7 @@ export function AgencyGoogleReviewsSection({
                         ))}
                       </p>
                     )}
-                    <p className="font-sans text-[12px]">{data.newest ? "Avaliações mais recentes do Google Maps." : "Avaliações exibidas na ordem de relevância definida pelo Google Maps."}</p>
+                    <p className="font-sans text-[12px]">{"newest" in data && data.newest ? "Avaliações mais recentes do Google Maps." : "Avaliações exibidas na ordem de relevância definida pelo Google Maps."}</p>
                   </div>
                 )}
               </div>
