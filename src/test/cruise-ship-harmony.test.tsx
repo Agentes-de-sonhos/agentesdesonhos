@@ -91,8 +91,8 @@ describe("Harmony route page", () => {
     submit.mockResolvedValue({ success: true });
     renderAt("/cruzeiros/royal-caribbean/harmony-of-the-seas");
     fireEvent.click(screen.getByRole("button", { name: "Quero orçamento deste roteiro" }));
-    fireEvent.change(screen.getByPlaceholderText("Como podemos chamar você?"), { target: { value: "Maria Souza" } });
-    fireEvent.change(screen.getByPlaceholderText("DDD + número"), { target: { value: "48999990000" } });
+    fireEvent.change(screen.getByPlaceholderText("Digite seu nome completo"), { target: { value: "Maria Souza" } });
+    fireEvent.change(screen.getByPlaceholderText("(11) 99999-9999"), { target: { value: "48999990000" } });
     fireEvent.click(screen.getByRole("checkbox", { name: /Concordo com o envio/ }));
     const btn = screen.getByRole("button", { name: "Solicite o seu orçamento" });
     fireEvent.click(btn); fireEvent.click(btn);
