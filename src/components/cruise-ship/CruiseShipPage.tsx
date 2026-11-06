@@ -361,9 +361,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                 <div hidden aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} /></div>
                 <label className="csp-consent"><input type="checkbox" checked={form.consent} onChange={(e) => change("consent", e.target.checked)} /><span>Concordo com o envio dos meus dados para que a agência entre em contato comigo sobre este orçamento, conforme a <a href={agencySiteHref("/politicasdeprivacidade")}>Política de Privacidade</a>.</span></label>
               </fieldset>
-              <button className="button" type="submit" disabled={!canSubmit}>{state === "submitting" ? "Enviando…" : "Solicitar orçamento ↗"}</button>
+              <button className="button" type="submit" disabled={!canSubmit}>{state === "submitting" ? "Enviando…" : "Solicite o seu orçamento"}</button>
               {presentation && <p className="note" role="status">Apresentação: nenhum dado será enviado.</p>}
-              {state === "error" && error && <p role="alert" className="csp-error">{error} Revise os dados e toque em “Solicitar orçamento” para tentar de novo.</p>}
+              {state === "error" && error && <p role="alert" className="csp-error">{error} Revise os dados e toque em “Solicite o seu orçamento” para tentar de novo.</p>}
             </form>
           )}
         </section>
