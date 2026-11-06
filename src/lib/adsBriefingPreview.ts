@@ -100,7 +100,7 @@ import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
-import curtiRicardoMural from "@/assets/whitelabel/curti/curti-ricardo-mural.webp.asset.json";
+import curtiRicardoMural from "@/assets/whitelabel/curti/curti-ricardo-mural.jpg.asset.json";
 import curtiRicardoAvatar from "@/assets/whitelabel/curti/curti-ricardo-avatar.png.asset.json";
 import curtiCert01 from "@/assets/whitelabel/curti/curti-certificado-01.jpg.asset.json";
 import curtiCert02 from "@/assets/whitelabel/curti/curti-certificado-02.jpg.asset.json";
