@@ -91,7 +91,7 @@ describe("Harmony route page", () => {
     fireEvent.change(screen.getByPlaceholderText("Como podemos chamar você?"), { target: { value: "Maria Souza" } });
     fireEvent.change(screen.getByPlaceholderText("DDD + número"), { target: { value: "48999990000" } });
     fireEvent.click(screen.getByRole("checkbox"));
-    const btn = screen.getByRole("button", { name: "Solicitar orçamento ↗" });
+    const btn = screen.getByRole("button", { name: "Solicite o seu orçamento" });
     fireEvent.click(btn); fireEvent.click(btn);
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
     const payload = submit.mock.calls[0][0];
