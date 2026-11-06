@@ -31,7 +31,9 @@ export function AgencyPhotoMural({ src, alt }: { src: string; alt: string }) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-muted">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-muted shadow-xl shadow-foreground/5 ring-1 ring-border/40 ring-offset-2 ring-offset-background">
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 z-[1] w-6 bg-gradient-to-r from-background/70 to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-[1] w-6 bg-gradient-to-l from-background/70 to-transparent" />
       <div
         ref={ref}
         role="region"
@@ -69,7 +71,7 @@ export function AgencyPhotoMural({ src, alt }: { src: string; alt: string }) {
           type="button"
           onClick={() => step(dir)}
           aria-label={dir === 1 ? "Ver próximas fotos" : "Ver fotos anteriores"}
-          className={`absolute top-1/2 ${dir === 1 ? "right-3" : "left-3"} flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-md backdrop-blur transition hover:bg-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary`}
+          className={`absolute z-[2] top-1/2 ${dir === 1 ? "right-3" : "left-3"} flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-background/90 text-foreground shadow-md backdrop-blur transition hover:bg-background focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary`}
         >
           {dir === 1 ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </button>
