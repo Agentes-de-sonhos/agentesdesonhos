@@ -100,6 +100,21 @@ import dricaViagensLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset
 import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asset.json";
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
+import curtiRicardoAvatar from "@/assets/whitelabel/curti/curti-ricardo-avatar.png.asset.json";
+import curtiCert01 from "@/assets/whitelabel/curti/curti-certificado-01.jpg.asset.json";
+import curtiCert02 from "@/assets/whitelabel/curti/curti-certificado-02.jpg.asset.json";
+import curtiCert03 from "@/assets/whitelabel/curti/curti-certificado-03.jpg.asset.json";
+import curtiCert04 from "@/assets/whitelabel/curti/curti-certificado-04.jpg.asset.json";
+import curtiCert05 from "@/assets/whitelabel/curti/curti-certificado-05.jpg.asset.json";
+import curtiCert06 from "@/assets/whitelabel/curti/curti-certificado-06.jpg.asset.json";
+import curtiCert07 from "@/assets/whitelabel/curti/curti-certificado-07.jpg.asset.json";
+import curtiCert08 from "@/assets/whitelabel/curti/curti-certificado-08.jpg.asset.json";
+import curtiCert09 from "@/assets/whitelabel/curti/curti-certificado-09.jpg.asset.json";
+import curtiCert10 from "@/assets/whitelabel/curti/curti-certificado-10.jpg.asset.json";
+import curtiCert11 from "@/assets/whitelabel/curti/curti-certificado-11.jpg.asset.json";
+import curtiCert12 from "@/assets/whitelabel/curti/curti-certificado-12.jpg.asset.json";
+import curtiCert13 from "@/assets/whitelabel/curti/curti-certificado-13.jpg.asset.json";
+import curtiCert14 from "@/assets/whitelabel/curti/curti-certificado-14.jpg.asset.json";
 import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png.asset.json";
 import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
@@ -1002,7 +1017,28 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     ownerName: "Ricardo Curti",
   },
   differentials: [
-    { title: "Atendimento pelo especialista", text: "Você é atendido pelo proprietário da agência, do primeiro contato ao retorno.", icon: "consultivo" },
+    {
+      title: "Atendimento direto com Ricardo Curti",
+      text: "Atendimento pessoal do proprietário e especialista em Orlando e viagens sob medida, do primeiro contato ao retorno.",
+      icon: "consultivo",
+      avatar: { src: curtiRicardoAvatar.url, alt: "Ricardo Curti, proprietário da Curti Viagens" },
+      gallery: { label: "Ver certificados e experiência", items: [
+        { src: curtiCert01.url, alt: "Certificado de Ricardo Curti Alves — Los Angeles University" },
+        { src: curtiCert02.url, alt: "Certificado de Ricardo Curti Alves — Visit Orlando" },
+        { src: curtiCert03.url, alt: "Certificado de Ricardo Curti Alves — Walt Disney World — visão geral" },
+        { src: curtiCert04.url, alt: "Certificado de Ricardo Curti Alves — Disney — hotéis resort" },
+        { src: curtiCert05.url, alt: "Certificado de Ricardo Curti Alves — Disney — parques temáticos" },
+        { src: curtiCert06.url, alt: "Certificado de Ricardo Curti Alves — Disney — programa de especialista" },
+        { src: curtiCert07.url, alt: "Certificado de Ricardo Curti Alves — Universal Orlando Resort — especialista" },
+        { src: curtiCert08.url, alt: "Certificado de Ricardo Curti Alves — Orlando — certificado de conclusão" },
+        { src: curtiCert09.url, alt: "Certificado de Ricardo Curti Alves — Academia — especialista" },
+        { src: curtiCert10.url, alt: "Certificado de Ricardo Curti Alves — Academia RCA — participação" },
+        { src: curtiCert11.url, alt: "Certificado de Ricardo Curti Alves — Academia RCA — especialista" },
+        { src: curtiCert12.url, alt: "Certificado de Ricardo Curti Alves — Academia RCA — especialista" },
+        { src: curtiCert13.url, alt: "Certificado de Ricardo Curti Alves — Academia — especialista" },
+        { src: curtiCert14.url, alt: "Certificado de Ricardo Curti Alves — Sentire Educação" },
+      ] },
+    },
     { title: "Roteiros realmente personalizados", text: "Cada viagem é desenhada a partir do perfil, do ritmo e das prioridades de quem viaja.", icon: "conferido" },
     { title: "Planejamento que antecipa riscos", text: "Detalhes pensados com antecedência, incluindo roteiro dia a dia para Orlando.", icon: "fornecedores" },
     { title: "Suporte durante toda a viagem", text: "Acompanhamento em viagem, inclusive 24h quando necessário.", icon: "acompanhamento" },
