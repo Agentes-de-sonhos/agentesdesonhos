@@ -158,7 +158,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   }, [variant, mapReady, ship]);
 
   /* ---------------- Sticky nav ---------------- */
-  const [active, setActive] = useState("sobre");
+  const [active, setActive] = useState("csp-sobre");
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined" || !rootRef.current) return;
     const obs = new IntersectionObserver((entries) => entries.forEach((e) => { if (e.isIntersecting) setActive(e.target.id); }), { rootMargin: "-15% 0px -65% 0px" });
@@ -191,9 +191,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     if (!group) return;
     setRouteChoice(group.id); setRouteVariant(order); setRouteDate("");
     if (state === "success" || state === "error") reset();
-    rootRef.current?.querySelector("#orcamento")?.scrollIntoView?.({ behavior: "smooth" });
+    rootRef.current?.querySelector("#csp-orcamento")?.scrollIntoView?.({ behavior: "smooth" });
   };
-  const chooseCabin = (name: string) => { change("cabin", name); rootRef.current?.querySelector("#orcamento")?.scrollIntoView?.({ behavior: "smooth" }); };
+  const chooseCabin = (name: string) => { change("cabin", name); rootRef.current?.querySelector("#csp-orcamento")?.scrollIntoView?.({ behavior: "smooth" }); };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,7 +206,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   const newRequest = () => { setForm(emptyForm()); setRouteChoice(""); setRouteVariant(null); setRouteDate(""); reset(); };
 
   const cur = pic >= 0 ? photos[pic] : null;
-  const anchors: [string, string][] = [["sobre", "O navio"], ["experiencia", "Experiências"], ["cabines", "Cabines"], ["roteiros", "Roteiros"]];
+  const anchors: [string, string][] = [["csp-sobre", "O navio"], ["csp-experiencia", "Experiências"], ["csp-cabines", "Cabines"], ["csp-roteiros", "Roteiros"]];
 
   return (
     <div className="csp" ref={rootRef} style={brandVars} data-testid="cruise-ship-page">
@@ -215,7 +215,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <div className="eyebrow">{ship.eyebrow}</div>
           <div className="title-row">
             <div><h1>{ship.titleLead} <em>{ship.titleTail}</em></h1><p>{ship.tagline}</p></div>
-            <a className="textlink" href="#roteiros" onClick={scrollTo("roteiros")}>Conhecer os roteiros ↓</a>
+            <a className="textlink" href="#csp-roteiros" onClick={scrollTo("csp-roteiros")}>Conhecer os roteiros ↓</a>
           </div>
         </div>
 
@@ -236,17 +236,17 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
         <nav className="anchors" aria-label="Seções">
           {anchors.map(([id, label]) => <a key={id} href={`#${id}`} className={active === id ? "active" : undefined} onClick={scrollTo(id)}>{label}</a>)}
-          <a href="#orcamento" className="nav-quote" onClick={scrollTo("orcamento")}>Solicitar orçamento ↗</a>
+          <a href="#csp-orcamento" className="nav-quote" onClick={scrollTo("csp-orcamento")}>Solicitar orçamento ↗</a>
         </nav>
 
-        <section id="sobre">
+        <section id="csp-sobre">
           <div className="section-head"><div><div className="eyebrow">{ship.about.eyebrow}</div><h2>{ship.about.titleA}<br /><em>{ship.about.titleB}</em></h2></div><p>{ship.about.text}</p></div>
           <div className="stats">{ship.about.stats.map((s) => <div key={s.label}><b>{s.value}</b><span>{s.label}</span></div>)}</div>
           <div className="tech-entry"><div><strong>{ship.about.techTitle}</strong><p>{ship.about.techText}</p></div><button className="button" aria-haspopup="dialog" onClick={() => openDialog(techRef.current)}>{ship.about.techButton}</button></div>
           <div className="why">{ship.about.why.map((w, i) => <div key={w.title}><span className="number">{String(i + 1).padStart(2, "0")}</span><h3>{w.title}</h3><p>{w.text}</p></div>)}</div>
         </section>
 
-        <section id="experiencia">
+        <section id="csp-experiencia">
           <div className="eyebrow">{ship.experiences.eyebrow}</div>
           <h2>{ship.experiences.titleA}<em>{ship.experiences.titleB}</em></h2>
           <div className="tabs" role="tablist" aria-label="Experiências">
@@ -262,7 +262,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           </div>
         </section>
 
-        <section id="cabines">
+        <section id="csp-cabines">
           <div className="section-head"><div><div className="eyebrow">{ship.cabins.eyebrow}</div><h2>{ship.cabins.titleA}<em>{ship.cabins.titleB}</em></h2></div><p>{ship.cabins.text}</p></div>
           <div className="cabin-grid">
             {ship.cabins.items.map((c) => (
@@ -275,7 +275,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <p className="note">{ship.cabins.note}</p>
         </section>
 
-        <section id="roteiros">
+        <section id="csp-roteiros">
           <div className="section-head route-section-head"><div><div className="eyebrow">{ship.routes.eyebrow}</div><h2>{ship.routes.titleA}<em>{ship.routes.titleB}</em></h2></div><p>{ship.routes.text}</p></div>
           <div className="route-intro"><span>⌖ MAPA DOS ITINERÁRIOS</span></div>
           <div className="route-tabs" role="tablist" aria-label="Tipos de roteiro">
@@ -313,7 +313,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <p className="note">Não é inventário completo nem consulta de disponibilidade em tempo real.</p>
         </section>
 
-        <section id="orcamento" className="quote">
+        <section id="csp-orcamento" className="quote">
           <div>
             <div className="eyebrow">{ship.quote.eyebrow}</div>
             <h2>{ship.quote.titleA}<br /><em>{ship.quote.titleB}</em></h2>
@@ -376,7 +376,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
         <div className="tech-content"><p><strong>{ship.tech.paragraphs[0]}</strong>{ship.tech.paragraphs.slice(1).map((p) => <span key={p}><br />{p}</span>)}</p></div>
       </dialog>
 
-      <a className="mobile-cta button" href="#orcamento" onClick={scrollTo("orcamento")}>Solicitar orçamento ↗</a>
+      <a className="mobile-cta button" href="#csp-orcamento" onClick={scrollTo("csp-orcamento")}>Solicitar orçamento ↗</a>
 
       <dialog ref={albumRef} id="albumDialog" aria-labelledby="albumTitle" onClick={backdropClose}>
         <button className="close" aria-label="Fechar álbum" onClick={() => closeDialog(albumRef.current)}>×</button>
