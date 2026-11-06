@@ -45,6 +45,9 @@ describe("Harmony quote payload", () => {
     expect(validCruiseQuote({ ...form, consent: false })).toBe(false);
     expect(validCruiseQuote({ ...form, phone: "123" })).toBe(false);
     expect(validCruiseQuote({ ...form, ages: "" })).toBe(false);
+    expect(validCruiseQuote({ ...form, children: 2, ages: "5," })).toBe(false);
+    expect(validCruiseQuote({ ...form, children: 2, ages: "0,9" })).toBe(true);
+    expect(validCruiseQuote({ ...form, ages: "18" })).toBe(false);
   });
   it("sends a cruise request with ship, line, exact order, date, nights, cabin and passengers", () => {
     const g = groups.find((x) => x.variants.some((v) => v.sailings.some((s) => s.date === "2027-04-10")))!;
@@ -90,7 +93,7 @@ describe("Harmony route page", () => {
     fireEvent.click(screen.getByRole("button", { name: "Quero orçamento deste roteiro" }));
     fireEvent.change(screen.getByPlaceholderText("Como podemos chamar você?"), { target: { value: "Maria Souza" } });
     fireEvent.change(screen.getByPlaceholderText("DDD + número"), { target: { value: "48999990000" } });
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Concordo com o envio/ }));
     const btn = screen.getByRole("button", { name: "Solicite o seu orçamento" });
     fireEvent.click(btn); fireEvent.click(btn);
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
