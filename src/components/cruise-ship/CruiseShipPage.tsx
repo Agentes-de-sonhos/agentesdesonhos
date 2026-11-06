@@ -15,12 +15,17 @@ import { agencySiteHref } from "@/lib/agencyContextLink";
  */
 const PlayIcon = () => <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14l11-7z" /></svg>;
 
+/**
+ * Agency palette from the site's own theme tokens (preset themes expose HSL
+ * tokens; custom brands also set --brand-*). Nav/titles use the agency ink so
+ * contrast stays readable whatever the accent color is.
+ */
 const brandVars = {
-  "--agency-primary": "var(--brand-primary, #216d73)",
-  "--agency-on-primary": "var(--brand-on-primary, #fff)",
-  "--agency-secondary": "color-mix(in srgb, var(--brand-primary, #142f3d) 72%, #000)",
+  "--agency-primary": "hsl(var(--primary, 183 55% 29%))",
+  "--agency-on-primary": "hsl(var(--primary-foreground, 0 0% 100%))",
+  "--agency-secondary": "hsl(var(--wl-ink, var(--foreground, 200 51% 16%)))",
   "--agency-on-secondary": "#fff",
-  "--agency-surface": "var(--brand-tertiary, #f5f3ee)",
+  "--agency-surface": "var(--brand-tertiary, hsl(var(--wl-sand, var(--secondary, 40 23% 95%))))",
 } as CSSProperties;
 
 const maskPhone = (raw: string) => {
@@ -49,6 +54,19 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     link.id = id; link.rel = "stylesheet";
     link.href = "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap";
     document.head.appendChild(link);
+  }, []);
+
+  // Sticky section nav sits right below the agency's own sticky/fixed header.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || typeof window === "undefined") return;
+    const measure = () => {
+      const header = [...document.querySelectorAll("header")].find((h) => ["sticky", "fixed"].includes(getComputedStyle(h).position));
+      root.style.setProperty("--csp-sticky-top", `${header ? Math.round(header.getBoundingClientRect().height) : 0}px`);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, []);
 
   /* ---------------- Gallery / video / album ---------------- */
