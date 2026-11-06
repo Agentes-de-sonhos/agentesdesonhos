@@ -97,6 +97,8 @@ export interface GooglePlaceReviews {
   url: string | null;
   attributions: GoogleAttribution[];
   reviews: GoogleReview[];
+  /** true quando o servidor entregou as avaliações mais recentes. */
+  newest?: boolean;
 }
 
 const str = (v: unknown): string | null =>
@@ -142,5 +144,6 @@ export function mapGooglePlaceReviews(payload: unknown): GooglePlaceReviews | nu
     url: httpsUrl(p.googleMapsUri),
     attributions,
     reviews,
+    newest: p.sort === "newest",
   };
 }

@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
           enabled: true, id: r.id, displayName: r.displayName?.text ?? null,
           rating: r.rating ?? null, userRatingCount: r.userRatingCount ?? null,
           googleMapsUri: r.googleMapsUri ?? null,
-          attributions: [], reviews: newest,
+          attributions: [], reviews: newest, sort: "newest",
         });
       }
     }
