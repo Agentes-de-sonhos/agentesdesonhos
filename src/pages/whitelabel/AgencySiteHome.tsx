@@ -2286,7 +2286,7 @@ function DifferentialGalleryButton({ title, gallery }: { title: string; gallery:
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" data-preview-interactive onClick={() => setOpen(true)}
+      <button type="button" data-preview-local="true" onClick={() => setOpen(true)}
         className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary underline-offset-4 hover:underline">
         {gallery.label} ({gallery.items.length}) <ArrowRight className="h-4 w-4" aria-hidden="true" />
       </button>
