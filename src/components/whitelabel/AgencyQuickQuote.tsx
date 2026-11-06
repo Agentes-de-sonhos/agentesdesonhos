@@ -11,7 +11,7 @@ import { ServiceInitialFields } from "@/components/whitelabel/ServiceInitialFiel
 import { isEditorialTheme } from "@/lib/agencySiteTheme";
 import { initialGridClass } from "@/lib/agencyInitialGrid";
 import {
-  REQUEST_SERVICES, initialBlockFields, initialServiceValues, isMultiRoute, periodMode, serviceByKey,
+  REQUEST_SERVICES, PRIMARY_REQUEST_SERVICES, initialBlockFields, initialServiceValues, isMultiRoute, periodMode, serviceByKey,
   validateQuickStep,
   type ServiceValues,
 } from "@/lib/agencySiteRequests";
@@ -279,7 +279,7 @@ export function AgencyQuickQuote({
                 : "wl-rail -mx-1 flex min-w-0 flex-1 flex-nowrap snap-x gap-1 overflow-x-auto px-1 pb-3"
             }
           >
-            {REQUEST_SERVICES.map((item) => {
+            {PRIMARY_REQUEST_SERVICES.map((item) => {
               const Icon = ICONS[item.key] ?? Compass;
               const selected = item.key === service.key;
               return (
