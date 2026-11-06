@@ -321,3 +321,13 @@
 .csp.csp.csp .csp-success h3{font-size:24px;margin:0 0 10px}
 .csp.csp.csp dialog{position:fixed;margin:auto}
 .csp.csp.csp section[id]{scroll-margin-top:calc(var(--csp-sticky-top,0px) + 90px)}
+
+/* Travel period and one age selector per child. */
+.csp.csp.csp .csp-field-label{display:block;font-size:11px}
+.csp.csp.csp .csp-period-grid,.csp.csp.csp .csp-age-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.csp.csp.csp .csp-undecided{display:flex;align-items:center;gap:8px;margin-top:10px}
+.csp.csp.csp .csp-undecided input{width:18px;height:18px;margin:0;accent-color:var(--teal)}
+.csp.csp.csp .csp-child-ages{grid-column:1/-1}
+.csp.csp.csp .csp-child-ages>p{font-size:13px;font-weight:600;color:var(--navy);margin:0 0 10px}
+.csp.csp.csp .csp-travel-period select:disabled{opacity:.55}
+@media(max-width:480px){.csp.csp.csp .csp-age-grid{grid-template-columns:1fr}}
