@@ -47,7 +47,8 @@ describe("servidor google-place-reviews", () => {
     expect(src).toContain("https://places.googleapis.com/v1/places/");
     expect(src).toContain('"X-Goog-Api-Key": KEY');
     expect(src).toContain("id,displayName,rating,userRatingCount,googleMapsUri,reviews,attributions");
-    expect(src).not.toContain("maps/api/place/details");
+    // Endpoint clássico só para os places opt-in de "mais recentes" (Curti).
+    expect(src).toMatch(/NEWEST_PLACES = new Set\(\["ChIJIayUCNDvyJQRPPvUIISIZbg"\]\)/);
   });
 });
 
