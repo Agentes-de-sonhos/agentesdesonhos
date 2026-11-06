@@ -289,6 +289,8 @@ export interface AgencySiteProfile {
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
+  /** Opt-in: "Como funciona" só com os cards numerados (sem bloco de etapas escuro). */
+  conciergeNumberedCards?: boolean;
   /** "Experiência em destaque": quando ativa, ocupa a posição da seção "modules". */
   featuredExperience?: AgencyFeaturedExperience;
   /** Mapa de Resorts do Brasil (opcional): página /resorts-brasil e/ou seção na home. Ausente = desligado. */

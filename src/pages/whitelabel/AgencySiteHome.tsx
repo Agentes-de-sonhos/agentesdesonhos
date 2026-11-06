@@ -1473,6 +1473,39 @@ export default function AgencySiteHome({
       case "concierge":
         {
         const copy = copyFor("concierge");
+        if (editorial && profile.conciergeNumberedCards && profile.conciergePoints?.length) {
+          return (
+            <section key={key} id="atendimento" className="bg-background">
+              <div className={`${container} ${compactSpacing ? "py-12 md:py-20" : "py-14 md:py-24"}`}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)] wl-kicker">
+                  {copy.kicker ?? "Como funciona"}
+                </p>
+                <h2 className="mt-4 text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">
+                  {copy.title ?? "Atendimento humano"}
+                </h2>
+                {copy.subtitle && (
+                  <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-muted-foreground md:text-base">{copy.subtitle}</p>
+                )}
+                <ol className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                  {profile.conciergePoints.map((p, i) => (
+                    <li key={p.key} className="relative flex h-full flex-col rounded-2xl border border-border/70 bg-card p-6 shadow-sm">
+                      <span
+                        aria-hidden="true"
+                        className="grid h-11 w-11 place-items-center rounded-full bg-[var(--brand-primary)] text-base font-bold text-background"
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <h3 className="mt-5 text-base font-semibold text-foreground">
+                        <span className="sr-only">Etapa {i + 1}: </span>{p.title}
+                      </h3>
+                      <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{p.text}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </section>
+          );
+        }
         if (editorial) {
           return (
             <section key={key} id="atendimento" className="bg-background">
