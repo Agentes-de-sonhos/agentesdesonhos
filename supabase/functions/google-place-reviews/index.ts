@@ -27,6 +27,33 @@ const PLACE_BY_HOSTNAME: Record<string, string> = {
   "www.curtiviagens.com.br": "ChIJIayUCNDvyJQRPPvUIISIZbg",
 };
 
+/** Places que exibem as avaliações mais recentes em vez das "mais relevantes". */
+const NEWEST_PLACES = new Set(["ChIJIayUCNDvyJQRPPvUIISIZbg"]);
+
+async function fetchNewest(placeId: string, key: string) {
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(placeId)}&fields=reviews&reviews_sort=newest&reviews_no_translations=true&language=pt-BR&key=${key}`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    const d = await resp.json().catch(() => null);
+    if (!resp.ok || d?.status !== "OK") {
+      console.error("google-place-reviews: newest indisponível", resp.status, d?.status ?? "");
+      return null;
+    }
+    const list = (Array.isArray(d.result?.reviews) ? d.result.reviews : []).slice(0, 5);
+    return list.map((x: any) => ({
+      authorAttribution: { displayName: x?.author_name ?? null, uri: x?.author_url ?? null, photoUri: x?.profile_photo_url ?? null },
+      rating: x?.rating ?? null,
+      text: x?.text ?? null,
+      relativePublishTimeDescription: x?.relative_time_description ?? null,
+      publishTime: typeof x?.time === "number" ? new Date(x.time * 1000).toISOString() : null,
+      googleMapsUri: null,
+      flagContentUri: null,
+    }));
+  } catch {
+    return null;
+  }
+}
+
 const FIELD_MASK = "id,displayName,rating,userRatingCount,googleMapsUri,reviews,attributions";
 const TIMEOUT_MS = 8000;
 
@@ -74,6 +101,18 @@ Deno.serve(async (req) => {
     if (!resp.ok || !r?.id) {
       console.error("google-place-reviews: falha", resp.status, r?.error?.status ?? "");
       return json({ error: "Avaliações indisponíveis no momento." }, 502);
+    }
+    // Opt-in: avaliações mais recentes (endpoint clássico com reviews_sort=newest).
+    if (NEWEST_PLACES.has(placeId)) {
+      const newest = await fetchNewest(placeId, KEY);
+      if (newest?.length) {
+        return json({
+          enabled: true, id: r.id, displayName: r.displayName?.text ?? null,
+          rating: r.rating ?? null, userRatingCount: r.userRatingCount ?? null,
+          googleMapsUri: r.googleMapsUri ?? null,
+          attributions: [], reviews: newest,
+        });
+      }
     }
     const reviews = (Array.isArray(r.reviews) ? r.reviews : []).slice(0, 5).map((x: any) => ({
       authorAttribution: {
