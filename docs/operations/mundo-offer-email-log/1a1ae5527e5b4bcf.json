@@ -7,8 +7,12 @@
     {
       "attachment": "image0.jpeg",
       "slug": "the-fives-riviera-maya-novembro-2026",
-      "status": "ready_to_publish",
-      "asset_commit": "6c00ecb52b157a3344535d9796e462bb92f113b8"
+      "status": "completed",
+      "asset_commit": "6c00ecb52b157a3344535d9796e462bb92f113b8",
+      "verified_public_host": "omundoemcores.com.br",
+      "public_image_http": 200,
+      "public_image_matches_reviewed_webp": true,
+      "publication_script_commit": "20e388f933670dc2589bb1828480d3b1ef6f2b31"
     },
     {
       "attachment": "image1.jpeg",
