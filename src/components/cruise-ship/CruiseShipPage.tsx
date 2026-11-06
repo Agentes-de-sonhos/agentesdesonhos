@@ -149,7 +149,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   }, []);
   const scrollTo = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    rootRef.current?.querySelector(`#${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    rootRef.current?.querySelector(`#${id}`)?.scrollIntoView?.({ behavior: "smooth", block: "start" });
   };
 
   /* ---------------- Quote (real CRM flow) ---------------- */
@@ -173,9 +173,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     if (!group) return;
     setRouteChoice(group.id); setRouteVariant(order); setRouteDate("");
     if (state === "success" || state === "error") reset();
-    rootRef.current?.querySelector("#orcamento")?.scrollIntoView({ behavior: "smooth" });
+    rootRef.current?.querySelector("#orcamento")?.scrollIntoView?.({ behavior: "smooth" });
   };
-  const chooseCabin = (name: string) => { change("cabin", name); rootRef.current?.querySelector("#orcamento")?.scrollIntoView({ behavior: "smooth" }); };
+  const chooseCabin = (name: string) => { change("cabin", name); rootRef.current?.querySelector("#orcamento")?.scrollIntoView?.({ behavior: "smooth" }); };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
