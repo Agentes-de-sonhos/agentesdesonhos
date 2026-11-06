@@ -68,7 +68,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     if (pic === -1 && galleryRef.current?.open) v.play?.()?.catch?.(() => {});
   }, [pic]);
 
-  const show = useCallback((index: number) => { setVideoError(false); setPic(index); openDialog(galleryRef.current); }, []);
+  const show = useCallback((index: number) => { setVideoError(false); setPic(index); openDialog(galleryRef.current); if (index === -1) videoRef.current?.play?.()?.catch?.(() => {}); }, []);
   const openPhoto = useCallback((key: string) => { const i = photos.findIndex((p) => p.key === key); if (i >= 0) show(i); }, [photos, show]);
   const prev = () => setPic((p) => (p === -1 ? photos.length - 1 : p - 1));
   const next = () => setPic((p) => (p === photos.length - 1 ? -1 : p + 1));
