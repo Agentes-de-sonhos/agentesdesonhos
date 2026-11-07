@@ -48,8 +48,9 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
     };
     measure();
     const t = window.setTimeout(measure, 300);
+    const t2 = window.setTimeout(measure, 1500);
     window.addEventListener("resize", measure);
-    return () => { window.clearTimeout(t); window.removeEventListener("resize", measure); };
+    return () => { window.clearTimeout(t); window.clearTimeout(t2); window.removeEventListener("resize", measure); };
   }, [isMaximized]);
 
   const stopDrag = useCallback(() => {
