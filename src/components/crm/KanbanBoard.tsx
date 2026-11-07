@@ -459,9 +459,10 @@ export function KanbanBoard() {
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
     e.preventDefault();
     const target = dragOver?.stageId === toStage.id ? dragOver : null;
-    await performDrop(toStage, target?.targetId ?? null, target?.before ?? false);
+    const id = draggedId;
     setDraggedId(null);
     setDragOver(null);
+    if (id) await performMove(id, toStage, target?.targetId ?? null, target?.before ?? false);
   };
 
   const handleCardDragOver = (e: React.DragEvent, stageId: string, targetId: string) => {
@@ -482,9 +483,10 @@ export function KanbanBoard() {
     e.preventDefault();
     e.stopPropagation();
     const before = dragOver?.before ?? true;
-    await performDrop(toStage, targetCardId, before);
+    const id = draggedId;
     setDraggedId(null);
     setDragOver(null);
+    if (id) await performMove(id, toStage, targetCardId, before);
   };
 
   const getTotalValue = (stageId: string) =>
