@@ -79,6 +79,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   const [videoError, setVideoError] = useState(false);
   const [category, setCategory] = useState("Todas");
   const photos = ship.photos;
+  const hasVideo = Boolean(ship.hero.video && ship.assets[ship.hero.video]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -89,8 +90,8 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
   const show = useCallback((index: number) => { setVideoError(false); setPic(index); openDialog(galleryRef.current); if (index === -1) videoRef.current?.play?.()?.catch?.(() => {}); }, []);
   const openPhoto = useCallback((key: string) => { const i = photos.findIndex((p) => p.key === key); if (i >= 0) show(i); }, [photos, show]);
-  const prev = () => setPic((p) => (p === -1 ? photos.length - 1 : p - 1));
-  const next = () => setPic((p) => (p === photos.length - 1 ? -1 : p + 1));
+  const prev = () => setPic((p) => (p <= (hasVideo ? -1 : 0) ? photos.length - 1 : p - 1));
+  const next = () => setPic((p) => (p === photos.length - 1 ? (hasVideo ? -1 : 0) : p + 1));
   const backdropClose = (e: React.MouseEvent<HTMLDialogElement>) => { if (e.target === e.currentTarget) closeDialog(e.currentTarget); };
 
   /* ---------------- Experiences ---------------- */
@@ -223,7 +224,13 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     if (!canSubmit || inFlight.current) return;
     inFlight.current = true;
     try {
-      await submit(cruiseQuotePayload(ship, { group: chosenGroup, variantIndex: chosenGroup ? routeVariant : null, date: routeDate || null }, form, honeypot));
+      const payload = cruiseQuotePayload(ship, { group: chosenGroup, variantIndex: chosenGroup ? routeVariant : null, date: routeDate || null }, form, honeypot);
+      const seasonalRoute = ship.routes.summaries?.find(r => `seasonal:${r.title}` === routeChoice);
+      if (seasonalRoute) {
+        payload.summary += `\nInteresse na temporada: ${seasonalRoute.title} · ${seasonalRoute.duration}`;
+        payload.details.roteiro = `${seasonalRoute.title} · ${seasonalRoute.duration} (datas a confirmar)`;
+      }
+      await submit(payload);
     } finally { inFlight.current = false; }
   };
   const newRequest = () => { setForm(emptyForm()); setTravelMonth(""); setTravelYear(""); setUndecided(false); setRouteChoice(""); setRouteVariant(null); setRouteDate(""); reset(); };
@@ -243,9 +250,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
         </div>
 
         <div className="gallery">
-          <button className="main-photo" aria-label={ship.hero.videoAria} onClick={() => show(-1)}>
+          <button className="main-photo" aria-label={ship.hero.videoAria} onClick={() => hasVideo ? show(-1) : openPhoto(ship.photos.find(p => ship.assets[p.key] === img(ship.hero.image))?.key ?? ship.photos[0].key)}>
             <img src={img(ship.hero.image)} alt={ship.hero.alt} />
-            <span className="play-badge" aria-hidden="true"><PlayIcon /></span>
+            {hasVideo && <span className="play-badge" aria-hidden="true"><PlayIcon /></span>}
             <span className="photo-caption">{ship.hero.caption}<small>{ship.hero.captionSmall}</small></span>
           </button>
           {ship.tiles.map((t) => (
@@ -290,7 +297,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <div className="cabin-grid">
             {ship.cabins.items.map((c) => (
               <article className="cabin" key={c.name}>
-                <div className="cabin-visual"><img loading="lazy" src={img(c.image)} alt={`Imagem ilustrativa da categoria ${c.name}`} /></div>
+                <div className="cabin-visual">{c.image ? <img loading="lazy" src={img(c.image)} alt={`Imagem ilustrativa da categoria ${c.name}`} /> : <div className="csp-cabin-no-photo"><span>{c.name}</span><small>Consulte a configuração da categoria</small></div>}</div>
                 <div className="cabin-copy"><h3>{c.name}</h3><p>{c.lead}</p><details><summary>Conhecer a categoria +</summary><p>{c.detail}</p></details><button onClick={() => chooseCabin(c.name)}>Tenho interesse ↗</button></div>
               </article>
             ))}
@@ -300,6 +307,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
         <section id="csp-roteiros">
           <div className="section-head route-section-head"><div><div className="eyebrow">{ship.routes.eyebrow}</div><h2>{ship.routes.titleA}<em>{ship.routes.titleB}</em></h2></div><p>{ship.routes.text}</p></div>
+          {groups.length > 0 ? <>
           <div className="route-intro"><span>⌖ MAPA DOS ITINERÁRIOS</span></div>
           <div className="route-tabs" role="tablist" aria-label="Tipos de roteiro">
             {ship.routes.regions.map((r) => (
@@ -333,6 +341,10 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             </div>
           </div>
           <div className="map-explanation"><strong>Como ler este mapa</strong><p>Os pontos indicam a localização aproximada dos destinos. As linhas mostram somente a sequência das escalas: <strong>não são o trajeto marítimo real</strong> e podem cruzar áreas de terra. O terminal exato, os dias de navegação e a ordem das paradas dependem da saída escolhida.</p></div>
+          </> : <div className="csp-route-summaries">
+            {ship.routes.summaries?.map((route) => <article key={route.title}><div className="eyebrow">{route.duration}</div><h3>{route.title}</h3><p>{route.text}</p><a className="button" href="#csp-orcamento" onClick={e => { setRouteChoice(`seasonal:${route.title}`); scrollTo("csp-orcamento")(e); }}>Consultar saídas</a></article>)}
+            <p className="note">{ship.routes.summaries?.length ? "As escalas apresentadas são alternativas da temporada; não representam uma sequência única. Consulte datas e itinerário completo com a agência." : "Consulte a agência para conhecer os roteiros disponíveis."}</p>
+          </div>}
           <p className="note">Não é inventário completo nem consulta de disponibilidade em tempo real.</p>
         </section>
 
@@ -373,6 +385,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                   </div>
                   <label>Roteiro de interesse<select name="roteiro" value={routeChoice} onChange={(e) => { setRouteChoice(e.target.value); setRouteVariant(null); setRouteDate(""); }}>
                     <option value="">{HELP_LABEL}</option>
+                    {ship.routes.summaries?.map(r => <option key={r.title} value={`seasonal:${r.title}`}>{r.title} · {r.duration}</option>)}
                     {groups.map((g) => <option key={g.id} value={g.id}>{g.region} · {g.n} noites · {g.title}</option>)}
                   </select></label>
                   {chosenGroup && chosenGroup.variants.length > 1 && (
@@ -466,9 +479,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
         onClose={() => videoRef.current?.pause?.()}
         onKeyDown={(e) => { if (e.key === "ArrowRight") next(); if (e.key === "ArrowLeft") prev(); }}>
         <button className="close" aria-label="Fechar galeria" onClick={() => closeDialog(galleryRef.current)}>×</button>
-        <video id="shipVideo" ref={videoRef} hidden={pic !== -1} preload="none" controls playsInline poster={img(ship.hero.image)} onError={() => setVideoError(true)}>
-          <source src={img(ship.hero.video)} type="video/mp4" />
-        </video>
+        {hasVideo && <video id="shipVideo" ref={videoRef} hidden={pic !== -1} preload="none" controls playsInline poster={img(ship.hero.image)} onError={() => setVideoError(true)}>
+          <source src={img(ship.hero.video!)} type="video/mp4" />
+        </video>}
         <img id="largePhoto" hidden={pic === -1} src={cur ? img(cur.key) : undefined} alt={cur?.label ?? ""} />
         <p id="videoError" hidden={!videoError}>Não foi possível reproduzir o vídeo. Tente novamente em instantes.</p>
         <div className="dialog-bottom">
@@ -477,7 +490,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <button aria-label="Próxima foto" onClick={next}>→</button>
         </div>
         <div className="lightbox-thumbs">
-          <button aria-label="Assistir ao vídeo" className={`video-thumb${pic === -1 ? " active" : ""}`} aria-pressed={pic === -1} onClick={() => setPic(-1)}><PlayIcon /></button>
+          {hasVideo && <button aria-label="Assistir ao vídeo" className={`video-thumb${pic === -1 ? " active" : ""}`} aria-pressed={pic === -1} onClick={() => setPic(-1)}><PlayIcon /></button>}
           {photos.map((p, i) => <button key={p.key} aria-label={`Ver ${p.label}`} className={pic === i ? "active" : undefined} aria-pressed={pic === i} onClick={() => setPic(i)}><img loading="lazy" src={img(p.key)} alt="" /></button>)}
         </div>
       </dialog>

@@ -22,5 +22,5 @@ export default function CruiseShipRoutePage({ info }: { info: AgencyDomainInfo }
       </div>
     );
   }
-  return <CruiseShipPage ship={ship} hostname={info.hostname} />;
+  return <CruiseShipPage key={`${ship.lineSlug}/${ship.shipSlug}`} ship={ship} hostname={info.hostname} />;
 }

@@ -356,3 +356,12 @@
  .csp.csp.csp .tech-fact{padding:16px 12px}
  .csp.csp.csp .tech-fact dd{font-size:28px}
 }
+
+/* Undated, officially announced seasonal options: never invent calendar entries. */
+.csp .csp-route-summaries { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 24px; margin-top: 32px; }
+.csp .csp-route-summaries article { border: 1px solid var(--line, #d9e2df); border-radius: 14px; padding: 28px; background: var(--paper, #faf9f5); }
+.csp .csp-route-summaries h3 { margin: 14px 0; }
+.csp .csp-route-summaries p { line-height: 1.7; margin-bottom: 24px; }
+.csp .csp-route-summaries > .note { grid-column: 1 / -1; }
+.csp .csp-cabin-no-photo { height: 100%; min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; background: #eaf0ed; color: #284c4b; }
+.csp .csp-cabin-no-photo span { font-size: 1.5rem; }
