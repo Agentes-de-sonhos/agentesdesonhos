@@ -43,7 +43,8 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       // dele (margens e rodapé), para a página não ganhar rolagem vertical.
       const base = window.innerHeight - top;
       el.style.height = `${base}px`;
-      const below = Math.max(0, (document.getElementById("root")?.offsetHeight ?? document.documentElement.scrollHeight) - window.innerHeight);
+      const rootH = document.getElementById("root")?.offsetHeight ?? document.documentElement.scrollHeight;
+      const below = Math.max(0, rootH - (el.getBoundingClientRect().bottom + window.scrollY));
       const next = Math.max(320, Math.floor(base - below));
       el.style.height = `${next}px`;
       setFitHeight((prev) => (prev === next ? prev : next));
