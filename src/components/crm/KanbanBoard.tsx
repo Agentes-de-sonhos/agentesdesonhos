@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Maximize2, Minimize2, Download, Target, ChevronsRightLeft } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2, Download, Target, ChevronsLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -68,9 +68,11 @@ import { useAdminNav } from "@/lib/agencyAdminNav";
 
 function SortableColumn({
   stage,
+  collapsed = false,
   children,
 }: {
   stage: PipelineStage;
+  collapsed?: boolean;
   children: (handle: {
     dragHandleProps: React.HTMLAttributes<HTMLButtonElement>;
     isDragging: boolean;
@@ -92,7 +94,7 @@ function SortableColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn("w-[290px] flex-shrink-0 snap-center md:snap-align-none", isMaximized && "h-full")}
+      className={cn(collapsed ? "w-11" : "w-[290px]", "flex-shrink-0 transition-[width] duration-200 snap-center md:snap-align-none", isMaximized && "h-full")}
     >
       {children({
         dragHandleProps: { ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>,
@@ -641,7 +643,7 @@ export function KanbanBoard() {
                     const stageCanEdit = canStage('opportunities', stage.id, 'edit');
 
                     return (
-                      <SortableColumn key={stage.id} stage={stage}>
+                      <SortableColumn key={stage.id} stage={stage} collapsed={collapsed.has(stage.id)}>
                         {({ dragHandleProps, isDragging }) => (
                           <div
                             onDragOver={(e) => handleDragOver(e, stage.id)}
@@ -656,16 +658,17 @@ export function KanbanBoard() {
                                 title={`Expandir ${stage.name}`}
                                 aria-label={`Expandir coluna ${stage.name}`}
                                 className={cn(
-                                  "flex min-h-[14rem] w-11 flex-col items-center gap-3 rounded-xl border py-3 text-foreground transition-colors hover:brightness-95",
+                                  "flex min-h-[14rem] w-11 flex-col items-center gap-3 self-start rounded-xl border py-3 text-foreground transition-colors hover:brightness-95",
                                   tokens.bg,
                                   tokens.border,
                                   dragOver?.stageId === stage.id && "ring-2 ring-primary/50"
                                 )}
                               >
-                                <span className="rounded-full bg-background/80 px-1.5 text-[11px] font-semibold tabular-nums">
+                                <ChevronsLeftRight className="h-4 w-4 text-muted-foreground" />
+                                <span className={cn("text-xs font-semibold [writing-mode:vertical-rl]", tokens.text)}>{stage.name}</span>
+                                <span className="text-[11px] font-medium tabular-nums text-muted-foreground">
                                   {stageOpps.length}
                                 </span>
-                                <span className="text-xs font-semibold [writing-mode:vertical-rl]">{stage.name}</span>
                               </button>
                             ) : (
                             <div
@@ -677,17 +680,7 @@ export function KanbanBoard() {
                               )}
                             >
 
-                              <div className="flex items-start gap-1">
-                              <button
-                                type="button"
-                                onClick={() => toggleCollapsed(stage.id)}
-                                title="Recolher coluna"
-                                aria-label={`Recolher coluna ${stage.name}`}
-                                className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-background/70 hover:text-foreground"
-                              >
-                                <ChevronsRightLeft className="h-3.5 w-3.5" />
-                              </button>
-                              <div className="min-w-0 flex-1">
+                              <div><div>
                               <StageColumnHeader
                                 stage={stage}
                                 count={stageOpps.length}
@@ -703,6 +696,7 @@ export function KanbanBoard() {
                                 onQuickAdd={isFirstStage ? () => setQuickAddOpen(true) : undefined}
                                 isProtected={isProtected}
                                 canEdit={stageCanEdit}
+                                onCollapse={() => toggleCollapsed(stage.id)}
                               />
                               </div>
                               </div>
@@ -761,17 +755,18 @@ export function KanbanBoard() {
                                   </div>
                                 )}
                               </div>
-                              {isFirstStage && canCreateOpp && (
+                              {canCreateOpp && (
                                 <div className="mt-2 flex items-center gap-1" data-no-kanban-drag>
                                   <button
                                     type="button"
-                                    onClick={() => { setVoicePrefill(null); setIsDialogOpen(true); }}
-                                    className="flex h-8 flex-1 items-center gap-1.5 rounded-md px-2 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
+                                    onClick={() => { setVoicePrefill(null); setTargetStage(isFirstStage ? null : stage); setIsDialogOpen(true); }}
+                                    aria-label={`Adicionar oportunidade em ${stage.name}`}
+                                    className="flex h-8 flex-1 items-center gap-1.5 rounded-md px-2 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
                                   >
-                                    <Plus className="h-3.5 w-3.5" /> Adicionar oportunidade
+                                    <Plus className="h-4 w-4" /> Adicionar
                                   </button>
                                   <VoiceOpportunityButton
-                                    onResult={(p) => { setVoicePrefill(p); setIsDialogOpen(true); }}
+                                    onResult={(p) => { setVoicePrefill(p); setTargetStage(isFirstStage ? null : stage); setIsDialogOpen(true); }}
                                   />
                                 </div>
                               )}
