@@ -102,8 +102,8 @@ function KanbanTabsSurface({
         className={cn("flex w-full min-h-0 flex-1 flex-col")}
       >
 
-        {/* Linha superior: identidade compartilhada do CRM */}
-        <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        {/* Título à esquerda; abas e ações da aba ativa no canto superior direito */}
+        <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <PageHeader
               pageKey="gestao-clientes"
@@ -112,10 +112,7 @@ function KanbanTabsSurface({
               icon={Users}
             />
           </div>
-        </div>
-
-        {/* Linha inferior: abas principais + ações da aba ativa */}
-        <div className="-mx-1 flex flex-wrap items-center gap-2 px-1 md:mx-0">
+        <div className="-mx-1 flex flex-wrap items-center justify-end gap-2 px-1 md:mx-0">
           <TabsList className="inline-flex w-max shrink-0 gap-0.5">
             {can('clients.view') && (
               <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
@@ -147,8 +144,9 @@ function KanbanTabsSurface({
           <div
             ref={setToolbarEl}
             data-testid="crm-toolbar-slot"
-            className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
+            className="flex min-w-0 flex-wrap items-center justify-end gap-1.5"
           />
+        </div>
         </div>
 
 

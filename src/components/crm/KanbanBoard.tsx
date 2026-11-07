@@ -548,6 +548,18 @@ export function KanbanBoard() {
                   icon={Target}
                   title="Nova Oportunidade"
                   subtitle="Preencha os dados da oportunidade para adicioná-la ao funil."
+                  rightSlot={canCreateOpp ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 shrink-0 gap-1 px-2.5 text-xs"
+                      title="Importar orçamento"
+                      aria-label="Importar orçamento"
+                      onClick={() => { setIsDialogOpen(false); setImportOpen(true); }}
+                    >
+                      <Download className="h-3.5 w-3.5" /> Importar
+                    </Button>
+                  ) : undefined}
                 />
                 <OpportunityForm
                   key={voicePrefill ? JSON.stringify(voicePrefill) : "blank"}
@@ -559,18 +571,6 @@ export function KanbanBoard() {
               </StandardPopupCard>
             </DialogContent>
           </Dialog>
-          {canCreateOpp && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              title="Importar orçamento"
-              aria-label="Importar orçamento"
-              onClick={() => setImportOpen(true)}
-            >
-              <Download className="h-3.5 w-3.5" /> Importar
-            </Button>
-          )}
           <Button
             variant="outline"
             size="sm"
