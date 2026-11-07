@@ -1751,3 +1751,7 @@ body[data-booking-selection-bar] {
 .wl-essya-curti #topo h1,
 .wl-essya-curti #topo h1 + *,
 .wl-essya-curti #topo p { text-shadow: 0 2px 14px hsl(220 12% 7% / 0.55), 0 1px 3px hsl(220 12% 7% / 0.45); }
+
+/* Espaço reservado do card ao arrastar no funil (estilo Trello). */
+@keyframes kanban-drop-open { from { opacity: 0; transform: scaleY(0.6); } to { opacity: 1; transform: scaleY(1); } }
+.kanban-drop-placeholder { animation: kanban-drop-open 120ms ease-out; transform-origin: top; }
