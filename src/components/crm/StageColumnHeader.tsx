@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Pencil, Copy, Trash2, Palette, GripVertical, Check, X, Plus } from "lucide-react";
+import { MoreHorizontal, ChevronsRightLeft, Pencil, Copy, Trash2, Palette, GripVertical, Check, X, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -37,6 +37,7 @@ interface Props {
   onQuickAdd?: () => void;
   isProtected?: boolean;
   canEdit?: boolean;
+  onCollapse?: () => void;
 }
 
 const COLOR_KEYS = Object.keys(STAGE_COLOR_PALETTE) as StageColor[];
@@ -53,6 +54,7 @@ export function StageColumnHeader({
   onQuickAdd,
   isProtected,
   canEdit = true,
+  onCollapse,
 }: Props) {
   const tokens = getStageTokens(stage.color);
   const [editing, setEditing] = useState(false);
@@ -152,18 +154,13 @@ export function StageColumnHeader({
             </button>
           )}
 
-          {!editing && (
-            <Badge
-              variant="secondary"
-              className={cn("text-xs px-1.5 py-0 font-bold", tokens.text)}
-            >
-              {count}
-            </Badge>
-          )}
         </div>
 
         {!editing && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
+            <span className="px-1 text-sm font-medium tabular-nums text-muted-foreground" aria-label={`${count} cartões`}>
+              {count}
+            </span>
             {onQuickAdd && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -190,20 +187,28 @@ export function StageColumnHeader({
                 <TooltipContent>{overdueCount} follow-up(s) atrasado(s)</TooltipContent>
               </Tooltip>
             )}
+            {onCollapse && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onCollapse}
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                aria-label={`Recolher coluna ${stage.name}`}
+                title="Recolher lista"
+              >
+                <ChevronsRightLeft className="h-4 w-4" />
+              </Button>
+            )}
             {canEdit && (
             <DropdownMenu open={pickingColor || undefined} onOpenChange={(o) => !o && setPickingColor(false)}>
               <DropdownMenuTrigger asChild>
                 <Button
                   size="icon"
                   variant="ghost"
-                  className={cn(
-                    "h-6 w-6 text-muted-foreground transition-opacity",
-                    "opacity-0 group-hover/header:opacity-100 md:focus:opacity-100",
-                    "data-[state=open]:opacity-100"
-                  )}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
                   aria-label="Opções da coluna"
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
