@@ -44,8 +44,15 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       const base = window.innerHeight - top;
       el.style.height = `${base}px`;
       const below = Math.max(0, (document.getElementById("root")?.offsetHeight ?? document.documentElement.scrollHeight) - window.innerHeight);
-      const next = Math.max(320, Math.floor(base - below));
+      let next = Math.max(320, Math.floor(base - below));
       el.style.height = `${next}px`;
+      // Alguns contêineres não encolhem na mesma proporção: corrige o resto.
+      for (let i = 0; i < 3; i++) {
+        const extra = (document.getElementById("root")?.offsetHeight ?? 0) - window.innerHeight;
+        if (extra <= 0 || next <= 320) break;
+        next = Math.max(320, next - extra);
+        el.style.height = `${next}px`;
+      }
       setFitHeight((prev) => (prev === next ? prev : next));
     };
     measure();
