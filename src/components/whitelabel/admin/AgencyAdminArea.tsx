@@ -47,6 +47,9 @@ const AgencyReservas = lazy(() => import("@/pages/whitelabel/admin/AgencyReserva
 const ProcessoReserva = lazy(() => import("@/pages/ProcessoReserva"));
 const AgencyAdminNotFound = lazy(() => import("@/pages/whitelabel/admin/AgencyAdminNotFound"));
 const ResortsCurationPanel = lazy(() => import("@/pages/site/ResortsCurationPanel"));
+const BlogPanel = lazy(() => import("@/pages/site/BlogPanel"));
+const BlogEditorPage = lazy(() => import("@/pages/site/BlogEditorPage"));
+const BlogPreviewPage = lazy(() => import("@/pages/site/BlogPreviewPage"));
 const Community = lazy(() => import("@/pages/Community"));
 
 /** Alias legado /reservas/:id → rota administrativa equivalente. */
@@ -113,6 +116,9 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     ["assinaturas-comerciais", AssinaturasComerciais],
     ["configuracoes/carteira", ConfiguracoesCarteira],
     ["site/resorts", ResortsCurationPanel],
+    ["site/blog", BlogPanel],
+    ["site/blog/:id", BlogEditorPage],
+    ["site/blog/:id/previa", BlogPreviewPage],
   ];
 
   const aliasPairs: Array<[string, ComponentType]> = [
@@ -136,6 +142,9 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
     ["/ferramentas-ia/modelos-roteiros", ModelosRoteiros],
     ["/reservas", AgencyReservas],
     ["/site/resorts", ResortsCurationPanel],
+    ["/site/blog", BlogPanel],
+    ["/site/blog/:id", BlogEditorPage],
+    ["/site/blog/:id/previa", BlogPreviewPage],
   ];
 
   const home = <AgencyAdminHome info={info} />;
