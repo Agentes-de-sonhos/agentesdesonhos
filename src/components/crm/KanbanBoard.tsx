@@ -94,7 +94,7 @@ function SortableColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(collapsed ? "w-11" : "w-[290px]", "flex-shrink-0 transition-[width] duration-200 snap-center md:snap-align-none", isMaximized && "h-full")}
+      className={cn(collapsed ? "w-11" : "w-[290px]", "h-full flex-shrink-0 transition-[width] duration-200 snap-center md:snap-align-none")}
     >
       {children({
         dragHandleProps: { ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>,
@@ -624,7 +624,7 @@ export function KanbanBoard() {
                 strategy={horizontalListSortingStrategy}
               >
                 <div
-                  className="flex min-h-full items-stretch gap-4"
+                  className="flex h-full items-stretch gap-4"
                   style={{ minWidth: "max-content" }}
                 >
                   {stages
@@ -649,7 +649,7 @@ export function KanbanBoard() {
                             onDragOver={(e) => handleDragOver(e, stage.id)}
                             onDrop={(e) => handleColumnDrop(e, stage)}
                             onDragEnd={resetDrag}
-                            className="flex min-h-full flex-col"
+                            className="flex h-full min-h-0 flex-col"
                           >
                             {collapsed.has(stage.id) ? (
                               <button
@@ -673,7 +673,7 @@ export function KanbanBoard() {
                             ) : (
                             <div
                               className={cn(
-                                "flex min-h-full flex-1 flex-col rounded-xl border p-3 transition-shadow",
+                                "flex h-full min-h-0 flex-1 flex-col rounded-xl border p-3 transition-shadow",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"
@@ -701,7 +701,7 @@ export function KanbanBoard() {
                               </div>
                               </div>
 
-                              <div className="flex-1 space-y-2.5">
+                              <div className="kanban-column-scroll -mr-2 min-h-0 flex-1 space-y-2.5 overflow-y-auto overscroll-contain pr-1.5">
 
 
                                 {stageOpps.map((opportunity) => {
