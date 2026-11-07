@@ -66,3 +66,9 @@ Não foi possível obter calendários MSC completos e atuais pelas páginas de i
 - Removidas cinco seleções promocionais com pessoas: MSC Musica p26, Costa Diadema p107/p109 e Costa Serena p106/p107. Mantidas cenas de atividades e espetáculos sem modelos posando para a câmera, além de ambientes e cabines.
 - Créditos por companhia com link à página oficial abaixo da galeria principal, do álbum, da galeria ampliada, do conjunto de cabines e da foto de experiência. Nenhum crédito repetido em cada miniatura.
 - Corrigidas as fotos das experiências de descanso para acompanhar seu conteúdo, sem substituir ambientes por fotos de outros navios.
+
+## Correção da prévia em branco — 07/11/2026
+
+O deploy Cloudflare Pages estava servindo o `index.html` de desenvolvimento, com `/src/main.tsx`, sem compilar a aplicação. A confirmação de deploy não comprovava a renderização da página.
+
+A prévia possui agora um artefato estático em `preview/navios/`, gerado por `node tools/cruise-preview/build.mjs`. Ele reutiliza `CruiseShipsPreview` e `CruiseShipPage`, com dados das oito páginas. Somente esse build substitui o módulo de solicitações por um bloqueio sem backend e usa a base cartográfica local. Não altera a configuração de produção nem o fluxo das agências. Regerar o artefato após mudanças nas páginas antes de atualizar o link de revisão.
