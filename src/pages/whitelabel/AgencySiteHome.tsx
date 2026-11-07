@@ -63,6 +63,7 @@ import {
 import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
+import { isMundoSeoHost } from "@/lib/mundoSeo";
 import { SEO } from "@/components/seo/SEO";
 import { resolveAgencySharePreview } from "@/lib/agencySharePreview";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
@@ -1961,7 +1962,7 @@ export default function AgencySiteHome({
   const sharePreview = resolveAgencySharePreview(info.hostname);
   return (
     <>
-      {sharePreview && !profile.presentation ? (
+      {isMundoSeoHost(info.hostname) ? null : sharePreview && !profile.presentation ? (
         <SEO
           title={sharePreview.title}
           exactTitle

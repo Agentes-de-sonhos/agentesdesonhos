@@ -289,8 +289,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   campaignCardPresentation: "photoAbove",
   nav: [
     { label: "Início", to: "/" },
-    { label: "Ofertas Novembro", to: "/oportunidades-novembro" },
+    { label: "Oportunidades de Novembro", to: "/oportunidades-novembro" },
     { label: "Especialidades", to: "/#campanhas", children: [
+      { label: "Disney", to: "/disney" },
       { label: "Universal Orlando", to: "/universal" },
       { label: "Xcaret", to: "/xcaret" },
       { label: "Resorts no Brasil", to: "/resorts-brasil" },
