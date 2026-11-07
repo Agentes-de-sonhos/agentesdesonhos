@@ -484,7 +484,11 @@ export function useOpportunities() {
       return { id, fromStageLabel, toStageLabel };
     },
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      // Só reconcilia com o servidor quando não há outra movimentação em curso,
+      // evitando que um recarregamento intermediário faça o cartão "pular".
+      if (queryClient.isMutating({ mutationKey: ["reorder-opportunities"] }) <= 1) {
+        queryClient.invalidateQueries({ queryKey: ["opportunities"] });
+      }
       queryClient.invalidateQueries({ queryKey: ["operations"] });
       queryClient.invalidateQueries({ queryKey: ["clients"] });
       queryClient.invalidateQueries({ queryKey: ["clients-search"] });
@@ -519,6 +523,7 @@ export function useOpportunities() {
   });
 
   const reorderOpportunitiesMutation = useMutation({
+    mutationKey: ["reorder-opportunities"],
     mutationFn: async ({
       movedId,
       fromStageId,
@@ -593,32 +598,12 @@ export function useOpportunities() {
     },
     // Atualização otimista: o cartão muda de lugar na hora; o servidor grava
     // em segundo plano e qualquer falha devolve o quadro ao estado anterior.
-    onMutate: async (vars) => {
+    // A troca visual já foi aplicada de forma síncrona em reorderOpportunities
+    // (no mesmo instante em que o cartão é solto); aqui só guardamos o rollback.
+    onMutate: async (vars: any) => {
       const key = ["opportunities", agencyOwnerId, user?.id];
-      await queryClient.cancelQueries({ queryKey: ["opportunities"] });
-      const previous = queryClient.getQueryData<Opportunity[]>(key);
-      if (previous) {
-        const targetPos = new Map(vars.orderedTargetIds.map((id, i) => [id, i]));
-        const sourcePos = new Map((vars.orderedSourceIds ?? []).map((id, i) => [id, i]));
-        const next = previous.map((o) => {
-          if (targetPos.has(o.id)) {
-            const patch: any = { position: targetPos.get(o.id) };
-            if (o.id === vars.movedId) {
-              patch.stage_id = vars.toStageId;
-              if (vars.toStageLegacyKey) patch.stage = vars.toStageLegacyKey;
-              if (vars.fromStageId && vars.fromStageId !== vars.toStageId) {
-                patch.stage_entered_at = new Date().toISOString();
-              }
-            }
-            return { ...o, ...patch };
-          }
-          if (sourcePos.has(o.id)) return { ...o, position: sourcePos.get(o.id) };
-          return o;
-        });
-        next.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-        queryClient.setQueryData(key, next);
-      }
-      return { previous, key };
+      await queryClient.cancelQueries({ queryKey: ["opportunities"] }, { revert: false } as any);
+      return { previous: vars.__previous as Opportunity[] | undefined, key };
     },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
@@ -651,7 +636,34 @@ export function useOpportunities() {
     createOpportunity: createOpportunityMutation.mutateAsync,
     updateOpportunity: updateOpportunityMutation.mutateAsync,
     updateStage: updateStageMutation.mutateAsync,
-    reorderOpportunities: reorderOpportunitiesMutation.mutateAsync,
+    reorderOpportunities: (vars: Parameters<typeof reorderOpportunitiesMutation.mutateAsync>[0]) => {
+      // Atualização otimista SÍNCRONA: o cartão sai da coluna de origem e entra
+      // na nova no mesmo render em que o arraste termina (sem piscar de volta).
+      const key = ["opportunities", agencyOwnerId, user?.id];
+      const previous = queryClient.getQueryData<Opportunity[]>(key);
+      if (previous) {
+        const targetPos = new Map(vars.orderedTargetIds.map((id, i) => [id, i]));
+        const sourcePos = new Map((vars.orderedSourceIds ?? []).map((id, i) => [id, i]));
+        const next = previous.map((o) => {
+          if (targetPos.has(o.id)) {
+            const patch: any = { position: targetPos.get(o.id) };
+            if (o.id === vars.movedId) {
+              patch.stage_id = vars.toStageId;
+              if (vars.toStageLegacyKey) patch.stage = vars.toStageLegacyKey;
+              if (vars.fromStageId && vars.fromStageId !== vars.toStageId) {
+                patch.stage_entered_at = new Date().toISOString();
+              }
+            }
+            return { ...o, ...patch };
+          }
+          if (sourcePos.has(o.id)) return { ...o, position: sourcePos.get(o.id) };
+          return o;
+        });
+        next.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+        queryClient.setQueryData(key, next);
+      }
+      return reorderOpportunitiesMutation.mutateAsync({ ...vars, __previous: previous } as any);
+    },
     deleteOpportunity: deleteOpportunityMutation.mutateAsync,
     isCreating: createOpportunityMutation.isPending,
   };
