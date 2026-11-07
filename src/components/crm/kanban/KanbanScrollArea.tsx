@@ -44,13 +44,21 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       const base = window.innerHeight - top;
       el.style.height = `${base}px`;
       const below = Math.max(0, (document.getElementById("root")?.offsetHeight ?? document.documentElement.scrollHeight) - window.innerHeight);
-      setFitHeight(Math.max(320, Math.floor(base - below)));
+      const next = Math.max(320, Math.floor(base - below));
+      el.style.height = `${next}px`;
+      setFitHeight((prev) => (prev === next ? prev : next));
     };
     measure();
     const t = window.setTimeout(measure, 300);
-    const t2 = window.setTimeout(measure, 1500);
+    // Reajusta quando o restante da página termina de carregar (cabeçalho, rodapé).
+    let raf = 0;
+    const root = document.getElementById("root");
+    const ro = root && typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure); })
+      : null;
+    if (root) ro?.observe(root);
     window.addEventListener("resize", measure);
-    return () => { window.clearTimeout(t); window.clearTimeout(t2); window.removeEventListener("resize", measure); };
+    return () => { window.clearTimeout(t); cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); };
   }, [isMaximized]);
 
   const stopDrag = useCallback(() => {
