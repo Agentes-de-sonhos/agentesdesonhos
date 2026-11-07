@@ -1,0 +1,3678 @@
+[
+  {
+    "lineSlug": "msc",
+    "shipSlug": "msc-virtuosa",
+    "lineName": "MSC Cruzeiros",
+    "shipName": "MSC Virtuosa",
+    "titleLead": "MSC",
+    "titleTail": "Virtuosa",
+    "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
+    "tagline": "O dia pode começar tranquilo. A noite, surpreender.",
+    "assets": {
+      "p25": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/main-features/galleria_vi_sitecore.jpg?bc=transparent&as=1&mh=600&mw=952&hash=0A973D2C8FFE2B6B9DF3FC06D9EEB18E",
+      "p43": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/entertainment/le-grand-theatre.jpg?bc=transparent&as=1&mh=600&mw=952&hash=C1CF8A9D0D3F686EE71379B4128E5F98",
+      "p28": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/main-features/vi_pool.jpg?bc=transparent&as=1&mh=600&mw=952&hash=462954F82EA42ABAB304D24DCDD937EB",
+      "p27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/main-features/family-lego.jpg?bc=transparent&as=1&mh=600&mw=952&hash=1D4C9AAADA7A347AF9ECF5E24D11BACE",
+      "p58": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/restaurants/msc-virtuosa-minuetto.jpg?bc=transparent&as=1&mh=720&mw=920&hash=A1263A1FA161BCAC9B8586D96862E29D",
+      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/main-features/msc-rob-render-location_sitecore.jpg?bc=transparent&as=1&mh=600&mw=952&hash=1503810380A828D8D4F0D3C9DF81D00C",
+      "p37": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_grand_suite_with_terrace_and_whirlpool_sxj_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=C8AD9DF33A39C9209AAB651364F21542",
+      "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_balcony_br1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=6939A0BCC9D5EE8C972B3CC6073163DF",
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet//Virtuosa/MSC_VIRTUOSA_MSC19001627_desk",
+      "video": "https://assets.msccruises.com/is/content/msccruises/MSC_Virtuosa_Ship_Visit_1920x540_v1",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_interior_ir1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=869C9D324713FD2A81F7EA6D161AA35A",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_ocean_view_or1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=374DE9AC3CB76B2DA72B916FFAE81AB3"
+    },
+    "hero": {
+      "image": "hero",
+      "video": "video",
+      "alt": "Imagem de divulgação do MSC Virtuosa",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Assista ao vídeo do navio",
+      "videoAria": "Assistir ao vídeo do MSC Virtuosa"
+    },
+    "tiles": [
+      {
+        "photo": "p25",
+        "alt": "Galleria Virtuosa",
+        "label": "Galleria Virtuosa"
+      },
+      {
+        "photo": "p43",
+        "alt": "Le Grand Théâtre",
+        "label": "Le Grand Théâtre"
+      },
+      {
+        "photo": "p28",
+        "alt": "Deck de piscinas",
+        "label": "Deck de piscinas"
+      }
+    ],
+    "albumTile": {
+      "image": "hero",
+      "alt": "Vista do MSC Virtuosa"
+    },
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "p25",
+        "label": "Galleria Virtuosa",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p43",
+        "label": "Le Grand Théâtre",
+        "category": "Lazer"
+      },
+      {
+        "key": "p28",
+        "label": "Deck de piscinas",
+        "category": "Lazer"
+      },
+      {
+        "key": "p27",
+        "label": "Espaços para crianças",
+        "category": "Lazer"
+      },
+      {
+        "key": "p58",
+        "label": "Restaurante Minuetto",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "p24",
+        "label": "MSC Starship Club · imagem de divulgação",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p37",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p40",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "hero",
+        "label": "Vista do MSC Virtuosa",
+        "category": "Exterior"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Ambientes",
+      "Lazer",
+      "Gastronomia",
+      "Cabines",
+      "Exterior"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O MSC VIRTUOSA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "Uma galeria coberta, espetáculos e encontros em família dão ritmo à viagem.",
+      "stats": [
+        {
+          "value": "6.334",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "2.421",
+          "label": "Cabines"
+        },
+        {
+          "value": "331 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "181.541",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Galleria Virtuosa faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p43",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Galleria Virtuosa",
+            "Le Grand Théâtre",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p58",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Savannah Aquapark",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p28",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "Deck de piscinas",
+            "Confira horários e condições de acesso.",
+            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "cabin-interna",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "cabin-externa",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p40",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "p37",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
+      "homePortEyebrow": "SANTOS / SALVADOR / MACEIÓ",
+      "homePortText": "Portos de embarque variam conforme a saída.",
+      "regions": [],
+      "regionRules": [],
+      "fallbackRegion": "América do Sul",
+      "coordinates": {},
+      "feed": {
+        "checkedAt": "2026-11-06",
+        "from": "2026-10-01",
+        "to": "2027-04-30",
+        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
+        "sailings": []
+      },
+      "geography": "",
+      "summaries": [
+        {
+          "title": "Nordeste",
+          "duration": "7 noites",
+          "text": "Embarques em Santos, Salvador ou Maceió. Escalas anunciadas: Búzios, Salvador e Maceió.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        },
+        {
+          "title": "Minicruzeiro",
+          "duration": "3 noites",
+          "text": "Embarque em Santos, com escala em Búzios.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "MSC Virtuosa",
+      "facts": [
+        {
+          "value": "6.334",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "2.421",
+          "label": "Cabines"
+        },
+        {
+          "value": "331 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "181.541",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        }
+      ],
+      "paragraphs": [
+        "6.334 · Hóspedes — capacidade publicada",
+        "2.421 · Cabines",
+        "331 m · Comprimento",
+        "181.541 · Arqueação bruta (GT)"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa/cabins-suites"
+      }
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa"
+  },
+  {
+    "lineSlug": "msc",
+    "shipSlug": "msc-divina",
+    "lineName": "MSC Cruzeiros",
+    "shipName": "MSC Divina",
+    "titleLead": "MSC",
+    "titleTail": "Divina",
+    "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
+    "tagline": "Um convite para viajar com tempo e elegância.",
+    "assets": {
+      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/msc-divina_silhouette.jpg?bc=transparent&as=1&mh=465&mw=1920&hash=7BBE28C7FFC488157904ED4D8633A16D",
+      "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61",
+      "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/entertainment/di_entertainment_theatre_pantheon_01.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=20AB98C8A79D95349E81E2C24A277368",
+      "p27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_aurea_spa_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=55095D40E543DD5F3A456902DD1FC5E4",
+      "p46": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/di_restaurant_and_bar_villa_rossa_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=BA80AD667FBE05FE52F2D9F3246F4D56",
+      "p35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_suite_with_balcony_11.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=57243A3C1E577C8738274673D45CA00F",
+      "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=AC0BA02F022680DB2D1C8368522E6AED",
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/preziosa/cabins/new/desktop/pr-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=85E439EA2BC257C42A26D0BCA5FAC694",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_ocean_view_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=8A76D745F26E7C078658B82774C6D055"
+    },
+    "hero": {
+      "image": "hero",
+      "video": null,
+      "alt": "Escadarias de cristal",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Explore as imagens do navio",
+      "videoAria": "Ver fotos do MSC Divina"
+    },
+    "tiles": [
+      {
+        "photo": "p26",
+        "alt": "Escadarias de cristal",
+        "label": "Escadarias de cristal"
+      },
+      {
+        "photo": "p40",
+        "alt": "Teatro Pantheon",
+        "label": "Teatro Pantheon"
+      },
+      {
+        "photo": "p27",
+        "alt": "MSC Aurea Spa",
+        "label": "MSC Aurea Spa"
+      }
+    ],
+    "albumTile": {
+      "image": "p38",
+      "alt": "Varanda · imagem ilustrativa"
+    },
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "p24",
+        "label": "Perfil do MSC Divina · ilustração da companhia",
+        "category": "Exterior"
+      },
+      {
+        "key": "p26",
+        "label": "Escadarias de cristal",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p40",
+        "label": "Teatro Pantheon",
+        "category": "Lazer"
+      },
+      {
+        "key": "p27",
+        "label": "MSC Aurea Spa",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p46",
+        "label": "Restaurante Villa Rossa",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "p35",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p38",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · referência MSC Preziosa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Exterior",
+      "Ambientes",
+      "Lazer",
+      "Gastronomia",
+      "Cabines"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O MSC DIVINA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "Escadarias de cristal e o Teatro Pantheon compõem um cenário de inspiração clássica.",
+      "stats": [
+        {
+          "value": "4.345",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "1.751",
+          "label": "Cabines"
+        },
+        {
+          "value": "333,30 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "139.072",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Teatro Pantheon faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p40",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Teatro Pantheon",
+            "Piscina Infinity",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p46",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Villa Rossa",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p27",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "MSC Aurea Spa",
+            "Confira horários e condições de acesso.",
+            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "cabin-interna",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização. Imagem de referência do MSC Preziosa, utilizada pela MSC na página desta categoria do Divina."
+        },
+        {
+          "name": "Externa",
+          "image": "cabin-externa",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p38",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "p35",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
+      "homePortEyebrow": "SANTOS",
+      "homePortText": "Portos de embarque variam conforme a saída.",
+      "regions": [],
+      "regionRules": [],
+      "fallbackRegion": "América do Sul",
+      "coordinates": {},
+      "feed": {
+        "checkedAt": "2026-11-06",
+        "from": "2026-10-01",
+        "to": "2027-04-30",
+        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
+        "sailings": []
+      },
+      "geography": "",
+      "summaries": [
+        {
+          "title": "Minicruzeiros",
+          "duration": "3 a 5 noites",
+          "text": "Santos; escalas alternadas em Búzios, Ilhabela e Ilha Grande.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "MSC Divina",
+      "facts": [
+        {
+          "value": "4.345",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "1.751",
+          "label": "Cabines"
+        },
+        {
+          "value": "333,30 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "139.072",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        }
+      ],
+      "paragraphs": [
+        "4.345 · Hóspedes — capacidade publicada",
+        "1.751 · Cabines",
+        "333,30 m · Comprimento",
+        "139.072 · Arqueação bruta (GT)"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/cabins-suites"
+      }
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina"
+  },
+  {
+    "lineSlug": "msc",
+    "shipSlug": "msc-musica",
+    "lineName": "MSC Cruzeiros",
+    "shipName": "MSC Musica",
+    "titleLead": "MSC",
+    "titleTail": "Musica",
+    "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
+    "tagline": "Seu próximo verão, em outro ritmo.",
+    "assets": {
+      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_public_area_life_on_board_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=DDAE93933D5BCB3381D279763ED35DD0",
+      "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_la_spiaggia_pool_area_07.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=A355188C0BF172F9112F765197D35DC5",
+      "p44": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_teatro_la_scala_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=41AE1AEF061900E93F8BBE6396DFAC79",
+      "p49": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/mu_restaurant_and_bar_oleandro_restaurant_01.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=37981E5581C09E6D990D7A4811C8BEEF",
+      "p25": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_msc26048847.jpg?bc=transparent&as=1&mh=600&mw=1000&hash=044329152333B6DEB7E18ED20DCEA20F",
+      "p35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_balcony_02.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=FA7DAB6A117A229F5D5A5326366AF675",
+      "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_oceanview_03.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=34ED8ABF123B3D9499B2E4E3184FFB4A",
+      "p32": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc3-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=B4877EA008C4E12E099CEF099551E4D3",
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/Musica/MSC_MUSICA_MSC18015178_desk",
+      "video": "https://msc-cdn.thron.com/delivery/public/video/msc/2ab2fe72-593e-4fd3-9031-a5afc03832d0/lhxtvk/WEBHD/60145_musica_-ship_tour_30sec_1920x540_web",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_interior_05.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=552183132B561E8BDE06DD8EB653085D",
+      "cabin-suíte": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc1-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=CDE094411A370185A29AD134351192E5"
+    },
+    "hero": {
+      "image": "hero",
+      "video": "video",
+      "alt": "Imagem de divulgação do MSC Musica",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Assista ao vídeo do navio",
+      "videoAria": "Assistir ao vídeo do MSC Musica"
+    },
+    "tiles": [
+      {
+        "photo": "p24",
+        "alt": "Deck de piscinas do MSC Musica",
+        "label": "Deck de piscinas"
+      },
+      {
+        "photo": "p40",
+        "alt": "La Spiaggia",
+        "label": "La Spiaggia"
+      },
+      {
+        "photo": "p44",
+        "alt": "Teatro La Scala",
+        "label": "Teatro La Scala"
+      }
+    ],
+    "albumTile": {
+      "image": "hero",
+      "alt": "Vista do MSC Musica"
+    },
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "p24",
+        "label": "Deck de piscinas do MSC Musica",
+        "category": "Lazer"
+      },
+      {
+        "key": "p40",
+        "label": "La Spiaggia",
+        "category": "Lazer"
+      },
+      {
+        "key": "p44",
+        "label": "Teatro La Scala",
+        "category": "Lazer"
+      },
+      {
+        "key": "p49",
+        "label": "Restaurante Oleandro",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "p25",
+        "label": "Spa · imagem de divulgação",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p35",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p38",
+        "label": "Externa · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p32",
+        "label": "Yacht Club · imagem de divulgação",
+        "category": "Cabines"
+      },
+      {
+        "key": "hero",
+        "label": "Vista do MSC Musica",
+        "category": "Exterior"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-suíte",
+        "label": "Suíte MSC Yacht Club · referência da companhia",
+        "category": "Cabines"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Lazer",
+      "Gastronomia",
+      "Ambientes",
+      "Cabines",
+      "Exterior"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O MSC MUSICA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "Entre o hall com cascata, os espaços de convivência e o teatro, escolha seu próprio compasso.",
+      "stats": [
+        {
+          "value": "3.223",
+          "label": "Hóspedes — ficha publicada"
+        },
+        {
+          "value": "1.275",
+          "label": "Cabines — ficha publicada"
+        },
+        {
+          "value": "293,80 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "92.409",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Teatro La Scala faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p44",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Teatro La Scala",
+            "La Spiaggia",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p49",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Oleandro",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p25",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "MSC Aurea Spa",
+            "Confira horários e condições de acesso.",
+            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "cabin-interna",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "p38",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p35",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "cabin-suíte",
+          "lead": "MSC Yacht Club",
+          "detail": "Referência de suíte MSC Yacht Club apresentada pela companhia para o Musica após a renovação. Configuração e categoria dependem da reserva."
+        }
+      ],
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
+      "homePortEyebrow": "SANTOS / RIO DE JANEIRO / ITAJAÍ / PARANAGUÁ",
+      "homePortText": "Portos de embarque variam conforme a saída.",
+      "regions": [],
+      "regionRules": [],
+      "fallbackRegion": "América do Sul",
+      "coordinates": {},
+      "feed": {
+        "checkedAt": "2026-11-06",
+        "from": "2026-10-01",
+        "to": "2027-04-30",
+        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
+        "sailings": []
+      },
+      "geography": "",
+      "summaries": [
+        {
+          "title": "Litoral brasileiro",
+          "duration": "7 noites",
+          "text": "Embarques no Rio, Itajaí ou Paranaguá; escalas variam conforme a saída.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        },
+        {
+          "title": "Minicruzeiros",
+          "duration": "3 e 4 noites",
+          "text": "Santos; visitas alternadas a Búzios, Ilha Grande e Ilhabela.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "MSC Musica",
+      "facts": [
+        {
+          "value": "3.223",
+          "label": "Hóspedes — ficha publicada"
+        },
+        {
+          "value": "1.275",
+          "label": "Cabines — ficha publicada"
+        },
+        {
+          "value": "293,80 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "92.409",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        },
+        {
+          "title": "Renovação anunciada para novembro de 2026",
+          "text": "A MSC anuncia Yacht Club, spa e academia renovados, além de Butcher’s Cut e Kaito Sushi Bar. A ficha numérica publicada pode anteceder a conclusão das obras; confirme a configuração da sua saída."
+        }
+      ],
+      "paragraphs": [
+        "3.223 · Hóspedes — ficha publicada",
+        "1.275 · Cabines — ficha publicada",
+        "293,80 m · Comprimento",
+        "92.409 · Arqueação bruta (GT)"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/cabins-suites"
+      }
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica"
+  },
+  {
+    "lineSlug": "msc",
+    "shipSlug": "msc-splendida",
+    "lineName": "MSC Cruzeiros",
+    "shipName": "MSC Splendida",
+    "titleLead": "MSC",
+    "titleTail": "Splendida",
+    "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
+    "tagline": "Dias de mar. Noites cheias de possibilidades.",
+    "assets": {
+      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/msc-splendida-silhouette-header.jpg?bc=transparent&as=1&mh=465&mw=1920&hash=72EF3143A88551B48249004CC6AF38BF",
+      "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_the_strand_theatre_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=4F3B55626356778A051ADA41351D3ED5",
+      "p57": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03",
+      "p28": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_lego_club_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=1A64580AB4D8CBD4A1E096331A20C5C5",
+      "p33": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/restaurants-and-bars/sp_restaurant_and_bar_villa_verde_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=46DAD812F16289C84A67CE1E63206A20",
+      "p27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_balinese_massage_02.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=BE8C91BE3F50FCDEB417B47346D6E25F",
+      "p51": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_suite_balcony_04.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=05CCE2FE0DD3839333FEB3B05FAF2355",
+      "p54": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=65397B6BDCDBAFE86A5F492AAE9385D7",
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/new/desktop/sp-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=459A4806EF6C932F73575B9507524F07",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_ocean_view_07.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=E75E1B413017B9B06C60C4859F9B32C3"
+    },
+    "hero": {
+      "image": "hero",
+      "video": null,
+      "alt": "Playa del Sol",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Explore as imagens do navio",
+      "videoAria": "Ver fotos do MSC Splendida"
+    },
+    "tiles": [
+      {
+        "photo": "p26",
+        "alt": "Teatro The Strand",
+        "label": "Teatro The Strand"
+      },
+      {
+        "photo": "p57",
+        "alt": "Playa del Sol",
+        "label": "Playa del Sol"
+      },
+      {
+        "photo": "p28",
+        "alt": "Clube infantil",
+        "label": "Clube infantil"
+      }
+    ],
+    "albumTile": {
+      "image": "p54",
+      "alt": "Varanda · imagem ilustrativa"
+    },
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "p24",
+        "label": "Perfil do MSC Splendida · ilustração da companhia",
+        "category": "Exterior"
+      },
+      {
+        "key": "p26",
+        "label": "Teatro The Strand",
+        "category": "Lazer"
+      },
+      {
+        "key": "p57",
+        "label": "Playa del Sol",
+        "category": "Lazer"
+      },
+      {
+        "key": "p28",
+        "label": "Clube infantil",
+        "category": "Lazer"
+      },
+      {
+        "key": "p33",
+        "label": "Restaurante Villa Verde",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "p27",
+        "label": "Spa · imagem de referência",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p51",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p54",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Exterior",
+      "Lazer",
+      "Gastronomia",
+      "Ambientes",
+      "Cabines"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O MSC SPLENDIDA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "Um navio para alternar piscinas, gastronomia e espetáculos entre uma escala e outra.",
+      "stats": [
+        {
+          "value": "4.363",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "1.637",
+          "label": "Cabines"
+        },
+        {
+          "value": "333,30 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "137.936",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Teatro The Strand faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p26",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Teatro The Strand",
+            "Playa del Sol",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p33",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Villa Verde",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p27",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "MSC Aurea Spa",
+            "Confira horários e condições de acesso.",
+            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "cabin-interna",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "cabin-externa",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p54",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "p51",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
+      "homePortEyebrow": "RIO DE JANEIRO / BUENOS AIRES",
+      "homePortText": "Portos de embarque variam conforme a saída.",
+      "regions": [],
+      "regionRules": [],
+      "fallbackRegion": "América do Sul",
+      "coordinates": {},
+      "feed": {
+        "checkedAt": "2026-11-06",
+        "from": "2026-10-01",
+        "to": "2027-04-30",
+        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
+        "sailings": []
+      },
+      "geography": "",
+      "summaries": [
+        {
+          "title": "Brasil e Prata",
+          "duration": "8 e 9 noites",
+          "text": "Embarques no Rio ou Buenos Aires. Escalas alternadas no litoral brasileiro e em Punta del Este.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "MSC Splendida",
+      "facts": [
+        {
+          "value": "4.363",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "1.637",
+          "label": "Cabines"
+        },
+        {
+          "value": "333,30 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "137.936",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        }
+      ],
+      "paragraphs": [
+        "4.363 · Hóspedes — capacidade publicada",
+        "1.637 · Cabines",
+        "333,30 m · Comprimento",
+        "137.936 · Arqueação bruta (GT)"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida/cabins-suites"
+      }
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida"
+  },
+  {
+    "lineSlug": "msc",
+    "shipSlug": "msc-seaview",
+    "lineName": "MSC Cruzeiros",
+    "shipName": "MSC Seaview",
+    "titleLead": "MSC",
+    "titleTail": "Seaview",
+    "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
+    "tagline": "O mar acompanha cada momento.",
+    "assets": {
+      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/silhouette_ship_seaview_03.jpg?bc=transparent&as=1&mh=465&mw=1920&hash=2F5B0C8A0B3490119731B14D6B27F351",
+      "p28": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_waterfront_boardwalk_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=EF43861F765908950259E186DF1E5942",
+      "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236",
+      "p48": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/entertainment/sv_entertainment_metropolitan_theatre_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=830F1667E66E2E2CD57F1D17C15955F0",
+      "p50": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/entertainment/sv_entertainment_mini_juniors_club_05.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=853ABC83CF1AACD699D9B4064ABD6469",
+      "p55": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/restaurant-and-bars/restaurants/sv_ocean-point-restaurant-buffet.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=9C6330F3FB59748949CA308E0E9479E9",
+      "p31": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_msc_aurea_spa_06.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=D9F629B3B114285815650D1C6BDE66AB",
+      "p39": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/tile-image/new/sv-sd.png?bc=transparent&as=1&mh=433&mw=700&hash=111E590065DB42131A81013C11FEC584",
+      "p43": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_balcony_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=B6D8921037E9B40A3BDF91C5D671528C",
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_inside_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=0F3144A32583AECE015AFAB1B61F9D1C",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_ocean_view_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=2FF2AEA105E4167924017F72BD34AA6B"
+    },
+    "hero": {
+      "image": "hero",
+      "video": null,
+      "alt": "Vista da popa e piscina do MSC Seaview",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Explore as imagens do navio",
+      "videoAria": "Ver fotos do MSC Seaview"
+    },
+    "tiles": [
+      {
+        "photo": "p28",
+        "alt": "Promenade externa",
+        "label": "Promenade externa"
+      },
+      {
+        "photo": "p26",
+        "alt": "Piscina na popa",
+        "label": "Piscina na popa"
+      },
+      {
+        "photo": "p48",
+        "alt": "Metropolitan Theatre",
+        "label": "Metropolitan Theatre"
+      }
+    ],
+    "albumTile": {
+      "image": "p43",
+      "alt": "Varanda · imagem ilustrativa"
+    },
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "p24",
+        "label": "MSC Seaview",
+        "category": "Exterior"
+      },
+      {
+        "key": "p28",
+        "label": "Promenade externa",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p26",
+        "label": "Piscina na popa",
+        "category": "Lazer"
+      },
+      {
+        "key": "p48",
+        "label": "Metropolitan Theatre",
+        "category": "Lazer"
+      },
+      {
+        "key": "p50",
+        "label": "Clube infantil",
+        "category": "Lazer"
+      },
+      {
+        "key": "p55",
+        "label": "Ocean Point Restaurant & Buffet",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "p31",
+        "label": "MSC Aurea Spa",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p39",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p43",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Exterior",
+      "Ambientes",
+      "Lazer",
+      "Gastronomia",
+      "Cabines"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O MSC SEAVIEW",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "A promenade externa convida a caminhar e encontrar um novo ângulo do horizonte.",
+      "stats": [
+        {
+          "value": "5.079",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "2.026",
+          "label": "Cabines"
+        },
+        {
+          "value": "323 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "153.516",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Metropolitan Theatre faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p28",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Metropolitan Theatre",
+            "Promenade externa",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p55",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Ocean Point",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p31",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "MSC Aurea Spa",
+            "Confira horários e condições de acesso.",
+            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "cabin-interna",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "cabin-externa",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p43",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "p39",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
+      "homePortEyebrow": "SANTOS / BALNEÁRIO CAMBORIÚ / BUENOS AIRES",
+      "homePortText": "Portos de embarque variam conforme a saída.",
+      "regions": [],
+      "regionRules": [],
+      "fallbackRegion": "América do Sul",
+      "coordinates": {},
+      "feed": {
+        "checkedAt": "2026-11-06",
+        "from": "2026-10-01",
+        "to": "2027-04-30",
+        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
+        "sailings": []
+      },
+      "geography": "",
+      "summaries": [
+        {
+          "title": "Brasil, Argentina e Uruguai",
+          "duration": "7 e 8 noites",
+          "text": "Santos, Balneário Camboriú ou Buenos Aires; destinos variam por saída.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        },
+        {
+          "title": "Minicruzeiros",
+          "duration": "3 noites",
+          "text": "Santos; visitas alternadas a Búzios e Balneário Camboriú.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "MSC Seaview",
+      "facts": [
+        {
+          "value": "5.079",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "2.026",
+          "label": "Cabines"
+        },
+        {
+          "value": "323 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "153.516",
+          "label": "Arqueação bruta (GT)"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        }
+      ],
+      "paragraphs": [
+        "5.079 · Hóspedes — capacidade publicada",
+        "2.026 · Cabines",
+        "323 m · Comprimento",
+        "153.516 · Arqueação bruta (GT)"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview/cabins-suites"
+      }
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview"
+  },
+  {
+    "lineSlug": "costa",
+    "shipSlug": "costa-diadema",
+    "lineName": "Costa Cruzeiros",
+    "shipName": "Costa Diadema",
+    "titleLead": "Costa",
+    "titleTail": "Diadema",
+    "eyebrow": "CRUZEIROS / COSTA / TEMPORADA 2026–2027",
+    "tagline": "Um toque italiano nos seus dias de mar.",
+    "assets": {
+      "p30": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Ship_desktop_1680x786_diadema_05.jpg",
+      "p31": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Img_grande_Diadema_1476x1476.jpg",
+      "p32": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Img_piccola_Diadema_528x516.jpg",
+      "p48": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Suite_Desktop_1392x636.jpg",
+      "p49": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Balcone_Desktop_1392x636.jpg",
+      "p50": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Esterna_Desktop_1392x636.jpg",
+      "p51": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Interna_Desktop_1392x636.jpg",
+      "p108": "https://edam-media.costa.it/media_guid/18/82/b9fa5363-cef5-4f6c-8bb9-de2dd7a1e82e/5dd4e133-48d0-4f38-b18e-ae5756632f56.jpg",
+      "p110": "https://edam-media.costa.it/media_guid/6/6/43022174-a885-4883-8ad5-e4e831c3da7b/439f614d-53bf-4cae-bf9c-ec49920a20c4.jpg",
+      "p111": "https://edam-media.costa.it/media_guid/5/5/00b556b0-5dc2-4c08-bbfe-89dfba841762/847c069f-71e3-4f26-ac6e-e8f78634904d.jpg",
+      "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Ship_desktop_1680x786_diadema_05.jpg"
+    },
+    "hero": {
+      "image": "hero",
+      "video": null,
+      "alt": "Imagem de divulgação do Costa Diadema",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Explore as imagens do navio",
+      "videoAria": "Ver fotos do Costa Diadema"
+    },
+    "tiles": [
+      {
+        "photo": "p31",
+        "alt": "Área de piscina do Costa Diadema",
+        "label": "Piscinas"
+      },
+      {
+        "photo": "p32",
+        "alt": "Vida a bordo do Costa Diadema",
+        "label": "Vida a bordo"
+      },
+      {
+        "photo": "p108",
+        "alt": "Teatro · imagem de referência da companhia",
+        "label": "Espetáculos"
+      }
+    ],
+    "albumTile": {
+      "image": "p111",
+      "alt": "Squok Club · imagem de referência da companhia"
+    },
+    "credit": "Imagens: Costa Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "p30",
+        "label": "Costa Diadema",
+        "category": "Exterior"
+      },
+      {
+        "key": "p31",
+        "label": "Área de piscina do Costa Diadema",
+        "category": "Lazer"
+      },
+      {
+        "key": "p32",
+        "label": "Vida a bordo do Costa Diadema",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p48",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p49",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p50",
+        "label": "Externa · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p51",
+        "label": "Interna · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p108",
+        "label": "Teatro · imagem de referência da companhia",
+        "category": "Lazer"
+      },
+      {
+        "key": "p110",
+        "label": "Pummid'Oro Pizzeria · imagem de referência da companhia",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p111",
+        "label": "Squok Club · imagem de referência da companhia",
+        "category": "Lazer"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Exterior",
+      "Lazer",
+      "Ambientes",
+      "Cabines"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O COSTA DIADEMA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "Da conversa no bar aos espetáculos, reserve espaço para aproveitar também o caminho.",
+      "stats": [
+        {
+          "value": "756",
+          "label": "Cabines com varanda"
+        },
+        {
+          "value": "11",
+          "label": "Piscinas + hidromassagens"
+        },
+        {
+          "value": "8",
+          "label": "Restaurantes"
+        },
+        {
+          "value": "11",
+          "label": "Bares"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Teatro Emerald faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p108",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Teatro Emerald",
+            "Áreas de piscina",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p110",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Carlsberg Country Rock Club",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p32",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "Áreas externas para relaxar",
+            "Confira horários e condições de acesso.",
+            "Serviços e bebidas dependem do pacote contratado."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "p51",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "p50",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p49",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "p48",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Explore as saídas documentadas para a temporada 2026/2027. Datas e escalas estão sujeitas a alteração pela companhia; a agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SAÍDA DE SANTOS",
+      "homePortText": "Embarque e desembarque em Santos.",
+      "regions": [
+        "Costa brasileira",
+        "Argentina e Uruguai"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Angra dos Reis": [
+          -23.01,
+          -44.32
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Cabo Frio": [
+          -22.88,
+          -42.02
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ]
+      },
+      "feed": {
+        "checkedAt": "2026-11-07",
+        "from": "2026-11-23",
+        "to": "2027-04-01",
+        "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2026-11-23",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-11-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-11-29",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-03",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-06",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-10",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-13",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-17",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-20",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-27",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-03",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-10",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-17",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-24",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-31",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-07",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-14",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-21",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-28",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-07",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-14",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-21",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-25",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-28",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-04-01",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
+      "summaries": [
+        {
+          "title": "Rio da Prata",
+          "duration": "7 noites",
+          "text": "Santos ou Itajaí, com Buenos Aires e Montevidéu.",
+          "source": "https://www.costacruzeiros.com/temporada-26-27.html"
+        },
+        {
+          "title": "Minicruzeiros",
+          "duration": "3 e 4 noites",
+          "text": "Santos e Itajaí, com Ilhabela nas saídas anunciadas.",
+          "source": "https://www.costacruzeiros.com/temporada-26-27.html"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "Costa Diadema",
+      "facts": [
+        {
+          "value": "756",
+          "label": "Cabines com varanda"
+        },
+        {
+          "value": "11",
+          "label": "Piscinas + hidromassagens"
+        },
+        {
+          "value": "8",
+          "label": "Restaurantes"
+        },
+        {
+          "value": "11",
+          "label": "Bares"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        }
+      ],
+      "paragraphs": [
+        "756 · Cabines com varanda",
+        "11 · Piscinas + hidromassagens",
+        "8 · Restaurantes",
+        "11 · Bares"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.costacruzeiros.com/navios/diadema.html"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.costacruzeiros.com/temporada-26-27.html"
+      },
+      {
+        "label": "Catálogo oficial Costa 2026/2027 · edição março/2026",
+        "url": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file"
+      }
+    ],
+    "creditUrl": "https://www.costacruzeiros.com/navios/diadema.html"
+  },
+  {
+    "lineSlug": "costa",
+    "shipSlug": "costa-serena",
+    "lineName": "Costa Cruzeiros",
+    "shipName": "Costa Serena",
+    "titleLead": "Costa",
+    "titleTail": "Serena",
+    "eyebrow": "CRUZEIROS / COSTA / TEMPORADA 2026–2027",
+    "tagline": "Uma nova cena a cada dia.",
+    "assets": {
+      "suite": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_GRAN_SUITE_MAIN-CostaSerenaPostDryDock2025_0079_1392x636.jpg",
+      "balcony": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_BALCONY_CABIN_MAIN_CostaSerenaPostDryDock2025_0212_1392x636.jpg",
+      "ocean": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_SEA_VIEW_CABIN_MAIN_MAIN-CostaSerenaPostDryDock2025_0266_1392x636.jpg",
+      "interior": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_INSIDE_CABIN_MAIN-CostaSerenaPostDryDock2025_0633_1392x636.jpg",
+      "p105": "https://edam-media.costa.it/media_guid/0/0/a9c8b6d3-3028-494d-97b0-bb7558adbd05/58135a60-09a8-4daa-acd9-4c16648a3407.jpg",
+      "p108": "https://edam-media.costa.it/media_guid/19/83/ca8287fe-ec25-46ff-82ff-a7e69f7fa44b/4ca1b6b8-b8c3-43d3-8f34-f6cb3dd58d5a.jpg",
+      "p109": "https://edam-media.costa.it/media_guid/24/88/598763fe-a491-4304-a4e4-3c34c94f4528/6bac8a59-6263-4d0f-a0f8-606771121aff.jpg",
+      "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/images/people/promocao-vazia/C446_Reception_Costa_serena.jpg.image.1476.1476.high.jpg"
+    },
+    "hero": {
+      "image": "hero",
+      "video": null,
+      "alt": "Recepção do Costa Serena · divulgação",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Explore as imagens do navio",
+      "videoAria": "Ver fotos do Costa Serena"
+    },
+    "tiles": [
+      {
+        "photo": "balcony",
+        "alt": "Varanda · imagem ilustrativa",
+        "label": "Cabines"
+      },
+      {
+        "photo": "p105",
+        "alt": "Pummid'Oro Pizzeria · imagem de referência da companhia",
+        "label": "Pizzeria"
+      },
+      {
+        "photo": "p109",
+        "alt": "Teatro · imagem de referência da companhia",
+        "label": "Espetáculos"
+      }
+    ],
+    "albumTile": {
+      "image": "p109",
+      "alt": "Teatro · imagem de referência da companhia"
+    },
+    "credit": "Imagens: Costa Cruzeiros · Divulgação.",
+    "photos": [
+      {
+        "key": "hero",
+        "label": "Recepção do Costa Serena · divulgação",
+        "category": "Ambientes"
+      },
+      {
+        "key": "suite",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "balcony",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "ocean",
+        "label": "Externa · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "interior",
+        "label": "Interna · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p105",
+        "label": "Pummid'Oro Pizzeria · imagem de referência da companhia",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p108",
+        "label": "Apollo Grand Bar · imagem de referência da companhia",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p109",
+        "label": "Teatro · imagem de referência da companhia",
+        "category": "Lazer"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Ambientes",
+      "Cabines",
+      "Lazer"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O COSTA SERENA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "O Serena renovado reúne referências à mitologia com cores e ambientes de inspiração pop.",
+      "stats": [
+        {
+          "value": "571",
+          "label": "Cabines com varanda"
+        },
+        {
+          "value": "7",
+          "label": "Piscinas + hidromassagens"
+        },
+        {
+          "value": "8",
+          "label": "Restaurantes e snack bars"
+        },
+        {
+          "value": "9",
+          "label": "Bares e lounges"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Teatro faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p109",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Teatro",
+            "Lido Sole",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p105",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Pummid’Oro Pizzeria",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "balcony",
+          "title": "Seu espaço para descansar.",
+          "text": "Entre uma descoberta e outra, aproveite o conforto da sua cabine.",
+          "items": [
+            "Imagem ilustrativa da categoria com varanda",
+            "Configuração e vista variam conforme a cabine.",
+            "Consulte as categorias disponíveis para sua saída."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "interior",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "ocean",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "balcony",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Suíte",
+          "image": "suite",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Explore as saídas documentadas para a temporada 2026/2027. Datas e escalas estão sujeitas a alteração pela companhia; a agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SAÍDA DO RIO DE JANEIRO",
+      "homePortText": "Embarque e desembarque no Rio de Janeiro.",
+      "regions": [
+        "Argentina e Uruguai"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Angra dos Reis": [
+          -23.01,
+          -44.32
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Cabo Frio": [
+          -22.88,
+          -42.02
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ]
+      },
+      "feed": {
+        "checkedAt": "2026-11-07",
+        "from": "2027-01-01",
+        "to": "2027-03-04",
+        "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2027-01-01",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilha Grande",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-10",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-19",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-27",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilha Grande",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-05",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Buenos Aires",
+              "Montevidéu",
+              "Punta del Este",
+              "Balneário Camboriú",
+              "Ilha Grande",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-14",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilha Grande",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-23",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Angra dos Reis",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-04",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
+      "summaries": [
+        {
+          "title": "Rio da Prata",
+          "duration": "8 e 9 noites",
+          "text": "Embarque no Rio. Buenos Aires, Montevidéu e escalas brasileiras variam por saída.",
+          "source": "https://www.costacruzeiros.com/temporada-26-27.html"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "Costa Serena",
+      "facts": [
+        {
+          "value": "571",
+          "label": "Cabines com varanda"
+        },
+        {
+          "value": "7",
+          "label": "Piscinas + hidromassagens"
+        },
+        {
+          "value": "8",
+          "label": "Restaurantes e snack bars"
+        },
+        {
+          "value": "9",
+          "label": "Bares e lounges"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        }
+      ],
+      "paragraphs": [
+        "571 · Cabines com varanda",
+        "7 · Piscinas + hidromassagens",
+        "8 · Restaurantes e snack bars",
+        "9 · Bares e lounges"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://www.costacruzeiros.com/navios/serena.html"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://www.costacruzeiros.com/temporada-26-27.html"
+      },
+      {
+        "label": "Catálogo oficial Costa 2026/2027 · edição março/2026",
+        "url": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file"
+      }
+    ],
+    "creditUrl": "https://www.costacruzeiros.com/navios/serena.html"
+  },
+  {
+    "lineSlug": "corazul",
+    "shipSlug": "buenavista",
+    "lineName": "Corazul Cruceros",
+    "shipName": "Buenavista",
+    "titleLead": "Corazul",
+    "titleTail": "Buenavista",
+    "eyebrow": "CRUZEIROS / CORAZUL / TEMPORADA 2026–2027",
+    "tagline": "Um novo jeito de encontrar o mar.",
+    "assets": {
+      "p13": "https://corazulcruceros.es/wp-content/uploads/2026/01/New_Buenavista_low_2.jpg",
+      "p19": "https://corazulcruceros.es/wp-content/uploads/2026/04/Restaurant-1-1-1024x699.jpg",
+      "p17": "https://corazulcruceros.es/wp-content/uploads/2026/02/Gym-2-1024x699.jpg",
+      "p51": "https://corazulcruceros.es/wp-content/uploads/2025/07/Kids-1-1024x699.jpg",
+      "p55": "https://corazulcruceros.es/wp-content/uploads/2025/07/Teens_01-1024x570.jpg",
+      "p63": "https://corazulcruceros.es/wp-content/uploads/2025/07/interior1-2.jpeg",
+      "p67": "https://corazulcruceros.es/wp-content/uploads/2025/09/ocean_view-1024x683.jpg",
+      "p79": "https://corazulcruceros.es/wp-content/uploads/2026/04/Balcony.jpg",
+      "p97": "https://corazulcruceros.es/wp-content/uploads/2026/04/Suite1.jpg",
+      "p82": "https://corazulcruceros.es/wp-content/uploads/2025/07/mini-suite.jpg",
+      "hero": "https://corazulcruceros.es/wp-content/uploads/2026/01/New_Buenavista_low_2.jpg",
+      "video": "https://corazulcruceros.es/wp-content/uploads/2026/01/Sailing2.mp4"
+    },
+    "hero": {
+      "image": "hero",
+      "video": "video",
+      "alt": "Imagem de divulgação do Buenavista",
+      "caption": "Seu próximo horizonte começa aqui.",
+      "captionSmall": "Assista ao vídeo do navio",
+      "videoAria": "Assistir ao vídeo do Buenavista"
+    },
+    "tiles": [
+      {
+        "photo": "p19",
+        "alt": "Restaurante · imagem de divulgação",
+        "label": "Restaurante"
+      },
+      {
+        "photo": "p17",
+        "alt": "Academia · imagem de divulgação",
+        "label": "Academia"
+      },
+      {
+        "photo": "p51",
+        "alt": "Espaço infantil · imagem de divulgação",
+        "label": "Espaço infantil"
+      }
+    ],
+    "albumTile": {
+      "image": "p82",
+      "alt": "Mini-suíte · imagem ilustrativa"
+    },
+    "credit": "Imagens: Corazul Cruceros · Divulgação.",
+    "photos": [
+      {
+        "key": "p13",
+        "label": "Buenavista · imagem de divulgação",
+        "category": "Exterior"
+      },
+      {
+        "key": "p19",
+        "label": "Restaurante · imagem de divulgação",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "p17",
+        "label": "Academia · imagem de divulgação",
+        "category": "Ambientes"
+      },
+      {
+        "key": "p51",
+        "label": "Espaço infantil · imagem de divulgação",
+        "category": "Lazer"
+      },
+      {
+        "key": "p55",
+        "label": "Espaço juvenil · imagem de divulgação",
+        "category": "Lazer"
+      },
+      {
+        "key": "p63",
+        "label": "Interna · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p67",
+        "label": "Externa · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p79",
+        "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p97",
+        "label": "Suíte · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "p82",
+        "label": "Mini-suíte · imagem ilustrativa",
+        "category": "Cabines"
+      }
+    ],
+    "photoCategories": [
+      "Todas",
+      "Exterior",
+      "Gastronomia",
+      "Ambientes",
+      "Lazer",
+      "Cabines"
+    ],
+    "about": {
+      "eyebrow": "01 / CONHEÇA O BUENAVISTA",
+      "titleA": "Seu tempo no mar.",
+      "titleB": "Do seu jeito.",
+      "text": "Conheça a proposta da Corazul e escolha como dividir seus dias entre descanso e descobertas.",
+      "stats": [
+        {
+          "value": "2.140",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "939",
+          "label": "Cabines"
+        },
+        {
+          "value": "260 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "13",
+          "label": "Conveses"
+        }
+      ],
+      "techTitle": "O navio em detalhes",
+      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techButton": "Ver ficha técnica do navio",
+      "why": [
+        {
+          "title": "Uma noite diferente",
+          "text": "Teatro e cinema faz parte das opções a bordo."
+        },
+        {
+          "title": "Tempo para descobrir",
+          "text": "Alterne as escalas com momentos para conhecer o navio."
+        },
+        {
+          "title": "Viaje em companhia",
+          "text": "Escolha atividades e horários que combinem com seu grupo."
+        },
+        {
+          "title": "Espaço para desacelerar",
+          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+        }
+      ]
+    },
+    "experiences": {
+      "eyebrow": "02 / A VIDA A BORDO",
+      "titleA": "O caminho também ",
+      "titleB": "faz parte.",
+      "tabs": [
+        {
+          "key": "fun",
+          "label": "Diversão e espetáculos",
+          "image": "p19",
+          "title": "Reserve a noite para uma nova experiência.",
+          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "items": [
+            "Teatro e cinema",
+            "Espaços juvenis",
+            "Atividades, horários e restrições variam por saída."
+          ]
+        },
+        {
+          "key": "food",
+          "label": "Sabores a bordo",
+          "image": "p19",
+          "title": "Um encontro à mesa.",
+          "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
+          "items": [
+            "Restaurantes a bordo",
+            "Confira os restaurantes incluídos na sua tarifa.",
+            "Especialidades, reservas e bebidas dependem do pacote contratado."
+          ]
+        },
+        {
+          "key": "rest",
+          "label": "Tempo para você",
+          "image": "p17",
+          "title": "Uma pausa entre as descobertas.",
+          "text": "Organize o dia com espaço para cuidar de você.",
+          "items": [
+            "Academia",
+            "Confira horários e condições de acesso.",
+            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+          ]
+        }
+      ]
+    },
+    "included": {
+      "title": "O que considerar na sua proposta?",
+      "items": [
+        {
+          "title": "Hospedagem e refeições",
+          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+        },
+        {
+          "title": "Bebidas e serviços",
+          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+        },
+        {
+          "title": "Valor final da viagem",
+          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+        }
+      ]
+    },
+    "cabins": {
+      "eyebrow": "03 / SEU LUGAR NO MAR",
+      "titleA": "Escolha como quer ",
+      "titleB": "descansar.",
+      "text": "A categoria e a localização da cabine fazem parte da experiência. A agência ajuda a comparar.",
+      "items": [
+        {
+          "name": "Interna",
+          "image": "p63",
+          "lead": "Um lugar para recarregar as energias.",
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+        },
+        {
+          "name": "Externa",
+          "image": "p67",
+          "lead": "A luz do dia também faz parte da viagem.",
+          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+        },
+        {
+          "name": "Varanda",
+          "image": "p79",
+          "lead": "Um momento ao ar livre, só seu.",
+          "detail": "Área externa privativa. Tamanho, vista e configuração variam conforme a categoria."
+        },
+        {
+          "name": "Mini-suíte",
+          "image": "p82",
+          "lead": "Um pouco mais de espaço para descansar.",
+          "detail": "Consulte dimensões, acomodação e benefícios da mini-suíte escolhida."
+        },
+        {
+          "name": "Suíte",
+          "image": "p97",
+          "lead": "Mais possibilidades para a sua estadia.",
+          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+        }
+      ],
+      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria."
+    },
+    "routes": {
+      "eyebrow": "04 / NOVOS HORIZONTES",
+      "titleA": "Encontre a sua ",
+      "titleB": "próxima viagem.",
+      "text": "Explore as saídas documentadas para a temporada 2026/2027. Datas e escalas estão sujeitas a alteração pela companhia; a agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SAÍDA DE SANTOS",
+      "homePortText": "Embarque e desembarque em Santos nas saídas detalhadas abaixo.",
+      "regions": [
+        "Costa brasileira"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Angra dos Reis": [
+          -23.01,
+          -44.32
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Cabo Frio": [
+          -22.88,
+          -42.02
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ]
+      },
+      "feed": {
+        "checkedAt": "2026-11-07",
+        "from": "2026-11-09",
+        "to": "2027-03-26",
+        "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2026-11-09",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-13",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-16",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-24",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-ilhabela/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-27",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-30",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-04",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-07",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-11",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-14",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-18",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Cabo Frio",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-cabo-frio/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-21",
+            "n": 5,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/natal/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-26",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-01",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-12",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-15",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-19",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-22",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-01",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-05",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-08",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-12",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-15",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-19",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-22",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
+      "summaries": [
+        {
+          "title": "Litoral brasileiro",
+          "duration": "Consulte as saídas",
+          "text": "Solicite à agência os roteiros atuais, datas e condições de operação para o período desejado.",
+          "source": "https://corazulcruceros.es/pt-br/o-navio/"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "05 / A VIAGEM COMEÇA NA CONVERSA",
+      "titleA": "Agora, imagine",
+      "titleB": "você a bordo.",
+      "textA": "Conte quando e com quem quer viajar.",
+      "textB": "A agência ajuda a encontrar a melhor combinação."
+    },
+    "tech": {
+      "title": "Ficha técnica do navio",
+      "subtitle": "Buenavista",
+      "facts": [
+        {
+          "value": "2.140",
+          "label": "Hóspedes — capacidade publicada"
+        },
+        {
+          "value": "939",
+          "label": "Cabines"
+        },
+        {
+          "value": "260 m",
+          "label": "Comprimento"
+        },
+        {
+          "value": "13",
+          "label": "Conveses"
+        }
+      ],
+      "notes": [
+        {
+          "title": "Antes de escolher",
+          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+        },
+        {
+          "title": "Programação e operação",
+          "text": "Confirme com a agência a programação atual e quais instalações estarão disponíveis na saída escolhida."
+        }
+      ],
+      "paragraphs": [
+        "2.140 · Hóspedes — capacidade publicada",
+        "939 · Cabines",
+        "260 m · Comprimento",
+        "13 · Conveses"
+      ]
+    },
+    "sources": [
+      {
+        "label": "Conheça o navio no site oficial",
+        "url": "https://corazulcruceros.es/pt-br/o-navio/"
+      },
+      {
+        "label": "Programação da temporada",
+        "url": "https://corazulcruceros.es/pt-br/o-navio/"
+      },
+      {
+        "label": "Roteiro oficial · mini-buzios",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/"
+      },
+      {
+        "label": "Roteiro oficial · mini-camboriu",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/"
+      },
+      {
+        "label": "Roteiro oficial · mini-ilhabela",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-ilhabela/"
+      },
+      {
+        "label": "Roteiro oficial · mini-cabo-frio",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-cabo-frio/"
+      },
+      {
+        "label": "Roteiro oficial · natal",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/natal/"
+      }
+    ],
+    "creditUrl": "https://corazulcruceros.es/pt-br/o-navio/"
+  }
+]
