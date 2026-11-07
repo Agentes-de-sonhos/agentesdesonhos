@@ -81,7 +81,6 @@ function SortableColumn({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stage.id,
   });
-  const { isMaximized } = useKanbanMaximize();
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
