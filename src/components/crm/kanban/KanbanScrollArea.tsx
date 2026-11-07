@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useRef } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useKanbanMaximize } from "./KanbanMaximizeContext";
 
@@ -29,6 +29,23 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
   );
 
   const { isMaximized } = useKanbanMaximize();
+
+  // Fora do modo maximizado, o quadro vai até a borda inferior da janela:
+  // a barra de rolagem horizontal fica no último pixel útil da tela.
+  const [fitHeight, setFitHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (isMaximized) return;
+    const measure = () => {
+      const el = innerRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      setFitHeight(Math.max(320, Math.floor(window.innerHeight - top)));
+    };
+    measure();
+    const t = window.setTimeout(measure, 300);
+    window.addEventListener("resize", measure);
+    return () => { window.clearTimeout(t); window.removeEventListener("resize", measure); };
+  }, [isMaximized]);
 
   const stopDrag = useCallback(() => {
     dragging.current = false;
@@ -69,13 +86,13 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
         "snap-x snap-mandatory md:snap-none",
         isMaximized
           ? "h-full min-h-0 flex-1"
-          : "min-h-[calc(100dvh-15rem)] max-h-[calc(100dvh-15rem)]",
+          : fitHeight == null && "min-h-[calc(100dvh-15rem)] max-h-[calc(100dvh-15rem)]",
         className
       )}
 
       // A combinação explícita evita que duas utilities touch-pan-* se
       // sobrescrevam no CSS e acabem liberando somente um dos eixos.
-      style={{ scrollbarWidth: "thin", touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
+      style={{ ...(!isMaximized && fitHeight != null ? { height: fitHeight } : {}), scrollbarWidth: "thin", touchAction: "pan-x pan-y", WebkitOverflowScrolling: "touch" }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={stopDrag}
