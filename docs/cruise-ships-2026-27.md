@@ -18,16 +18,44 @@ Implementação no componente compartilhado do Harmony. Sem chamadas de constru�
 - Galeria por categoria, ficha técnica, experiências, cabines e formulário existente de solicitação de cruzeiros.
 - Fontes oficiais consultadas em 06/11/2026 registradas nos dados e em `cruise-ships-2026-27-media.json`. Imagens remotas; não se presume licença comercial por estarem disponíveis publicamente.
 - Números e infraestrutura usam a ficha de cada companhia. Musica explicita a renovação anunciada e a possibilidade de a ficha preceder a configuração final.
-- Opções de temporada são resumos oficiais, sem datas, sequência de portos ou mapas inventados. Os feeds de saídas permanecem vazios até importação de calendários verificados. O explorador original do Harmony permanece intacto.
+- Opções MSC usam resumos oficiais enquanto faltam calendários verificáveis. Costa e Corazul possuem feeds selecionados de saídas documentadas, detalhados abaixo. O explorador original do Harmony permanece intacto.
 - Imagens de categorias/ambientes genéricos são identificadas como ilustrativas/de referência. Cabines sem imagem verificada recebem apresentação textual.
 - Vídeo opcional: nunca mostra um player sem mídia; galerias de fotos circulam sem entrar em um vídeo inexistente.
 - Trocar de navio reinicia o estado da página. O interesse no roteiro sazonal é enviado no resumo e nos detalhes do pedido existente, sem mudar o destino do tenant.
 
 ## Validação e limites
 
-- 17 testes de regressão: Harmony, oito novas páginas, integridade das mídias e navegação da galeria sem vídeo.
+- 18 testes de regressão: Harmony, oito novas páginas, integridade das mídias, feeds de saídas e navegação da galeria sem vídeo.
 - Build Vite passou; avisos preexistentes de CSS e tamanho de chunks.
 - Imagens selecionadas conferidas por download e folhas de contato; referências que responderam 403 não foram utilizadas.
-- A prévia gerenciada não iniciou: `Failed to load native binding` em `@swc/core`. Revisão responsiva no navegador ainda pendente.
+- O servidor de desenvolvimento da prévia falhou em `@swc/core`. Revisão visual realizada em prévia estática compilada do componente real; escopo detalhado abaixo.
 - Confirmar autorização comercial das mídias antes de colocar essas páginas em produção. Este desenvolvimento é entregue em PR de rascunho, sem merge e sem publicação automática.
-- Pendências para equivalência completa com o Harmony: calendários/mapas por saída, fotos das categorias ainda sem mídia e revisão visual responsiva.
+- Pendências de conteúdo: calendários/mapas MSC, saídas com divergências nas fontes e direitos de uso comercial das fotos.
+
+## Continuação — 07/11/2026
+
+- Todas as 33 categorias de cabine agora têm imagem. Foram adicionadas dez imagens das páginas oficiais `cabins-suites` da MSC, conferidas por download e folha de contato. A interna do Divina usa a referência do Preziosa que a própria MSC apresenta nessa página, identificada no texto e na galeria; não é apresentada como fotografia do Divina. A suíte do Musica é referência do Yacht Club após a renovação.
+- 60 saídas com datas e ordem de portos: Diadema 25, Serena 8 e Buenavista 27. O explorador existente já suporta os novos feeds sem duplicação de componentes. Formulário recebe a combinação, a ordem e a data escolhidas.
+- Costa: catálogo oficial da Costa Extra, edição março/2026, páginas 6 e 8. A data de consulta não torna esse catálogo um inventário em tempo real. Seleção de embarques em Santos (Diadema) e Rio (Serena); travessias, outros portos de embarque e o trecho Serena de 13/03 com ano contraditório não importados. `Agra dos Reis` no catálogo foi normalizado para Angra dos Reis. Repetições reais de Ilhabela foram preservadas.
+- Corazul: listagem e páginas detalhadas atuais em português, saídas futuras a partir de 07/11. Mini Búzios, Mini Camboriú, Mini Ilhabela, Mini Cabo Frio e Natal importados. O mapa exibe somente portos, sem inventar dias de navegação ou horários.
+- A geografia local em `public/maps/cruise-south-america.geojson` é uma seleção dos países da América do Sul de Natural Earth, escala 1:110 milhões. Fonte: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson . Dados geográficos Natural Earth em domínio público; essa licença não se aplica às fotos dos navios. Coordenadas são aproximações da cidade/porto para visualização esquemática, não terminais nem rotas de navegação.
+
+### Divergências preservadas fora do calendário
+
+| Produto | Motivo |
+| --- | --- |
+| Buenavista Mini Búzios e Ilhabela · 20/11/2026 | Página detalhada menciona Cabo Frio e duplica o dia 4; título e sequência não concordam. |
+| Buenavista Nordeste · 04, 11, 18 e 25/01/2027 | Produto anunciado com sete noites termina no dia 7 em Ilhabela no detalhamento, sem retorno documentado a Santos. |
+| Buenavista Carnaval · 05/02/2027 | Mesmo problema de duração/porto final do Nordeste. |
+| Buenavista Réveillon · 30/12/2026 | Texto coloca a celebração de Réveillon no dia 3, incompatível com a data de embarque. |
+| Costa Serena · 13/03 | O catálogo imprime 2026 para esse trecho em meio à programação de 2027. |
+
+Não foi possível obter calendários MSC completos e atuais pelas páginas de itinerários: respostas sem saídas, conteúdo dinâmico incompleto e brochuras anteriores à mudança de programação de Divina/Musica/Seaview. Os cinco navios mantêm resumos da temporada do comunicado oficial de 31/08/2026. Para completar as datas/mapas MSC, falta uma exportação ou tabela oficial atualizada de saídas, com sequência de portos. Não transpor automaticamente datas de um navio para outro.
+
+### Verificação atual
+
+- Build Vite aprovado novamente após os novos feeds e imagens; avisos preexistentes de CSS e tamanho de chunks.
+- 18 testes passaram: regressão Harmony, oito páginas, galerias, seleção de roteiro/datado, fontes e coordenadas dos feeds e exclusão das inconsistências conhecidas.
+- Revisão visual do componente compartilhado em prévia estática de QA (serviços externos substituídos por mocks que bloqueiam envio): oito páginas renderizadas no desktop; layout em iframe de 390 px (375 px úteis) conferido no Serena sem overflow horizontal; navegação, mapa e transferência de seleção ao formulário conferidos no Diadema; mapa do Buenavista conferido. Isso não equivale a testar entrega real de leads nem o cabeçalho/rodapé de cada tenant.
+- O erro nativo do servidor de desenvolvimento continua restrito à infraestrutura de preview. A revisão estática usa o componente real compilado, sem alteração na configuração de produção.
+- As pendências anteriores de fotos de cabine e revisão visual básica foram resolvidas. Permanecem os calendários MSC, divergências explicitadas acima e confirmação do direito de uso comercial das mídias antes de produção. PR mantido em rascunho.

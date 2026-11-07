@@ -18,7 +18,9 @@
       "p37": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_grand_suite_with_terrace_and_whirlpool_sxj_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=C8AD9DF33A39C9209AAB651364F21542",
       "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_balcony_br1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=6939A0BCC9D5EE8C972B3CC6073163DF",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet//Virtuosa/MSC_VIRTUOSA_MSC19001627_desk",
-      "video": "https://assets.msccruises.com/is/content/msccruises/MSC_Virtuosa_Ship_Visit_1920x540_v1"
+      "video": "https://assets.msccruises.com/is/content/msccruises/MSC_Virtuosa_Ship_Visit_1920x540_v1",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_interior_ir1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=869C9D324713FD2A81F7EA6D161AA35A",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_ocean_view_or1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=374DE9AC3CB76B2DA72B916FFAE81AB3"
     },
     "hero": {
       "image": "hero",
@@ -95,6 +97,16 @@
         "key": "hero",
         "label": "Vista do MSC Virtuosa",
         "category": "Exterior"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
+        "category": "Cabines"
       }
     ],
     "photoCategories": [
@@ -218,13 +230,13 @@
       "items": [
         {
           "name": "Interna",
-          "image": null,
+          "image": "cabin-interna",
           "lead": "Um lugar para recarregar as energias.",
           "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
         },
         {
           "name": "Externa",
-          "image": null,
+          "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
           "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
         },
@@ -241,7 +253,7 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
@@ -326,6 +338,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa/cabins-suites"
       }
     ]
   },
@@ -346,7 +362,9 @@
       "p46": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/di_restaurant_and_bar_villa_rossa_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=BA80AD667FBE05FE52F2D9F3246F4D56",
       "p35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_suite_with_balcony_11.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=57243A3C1E577C8738274673D45CA00F",
       "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=AC0BA02F022680DB2D1C8368522E6AED",
-      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61"
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/preziosa/cabins/new/desktop/pr-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=85E439EA2BC257C42A26D0BCA5FAC694",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_ocean_view_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=8A76D745F26E7C078658B82774C6D055"
     },
     "hero": {
       "image": "hero",
@@ -412,6 +430,16 @@
       {
         "key": "p38",
         "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · referência MSC Preziosa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
       }
     ],
@@ -536,13 +564,13 @@
       "items": [
         {
           "name": "Interna",
-          "image": null,
+          "image": "cabin-interna",
           "lead": "Um lugar para recarregar as energias.",
-          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
+          "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização. Imagem de referência do MSC Preziosa, utilizada pela MSC na página desta categoria do Divina."
         },
         {
           "name": "Externa",
-          "image": null,
+          "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
           "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
         },
@@ -559,7 +587,7 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
@@ -638,6 +666,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/cabins-suites"
       }
     ]
   },
@@ -661,7 +693,9 @@
       "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_oceanview_03.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=34ED8ABF123B3D9499B2E4E3184FFB4A",
       "p32": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc3-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=B4877EA008C4E12E099CEF099551E4D3",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/Musica/MSC_MUSICA_MSC18015178_desk",
-      "video": "https://msc-cdn.thron.com/delivery/public/video/msc/2ab2fe72-593e-4fd3-9031-a5afc03832d0/lhxtvk/WEBHD/60145_musica_-ship_tour_30sec_1920x540_web"
+      "video": "https://msc-cdn.thron.com/delivery/public/video/msc/2ab2fe72-593e-4fd3-9031-a5afc03832d0/lhxtvk/WEBHD/60145_musica_-ship_tour_30sec_1920x540_web",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_interior_05.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=552183132B561E8BDE06DD8EB653085D",
+      "cabin-suíte": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc1-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=CDE094411A370185A29AD134351192E5"
     },
     "hero": {
       "image": "hero",
@@ -743,6 +777,16 @@
         "key": "hero",
         "label": "Vista do MSC Musica",
         "category": "Exterior"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-suíte",
+        "label": "Suíte MSC Yacht Club · referência da companhia",
+        "category": "Cabines"
       }
     ],
     "photoCategories": [
@@ -866,7 +910,7 @@
       "items": [
         {
           "name": "Interna",
-          "image": null,
+          "image": "cabin-interna",
           "lead": "Um lugar para recarregar as energias.",
           "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
         },
@@ -884,12 +928,12 @@
         },
         {
           "name": "Suíte",
-          "image": null,
-          "lead": "Mais possibilidades para a sua estadia.",
-          "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
+          "image": "cabin-suíte",
+          "lead": "MSC Yacht Club",
+          "detail": "Referência de suíte MSC Yacht Club apresentada pela companhia para o Musica após a renovação. Configuração e categoria dependem da reserva."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
@@ -978,6 +1022,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/cabins-suites"
       }
     ]
   },
@@ -999,7 +1047,9 @@
       "p27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_balinese_massage_02.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=BE8C91BE3F50FCDEB417B47346D6E25F",
       "p51": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_suite_balcony_04.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=05CCE2FE0DD3839333FEB3B05FAF2355",
       "p54": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=65397B6BDCDBAFE86A5F492AAE9385D7",
-      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03"
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/new/desktop/sp-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=459A4806EF6C932F73575B9507524F07",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_ocean_view_07.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=E75E1B413017B9B06C60C4859F9B32C3"
     },
     "hero": {
       "image": "hero",
@@ -1070,6 +1120,16 @@
       {
         "key": "p54",
         "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
       }
     ],
@@ -1194,13 +1254,13 @@
       "items": [
         {
           "name": "Interna",
-          "image": null,
+          "image": "cabin-interna",
           "lead": "Um lugar para recarregar as energias.",
           "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
         },
         {
           "name": "Externa",
-          "image": null,
+          "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
           "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
         },
@@ -1217,7 +1277,7 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
@@ -1296,6 +1356,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida/cabins-suites"
       }
     ]
   },
@@ -1318,7 +1382,9 @@
       "p31": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_msc_aurea_spa_06.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=D9F629B3B114285815650D1C6BDE66AB",
       "p39": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/tile-image/new/sv-sd.png?bc=transparent&as=1&mh=433&mw=700&hash=111E590065DB42131A81013C11FEC584",
       "p43": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_balcony_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=B6D8921037E9B40A3BDF91C5D671528C",
-      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236"
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_inside_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=0F3144A32583AECE015AFAB1B61F9D1C",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_ocean_view_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=2FF2AEA105E4167924017F72BD34AA6B"
     },
     "hero": {
       "image": "hero",
@@ -1394,6 +1460,16 @@
       {
         "key": "p43",
         "label": "Varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-interna",
+        "label": "Interna · imagem ilustrativa da companhia",
+        "category": "Cabines"
+      },
+      {
+        "key": "cabin-externa",
+        "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
       }
     ],
@@ -1518,13 +1594,13 @@
       "items": [
         {
           "name": "Interna",
-          "image": null,
+          "image": "cabin-interna",
           "lead": "Um lugar para recarregar as energias.",
           "detail": "Sem janela para o exterior. Confira ocupação, configuração das camas e localização."
         },
         {
           "name": "Externa",
-          "image": null,
+          "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
           "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
         },
@@ -1541,7 +1617,7 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas publicadas pela companhia; layout, decoração e área variam conforme categoria e cabine. Confirme a configuração na reserva."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
@@ -1626,6 +1702,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+      },
+      {
+        "label": "Cabines e suítes · página oficial MSC",
+        "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview/cabins-suites"
       }
     ]
   },
@@ -1888,27 +1968,400 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "SANTOS / ITAJAÍ",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-06",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "text": "Explore as saídas documentadas para a temporada 2026/2027. Datas e escalas estão sujeitas a alteração pela companhia; a agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SAÍDA DE SANTOS",
+      "homePortText": "Embarque e desembarque em Santos.",
+      "regions": [
+        "Costa brasileira",
+        "Argentina e Uruguai"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Angra dos Reis": [
+          -23.01,
+          -44.32
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Cabo Frio": [
+          -22.88,
+          -42.02
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-07",
+        "from": "2026-11-23",
+        "to": "2027-04-01",
+        "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2026-11-23",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-11-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-11-29",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-03",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-06",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-10",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-13",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-17",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-20",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-27",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-03",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-10",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-17",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-24",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-31",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-07",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-14",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-21",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-28",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-07",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-14",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Buenos Aires",
+              "Montevidéu",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-21",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-25",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-28",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-04-01",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Itajaí",
+              "Santos"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Rio da Prata",
@@ -1973,6 +2426,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.costacruzeiros.com/temporada-26-27.html"
+      },
+      {
+        "label": "Catálogo oficial Costa 2026/2027 · edição março/2026",
+        "url": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file"
       }
     ]
   },
@@ -2221,27 +2678,210 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "RIO DE JANEIRO",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-06",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "text": "Explore as saídas documentadas para a temporada 2026/2027. Datas e escalas estão sujeitas a alteração pela companhia; a agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SAÍDA DO RIO DE JANEIRO",
+      "homePortText": "Embarque e desembarque no Rio de Janeiro.",
+      "regions": [
+        "Argentina e Uruguai"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Angra dos Reis": [
+          -23.01,
+          -44.32
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Cabo Frio": [
+          -22.88,
+          -42.02
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-07",
+        "from": "2027-01-01",
+        "to": "2027-03-04",
+        "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2027-01-01",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilha Grande",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-10",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-19",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-01-27",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilha Grande",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-05",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Buenos Aires",
+              "Montevidéu",
+              "Punta del Este",
+              "Balneário Camboriú",
+              "Ilha Grande",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-14",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilha Grande",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-02-23",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Angra dos Reis",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-04",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Buenos Aires",
+              "Montevidéu",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
+            "status": "published"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Rio da Prata",
@@ -2300,6 +2940,10 @@
       {
         "label": "Programação da temporada",
         "url": "https://www.costacruzeiros.com/temporada-26-27.html"
+      },
+      {
+        "label": "Catálogo oficial Costa 2026/2027 · edição março/2026",
+        "url": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file"
       }
     ]
   },
@@ -2558,27 +3202,416 @@
           "detail": "Compare área, ocupação e benefícios. Serviços exclusivos dependem da categoria contratada."
         }
       ],
-      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria. Categorias sem foto verificada são apresentadas sem imagem."
+      "note": "Imagens ilustrativas divulgadas pela companhia. Área, mobiliário, vista, ocupação e benefícios variam por categoria."
     },
     "routes": {
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "SANTOS / RIO DE JANEIRO",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-06",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "text": "Explore as saídas documentadas para a temporada 2026/2027. Datas e escalas estão sujeitas a alteração pela companhia; a agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SAÍDA DE SANTOS",
+      "homePortText": "Embarque e desembarque em Santos nas saídas detalhadas abaixo.",
+      "regions": [
+        "Costa brasileira"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Angra dos Reis": [
+          -23.01,
+          -44.32
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Cabo Frio": [
+          -22.88,
+          -42.02
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-07",
+        "from": "2026-11-09",
+        "to": "2027-03-26",
+        "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2026-11-09",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-13",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-16",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-24",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-ilhabela/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-27",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-30",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-04",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-07",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-11",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-14",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-18",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Cabo Frio",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-cabo-frio/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-21",
+            "n": 5,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/natal/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-26",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-01",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-12",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-15",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-19",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-22",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-01",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-05",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-08",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-12",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-15",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-19",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-22",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/",
+            "status": "official_checked"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Litoral brasileiro",
@@ -2641,6 +3674,26 @@
       {
         "label": "Programação da temporada",
         "url": "https://corazulcruceros.es/pt-br/o-navio/"
+      },
+      {
+        "label": "Roteiro oficial · mini-buzios",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-buzios/"
+      },
+      {
+        "label": "Roteiro oficial · mini-camboriu",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/"
+      },
+      {
+        "label": "Roteiro oficial · mini-ilhabela",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-ilhabela/"
+      },
+      {
+        "label": "Roteiro oficial · mini-cabo-frio",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/mini-cabo-frio/"
+      },
+      {
+        "label": "Roteiro oficial · natal",
+        "url": "https://corazulcruceros.es/pt-br/itinerarios/natal/"
       }
     ]
   }

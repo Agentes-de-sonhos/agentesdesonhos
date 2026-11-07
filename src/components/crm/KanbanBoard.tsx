@@ -81,7 +81,6 @@ function SortableColumn({
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: stage.id,
   });
-  const { isMaximized } = useKanbanMaximize();
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -94,7 +93,7 @@ function SortableColumn({
     <div
       ref={setNodeRef}
       style={style}
-      className={cn(collapsed ? "w-11" : "w-[290px]", "flex-shrink-0 transition-[width] duration-200 snap-center md:snap-align-none", isMaximized && "h-full")}
+      className={cn(collapsed ? "w-11" : "w-[290px]", "h-full flex-shrink-0 transition-[width] duration-200 snap-center md:snap-align-none")}
     >
       {children({
         dragHandleProps: { ...attributes, ...listeners } as React.HTMLAttributes<HTMLButtonElement>,
@@ -549,6 +548,18 @@ export function KanbanBoard() {
                   icon={Target}
                   title="Nova Oportunidade"
                   subtitle="Preencha os dados da oportunidade para adicioná-la ao funil."
+                  rightSlot={canCreateOpp ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 shrink-0 gap-1 px-2.5 text-xs"
+                      title="Importar orçamento"
+                      aria-label="Importar orçamento"
+                      onClick={() => { setIsDialogOpen(false); setImportOpen(true); }}
+                    >
+                      <Download className="h-3.5 w-3.5" /> Importar
+                    </Button>
+                  ) : undefined}
                 />
                 <OpportunityForm
                   key={voicePrefill ? JSON.stringify(voicePrefill) : "blank"}
@@ -560,18 +571,6 @@ export function KanbanBoard() {
               </StandardPopupCard>
             </DialogContent>
           </Dialog>
-          {canCreateOpp && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
-              title="Importar orçamento"
-              aria-label="Importar orçamento"
-              onClick={() => setImportOpen(true)}
-            >
-              <Download className="h-3.5 w-3.5" /> Importar
-            </Button>
-          )}
           <Button
             variant="outline"
             size="sm"
@@ -624,7 +623,7 @@ export function KanbanBoard() {
                 strategy={horizontalListSortingStrategy}
               >
                 <div
-                  className="flex min-h-full items-stretch gap-4"
+                  className="flex h-full items-stretch gap-4"
                   style={{ minWidth: "max-content" }}
                 >
                   {stages
@@ -649,7 +648,7 @@ export function KanbanBoard() {
                             onDragOver={(e) => handleDragOver(e, stage.id)}
                             onDrop={(e) => handleColumnDrop(e, stage)}
                             onDragEnd={resetDrag}
-                            className="flex min-h-full flex-col"
+                            className="flex h-full min-h-0 flex-col"
                           >
                             {collapsed.has(stage.id) ? (
                               <button
@@ -673,7 +672,7 @@ export function KanbanBoard() {
                             ) : (
                             <div
                               className={cn(
-                                "flex min-h-full flex-1 flex-col rounded-xl border p-3 transition-shadow",
+                                "flex max-h-full min-h-0 flex-col self-start rounded-xl border p-3 transition-shadow",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"
@@ -701,7 +700,7 @@ export function KanbanBoard() {
                               </div>
                               </div>
 
-                              <div className="flex-1 space-y-2.5">
+                              <div className="kanban-column-scroll -mx-1 -mr-2 min-h-0 flex-initial space-y-2.5 overflow-y-auto overscroll-contain px-1 py-1 pr-1.5">
 
 
                                 {stageOpps.map((opportunity) => {

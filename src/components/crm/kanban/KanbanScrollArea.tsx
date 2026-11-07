@@ -39,12 +39,23 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       const el = innerRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      setFitHeight(Math.max(320, Math.floor(window.innerHeight - top)));
+      // O quadro vai até a borda da janela, descontando só o respiro inferior
+      // do conteúdo: a página não ganha rolagem vertical (cada coluna rola sozinha).
+      const pad = parseFloat(getComputedStyle(el.closest("main > div") ?? el).paddingBottom) || 0;
+      const next = Math.max(320, Math.floor(window.innerHeight - top - pad));
+      setFitHeight((prev) => (prev === next ? prev : next));
     };
     measure();
     const t = window.setTimeout(measure, 300);
+    // Reajusta quando o restante da página termina de carregar (cabeçalho, rodapé).
+    let raf = 0;
+    const root = document.getElementById("root");
+    const ro = root && typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(measure); })
+      : null;
+    if (root) ro?.observe(root);
     window.addEventListener("resize", measure);
-    return () => { window.clearTimeout(t); window.removeEventListener("resize", measure); };
+    return () => { window.clearTimeout(t); cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); };
   }, [isMaximized]);
 
   const stopDrag = useCallback(() => {

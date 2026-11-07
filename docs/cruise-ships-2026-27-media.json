@@ -12,9 +12,12 @@
       "p37": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_grand_suite_with_terrace_and_whirlpool_sxj_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=C8AD9DF33A39C9209AAB651364F21542",
       "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_balcony_br1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=6939A0BCC9D5EE8C972B3CC6073163DF",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet//Virtuosa/MSC_VIRTUOSA_MSC19001627_desk",
-      "video": "https://assets.msccruises.com/is/content/msccruises/MSC_Virtuosa_Ship_Visit_1920x540_v1"
+      "video": "https://assets.msccruises.com/is/content/msccruises/MSC_Virtuosa_Ship_Visit_1920x540_v1",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_interior_ir1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=869C9D324713FD2A81F7EA6D161AA35A",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_ocean_view_or1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=374DE9AC3CB76B2DA72B916FFAE81AB3"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa/cabins-suites"
   },
   "divina": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina",
@@ -27,9 +30,12 @@
       "p46": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/di_restaurant_and_bar_villa_rossa_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=BA80AD667FBE05FE52F2D9F3246F4D56",
       "p35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_suite_with_balcony_11.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=57243A3C1E577C8738274673D45CA00F",
       "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=AC0BA02F022680DB2D1C8368522E6AED",
-      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61"
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/preziosa/cabins/new/desktop/pr-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=85E439EA2BC257C42A26D0BCA5FAC694",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_ocean_view_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=8A76D745F26E7C078658B82774C6D055"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/cabins-suites"
   },
   "musica": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica",
@@ -45,9 +51,12 @@
       "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_oceanview_03.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=34ED8ABF123B3D9499B2E4E3184FFB4A",
       "p32": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc3-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=B4877EA008C4E12E099CEF099551E4D3",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/Musica/MSC_MUSICA_MSC18015178_desk",
-      "video": "https://msc-cdn.thron.com/delivery/public/video/msc/2ab2fe72-593e-4fd3-9031-a5afc03832d0/lhxtvk/WEBHD/60145_musica_-ship_tour_30sec_1920x540_web"
+      "video": "https://msc-cdn.thron.com/delivery/public/video/msc/2ab2fe72-593e-4fd3-9031-a5afc03832d0/lhxtvk/WEBHD/60145_musica_-ship_tour_30sec_1920x540_web",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_interior_05.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=552183132B561E8BDE06DD8EB653085D",
+      "cabin-suíte": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc1-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=CDE094411A370185A29AD134351192E5"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/cabins-suites"
   },
   "splendida": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
@@ -61,9 +70,12 @@
       "p27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_balinese_massage_02.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=BE8C91BE3F50FCDEB417B47346D6E25F",
       "p51": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_suite_balcony_04.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=05CCE2FE0DD3839333FEB3B05FAF2355",
       "p54": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=65397B6BDCDBAFE86A5F492AAE9385D7",
-      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03"
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/new/desktop/sp-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=459A4806EF6C932F73575B9507524F07",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_ocean_view_07.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=E75E1B413017B9B06C60C4859F9B32C3"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida/cabins-suites"
   },
   "seaview": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
@@ -78,9 +90,12 @@
       "p31": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_msc_aurea_spa_06.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=D9F629B3B114285815650D1C6BDE66AB",
       "p39": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/tile-image/new/sv-sd.png?bc=transparent&as=1&mh=433&mw=700&hash=111E590065DB42131A81013C11FEC584",
       "p43": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_balcony_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=B6D8921037E9B40A3BDF91C5D671528C",
-      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236"
+      "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236",
+      "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_inside_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=0F3144A32583AECE015AFAB1B61F9D1C",
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_ocean_view_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=2FF2AEA105E4167924017F72BD34AA6B"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview/cabins-suites"
   },
   "diadema": {
     "page": "https://www.costacruzeiros.com/navios/diadema.html",
