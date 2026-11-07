@@ -124,6 +124,7 @@ export function KanbanBoard() {
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [draggedHeight, setDraggedHeight] = useState(72);
   const [voicePrefill, setVoicePrefill] = useState<VoiceOpportunityPrefill | null>(null);
+  const [targetStage, setTargetStage] = useState<PipelineStage | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
     try {
       return new Set(JSON.parse(localStorage.getItem("crm-kanban-collapsed") || "[]"));
@@ -536,14 +537,7 @@ export function KanbanBoard() {
               className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if (!o) setVoicePrefill(null); }}>
-            {canCreateOpp && (
-              <DialogTrigger asChild>
-                <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
-                  <Plus className="h-3.5 w-3.5" /> Nova
-                </Button>
-              </DialogTrigger>
-            )}
+          <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if (!o) { setVoicePrefill(null); setTargetStage(null); } }}>
             <DialogContent
               className="h-[100dvh] max-h-[100dvh] w-screen max-w-none flex flex-col rounded-none px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-4xl sm:rounded-lg sm:p-6 overflow-y-auto bg-muted border-0 sm:p-4"
               onOpenAutoFocus={(e) => e.preventDefault()}
@@ -557,7 +551,8 @@ export function KanbanBoard() {
                 <OpportunityForm
                   key={voicePrefill ? JSON.stringify(voicePrefill) : "blank"}
                   prefill={voicePrefill}
-                  onSuccess={() => { setIsDialogOpen(false); setVoicePrefill(null); }}
+                  targetStage={targetStage}
+                  onSuccess={() => { setIsDialogOpen(false); setVoicePrefill(null); setTargetStage(null); }}
                   onCancel={() => setIsDialogOpen(false)}
                 />
               </StandardPopupCard>
