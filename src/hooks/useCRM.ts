@@ -591,6 +591,35 @@ export function useOpportunities() {
       }
       return { movedId, stageChanged, fromStageLabel, toStageLabel };
     },
+    // Atualização otimista: o cartão muda de lugar na hora; o servidor grava
+    // em segundo plano e qualquer falha devolve o quadro ao estado anterior.
+    onMutate: async (vars) => {
+      const key = ["opportunities", agencyOwnerId, user?.id];
+      await queryClient.cancelQueries({ queryKey: ["opportunities"] });
+      const previous = queryClient.getQueryData<Opportunity[]>(key);
+      if (previous) {
+        const targetPos = new Map(vars.orderedTargetIds.map((id, i) => [id, i]));
+        const sourcePos = new Map((vars.orderedSourceIds ?? []).map((id, i) => [id, i]));
+        const next = previous.map((o) => {
+          if (targetPos.has(o.id)) {
+            const patch: any = { position: targetPos.get(o.id) };
+            if (o.id === vars.movedId) {
+              patch.stage_id = vars.toStageId;
+              if (vars.toStageLegacyKey) patch.stage = vars.toStageLegacyKey;
+              if (vars.fromStageId && vars.fromStageId !== vars.toStageId) {
+                patch.stage_entered_at = new Date().toISOString();
+              }
+            }
+            return { ...o, ...patch };
+          }
+          if (sourcePos.has(o.id)) return { ...o, position: sourcePos.get(o.id) };
+          return o;
+        });
+        next.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+        queryClient.setQueryData(key, next);
+      }
+      return { previous, key };
+    },
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       if (res?.stageChanged) {
@@ -604,8 +633,9 @@ export function useOpportunities() {
         });
       }
     },
-    onError: (error: any) => {
-      // O cache volta a refletir o servidor em qualquer falha.
+    onError: (error: any, _vars, context: any) => {
+      // Desfaz a movimentação otimista e volta a refletir o servidor.
+      if (context?.previous) queryClient.setQueryData(context.key, context.previous);
       queryClient.invalidateQueries({ queryKey: ["opportunities"] });
       if (error?.name === 'PermissionDeniedError') return;
       const message = String(error?.message || "");
