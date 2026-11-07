@@ -58,6 +58,41 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
     return () => { window.clearTimeout(t); cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); };
   }, [isMaximized]);
 
+  // Rolagem automática ao arrastar um cartão perto das bordas (estilo Trello).
+  useEffect(() => {
+    const el = innerRef.current;
+    if (!el) return;
+    const EDGE = 120;
+    const MAX = 22;
+    let vx = 0;
+    let raf = 0;
+    const tick = () => {
+      if (vx === 0) { raf = 0; return; }
+      el.scrollLeft += vx;
+      raf = requestAnimationFrame(tick);
+    };
+    const onOver = (e: DragEvent) => {
+      const r = el.getBoundingClientRect();
+      const left = Math.max(r.left, 0);
+      const right = Math.min(r.right, window.innerWidth);
+      let next = 0;
+      if (e.clientX > right - EDGE) next = Math.ceil(MAX * Math.min(1, (e.clientX - (right - EDGE)) / EDGE));
+      else if (e.clientX < left + EDGE) next = -Math.ceil(MAX * Math.min(1, (left + EDGE - e.clientX) / EDGE));
+      vx = next;
+      if (vx !== 0 && !raf) raf = requestAnimationFrame(tick);
+    };
+    const stop = () => { vx = 0; };
+    document.addEventListener("dragover", onOver);
+    document.addEventListener("drop", stop);
+    document.addEventListener("dragend", stop);
+    return () => {
+      document.removeEventListener("dragover", onOver);
+      document.removeEventListener("drop", stop);
+      document.removeEventListener("dragend", stop);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const stopDrag = useCallback(() => {
     dragging.current = false;
     const el = innerRef.current;
