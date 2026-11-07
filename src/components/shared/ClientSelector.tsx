@@ -129,7 +129,8 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
         </div>
 
         {showDropdown && (
-          <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-lg max-h-64 overflow-y-auto">
+          <div className="absolute z-50 mt-1 flex max-h-64 w-full flex-col overflow-hidden rounded-md border bg-popover shadow-lg">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             {filtered.map((client) => (
               <button
                 key={client.id}
@@ -164,14 +165,16 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
                 Carregar mais resultados
               </button>
             )}
-            <button
+            </div>
+            <Button
               type="button"
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-sm font-medium text-primary hover:bg-accent border-t transition-colors"
+              variant="ghost"
+              className="h-auto min-h-10 w-full shrink-0 justify-start gap-2 whitespace-normal rounded-none border-t px-3 py-2.5 text-left text-sm font-medium text-primary"
               onClick={handleOpenQuickCreate}
             >
-              <UserPlus className="h-4 w-4" />
-              Criar novo cliente
-            </button>
+              <UserPlus className="h-4 w-4 shrink-0" />
+              <span className="min-w-0 break-words">Criar novo cliente{query.trim() ? `: “${query.trim()}”` : ""}</span>
+            </Button>
           </div>
         )}
 

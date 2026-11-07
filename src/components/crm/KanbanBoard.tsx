@@ -672,14 +672,14 @@ export function KanbanBoard() {
                             ) : (
                             <div
                               className={cn(
-                                "flex max-h-full min-h-0 flex-col self-start rounded-xl border p-3 transition-shadow",
+                                "flex w-full max-h-full min-h-0 min-w-0 flex-col self-start rounded-xl border p-3 transition-shadow",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"
                               )}
                             >
 
-                              <div><div>
+                              <div className="min-w-0 shrink-0">
                               <StageColumnHeader
                                 stage={stage}
                                 count={stageOpps.length}
@@ -698,9 +698,8 @@ export function KanbanBoard() {
                                 onCollapse={() => toggleCollapsed(stage.id)}
                               />
                               </div>
-                              </div>
 
-                              <div className="kanban-column-scroll -mx-1 -mr-2 min-h-0 flex-initial space-y-2.5 overflow-y-auto overscroll-contain px-1 py-1 pr-1.5">
+                              <div className="kanban-column-scroll -mx-1 min-h-0 min-w-0 flex-initial space-y-2.5 overflow-y-auto overscroll-contain px-1 py-1">
 
 
                                 {stageOpps.map((opportunity) => {
@@ -755,7 +754,7 @@ export function KanbanBoard() {
                                 )}
                               </div>
                               {canCreateOpp && (
-                                <div className="mt-2 flex items-center gap-1" data-no-kanban-drag>
+                                <div className="mt-2 flex shrink-0 items-center gap-1" data-no-kanban-drag>
                                   <button
                                     type="button"
                                     onClick={() => { setVoicePrefill(null); setTargetStage(isFirstStage ? null : stage); setIsDialogOpen(true); }}

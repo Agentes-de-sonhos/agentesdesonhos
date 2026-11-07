@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Fixar criação de cliente no rodapé da busca, preservar nome digitado e corrigir sobreposição/largura das colunas; conferir sessão autenticada sem gravar dados.
 - [x] Fundador elegível à reserva em orçamentos: migration 0061 aplicada, gate Curti confirmado false→true e regressões SQL executadas; 27 testes aprovados e build OK. Aviso administrativo atualizado; nenhuma solicitação/notificação enviada. Fluxo autenticado pela interface não exercitado.
 - [x] Liberar campanha Novembro O Mundo em Cores: bloqueios demonstrativos retirados, somente ofertas publicadas, navegação/WhatsApp e formulário compartilhado; 15 testes aprovados, Radar com envio simulado confirmado, sem overflow em 768/390. Recebimento real no CRM/Twilio não exercitado; mídias CDN não entregues no localhost.
 - [x] Pristur briefing-22-v1: fixture técnica isolada com wordmark e marca pendente, conteúdo autorizado; 45 testes aprovados, desktop/mobile sem overflow, FAQ e CTA bloqueado conferidos, zero chamadas ao backend. Sem publicar/deploy/vínculo real. Limite: mídias CDN Orlando não entregues no localhost; evidências em docs/validacao-pristur-briefing-22.md.
