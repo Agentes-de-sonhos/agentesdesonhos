@@ -41,12 +41,11 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       const top = el.getBoundingClientRect().top + window.scrollY;
       // Desconta o que existe abaixo do quadro (margens/rodapé da página),
       // para que a página inteira nunca precise de rolagem vertical.
-      const rect = el.getBoundingClientRect();
       const footer = document.querySelector("footer");
       // Espaço entre o fim do quadro e o fim da página (margens + rodapé de versão).
-      const below = footer
-        ? Math.max(0, footer.getBoundingClientRect().bottom - rect.bottom)
-        : 0;
+      const main = el.closest("main");
+      const pad = main ? parseFloat(getComputedStyle(main).paddingBottom) || 0 : 0;
+      const below = (footer?.offsetHeight ?? 0) + pad;
       setFitHeight(Math.max(320, Math.floor(window.innerHeight - top - below)));
     };
     measure();
