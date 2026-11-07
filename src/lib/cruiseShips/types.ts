@@ -41,6 +41,7 @@ export interface CruiseShipContent {
   tiles: { photo: string; alt: string; label: string }[];
   albumTile: { image: string; alt: string };
   credit: string;
+  creditUrl?: string;
   photos: CruisePhoto[];
   photoCategories: string[];
   about: {

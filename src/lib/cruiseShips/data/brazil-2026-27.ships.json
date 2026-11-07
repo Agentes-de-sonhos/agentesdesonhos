@@ -51,7 +51,7 @@
       "image": "hero",
       "alt": "Vista do MSC Virtuosa"
     },
-    "credit": "Imagens: MSC Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "p25",
@@ -194,11 +194,11 @@
         {
           "key": "rest",
           "label": "Tempo para você",
-          "image": "p27",
+          "image": "p28",
           "title": "Uma pausa entre as descobertas.",
           "text": "Organize o dia com espaço para cuidar de você.",
           "items": [
-            "MSC Starship Club",
+            "Deck de piscinas",
             "Confira horários e condições de acesso.",
             "Tratamentos e serviços personalizados podem ter cobrança adicional."
           ]
@@ -343,7 +343,8 @@
         "label": "Cabines e suítes · página oficial MSC",
         "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa/cabins-suites"
       }
-    ]
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa"
   },
   {
     "lineSlug": "msc",
@@ -395,7 +396,7 @@
       "image": "p38",
       "alt": "Varanda · imagem ilustrativa"
     },
-    "credit": "Imagens: MSC Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "p24",
@@ -671,7 +672,8 @@
         "label": "Cabines e suítes · página oficial MSC",
         "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/cabins-suites"
       }
-    ]
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina"
   },
   {
     "lineSlug": "msc",
@@ -686,7 +688,6 @@
       "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_public_area_life_on_board_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=DDAE93933D5BCB3381D279763ED35DD0",
       "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_la_spiaggia_pool_area_07.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=A355188C0BF172F9112F765197D35DC5",
       "p44": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_teatro_la_scala_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=41AE1AEF061900E93F8BBE6396DFAC79",
-      "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_msc23022676.jpg?bc=transparent&as=1&mh=600&mw=1000&hash=6BF1023E67151FB72CBD5BB194B2CA61",
       "p49": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/mu_restaurant_and_bar_oleandro_restaurant_01.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=37981E5581C09E6D990D7A4811C8BEEF",
       "p25": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_msc26048847.jpg?bc=transparent&as=1&mh=600&mw=1000&hash=044329152333B6DEB7E18ED20DCEA20F",
       "p35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_balcony_02.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=FA7DAB6A117A229F5D5A5326366AF675",
@@ -726,7 +727,7 @@
       "image": "hero",
       "alt": "Vista do MSC Musica"
     },
-    "credit": "Imagens: MSC Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "p24",
@@ -741,11 +742,6 @@
       {
         "key": "p44",
         "label": "Teatro La Scala",
-        "category": "Lazer"
-      },
-      {
-        "key": "p26",
-        "label": "Espaços para famílias",
         "category": "Lazer"
       },
       {
@@ -874,7 +870,7 @@
         {
           "key": "rest",
           "label": "Tempo para você",
-          "image": "p26",
+          "image": "p25",
           "title": "Uma pausa entre as descobertas.",
           "text": "Organize o dia com espaço para cuidar de você.",
           "items": [
@@ -1027,7 +1023,8 @@
         "label": "Cabines e suítes · página oficial MSC",
         "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/cabins-suites"
       }
-    ]
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica"
   },
   {
     "lineSlug": "msc",
@@ -1080,7 +1077,7 @@
       "image": "p54",
       "alt": "Varanda · imagem ilustrativa"
     },
-    "credit": "Imagens: MSC Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "p24",
@@ -1361,7 +1358,8 @@
         "label": "Cabines e suítes · página oficial MSC",
         "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida/cabins-suites"
       }
-    ]
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida"
   },
   {
     "lineSlug": "msc",
@@ -1415,7 +1413,7 @@
       "image": "p43",
       "alt": "Varanda · imagem ilustrativa"
     },
-    "credit": "Imagens: MSC Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "p24",
@@ -1707,7 +1705,8 @@
         "label": "Cabines e suítes · página oficial MSC",
         "url": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview/cabins-suites"
       }
-    ]
+    ],
+    "creditUrl": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview"
   },
   {
     "lineSlug": "costa",
@@ -1726,9 +1725,7 @@
       "p49": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Balcone_Desktop_1392x636.jpg",
       "p50": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Esterna_Desktop_1392x636.jpg",
       "p51": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Interna_Desktop_1392x636.jpg",
-      "p107": "https://edam-media.costa.it/media_guid/8/8/dc0c4496-c897-4d59-b01b-cb5d3b456439/ede67fa4-d4ba-43da-a8f0-facfdd511d8e.jpg",
       "p108": "https://edam-media.costa.it/media_guid/18/82/b9fa5363-cef5-4f6c-8bb9-de2dd7a1e82e/5dd4e133-48d0-4f38-b18e-ae5756632f56.jpg",
-      "p109": "https://edam-media.costa.it/media_guid/15/15/6c393406-e7a7-4a46-ad30-c937da2fe9d3/2814a218-6910-401d-9fee-6fe5a2fe0a63.jpg",
       "p110": "https://edam-media.costa.it/media_guid/6/6/43022174-a885-4883-8ad5-e4e831c3da7b/439f614d-53bf-4cae-bf9c-ec49920a20c4.jpg",
       "p111": "https://edam-media.costa.it/media_guid/5/5/00b556b0-5dc2-4c08-bbfe-89dfba841762/847c069f-71e3-4f26-ac6e-e8f78634904d.jpg",
       "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Ship_desktop_1680x786_diadema_05.jpg"
@@ -1762,7 +1759,7 @@
       "image": "p111",
       "alt": "Squok Club · imagem de referência da companhia"
     },
-    "credit": "Imagens: Costa Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: Costa Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "p30",
@@ -1800,19 +1797,9 @@
         "category": "Cabines"
       },
       {
-        "key": "p107",
-        "label": "Carlsberg Country Rock Club · imagem de referência da companhia",
-        "category": "Ambientes"
-      },
-      {
         "key": "p108",
         "label": "Teatro · imagem de referência da companhia",
         "category": "Lazer"
-      },
-      {
-        "key": "p109",
-        "label": "Beauty Spa Solemio · imagem de referência da companhia",
-        "category": "Ambientes"
       },
       {
         "key": "p110",
@@ -1909,13 +1896,13 @@
         {
           "key": "rest",
           "label": "Tempo para você",
-          "image": "p109",
+          "image": "p32",
           "title": "Uma pausa entre as descobertas.",
           "text": "Organize o dia com espaço para cuidar de você.",
           "items": [
-            "Spa Solemio",
+            "Áreas externas para relaxar",
             "Confira horários e condições de acesso.",
-            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+            "Serviços e bebidas dependem do pacote contratado."
           ]
         }
       ]
@@ -2431,7 +2418,8 @@
         "label": "Catálogo oficial Costa 2026/2027 · edição março/2026",
         "url": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file"
       }
-    ]
+    ],
+    "creditUrl": "https://www.costacruzeiros.com/navios/diadema.html"
   },
   {
     "lineSlug": "costa",
@@ -2448,8 +2436,6 @@
       "ocean": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_SEA_VIEW_CABIN_MAIN_MAIN-CostaSerenaPostDryDock2025_0266_1392x636.jpg",
       "interior": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_INSIDE_CABIN_MAIN-CostaSerenaPostDryDock2025_0633_1392x636.jpg",
       "p105": "https://edam-media.costa.it/media_guid/0/0/a9c8b6d3-3028-494d-97b0-bb7558adbd05/58135a60-09a8-4daa-acd9-4c16648a3407.jpg",
-      "p106": "https://edam-media.costa.it/media_guid/4/4/d51c61f5-e7dd-46ef-91d3-d6d99ae7f44e/eae23771-5241-4056-8f7c-dbd5f49ca109.jpg",
-      "p107": "https://edam-media.costa.it/media_guid/22/86/732ce9ec-7150-4cc3-8f66-85f229d887c2/af7c9e65-7df9-40f4-a7be-16c75026efff.jpg",
       "p108": "https://edam-media.costa.it/media_guid/19/83/ca8287fe-ec25-46ff-82ff-a7e69f7fa44b/4ca1b6b8-b8c3-43d3-8f34-f6cb3dd58d5a.jpg",
       "p109": "https://edam-media.costa.it/media_guid/24/88/598763fe-a491-4304-a4e4-3c34c94f4528/6bac8a59-6263-4d0f-a0f8-606771121aff.jpg",
       "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/images/people/promocao-vazia/C446_Reception_Costa_serena.jpg.image.1476.1476.high.jpg"
@@ -2483,7 +2469,7 @@
       "image": "p109",
       "alt": "Teatro · imagem de referência da companhia"
     },
-    "credit": "Imagens: Costa Cruzeiros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: Costa Cruzeiros · Divulgação.",
     "photos": [
       {
         "key": "hero",
@@ -2514,16 +2500,6 @@
         "key": "p105",
         "label": "Pummid'Oro Pizzeria · imagem de referência da companhia",
         "category": "Ambientes"
-      },
-      {
-        "key": "p106",
-        "label": "Spa Solemio · imagem de referência da companhia",
-        "category": "Ambientes"
-      },
-      {
-        "key": "p107",
-        "label": "Lido Sole · imagem de referência da companhia",
-        "category": "Lazer"
       },
       {
         "key": "p108",
@@ -2619,13 +2595,13 @@
         {
           "key": "rest",
           "label": "Tempo para você",
-          "image": "p106",
-          "title": "Uma pausa entre as descobertas.",
-          "text": "Organize o dia com espaço para cuidar de você.",
+          "image": "balcony",
+          "title": "Seu espaço para descansar.",
+          "text": "Entre uma descoberta e outra, aproveite o conforto da sua cabine.",
           "items": [
-            "Spa Solemio",
-            "Confira horários e condições de acesso.",
-            "Tratamentos e serviços personalizados podem ter cobrança adicional."
+            "Imagem ilustrativa da categoria com varanda",
+            "Configuração e vista variam conforme a cabine.",
+            "Consulte as categorias disponíveis para sua saída."
           ]
         }
       ]
@@ -2945,7 +2921,8 @@
         "label": "Catálogo oficial Costa 2026/2027 · edição março/2026",
         "url": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file"
       }
-    ]
+    ],
+    "creditUrl": "https://www.costacruzeiros.com/navios/serena.html"
   },
   {
     "lineSlug": "corazul",
@@ -2999,7 +2976,7 @@
       "image": "p82",
       "alt": "Mini-suíte · imagem ilustrativa"
     },
-    "credit": "Imagens: Corazul Cruceros. Materiais de divulgação; imagens de categorias e ambientes podem ser ilustrativas.",
+    "credit": "Imagens: Corazul Cruceros · Divulgação.",
     "photos": [
       {
         "key": "p13",
@@ -3695,6 +3672,7 @@
         "label": "Roteiro oficial · natal",
         "url": "https://corazulcruceros.es/pt-br/itinerarios/natal/"
       }
-    ]
+    ],
+    "creditUrl": "https://corazulcruceros.es/pt-br/o-navio/"
   }
 ]

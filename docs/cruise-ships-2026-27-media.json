@@ -16,8 +16,10 @@
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_interior_ir1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=869C9D324713FD2A81F7EA6D161AA35A",
       "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_ocean_view_or1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=374DE9AC3CB76B2DA72B916FFAE81AB3"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
-    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa/cabins-suites"
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa/cabins-suites",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": []
   },
   "divina": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina",
@@ -34,8 +36,10 @@
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/preziosa/cabins/new/desktop/pr-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=85E439EA2BC257C42A26D0BCA5FAC694",
       "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_ocean_view_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=8A76D745F26E7C078658B82774C6D055"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
-    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/cabins-suites"
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/cabins-suites",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": []
   },
   "musica": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica",
@@ -44,7 +48,6 @@
       "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_public_area_life_on_board_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=DDAE93933D5BCB3381D279763ED35DD0",
       "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_la_spiaggia_pool_area_07.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=A355188C0BF172F9112F765197D35DC5",
       "p44": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_teatro_la_scala_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=41AE1AEF061900E93F8BBE6396DFAC79",
-      "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_msc23022676.jpg?bc=transparent&as=1&mh=600&mw=1000&hash=6BF1023E67151FB72CBD5BB194B2CA61",
       "p49": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/mu_restaurant_and_bar_oleandro_restaurant_01.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=37981E5581C09E6D990D7A4811C8BEEF",
       "p25": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/public-areas/mu_msc26048847.jpg?bc=transparent&as=1&mh=600&mw=1000&hash=044329152333B6DEB7E18ED20DCEA20F",
       "p35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_balcony_02.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=FA7DAB6A117A229F5D5A5326366AF675",
@@ -55,8 +58,12 @@
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_interior_05.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=552183132B561E8BDE06DD8EB653085D",
       "cabin-suíte": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc1-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=CDE094411A370185A29AD134351192E5"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
-    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/cabins-suites"
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/cabins-suites",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": [
+      "p26"
+    ]
   },
   "splendida": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
@@ -74,8 +81,10 @@
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/new/desktop/sp-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=459A4806EF6C932F73575B9507524F07",
       "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_ocean_view_07.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=E75E1B413017B9B06C60C4859F9B32C3"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
-    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida/cabins-suites"
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida/cabins-suites",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": []
   },
   "seaview": {
     "page": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
@@ -94,8 +103,10 @@
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_inside_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=0F3144A32583AECE015AFAB1B61F9D1C",
       "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_ocean_view_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=2FF2AEA105E4167924017F72BD34AA6B"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
-    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview/cabins-suites"
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "cabinSource": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview/cabins-suites",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": []
   },
   "diadema": {
     "page": "https://www.costacruzeiros.com/navios/diadema.html",
@@ -108,14 +119,17 @@
       "p49": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Balcone_Desktop_1392x636.jpg",
       "p50": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Esterna_Desktop_1392x636.jpg",
       "p51": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Interna_Desktop_1392x636.jpg",
-      "p107": "https://edam-media.costa.it/media_guid/8/8/dc0c4496-c897-4d59-b01b-cb5d3b456439/ede67fa4-d4ba-43da-a8f0-facfdd511d8e.jpg",
       "p108": "https://edam-media.costa.it/media_guid/18/82/b9fa5363-cef5-4f6c-8bb9-de2dd7a1e82e/5dd4e133-48d0-4f38-b18e-ae5756632f56.jpg",
-      "p109": "https://edam-media.costa.it/media_guid/15/15/6c393406-e7a7-4a46-ad30-c937da2fe9d3/2814a218-6910-401d-9fee-6fe5a2fe0a63.jpg",
       "p110": "https://edam-media.costa.it/media_guid/6/6/43022174-a885-4883-8ad5-e4e831c3da7b/439f614d-53bf-4cae-bf9c-ec49920a20c4.jpg",
       "p111": "https://edam-media.costa.it/media_guid/5/5/00b556b0-5dc2-4c08-bbfe-89dfba841762/847c069f-71e3-4f26-ac6e-e8f78634904d.jpg",
       "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Ship_desktop_1680x786_diadema_05.jpg"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": [
+      "p107",
+      "p109"
+    ]
   },
   "serena": {
     "page": "https://www.costacruzeiros.com/navios/serena.html",
@@ -126,15 +140,18 @@
       "ocean": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_SEA_VIEW_CABIN_MAIN_MAIN-CostaSerenaPostDryDock2025_0266_1392x636.jpg",
       "interior": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_INSIDE_CABIN_MAIN-CostaSerenaPostDryDock2025_0633_1392x636.jpg",
       "p105": "https://edam-media.costa.it/media_guid/0/0/a9c8b6d3-3028-494d-97b0-bb7558adbd05/58135a60-09a8-4daa-acd9-4c16648a3407.jpg",
-      "p106": "https://edam-media.costa.it/media_guid/4/4/d51c61f5-e7dd-46ef-91d3-d6d99ae7f44e/eae23771-5241-4056-8f7c-dbd5f49ca109.jpg",
-      "p107": "https://edam-media.costa.it/media_guid/22/86/732ce9ec-7150-4cc3-8f66-85f229d887c2/af7c9e65-7df9-40f4-a7be-16c75026efff.jpg",
       "p108": "https://edam-media.costa.it/media_guid/19/83/ca8287fe-ec25-46ff-82ff-a7e69f7fa44b/4ca1b6b8-b8c3-43d3-8f34-f6cb3dd58d5a.jpg",
       "p109": "https://edam-media.costa.it/media_guid/24/88/598763fe-a491-4304-a4e4-3c34c94f4528/6bac8a59-6263-4d0f-a0f8-606771121aff.jpg",
       "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/images/people/promocao-vazia/C446_Reception_Costa_serena.jpg.image.1476.1476.high.jpg"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication.",
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
     "additionalSources": [
       "https://www.costacruzeiros.com/temporada-26-27.html"
+    ],
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": [
+      "p106",
+      "p107"
     ]
   },
   "buenavista": {
@@ -154,6 +171,8 @@
       "hero": "https://corazulcruceros.es/wp-content/uploads/2026/01/New_Buenavista_low_2.jpg",
       "video": "https://corazulcruceros.es/wp-content/uploads/2026/01/Sailing2.mp4"
     },
-    "rights": "Official source and attribution recorded. Public availability does not establish a commercial reuse licence; validate agency/armador media authorization before publication."
+    "rights": "Uso comercial autorizado conforme confirmação expressa de Fernando nesta conversa em 07/11/2026 (UTC). Origem oficial registrada; autorização informada pelo responsável pelo projeto.",
+    "selectionPolicy": "Evitar pessoas posando ou olhando para a câmera; priorizar navio, ambientes e cabines. Um crédito com link oficial abaixo de cada galeria e de cada foto isolada.",
+    "excludedAssets": []
   }
 }

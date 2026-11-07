@@ -30,6 +30,12 @@ describe('Brazilian cruise pages', () => {
     render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ship.titleTail);
     expect(document.querySelectorAll('img[src=""]')).toHaveLength(0);
+    for (const selector of ['.gallery + .media-credit', '.experience-media .media-credit', '.cabin-grid + .media-credit', '#albumDialog > .media-credit', '#galleryDialog > .media-credit']) {
+      const credit = document.querySelector(selector);
+      expect(credit).toHaveTextContent(ship.lineName);
+      expect(credit?.querySelector('a')).toHaveAttribute('href', ship.creditUrl);
+    }
+    expect(document.querySelectorAll('.album-grid .media-credit, .lightbox-thumbs .media-credit')).toHaveLength(0);
     if (ship.routes.feed.sailings.length) {
       expect(document.querySelector('#itineraryMap')).not.toBeNull();
       fireEvent.click(screen.getByText('Quero orçamento deste roteiro'));

@@ -16,7 +16,7 @@ Implementação no componente compartilhado do Harmony. Sem chamadas de constru�
 ## Conteúdo e implementação
 
 - Galeria por categoria, ficha técnica, experiências, cabines e formulário existente de solicitação de cruzeiros.
-- Fontes oficiais consultadas em 06/11/2026 registradas nos dados e em `cruise-ships-2026-27-media.json`. Imagens remotas; não se presume licença comercial por estarem disponíveis publicamente.
+- Fontes oficiais consultadas em 06/11/2026 registradas nos dados e em `cruise-ships-2026-27-media.json`. Imagens remotas de fontes oficiais; Fernando confirmou expressamente a autorização de uso comercial em 07/11/2026 (UTC).
 - Números e infraestrutura usam a ficha de cada companhia. Musica explicita a renovação anunciada e a possibilidade de a ficha preceder a configuração final.
 - Opções MSC usam resumos oficiais enquanto faltam calendários verificáveis. Costa e Corazul possuem feeds selecionados de saídas documentadas, detalhados abaixo. O explorador original do Harmony permanece intacto.
 - Imagens de categorias/ambientes genéricos são identificadas como ilustrativas/de referência. Cabines sem imagem verificada recebem apresentação textual.
@@ -29,8 +29,8 @@ Implementação no componente compartilhado do Harmony. Sem chamadas de constru�
 - Build Vite passou; avisos preexistentes de CSS e tamanho de chunks.
 - Imagens selecionadas conferidas por download e folhas de contato; referências que responderam 403 não foram utilizadas.
 - O servidor de desenvolvimento da prévia falhou em `@swc/core`. Revisão visual realizada em prévia estática compilada do componente real; escopo detalhado abaixo.
-- Confirmar autorização comercial das mídias antes de colocar essas páginas em produção. Este desenvolvimento é entregue em PR de rascunho, sem merge e sem publicação automática.
-- Pendências de conteúdo: calendários/mapas MSC, saídas com divergências nas fontes e direitos de uso comercial das fotos.
+- Autorização comercial das mídias confirmada pelo responsável pelo projeto nesta conversa. Este desenvolvimento é entregue em PR de rascunho, sem merge e sem publicação automática.
+- Pendências de conteúdo: calendários/mapas MSC, saídas com divergências nas fontes.
 
 ## Continuação — 07/11/2026
 
@@ -58,4 +58,11 @@ Não foi possível obter calendários MSC completos e atuais pelas páginas de i
 - 18 testes passaram: regressão Harmony, oito páginas, galerias, seleção de roteiro/datado, fontes e coordenadas dos feeds e exclusão das inconsistências conhecidas.
 - Revisão visual do componente compartilhado em prévia estática de QA (serviços externos substituídos por mocks que bloqueiam envio): oito páginas renderizadas no desktop; layout em iframe de 390 px (375 px úteis) conferido no Serena sem overflow horizontal; navegação, mapa e transferência de seleção ao formulário conferidos no Diadema; mapa do Buenavista conferido. Isso não equivale a testar entrega real de leads nem o cabeçalho/rodapé de cada tenant.
 - O erro nativo do servidor de desenvolvimento continua restrito à infraestrutura de preview. A revisão estática usa o componente real compilado, sem alteração na configuração de produção.
-- As pendências anteriores de fotos de cabine e revisão visual básica foram resolvidas. Permanecem os calendários MSC, divergências explicitadas acima e confirmação do direito de uso comercial das mídias antes de produção. PR mantido em rascunho.
+- As pendências anteriores de fotos de cabine e revisão visual básica foram resolvidas. Permanecem os calendários MSC, divergências explicitadas acima. PR mantido em rascunho.
+
+## Revisão de imagens e créditos — 07/11/2026
+
+- Autorização comercial registrada conforme confirmação expressa de Fernando; não inferida da disponibilidade pública.
+- Removidas cinco seleções promocionais com pessoas: MSC Musica p26, Costa Diadema p107/p109 e Costa Serena p106/p107. Mantidas cenas de atividades e espetáculos sem modelos posando para a câmera, além de ambientes e cabines.
+- Créditos por companhia com link à página oficial abaixo da galeria principal, do álbum, da galeria ampliada, do conjunto de cabines e da foto de experiência. Nenhum crédito repetido em cada miniatura.
+- Corrigidas as fotos das experiências de descanso para acompanhar seu conteúdo, sem substituir ambientes por fotos de outros navios.

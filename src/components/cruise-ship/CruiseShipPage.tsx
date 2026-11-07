@@ -42,6 +42,10 @@ const emptyForm = (): CruiseQuoteForm => ({ name: "", phone: "", email: "", peri
 function openDialog(d: HTMLDialogElement | null) { if (d && !d.open) { if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", ""); } }
 function closeDialog(d: HTMLDialogElement | null) { if (d) { if (typeof d.close === "function") d.close(); else d.removeAttribute("open"); } }
 
+function MediaCredit({ ship }: { ship: CruiseShipContent }) {
+  return <div className="media-line media-credit"><span>{ship.credit}{ship.creditUrl && <> Fonte: <a href={ship.creditUrl} target="_blank" rel="noopener noreferrer">site oficial da companhia</a>.</>}</span></div>;
+}
+
 export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; hostname: string }) {
   const A = ship.assets;
   const img = (k: string) => A[k] ?? "";
@@ -262,7 +266,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             <img src={img(ship.albumTile.image)} alt={ship.albumTile.alt} /><span>⊞ Ver todas as {photos.length} fotos</span>
           </button>
         </div>
-        <div className="media-line media-credit"><span>{ship.credit}</span></div>
+        <MediaCredit ship={ship} />
 
         <nav className="anchors" aria-label="Seções">
           {anchors.map(([id, label]) => <a key={id} href={`#${id}`} className={active === id ? "active" : undefined} onClick={scrollTo(id)}>{label}</a>)}
@@ -283,7 +287,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             {ship.experiences.tabs.map((t) => <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>{t.label}</button>)}
           </div>
           <div className="experience-panel" role="tabpanel">
-            <img src={img(exp.image)} alt={exp.title} />
+            <div className="experience-media"><img src={img(exp.image)} alt={exp.title} /><MediaCredit ship={ship} /></div>
             <div className="panel-copy"><div className="eyebrow">{ship.shipName.toUpperCase()}</div><h3>{exp.title}</h3><p>{exp.text}</p><ul>{exp.items.map((x) => <li key={x}>{x}</li>)}</ul></div>
           </div>
           <div className="included" aria-labelledby="includedTitle">
@@ -302,6 +306,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
               </article>
             ))}
           </div>
+          <MediaCredit ship={ship} />
           <p className="note">{ship.cabins.note}</p>
         </section>
 
@@ -473,6 +478,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             <button key={p.key} onClick={() => openPhoto(p.key)}><img loading="lazy" src={img(p.key)} alt={p.label} /><span>{p.label}</span></button>
           ))}
         </div>
+        <MediaCredit ship={ship} />
       </dialog>
 
       <dialog ref={galleryRef} id="galleryDialog" aria-label={`Vídeo e fotos do ${ship.shipName}`} onClick={backdropClose}
@@ -493,6 +499,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           {hasVideo && <button aria-label="Assistir ao vídeo" className={`video-thumb${pic === -1 ? " active" : ""}`} aria-pressed={pic === -1} onClick={() => setPic(-1)}><PlayIcon /></button>}
           {photos.map((p, i) => <button key={p.key} aria-label={`Ver ${p.label}`} className={pic === i ? "active" : undefined} aria-pressed={pic === i} onClick={() => setPic(i)}><img loading="lazy" src={img(p.key)} alt="" /></button>)}
         </div>
+        <MediaCredit ship={ship} />
       </dialog>
     </div>
   );
