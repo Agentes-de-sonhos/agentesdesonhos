@@ -1,3 +1,4 @@
+import { mundoSeoPage } from "@/lib/mundoSeo";
 import disneyGoogle from "@/components/landing/disney/disneyHotelsGoogleData.json";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -180,8 +181,9 @@ function HotelsGallery() {
 
 export default function DisneyLandingPage({ info }: { info: AgencyDomainInfo }) {
   useAgencySiteThemeOnBody(info.hostname);
-  useNoindex();
-  useEffect(() => { document.title = `Walt Disney World Resort | ${info.agency_name ?? "Ingressos e hotéis"}`; }, [info.agency_name]);
+  const mundoSeo = !!mundoSeoPage(info.hostname, "/disney");
+  useNoindex(!mundoSeo);
+  useEffect(() => { if (mundoSeo) return; document.title = `Walt Disney World Resort | ${info.agency_name ?? "Ingressos e hotéis"}`; }, [info.agency_name, mundoSeo]);
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
       <Header info={info} />

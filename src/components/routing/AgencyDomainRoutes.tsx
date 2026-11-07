@@ -1,3 +1,4 @@
+import { MundoSEO } from "@/components/seo/MundoSEO";
 import AgencyResortPage from "@/pages/whitelabel/AgencyResortPage";
 import { getUniversalHotelPage } from "@/components/landing/universal/universalHotelsCatalog";
 import { agencySiteHref } from "@/lib/agencyContextLink";
@@ -212,6 +213,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
 
   return (
       <AgencySitePasswordGate info={info}>
+        <MundoSEO hostname={info.hostname} />
         <Routes>
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
           {construction && (

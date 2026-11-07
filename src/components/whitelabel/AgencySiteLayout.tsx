@@ -1,3 +1,4 @@
+import { isMundoSeoHost } from "@/lib/mundoSeo";
 import { Link } from "react-router-dom";
 import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
@@ -336,7 +337,7 @@ export function AgencyFooter({
   const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
   if (luxury) {
-    const navLinks = navAll.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
+    const navLinks = (isMundoSeoHost(info.hostname) ? navAll.flatMap(l => [l, ...(l.children ?? []).filter(child => ["/disney", "/universal", "/resorts-brasil"].includes(child.to))]) : navAll).filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
     const legalLinks = [
       { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
       { label: "Termos de Uso", to: "/termosdeuso" },
@@ -494,7 +495,7 @@ export function AgencyFooter({
   }
 
   if (editorial) {
-    const navLinks = navAll.filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
+    const navLinks = (isMundoSeoHost(info.hostname) ? navAll.flatMap(l => [l, ...(l.children ?? []).filter(child => ["/disney", "/universal", "/resorts-brasil"].includes(child.to))]) : navAll).filter((l) => l.to !== "/" && l.to !== "/area-do-cliente");
     const legalLinks = [
       { label: "Política de Privacidade", to: "/politicasdeprivacidade" },
       { label: "Termos de Uso", to: "/termosdeuso" },

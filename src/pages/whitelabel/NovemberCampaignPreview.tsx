@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { MundoSEO } from "@/components/seo/MundoSEO";
 import { BrowserRouter } from "react-router-dom";
 import { Headphones, Plane, ShieldCheck, Tag } from "lucide-react";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
@@ -53,7 +53,7 @@ export default function NovemberCampaignPreview() {
   };
   return <BrowserRouter><div className="november-preview">
     <AgencySiteLayout info={{ ...MUNDO_EM_CORES_PREVIEW_INFO, hostname: "omundoemcores.com.br", agency_name: "O Mundo em Cores", phone: MUNDO_WHATSAPP }}>
-      <Helmet><title>Oportunidades de Novembro | O Mundo em Cores</title><meta name="description" content="Oportunidades de novembro da O Mundo em Cores: destinos incríveis, condições especiais e planejamento de viagens." /><meta property="og:title" content="Oportunidades de Novembro | O Mundo em Cores" /><meta property="og:description" content="Destinos incríveis, condições especiais e experiências que ficam para sempre." /><meta property="og:type" content="website" /><meta name="twitter:card" content="summary_large_image" /></Helmet>
+      <MundoSEO hostname="omundoemcores.com.br" />
       <div className="november-campaign">
         <CampaignHero /><CategoryRail active={category} onSelect={id => { setCategory(id); setPeriod("todos"); }} />
         <FeaturedOffers real offers={offers} onSelect={onSelectOffer} onReset={() => { setCategory("todos"); setPeriod("todos"); }} />
