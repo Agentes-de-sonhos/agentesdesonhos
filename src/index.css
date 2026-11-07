@@ -1761,3 +1761,6 @@ body[data-booking-selection-bar] {
 .kanban-column-scroll::-webkit-scrollbar { width: 6px; }
 .kanban-column-scroll::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.25); border-radius: 9999px; }
 .kanban-column-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* No funil (Oportunidades/Operações) o rodapé de versão sai para liberar altura. */
+main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }

@@ -39,14 +39,10 @@ export const KanbanScrollArea = forwardRef<HTMLDivElement, {
       const el = innerRef.current;
       if (!el) return;
       const top = el.getBoundingClientRect().top + window.scrollY;
-      // Mede com o quadro na altura da janela e desconta o que sobra abaixo
-      // dele (margens e rodapé), para a página não ganhar rolagem vertical.
-      const base = window.innerHeight - top;
-      el.style.height = `${base}px`;
-      const rootH = document.getElementById("root")?.offsetHeight ?? document.documentElement.scrollHeight;
-      const below = Math.max(0, rootH - (el.getBoundingClientRect().bottom + window.scrollY));
-      const next = Math.max(320, Math.floor(base - below));
-      el.style.height = `${next}px`;
+      // O quadro vai até a borda da janela, descontando só o respiro inferior
+      // do conteúdo: a página não ganha rolagem vertical (cada coluna rola sozinha).
+      const pad = parseFloat(getComputedStyle(el.closest("main > div") ?? el).paddingBottom) || 0;
+      const next = Math.max(320, Math.floor(window.innerHeight - top - pad));
       setFitHeight((prev) => (prev === next ? prev : next));
     };
     measure();
