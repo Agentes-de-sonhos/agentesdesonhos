@@ -63,6 +63,8 @@ interface OpportunityFormProps {
   focusSection?: "booking-request";
   /** Dados ditados por voz para uma nova oportunidade (somente sugestão). */
   prefill?: VoiceOpportunityPrefill | null;
+  /** Etapa onde a nova oportunidade deve nascer (rodapé da coluna). */
+  targetStage?: { id: string; name: string; legacy_key?: string | null } | null;
 }
 
 export interface VoiceOpportunityPrefill {
@@ -76,11 +78,11 @@ export interface VoiceOpportunityPrefill {
   notes?: string | null;
 }
 
-export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection, prefill }: OpportunityFormProps) {
+export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection, prefill, targetStage }: OpportunityFormProps) {
   const { clients } = useClients();
   const { isMaster } = usePermissions();
   const { data: teamMembers = [] } = useTeamMembers();
-  const { createOpportunity, updateOpportunity, isCreating } = useOpportunities();
+  const { createOpportunity, updateOpportunity, updateStage, isCreating } = useOpportunities();
   const { followups: existingFollowups, syncFollowups, isSyncing } =
     useOpportunityFollowups(opportunity?.id);
   const bookingSectionRef = useRef<HTMLDivElement | null>(null);
@@ -191,6 +193,18 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
         } as any);
       });
       opportunityId = created?.id;
+      if (created?.id && targetStage && created.stage_id !== targetStage.id) {
+        try {
+          await updateStage({
+            id: created.id,
+            fromStage: created.stage,
+            toStage: targetStage.legacy_key || created.stage,
+            toStageId: targetStage.id,
+            fromStageId: created.stage_id ?? undefined,
+            toStageLabel: targetStage.name,
+          });
+        } catch { /* permanece na primeira etapa */ }
+      }
     }
 
     if (opportunityId) {
