@@ -408,7 +408,7 @@ export function OpportunityCard({
         }}
         className={cn(
           "cursor-grab active:cursor-grabbing transition-all hover:shadow-lg hover:-translate-y-0.5 bg-card border",
-          isOverdue && "ring-2 ring-destructive/60 shadow-destructive/10"
+          isOverdue && "ring-2 ring-inset ring-destructive/60 shadow-destructive/10"
         )}
       >
         <CardContent className="p-3.5">
