@@ -1755,3 +1755,14 @@ body[data-booking-selection-bar] {
 /* Espaço reservado do card ao arrastar no funil (estilo Trello). */
 @keyframes kanban-drop-open { from { opacity: 0; transform: scaleY(0.6); } to { opacity: 1; transform: scaleY(1); } }
 .kanban-drop-placeholder { animation: kanban-drop-open 120ms ease-out; transform-origin: top; }
+
+/* Rolagem vertical discreta dentro de cada coluna do funil */
+.kanban-column-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--muted-foreground) / 0.25) transparent; }
+.kanban-column-scroll::-webkit-scrollbar { width: 6px; }
+.kanban-column-scroll::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.25); border-radius: 9999px; }
+.kanban-column-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* No funil (Oportunidades/Operações) o rodapé de versão sai para liberar altura. */
+main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
+/* Com a barra de abas no topo, o painel do funil não força 100% da tela extra. */
+.min-h-screen:has(> main [data-testid="kanban-scroll-area"]) { min-height: 0; }
