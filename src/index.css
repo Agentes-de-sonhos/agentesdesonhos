@@ -1764,3 +1764,5 @@ body[data-booking-selection-bar] {
 
 /* No funil (Oportunidades/Operações) o rodapé de versão sai para liberar altura. */
 main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
+/* Com a barra de abas no topo, o painel do funil não força 100% da tela extra. */
+.min-h-screen:has(> main [data-testid="kanban-scroll-area"]) { min-height: 0; }
