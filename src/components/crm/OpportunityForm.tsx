@@ -61,9 +61,22 @@ interface OpportunityFormProps {
   onCancel: () => void;
   /** "booking-request" rola e destaca o bloco de serviços solicitados. */
   focusSection?: "booking-request";
+  /** Dados ditados por voz para uma nova oportunidade (somente sugestão). */
+  prefill?: VoiceOpportunityPrefill | null;
 }
 
-export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection }: OpportunityFormProps) {
+export interface VoiceOpportunityPrefill {
+  client_name?: string | null;
+  destination?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  adults_count?: number | null;
+  children_count?: number | null;
+  estimated_value?: number | null;
+  notes?: string | null;
+}
+
+export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection, prefill }: OpportunityFormProps) {
   const { clients } = useClients();
   const { isMaster } = usePermissions();
   const { data: teamMembers = [] } = useTeamMembers();
@@ -111,17 +124,28 @@ export function OpportunityForm({ opportunity, onSuccess, onCancel, focusSection
     resolver: zodResolver(opportunitySchema),
     defaultValues: {
       client_id: opportunity?.client_id || "",
-      destination: opportunity?.destination || "",
-      start_date: parseLocalDateSafe(opportunity?.start_date) || undefined,
-      end_date: parseLocalDateSafe(opportunity?.end_date) || undefined,
-      adults_count: opportunity?.adults_count ?? opportunity?.passengers_count ?? 1,
-      children_count: opportunity?.children_count ?? 0,
+      destination: opportunity?.destination || prefill?.destination || "",
+      start_date: parseLocalDateSafe(opportunity?.start_date ?? prefill?.start_date ?? undefined) || undefined,
+      end_date: parseLocalDateSafe(opportunity?.end_date ?? prefill?.end_date ?? undefined) || undefined,
+      adults_count: opportunity?.adults_count ?? opportunity?.passengers_count ?? prefill?.adults_count ?? 1,
+      children_count: opportunity?.children_count ?? prefill?.children_count ?? 0,
       children_ages: opportunity?.children_ages ?? [],
-      estimated_value: opportunity?.estimated_value || 0,
-      notes: opportunity?.notes || "",
+      estimated_value: opportunity?.estimated_value || prefill?.estimated_value || 0,
+      notes: opportunity?.notes || prefill?.notes || "",
       assigned_team_member_id: opportunity?.assigned_team_member_id || "__owner__",
     },
   });
+
+  // Ditado: associa o cliente citado somente quando o nome bate com um único cadastro.
+  const prefillDoneRef = useRef(false);
+  useEffect(() => {
+    if (opportunity || prefillDoneRef.current || !prefill?.client_name || !clients.length) return;
+    prefillDoneRef.current = true;
+    const norm = (v: string) => v.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+    const wanted = norm(prefill.client_name);
+    const matches = clients.filter((c: any) => norm(c.name || "").includes(wanted) || wanted.includes(norm(c.name || "x")));
+    if (matches.length === 1) form.setValue("client_id", (matches[0] as any).id, { shouldValidate: true });
+  }, [clients, prefill, opportunity]);
 
   const handleSubmit = async (data: FormData) => {
     const totalPassengers = (data.adults_count || 0) + (data.children_count || 0);
