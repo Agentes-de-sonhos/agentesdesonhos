@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { format, differenceInDays, differenceInHours, isPast, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Plus, Search, Maximize2, Minimize2, Download, Target } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2, Download, Target, ChevronsRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -34,7 +34,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { OpportunityCard } from "./OpportunityCard";
-import { OpportunityForm } from "./OpportunityForm";
+import { OpportunityForm, type VoiceOpportunityPrefill } from "./OpportunityForm";
+import { VoiceOpportunityButton } from "./kanban/VoiceOpportunityButton";
 import { StageColumnHeader } from "./StageColumnHeader";
 import { AddStageColumn } from "./AddStageColumn";
 import { DeleteStageDialog } from "./DeleteStageDialog";
@@ -121,6 +122,27 @@ export function KanbanBoard() {
   const [filterClient] = useState<string>("all");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
+  const [draggedHeight, setDraggedHeight] = useState(72);
+  const [voicePrefill, setVoicePrefill] = useState<VoiceOpportunityPrefill | null>(null);
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem("crm-kanban-collapsed") || "[]"));
+    } catch {
+      return new Set();
+    }
+  });
+  const toggleCollapsed = (id: string) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try { localStorage.setItem("crm-kanban-collapsed", JSON.stringify([...next])); } catch { /* sem armazenamento */ }
+      return next;
+    });
+  const resetDrag = () => {
+    setDraggedId(null);
+    setDragOver(null);
+  };
   const [deleteTarget, setDeleteTarget] = useState<PipelineStage | null>(null);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -219,13 +241,20 @@ export function KanbanBoard() {
         return;
       }
     }
-    setDraggedId(id);
+    const h = (e.target as HTMLElement)?.getBoundingClientRect?.().height;
+    if (h) setDraggedHeight(Math.round(h));
+    // Adia a troca de estado para o navegador capturar a imagem do card intacta.
+    requestAnimationFrame(() => setDraggedId(id));
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, stageId?: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+    if (!stageId) return;
+    setDragOver((prev) =>
+      prev && prev.stageId === stageId && prev.targetId === null ? prev : { stageId, targetId: null, before: false }
+    );
   };
 
   /**
@@ -427,7 +456,8 @@ export function KanbanBoard() {
 
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
     e.preventDefault();
-    await performDrop(toStage, null, false);
+    const target = dragOver?.stageId === toStage.id ? dragOver : null;
+    await performDrop(toStage, target?.targetId ?? null, target?.before ?? false);
     setDraggedId(null);
     setDragOver(null);
   };
@@ -506,7 +536,7 @@ export function KanbanBoard() {
               className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <Dialog open={isDialogOpen} onOpenChange={(o) => { setIsDialogOpen(o); if (!o) setVoicePrefill(null); }}>
             {canCreateOpp && (
               <DialogTrigger asChild>
                 <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" title="Nova oportunidade" aria-label="Nova oportunidade">
@@ -525,7 +555,9 @@ export function KanbanBoard() {
                   subtitle="Preencha os dados da oportunidade para adicioná-la ao funil."
                 />
                 <OpportunityForm
-                  onSuccess={() => setIsDialogOpen(false)}
+                  key={voicePrefill ? JSON.stringify(voicePrefill) : "blank"}
+                  prefill={voicePrefill}
+                  onSuccess={() => { setIsDialogOpen(false); setVoicePrefill(null); }}
                   onCancel={() => setIsDialogOpen(false)}
                 />
               </StandardPopupCard>
@@ -617,10 +649,30 @@ export function KanbanBoard() {
                       <SortableColumn key={stage.id} stage={stage}>
                         {({ dragHandleProps, isDragging }) => (
                           <div
-                            onDragOver={handleDragOver}
+                            onDragOver={(e) => handleDragOver(e, stage.id)}
                             onDrop={(e) => handleColumnDrop(e, stage)}
+                            onDragEnd={resetDrag}
                             className="flex min-h-full flex-col"
                           >
+                            {collapsed.has(stage.id) ? (
+                              <button
+                                type="button"
+                                onClick={() => toggleCollapsed(stage.id)}
+                                title={`Expandir ${stage.name}`}
+                                aria-label={`Expandir coluna ${stage.name}`}
+                                className={cn(
+                                  "flex min-h-[14rem] w-11 flex-col items-center gap-3 rounded-xl border py-3 text-foreground transition-colors hover:brightness-95",
+                                  tokens.bg,
+                                  tokens.border,
+                                  dragOver?.stageId === stage.id && "ring-2 ring-primary/50"
+                                )}
+                              >
+                                <span className="rounded-full bg-background/80 px-1.5 text-[11px] font-semibold tabular-nums">
+                                  {stageOpps.length}
+                                </span>
+                                <span className="text-xs font-semibold [writing-mode:vertical-rl]">{stage.name}</span>
+                              </button>
+                            ) : (
                             <div
                               className={cn(
                                 "flex min-h-full flex-1 flex-col rounded-xl border p-3 transition-shadow",
@@ -630,6 +682,17 @@ export function KanbanBoard() {
                               )}
                             >
 
+                              <div className="flex items-start gap-1">
+                              <button
+                                type="button"
+                                onClick={() => toggleCollapsed(stage.id)}
+                                title="Recolher coluna"
+                                aria-label={`Recolher coluna ${stage.name}`}
+                                className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-background/70 hover:text-foreground"
+                              >
+                                <ChevronsRightLeft className="h-3.5 w-3.5" />
+                              </button>
+                              <div className="min-w-0 flex-1">
                               <StageColumnHeader
                                 stage={stage}
                                 count={stageOpps.length}
@@ -646,24 +709,30 @@ export function KanbanBoard() {
                                 isProtected={isProtected}
                                 canEdit={stageCanEdit}
                               />
+                              </div>
+                              </div>
 
                               <div className="flex-1 space-y-2.5">
 
 
                                 {stageOpps.map((opportunity) => {
-                                  const isIndicator = dragOver?.stageId === stage.id && dragOver?.targetId === opportunity.id;
+                                  const isIndicator = !!draggedId && dragOver?.stageId === stage.id && dragOver?.targetId === opportunity.id;
+                                  const placeholder = (
+                                    <div
+                                      aria-hidden
+                                      className="kanban-drop-placeholder rounded-lg bg-foreground/10 ring-1 ring-inset ring-foreground/10"
+                                      style={{ height: draggedHeight }}
+                                    />
+                                  );
+                                  const isSelf = draggedId === opportunity.id;
                                   return (
                                     <div
                                       key={opportunity.id}
                                       onDragOver={(e) => handleCardDragOver(e, stage.id, opportunity.id)}
                                       onDrop={(e) => handleCardDrop(e, stage, opportunity.id)}
-                                      className={cn(
-                                        "transition-shadow",
-                                        isIndicator && dragOver?.before && "border-t-2 border-primary rounded-t-sm pt-0.5",
-                                        isIndicator && !dragOver?.before && "border-b-2 border-primary rounded-b-sm pb-0.5",
-                                        draggedId === opportunity.id && "opacity-40"
-                                      )}
+                                      className={cn("space-y-2.5", isSelf && "hidden")}
                                     >
+                                      {isIndicator && dragOver?.before && placeholder}
                                       <OpportunityCard
                                         opportunity={opportunity}
                                         onDragStart={handleDragStart}
@@ -674,10 +743,18 @@ export function KanbanBoard() {
                                           handleMoveToStage(opportunity, toStageId)
                                         }
                                       />
+                                      {isIndicator && !dragOver?.before && placeholder}
                                     </div>
                                   );
                                 })}
-                                {stageOpps.length === 0 && (
+                                {!!draggedId && dragOver?.stageId === stage.id && dragOver.targetId === null && (
+                                  <div
+                                    aria-hidden
+                                    className="kanban-drop-placeholder rounded-lg bg-foreground/10 ring-1 ring-inset ring-foreground/10"
+                                    style={{ height: draggedHeight }}
+                                  />
+                                )}
+                                {stageOpps.length === 0 && !(draggedId && dragOver?.stageId === stage.id) && (
                                   <div className="flex flex-col items-center justify-center text-center py-10 px-3 text-xs text-muted-foreground/70 border-2 border-dashed rounded-lg border-muted-foreground/15">
                                     <span className="text-lg mb-1">✨</span>
                                     <span className="font-medium text-muted-foreground">
@@ -689,7 +766,22 @@ export function KanbanBoard() {
                                   </div>
                                 )}
                               </div>
+                              {isFirstStage && canCreateOpp && (
+                                <div className="mt-2 flex items-center gap-1" data-no-kanban-drag>
+                                  <button
+                                    type="button"
+                                    onClick={() => { setVoicePrefill(null); setIsDialogOpen(true); }}
+                                    className="flex h-8 flex-1 items-center gap-1.5 rounded-md px-2 text-left text-xs font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
+                                  >
+                                    <Plus className="h-3.5 w-3.5" /> Adicionar oportunidade
+                                  </button>
+                                  <VoiceOpportunityButton
+                                    onResult={(p) => { setVoicePrefill(p); setIsDialogOpen(true); }}
+                                  />
+                                </div>
+                              )}
                             </div>
+                            )}
                           </div>
                         )}
                       </SortableColumn>
