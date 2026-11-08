@@ -50,7 +50,7 @@ describe('Brazilian cruise pages', () => {
   });
   it('keeps dated routes source-backed with complete coordinates and valid durations', () => {
     const dated = ships.filter(s => s.routes.feed.sailings.length);
-    expect(dated.map(s => s.shipSlug)).toEqual(['costa-diadema', 'costa-serena', 'buenavista']);
+    expect(dated.map(s => s.shipSlug)).toEqual(['msc-musica', 'costa-diadema', 'costa-serena', 'buenavista']);
     for (const s of dated) {
       const feed = s.routes.feed.sailings;
       expect(new Set(feed.map(r => r.date)).size).toBe(feed.length);

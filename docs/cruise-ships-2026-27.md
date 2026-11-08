@@ -72,3 +72,7 @@ Não foi possível obter calendários MSC completos e atuais pelas páginas de i
 O deploy Cloudflare Pages estava servindo o `index.html` de desenvolvimento, com `/src/main.tsx`, sem compilar a aplicação. A confirmação de deploy não comprovava a renderização da página.
 
 A prévia possui agora um artefato estático em `preview/navios/`, gerado por `node tools/cruise-preview/build.mjs`. Ele reutiliza `CruiseShipsPreview` e `CruiseShipPage`, com dados das oito páginas. Somente esse build substitui o módulo de solicitações por um bloqueio sem backend e usa a base cartográfica local. Não altera a configuração de produção nem o fluxo das agências. Regerar o artefato após mudanças nas páginas antes de atualizar o link de revisão.
+
+## Conferência editorial — 08/11/2026
+
+A revisão atual está em [cruise-ships-content-audit-2026-11-08.md](cruise-ships-content-audit-2026-11-08.md). São 66 saídas selecionadas: Musica 7, Diadema 24, Serena 8 e Buenavista 27. Esta revisão substitui as contagens e pendências de calendário descritas acima: quatro MSC permanecem sem datas e o Musica tem seleção parcial. Números contraditórios do Buenavista foram omitidos.

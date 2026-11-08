@@ -186,7 +186,7 @@
           "title": "Um encontro à mesa.",
           "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
           "items": [
-            "Savannah Aquapark",
+            "Restaurante Minuetto",
             "Confira os restaurantes incluídos na sua tarifa.",
             "Especialidades, reservas e bebidas dependem do pacote contratado."
           ]
@@ -238,7 +238,7 @@
           "name": "Externa",
           "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -267,7 +267,7 @@
       "fallbackRegion": "América do Sul",
       "coordinates": {},
       "feed": {
-        "checkedAt": "2026-11-06",
+        "checkedAt": "2026-11-08",
         "from": "2026-10-01",
         "to": "2027-04-30",
         "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
@@ -573,7 +573,7 @@
           "name": "Externa",
           "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -602,7 +602,7 @@
       "fallbackRegion": "América do Sul",
       "coordinates": {},
       "feed": {
-        "checkedAt": "2026-11-06",
+        "checkedAt": "2026-11-08",
         "from": "2026-10-01",
         "to": "2027-04-30",
         "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
@@ -614,7 +614,7 @@
           "title": "Minicruzeiros",
           "duration": "3 a 5 noites",
           "text": "Santos; escalas alternadas em Búzios, Ilhabela e Ilha Grande.",
-          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-divina-e-msc-musica-realizam-ultima-escala-na-europa-e-ja-navegam-rumo-ao-bra/"
         }
       ]
     },
@@ -914,7 +914,7 @@
           "name": "Externa",
           "image": "p38",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -935,33 +935,122 @@
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "SANTOS / RIO DE JANEIRO / ITAJAÍ / PARANAGUÁ",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
+      "text": "Veja uma seleção de minicruzeiros de 3 noites entre Santos e Búzios. A temporada também inclui viagens de 4 e 7 noites e embarques em outros portos. Datas, escalas e disponibilidade devem ser confirmadas antes da reserva.",
+      "homePortEyebrow": "SAÍDA DE SANTOS",
+      "homePortText": "Embarque e desembarque em Santos nas saídas detalhadas abaixo.",
+      "regions": [
+        "Costa brasileira"
+      ],
       "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-06",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Santos": [
+          -23.96,
+          -46.3
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-08",
+        "from": "2026-11-23",
+        "to": "2027-03-29",
+        "scope": "Seleção de minicruzeiros; não representa todo o inventário da companhia.",
+        "sailings": [
+          {
+            "date": "2026-11-23",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          },
+          {
+            "date": "2026-11-30",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-03",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-10",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          },
+          {
+            "date": "2026-12-17",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-19",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          },
+          {
+            "date": "2027-03-29",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
+            "status": "published"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Litoral brasileiro",
           "duration": "7 noites",
           "text": "Embarques no Rio, Itajaí ou Paranaguá; escalas variam conforme a saída.",
-          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-divina-e-msc-musica-realizam-ultima-escala-na-europa-e-ja-navegam-rumo-ao-bra/"
         },
         {
           "title": "Minicruzeiros",
           "duration": "3 e 4 noites",
           "text": "Santos; visitas alternadas a Búzios, Ilha Grande e Ilhabela.",
-          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-cruzeiros-convida-viajantes-a-vivenciarem-o-msc-yacht-club/"
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-divina-e-msc-musica-realizam-ultima-escala-na-europa-e-ja-navegam-rumo-ao-bra/"
         }
       ]
     },
@@ -999,8 +1088,8 @@
           "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
         },
         {
-          "title": "Renovação anunciada para novembro de 2026",
-          "text": "A MSC anuncia Yacht Club, spa e academia renovados, além de Butcher’s Cut e Kaito Sushi Bar. A ficha numérica publicada pode anteceder a conclusão das obras; confirme a configuração da sua saída."
+          "title": "Novidades da temporada 2026/2027",
+          "text": "A MSC anunciou em 6 de novembro Yacht Club, spa e academia renovados, além de Butcher’s Cut e Kaito Sushi Bar. A ficha numérica publicada pode anteceder a configuração renovada; confirme a categoria na reserva."
         }
       ],
       "paragraphs": [
@@ -1259,7 +1348,7 @@
           "name": "Externa",
           "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -1288,7 +1377,7 @@
       "fallbackRegion": "América do Sul",
       "coordinates": {},
       "feed": {
-        "checkedAt": "2026-11-06",
+        "checkedAt": "2026-11-08",
         "from": "2026-10-01",
         "to": "2027-04-30",
         "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
@@ -1532,7 +1621,7 @@
         {
           "key": "fun",
           "label": "Diversão e espetáculos",
-          "image": "p28",
+          "image": "p48",
           "title": "Reserve a noite para uma nova experiência.",
           "text": "Consulte a programação diária e escolha o que combina com você.",
           "items": [
@@ -1600,7 +1689,7 @@
           "name": "Externa",
           "image": "cabin-externa",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -1629,7 +1718,7 @@
       "fallbackRegion": "América do Sul",
       "coordinates": {},
       "feed": {
-        "checkedAt": "2026-11-06",
+        "checkedAt": "2026-11-08",
         "from": "2026-10-01",
         "to": "2027-04-30",
         "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
@@ -1888,7 +1977,7 @@
           "title": "Um encontro à mesa.",
           "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
           "items": [
-            "Carlsberg Country Rock Club",
+            "Pummid’Oro Pizzeria",
             "Confira os restaurantes incluídos na sua tarifa.",
             "Especialidades, reservas e bebidas dependem do pacote contratado."
           ]
@@ -1940,7 +2029,7 @@
           "name": "Externa",
           "image": "p50",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -2033,7 +2122,7 @@
         ]
       },
       "feed": {
-        "checkedAt": "2026-11-07",
+        "checkedAt": "2026-11-08",
         "from": "2026-11-23",
         "to": "2027-04-01",
         "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
@@ -2131,19 +2220,6 @@
           },
           {
             "date": "2026-12-20",
-            "n": 7,
-            "ports": [
-              "Santos",
-              "Buenos Aires",
-              "Montevidéu",
-              "Itajaí",
-              "Santos"
-            ],
-            "source": "https://www.costaextra.com.br/binaries/content/documents/costaportal-portuguese/downloadscatalogofacets/hippo:resultset/diptico-temporada-america-do-sul-26-27/CostaPortal:file",
-            "status": "published"
-          },
-          {
-            "date": "2026-12-27",
             "n": 7,
             "ports": [
               "Santos",
@@ -2639,7 +2715,7 @@
           "name": "Externa",
           "image": "ocean",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -2731,7 +2807,7 @@
         ]
       },
       "feed": {
-        "checkedAt": "2026-11-07",
+        "checkedAt": "2026-11-08",
         "from": "2027-01-01",
         "to": "2027-03-04",
         "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
@@ -3044,20 +3120,20 @@
       "text": "Conheça a proposta da Corazul e escolha como dividir seus dias entre descanso e descobertas.",
       "stats": [
         {
-          "value": "2.140",
-          "label": "Hóspedes — capacidade publicada"
-        },
-        {
-          "value": "939",
-          "label": "Cabines"
-        },
-        {
-          "value": "260 m",
-          "label": "Comprimento"
-        },
-        {
           "value": "13",
           "label": "Conveses"
+        },
+        {
+          "value": "Internas a suítes",
+          "label": "Acomodações"
+        },
+        {
+          "value": "Infantil e juvenil",
+          "label": "Clubes"
+        },
+        {
+          "value": "Teatro",
+          "label": "Entretenimento"
         }
       ],
       "techTitle": "O navio em detalhes",
@@ -3066,7 +3142,7 @@
       "why": [
         {
           "title": "Uma noite diferente",
-          "text": "Teatro e cinema faz parte das opções a bordo."
+          "text": "Teatro e cinema fazem parte das opções a bordo."
         },
         {
           "title": "Tempo para descobrir",
@@ -3089,14 +3165,14 @@
       "tabs": [
         {
           "key": "fun",
-          "label": "Diversão e espetáculos",
-          "image": "p19",
-          "title": "Reserve a noite para uma nova experiência.",
-          "text": "Consulte a programação diária e escolha o que combina com você.",
+          "label": "Diversão em família",
+          "image": "p55",
+          "title": "Momentos para cada idade.",
+          "text": "Conheça os espaços infantis e juvenis e consulte a programação a bordo.",
           "items": [
-            "Teatro e cinema",
-            "Espaços juvenis",
-            "Atividades, horários e restrições variam por saída."
+            "Clube infantil",
+            "Clube juvenil",
+            "Atividades, horários e faixas etárias variam por saída."
           ]
         },
         {
@@ -3158,7 +3234,7 @@
           "name": "Externa",
           "image": "p67",
           "lead": "A luz do dia também faz parte da viagem.",
-          "detail": "Janela ou vigia; algumas categorias têm vista obstruída. Confirme o código da cabine."
+          "detail": "Janela ou vigia. Confira a vista, localização e configuração da categoria escolhida."
         },
         {
           "name": "Varanda",
@@ -3256,7 +3332,7 @@
         ]
       },
       "feed": {
-        "checkedAt": "2026-11-07",
+        "checkedAt": "2026-11-08",
         "from": "2026-11-09",
         "to": "2027-03-26",
         "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
@@ -3610,20 +3686,20 @@
       "subtitle": "Buenavista",
       "facts": [
         {
-          "value": "2.140",
-          "label": "Hóspedes — capacidade publicada"
-        },
-        {
-          "value": "939",
-          "label": "Cabines"
-        },
-        {
-          "value": "260 m",
-          "label": "Comprimento"
-        },
-        {
           "value": "13",
           "label": "Conveses"
+        },
+        {
+          "value": "Internas a suítes",
+          "label": "Acomodações"
+        },
+        {
+          "value": "Infantil e juvenil",
+          "label": "Clubes"
+        },
+        {
+          "value": "Teatro",
+          "label": "Entretenimento"
         }
       ],
       "notes": [
@@ -3634,13 +3710,17 @@
         {
           "title": "Programação e operação",
           "text": "Confirme com a agência a programação atual e quais instalações estarão disponíveis na saída escolhida."
+        },
+        {
+          "title": "Informações técnicas",
+          "text": "Capacidade, total de cabines e comprimento não são exibidos porque as páginas oficiais apresentam valores divergentes."
         }
       ],
       "paragraphs": [
-        "2.140 · Hóspedes — capacidade publicada",
-        "939 · Cabines",
-        "260 m · Comprimento",
-        "13 · Conveses"
+        "13 · Conveses",
+        "Internas a suítes · Acomodações",
+        "Infantil e juvenil · Clubes",
+        "Teatro · Entretenimento"
       ]
     },
     "sources": [
