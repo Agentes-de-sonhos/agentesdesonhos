@@ -922,6 +922,8 @@ const hotelSchema = z.object({
   check_in: z.date({ required_error: "Selecione a data de check-in", invalid_type_error: "Selecione a data de check-in" }),
   check_out: z.date({ required_error: "Selecione a data de check-out", invalid_type_error: "Selecione a data de check-out" }),
   meal_plan: z.string().min(1, "Selecione o regime de alimentação"),
+  refund_policy: z.string().optional(),
+  free_cancellation_until: z.string().optional(),
   rooms: z.array(hotelRoomSchema).min(1, "Adicione pelo menos um apartamento"),
   notes: z.string().optional(),
 }).refine((v) => !v.check_in || !v.check_out || v.check_out >= v.check_in, {
@@ -966,6 +968,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
       option_label: initialData?.option_label || "", service_description: initialData?.description || "",
       hotel_name: init?.hotel_name || "", city: init?.city || prefill?.city || "",
       meal_plan: init?.meal_plan || "",
+      refund_policy: init?.refund_policy || "",
+      free_cancellation_until: init?.free_cancellation_until || "",
       rooms: initialRooms,
       notes: init?.notes || "",
       check_in: init?.check_in ? parseLocalDate(init.check_in) : tripStartDate,
@@ -1105,6 +1109,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         hotel_name: values.hotel_name, city: values.city,
         check_in: format(values.check_in, "yyyy-MM-dd"), check_out: format(values.check_out, "yyyy-MM-dd"),
         meal_plan: values.meal_plan,
+        refund_policy: values.refund_policy || "",
+        free_cancellation_until: values.refund_policy === "refundable" ? (values.free_cancellation_until || "") : "",
         // Legacy field kept for backward-compat readers
         room_type: rooms[0]?.room_type || "",
         price: total,
@@ -1232,6 +1238,21 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
                 </SelectContent>
               </Select><FormMessage /></FormItem>
           )} />
+          <FormField control={form.control} name="refund_policy" render={({ field }) => (
+            <FormItem><FormLabel>Cancelamento / Reembolso (opcional)</FormLabel>
+              <Select onValueChange={(v) => field.onChange(v === "none" ? "" : v)} value={field.value || "none"}><FormControl><SelectTrigger><SelectValue placeholder="Não informar" /></SelectTrigger></FormControl>
+                <SelectContent>
+                  <SelectItem value="none">Não informar</SelectItem>
+                  <SelectItem value="refundable">Reembolsável (cancelamento grátis)</SelectItem>
+                  <SelectItem value="non_refundable">Não reembolsável</SelectItem>
+                </SelectContent>
+              </Select><FormMessage /></FormItem>
+          )} />
+          {form.watch("refund_policy") === "refundable" && (
+            <FormField control={form.control} name="free_cancellation_until" render={({ field }) => (
+              <FormItem><FormLabel>Cancelamento grátis até (opcional)</FormLabel><FormControl><Input type="date" {...field} value={field.value || ""} /></FormControl><FormMessage /></FormItem>
+            )} />
+          )}
         </div>
 
         {/* 4b. Apartamentos */}

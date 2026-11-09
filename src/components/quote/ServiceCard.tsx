@@ -115,6 +115,7 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
       details.push(`Check-in: ${formatDate(data.check_in)}`);
       details.push(`Check-out: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`Alimentação: ${data.meal_plan}`);
+      if (hotelRefundLabel(data)) details.push(hotelRefundLabel(data) as string);
       if (Array.isArray(data.rooms) && data.rooms.length > 0) {
         const hasMulti = data.rooms.length > 1;
         data.rooms.forEach((r: any) => {

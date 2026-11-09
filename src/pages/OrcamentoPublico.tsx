@@ -245,6 +245,7 @@ function getServiceDetails(service: QuoteService): string[] {
     case "hotel":
       details.push(`${t("checkIn")}: ${formatDateShort(data.check_in)} | ${t("checkOut")}: ${formatDateShort(data.check_out)}`);
       if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
+      if (hotelRefundLabel(data)) details.push(hotelRefundLabel(data) as string);
       if (Array.isArray(data.rooms) && data.rooms.length > 0) {
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
@@ -528,6 +529,13 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
             <UtensilsCrossed className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="font-medium">{formatLabel(data.meal_plan)}</span>
           </div>
+        )}
+        {hotelRefundLabel(data) && (
+          <span className={data.refund_policy === "refundable"
+            ? "rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
+            : "rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"}>
+            {hotelRefundLabel(data)}
+          </span>
         )}
       </div>
       {rooms.length > 0 && !hasMultipleRooms && (
