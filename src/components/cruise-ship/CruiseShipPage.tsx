@@ -334,9 +334,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             </div>
             <div className="route-details" role="tabpanel" aria-live="polite" data-testid="route-details">
               {group && variant && (<>
-                <div className="eyebrow">{group.n} NOITES · {ship.routes.homePortEyebrow}</div>
+                <div className="eyebrow">{group.n} NOITES · SAÍDA DE {variant.ports[0]}</div>
                 <h3>{group.title}</h3>
-                <p>{ship.routes.homePortText}</p>
+                <p>Embarque em {variant.ports[0]} e desembarque em {variant.ports.at(-1)}.</p>
                 <div className="route-months"><strong>Meses com saídas encontradas</strong><p>{months.join(" · ")}</p></div>
                 <ol className="day-list">{variant.ports.map((p, i) => <li key={`${p}-${i}`}><span>{i === 0 ? "Início" : i === variant.ports.length - 1 ? "Fim" : i}</span><b>{p}</b></li>)}</ol>
                 <p className="note">Sequência de portos. Dias de navegação não estão representados nesta lista.</p>

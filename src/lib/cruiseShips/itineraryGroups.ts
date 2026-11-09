@@ -14,16 +14,18 @@ export function regionOf(sailing: CruiseSailing, routes: Pick<CruiseShipContent[
 }
 
 /**
- * Exact port of the approved grouping: key = nights + set of intermediate
+ * Exact port of the approved grouping: key = embark/disembark ports + nights + set of intermediate
  * ports (order-insensitive); each distinct full port order becomes a variant
  * that keeps its own dates. Group title uses the first observed order.
  */
 export function buildItineraryGroups(sailings: CruiseSailing[], routes: Pick<CruiseShipContent["routes"], "regionRules" | "fallbackRegion">): ItineraryGroup[] {
   const byGroup = new Map<string, ItineraryGroup>();
-  for (const r of eligibleSailings(sailings)) {
-    const key = `${r.n}|${[...new Set(r.ports.slice(1, -1))].sort().join("|")}`;
+  const eligible = eligibleSailings(sailings);
+  const multipleOrigins = new Set(eligible.map(s => s.ports[0])).size > 1;
+  for (const r of eligible) {
+    const key = `${r.ports[0]}|${r.ports.at(-1)}|${r.n}|${[...new Set(r.ports.slice(1, -1))].sort().join("|")}`;
     if (!byGroup.has(key)) {
-      byGroup.set(key, { id: `route-${byGroup.size}`, n: r.n, region: regionOf(r, routes), title: r.ports.slice(1, -1).join(" + "), variants: [] });
+      byGroup.set(key, { id: `route-${byGroup.size}`, n: r.n, region: regionOf(r, routes), title: r.ports.slice(1, -1).join(" + ") + (multipleOrigins ? ` · Saída de ${r.ports[0]}` : ""), variants: [] });
     }
     const g = byGroup.get(key)!;
     let v = g.variants.find((x) => x.ports.join("|") === r.ports.join("|"));

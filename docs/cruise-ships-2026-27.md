@@ -76,3 +76,7 @@ A prévia possui agora um artefato estático em `preview/navios/`, gerado por `n
 ## Conferência editorial — 08/11/2026
 
 A revisão atual está em [cruise-ships-content-audit-2026-11-08.md](cruise-ships-content-audit-2026-11-08.md). São 66 saídas selecionadas: Musica 7, Diadema 24, Serena 8 e Buenavista 27. Esta revisão substitui as contagens e pendências de calendário descritas acima: quatro MSC permanecem sem datas e o Musica tem seleção parcial. Números contraditórios do Buenavista foram omitidos.
+
+## Calendários MSC — 09/11/2026
+
+Os oito navios agora possuem seleções datadas no explorador, totalizando 205 saídas. A pendência de ausência de calendário nos quatro MSC foi resolvida para o escopo de viagens selecionadas de ida e volta com embarque no Brasil. O inventário continua explicitamente parcial. Fontes, contagens, exclusões e mudanças estão em [cruise-ships-calendar-review-2026-11-09.md](cruise-ships-calendar-review-2026-11-09.md).

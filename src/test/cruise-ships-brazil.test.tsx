@@ -50,7 +50,7 @@ describe('Brazilian cruise pages', () => {
   });
   it('keeps dated routes source-backed with complete coordinates and valid durations', () => {
     const dated = ships.filter(s => s.routes.feed.sailings.length);
-    expect(dated.map(s => s.shipSlug)).toEqual(['msc-musica', 'costa-diadema', 'costa-serena', 'buenavista']);
+    expect(dated).toHaveLength(8);
     for (const s of dated) {
       const feed = s.routes.feed.sailings;
       expect(new Set(feed.map(r => r.date)).size).toBe(feed.length);
@@ -67,6 +67,28 @@ describe('Brazilian cruise pages', () => {
     const buenavista = dated.find(s => s.shipSlug === 'buenavista')!;
     expect(buenavista.routes.feed.sailings.map(s => s.date)).not.toContain('2026-11-20');
     expect(buenavista.routes.feed.sailings.some(s => s.n === 7)).toBe(false);
+  });
+  it('keeps departure ports separate even when destinations and duration match', () => {
+    const routes = ships[0].routes;
+    const groups = buildItineraryGroups([
+      { date: '2027-01-01', n: 3, ports: ['Santos', 'Búzios', 'Santos'], status: 'published' },
+      { date: '2027-01-01', n: 3, ports: ['Rio de Janeiro', 'Búzios', 'Rio de Janeiro'], status: 'published' },
+    ], routes);
+    expect(groups).toHaveLength(2);
+    expect(groups.map(g => g.title)).toEqual(['Búzios · Saída de Santos', 'Búzios · Saída de Rio de Janeiro']);
+  });
+  it('uses the selected departure port in the page and quote form', () => {
+    const ship = ships.find(s => s.shipSlug === 'msc-virtuosa')!;
+    const groups = buildItineraryGroups(ship.routes.feed.sailings, ship.routes);
+    const salvador = groups.find(g => g.variants[0].ports[0] === 'Salvador')!;
+    render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
+    fireEvent.change(screen.getByLabelText('Duração'), { target: { value: '7' } });
+    fireEvent.change(screen.getByLabelText('Destinos'), { target: { value: salvador.id } });
+    expect(screen.getByTestId('route-details')).toHaveTextContent('Embarque em Salvador e desembarque em Salvador.');
+    fireEvent.click(screen.getByText('Quero orçamento deste roteiro'));
+    expect(screen.getByLabelText('Roteiro de interesse')).toHaveValue(salvador.id);
+    const dates = Array.from((screen.getByLabelText('Data de saída') as HTMLSelectElement).options).map(o => o.value).filter(Boolean);
+    expect(dates).toEqual(salvador.variants[0].sailings.map(s => s.date));
   });
   it('photo-only gallery wraps without displaying a nonexistent video', () => {
     const s = ships.find(s => !s.hero.video)!;

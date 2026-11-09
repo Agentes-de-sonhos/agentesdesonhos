@@ -259,21 +259,646 @@
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "SANTOS / SALVADOR / MACEIÓ",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-08",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "text": "Explore uma seleção de viagens de ida e volta com embarque em Santos, Salvador e Maceió. Escolha a duração, os destinos e a ordem das escalas para consultar as datas correspondentes. A agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SANTOS, SALVADOR E MACEIÓ",
+      "homePortText": "O porto de embarque é informado em cada roteiro.",
+      "regions": [
+        "Costa brasileira"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu",
+            "Punta del Este"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Maceió": [
+          -9.67,
+          -35.74
+        ],
+        "Salvador": [
+          -12.97,
+          -38.51
+        ],
+        "Santos": [
+          -23.96,
+          -46.3
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-09",
+        "from": "2026-12-02",
+        "to": "2027-03-27",
+        "scope": "Seleção de viagens de ida e volta com embarque no Brasil, consultadas na listagem interativa oficial; não é inventário completo nem disponibilidade em tempo real.",
+        "sailings": [
+          {
+            "date": "2026-12-02",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-05",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-08",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-09",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-12",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-15",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-16",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-19",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-22",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-02",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-05",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-06",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-09",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-12",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-13",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-16",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-19",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-20",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-23",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-26",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-27",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-30",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-02",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-03",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-06",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-09",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-10",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-13",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-16",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-17",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-20",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-23",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-24",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-27",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-02",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-03",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-06",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-09",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-10",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-13",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-16",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-17",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-20",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-23",
+            "n": 7,
+            "ports": [
+              "Salvador",
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-24",
+            "n": 7,
+            "ports": [
+              "Maceió",
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-27",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Salvador",
+              "Maceió",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-virtuosa",
+            "status": "official_checked"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Nordeste",
@@ -594,21 +1219,265 @@
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
+      "text": "Explore uma seleção de viagens de ida e volta com embarque em Santos. Escolha a duração, os destinos e a ordem das escalas para consultar as datas correspondentes. A agência confirma a disponibilidade antes da reserva.",
       "homePortEyebrow": "SANTOS",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-08",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "homePortText": "O porto de embarque é informado em cada roteiro.",
+      "regions": [
+        "Costa brasileira"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu",
+            "Punta del Este"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Santos": [
+          -23.96,
+          -46.3
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-09",
+        "from": "2026-11-29",
+        "to": "2027-03-11",
+        "scope": "Seleção de viagens de ida e volta com embarque no Brasil, consultadas na listagem interativa oficial; não é inventário completo nem disponibilidade em tempo real.",
+        "sailings": [
+          {
+            "date": "2026-11-29",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilha Grande",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-15",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-02",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-23",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-26",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-29",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-01",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-05",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilha Grande",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-09",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-12",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-15",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-19",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-22",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-25",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-01",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-04",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Ilha Grande",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-08",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-11",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-divina/itineraries",
+            "status": "official_checked"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Minicruzeiros",
@@ -935,29 +1804,58 @@
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Veja uma seleção de minicruzeiros de 3 noites entre Santos e Búzios. A temporada também inclui viagens de 4 e 7 noites e embarques em outros portos. Datas, escalas e disponibilidade devem ser confirmadas antes da reserva.",
-      "homePortEyebrow": "SAÍDA DE SANTOS",
-      "homePortText": "Embarque e desembarque em Santos nas saídas detalhadas abaixo.",
+      "text": "Explore uma seleção de viagens de ida e volta com embarque em Santos, Rio de Janeiro, Itajaí e Paranaguá. Escolha a duração, os destinos e a ordem das escalas para consultar as datas correspondentes. A agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SANTOS, RIO DE JANEIRO, ITAJAÍ E PARANAGUÁ",
+      "homePortText": "O porto de embarque é informado em cada roteiro.",
       "regions": [
         "Costa brasileira"
       ],
-      "regionRules": [],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu",
+            "Punta del Este"
+          ]
+        }
+      ],
       "fallbackRegion": "Costa brasileira",
       "coordinates": {
-        "Santos": [
-          -23.96,
-          -46.3
-        ],
         "Búzios": [
           -22.75,
           -41.88
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Paranaguá": [
+          -25.52,
+          -48.51
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ],
+        "Santos": [
+          -23.96,
+          -46.3
         ]
       },
       "feed": {
-        "checkedAt": "2026-11-08",
+        "checkedAt": "2026-11-09",
         "from": "2026-11-23",
         "to": "2027-03-29",
-        "scope": "Seleção de minicruzeiros; não representa todo o inventário da companhia.",
+        "scope": "Seleção de viagens de ida e volta com embarque no Brasil, consultadas na listagem interativa oficial; não é inventário completo nem disponibilidade em tempo real.",
         "sailings": [
           {
             "date": "2026-11-23",
@@ -967,8 +1865,20 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-11-26",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           },
           {
             "date": "2026-11-30",
@@ -978,8 +1888,8 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           },
           {
             "date": "2026-12-03",
@@ -989,8 +1899,20 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-06",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           },
           {
             "date": "2026-12-10",
@@ -1000,8 +1922,20 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-13",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           },
           {
             "date": "2026-12-17",
@@ -1011,8 +1945,470 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-22",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilha Grande",
+              "Búzios",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-02",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-03",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-05",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-09",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-10",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-12",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-16",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-17",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-19",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-23",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Ilha Grande",
+              "Búzios",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-24",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Ilha Grande",
+              "Búzios",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-26",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilha Grande",
+              "Búzios",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-30",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-31",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-02",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-06",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-07",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-09",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-13",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-14",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-16",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-20",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-21",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-23",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-27",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-28",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-02",
+            "n": 7,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-06",
+            "n": 7,
+            "ports": [
+              "Paranaguá",
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-07",
+            "n": 7,
+            "ports": [
+              "Itajaí",
+              "Ilhabela",
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilha Grande",
+              "Paranaguá",
+              "Itajaí"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-15",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           },
           {
             "date": "2027-03-19",
@@ -1022,8 +2418,20 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-22",
+            "n": 4,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Ilha Grande",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           },
           {
             "date": "2027-03-29",
@@ -1033,8 +2441,8 @@
               "Búzios",
               "Santos"
             ],
-            "source": "https://www.msccruzeiros.com.br/our-cruises/navios/msc-musica/itineraries",
-            "status": "published"
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-musica/itineraries",
+            "status": "official_checked"
           }
         ]
       },
@@ -1369,21 +2777,239 @@
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "RIO DE JANEIRO / BUENOS AIRES",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-08",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "text": "Explore uma seleção de viagens de ida e volta com embarque em Rio de Janeiro. Escolha a duração, os destinos e a ordem das escalas para consultar as datas correspondentes. A agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "RIO DE JANEIRO",
+      "homePortText": "O porto de embarque é informado em cada roteiro.",
+      "regions": [
+        "Argentina e Uruguai"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu",
+            "Punta del Este"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Ilha Grande": [
+          -23.14,
+          -44.17
+        ],
+        "Ilhabela": [
+          -23.78,
+          -45.36
+        ],
+        "Itajaí": [
+          -26.91,
+          -48.65
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Rio de Janeiro": [
+          -22.9,
+          -43.17
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-09",
+        "from": "2026-12-06",
+        "to": "2027-03-18",
+        "scope": "Seleção de viagens de ida e volta com embarque no Brasil, consultadas na listagem interativa oficial; não é inventário completo nem disponibilidade em tempo real.",
+        "sailings": [
+          {
+            "date": "2026-12-06",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-14",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-22",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-08",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilhabela",
+              "Itajaí",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-17",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-26",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-04",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Búzios",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-13",
+            "n": 9,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Ilha Grande",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-22",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-02",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-10",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-03-18",
+            "n": 8,
+            "ports": [
+              "Rio de Janeiro",
+              "Ilhabela",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Rio de Janeiro"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-splendida",
+            "status": "official_checked"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Brasil e Prata",
@@ -1710,21 +3336,408 @@
       "eyebrow": "04 / NOVOS HORIZONTES",
       "titleA": "Encontre a sua ",
       "titleB": "próxima viagem.",
-      "text": "Conheça as opções anunciadas para a temporada. A agência confirma datas, sequência de escalas e disponibilidade.",
-      "homePortEyebrow": "SANTOS / BALNEÁRIO CAMBORIÚ / BUENOS AIRES",
-      "homePortText": "Portos de embarque variam conforme a saída.",
-      "regions": [],
-      "regionRules": [],
-      "fallbackRegion": "América do Sul",
-      "coordinates": {},
-      "feed": {
-        "checkedAt": "2026-11-08",
-        "from": "2026-10-01",
-        "to": "2027-04-30",
-        "scope": "Temporada brasileira 2026/2027; datas específicas ainda não importadas.",
-        "sailings": []
+      "text": "Explore uma seleção de viagens de ida e volta com embarque em Santos e Balneário Camboriú. Escolha a duração, os destinos e a ordem das escalas para consultar as datas correspondentes. A agência confirma a disponibilidade antes da reserva.",
+      "homePortEyebrow": "SANTOS E BALNEÁRIO CAMBORIÚ",
+      "homePortText": "O porto de embarque é informado em cada roteiro.",
+      "regions": [
+        "Costa brasileira",
+        "Argentina e Uruguai"
+      ],
+      "regionRules": [
+        {
+          "region": "Argentina e Uruguai",
+          "ports": [
+            "Buenos Aires",
+            "Montevidéu",
+            "Punta del Este"
+          ]
+        }
+      ],
+      "fallbackRegion": "Costa brasileira",
+      "coordinates": {
+        "Balneário Camboriú": [
+          -26.99,
+          -48.61
+        ],
+        "Buenos Aires": [
+          -34.59,
+          -58.37
+        ],
+        "Búzios": [
+          -22.75,
+          -41.88
+        ],
+        "Montevidéu": [
+          -34.9,
+          -56.21
+        ],
+        "Punta del Este": [
+          -34.96,
+          -54.95
+        ],
+        "Santos": [
+          -23.96,
+          -46.3
+        ]
       },
-      "geography": "",
+      "feed": {
+        "checkedAt": "2026-11-09",
+        "from": "2026-11-29",
+        "to": "2027-02-28",
+        "scope": "Seleção de viagens de ida e volta com embarque no Brasil, consultadas na listagem interativa oficial; não é inventário completo nem disponibilidade em tempo real.",
+        "sailings": [
+          {
+            "date": "2026-11-29",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Búzios",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-02",
+            "n": 3,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-05",
+            "n": 8,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Montevidéu",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-06",
+            "n": 8,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Montevidéu",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-13",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-14",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-20",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-21",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-27",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2026-12-28",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-03",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-04",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-10",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Montevidéu",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-11",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Montevidéu",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-17",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-18",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-24",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-25",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-01-31",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-01",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-07",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-08",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-14",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-15",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-21",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-22",
+            "n": 7,
+            "ports": [
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos",
+              "Balneário Camboriú"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          },
+          {
+            "date": "2027-02-28",
+            "n": 7,
+            "ports": [
+              "Santos",
+              "Balneário Camboriú",
+              "Punta del Este",
+              "Buenos Aires",
+              "Santos"
+            ],
+            "source": "https://www.msccruzeiros.com.br/nossos-cruzeiros/navios/msc-seaview",
+            "status": "official_checked"
+          }
+        ]
+      },
+      "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
           "title": "Brasil, Argentina e Uruguai",
