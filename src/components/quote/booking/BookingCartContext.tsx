@@ -347,7 +347,7 @@ export function BookingCartProvider({
             client_notes: [
               hotelRateChoiceNotes(
                 services.filter((s) => effectiveIds.includes(s.id)) as any,
-                (v) => formatQuoteCurrency(v, getQuoteCurrencyInfo(quote as any)),
+                (v) => formatQuoteCurrency(v, currency),
               ),
               input.notes.trim(),
             ].filter(Boolean).join("\n\n") || null,
