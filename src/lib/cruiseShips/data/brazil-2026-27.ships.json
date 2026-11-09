@@ -162,13 +162,13 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC VIRTUOSA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "Uma galeria coberta, espetáculos e encontros em família dão ritmo à viagem.",
+      "titleA": "Um navio de encontros.",
+      "titleB": "Uma viagem de descobertas.",
+      "text": "Da Galleria Virtuosa ao deck de piscinas, encontre espaços para passear, brincar e aproveitar as noites a bordo.",
       "stats": [
         {
           "value": "6.334",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada"
         },
         {
           "value": "2.421",
@@ -181,27 +181,35 @@
         {
           "value": "181.541",
           "label": "Arqueação bruta (GT)"
+        },
+        {
+          "value": "43 m",
+          "label": "Largura"
+        },
+        {
+          "value": "65 m",
+          "label": "Altura"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Galleria Virtuosa faz parte das opções a bordo."
+          "title": "Um passeio sob as luzes",
+          "text": "A Galleria Virtuosa reúne lojas e lugares para comer sob um teto de LED que transforma o ambiente."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Noites com diferentes cenários",
+          "text": "O Le Grand Théâtre e o TV Studio & Bar dão espaço a espetáculos e entretenimento."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "Diversão para os pequenos",
+          "text": "Áreas LEGO, Baby Club Chicco e o Savannah Aquapark oferecem opções para diferentes idades."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Sabores para explorar",
+          "text": "Minuetto, ¡Hola! Tacos & Cantina e Kaito Sushi Bar mostram diferentes propostas de gastronomia."
         }
       ]
     },
@@ -966,37 +974,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "MSC Virtuosa",
+      "subtitle": "Conheça os números e a estrutura do MSC Virtuosa.",
       "facts": [
         {
           "value": "6.334",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada",
+          "detail": "Hóspedes, conforme a ficha da MSC"
         },
         {
           "value": "2.421",
-          "label": "Cabines"
+          "label": "Cabines",
+          "detail": "Categorias internas, externas, varandas e suítes"
         },
         {
           "value": "331 m",
-          "label": "Comprimento"
+          "label": "Comprimento",
+          "detail": "Comprimento total publicado"
         },
         {
           "value": "181.541",
-          "label": "Arqueação bruta (GT)"
+          "label": "Arqueação bruta (GT)",
+          "detail": "Medida do volume interno; não é o peso do navio"
+        },
+        {
+          "value": "43 m",
+          "label": "Largura",
+          "detail": "Dimensão publicada pela companhia"
+        },
+        {
+          "value": "65 m",
+          "label": "Altura",
+          "detail": "Dimensão publicada pela companhia"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Capacidade e configuração",
+          "text": "A capacidade publicada considera a configuração de ocupação do navio. Categoria, número de hóspedes e benefícios variam por cabine."
+        },
+        {
+          "title": "Fonte dos números",
+          "text": "Ficha técnica da página oficial brasileira da MSC, consultada em 9 de novembro de 2026. GT é uma medida de volume interno, não o peso em toneladas."
         }
       ],
-      "paragraphs": [
-        "6.334 · Hóspedes — capacidade publicada",
-        "2.421 · Cabines",
-        "331 m · Comprimento",
-        "181.541 · Arqueação bruta (GT)"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -1178,13 +1199,13 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC DIVINA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "Escadarias de cristal e o Teatro Pantheon compõem um cenário de inspiração clássica.",
+      "titleA": "Elegância em cada encontro.",
+      "titleB": "O mar em cada pausa.",
+      "text": "Escadarias de cristal, lounges e restaurantes com vista para o oceano compõem uma viagem de inspiração clássica.",
       "stats": [
         {
           "value": "4.345",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada"
         },
         {
           "value": "1.751",
@@ -1197,27 +1218,35 @@
         {
           "value": "139.072",
           "label": "Arqueação bruta (GT)"
+        },
+        {
+          "value": "37,92 m",
+          "label": "Largura"
+        },
+        {
+          "value": "67,69 m",
+          "label": "Altura"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Teatro Pantheon faz parte das opções a bordo."
+          "title": "Um cenário para a noite",
+          "text": "O Teatro Pantheon recebe espetáculos; o Golden Jazz Bar é outra opção para aproveitar a noite."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Detalhes que convidam a passear",
+          "text": "As escadarias Swarovski e a galeria de arte fazem parte dos ambientes para descobrir a bordo."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "À mesa, diferentes escolhas",
+          "text": "Villa Rossa, Black Crab e Calumet Buffet oferecem ambientes distintos para as refeições."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Uma pausa com vista",
+          "text": "O MSC Aurea Spa reúne tratamentos e espaços de bem-estar para alternar com as escalas."
         }
       ]
     },
@@ -1595,37 +1624,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "MSC Divina",
+      "subtitle": "Conheça os números e a estrutura do MSC Divina.",
       "facts": [
         {
           "value": "4.345",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada",
+          "detail": "Hóspedes, conforme a ficha da MSC"
         },
         {
           "value": "1.751",
-          "label": "Cabines"
+          "label": "Cabines",
+          "detail": "Categorias internas, externas, varandas e suítes"
         },
         {
           "value": "333,30 m",
-          "label": "Comprimento"
+          "label": "Comprimento",
+          "detail": "Comprimento total publicado"
         },
         {
           "value": "139.072",
-          "label": "Arqueação bruta (GT)"
+          "label": "Arqueação bruta (GT)",
+          "detail": "Medida do volume interno; não é o peso do navio"
+        },
+        {
+          "value": "37,92 m",
+          "label": "Largura",
+          "detail": "Dimensão publicada pela companhia"
+        },
+        {
+          "value": "67,69 m",
+          "label": "Altura",
+          "detail": "Dimensão publicada pela companhia"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Capacidade e configuração",
+          "text": "A capacidade publicada considera a configuração de ocupação do navio. Categoria, número de hóspedes e benefícios variam por cabine."
+        },
+        {
+          "title": "Fonte dos números",
+          "text": "Ficha técnica da página oficial brasileira da MSC, consultada em 9 de novembro de 2026. GT é uma medida de volume interno, não o peso em toneladas."
         }
       ],
-      "paragraphs": [
-        "4.345 · Hóspedes — capacidade publicada",
-        "1.751 · Cabines",
-        "333,30 m · Comprimento",
-        "139.072 · Arqueação bruta (GT)"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -1806,17 +1848,17 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC MUSICA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "Entre o hall com cascata, os espaços de convivência e o teatro, escolha seu próprio compasso.",
+      "titleA": "Cada dia, um novo compasso.",
+      "titleB": "Cada pausa, o seu ritmo.",
+      "text": "Entre a cascata do hall, os decks de piscinas e o Teatro La Scala, descubra a bordo seu jeito de aproveitar o mar.",
       "stats": [
         {
           "value": "3.223",
-          "label": "Hóspedes — ficha publicada"
+          "label": "Capacidade publicada"
         },
         {
           "value": "1.275",
-          "label": "Cabines — ficha publicada"
+          "label": "Cabines"
         },
         {
           "value": "293,80 m",
@@ -1825,27 +1867,35 @@
         {
           "value": "92.409",
           "label": "Arqueação bruta (GT)"
+        },
+        {
+          "value": "32,20 m",
+          "label": "Largura"
+        },
+        {
+          "value": "59,64 m",
+          "label": "Altura"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Teatro La Scala faz parte das opções a bordo."
+          "title": "O palco da sua noite",
+          "text": "O Teatro La Scala e os lounges recebem a programação de entretenimento do navio."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Encontros pelo caminho",
+          "text": "Bar della Cascata e L’Enoteca são convites para conversar entre uma atividade e outra."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "Dias para estar ao ar livre",
+          "text": "As áreas de piscina La Spiaggia e Copacabana permitem alternar um mergulho com o descanso."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Espaço para renovar as energias",
+          "text": "Spa e academia renovados fazem parte das novidades anunciadas para a temporada 2026/2027."
         }
       ]
     },
@@ -2613,41 +2663,54 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "MSC Musica",
+      "subtitle": "Conheça os números e a estrutura do MSC Musica.",
       "facts": [
         {
           "value": "3.223",
-          "label": "Hóspedes — ficha publicada"
+          "label": "Capacidade publicada",
+          "detail": "Hóspedes, conforme a ficha da MSC"
         },
         {
           "value": "1.275",
-          "label": "Cabines — ficha publicada"
+          "label": "Cabines",
+          "detail": "Categorias internas, externas, varandas e suítes"
         },
         {
           "value": "293,80 m",
-          "label": "Comprimento"
+          "label": "Comprimento",
+          "detail": "Comprimento total publicado"
         },
         {
           "value": "92.409",
-          "label": "Arqueação bruta (GT)"
+          "label": "Arqueação bruta (GT)",
+          "detail": "Medida do volume interno; não é o peso do navio"
+        },
+        {
+          "value": "32,20 m",
+          "label": "Largura",
+          "detail": "Dimensão publicada pela companhia"
+        },
+        {
+          "value": "59,64 m",
+          "label": "Altura",
+          "detail": "Dimensão publicada pela companhia"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Capacidade e configuração",
+          "text": "A capacidade publicada considera a configuração de ocupação do navio. Categoria, número de hóspedes e benefícios variam por cabine."
+        },
+        {
+          "title": "Fonte dos números",
+          "text": "Ficha técnica da página oficial brasileira da MSC, consultada em 9 de novembro de 2026. GT é uma medida de volume interno, não o peso em toneladas."
         },
         {
           "title": "Novidades da temporada 2026/2027",
           "text": "A MSC anunciou em 6 de novembro Yacht Club, spa e academia renovados, além de Butcher’s Cut e Kaito Sushi Bar. A ficha numérica publicada pode anteceder a configuração renovada; confirme a categoria na reserva."
         }
       ],
-      "paragraphs": [
-        "3.223 · Hóspedes — ficha publicada",
-        "1.275 · Cabines — ficha publicada",
-        "293,80 m · Comprimento",
-        "92.409 · Arqueação bruta (GT)"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -2828,13 +2891,13 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC SPLENDIDA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "Um navio para alternar piscinas, gastronomia e espetáculos entre uma escala e outra.",
+      "titleA": "Dias para explorar.",
+      "titleB": "Noites para lembrar.",
+      "text": "Piscinas, teatro e espaços de convivência dão diferentes cenários à viagem, do primeiro passeio ao último espetáculo.",
       "stats": [
         {
           "value": "4.363",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada"
         },
         {
           "value": "1.637",
@@ -2847,27 +2910,35 @@
         {
           "value": "137.936",
           "label": "Arqueação bruta (GT)"
+        },
+        {
+          "value": "37,92 m",
+          "label": "Largura"
+        },
+        {
+          "value": "66,80 m",
+          "label": "Altura"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Teatro The Strand faz parte das opções a bordo."
+          "title": "Um espetáculo a cada noite",
+          "text": "O Teatro The Strand é um dos pontos de encontro para acompanhar a programação a bordo."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Diversão além da piscina",
+          "text": "Tobogã, Arena Sport Center e clubes infantis ampliam as possibilidades dos dias de navegação."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "Sabores em boa companhia",
+          "text": "Villa Verde, Pago Pago Buffet e Butcher’s Cut oferecem propostas diferentes à mesa."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Tempo para desacelerar",
+          "text": "Playa del Sol e o spa são alternativas para reservar uma pausa entre as atividades."
         }
       ]
     },
@@ -3219,37 +3290,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "MSC Splendida",
+      "subtitle": "Conheça os números e a estrutura do MSC Splendida.",
       "facts": [
         {
           "value": "4.363",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada",
+          "detail": "Hóspedes, conforme a ficha da MSC"
         },
         {
           "value": "1.637",
-          "label": "Cabines"
+          "label": "Cabines",
+          "detail": "Categorias internas, externas, varandas e suítes"
         },
         {
           "value": "333,30 m",
-          "label": "Comprimento"
+          "label": "Comprimento",
+          "detail": "Comprimento total publicado"
         },
         {
           "value": "137.936",
-          "label": "Arqueação bruta (GT)"
+          "label": "Arqueação bruta (GT)",
+          "detail": "Medida do volume interno; não é o peso do navio"
+        },
+        {
+          "value": "37,92 m",
+          "label": "Largura",
+          "detail": "Dimensão publicada pela companhia"
+        },
+        {
+          "value": "66,80 m",
+          "label": "Altura",
+          "detail": "Dimensão publicada pela companhia"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Capacidade e configuração",
+          "text": "A capacidade publicada considera a configuração de ocupação do navio. Categoria, número de hóspedes e benefícios variam por cabine."
+        },
+        {
+          "title": "Fonte dos números",
+          "text": "Ficha técnica da página oficial brasileira da MSC, consultada em 9 de novembro de 2026. GT é uma medida de volume interno, não o peso em toneladas."
         }
       ],
-      "paragraphs": [
-        "4.363 · Hóspedes — capacidade publicada",
-        "1.637 · Cabines",
-        "333,30 m · Comprimento",
-        "137.936 · Arqueação bruta (GT)"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -3430,13 +3514,13 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC SEAVIEW",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "A promenade externa convida a caminhar e encontrar um novo ângulo do horizonte.",
+      "titleA": "Mais perto do horizonte.",
+      "titleB": "Mais tempo ao ar livre.",
+      "text": "Caminhe pela promenade externa, descubra piscinas com vista e acompanhe o mar em diferentes momentos do dia.",
       "stats": [
         {
           "value": "5.079",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada"
         },
         {
           "value": "2.026",
@@ -3449,27 +3533,35 @@
         {
           "value": "153.516",
           "label": "Arqueação bruta (GT)"
+        },
+        {
+          "value": "41 m",
+          "label": "Largura"
+        },
+        {
+          "value": "74,8 m",
+          "label": "Altura"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Metropolitan Theatre faz parte das opções a bordo."
+          "title": "O mar acompanha o passeio",
+          "text": "A promenade externa contorna o navio e conecta restaurantes, bares e áreas para descansar."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Diversão em movimento",
+          "text": "Forest Aquaventure Park, boliche e clubes infantis oferecem atividades para diferentes idades."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "Quando a noite chega",
+          "text": "O Metropolitan Theatre e o átrio de quatro decks recebem espetáculos e entretenimento."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Uma mesa, uma nova vista",
+          "text": "Ocean Cay, Ocean Point e Venchi 1878 são alguns dos espaços para explorar os sabores a bordo."
         }
       ]
     },
@@ -3996,37 +4088,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "MSC Seaview",
+      "subtitle": "Conheça os números e a estrutura do MSC Seaview.",
       "facts": [
         {
           "value": "5.079",
-          "label": "Hóspedes — capacidade publicada"
+          "label": "Capacidade publicada",
+          "detail": "Hóspedes, conforme a ficha da MSC"
         },
         {
           "value": "2.026",
-          "label": "Cabines"
+          "label": "Cabines",
+          "detail": "Categorias internas, externas, varandas e suítes"
         },
         {
           "value": "323 m",
-          "label": "Comprimento"
+          "label": "Comprimento",
+          "detail": "Comprimento total publicado"
         },
         {
           "value": "153.516",
-          "label": "Arqueação bruta (GT)"
+          "label": "Arqueação bruta (GT)",
+          "detail": "Medida do volume interno; não é o peso do navio"
+        },
+        {
+          "value": "41 m",
+          "label": "Largura",
+          "detail": "Dimensão publicada pela companhia"
+        },
+        {
+          "value": "74,8 m",
+          "label": "Altura",
+          "detail": "Dimensão publicada pela companhia"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Capacidade e configuração",
+          "text": "A capacidade publicada considera a configuração de ocupação do navio. Categoria, número de hóspedes e benefícios variam por cabine."
+        },
+        {
+          "title": "Fonte dos números",
+          "text": "Ficha técnica da página oficial brasileira da MSC, consultada em 9 de novembro de 2026. GT é uma medida de volume interno, não o peso em toneladas."
         }
       ],
-      "paragraphs": [
-        "5.079 · Hóspedes — capacidade publicada",
-        "2.026 · Cabines",
-        "323 m · Comprimento",
-        "153.516 · Arqueação bruta (GT)"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -4208,10 +4313,18 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O COSTA DIADEMA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "Da conversa no bar aos espetáculos, reserve espaço para aproveitar também o caminho.",
+      "titleA": "Dias leves. Noites vivas.",
+      "titleB": "A Itália acompanha você.",
+      "text": "Do Lido Diana ao Teatro Emerald, descubra um navio que combina encontros, sabores italianos e pausas à beira-mar.",
       "stats": [
+        {
+          "value": "2014",
+          "label": "Ano de estreia"
+        },
+        {
+          "value": "306 m",
+          "label": "Comprimento"
+        },
         {
           "value": "756",
           "label": "Cabines com varanda"
@@ -4229,25 +4342,25 @@
           "label": "Bares"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Teatro Emerald faz parte das opções a bordo."
+          "title": "A noite ganha um palco",
+          "text": "O Teatro Emerald e a discoteca Pietra di Luna oferecem diferentes formas de aproveitar a programação."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Um encontro no Orlov",
+          "text": "O Gran Bar Orlov e o átrio Eliodoro são espaços para conversar e descobrir os ambientes do navio."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "À mesa, um toque italiano",
+          "text": "Pummid’Oro e outras opções de restaurantes e bares convidam a explorar sabores ao longo da viagem."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Uma pausa para o bem-estar",
+          "text": "Piscinas, sauna e talassoterapia permitem alternar diversão e descanso; serviços do spa são adicionais."
         }
       ]
     },
@@ -4747,37 +4860,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "Costa Diadema",
+      "subtitle": "Conheça os números e a estrutura do Costa Diadema.",
       "facts": [
         {
+          "value": "2014",
+          "label": "Ano de estreia",
+          "detail": "Entrada em serviço publicada pela Costa"
+        },
+        {
+          "value": "306 m",
+          "label": "Comprimento",
+          "detail": "Comprimento total no material técnico da companhia"
+        },
+        {
           "value": "756",
-          "label": "Cabines com varanda"
+          "label": "Cabines com varanda",
+          "detail": "Quantidade divulgada na página brasileira"
         },
         {
           "value": "11",
-          "label": "Piscinas + hidromassagens"
+          "label": "Piscinas + hidromassagens",
+          "detail": "Contagem conjunta; não significa 11 piscinas"
         },
         {
           "value": "8",
-          "label": "Restaurantes"
+          "label": "Restaurantes",
+          "detail": "Opções gratuitas e de especialidades"
         },
         {
           "value": "11",
-          "label": "Bares"
+          "label": "Bares",
+          "detail": "Espaços com consumo conforme a tarifa ou pacote"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Como ler os números",
+          "text": "Piscinas e hidromassagens aparecem somadas na contagem da Costa. Restaurantes de especialidades, bebidas e spa podem ter cobrança adicional."
+        },
+        {
+          "title": "Fontes e configuração",
+          "text": "Instalações conforme a página brasileira do navio, consultada em 9 de novembro de 2026. Ano de estreia e comprimento conforme material técnico oficial da Costa; confirme a categoria e os serviços incluídos na proposta."
         }
       ],
-      "paragraphs": [
-        "756 · Cabines com varanda",
-        "11 · Piscinas + hidromassagens",
-        "8 · Restaurantes",
-        "11 · Bares"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -4922,10 +5048,18 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O COSTA SERENA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "O Serena renovado reúne referências à mitologia com cores e ambientes de inspiração pop.",
+      "titleA": "Um clássico, novas cores.",
+      "titleB": "Sua viagem ganha vida.",
+      "text": "Renovado em 2025, o Costa Serena combina referências à mitologia, ambientes de inspiração pop e novos momentos à beira-mar.",
       "stats": [
+        {
+          "value": "2007",
+          "label": "Ano de estreia"
+        },
+        {
+          "value": "2025",
+          "label": "Renovação"
+        },
         {
           "value": "571",
           "label": "Cabines com varanda"
@@ -4943,25 +5077,25 @@
           "label": "Bares e lounges"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Teatro faz parte das opções a bordo."
+          "title": "O mito ganhou novas cores",
+          "text": "A decoração renovada leva referências à mitologia aos espaços de convivência do navio."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Dias de piscina e horizonte",
+          "text": "Lido Sole e Sunset Bar oferecem cenários para descansar e conversar entre as escalas."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "Sabores com sotaque italiano",
+          "text": "A Pummid’Oro reúne pizza e um ambiente renovado; restaurantes de especialidades têm cobrança própria."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "A noite continua a bordo",
+          "text": "Teatro, bares e lounges oferecem alternativas para acompanhar a programação depois do jantar."
         }
       ]
     },
@@ -5278,37 +5412,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "Costa Serena",
+      "subtitle": "Conheça os números e a estrutura do Costa Serena.",
       "facts": [
         {
+          "value": "2007",
+          "label": "Ano de estreia",
+          "detail": "Entrega do navio registrada pela Fincantieri"
+        },
+        {
+          "value": "2025",
+          "label": "Renovação",
+          "detail": "Renovação concluída em novembro"
+        },
+        {
           "value": "571",
-          "label": "Cabines com varanda"
+          "label": "Cabines com varanda",
+          "detail": "Quantidade divulgada na página brasileira"
         },
         {
           "value": "7",
-          "label": "Piscinas + hidromassagens"
+          "label": "Piscinas + hidromassagens",
+          "detail": "Contagem conjunta de piscinas e hidromassagens"
         },
         {
           "value": "8",
-          "label": "Restaurantes e snack bars"
+          "label": "Restaurantes e snack bars",
+          "detail": "Opções de refeições e lanches"
         },
         {
           "value": "9",
-          "label": "Bares e lounges"
+          "label": "Bares e lounges",
+          "detail": "Ambientes para encontros e entretenimento"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Renovação e estrutura",
+          "text": "O navio foi entregue em 2007 e renovado em novembro de 2025. A decoração e os ambientes atuais refletem essa renovação."
+        },
+        {
+          "title": "Fontes dos números",
+          "text": "Instalações conforme a página brasileira da Costa, consultada em 9 de novembro de 2026. Piscinas e hidromassagens são contadas juntas. Quantidades em outras versões do site podem diferir; confirme serviços e categoria na proposta."
         }
       ],
-      "paragraphs": [
-        "571 · Cabines com varanda",
-        "7 · Piscinas + hidromassagens",
-        "8 · Restaurantes e snack bars",
-        "9 · Bares e lounges"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {
@@ -5491,46 +5638,54 @@
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O BUENAVISTA",
-      "titleA": "Seu tempo no mar.",
-      "titleB": "Do seu jeito.",
-      "text": "Conheça a proposta da Corazul e escolha como dividir seus dias entre descanso e descobertas.",
+      "titleA": "O mar convida a ficar.",
+      "titleB": "Cada dia, um novo encontro.",
+      "text": "Entre o teatro, os lounges e os momentos à beira-mar, descubra um navio de inspiração mediterrânea para aproveitar em boa companhia.",
       "stats": [
         {
           "value": "13",
           "label": "Conveses"
         },
         {
-          "value": "Internas a suítes",
-          "label": "Acomodações"
+          "value": "260 m",
+          "label": "Comprimento*"
         },
         {
-          "value": "Infantil e juvenil",
-          "label": "Clubes"
+          "value": "939",
+          "label": "Cabines*"
         },
         {
-          "value": "Teatro",
-          "label": "Entretenimento"
+          "value": "3",
+          "label": "Piscinas + hidromassagens*"
+        },
+        {
+          "value": "5",
+          "label": "Restaurantes*"
+        },
+        {
+          "value": "7",
+          "label": "Bares*"
         }
       ],
-      "techTitle": "O navio em detalhes",
-      "techText": "Confira estrutura e informações para planejar a viagem.",
+      "techTitle": "Conheça o navio em detalhes",
+      "techText": "Números, estrutura e características para planejar sua viagem.",
       "techButton": "Ver ficha técnica do navio",
       "why": [
         {
-          "title": "Uma noite diferente",
-          "text": "Teatro e cinema fazem parte das opções a bordo."
+          "title": "O espetáculo faz parte",
+          "text": "Teatro e Starlight são espaços para acompanhar a programação e aproveitar as noites de navegação."
         },
         {
-          "title": "Tempo para descobrir",
-          "text": "Alterne as escalas com momentos para conhecer o navio."
+          "title": "Encontros com sabor",
+          "text": "Restaurantes, Café del Mundo e bares como o Tiffany oferecem diferentes ambientes para conversar à mesa."
         },
         {
-          "title": "Viaje em companhia",
-          "text": "Escolha atividades e horários que combinem com seu grupo."
+          "title": "Tempo para cada geração",
+          "text": "O clube infantil Joven Tripulación atende faixas de 3 a 12 anos; o Buenaonda é voltado aos jovens a partir de 13."
         },
         {
-          "title": "Espaço para desacelerar",
-          "text": "Deixe um tempo livre para conversar, ler ou simplesmente olhar o mar."
+          "title": "Também dá para desacelerar",
+          "text": "Biblioteca, spa e área de hidromassagem são convites para reservar uma pausa entre as escalas."
         }
       ]
     },
@@ -6059,45 +6214,50 @@
     },
     "tech": {
       "title": "Ficha técnica do navio",
-      "subtitle": "Buenavista",
+      "subtitle": "Conheça os números e a estrutura do Buenavista.",
       "facts": [
         {
+          "value": "2.140",
+          "label": "Capacidade publicada",
+          "detail": "Hóspedes, conforme a página dedicada ao navio"
+        },
+        {
+          "value": "939",
+          "label": "Cabines",
+          "detail": "Categorias internas, externas, varandas e suítes"
+        },
+        {
           "value": "13",
-          "label": "Conveses"
+          "label": "Conveses",
+          "detail": "Estrutura divulgada pela Corazul"
         },
         {
-          "value": "Internas a suítes",
-          "label": "Acomodações"
+          "value": "260 m",
+          "label": "Comprimento",
+          "detail": "Medida publicada na ficha do navio"
         },
         {
-          "value": "Infantil e juvenil",
-          "label": "Clubes"
+          "value": "3",
+          "label": "Piscinas e hidromassagens",
+          "detail": "Contagem conjunta; não significa três piscinas"
         },
         {
-          "value": "Teatro",
-          "label": "Entretenimento"
+          "value": "5",
+          "label": "Restaurantes",
+          "detail": "Além de sete bares, segundo a ficha da companhia"
         }
       ],
       "notes": [
         {
-          "title": "Antes de escolher",
-          "text": "Capacidade, configuração e serviços podem mudar. Confirme as características da saída e da cabine na proposta."
+          "title": "Fonte dos números",
+          "text": "Adotamos a página oficial dedicada ao Buenavista, consultada em 9 de novembro de 2026. Páginas de roteiros da Corazul trazem números diferentes para capacidade, cabines, comprimento e instalações; esses valores são uma referência publicada, não uma garantia da configuração de cada saída."
         },
         {
-          "title": "Programação e operação",
-          "text": "Confirme com a agência a programação atual e quais instalações estarão disponíveis na saída escolhida."
-        },
-        {
-          "title": "Informações técnicas",
-          "text": "Capacidade, total de cabines e comprimento não são exibidos porque as páginas oficiais apresentam valores divergentes."
+          "title": "Famílias e serviços",
+          "text": "Clube infantil para faixas de 3 a 12 anos e clube juvenil a partir de 13. Programação, acesso a atividades, restaurantes de especialidades e spa dependem das condições da viagem."
         }
       ],
-      "paragraphs": [
-        "13 · Conveses",
-        "Internas a suítes · Acomodações",
-        "Infantil e juvenil · Clubes",
-        "Teatro · Entretenimento"
-      ]
+      "paragraphs": []
     },
     "sources": [
       {

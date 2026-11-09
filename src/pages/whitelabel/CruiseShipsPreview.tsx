@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import { CRUISE_SHIPS } from "@/lib/cruiseShips";
 import { CruiseShipPage } from "@/components/cruise-ship/CruiseShipPage";
@@ -19,7 +19,7 @@ export default function CruiseShipsPreview() {
     return () => meta.remove();
   }, [allowed, ship.shipName]);
   if (!allowed) return <main className="p-8">Página indisponível.</main>;
-  return <>
+  return <div className="cruise-preview" style={{ "--primary": "224 38% 12%", "--primary-foreground": "0 0% 100%", "--wl-ink": "224 38% 12%", "--wl-sand": "240 33% 98%" } as CSSProperties}>
     <header className="border-b bg-background p-4 text-foreground">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4">
         <div><strong>Prévia dos navios</strong><p className="text-sm">Versão para revisão. Envio de orçamento desativado; identidade visual de referência.</p></div>
@@ -29,5 +29,5 @@ export default function CruiseShipsPreview() {
       </div>
     </header>
     <CruiseShipPage key={ship.shipSlug} ship={ship} hostname="review.preview.local" />
-  </>;
+  </div>;
 }

@@ -275,7 +275,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
         <section id="csp-sobre">
           <div className="section-head"><div><div className="eyebrow">{ship.about.eyebrow}</div><h2>{ship.about.titleA}<br /><em>{ship.about.titleB}</em></h2></div><p>{ship.about.text}</p></div>
-          <div className="stats">{ship.about.stats.map((s) => <div key={s.label}><b>{s.value}</b><span>{s.label}</span></div>)}</div>
+          <div className="stats" style={{ "--stats-count": Math.min(ship.about.stats.length, 6) } as CSSProperties}>{ship.about.stats.map((s) => <div key={s.label}><b>{s.value}</b><span>{s.label}</span></div>)}</div>
           <div className="tech-entry"><div><strong>{ship.about.techTitle}</strong><p>{ship.about.techText}</p></div><button className="button" aria-haspopup="dialog" onClick={() => openDialog(techRef.current)}>{ship.about.techButton}</button></div>
           <div className="why">{ship.about.why.map((w, i) => <div key={w.title}><span className="number">{String(i + 1).padStart(2, "0")}</span><h3>{w.title}</h3><p>{w.text}</p></div>)}</div>
         </section>
@@ -441,7 +441,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           {ship.tech.subtitle && <p>{ship.tech.subtitle}</p>}
         </header>
         {ship.tech.facts?.length ? (
-          <dl className="tech-facts">
+          <dl className="tech-facts" style={{ "--facts-columns": ship.tech.facts.length === 4 ? 2 : 3 } as CSSProperties}>
             {ship.tech.facts.map((fact) => (
               <div className="tech-fact" key={fact.label}>
                 <dt>{fact.label}</dt>

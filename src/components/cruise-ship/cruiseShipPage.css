@@ -41,7 +41,7 @@
 .csp.csp.csp section{padding:62px 0;border-bottom:1px solid var(--line)}
 .csp.csp.csp .section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:30px;gap:40px}
 .csp.csp.csp .section-head>p{max-width:340px;margin:0;font-size:14px}
-.csp.csp.csp .stats{display:grid;grid-template-columns:repeat(6,1fr);margin-top:34px;padding:25px 0;border-block:1px solid var(--line)}
+.csp.csp.csp .stats{display:grid;grid-template-columns:repeat(var(--stats-count,6),minmax(0,1fr));margin-top:34px;padding:25px 0;border-block:1px solid var(--line)}
 .csp.csp.csp .stats div{text-align:center;border-right:1px solid var(--line)}
 .csp.csp.csp .stats div:last-child{border:0}
 .csp.csp.csp .stats b{display:block;font:600 30px 'DM Sans',sans-serif;margin-bottom:7px}
@@ -340,7 +340,7 @@
 .csp.csp.csp .tech-header .eyebrow{margin-bottom:12px}
 .csp.csp.csp #techDialog h2{font-size:30px;line-height:1.2;letter-spacing:-1px;margin:0}
 .csp.csp.csp .tech-header p{font-size:15px;line-height:1.6;margin:10px 0 0}
-.csp.csp.csp .tech-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0}
+.csp.csp.csp .tech-facts{display:grid;grid-template-columns:repeat(var(--facts-columns,3),minmax(0,1fr));gap:12px;margin:0}
 .csp.csp.csp .tech-fact{padding:20px 16px;border:1px solid var(--line);border-radius:12px;background:var(--cream)}
 .csp.csp.csp .tech-fact dt{font-size:13px;font-weight:600;line-height:1.4;color:var(--navy);min-height:36px}
 .csp.csp.csp .tech-fact dd{margin:8px 0 0;font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-1px;color:var(--teal);font-variant-numeric:tabular-nums}

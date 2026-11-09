@@ -51,6 +51,25 @@ describe('Brazilian cruise pages', () => {
     expect(document.querySelector('#shipVideo')).toHaveAttribute('hidden');
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
   });
+  it.each(ships.map(s => [s.shipName, s] as const))('%s has six numerical highlights and a complete specification dialog', (_name, ship) => {
+    render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
+    const values = [...document.querySelectorAll('.stats b')].map(e => e.textContent);
+    expect(values).toHaveLength(6);
+    expect(values.every(value => /\d/.test(value ?? ''))).toBe(true);
+    fireEvent.click(screen.getByRole('button', { name: 'Ver ficha técnica do navio' }));
+    const dialog = document.querySelector('#techDialog')!;
+    expect(dialog).toHaveAttribute('open');
+    expect(dialog.querySelectorAll('.tech-fact')).toHaveLength(6);
+    expect(dialog.querySelectorAll('.tech-fact-detail')).toHaveLength(6);
+    expect(dialog).toHaveTextContent(`Conheça os números e a estrutura do ${ship.shipName}.`);
+    if (ship.shipSlug === 'buenavista') {
+      expect(dialog).toHaveTextContent('2.140');
+      expect(dialog).toHaveTextContent('números diferentes');
+      expect(dialog).not.toHaveTextContent('não são exibidos');
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Fechar ficha técnica' }));
+    expect(dialog).not.toHaveAttribute('open');
+  });
   it.each(ships.map(s => [s.shipName, s] as const))('%s renders the available itinerary detail', (_name, ship) => {
     render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ship.titleTail);
