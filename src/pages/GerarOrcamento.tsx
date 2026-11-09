@@ -1115,6 +1115,24 @@ export default function GerarOrcamento() {
     });
   };
 
+  const handleDuplicateService = async (svc: any) => {
+    try {
+      await addService({
+        service_type: svc.service_type,
+        service_data: JSON.parse(JSON.stringify(svc.service_data || {})),
+        amount: Number(svc.amount) || 0,
+        option_label: svc.option_label ? `${svc.option_label} (cópia)` : "Cópia",
+        description: svc.description ?? undefined,
+        image_url: svc.image_url ?? undefined,
+        image_urls: svc.image_urls ?? undefined,
+        section_id: svc.section_id ?? null,
+      } as any);
+      toast({ title: "Serviço duplicado", description: "Edite a cópia para ajustar café, reembolso, preço e etiqueta." });
+    } catch {
+      toast({ title: "Não foi possível duplicar o serviço", variant: "destructive" });
+    }
+  };
+
   const handleDuplicate = async (qId: string) => {
     const dup = await duplicateQuote(qId);
     navigate(nav.quote(dup.id));
@@ -1538,6 +1556,7 @@ export default function GerarOrcamento() {
                     </span>
                   </div>
                 )}
+                <DuplicateServiceContext.Provider value={handleDuplicateService}>
                 <QuoteServicesOrganizer
                     services={quote.services || []}
                     sections={quote.sections || []}

@@ -1,3 +1,4 @@
+import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { sanitizedDescriptionHtml, descriptionToPlainText } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { translateQuote } from "@/i18n/publicMaterials/quote";

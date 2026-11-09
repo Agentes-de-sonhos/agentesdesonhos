@@ -1,3 +1,4 @@
+import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { useState, useEffect, useRef } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useToolSharePreview } from "@/lib/toolSharePreview";
