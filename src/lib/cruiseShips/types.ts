@@ -70,6 +70,8 @@ export interface CruiseShipContent {
     coordinates: Record<string, [number, number]>;
     feed: CruiseItineraryFeed;
     geography: string; // GeoJSON URL
+    /** Official products whose complete port sequence is not yet verified. Never draw inferred routes. */
+    announcements?: { id: string; title: string; n: number; region: string; text: string; dates: string[]; note: string; source: string }[];
     summaries?: { title: string; duration: string; text: string; source: string }[];
   };
   quote: { eyebrow: string; titleA: string; titleB: string; textA: string; textB: string };

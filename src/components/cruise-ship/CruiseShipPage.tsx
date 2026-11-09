@@ -104,16 +104,19 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
   /* ---------------- Itineraries ---------------- */
   const groups = useMemo(() => buildItineraryGroups(ship.routes.feed.sailings, ship.routes), [ship]);
+  const announcements = useMemo(() => ship.routes.announcements ?? [], [ship]);
   const [region, setRegion] = useState(ship.routes.regions[0]);
-  const nightsOptions = useMemo(() => [...new Set(groups.filter((g) => g.region === region).map((g) => g.n))].sort((a, b) => a - b), [groups, region]);
+  const nightsOptions = useMemo(() => [...new Set([...groups.filter((g) => g.region === region).map((g) => g.n), ...announcements.filter(a => a.region === region).map(a => a.n)])].sort((a, b) => a - b), [groups, announcements, region]);
   const [nights, setNights] = useState<number>(nightsOptions[0]);
   const combos = useMemo(() => groups.filter((g) => g.region === region && g.n === nights), [groups, region, nights]);
-  const [comboId, setComboId] = useState<string>(combos[0]?.id ?? "");
+  const announcedCombos = useMemo(() => announcements.filter(a => a.region === region && a.n === nights), [announcements, region, nights]);
+  const [comboId, setComboId] = useState<string>(combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : ""));
   const [order, setOrder] = useState(0);
   useEffect(() => { setNights(nightsOptions[0]); }, [nightsOptions]);
-  useEffect(() => { setComboId(combos[0]?.id ?? ""); }, [combos]);
+  useEffect(() => { setComboId(combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : "")); }, [combos, announcedCombos]);
   useEffect(() => { setOrder(0); }, [comboId]);
   const group = groups.find((g) => g.id === comboId) ?? null;
+  const announcement = announcements.find(a => `announced:${a.id}` === comboId);
   const variant = group?.variants[order] ?? group?.variants[0] ?? null;
   const months = variant ? variantMonths(variant) : [];
 
@@ -146,7 +149,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
   useEffect(() => {
     const L = leafletRef.current, map = mapRef.current;
-    if (!L || !map || !variant) return;
+    if (!L || !map) return;
+    layerRef.current?.remove();
+    if (!variant) return;
     const color = (rootRef.current && getComputedStyle(rootRef.current).getPropertyValue("--teal").trim()) || "#216d73";
     layerRef.current?.remove();
     const layer = L.layerGroup().addTo(map);
@@ -216,6 +221,12 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   const canSubmit = (undecided || (!travelMonth && !travelYear) || (!!travelMonth && !!travelYear)) && validCruiseQuote(form) && state !== "submitting" && !presentation;
 
   const quoteThisRoute = () => {
+    if (announcement) {
+      setRouteChoice(`announced:${announcement.id}`); setRouteVariant(null); setRouteDate("");
+      if (state === "success" || state === "error") reset();
+      rootRef.current?.querySelector("#csp-orcamento")?.scrollIntoView?.({ behavior: "smooth" });
+      return;
+    }
     if (!group) return;
     setRouteChoice(group.id); setRouteVariant(order); setRouteDate("");
     if (state === "success" || state === "error") reset();
@@ -233,6 +244,11 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
       if (seasonalRoute) {
         payload.summary += `\nInteresse na temporada: ${seasonalRoute.title} · ${seasonalRoute.duration}`;
         payload.details.roteiro = `${seasonalRoute.title} · ${seasonalRoute.duration} (datas a confirmar)`;
+      }
+      const advertised = announcements.find(a => `announced:${a.id}` === routeChoice);
+      if (advertised) {
+        payload.summary += `\nInteresse em roteiro anunciado: ${advertised.title} · ${advertised.n} noites. Itinerário completo a confirmar.`;
+        payload.details.roteiro = `${advertised.title} · ${advertised.n} noites (itinerário a confirmar)`;
       }
       await submit(payload);
     } finally { inFlight.current = false; }
@@ -312,21 +328,29 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
         <section id="csp-roteiros">
           <div className="section-head route-section-head"><div><div className="eyebrow">{ship.routes.eyebrow}</div><h2>{ship.routes.titleA}<em>{ship.routes.titleB}</em></h2></div><p>{ship.routes.text}</p></div>
-          {groups.length > 0 ? <>
-          <div className="route-intro"><span>⌖ MAPA DOS ITINERÁRIOS</span></div>
+          {groups.length > 0 || announcements.length > 0 ? <>
+          <div className="route-intro"><span>⌖ EXPLORE OS ITINERÁRIOS</span></div>
           <div className="route-tabs" role="tablist" aria-label="Tipos de roteiro">
             {ship.routes.regions.map((r) => (
               <button key={r} role="tab" aria-selected={region === r} className={region === r ? "active" : undefined} onClick={() => setRegion(r)}>
-                <span>{r}</span><small>{groups.filter((g) => g.region === r).length} combinações de duração e destinos</small>
+                <span>{r}</span><small>{groups.filter((g) => g.region === r).length + announcements.filter(a => a.region === r).length} opções de duração e roteiro</small>
               </button>
             ))}
           </div>
           <div className="route-selectors">
             <label>Duração<select aria-label="Duração" value={nights} onChange={(e) => setNights(Number(e.target.value))}>{nightsOptions.map((n) => <option key={n} value={n}>{n} noites</option>)}</select></label>
-            <label>Destinos<select aria-label="Destinos" value={comboId} onChange={(e) => setComboId(e.target.value)}>{combos.map((g) => <option key={g.id} value={g.id}>{g.title}</option>)}</select></label>
+            <label>Destinos<select aria-label="Destinos" value={comboId} onChange={(e) => setComboId(e.target.value)}>{combos.map((g) => <option key={g.id} value={g.id}>{g.title}</option>)}{announcedCombos.map(a => <option key={a.id} value={`announced:${a.id}`}>{a.title} · itinerário a confirmar</option>)}</select></label>
             <label id="orderLabel" hidden={!group || group.variants.length === 1}>Ordem das escalas<select aria-label="Ordem das escalas" value={order} onChange={(e) => setOrder(Number(e.target.value))}>{group?.variants.map((v, i) => <option key={i} value={i}>{variantCalls(v)}</option>)}</select></label>
           </div>
-          <div className="route-explorer">
+          {announcement && <article className="route-details csp-announced-route" data-testid="announced-route" aria-live="polite">
+            <div className="eyebrow">{announcement.n} NOITES · ROTEIRO ANUNCIADO PELA COMPANHIA</div>
+            <h3>{announcement.title}</h3><p>{announcement.text}</p>
+            {announcement.dates.length > 0 && <p><strong>Saídas anunciadas de Santos:</strong> {announcement.dates.map(dateLabel).join(" · ")}</p>}
+            <p>{announcement.note}</p>
+            <p className="note">O mapa será apresentado quando a sequência completa estiver conferida. Divulgação não garante disponibilidade.</p>
+            <button className="button" onClick={quoteThisRoute}>Consultar este roteiro</button>
+          </article>}
+          <div className="route-explorer" hidden={!!announcement}>
             <div className="map-wrapper">
               <div id="itineraryMap" ref={mapEl} role="region" aria-label={group && variant ? `Mapa: ${group.region} · ${group.n} noites · ${variantCalls(variant)}` : "Mapa das escalas do roteiro selecionado"} />
               <p className="note" aria-live="polite">{mapStatus}</p>
@@ -345,11 +369,15 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
               </>)}
             </div>
           </div>
-          <div className="map-explanation"><strong>Como ler este mapa</strong><p>Os pontos indicam a localização aproximada dos destinos. As linhas mostram somente a sequência das escalas: <strong>não são o trajeto marítimo real</strong> e podem cruzar áreas de terra. O terminal exato, os dias de navegação e a ordem das paradas dependem da saída escolhida.</p></div>
+          <div className="map-explanation" hidden={!!announcement}><strong>Como ler este mapa</strong><p>Os pontos indicam a localização aproximada dos destinos. As linhas mostram somente a sequência das escalas: <strong>não são o trajeto marítimo real</strong> e podem cruzar áreas de terra. O terminal exato, os dias de navegação e a ordem das paradas dependem da saída escolhida.</p></div>
           </> : <div className="csp-route-summaries">
             {ship.routes.summaries?.map((route) => <article key={route.title}><div className="eyebrow">{route.duration}</div><h3>{route.title}</h3><p>{route.text}</p><a className="button" href="#csp-orcamento" onClick={e => { setRouteChoice(`seasonal:${route.title}`); scrollTo("csp-orcamento")(e); }}>Consultar saídas</a></article>)}
             <p className="note">{ship.routes.summaries?.length ? "As escalas apresentadas são alternativas da temporada; não representam uma sequência única. Consulte datas e itinerário completo com a agência." : "Consulte a agência para conhecer os roteiros disponíveis."}</p>
           </div>}
+          {groups.length > 0 && !!ship.routes.summaries?.length && <details className="variant-note"><summary>Panorama dos roteiros da temporada +</summary>
+            {ship.routes.summaries.map(r => <p key={r.title}><strong>{r.title} · {r.duration}.</strong> {r.text}</p>)}
+            <p className="note">O panorama inclui opções anunciadas que podem não estar no calendário selecionado acima. Consulte as datas e a sequência de cada embarque.</p>
+          </details>}
           <p className="note">Não é inventário completo nem consulta de disponibilidade em tempo real.</p>
         </section>
 
@@ -391,6 +419,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                   <label>Roteiro de interesse<select name="roteiro" value={routeChoice} onChange={(e) => { setRouteChoice(e.target.value); setRouteVariant(null); setRouteDate(""); }}>
                     <option value="">{HELP_LABEL}</option>
                     {ship.routes.summaries?.map(r => <option key={r.title} value={`seasonal:${r.title}`}>{r.title} · {r.duration}</option>)}
+                    {announcements.map(a => <option key={a.id} value={`announced:${a.id}`}>{a.title} · {a.n} noites · itinerário a confirmar</option>)}
                     {groups.map((g) => <option key={g.id} value={g.id}>{g.region} · {g.n} noites · {g.title}</option>)}
                   </select></label>
                   {chosenGroup && chosenGroup.variants.length > 1 && (

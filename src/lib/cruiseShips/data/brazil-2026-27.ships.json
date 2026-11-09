@@ -1613,6 +1613,18 @@
           "text": "Santos; escalas alternadas em Búzios, Ilhabela e Ilha Grande.",
           "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-divina-e-msc-musica-realizam-ultima-escala-na-europa-e-ja-navegam-rumo-ao-bra/"
         }
+      ],
+      "announcements": [
+        {
+          "id": "minicruzeiro-5",
+          "title": "Minicruzeiro de cinco noites",
+          "n": 5,
+          "region": "Costa brasileira",
+          "text": "A MSC anuncia minicruzeiros de três a cinco noites com embarque em Santos e visitas alternadas a Búzios, Ilhabela e Ilha Grande.",
+          "dates": [],
+          "note": "As datas e a combinação exata de escalas desta duração ainda precisam ser confirmadas com a agência. Os destinos anunciados não representam uma sequência única.",
+          "source": "https://www.mscpressarea.com/pt_BR/press-releases/msc-divina-e-msc-musica-realizam-ultima-escala-na-europa-e-ja-navegam-rumo-ao-bra/"
+        }
       ]
     },
     "quote": {
@@ -6198,10 +6210,63 @@
       "geography": "/maps/cruise-south-america.geojson",
       "summaries": [
         {
-          "title": "Litoral brasileiro",
-          "duration": "Consulte as saídas",
-          "text": "Solicite à agência os roteiros atuais, datas e condições de operação para o período desejado.",
-          "source": "https://corazulcruceros.es/pt-br/o-navio/"
+          "title": "Temporada brasileira",
+          "duration": "3, 4, 5 e 7 noites",
+          "text": "Minicruzeiros, Natal, Réveillon, Nordeste e Carnaval. Embarques anunciados em Santos e no Rio de Janeiro; consulte a sequência própria de cada saída.",
+          "source": "https://corazulcruceros.es/pt-br/itinerarios/"
+        }
+      ],
+      "announcements": [
+        {
+          "id": "mini-buzios-ilhabela",
+          "title": "Mini Búzios e Ilhabela",
+          "n": 4,
+          "region": "Costa brasileira",
+          "text": "Produto anunciado pela Corazul com embarque em Santos e possibilidade de embarque no Rio de Janeiro no dia seguinte.",
+          "dates": [
+            "2026-11-20"
+          ],
+          "note": "A página detalhada diverge do título e repete um dia. A agência confirma a sequência das escalas antes da reserva.",
+          "source": "https://corazulcruceros.es/pt-br/mini-buzios-e-ilhabela/"
+        },
+        {
+          "id": "reveillon",
+          "title": "Réveillon",
+          "n": 5,
+          "region": "Costa brasileira",
+          "text": "Celebração de Ano Novo a bordo, com embarque anunciado em Santos e alternativa no Rio de Janeiro.",
+          "dates": [
+            "2026-12-30"
+          ],
+          "note": "O dia da celebração está inconsistente no detalhamento oficial. Horários, passagem por Copacabana e sequência final devem ser confirmados com a agência.",
+          "source": "https://corazulcruceros.es/pt-br/reveillon/"
+        },
+        {
+          "id": "nordeste",
+          "title": "Nordeste",
+          "n": 7,
+          "region": "Costa brasileira",
+          "text": "A companhia anuncia Rio de Janeiro, Salvador com pernoite e Ilhabela, com embarque em Santos e alternativa no Rio de Janeiro no dia seguinte.",
+          "dates": [
+            "2027-01-04",
+            "2027-01-11",
+            "2027-01-18",
+            "2027-01-25"
+          ],
+          "note": "A oferta anuncia sete noites, mas o detalhamento termina no dia 7 em Ilhabela sem esclarecer o retorno. A agência confirma o itinerário completo e o desembarque antes da reserva.",
+          "source": "https://corazulcruceros.es/pt-br/7n-nordeste/"
+        },
+        {
+          "id": "carnaval",
+          "title": "Carnaval",
+          "n": 7,
+          "region": "Costa brasileira",
+          "text": "Carnaval com dois dias anunciados em Salvador, além de Rio de Janeiro e Ilhabela. Embarque em Santos e alternativa no Rio no dia seguinte.",
+          "dates": [
+            "2027-02-05"
+          ],
+          "note": "A oferta anuncia sete noites, mas o detalhamento termina no dia 7 em Ilhabela sem esclarecer o retorno. A agência confirma o itinerário completo e o desembarque antes da reserva.",
+          "source": "https://corazulcruceros.es/pt-br/carnaval/"
         }
       ]
     },

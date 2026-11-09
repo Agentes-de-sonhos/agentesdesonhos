@@ -112,6 +112,43 @@ describe('Brazilian cruise pages', () => {
     expect(buenavista.routes.feed.sailings.map(s => s.date)).not.toContain('2026-11-20');
     expect(buenavista.routes.feed.sailings.some(s => s.n === 7)).toBe(false);
   });
+  it('shows all advertised Brazilian durations even when a complete route is unavailable', () => {
+    const expected: Record<string, number[]> = {
+      'msc-virtuosa': [3, 7], 'msc-divina': [3, 4, 5], 'msc-musica': [3, 4, 7],
+      'msc-splendida': [8, 9], 'msc-seaview': [3, 7, 8],
+      'costa-diadema': [3, 4, 7], 'costa-serena': [8, 9], 'buenavista': [3, 4, 5, 7],
+    };
+    for (const ship of ships) {
+      const durations = [...new Set([...ship.routes.feed.sailings.map(s => s.n), ...(ship.routes.announcements ?? []).map(a => a.n)])].sort((a,b) => a-b);
+      expect(durations, ship.shipName).toEqual(expected[ship.shipSlug]);
+    }
+  });
+  it('keeps Buenavista seven-night products visible without inventing a return port', () => {
+    render(<CruiseShipPage ship={ships.find(s => s.shipSlug === 'buenavista')!} hostname="review.preview.local" />);
+    expect([...screen.getByLabelText('Duração').querySelectorAll('option')].map(o => o.value)).toEqual(['3','4','5','7']);
+    fireEvent.change(screen.getByLabelText('Duração'), { target: { value: '7' } });
+    expect(screen.getByTestId('announced-route')).toHaveTextContent('Nordeste');
+    expect(screen.getByTestId('announced-route')).toHaveTextContent('04/01/2027');
+    expect(document.querySelector('.route-explorer')).toHaveAttribute('hidden');
+    fireEvent.change(screen.getByLabelText('Destinos'), { target: { value: 'announced:carnaval' } });
+    expect(screen.getByTestId('announced-route')).toHaveTextContent('05/02/2027');
+    fireEvent.click(screen.getByRole('button', { name: 'Consultar este roteiro' }));
+    expect(screen.getByLabelText('Roteiro de interesse')).toHaveValue('announced:carnaval');
+    expect(screen.queryByLabelText('Data de saída')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Duração'), { target: { value: '3' } });
+    expect(screen.queryByTestId('announced-route')).not.toBeInTheDocument();
+    expect(document.querySelector('.route-explorer')).not.toHaveAttribute('hidden');
+    fireEvent.click(screen.getByRole('button', { name: 'Quero orçamento deste roteiro' }));
+    expect(screen.getByLabelText('Data de saída')).toBeInTheDocument();
+  });
+  it('shows Divina five-night announcement without fabricating dated departures', () => {
+    render(<CruiseShipPage ship={ships.find(s => s.shipSlug === 'msc-divina')!} hostname="review.preview.local" />);
+    fireEvent.change(screen.getByLabelText('Duração'), { target: { value: '5' } });
+    expect(screen.getByTestId('announced-route')).toHaveTextContent('Minicruzeiro de cinco noites');
+    expect(screen.getByTestId('announced-route')).not.toHaveTextContent('Saídas anunciadas de Santos');
+    fireEvent.click(screen.getByRole('button', { name: 'Consultar este roteiro' }));
+    expect(screen.getByLabelText('Roteiro de interesse')).toHaveValue('announced:minicruzeiro-5');
+  });
   it('keeps departure ports separate even when destinations and duration match', () => {
     const routes = ships[0].routes;
     const groups = buildItineraryGroups([

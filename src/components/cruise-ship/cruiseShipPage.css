@@ -370,3 +370,6 @@
 .csp.csp.csp .experience-media>img{width:100%;object-fit:cover;flex:1;min-height:0}
 .csp.csp.csp .experience-media .media-credit{padding:10px 16px}
 .csp.csp.csp .media-credit a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+
+.csp.csp.csp .route-explorer[hidden], .csp.csp.csp .map-explanation[hidden] { display: none; }
+.csp .csp-announced-route { margin: 1rem 0; padding: 2rem; border: 1px solid var(--line); border-radius: 12px; }
