@@ -1,3 +1,4 @@
+import { DuplicateServiceContext } from "@/components/quote/ServiceCard";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, ChevronDown, CloudOff, Cloud } from "lucide-react";
@@ -1575,6 +1576,7 @@ export default function GerarOrcamento() {
                     isSaving={isSavingSections}
                     currency={quoteCurrencyCode}
                 />
+                </DuplicateServiceContext.Provider>
               </div>
             </QuoteStepCard>
 
