@@ -1581,6 +1581,15 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...CURTI_VIAGENS_PREVIEW_PROFILE,
   key: "curtiViagensOfficial",
   presentation: false,
+  destinations: CURTI_VIAGENS_PREVIEW_PROFILE.destinations?.map((destination) =>
+    destination.key === "eua-canada"
+      ? { ...destination, key: "nova-york", image: "curtiNovaYork", label: "Estados Unidos", title: "Nova York", text: "A energia da Big Apple com roteiros sob medida, atrações clássicas, espetáculos da Broadway e logística no seu ritmo." }
+      : destination,
+  ),
+  copy: {
+    ...CURTI_VIAGENS_PREVIEW_PROFILE.copy,
+    destinations: { ...CURTI_VIAGENS_PREVIEW_PROFILE.copy?.destinations, title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Caribe, Nova York, Europa, resorts e cruzeiros." },
+  },
   seo: { title: "Curti Viagens", description: "Curti Viagens: consultoria completa de viagens em Holambra (SP), desde 2013." },
 };
 
