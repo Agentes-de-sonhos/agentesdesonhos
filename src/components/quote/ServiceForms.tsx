@@ -40,6 +40,7 @@ import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MAX_HOTEL_RATES, MEAL_PLAN_LABELS, sanitizeExtraRates, type HotelExtraRate } from "@/lib/hotelRates";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
 import { Calendar } from "@/components/ui/calendar";
@@ -979,6 +980,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 
   const roomsWatch = form.watch("rooms");
   const totalPrice = (roomsWatch || []).reduce((sum, r) => sum + (Number(r.quantity) || 0) * (Number(r.unit_price) || 0), 0);
+  const [extraRates, setExtraRates] = useState<HotelExtraRate[]>(() => sanitizeExtraRates(init?.extra_rates));
+  const [rateLabel, setRateLabel] = useState<string>(() => String(init?.rate_label || ""));
 
   const addRoom = () => {
     const current = form.getValues("rooms") || [];
