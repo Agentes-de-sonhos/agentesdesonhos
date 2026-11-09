@@ -1,9 +1,11 @@
+import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
+import { createContext, useContext } from "react";
 import { descriptionToPlainText } from "@/lib/richDescription";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, ChevronDown, Map, TramFront, GripVertical, ImageOff, Loader2,
+  Plane, Hotel, Car, Bus, Ticket, Shield, Ship, MoreHorizontal, Trash2, Tag, Pencil, Copy, ChevronDown, Map, TramFront, GripVertical, ImageOff, Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -115,6 +117,7 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
       details.push(`Check-in: ${formatDate(data.check_in)}`);
       details.push(`Check-out: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`Alimentação: ${data.meal_plan}`);
+      if (hotelRefundLabel(data)) details.push(hotelRefundLabel(data) as string);
       if (Array.isArray(data.rooms) && data.rooms.length > 0) {
         const hasMulti = data.rooms.length > 1;
         data.rooms.forEach((r: any) => {
@@ -190,6 +193,9 @@ function getServiceDetails(service: QuoteService, currency: QuoteCurrency = 'BRL
   return details;
 }
 
+/** Duplicar serviço: fornecido pelo editor do orçamento; ausente = botão oculto. */
+export const DuplicateServiceContext = createContext<((service: QuoteService) => void | Promise<void>) | null>(null);
+
 interface ServiceCardProps {
   service: QuoteService;
   onDelete: (id: string) => void;
@@ -201,6 +207,8 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle, currency = 'BRL' }: ServiceCardProps) {
   const [open, setOpen] = useState(false);
+  const onDuplicate = useContext(DuplicateServiceContext);
+  const [duplicating, setDuplicating] = useState(false);
   const customOtherIcon = service.service_type === "other"
     ? sanitizeIncludedIconId((service.service_data as any)?.icon_id)
     : null;
@@ -274,6 +282,16 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
               <Button variant="ghost" size="icon" onClick={() => onEdit(service)} className="text-muted-foreground hover:text-primary h-8 w-8">
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
+              {onDuplicate && (
+                <Button
+                  variant="ghost" size="icon" title="Duplicar serviço" aria-label="Duplicar serviço"
+                  disabled={duplicating}
+                  onClick={async () => { setDuplicating(true); try { await onDuplicate(service); } finally { setDuplicating(false); } }}
+                  className="text-muted-foreground hover:text-primary h-8 w-8"
+                >
+                  {duplicating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+              )}
               <ConfirmDeleteDialog
                 onConfirm={() => onDelete(service.id)}
                 title="Remover serviço?"

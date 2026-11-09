@@ -1,3 +1,4 @@
+import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { sanitizedDescriptionHtml, descriptionToPlainText } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
@@ -295,6 +296,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`${t("checkIn")}: ${formatDate(data.check_in)} | ${t("checkOut")}: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
+      if (hotelRefundLabel(data)) details.push(hotelRefundLabel(data) as string);
       if (Array.isArray(data.rooms) && data.rooms.length === 1) {
         details.push(`${t("accommodations")}:`);
         data.rooms.forEach((r: any) => {
