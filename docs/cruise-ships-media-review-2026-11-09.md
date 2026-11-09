@@ -12,11 +12,12 @@ URLs individuais e páginas de origem em `cruise-ships-2026-27-media.json`. MSC:
 
 ## Vídeos
 
-O destaque principal abre o vídeo oficial em todos os oito navios. Virtuosa (32 s), Musica (32 s), Buenavista (3 s), Diadema (2 min 37 s) e Serena (3 min 5 s) usam arquivos oficiais MP4; os dois Costa são tours completos, não clipes de 30 segundos. Divina, Splendida e Seaview usam os vídeos YouTube incorporados nas páginas oficiais MSC, com carregamento somente após clique. O player é desmontado ao fechar ou passar para uma foto, interrompendo a reprodução.
+O destaque principal abre o vídeo oficial em todos os oito navios, usando MP4 hospedados pelas companhias. Clipes curtos: Virtuosa (32 s), Divina (30 s), Musica (32 s), Splendida (29 s), Seaview (35 s) e Buenavista (3 s). Os clipes de Divina, Splendida e Seaview foram encontrados nas páginas internacionais oficiais MSC; substituem os tours longos incorporados na versão brasileira. Diadema (2 min 37 s) e Serena (3 min 5 s) usam os tours oficiais disponíveis, não clipes de 30 segundos. Não foi necessário incorporar YouTube.
+
 
 ## Verificação
 
 - Seleção visual por folhas de contato; comparação de URLs canônicas e similaridade visual (dHash), sem pares sinalizados nas galerias finais.
-- Downloads de imagens selecionadas conferidos; cinco arquivos MP4 baixados e reconhecidos pelo ffprobe.
-- Testes de unicidade no álbum e no mosaico, abertura/fechamento do player incorporado, galeria sem vídeo e regressões dos roteiros/formulários: 22 testes.
+- Downloads de imagens selecionadas conferidos; oito arquivos MP4 baixados e reconhecidos pelo ffprobe.
+- Testes de unicidade no álbum e no mosaico, abertura do vídeo em destaque e navegação para fotos, galeria sem vídeo e regressões dos roteiros/formulários: 22 testes.
 - Prévia estática recompilada com os mesmos componentes e dados da aplicação. Sem chamada ao Lovable, sem mesclar em produção.

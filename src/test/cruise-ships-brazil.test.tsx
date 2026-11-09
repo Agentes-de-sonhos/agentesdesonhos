@@ -40,17 +40,16 @@ describe('Brazilian cruise pages', () => {
       expect(s.hero.video).toBeTruthy();
     }
   });
-  it('opens the official embedded video from the main cover and unmounts it on close', () => {
-    const ship = ships.find(s => s.hero.videoType === 'youtube')!;
+  it('opens the official video from the main cover before the photos', () => {
+    const ship = ships[0];
     render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
-    expect(screen.queryByTitle(`Vídeo oficial do ${ship.shipName}`)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: ship.hero.videoAria }));
-    expect(screen.getByTitle(`Vídeo oficial do ${ship.shipName}`)).toHaveAttribute('src', ship.assets[ship.hero.video!]);
+    expect(document.querySelector('#galleryDialog')).toHaveAttribute('open');
+    expect(document.querySelector('#shipVideo')).not.toHaveAttribute('hidden');
+    expect(document.querySelector('#shipVideo source')).toHaveAttribute('src', ship.assets[ship.hero.video!]);
     fireEvent.click(screen.getByRole('button', { name: 'Próxima foto' }));
-    expect(screen.queryByTitle(`Vídeo oficial do ${ship.shipName}`)).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Assistir ao vídeo' }));
-    fireEvent(document.querySelector('#galleryDialog')!, new Event('close'));
-    expect(screen.queryByTitle(`Vídeo oficial do ${ship.shipName}`)).toBeNull();
+    expect(document.querySelector('#shipVideo')).toHaveAttribute('hidden');
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
   });
   it.each(ships.map(s => [s.shipName, s] as const))('%s renders the available itinerary detail', (_name, ship) => {
     render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);

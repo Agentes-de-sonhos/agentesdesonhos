@@ -264,7 +264,7 @@
 .csp.csp.csp .photo-caption small{display:block;font-size:12px;letter-spacing:.3px;margin-top:10px}
 .csp.csp.csp .lightbox-thumbs .video-thumb{display:grid;place-items:center;background:var(--teal);color:var(--on-primary)}
 .csp.csp.csp .video-thumb svg{width:25px;height:25px;fill:currentColor}
-.csp.csp.csp #galleryDialog #shipVideo{width:100%;border:0;display:block;height:65vh;background:#102d3a;object-fit:contain}
+.csp.csp.csp #galleryDialog #shipVideo{height:65vh;background:#102d3a;object-fit:contain}
 .csp.csp.csp #videoError{font-size:12px}
 .csp.csp.csp #videoError a{text-decoration:underline}
 @media(max-width:800px){.csp.csp.csp .gallery .play-badge{width:58px;height:58px;top:40%}

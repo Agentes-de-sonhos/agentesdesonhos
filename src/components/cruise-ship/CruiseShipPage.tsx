@@ -482,11 +482,10 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
       </dialog>
 
       <dialog ref={galleryRef} id="galleryDialog" aria-label={`Vídeo e fotos do ${ship.shipName}`} onClick={backdropClose}
-        onClose={() => { videoRef.current?.pause?.(); setPic(0); }}
+        onClose={() => videoRef.current?.pause?.()}
         onKeyDown={(e) => { if (e.key === "ArrowRight") next(); if (e.key === "ArrowLeft") prev(); }}>
         <button className="close" aria-label="Fechar galeria" onClick={() => closeDialog(galleryRef.current)}>×</button>
-        {hasVideo && ship.hero.videoType === "youtube" && pic === -1 && <iframe id="shipVideo" title={`Vídeo oficial do ${ship.shipName}`} src={img(ship.hero.video!)} allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />}
-        {hasVideo && ship.hero.videoType !== "youtube" && <video id="shipVideo" ref={videoRef} hidden={pic !== -1} preload="none" controls playsInline poster={img(ship.hero.image)} onError={() => setVideoError(true)}>
+        {hasVideo && <video id="shipVideo" ref={videoRef} hidden={pic !== -1} preload="none" controls playsInline poster={img(ship.hero.image)} onError={() => setVideoError(true)}>
           <source src={img(ship.hero.video!)} type="video/mp4" />
         </video>}
         <img id="largePhoto" hidden={pic === -1} src={cur ? img(cur.key) : undefined} alt={cur?.label ?? ""} />

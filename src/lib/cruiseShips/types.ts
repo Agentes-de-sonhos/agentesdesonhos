@@ -37,7 +37,7 @@ export interface CruiseShipContent {
   eyebrow: string;
   tagline: string;
   assets: Record<string, string>;
-  hero: { image: string; video?: string | null; videoType?: "mp4" | "youtube"; alt: string; caption: string; captionSmall: string; videoAria: string };
+  hero: { image: string; video?: string | null; alt: string; caption: string; captionSmall: string; videoAria: string };
   tiles: { photo: string; alt: string; label: string }[];
   albumTile: { image: string; alt: string };
   credit: string;
