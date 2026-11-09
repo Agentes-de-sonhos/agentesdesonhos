@@ -50,6 +50,7 @@ import {
   type ShowcaseModel,
 } from "@/lib/quoteBookingShowcase";
 import { flyToCart, findCartTarget } from "@/lib/bookingCartFly";
+import { hotelRateChoiceNotes } from "@/lib/hotelRates";
 import type { Quote, QuoteChoiceGroup, QuoteService } from "@/types/quote";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 
@@ -343,7 +344,13 @@ export function BookingCartProvider({
             client_name: hasLinkedClient ? "" : input.name.trim(),
             client_email: hasLinkedClient ? "" : input.email.trim(),
             client_whatsapp: hasLinkedClient ? "" : input.whatsapp.trim(),
-            client_notes: input.notes.trim() || null,
+            client_notes: [
+              hotelRateChoiceNotes(
+                services.filter((s) => effectiveIds.includes(s.id)) as any,
+                (v) => formatQuoteCurrency(v, getQuoteCurrencyInfo(quote as any)),
+              ),
+              input.notes.trim(),
+            ].filter(Boolean).join("\n\n") || null,
             disclaimer_accepted: true,
             idempotency_key: idempotencyKey.current,
           },

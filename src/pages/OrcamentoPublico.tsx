@@ -1,4 +1,5 @@
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
+import { getHotelRateChoice, hotelRates, mealPlanLabel, setHotelRateChoice, subscribeHotelRateChoice } from "@/lib/hotelRates";
 import { useState, useEffect, useRef } from "react";
 import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useToolSharePreview } from "@/lib/toolSharePreview";
@@ -613,6 +614,7 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
           })}
         </div>
       )}
+      {service && <HotelRatePicker data={data} service={service} showPrices={showPrices} fmt={fmt} />}
       {data.notes && (
         <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -620,6 +622,47 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+function HotelRatePicker({ data, service, showPrices, fmt }: { data: any; service: QuoteService; showPrices: boolean; fmt: (v: number) => string }) {
+  const rates = hotelRates(data, Number(service.amount) || 0);
+  const [choice, setChoice] = useState(() => getHotelRateChoice(service.id));
+  useEffect(() => {
+    const unsub = subscribeHotelRateChoice(() => setChoice(getHotelRateChoice(service.id)));
+    return () => { unsub(); };
+  }, [service.id]);
+  if (!rates.length) return null;
+  return (
+    <div className="space-y-2" data-hotel-rates>
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Escolha sua tarifa</div>
+      <div role="radiogroup" className="grid gap-2 sm:grid-cols-2">
+        {rates.map((r) => {
+          const active = choice === r.id;
+          return (
+            <button key={r.id} type="button" role="radio" aria-checked={active}
+              onClick={() => setHotelRateChoice(service.id, r.id)}
+              className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors ${active ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border/60 hover:border-primary/50"}`}>
+              <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${active ? "border-primary" : "border-muted-foreground/40"}`}>
+                {active && <span className="h-2 w-2 rounded-full bg-primary" />}
+              </span>
+              <span className="min-w-0 flex-1 space-y-1">
+                <span className="block text-sm font-semibold text-foreground">{r.label}</span>
+                {r.meal_plan && (
+                  <span className="flex items-center gap-1.5 text-xs text-foreground/80">
+                    <UtensilsCrossed className="h-3 w-3 text-muted-foreground" />{mealPlanLabel(r.meal_plan)}
+                  </span>
+                )}
+                {r.refundLabel && (
+                  <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${r.refundable ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>{r.refundLabel}</span>
+                )}
+                {showPrices && <span className="block pt-1 text-base font-bold tabular-nums text-foreground">{fmt(r.price)}</span>}
+              </span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
