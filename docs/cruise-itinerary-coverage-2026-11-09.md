@@ -43,3 +43,12 @@ Os nove produtos da listagem oficial agora têm representação: cinco grupos da
 ## Limites da conferência
 
 Esta auditoria confronta durações e famílias de produtos com anúncios oficiais. Não é uma nova varredura exaustiva de todas as datas, escalas, portos de embarque e travessias dos motores de reservas. As 205 saídas datadas selecionadas permanecem inalteradas. Exclusões documentadas no calendário anterior continuam válidas para mapas, sem implicar inexistência comercial dos produtos. Não afirmar inventário completo.
+
+## Complemento: mapas de sete noites
+
+A brochura Corazul vinculada pelo Manual do Agente da R11 Travel apresenta na página 4 os quatro roteiros Nordeste (04, 11, 18 e 25/01/2027) e o Carnaval (05/02/2027), com retorno a Santos no oitavo dia. Ela esclarece o trecho omitido no texto da página da companhia. A sequência adotada é Santos → Rio de Janeiro → Salvador (pernoite) → Ilhabela → Santos; os dias de navegação não são desenhados como portos. As datas coincidem com os anúncios atuais da companhia. Não foram importadas as demais saídas do material, que contém programação antiga em outros trechos.
+
+Fonte: https://manualdoagente.com.br/wp-content/uploads/Brochura-Cruzeiros-26-27-2.pdf
+Vínculo da brochura: https://manualdoagente.com.br/temporada-brasileira/corazul-cruceros-temporada-brasileira/
+
+Nordeste e Carnaval passam dos anúncios pendentes para grupos com mapa, preservando seus nomes e calendários separados mesmo com portos iguais. O Buenavista passa a 32 saídas datadas; total dos oito navios: 210. Permanecem duas pendências do Buenavista (Mini Búzios e Ilhabela e Réveillon) e a seleção de datas do Divina de cinco noites. Este complemento substitui apenas a pendência dos dois roteiros de sete noites descrita acima.

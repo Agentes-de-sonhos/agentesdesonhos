@@ -5875,7 +5875,7 @@
         ]
       },
       "feed": {
-        "checkedAt": "2026-11-08",
+        "checkedAt": "2026-11-09",
         "from": "2026-11-09",
         "to": "2027-03-26",
         "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
@@ -6038,6 +6038,66 @@
             "status": "official_checked"
           },
           {
+            "date": "2027-01-04",
+            "n": 7,
+            "title": "Nordeste",
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Salvador",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://manualdoagente.com.br/wp-content/uploads/Brochura-Cruzeiros-26-27-2.pdf",
+            "status": "official_checked",
+            "note": "Pernoite em Salvador (dias 4 e 5). Retorno a Santos no dia 8, conforme a brochura Corazul distribuída pela R11 Travel."
+          },
+          {
+            "date": "2027-01-11",
+            "n": 7,
+            "title": "Nordeste",
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Salvador",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://manualdoagente.com.br/wp-content/uploads/Brochura-Cruzeiros-26-27-2.pdf",
+            "status": "official_checked",
+            "note": "Pernoite em Salvador (dias 4 e 5). Retorno a Santos no dia 8, conforme a brochura Corazul distribuída pela R11 Travel."
+          },
+          {
+            "date": "2027-01-18",
+            "n": 7,
+            "title": "Nordeste",
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Salvador",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://manualdoagente.com.br/wp-content/uploads/Brochura-Cruzeiros-26-27-2.pdf",
+            "status": "official_checked",
+            "note": "Pernoite em Salvador (dias 4 e 5). Retorno a Santos no dia 8, conforme a brochura Corazul distribuída pela R11 Travel."
+          },
+          {
+            "date": "2027-01-25",
+            "n": 7,
+            "title": "Nordeste",
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Salvador",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://manualdoagente.com.br/wp-content/uploads/Brochura-Cruzeiros-26-27-2.pdf",
+            "status": "official_checked",
+            "note": "Pernoite em Salvador (dias 4 e 5). Retorno a Santos no dia 8, conforme a brochura Corazul distribuída pela R11 Travel."
+          },
+          {
             "date": "2027-02-01",
             "n": 4,
             "ports": [
@@ -6048,6 +6108,21 @@
             ],
             "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
             "status": "official_checked"
+          },
+          {
+            "date": "2027-02-05",
+            "n": 7,
+            "title": "Carnaval",
+            "ports": [
+              "Santos",
+              "Rio de Janeiro",
+              "Salvador",
+              "Ilhabela",
+              "Santos"
+            ],
+            "source": "https://manualdoagente.com.br/wp-content/uploads/Brochura-Cruzeiros-26-27-2.pdf",
+            "status": "official_checked",
+            "note": "Pernoite em Salvador (dias 4 e 5). Retorno a Santos no dia 8, conforme a brochura Corazul distribuída pela R11 Travel."
           },
           {
             "date": "2027-02-12",
@@ -6240,33 +6315,6 @@
           ],
           "note": "O dia da celebração está inconsistente no detalhamento oficial. Horários, passagem por Copacabana e sequência final devem ser confirmados com a agência.",
           "source": "https://corazulcruceros.es/pt-br/reveillon/"
-        },
-        {
-          "id": "nordeste",
-          "title": "Nordeste",
-          "n": 7,
-          "region": "Costa brasileira",
-          "text": "A companhia anuncia Rio de Janeiro, Salvador com pernoite e Ilhabela, com embarque em Santos e alternativa no Rio de Janeiro no dia seguinte.",
-          "dates": [
-            "2027-01-04",
-            "2027-01-11",
-            "2027-01-18",
-            "2027-01-25"
-          ],
-          "note": "A oferta anuncia sete noites, mas o detalhamento termina no dia 7 em Ilhabela sem esclarecer o retorno. A agência confirma o itinerário completo e o desembarque antes da reserva.",
-          "source": "https://corazulcruceros.es/pt-br/7n-nordeste/"
-        },
-        {
-          "id": "carnaval",
-          "title": "Carnaval",
-          "n": 7,
-          "region": "Costa brasileira",
-          "text": "Carnaval com dois dias anunciados em Salvador, além de Rio de Janeiro e Ilhabela. Embarque em Santos e alternativa no Rio no dia seguinte.",
-          "dates": [
-            "2027-02-05"
-          ],
-          "note": "A oferta anuncia sete noites, mas o detalhamento termina no dia 7 em Ilhabela sem esclarecer o retorno. A agência confirma o itinerário completo e o desembarque antes da reserva.",
-          "source": "https://corazulcruceros.es/pt-br/carnaval/"
         }
       ]
     },

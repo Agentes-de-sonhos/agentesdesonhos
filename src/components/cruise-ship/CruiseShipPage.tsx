@@ -364,6 +364,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                 <div className="route-months"><strong>Meses com saídas encontradas</strong><p>{months.join(" · ")}</p></div>
                 <ol className="day-list">{variant.ports.map((p, i) => <li key={`${p}-${i}`}><span>{i === 0 ? "Início" : i === variant.ports.length - 1 ? "Fim" : i}</span><b>{p}</b></li>)}</ol>
                 <p className="note">Sequência de portos. Dias de navegação não estão representados nesta lista.</p>
+                {[...new Set(variant.sailings.flatMap(s => s.note ? [s.note] : []))].map(note => <p className="note" key={note}>{note}</p>)}
                 <button className="button" onClick={quoteThisRoute}>Quero orçamento deste roteiro</button>
                 <details className="variant-note"><summary>Datas desta opção +</summary><p>{variant.sailings.map((s) => dateLabel(s.date)).join(" · ")}</p><p>Consulte a agência para confirmar as escalas e a disponibilidade no período desejado.</p></details>
               </>)}

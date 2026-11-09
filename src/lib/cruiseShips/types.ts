@@ -5,6 +5,8 @@
 export type CruiseSailingStatus = "published" | "official_checked" | "conflict";
 
 export interface CruiseSailing {
+  title?: string; // Named products with the same ports keep separate dates (e.g. Carnaval).
+  note?: string;
   date: string; // YYYY-MM-DD
   n: number; // nights
   ports: string[]; // embark ... disembark (call order, sea days not inferred)

@@ -23,9 +23,9 @@ export function buildItineraryGroups(sailings: CruiseSailing[], routes: Pick<Cru
   const eligible = eligibleSailings(sailings);
   const multipleOrigins = new Set(eligible.map(s => s.ports[0])).size > 1;
   for (const r of eligible) {
-    const key = `${r.ports[0]}|${r.ports.at(-1)}|${r.n}|${[...new Set(r.ports.slice(1, -1))].sort().join("|")}`;
+    const key = `${r.title ?? ""}|${r.ports[0]}|${r.ports.at(-1)}|${r.n}|${[...new Set(r.ports.slice(1, -1))].sort().join("|")}`;
     if (!byGroup.has(key)) {
-      byGroup.set(key, { id: `route-${byGroup.size}`, n: r.n, region: regionOf(r, routes), title: r.ports.slice(1, -1).join(" + ") + (multipleOrigins ? ` · Saída de ${r.ports[0]}` : ""), variants: [] });
+      byGroup.set(key, { id: `route-${byGroup.size}`, n: r.n, region: regionOf(r, routes), title: (r.title ?? r.ports.slice(1, -1).join(" + ")) + (multipleOrigins ? ` · Saída de ${r.ports[0]}` : ""), variants: [] });
     }
     const g = byGroup.get(key)!;
     let v = g.variants.find((x) => x.ports.join("|") === r.ports.join("|"));
