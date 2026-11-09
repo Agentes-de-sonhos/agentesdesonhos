@@ -110,6 +110,8 @@ describe('Brazilian cruise pages', () => {
     }
     const buenavista = dated.find(s => s.shipSlug === 'buenavista')!;
     expect(buenavista.routes.feed.sailings.map(s => s.date)).not.toContain('2026-11-20');
+    // Suspensão comunicada pela companhia em 6/11: o catálogo estático ainda listava esta saída.
+    expect(buenavista.routes.feed.sailings.map(s => s.date)).not.toContain('2026-11-09');
     expect(buenavista.routes.feed.sailings.filter(s => s.n === 7)).toHaveLength(5);
   });
   it('shows all advertised Brazilian durations even when a complete route is unavailable', () => {

@@ -5745,19 +5745,19 @@
       ]
     },
     "included": {
-      "title": "O que considerar na sua proposta?",
+      "title": "O que está incluído na temporada brasileira?",
       "items": [
         {
           "title": "Hospedagem e refeições",
-          "text": "Confira a categoria da cabine, os restaurantes e os horários de refeições contemplados na tarifa escolhida."
+          "text": "Confira na proposta a categoria da cabine e os restaurantes e horários de refeições contemplados na tarifa escolhida."
         },
         {
-          "title": "Bebidas e serviços",
-          "text": "Pacotes de bebidas, internet, tratamentos e excursões têm condições próprias. Verifique exatamente o que está incluído."
+          "title": "Pacote de bebidas Corazul Plus",
+          "text": "A divulgação da temporada brasileira 2026/2027 inclui o Corazul Plus na tarifa, com uma seleção de bebidas. Rótulos premium e upgrades têm custo adicional; confira as condições do pacote."
         },
         {
-          "title": "Valor final da viagem",
-          "text": "Peça o detalhamento de taxas, serviços, transporte até o porto e condições de cancelamento antes de reservar."
+          "title": "Seguro viagem e serviços extras",
+          "text": "A oferta da temporada brasileira também anuncia seguro viagem incluído. Confira coberturas e limites na proposta, além de taxas e serviços extras, como internet, tratamentos e excursões."
         }
       ]
     },
@@ -5876,22 +5876,10 @@
       },
       "feed": {
         "checkedAt": "2026-11-09",
-        "from": "2026-11-09",
+        "from": "2026-11-13",
         "to": "2027-03-26",
         "scope": "Seleção de saídas com embarque no Brasil; não representa todo o inventário da companhia.",
         "sailings": [
-          {
-            "date": "2026-11-09",
-            "n": 4,
-            "ports": [
-              "Santos",
-              "Rio de Janeiro",
-              "Balneário Camboriú",
-              "Santos"
-            ],
-            "source": "https://corazulcruceros.es/pt-br/itinerarios/mini-camboriu/",
-            "status": "official_checked"
-          },
           {
             "date": "2026-11-13",
             "n": 3,
@@ -6400,6 +6388,10 @@
       {
         "label": "Roteiro oficial · natal",
         "url": "https://corazulcruceros.es/pt-br/itinerarios/natal/"
+      },
+      {
+        "label": "Inclusões da temporada brasileira · R11 Travel",
+        "url": "https://manualdoagente.com.br/temporada-brasileira/corazul-cruceros-temporada-brasileira/"
       }
     ],
     "creditUrl": "https://corazulcruceros.es/pt-br/o-navio/"
