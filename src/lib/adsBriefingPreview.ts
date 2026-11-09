@@ -1583,7 +1583,7 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
   presentation: false,
   destinations: CURTI_VIAGENS_PREVIEW_PROFILE.destinations?.map((destination) =>
     destination.key === "eua-canada"
-      ? { ...destination, key: "nova-york", image: "curtiNovaYork", label: "Estados Unidos", title: "Nova York", text: "A energia da Big Apple com roteiros sob medida, atrações clássicas, espetáculos da Broadway e logística no seu ritmo." }
+      ? { ...destination, key: "nova-york", image: "curtiNovaYork", label: "Estados Unidos", title: "Nova York", text: "Descubra o melhor dos Estados Unidos com roteiros sob medida, entre cidades vibrantes, praias e experiências inesquecíveis." }
       : destination,
   ),
   copy: {
