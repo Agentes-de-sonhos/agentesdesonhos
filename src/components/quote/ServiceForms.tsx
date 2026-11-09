@@ -40,6 +40,7 @@ import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MAX_HOTEL_RATES, MEAL_PLAN_LABELS, sanitizeExtraRates, type HotelExtraRate } from "@/lib/hotelRates";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
 import { Calendar } from "@/components/ui/calendar";
@@ -979,6 +980,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
 
   const roomsWatch = form.watch("rooms");
   const totalPrice = (roomsWatch || []).reduce((sum, r) => sum + (Number(r.quantity) || 0) * (Number(r.unit_price) || 0), 0);
+  const [extraRates, setExtraRates] = useState<HotelExtraRate[]>(() => sanitizeExtraRates(init?.extra_rates));
+  const [rateLabel, setRateLabel] = useState<string>(() => String(init?.rate_label || ""));
 
   const addRoom = () => {
     const current = form.getValues("rooms") || [];
@@ -1090,6 +1093,7 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
   const handleSubmit = (values: z.infer<typeof hotelSchema>) => {
     try {
       const rooms = values.rooms.map((r) => {
+        // (tarifas extras ficam em extra_rates)
         const quantity = Number(r.quantity) || 0;
         const unit_price = Number(r.unit_price) || 0;
         const ages = (r.children_ages || []).slice(0, r.children);
@@ -1117,6 +1121,8 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
         rooms,
         notes: values.notes || "",
         place_id: selectedPlaceId,
+        rate_label: extraRates.length ? rateLabel.trim() : "",
+        extra_rates: sanitizeExtraRates(extraRates),
       };
       onSubmit(data, total, values.option_label || undefined, values.service_description || undefined);
     } catch (err) {
@@ -1360,6 +1366,77 @@ function HotelForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDa
           {form.formState.errors.rooms && typeof form.formState.errors.rooms.message === "string" && (
             <p className="text-xs text-destructive">{form.formState.errors.rooms.message}</p>
           )}
+        </div>
+
+        {/* 4c. Outras tarifas do mesmo hotel */}
+        <div className="rounded-xl border border-border/60 bg-muted/30 p-4 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <div className="text-sm font-semibold">Tarifas deste hotel</div>
+              <div className="text-xs text-muted-foreground">Ofereça até {MAX_HOTEL_RATES} tarifas (com/sem café, reembolsável ou não). O cliente escolhe uma.</div>
+            </div>
+            <Button type="button" size="sm" variant="outline" disabled={extraRates.length >= MAX_HOTEL_RATES - 1}
+              onClick={() => setExtraRates((p) => [...p, {
+                id: `rate-${Date.now()}`, label: "", meal_plan: form.getValues("meal_plan") || "",
+                refund_policy: "", free_cancellation_until: "", price: totalPrice,
+              }])}>
+              <Plus className="mr-1.5 h-3.5 w-3.5" /> Adicionar tarifa
+            </Button>
+          </div>
+          {extraRates.length > 0 && (
+            <div className="rounded-lg border border-border/60 bg-background p-3 space-y-2">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tarifa 1 (dados acima)</div>
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-end">
+                <div><Label className="text-xs">Nome da tarifa</Label>
+                  <Input value={rateLabel} placeholder="Ex: Com café · Reembolsável" onChange={(e) => setRateLabel(e.target.value)} /></div>
+                <div className="text-sm font-semibold tabular-nums pb-2">R$ {totalPrice.toFixed(2).replace(".", ",")}</div>
+              </div>
+            </div>
+          )}
+          {extraRates.map((r, idx) => {
+            const upd = (patch: Partial<HotelExtraRate>) =>
+              setExtraRates((p) => p.map((x, i) => (i === idx ? { ...x, ...patch } : x)));
+            return (
+              <div key={r.id} className="rounded-lg border border-border/60 bg-background p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Tarifa {idx + 2}</div>
+                  <div className="flex gap-1">
+                    <Button type="button" size="sm" variant="ghost" disabled={extraRates.length >= MAX_HOTEL_RATES - 1}
+                      onClick={() => setExtraRates((p) => [...p, { ...r, id: `rate-${Date.now()}` }])}>Duplicar</Button>
+                    <Button type="button" size="sm" variant="ghost" className="text-destructive"
+                      onClick={() => setExtraRates((p) => p.filter((_, i) => i !== idx))}><Trash2 className="h-3.5 w-3.5" /></Button>
+                  </div>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div><Label className="text-xs">Nome da tarifa</Label>
+                    <Input value={r.label} placeholder="Ex: Sem café · Não reembolsável" onChange={(e) => upd({ label: e.target.value })} /></div>
+                  <div><Label className="text-xs">Valor total da estadia (R$)</Label>
+                    <Input type="number" min={0} step="0.01" value={r.price} onChange={(e) => upd({ price: Number(e.target.value) || 0 })} /></div>
+                  <div><Label className="text-xs">Regime de alimentação</Label>
+                    <Select value={r.meal_plan || "none"} onValueChange={(v) => upd({ meal_plan: v === "none" ? "" : v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Não informar</SelectItem>
+                        {Object.entries(MEAL_PLAN_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                      </SelectContent>
+                    </Select></div>
+                  <div><Label className="text-xs">Cancelamento / Reembolso</Label>
+                    <Select value={r.refund_policy || "none"} onValueChange={(v) => upd({ refund_policy: v === "none" ? "" : v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Não informar</SelectItem>
+                        <SelectItem value="refundable">Reembolsável</SelectItem>
+                        <SelectItem value="non_refundable">Não reembolsável</SelectItem>
+                      </SelectContent>
+                    </Select></div>
+                  {r.refund_policy === "refundable" && (
+                    <div><Label className="text-xs">Cancelamento grátis até</Label>
+                      <Input type="date" value={r.free_cancellation_until} onChange={(e) => upd({ free_cancellation_until: e.target.value })} /></div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* 5. Description */}
