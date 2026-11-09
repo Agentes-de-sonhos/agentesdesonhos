@@ -1,5 +1,6 @@
+(globalThis as any).DOMMatrix ||= class {};
 import { expect, test } from "vitest";
-import { parsedHotelToHotelData } from "@/components/quote/hotel-import/HotelSmartImport";
+const { parsedHotelToHotelData } = await import("@/components/quote/hotel-import/HotelSmartImport");
 test("2 quartos 4 adultos", () => {
   const d = parsedHotelToHotelData({ quantidade_quartos: 2, hospedes_adultos: 4, valor_total_brl: 2727.44 } as any);
   expect(d.rooms!.length).toBe(2);
