@@ -218,7 +218,34 @@ export function parsedHotelToHotelData(p: ParsedHotel): Partial<HotelData> {
     p.observacoes.forEach((o) => notes.push(`• ${o}`));
   }
 
+  // Build structured rooms so the form opens with every imported room.
+  const roomCount = Math.max(1, Math.floor(Number(p.quantidade_quartos) || 1));
+  const totalAdults = Math.max(0, Math.floor(Number(p.hospedes_adultos) || 0));
+  const totalChildren = Math.max(0, Math.floor(Number(p.hospedes_criancas) || 0));
+  const roomLabel = (() => {
+    const raw = `${p.tipo_acomodacao || ""} ${p.categoria_quarto || ""}`;
+    if (/qu[aá]druplo|quad/i.test(raw)) return "Quádruplo";
+    if (/triplo|triple/i.test(raw)) return "Triplo";
+    if (/single|individual/i.test(raw)) return "Single";
+    if (/su[ií]te|suite/i.test(raw)) return "Suíte";
+    return "Duplo";
+  })();
+  const unitPrice = +(total / roomCount).toFixed(2);
+  const rooms = Array.from({ length: roomCount }, (_, i) => {
+    const adults = totalAdults
+      ? Math.floor(totalAdults / roomCount) + (i < totalAdults % roomCount ? 1 : 0)
+      : 2;
+    const children = Math.floor(totalChildren / roomCount) + (i < totalChildren % roomCount ? 1 : 0);
+    // Last room absorbs rounding so the sum equals the imported total.
+    const price = i === roomCount - 1 ? +(total - unitPrice * (roomCount - 1)).toFixed(2) : unitPrice;
+    return {
+      room_type: roomLabel, quantity: 1, adults, children, children_ages: [],
+      unit_price: price, total_price: price, notes: "",
+    };
+  });
+
   return {
+    rooms,
     hotel_name: p.nome_hotel || "",
     city: [p.cidade, p.pais].filter(Boolean).join(", "),
     check_in,
