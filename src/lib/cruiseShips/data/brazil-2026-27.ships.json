@@ -20,14 +20,21 @@
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet//Virtuosa/MSC_VIRTUOSA_MSC19001627_desk",
       "video": "https://assets.msccruises.com/is/content/msccruises/MSC_Virtuosa_Ship_Visit_1920x540_v1",
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_interior_ir1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=869C9D324713FD2A81F7EA6D161AA35A",
-      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_ocean_view_or1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=374DE9AC3CB76B2DA72B916FFAE81AB3"
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/cabins/expandible/vi_deluxe_ocean_view_or1_exp_desk.jpg?bc=transparent&as=1&mh=433&mw=700&hash=374DE9AC3CB76B2DA72B916FFAE81AB3",
+      "review-14": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/main-features/msc-yacht-club-top-sail-lounge_vi.jpg?bc=transparent&as=1&mh=600&mw=952&hash=A2B98F8DE65743CA6E28B4560A63FBAC",
+      "review-36": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/entertainment/savannah-aquapark.jpg?bc=transparent&as=1&mh=600&mw=952&hash=F96C7B691BB22DB038E39616E1E9ADC4",
+      "review-38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/entertainment/red-gem-casino.jpg?bc=transparent&as=1&mh=600&mw=952&hash=87F40B4C5CC917426724DF4616C656D0",
+      "review-40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/entertainment/tv-studio-bar.jpg?bc=transparent&as=1&mh=720&mw=920&hash=7FCF699B1045633EE8B707DECAC12041",
+      "review-46": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/entertainment/msc-virtuosa-baby-club-chicco.jpg?bc=transparent&as=1&mh=720&mw=920&hash=9CB0D218F0887873E26BA0F82DE03EF7",
+      "review-52": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/restaurants/hola-tacos-cantina.jpg?bc=transparent&as=1&mh=720&mw=920&hash=99ABDB16C4B5B332A7A5232FB947B08E",
+      "review-56": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/virtuosa/restaurants/kaito-sushi-bar-msc-virtuosa.jpg?bc=transparent&as=1&mh=720&mw=920&hash=FF118EA781504D360E8975276FBED28B"
     },
     "hero": {
       "image": "hero",
       "video": "video",
       "alt": "Imagem de divulgação do MSC Virtuosa",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Assista ao vídeo do navio",
+      "captionSmall": "Assista ao vídeo oficial do navio",
       "videoAria": "Assistir ao vídeo do MSC Virtuosa"
     },
     "tiles": [
@@ -48,8 +55,8 @@
       }
     ],
     "albumTile": {
-      "image": "hero",
-      "alt": "Vista do MSC Virtuosa"
+      "image": "p40",
+      "alt": "Varanda · imagem ilustrativa"
     },
     "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
@@ -107,6 +114,41 @@
         "key": "cabin-externa",
         "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
+      },
+      {
+        "key": "review-14",
+        "label": "Top Sail Lounge",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-36",
+        "label": "Savannah Aquapark",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-38",
+        "label": "Red Gem Casino",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-40",
+        "label": "TV Studio & Bar",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-46",
+        "label": "Baby Club Chicco",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-52",
+        "label": "¡Hola! Tacos & Cantina",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-56",
+        "label": "Kaito Sushi Bar",
+        "category": "Gastronomia"
       }
     ],
     "photoCategories": [
@@ -115,7 +157,8 @@
       "Lazer",
       "Gastronomia",
       "Cabines",
-      "Exterior"
+      "Exterior",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC VIRTUOSA",
@@ -981,7 +1024,6 @@
     "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
     "tagline": "Um convite para viajar com tempo e elegância.",
     "assets": {
-      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/msc-divina_silhouette.jpg?bc=transparent&as=1&mh=465&mw=1920&hash=7BBE28C7FFC488157904ED4D8633A16D",
       "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61",
       "p40": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/entertainment/di_entertainment_theatre_pantheon_01.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=20AB98C8A79D95349E81E2C24A277368",
       "p27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_aurea_spa_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=55095D40E543DD5F3A456902DD1FC5E4",
@@ -990,21 +1032,34 @@
       "p38": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=AC0BA02F022680DB2D1C8368522E6AED",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_public_area_swarovski_staircases_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=F88AE75E1BBFAE5D5EAE3C45B5DBFC61",
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/preziosa/cabins/new/desktop/pr-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=85E439EA2BC257C42A26D0BCA5FAC694",
-      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_ocean_view_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=8A76D745F26E7C078658B82774C6D055"
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_ocean_view_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=8A76D745F26E7C078658B82774C6D055",
+      "review-0": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/cabins/expandible/di_royal_suite_01.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=C5C229B4D28CC1402F87FE75FA7986F8",
+      "review-8": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/public-area/di_yacht-club.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=A10F2A86CEF6E35329AE9A99DB1D165E",
+      "review-26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/entertainment/di_entertainment_casino_veneziano_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=5A9B01B6AFE3ADCB0E38979A2A00B7F2",
+      "review-27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/entertainment/di_entertainment_f1_simulator_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=FC0EA38435D849C69DB744701996CA20",
+      "review-29": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/entertainment/di_entertainment_virtual_world_05.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=EF3E0296B88957F70515E9389E6EFA04",
+      "review-30": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/entertainment/di_entertainment_galleria_arte_06.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=58071DD279EC7D7A70F58C4802C63EBD",
+      "review-34": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/7-black-crab-restaurant.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=18CA2DE225EFFA168ED39BC7A0574930",
+      "review-36": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/8-calumet-buffet.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=2D8F36331F77A6E95FB21CB4DEDEC4BD",
+      "review-44": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/black-white-lounge.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=F2E7F7265BAD0AB423F3A0A3D1CD5249",
+      "review-52": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/di_restaurant_and_bar_sports_bar_bowling_15.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=2306A4C31539400C6A20405D88A92583",
+      "review-54": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/divina/restaurants-and-bars/06-golden-jazz-bar.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=F65126602B1F1E2A5E923D00797D889D",
+      "video": "https://www.youtube-nocookie.com/embed/w79kdoVMIg0?rel=0&autoplay=1"
     },
     "hero": {
       "image": "hero",
-      "video": null,
+      "video": "video",
       "alt": "Escadarias de cristal",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Explore as imagens do navio",
-      "videoAria": "Ver fotos do MSC Divina"
+      "captionSmall": "Assista ao vídeo oficial do navio",
+      "videoAria": "Assistir ao vídeo do MSC Divina",
+      "videoType": "youtube"
     },
     "tiles": [
       {
-        "photo": "p26",
-        "alt": "Escadarias de cristal",
-        "label": "Escadarias de cristal"
+        "photo": "p46",
+        "alt": "Restaurante Villa Rossa",
+        "label": "Restaurante Villa Rossa"
       },
       {
         "photo": "p40",
@@ -1023,11 +1078,6 @@
     },
     "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
-      {
-        "key": "p24",
-        "label": "Perfil do MSC Divina · ilustração da companhia",
-        "category": "Exterior"
-      },
       {
         "key": "p26",
         "label": "Escadarias de cristal",
@@ -1059,23 +1109,73 @@
         "category": "Cabines"
       },
       {
-        "key": "cabin-interna",
-        "label": "Interna · referência MSC Preziosa",
-        "category": "Cabines"
-      },
-      {
         "key": "cabin-externa",
         "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
+      },
+      {
+        "key": "review-0",
+        "label": "Royal Suite · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "review-8",
+        "label": "MSC Yacht Club",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-26",
+        "label": "Casino Veneziano",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-27",
+        "label": "Simulador de Fórmula 1",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-29",
+        "label": "Virtual World",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-30",
+        "label": "Galeria de arte",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-34",
+        "label": "Black Crab Restaurant",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-36",
+        "label": "Calumet Buffet",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-44",
+        "label": "Black & White Lounge",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-52",
+        "label": "Sports Bar & Bowling",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-54",
+        "label": "Golden Jazz Bar",
+        "category": "Gastronomia"
       }
     ],
     "photoCategories": [
       "Todas",
-      "Exterior",
       "Ambientes",
       "Lazer",
       "Gastronomia",
-      "Cabines"
+      "Cabines",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC DIVINA",
@@ -1565,21 +1665,28 @@
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/Musica/MSC_MUSICA_MSC18015178_desk",
       "video": "https://msc-cdn.thron.com/delivery/public/video/msc/2ab2fe72-593e-4fd3-9031-a5afc03832d0/lhxtvk/WEBHD/60145_musica_-ship_tour_30sec_1920x540_web",
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/expandible/mu_interior_05.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=552183132B561E8BDE06DD8EB653085D",
-      "cabin-suíte": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc1-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=CDE094411A370185A29AD134351192E5"
+      "cabin-suíte": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/cabins/tile-image/yc1-1.jpg?bc=transparent&as=1&mh=433&mw=700&hash=CDE094411A370185A29AD134351192E5",
+      "review-23": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/msc26048855_mu.jpg?bc=transparent&as=1&mh=600&mw=800&hash=9C10608CA94945076140290AE4FCFADF",
+      "review-25": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_sanremo_casino_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=7337C5D566EA97FA237965CCC49A0BA3",
+      "review-27": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/entertainment/mu_entertainment_children_indoor_playroom_05.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=3B0EDD05F967E7AA63A7CA9426AC5D7D",
+      "review-35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/mu_restaurant_and_bar_main_restaurant_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=F00E019FE5FCF0DC1B75C33192721F79",
+      "review-39": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/mu_restaurant_and_bar_gli_archi_cafeteria_06.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=A84CD9F3D468D57D2CFF899A0D802A26",
+      "review-43": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/mu_restaurant_and_bar_enoteca_wine_bar_05.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=70B1716F1F46AD84CECD429BBC5BF301",
+      "review-57": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/musica/restaurants-and-bars/bar-della-cascata_msc-musica.jpg?bc=transparent&as=1&mh=720&mw=920&hash=2D41A893283153F308C2334A28104364"
     },
     "hero": {
       "image": "hero",
       "video": "video",
       "alt": "Imagem de divulgação do MSC Musica",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Assista ao vídeo do navio",
+      "captionSmall": "Assista ao vídeo oficial do navio",
       "videoAria": "Assistir ao vídeo do MSC Musica"
     },
     "tiles": [
       {
         "photo": "p24",
         "alt": "Deck de piscinas do MSC Musica",
-        "label": "Deck de piscinas"
+        "label": "Deck de piscinas do MSC Musica"
       },
       {
         "photo": "p40",
@@ -1593,8 +1700,8 @@
       }
     ],
     "albumTile": {
-      "image": "hero",
-      "alt": "Vista do MSC Musica"
+      "image": "p35",
+      "alt": "Varanda · imagem ilustrativa"
     },
     "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
@@ -1652,6 +1759,41 @@
         "key": "cabin-suíte",
         "label": "Suíte MSC Yacht Club · referência da companhia",
         "category": "Cabines"
+      },
+      {
+        "key": "review-23",
+        "label": "Academia · imagem de divulgação",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-25",
+        "label": "Sanremo Casino",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-27",
+        "label": "Sala de jogos infantil",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-35",
+        "label": "Restaurante principal",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-39",
+        "label": "Gli Archi Cafeteria",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-43",
+        "label": "L’Enoteca Wine Bar",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-57",
+        "label": "Bar della Cascata",
+        "category": "Áreas comuns"
       }
     ],
     "photoCategories": [
@@ -1660,7 +1802,8 @@
       "Gastronomia",
       "Ambientes",
       "Cabines",
-      "Exterior"
+      "Exterior",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC MUSICA",
@@ -2533,7 +2676,6 @@
     "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
     "tagline": "Dias de mar. Noites cheias de possibilidades.",
     "assets": {
-      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/msc-splendida-silhouette-header.jpg?bc=transparent&as=1&mh=465&mw=1920&hash=72EF3143A88551B48249004CC6AF38BF",
       "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_the_strand_theatre_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=4F3B55626356778A051ADA41351D3ED5",
       "p57": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03",
       "p28": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_lego_club_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=1A64580AB4D8CBD4A1E096331A20C5C5",
@@ -2543,15 +2685,26 @@
       "p54": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_balcony_06.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=65397B6BDCDBAFE86A5F492AAE9385D7",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_playa_sol_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=C1120E51B2C9F03B3D615A0E8EC46A03",
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/new/desktop/sp-ir1.png?bc=transparent&as=1&mh=433&mw=700&hash=459A4806EF6C932F73575B9507524F07",
-      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_ocean_view_07.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=E75E1B413017B9B06C60C4859F9B32C3"
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/cabins/expandible/sp_ocean_view_07.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=E75E1B413017B9B06C60C4859F9B32C3",
+      "review-11": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/public-areas/sp_public_area_yc_concierge_reception_04.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=D5AEACA8C2569B6BD10DD67B97D73169",
+      "review-14": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/restaurants-and-bars/sea_pavilion_jereme_leung.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=B51442219321F9964C4A7B50E53920FA",
+      "review-16": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/restaurants-and-bars/sp_restaurant_and_bar_pago_buffet_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=7C5E8075A1D00A05955F21F25BDD1EAA",
+      "review-20": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/restaurants-and-bars/butchers_cut.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=CB5B7D86813094CCEE3758CBE82A8CAE",
+      "review-28": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/restaurants-and-bars/sp_restaurant_and_bar_aperitivo_10.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=65153AEEC2BF05D0AD9A09671C4947DD",
+      "review-34": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/restaurants-and-bars/sp_restaurant_and_bar_piazzetta_12.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=7D683E5529007BF4F56944760DB4B0A1",
+      "review-60": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_teens_toboga_04.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=31411C996A592F192F75E14B97E7DEF3",
+      "review-63": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_arena_sport_center_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=26316F735D2AAC5154B6E46476FD0B2E",
+      "review-66": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/splendida/entertainment/sp_entertainment_royal_palm_casino_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=F7CAFB0BC62FA610F4E0B727E709A232",
+      "video": "https://www.youtube-nocookie.com/embed/XLTrzNGFOzA?rel=0&autoplay=1"
     },
     "hero": {
       "image": "hero",
-      "video": null,
+      "video": "video",
       "alt": "Playa del Sol",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Explore as imagens do navio",
-      "videoAria": "Ver fotos do MSC Splendida"
+      "captionSmall": "Assista ao vídeo oficial do navio",
+      "videoAria": "Assistir ao vídeo do MSC Splendida",
+      "videoType": "youtube"
     },
     "tiles": [
       {
@@ -2560,9 +2713,9 @@
         "label": "Teatro The Strand"
       },
       {
-        "photo": "p57",
-        "alt": "Playa del Sol",
-        "label": "Playa del Sol"
+        "photo": "review-60",
+        "alt": "Tobogã",
+        "label": "Tobogã"
       },
       {
         "photo": "p28",
@@ -2576,11 +2729,6 @@
     },
     "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
-      {
-        "key": "p24",
-        "label": "Perfil do MSC Splendida · ilustração da companhia",
-        "category": "Exterior"
-      },
       {
         "key": "p26",
         "label": "Teatro The Strand",
@@ -2625,15 +2773,60 @@
         "key": "cabin-externa",
         "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
+      },
+      {
+        "key": "review-11",
+        "label": "Recepção do MSC Yacht Club",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-14",
+        "label": "Sea Pavilion by Jereme Leung",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-16",
+        "label": "Pago Pago Buffet",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-20",
+        "label": "Butcher’s Cut",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-28",
+        "label": "L’Aperitivo Bar",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-34",
+        "label": "La Piazzetta",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-60",
+        "label": "Tobogã",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-63",
+        "label": "Arena Sport Center",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-66",
+        "label": "Royal Palm Casino",
+        "category": "Lazer"
       }
     ],
     "photoCategories": [
       "Todas",
-      "Exterior",
       "Lazer",
       "Gastronomia",
       "Ambientes",
-      "Cabines"
+      "Cabines",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC SPLENDIDA",
@@ -3086,7 +3279,6 @@
     "eyebrow": "CRUZEIROS / MSC / TEMPORADA 2026–2027",
     "tagline": "O mar acompanha cada momento.",
     "assets": {
-      "p24": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/silhouette_ship_seaview_03.jpg?bc=transparent&as=1&mh=465&mw=1920&hash=2F5B0C8A0B3490119731B14D6B27F351",
       "p28": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_waterfront_boardwalk_01.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=EF43861F765908950259E186DF1E5942",
       "p26": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236",
       "p48": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/entertainment/sv_entertainment_metropolitan_theatre_02.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=830F1667E66E2E2CD57F1D17C15955F0",
@@ -3097,15 +3289,25 @@
       "p43": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_balcony_08.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=B6D8921037E9B40A3BDF91C5D671528C",
       "hero": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_south_beach_pool_03.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=139BFD73E1974BA46D50FB7E3C48C236",
       "cabin-interna": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_inside_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=0F3144A32583AECE015AFAB1B61F9D1C",
-      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_ocean_view_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=2FF2AEA105E4167924017F72BD34AA6B"
+      "cabin-externa": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/cabins/expandible/sv_ocean_view_exp.jpg?bc=transparent&as=1&mh=1299&mw=2100&hash=2FF2AEA105E4167924017F72BD34AA6B",
+      "review-7": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_miami_beach_pool_02.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=83C59DD5637D2CAF65BD732AE3C2AC67",
+      "review-11": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_four_decks_atrium_04.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=692A47355F7675256A4086070B04CE0C",
+      "review-17": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/public-areas/sv_public_area_state_art_gym_07.jpg?bc=transparent&as=1&mh=1800&mw=2880&hash=D2EB14F9C1EC94F305806A9B77E24542",
+      "review-35": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/entertainment/sv_entertainment_forest_aquaventure_park_01.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=65B01DF8759C9732C1851578945494AB",
+      "review-39": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/entertainment/sv_entertainment_two_full_sized_bowling_alleys_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=68EF9F01892F65D4C91C823A4A01606E",
+      "review-45": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/restaurant-and-bars/restaurants/sv_restaurant_bar_ocean_cay_restaurant_03.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=37F8DC3F80BDDE011BB05A934669A5D8",
+      "review-63": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/restaurant-and-bars/bars/sv_restaurant_bar_tvenchi_1878_chocolate_bar_08.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=F6080A56015901DF6574825EF8FE2415",
+      "review-67": "https://www.msccruzeiros.com.br/-/media/global-contents/ships/fleet/seaview/restaurant-and-bars/bars/sv_restaurant_bar_champagne_bar_20.jpg?bc=transparent&as=1&mh=1080&mw=1380&hash=99DEA03EB982CBB1E2966A5AAABF3AEA",
+      "video": "https://www.youtube-nocookie.com/embed/3lzdgXMUhw4?rel=0&autoplay=1"
     },
     "hero": {
       "image": "hero",
-      "video": null,
+      "video": "video",
       "alt": "Vista da popa e piscina do MSC Seaview",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Explore as imagens do navio",
-      "videoAria": "Ver fotos do MSC Seaview"
+      "captionSmall": "Assista ao vídeo oficial do navio",
+      "videoAria": "Assistir ao vídeo do MSC Seaview",
+      "videoType": "youtube"
     },
     "tiles": [
       {
@@ -3114,9 +3316,9 @@
         "label": "Promenade externa"
       },
       {
-        "photo": "p26",
-        "alt": "Piscina na popa",
-        "label": "Piscina na popa"
+        "photo": "review-35",
+        "alt": "Forest Aquaventure Park",
+        "label": "Forest Aquaventure Park"
       },
       {
         "photo": "p48",
@@ -3130,11 +3332,6 @@
     },
     "credit": "Imagens: MSC Cruzeiros · Divulgação.",
     "photos": [
-      {
-        "key": "p24",
-        "label": "MSC Seaview",
-        "category": "Exterior"
-      },
       {
         "key": "p28",
         "label": "Promenade externa",
@@ -3184,15 +3381,55 @@
         "key": "cabin-externa",
         "label": "Externa · imagem ilustrativa da companhia",
         "category": "Cabines"
+      },
+      {
+        "key": "review-7",
+        "label": "Miami Beach Pool",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-11",
+        "label": "Átrio de quatro decks",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-17",
+        "label": "Academia",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-35",
+        "label": "Forest Aquaventure Park",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-39",
+        "label": "Pistas de boliche",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-45",
+        "label": "Ocean Cay Restaurant",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-63",
+        "label": "Venchi 1878 Chocolate Bar",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-67",
+        "label": "Champagne Bar",
+        "category": "Gastronomia"
       }
     ],
     "photoCategories": [
       "Todas",
-      "Exterior",
       "Ambientes",
       "Lazer",
       "Gastronomia",
-      "Cabines"
+      "Cabines",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O MSC SEAVIEW",
@@ -3827,39 +4064,48 @@
       "p49": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Balcone_Desktop_1392x636.jpg",
       "p50": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Esterna_Desktop_1392x636.jpg",
       "p51": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/desktop/Diadema_Interna_Desktop_1392x636.jpg",
-      "p108": "https://edam-media.costa.it/media_guid/18/82/b9fa5363-cef5-4f6c-8bb9-de2dd7a1e82e/5dd4e133-48d0-4f38-b18e-ae5756632f56.jpg",
-      "p110": "https://edam-media.costa.it/media_guid/6/6/43022174-a885-4883-8ad5-e4e831c3da7b/439f614d-53bf-4cae-bf9c-ec49920a20c4.jpg",
-      "p111": "https://edam-media.costa.it/media_guid/5/5/00b556b0-5dc2-4c08-bbfe-89dfba841762/847c069f-71e3-4f26-ac6e-e8f78634904d.jpg",
-      "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Ship_desktop_1680x786_diadema_05.jpg"
+      "p108": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/interior/Teatro-emerald.jpg.image.1130.411.high.jpg",
+      "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/ships/di/in-page/Ship_desktop_1680x786_diadema_05.jpg",
+      "video": "https://progressive.costa.it/b2c/video/digital_content/ship_visit/costa_diadema_fpv_compress.mp4",
+      "review-377": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/interior/hall-Eliodoro-Atrium.jpg.image.770.434.high.jpg",
+      "review-383": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/spa/tepidarium.jpg.image.325.434.high.jpg",
+      "review-389": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/interior/Discoteca-pietra-di-luna.jpg.image.1130.411.high.jpg",
+      "review-401": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/interior/Grand-Bar-Orlov.jpg.image.770.434.high.jpg",
+      "review-425": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/cabins/Samsara-Gran-Suite-Veranda-con-Jacuzzi.jpg.image.770.434.high.jpg",
+      "review-437": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/cabins/minisuite-con-balcone.jpg.image.1130.411.high.jpg",
+      "review-461": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/swimming-pool/Piscina-Lido-Diana.jpg.image.770.434.high.jpg",
+      "review-491": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/spa/Samsara-hall.jpg.image.770.434.high.jpg",
+      "review-503": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/spa/Samsara-rock-sauna.jpg.image.1130.411.high.jpg",
+      "review-515": "https://www.costacruises.nl/content/dam/costa/costa-magazine/photo/ships/DI/spa/Samsara-thalasso.jpg.image.770.434.high.jpg"
     },
     "hero": {
       "image": "hero",
-      "video": null,
+      "video": "video",
       "alt": "Imagem de divulgação do Costa Diadema",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Explore as imagens do navio",
-      "videoAria": "Ver fotos do Costa Diadema"
+      "captionSmall": "Assista ao vídeo oficial do navio",
+      "videoAria": "Assistir ao vídeo do Costa Diadema"
     },
     "tiles": [
       {
         "photo": "p31",
         "alt": "Área de piscina do Costa Diadema",
-        "label": "Piscinas"
+        "label": "Área de piscina do Costa Diadema"
       },
       {
         "photo": "p32",
         "alt": "Vida a bordo do Costa Diadema",
-        "label": "Vida a bordo"
+        "label": "Vida a bordo do Costa Diadema"
       },
       {
         "photo": "p108",
-        "alt": "Teatro · imagem de referência da companhia",
-        "label": "Espetáculos"
+        "alt": "Teatro Emerald",
+        "label": "Teatro Emerald"
       }
     ],
     "albumTile": {
-      "image": "p111",
-      "alt": "Squok Club · imagem de referência da companhia"
+      "image": "review-377",
+      "alt": "Átrio Eliodoro"
     },
     "credit": "Imagens: Costa Cruzeiros · Divulgação.",
     "photos": [
@@ -3900,17 +4146,57 @@
       },
       {
         "key": "p108",
-        "label": "Teatro · imagem de referência da companhia",
+        "label": "Teatro Emerald",
         "category": "Lazer"
       },
       {
-        "key": "p110",
-        "label": "Pummid'Oro Pizzeria · imagem de referência da companhia",
-        "category": "Ambientes"
+        "key": "review-377",
+        "label": "Átrio Eliodoro",
+        "category": "Áreas comuns"
       },
       {
-        "key": "p111",
-        "label": "Squok Club · imagem de referência da companhia",
+        "key": "review-383",
+        "label": "Tepidário do spa",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-389",
+        "label": "Discoteca Pietra di Luna",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-401",
+        "label": "Gran Bar Orlov",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-425",
+        "label": "Sala da Grand Suite · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "review-437",
+        "label": "Mini-suíte com varanda · imagem ilustrativa",
+        "category": "Cabines"
+      },
+      {
+        "key": "review-461",
+        "label": "Piscina Lido Diana",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-491",
+        "label": "Recepção do spa",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-503",
+        "label": "Sauna",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-515",
+        "label": "Piscina de talassoterapia",
         "category": "Lazer"
       }
     ],
@@ -3919,7 +4205,9 @@
       "Exterior",
       "Lazer",
       "Ambientes",
-      "Cabines"
+      "Cabines",
+      "Áreas comuns",
+      "Gastronomia"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O COSTA DIADEMA",
@@ -3986,7 +4274,7 @@
         {
           "key": "food",
           "label": "Sabores a bordo",
-          "image": "p110",
+          "image": "review-401",
           "title": "Um encontro à mesa.",
           "text": "Há momentos para uma refeição sem pressa e para descobrir novos sabores.",
           "items": [
@@ -3998,7 +4286,7 @@
         {
           "key": "rest",
           "label": "Tempo para você",
-          "image": "p32",
+          "image": "review-515",
           "title": "Uma pausa entre as descobertas.",
           "text": "Organize o dia com espaço para cuidar de você.",
           "items": [
@@ -4525,43 +4813,48 @@
       "ocean": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_SEA_VIEW_CABIN_MAIN_MAIN-CostaSerenaPostDryDock2025_0266_1392x636.jpg",
       "interior": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/2025/serena/C450_Desktop_INSIDE_CABIN_MAIN-CostaSerenaPostDryDock2025_0633_1392x636.jpg",
       "p105": "https://edam-media.costa.it/media_guid/0/0/a9c8b6d3-3028-494d-97b0-bb7558adbd05/58135a60-09a8-4daa-acd9-4c16648a3407.jpg",
-      "p108": "https://edam-media.costa.it/media_guid/19/83/ca8287fe-ec25-46ff-82ff-a7e69f7fa44b/4ca1b6b8-b8c3-43d3-8f34-f6cb3dd58d5a.jpg",
-      "p109": "https://edam-media.costa.it/media_guid/24/88/598763fe-a491-4304-a4e4-3c34c94f4528/6bac8a59-6263-4d0f-a0f8-606771121aff.jpg",
-      "hero": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/images/people/promocao-vazia/C446_Reception_Costa_serena.jpg.image.1476.1476.high.jpg"
+      "p109": "https://www.costacruzeiros.com/content/dam/costa-app/se/entertainmentListPath/9d447326-dea6-4c43-ae7b-cfb5c7eebf85/9d447326-dea6-4c43-ae7b-cfb5c7eebf85.jpg",
+      "video": "https://progressive.costa.it/b2c/video/digital_content/serena/costa_serena_visit_ship.mp4",
+      "reception": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/images/people/promocao-vazia/C446_Reception_Costa_serena.jpg.image.1476.1476.high.jpg",
+      "review-139": "https://www.costacruzeiros.com/content/dam/costa/costa-asset/digital-contents/serena-pop/C446_serena_pop_528x516.jpg.image.264.258.high.jpg",
+      "review-148": "https://www.costacruzeiros.com/content/dam/costa-app/se/wellnessSportListPath/fa460fca-87c2-4370-a804-7549c98f7c64/fa460fca-87c2-4370-a804-7549c98f7c64.jpg",
+      "review-151": "https://edam-media.costa.it/media_guid/24/88/8d775daa-8e89-469d-b2a2-93d2193fc50c/b05f096d-1ef8-417b-8aad-c1dc25d68f11.jpg",
+      "review-161": "https://edam-media.costa.it/media_guid/6/6/bb85ea33-6478-4713-931e-6eb269c14ef2/46d044d1-cf31-4971-8e21-00fe437a1243.jpg",
+      "review-163": "https://edam-media.costa.it/media_guid/13/13/43d94a64-49d3-4d80-b8aa-0c35058e6306/6dfed7a5-6ed2-4d30-aa57-c7dabbeea129.jpg"
     },
     "hero": {
-      "image": "hero",
-      "video": null,
-      "alt": "Recepção do Costa Serena · divulgação",
+      "image": "review-139",
+      "video": "video",
+      "alt": "Costa Serena em navegação",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Explore as imagens do navio",
-      "videoAria": "Ver fotos do Costa Serena"
+      "captionSmall": "Assista ao vídeo oficial do navio",
+      "videoAria": "Assistir ao vídeo do Costa Serena"
     },
     "tiles": [
       {
-        "photo": "balcony",
-        "alt": "Varanda · imagem ilustrativa",
-        "label": "Cabines"
+        "photo": "review-148",
+        "alt": "Lido Sole",
+        "label": "Lido Sole"
       },
       {
         "photo": "p105",
         "alt": "Pummid'Oro Pizzeria · imagem de referência da companhia",
-        "label": "Pizzeria"
+        "label": "Pummid'Oro Pizzeria · imagem de referência da companhia"
       },
       {
         "photo": "p109",
-        "alt": "Teatro · imagem de referência da companhia",
-        "label": "Espetáculos"
+        "alt": "Teatro do Costa Serena",
+        "label": "Teatro do Costa Serena"
       }
     ],
     "albumTile": {
-      "image": "p109",
-      "alt": "Teatro · imagem de referência da companhia"
+      "image": "balcony",
+      "alt": "Varanda · imagem ilustrativa"
     },
     "credit": "Imagens: Costa Cruzeiros · Divulgação.",
     "photos": [
       {
-        "key": "hero",
+        "key": "reception",
         "label": "Recepção do Costa Serena · divulgação",
         "category": "Ambientes"
       },
@@ -4591,21 +4884,44 @@
         "category": "Ambientes"
       },
       {
-        "key": "p108",
-        "label": "Apollo Grand Bar · imagem de referência da companhia",
-        "category": "Ambientes"
+        "key": "p109",
+        "label": "Teatro do Costa Serena",
+        "category": "Lazer"
       },
       {
-        "key": "p109",
-        "label": "Teatro · imagem de referência da companhia",
+        "key": "review-139",
+        "label": "Costa Serena em navegação",
+        "category": "Navio"
+      },
+      {
+        "key": "review-148",
+        "label": "Lido Sole",
         "category": "Lazer"
+      },
+      {
+        "key": "review-151",
+        "label": "Sunset Bar",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-161",
+        "label": "Espaço MyTours",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-163",
+        "label": "My Moments Photo Store",
+        "category": "Áreas comuns"
       }
     ],
     "photoCategories": [
       "Todas",
       "Ambientes",
       "Cabines",
-      "Lazer"
+      "Lazer",
+      "Navio",
+      "Gastronomia",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O COSTA SERENA",
@@ -4684,7 +5000,7 @@
         {
           "key": "rest",
           "label": "Tempo para você",
-          "image": "balcony",
+          "image": "review-151",
           "title": "Seu espaço para descansar.",
           "text": "Entre uma descoberta e outra, aproveite o conforto da sua cabine.",
           "items": [
@@ -5024,9 +5340,9 @@
     "tagline": "Um novo jeito de encontrar o mar.",
     "assets": {
       "p13": "https://corazulcruceros.es/wp-content/uploads/2026/01/New_Buenavista_low_2.jpg",
-      "p19": "https://corazulcruceros.es/wp-content/uploads/2026/04/Restaurant-1-1-1024x699.jpg",
-      "p17": "https://corazulcruceros.es/wp-content/uploads/2026/02/Gym-2-1024x699.jpg",
-      "p51": "https://corazulcruceros.es/wp-content/uploads/2025/07/Kids-1-1024x699.jpg",
+      "p19": "https://corazulcruceros.es/wp-content/uploads/2025/08/cafedelmundo01.png",
+      "p17": "https://corazulcruceros.es/wp-content/uploads/2025/08/sportarea.png",
+      "p51": "https://corazulcruceros.es/wp-content/uploads/2025/08/kids.png",
       "p55": "https://corazulcruceros.es/wp-content/uploads/2025/07/Teens_01-1024x570.jpg",
       "p63": "https://corazulcruceros.es/wp-content/uploads/2025/07/interior1-2.jpeg",
       "p67": "https://corazulcruceros.es/wp-content/uploads/2025/09/ocean_view-1024x683.jpg",
@@ -5034,21 +5350,30 @@
       "p97": "https://corazulcruceros.es/wp-content/uploads/2026/04/Suite1.jpg",
       "p82": "https://corazulcruceros.es/wp-content/uploads/2025/07/mini-suite.jpg",
       "hero": "https://corazulcruceros.es/wp-content/uploads/2026/01/New_Buenavista_low_2.jpg",
-      "video": "https://corazulcruceros.es/wp-content/uploads/2026/01/Sailing2.mp4"
+      "video": "https://corazulcruceros.es/wp-content/uploads/2026/01/Sailing2.mp4",
+      "review-211": "https://corazulcruceros.es/wp-content/uploads/2025/08/bar_atrio1.png",
+      "review-212": "https://corazulcruceros.es/wp-content/uploads/2025/07/Atrium1.jpg",
+      "review-213": "https://corazulcruceros.es/wp-content/uploads/2025/08/Lobby.png",
+      "review-221": "https://corazulcruceros.es/wp-content/uploads/2025/08/Biblioteca.png",
+      "review-222": "https://corazulcruceros.es/wp-content/uploads/2025/08/teatroedm.png",
+      "review-223": "https://corazulcruceros.es/wp-content/uploads/2025/08/starlight_1.png",
+      "review-226": "https://corazulcruceros.es/wp-content/uploads/2025/08/Bar_Tiffany.png",
+      "review-239": "https://corazulcruceros.es/wp-content/uploads/2025/08/lido_jacuzzi.png",
+      "review-240": "https://corazulcruceros.es/wp-content/uploads/2025/08/Bar_lido.png"
     },
     "hero": {
       "image": "hero",
       "video": "video",
       "alt": "Imagem de divulgação do Buenavista",
       "caption": "Seu próximo horizonte começa aqui.",
-      "captionSmall": "Assista ao vídeo do navio",
+      "captionSmall": "Assista ao vídeo oficial do navio",
       "videoAria": "Assistir ao vídeo do Buenavista"
     },
     "tiles": [
       {
         "photo": "p19",
-        "alt": "Restaurante · imagem de divulgação",
-        "label": "Restaurante"
+        "alt": "Café del Mundo · divulgação",
+        "label": "Café del Mundo"
       },
       {
         "photo": "p17",
@@ -5074,22 +5399,17 @@
       },
       {
         "key": "p19",
-        "label": "Restaurante · imagem de divulgação",
+        "label": "Café del Mundo · divulgação",
         "category": "Gastronomia"
       },
       {
         "key": "p17",
-        "label": "Academia · imagem de divulgação",
+        "label": "Academia · divulgação",
         "category": "Ambientes"
       },
       {
         "key": "p51",
-        "label": "Espaço infantil · imagem de divulgação",
-        "category": "Lazer"
-      },
-      {
-        "key": "p55",
-        "label": "Espaço juvenil · imagem de divulgação",
+        "label": "Espaço infantil · divulgação",
         "category": "Lazer"
       },
       {
@@ -5116,6 +5436,51 @@
         "key": "p82",
         "label": "Mini-suíte · imagem ilustrativa",
         "category": "Cabines"
+      },
+      {
+        "key": "review-211",
+        "label": "Bar do átrio · divulgação",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-212",
+        "label": "Átrio · divulgação",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-213",
+        "label": "Lobby · divulgação",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-221",
+        "label": "Biblioteca · divulgação",
+        "category": "Áreas comuns"
+      },
+      {
+        "key": "review-222",
+        "label": "Teatro · divulgação",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-223",
+        "label": "Starlight · divulgação",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-226",
+        "label": "Bar Tiffany · divulgação",
+        "category": "Gastronomia"
+      },
+      {
+        "key": "review-239",
+        "label": "Jacuzzi do Lido · divulgação",
+        "category": "Lazer"
+      },
+      {
+        "key": "review-240",
+        "label": "Lido Bar · divulgação",
+        "category": "Gastronomia"
       }
     ],
     "photoCategories": [
@@ -5124,7 +5489,8 @@
       "Gastronomia",
       "Ambientes",
       "Lazer",
-      "Cabines"
+      "Cabines",
+      "Áreas comuns"
     ],
     "about": {
       "eyebrow": "01 / CONHEÇA O BUENAVISTA",

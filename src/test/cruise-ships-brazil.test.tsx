@@ -26,6 +26,32 @@ describe('Brazilian cruise pages', () => {
       for (const k of keys) expect(s.assets[k], `${s.shipName}/${k}`).toMatch(/^https:\/\//);
     }
   });
+  it('keeps gallery images and the five cover positions distinct', () => {
+    const canonical = (url: string) => {
+      const u = new URL(url);
+      return u.pathname.toLowerCase().replace(/\.image\..*$/, '').replace(/-\d+x\d+(?=\.)/, '').replace(/\.webp$/, '');
+    };
+    for (const s of ships) {
+      const images = s.photos.map(p => canonical(s.assets[p.key]));
+      expect(new Set(images).size, s.shipName).toBe(images.length);
+      expect(images.length).toBeLessThanOrEqual(18);
+      const cover = [s.hero.image, ...s.tiles.map(t => t.photo), s.albumTile.image].map(k => canonical(s.assets[k]));
+      expect(new Set(cover).size, s.shipName).toBe(5);
+      expect(s.hero.video).toBeTruthy();
+    }
+  });
+  it('opens the official embedded video from the main cover and unmounts it on close', () => {
+    const ship = ships.find(s => s.hero.videoType === 'youtube')!;
+    render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
+    expect(screen.queryByTitle(`Vídeo oficial do ${ship.shipName}`)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: ship.hero.videoAria }));
+    expect(screen.getByTitle(`Vídeo oficial do ${ship.shipName}`)).toHaveAttribute('src', ship.assets[ship.hero.video!]);
+    fireEvent.click(screen.getByRole('button', { name: 'Próxima foto' }));
+    expect(screen.queryByTitle(`Vídeo oficial do ${ship.shipName}`)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Assistir ao vídeo' }));
+    fireEvent(document.querySelector('#galleryDialog')!, new Event('close'));
+    expect(screen.queryByTitle(`Vídeo oficial do ${ship.shipName}`)).toBeNull();
+  });
   it.each(ships.map(s => [s.shipName, s] as const))('%s renders the available itinerary detail', (_name, ship) => {
     render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(ship.titleTail);
@@ -91,7 +117,8 @@ describe('Brazilian cruise pages', () => {
     expect(dates).toEqual(salvador.variants[0].sailings.map(s => s.date));
   });
   it('photo-only gallery wraps without displaying a nonexistent video', () => {
-    const s = ships.find(s => !s.hero.video)!;
+    const original = ships[0];
+    const s = { ...original, hero: { ...original.hero, video: null } };
     render(<CruiseShipPage ship={s} hostname="review.preview.local" />);
     fireEvent.click(screen.getByRole('button', { name: s.hero.videoAria }));
     expect(document.querySelector('video')).toBeNull();
