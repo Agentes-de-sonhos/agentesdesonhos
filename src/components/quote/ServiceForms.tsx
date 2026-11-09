@@ -39,6 +39,7 @@ import {
 import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
 import { Calendar } from "@/components/ui/calendar";
@@ -441,9 +442,17 @@ function FlightLegFields({ legs, onChange, label, direction, defaultSegmentType 
   );
 }
 
-function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount = 1, childrenCount = 0, paymentSlot, photoSlot, prefill }: Omit<ServiceFormProps, "serviceType">) {
+function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartDate, tripEndDate, initialData, adultsCount: quoteAdults = 1, childrenCount: quoteChildren = 0, paymentSlot, photoSlot, prefill }: Omit<ServiceFormProps, "serviceType">) {
   const disableDate = makeDateDisabler(tripStartDate, tripEndDate);
   const init = initialData?.service_data;
+  // Passageiros desta passagem: podem diferir do total do orçamento (ex.: parte do grupo já tem aéreo).
+  const importedPax = Number(init?.imported_summary?.passengers) || 0;
+  const [adultsCount, setAdultsCount] = useState<number>(
+    typeof init?.adults_count === "number" ? init.adults_count : importedPax > 0 ? Math.min(importedPax, Math.max(quoteAdults, 1)) : quoteAdults,
+  );
+  const [childrenCount, setChildrenCount] = useState<number>(
+    typeof init?.children_count === "number" ? init.children_count : importedPax > 0 ? 0 : quoteChildren,
+  );
   const normalizedLegs = normalizeLegs(init);
   const hasImportedLegs =
     (init?.outbound_legs?.length ?? 0) > 0 || (init?.return_legs?.length ?? 0) > 0 || (init?.internal_legs?.length ?? 0) > 0;
@@ -559,6 +568,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       charge_fees_first_installment: !!(values.includes_boarding_fee && values.charge_fees_first_installment && (Number(values.fees_amount) || 0) > 0),
       adult_price: values.adult_price, child_price: values.child_price,
       is_unit_price: true, is_one_way: isOneWay,
+      adults_count: adultsCount, children_count: childrenCount,
       notes: values.notes || "",
     };
 
@@ -776,6 +786,23 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
           </button>
           {showPricing && (
             <div className="px-4 pb-4 space-y-4 border-t border-border/40 pt-3">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="flight-adults-count">Adultos nesta passagem</Label>
+                  <Input id="flight-adults-count" type="number" min={0} step={1} value={adultsCount}
+                    onChange={(e) => setAdultsCount(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    onFocus={(e) => e.target.select()} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="flight-children-count">Crianças nesta passagem</Label>
+                  <Input id="flight-children-count" type="number" min={0} step={1} value={childrenCount}
+                    onChange={(e) => setChildrenCount(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    onFocus={(e) => e.target.select()} />
+                </div>
+                <p className="sm:col-span-2 -mt-2 text-xs text-muted-foreground">
+                  O orçamento tem {quoteAdults} adulto{quoteAdults !== 1 ? "s" : ""}{quoteChildren > 0 ? ` e ${quoteChildren} criança${quoteChildren !== 1 ? "s" : ""}` : ""}. Ajuste aqui se a passagem for só para parte do grupo.
+                </p>
+              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField control={form.control} name="adult_price" render={({ field }) => (
                   <FormItem>
