@@ -596,6 +596,29 @@ export function KanbanBoard() {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
+  // Quando uma coluna esvazia (ou recebe o 1º cartão), volta à regra
+  // automática: vazia recolhe, com cartões expande.
+  const prevCountsRef = useRef<Record<string, number>>({});
+  useEffect(() => {
+    if (isLoading) return;
+    const prev = prevCountsRef.current;
+    const changed: string[] = [];
+    for (const st of stages) {
+      const count = getOpportunitiesForStage(st.id).length;
+      const before = prev[st.id];
+      if (before !== undefined && (before === 0) !== (count === 0)) changed.push(st.id);
+      prev[st.id] = count;
+    }
+    if (changed.length) {
+      setCollapseOverrides((cur) => {
+        const next = { ...cur };
+        changed.forEach((id) => delete next[id]);
+        persistOverrides(next);
+        return next;
+      });
+    }
+  });
+
   const handleStageDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
