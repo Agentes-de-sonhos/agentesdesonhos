@@ -31,18 +31,15 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
     expect(dash).toBeLessThan(slot);
   });
 
-  it("exibe o título único 'Gestão de Relacionamento com Clientes' nas três abas", () => {
-    expect(page).toContain('title="Gestão de Relacionamento com Clientes"');
-    expect(page).not.toContain('title="CRM"');
-    expect(page).not.toContain("titleAfter");
-    expect(page).not.toContain('title="Gestão de Clientes"');
-    expect(page).not.toContain("Gerencie clientes, oportunidades e metas de vendas");
+  it("título identifica Oportunidades e Operações; CRM fica em Clientes/Visão Geral", () => {
+    expect(page).toContain('funil: { title: "Oportunidades"');
+    expect(page).toContain('operacoes: { title: "Operações"');
+    expect(page).toContain('clientes: { title: "Gestão de Relacionamento com Clientes"');
   });
 
-  it("mantém o subtítulo exato compartilhado em todas as abas", () => {
-    expect(page).toContain(
-      "Centralize clientes, oportunidades, operações e metas de vendas em um só lugar."
-    );
+  it("abas são botões coloridos separados, sem menu cinza único", () => {
+    expect(page).not.toContain("<TabsList");
+    expect(page).toContain("--fin-");
   });
 
   it("slot de ações ocupa o espaço disponível para empurrar Importar à direita", () => {
