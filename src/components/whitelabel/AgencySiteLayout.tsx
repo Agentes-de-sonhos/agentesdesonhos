@@ -93,11 +93,19 @@ export function withBlogLink(nav: AgencySiteNavItem[], show: boolean): AgencySit
   return i >= 0 ? [...nav.slice(0, i), item, ...nav.slice(i)] : [...nav, item];
 }
 
+export function withCruiseSeasonLink(nav: AgencySiteNavItem[]): AgencySiteNavItem[] {
+  const path = "/cruzeiros/temporada-brasileira-2026-2027";
+  if (nav.some(item => item.to === path || item.children?.some(child => child.to === path))) return nav;
+  const i = nav.findIndex(item => /ofertas|sobre|atendimento|area-do-cliente/.test(item.to));
+  const link = {label: "Cruzeiros 26/27", to: path};
+  return i >= 0 ? [...nav.slice(0,i), link, ...nav.slice(i)] : [...nav,link];
+}
+
 export function siteNavLinks(hostname?: string | null): AgencySiteNavItem[] {
   const profile = resolveSiteProfile(hostname);
-  if (profile.nav?.length) return profile.nav;
+  if (profile.nav?.length) return withCruiseSeasonLink(profile.nav);
   const offersEnabled = sectionOverrideEnabled(profile.sections?.offers);
-  return NAV_LINKS.filter((l) => offersEnabled || l.to !== "/ofertas");
+  return withCruiseSeasonLink(NAV_LINKS.filter((l) => offersEnabled || l.to !== "/ofertas"));
 }
 
 export function AgencyBrandBar({

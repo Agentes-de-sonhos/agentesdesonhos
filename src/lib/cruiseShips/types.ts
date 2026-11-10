@@ -5,6 +5,8 @@
 export type CruiseSailingStatus = "published" | "official_checked" | "conflict";
 
 export interface CruiseSailing {
+  title?: string; // Named products with the same ports keep separate dates (e.g. Carnaval).
+  note?: string;
   date: string; // YYYY-MM-DD
   n: number; // nights
   ports: string[]; // embark ... disembark (call order, sea days not inferred)
@@ -37,10 +39,11 @@ export interface CruiseShipContent {
   eyebrow: string;
   tagline: string;
   assets: Record<string, string>;
-  hero: { image: string; video: string; alt: string; caption: string; captionSmall: string; videoAria: string };
+  hero: { image: string; video?: string | null; alt: string; caption: string; captionSmall: string; videoAria: string };
   tiles: { photo: string; alt: string; label: string }[];
   albumTile: { image: string; alt: string };
   credit: string;
+  creditUrl?: string;
   photos: CruisePhoto[];
   photoCategories: string[];
   about: {
@@ -56,7 +59,7 @@ export interface CruiseShipContent {
   included: { title: string; items: { title: string; text: string }[] };
   cabins: {
     eyebrow: string; titleA: string; titleB: string; text: string;
-    items: { name: string; lead: string; detail: string; image: string }[];
+    items: { name: string; lead: string; detail: string; image?: string | null }[];
     note: string;
   };
   routes: {
@@ -69,8 +72,12 @@ export interface CruiseShipContent {
     coordinates: Record<string, [number, number]>;
     feed: CruiseItineraryFeed;
     geography: string; // GeoJSON URL
+    /** Official products whose complete port sequence is not yet verified. Never draw inferred routes. */
+    announcements?: { id: string; title: string; n: number; region: string; text: string; dates: string[]; note: string; source: string }[];
+    summaries?: { title: string; duration: string; text: string; source: string }[];
   };
   quote: { eyebrow: string; titleA: string; titleB: string; textA: string; textB: string };
+  sources?: { label: string; url: string }[];
   tech: {
     title: string;
     subtitle?: string;

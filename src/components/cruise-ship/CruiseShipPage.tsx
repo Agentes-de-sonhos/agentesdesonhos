@@ -42,6 +42,10 @@ const emptyForm = (): CruiseQuoteForm => ({ name: "", phone: "", email: "", peri
 function openDialog(d: HTMLDialogElement | null) { if (d && !d.open) { if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", ""); } }
 function closeDialog(d: HTMLDialogElement | null) { if (d) { if (typeof d.close === "function") d.close(); else d.removeAttribute("open"); } }
 
+function MediaCredit({ ship }: { ship: CruiseShipContent }) {
+  return <div className="media-line media-credit"><span>{ship.credit}{ship.creditUrl && <> Fonte: <a href={ship.creditUrl} target="_blank" rel="noopener noreferrer">site oficial da companhia</a>.</>}</span></div>;
+}
+
 export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; hostname: string }) {
   const A = ship.assets;
   const img = (k: string) => A[k] ?? "";
@@ -79,6 +83,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   const [videoError, setVideoError] = useState(false);
   const [category, setCategory] = useState("Todas");
   const photos = ship.photos;
+  const hasVideo = Boolean(ship.hero.video && ship.assets[ship.hero.video]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -89,8 +94,8 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
   const show = useCallback((index: number) => { setVideoError(false); setPic(index); openDialog(galleryRef.current); if (index === -1) videoRef.current?.play?.()?.catch?.(() => {}); }, []);
   const openPhoto = useCallback((key: string) => { const i = photos.findIndex((p) => p.key === key); if (i >= 0) show(i); }, [photos, show]);
-  const prev = () => setPic((p) => (p === -1 ? photos.length - 1 : p - 1));
-  const next = () => setPic((p) => (p === photos.length - 1 ? -1 : p + 1));
+  const prev = () => setPic((p) => (p <= (hasVideo ? -1 : 0) ? photos.length - 1 : p - 1));
+  const next = () => setPic((p) => (p === photos.length - 1 ? (hasVideo ? -1 : 0) : p + 1));
   const backdropClose = (e: React.MouseEvent<HTMLDialogElement>) => { if (e.target === e.currentTarget) closeDialog(e.currentTarget); };
 
   /* ---------------- Experiences ---------------- */
@@ -99,16 +104,19 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
   /* ---------------- Itineraries ---------------- */
   const groups = useMemo(() => buildItineraryGroups(ship.routes.feed.sailings, ship.routes), [ship]);
+  const announcements = useMemo(() => ship.routes.announcements ?? [], [ship]);
   const [region, setRegion] = useState(ship.routes.regions[0]);
-  const nightsOptions = useMemo(() => [...new Set(groups.filter((g) => g.region === region).map((g) => g.n))].sort((a, b) => a - b), [groups, region]);
+  const nightsOptions = useMemo(() => [...new Set([...groups.filter((g) => g.region === region).map((g) => g.n), ...announcements.filter(a => a.region === region).map(a => a.n)])].sort((a, b) => a - b), [groups, announcements, region]);
   const [nights, setNights] = useState<number>(nightsOptions[0]);
   const combos = useMemo(() => groups.filter((g) => g.region === region && g.n === nights), [groups, region, nights]);
-  const [comboId, setComboId] = useState<string>(combos[0]?.id ?? "");
+  const announcedCombos = useMemo(() => announcements.filter(a => a.region === region && a.n === nights), [announcements, region, nights]);
+  const [comboId, setComboId] = useState<string>(combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : ""));
   const [order, setOrder] = useState(0);
   useEffect(() => { setNights(nightsOptions[0]); }, [nightsOptions]);
-  useEffect(() => { setComboId(combos[0]?.id ?? ""); }, [combos]);
+  useEffect(() => { setComboId(combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : "")); }, [combos, announcedCombos]);
   useEffect(() => { setOrder(0); }, [comboId]);
   const group = groups.find((g) => g.id === comboId) ?? null;
+  const announcement = announcements.find(a => `announced:${a.id}` === comboId);
   const variant = group?.variants[order] ?? group?.variants[0] ?? null;
   const months = variant ? variantMonths(variant) : [];
 
@@ -141,7 +149,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
   useEffect(() => {
     const L = leafletRef.current, map = mapRef.current;
-    if (!L || !map || !variant) return;
+    if (!L || !map) return;
+    layerRef.current?.remove();
+    if (!variant) return;
     const color = (rootRef.current && getComputedStyle(rootRef.current).getPropertyValue("--teal").trim()) || "#216d73";
     layerRef.current?.remove();
     const layer = L.layerGroup().addTo(map);
@@ -211,6 +221,12 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   const canSubmit = (undecided || (!travelMonth && !travelYear) || (!!travelMonth && !!travelYear)) && validCruiseQuote(form) && state !== "submitting" && !presentation;
 
   const quoteThisRoute = () => {
+    if (announcement) {
+      setRouteChoice(`announced:${announcement.id}`); setRouteVariant(null); setRouteDate("");
+      if (state === "success" || state === "error") reset();
+      rootRef.current?.querySelector("#csp-orcamento")?.scrollIntoView?.({ behavior: "smooth" });
+      return;
+    }
     if (!group) return;
     setRouteChoice(group.id); setRouteVariant(order); setRouteDate("");
     if (state === "success" || state === "error") reset();
@@ -223,7 +239,18 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     if (!canSubmit || inFlight.current) return;
     inFlight.current = true;
     try {
-      await submit(cruiseQuotePayload(ship, { group: chosenGroup, variantIndex: chosenGroup ? routeVariant : null, date: routeDate || null }, form, honeypot));
+      const payload = cruiseQuotePayload(ship, { group: chosenGroup, variantIndex: chosenGroup ? routeVariant : null, date: routeDate || null }, form, honeypot);
+      const seasonalRoute = ship.routes.summaries?.find(r => `seasonal:${r.title}` === routeChoice);
+      if (seasonalRoute) {
+        payload.summary += `\nInteresse na temporada: ${seasonalRoute.title} · ${seasonalRoute.duration}`;
+        payload.details.roteiro = `${seasonalRoute.title} · ${seasonalRoute.duration} (datas a confirmar)`;
+      }
+      const advertised = announcements.find(a => `announced:${a.id}` === routeChoice);
+      if (advertised) {
+        payload.summary += `\nInteresse em roteiro anunciado: ${advertised.title} · ${advertised.n} noites. Itinerário completo a confirmar.`;
+        payload.details.roteiro = `${advertised.title} · ${advertised.n} noites (itinerário a confirmar)`;
+      }
+      await submit(payload);
     } finally { inFlight.current = false; }
   };
   const newRequest = () => { setForm(emptyForm()); setTravelMonth(""); setTravelYear(""); setUndecided(false); setRouteChoice(""); setRouteVariant(null); setRouteDate(""); reset(); };
@@ -243,9 +270,9 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
         </div>
 
         <div className="gallery">
-          <button className="main-photo" aria-label={ship.hero.videoAria} onClick={() => show(-1)}>
+          <button className="main-photo" aria-label={ship.hero.videoAria} onClick={() => hasVideo ? show(-1) : openPhoto(ship.photos.find(p => ship.assets[p.key] === img(ship.hero.image))?.key ?? ship.photos[0].key)}>
             <img src={img(ship.hero.image)} alt={ship.hero.alt} />
-            <span className="play-badge" aria-hidden="true"><PlayIcon /></span>
+            {hasVideo && <span className="play-badge" aria-hidden="true"><PlayIcon /></span>}
             <span className="photo-caption">{ship.hero.caption}<small>{ship.hero.captionSmall}</small></span>
           </button>
           {ship.tiles.map((t) => (
@@ -255,7 +282,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             <img src={img(ship.albumTile.image)} alt={ship.albumTile.alt} /><span>⊞ Ver todas as {photos.length} fotos</span>
           </button>
         </div>
-        <div className="media-line media-credit"><span>{ship.credit}</span></div>
+        <MediaCredit ship={ship} />
 
         <nav className="anchors" aria-label="Seções">
           {anchors.map(([id, label]) => <a key={id} href={`#${id}`} className={active === id ? "active" : undefined} onClick={scrollTo(id)}>{label}</a>)}
@@ -264,7 +291,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
 
         <section id="csp-sobre">
           <div className="section-head"><div><div className="eyebrow">{ship.about.eyebrow}</div><h2>{ship.about.titleA}<br /><em>{ship.about.titleB}</em></h2></div><p>{ship.about.text}</p></div>
-          <div className="stats">{ship.about.stats.map((s) => <div key={s.label}><b>{s.value}</b><span>{s.label}</span></div>)}</div>
+          <div className="stats" style={{ "--stats-count": Math.min(ship.about.stats.length, 6) } as CSSProperties}>{ship.about.stats.map((s) => <div key={s.label}><b>{s.value}</b><span>{s.label}</span></div>)}</div>
           <div className="tech-entry"><div><strong>{ship.about.techTitle}</strong><p>{ship.about.techText}</p></div><button className="button" aria-haspopup="dialog" onClick={() => openDialog(techRef.current)}>{ship.about.techButton}</button></div>
           <div className="why">{ship.about.why.map((w, i) => <div key={w.title}><span className="number">{String(i + 1).padStart(2, "0")}</span><h3>{w.title}</h3><p>{w.text}</p></div>)}</div>
         </section>
@@ -276,7 +303,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             {ship.experiences.tabs.map((t) => <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>{t.label}</button>)}
           </div>
           <div className="experience-panel" role="tabpanel">
-            <img src={img(exp.image)} alt={exp.title} />
+            <div className="experience-media"><img src={img(exp.image)} alt={exp.title} /><MediaCredit ship={ship} /></div>
             <div className="panel-copy"><div className="eyebrow">{ship.shipName.toUpperCase()}</div><h3>{exp.title}</h3><p>{exp.text}</p><ul>{exp.items.map((x) => <li key={x}>{x}</li>)}</ul></div>
           </div>
           <div className="included" aria-labelledby="includedTitle">
@@ -290,30 +317,40 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <div className="cabin-grid">
             {ship.cabins.items.map((c) => (
               <article className="cabin" key={c.name}>
-                <div className="cabin-visual"><img loading="lazy" src={img(c.image)} alt={`Imagem ilustrativa da categoria ${c.name}`} /></div>
+                <div className="cabin-visual">{c.image ? <img loading="lazy" src={img(c.image)} alt={`Imagem ilustrativa da categoria ${c.name}`} /> : <div className="csp-cabin-no-photo"><span>{c.name}</span><small>Consulte a configuração da categoria</small></div>}</div>
                 <div className="cabin-copy"><h3>{c.name}</h3><p>{c.lead}</p><details><summary>Conhecer a categoria +</summary><p>{c.detail}</p></details><button onClick={() => chooseCabin(c.name)}>Tenho interesse ↗</button></div>
               </article>
             ))}
           </div>
+          <MediaCredit ship={ship} />
           <p className="note">{ship.cabins.note}</p>
         </section>
 
         <section id="csp-roteiros">
           <div className="section-head route-section-head"><div><div className="eyebrow">{ship.routes.eyebrow}</div><h2>{ship.routes.titleA}<em>{ship.routes.titleB}</em></h2></div><p>{ship.routes.text}</p></div>
-          <div className="route-intro"><span>⌖ MAPA DOS ITINERÁRIOS</span></div>
+          {groups.length > 0 || announcements.length > 0 ? <>
+          <div className="route-intro"><span>⌖ EXPLORE OS ITINERÁRIOS</span></div>
           <div className="route-tabs" role="tablist" aria-label="Tipos de roteiro">
             {ship.routes.regions.map((r) => (
               <button key={r} role="tab" aria-selected={region === r} className={region === r ? "active" : undefined} onClick={() => setRegion(r)}>
-                <span>{r}</span><small>{groups.filter((g) => g.region === r).length} combinações de duração e destinos</small>
+                <span>{r}</span><small>{groups.filter((g) => g.region === r).length + announcements.filter(a => a.region === r).length} opções de duração e roteiro</small>
               </button>
             ))}
           </div>
           <div className="route-selectors">
             <label>Duração<select aria-label="Duração" value={nights} onChange={(e) => setNights(Number(e.target.value))}>{nightsOptions.map((n) => <option key={n} value={n}>{n} noites</option>)}</select></label>
-            <label>Destinos<select aria-label="Destinos" value={comboId} onChange={(e) => setComboId(e.target.value)}>{combos.map((g) => <option key={g.id} value={g.id}>{g.title}</option>)}</select></label>
+            <label>Destinos<select aria-label="Destinos" value={comboId} onChange={(e) => setComboId(e.target.value)}>{combos.map((g) => <option key={g.id} value={g.id}>{g.title}</option>)}{announcedCombos.map(a => <option key={a.id} value={`announced:${a.id}`}>{a.title} · itinerário a confirmar</option>)}</select></label>
             <label id="orderLabel" hidden={!group || group.variants.length === 1}>Ordem das escalas<select aria-label="Ordem das escalas" value={order} onChange={(e) => setOrder(Number(e.target.value))}>{group?.variants.map((v, i) => <option key={i} value={i}>{variantCalls(v)}</option>)}</select></label>
           </div>
-          <div className="route-explorer">
+          {announcement && <article className="route-details csp-announced-route" data-testid="announced-route" aria-live="polite">
+            <div className="eyebrow">{announcement.n} NOITES · ROTEIRO ANUNCIADO PELA COMPANHIA</div>
+            <h3>{announcement.title}</h3><p>{announcement.text}</p>
+            {announcement.dates.length > 0 && <p><strong>Saídas anunciadas de Santos:</strong> {announcement.dates.map(dateLabel).join(" · ")}</p>}
+            <p>{announcement.note}</p>
+            <p className="note">O mapa será apresentado quando a sequência completa estiver conferida. Divulgação não garante disponibilidade.</p>
+            <button className="button" onClick={quoteThisRoute}>Consultar este roteiro</button>
+          </article>}
+          <div className="route-explorer" hidden={!!announcement}>
             <div className="map-wrapper">
               <div id="itineraryMap" ref={mapEl} role="region" aria-label={group && variant ? `Mapa: ${group.region} · ${group.n} noites · ${variantCalls(variant)}` : "Mapa das escalas do roteiro selecionado"} />
               <p className="note" aria-live="polite">{mapStatus}</p>
@@ -321,18 +358,27 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             </div>
             <div className="route-details" role="tabpanel" aria-live="polite" data-testid="route-details">
               {group && variant && (<>
-                <div className="eyebrow">{group.n} NOITES · {ship.routes.homePortEyebrow}</div>
+                <div className="eyebrow">{group.n} NOITES · SAÍDA DE {variant.ports[0]}</div>
                 <h3>{group.title}</h3>
-                <p>{ship.routes.homePortText}</p>
+                <p>Embarque em {variant.ports[0]} e desembarque em {variant.ports.at(-1)}.</p>
                 <div className="route-months"><strong>Meses com saídas encontradas</strong><p>{months.join(" · ")}</p></div>
                 <ol className="day-list">{variant.ports.map((p, i) => <li key={`${p}-${i}`}><span>{i === 0 ? "Início" : i === variant.ports.length - 1 ? "Fim" : i}</span><b>{p}</b></li>)}</ol>
                 <p className="note">Sequência de portos. Dias de navegação não estão representados nesta lista.</p>
+                {[...new Set(variant.sailings.flatMap(s => s.note ? [s.note] : []))].map(note => <p className="note" key={note}>{note}</p>)}
                 <button className="button" onClick={quoteThisRoute}>Quero orçamento deste roteiro</button>
                 <details className="variant-note"><summary>Datas desta opção +</summary><p>{variant.sailings.map((s) => dateLabel(s.date)).join(" · ")}</p><p>Consulte a agência para confirmar as escalas e a disponibilidade no período desejado.</p></details>
               </>)}
             </div>
           </div>
-          <div className="map-explanation"><strong>Como ler este mapa</strong><p>Os pontos indicam a localização aproximada dos destinos. As linhas mostram somente a sequência das escalas: <strong>não são o trajeto marítimo real</strong> e podem cruzar áreas de terra. O terminal exato, os dias de navegação e a ordem das paradas dependem da saída escolhida.</p></div>
+          <div className="map-explanation" hidden={!!announcement}><strong>Como ler este mapa</strong><p>Os pontos indicam a localização aproximada dos destinos. As linhas mostram somente a sequência das escalas: <strong>não são o trajeto marítimo real</strong> e podem cruzar áreas de terra. O terminal exato, os dias de navegação e a ordem das paradas dependem da saída escolhida.</p></div>
+          </> : <div className="csp-route-summaries">
+            {ship.routes.summaries?.map((route) => <article key={route.title}><div className="eyebrow">{route.duration}</div><h3>{route.title}</h3><p>{route.text}</p><a className="button" href="#csp-orcamento" onClick={e => { setRouteChoice(`seasonal:${route.title}`); scrollTo("csp-orcamento")(e); }}>Consultar saídas</a></article>)}
+            <p className="note">{ship.routes.summaries?.length ? "As escalas apresentadas são alternativas da temporada; não representam uma sequência única. Consulte datas e itinerário completo com a agência." : "Consulte a agência para conhecer os roteiros disponíveis."}</p>
+          </div>}
+          {groups.length > 0 && !!ship.routes.summaries?.length && <details className="variant-note"><summary>Panorama dos roteiros da temporada +</summary>
+            {ship.routes.summaries.map(r => <p key={r.title}><strong>{r.title} · {r.duration}.</strong> {r.text}</p>)}
+            <p className="note">O panorama inclui opções anunciadas que podem não estar no calendário selecionado acima. Consulte as datas e a sequência de cada embarque.</p>
+          </details>}
           <p className="note">Não é inventário completo nem consulta de disponibilidade em tempo real.</p>
         </section>
 
@@ -373,6 +419,8 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
                   </div>
                   <label>Roteiro de interesse<select name="roteiro" value={routeChoice} onChange={(e) => { setRouteChoice(e.target.value); setRouteVariant(null); setRouteDate(""); }}>
                     <option value="">{HELP_LABEL}</option>
+                    {ship.routes.summaries?.map(r => <option key={r.title} value={`seasonal:${r.title}`}>{r.title} · {r.duration}</option>)}
+                    {announcements.map(a => <option key={a.id} value={`announced:${a.id}`}>{a.title} · {a.n} noites · itinerário a confirmar</option>)}
                     {groups.map((g) => <option key={g.id} value={g.id}>{g.region} · {g.n} noites · {g.title}</option>)}
                   </select></label>
                   {chosenGroup && chosenGroup.variants.length > 1 && (
@@ -423,7 +471,7 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           {ship.tech.subtitle && <p>{ship.tech.subtitle}</p>}
         </header>
         {ship.tech.facts?.length ? (
-          <dl className="tech-facts">
+          <dl className="tech-facts" style={{ "--facts-columns": ship.tech.facts.length === 4 ? 2 : 3 } as CSSProperties}>
             {ship.tech.facts.map((fact) => (
               <div className="tech-fact" key={fact.label}>
                 <dt>{fact.label}</dt>
@@ -460,15 +508,16 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             <button key={p.key} onClick={() => openPhoto(p.key)}><img loading="lazy" src={img(p.key)} alt={p.label} /><span>{p.label}</span></button>
           ))}
         </div>
+        <MediaCredit ship={ship} />
       </dialog>
 
       <dialog ref={galleryRef} id="galleryDialog" aria-label={`Vídeo e fotos do ${ship.shipName}`} onClick={backdropClose}
         onClose={() => videoRef.current?.pause?.()}
         onKeyDown={(e) => { if (e.key === "ArrowRight") next(); if (e.key === "ArrowLeft") prev(); }}>
         <button className="close" aria-label="Fechar galeria" onClick={() => closeDialog(galleryRef.current)}>×</button>
-        <video id="shipVideo" ref={videoRef} hidden={pic !== -1} preload="none" controls playsInline poster={img(ship.hero.image)} onError={() => setVideoError(true)}>
-          <source src={img(ship.hero.video)} type="video/mp4" />
-        </video>
+        {hasVideo && <video id="shipVideo" ref={videoRef} hidden={pic !== -1} preload="none" controls playsInline poster={img(ship.hero.image)} onError={() => setVideoError(true)}>
+          <source src={img(ship.hero.video!)} type="video/mp4" />
+        </video>}
         <img id="largePhoto" hidden={pic === -1} src={cur ? img(cur.key) : undefined} alt={cur?.label ?? ""} />
         <p id="videoError" hidden={!videoError}>Não foi possível reproduzir o vídeo. Tente novamente em instantes.</p>
         <div className="dialog-bottom">
@@ -477,9 +526,10 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
           <button aria-label="Próxima foto" onClick={next}>→</button>
         </div>
         <div className="lightbox-thumbs">
-          <button aria-label="Assistir ao vídeo" className={`video-thumb${pic === -1 ? " active" : ""}`} aria-pressed={pic === -1} onClick={() => setPic(-1)}><PlayIcon /></button>
+          {hasVideo && <button aria-label="Assistir ao vídeo" className={`video-thumb${pic === -1 ? " active" : ""}`} aria-pressed={pic === -1} onClick={() => setPic(-1)}><PlayIcon /></button>}
           {photos.map((p, i) => <button key={p.key} aria-label={`Ver ${p.label}`} className={pic === i ? "active" : undefined} aria-pressed={pic === i} onClick={() => setPic(i)}><img loading="lazy" src={img(p.key)} alt="" /></button>)}
         </div>
+        <MediaCredit ship={ship} />
       </dialog>
     </div>
   );

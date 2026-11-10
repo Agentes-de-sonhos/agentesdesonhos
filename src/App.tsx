@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { isSiteLabAdminPath } from "@/lib/sitelabModels";
 import { NOVEMBER_CAMPAIGN_PATH } from "@/lib/novemberCampaignAccess";
+const CruiseShipsPreview = lazy(() => import("@/pages/whitelabel/CruiseShipsPreview"));
 const NovemberCampaignPreview = lazy(() => import("@/pages/whitelabel/NovemberCampaignPreview"));
 
 import { AuthProvider } from "@/hooks/useAuth";
@@ -314,6 +315,7 @@ const App = () => {
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
             {/* Prévias técnicas ADS: fixtures locais isoladas; só no host id-preview, demais hosts = 404. */}
             <Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} />
+            <Route path="/preview/navios" element={<CruiseShipsPreview />} />
             <Route path="/preview/enquete" element={<SurveyPreview />} />
             <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
             <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
