@@ -1,3 +1,4 @@
+import { isAgencySearchExcluded } from "@/lib/agencySearchExclusions";
 import { Helmet } from "react-helmet-async";
 import { useLocation } from "react-router-dom";
 import {
@@ -67,7 +68,11 @@ export function SEO({
     ? absoluteUrl(canonical)
     : absoluteUrl(pathname);
   const finalImage = image ?? DEFAULT_OG_IMAGE;
-  const robotsContent = noindex ? "noindex, nofollow" : "index, follow";
+  // An explicit tenant exclusion must not be overwritten by a page's
+  // default indexable SEO, notably the shared legal pages.
+  const excluded = typeof window !== "undefined" &&
+    isAgencySearchExcluded(window.location.hostname, pathname);
+  const robotsContent = noindex ? "noindex, nofollow" : excluded ? "noindex, follow" : "index, follow";
 
   return (
     <Helmet prioritizeSeoTags>
