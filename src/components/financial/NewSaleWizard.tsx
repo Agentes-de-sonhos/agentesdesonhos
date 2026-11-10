@@ -38,6 +38,10 @@ import {
 import { useSellers } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
+import { useSupplierServiceRules } from "@/hooks/useSupplierServiceCatalog";
+import { ServiceSelect } from "@/components/financial/commission/ServiceSelect";
+import { SaleCommissionFields, suggestionToPatch, useCommissionSuggestion } from "@/components/financial/commission/SaleCommissionFields";
+import { calcCommission, finalizeProductCommission, legacyServiceKey, resolveCommissionSuggestion, validateSaleCommission } from "@/lib/supplierCommissionRules";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -89,6 +93,10 @@ const defaultProduct = (): DraftProduct => ({
   non_commissionable_taxes: 0,
   commission_type: "percentage",
   commission_value: 0,
+  service_key: null,
+  service_label: null,
+  commission_kind: null,
+  commission_rule_source: null,
   supplier_name: "",
   operator_id: null,
   payment_rule: "after_sale",
@@ -103,14 +111,11 @@ const defaultProduct = (): DraftProduct => ({
 const fmtCurrency = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 
-const productCommission = (p: SaleProductFormData) => {
-  const taxes = Number(p.non_commissionable_taxes) || 0;
-  const base = (Number(p.sale_price) || 0) - taxes;
-  if (p.commission_type === "percentage") {
-    return base * (Number(p.commission_value) || 0) / 100;
-  }
-  return Number(p.commission_value) || 0;
-};
+const productCommission = (p: SaleProductFormData) =>
+  calcCommission(p.commission_kind ?? null, p.commission_value, Number(p.sale_price) || 0, Number(p.non_commissionable_taxes) || 0).amount;
+
+const productCommissionMissing = (p: SaleProductFormData) =>
+  !!validateSaleCommission(p.commission_kind, p.commission_value, Number(p.sale_price) || 0, Number(p.non_commissionable_taxes) || 0);
 
 // Map a quote_service/trip_service into a DraftProduct, applying agency
 // supplier terms when the source already references a structured operator.
@@ -164,17 +169,6 @@ function serviceToDraftProduct(
   if (draft.operator_id && termsByOperator) {
     const t = termsByOperator.get(draft.operator_id);
     if (t) {
-      if (t.default_commission_type) {
-        draft.commission_type = t.default_commission_type;
-        if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
-          draft.commission_value = Number(t.default_commission_percent);
-        } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
-          draft.commission_value = Number(t.default_commission_fixed);
-        }
-      }
-      if (t.default_non_commissionable_fees != null) {
-        draft.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
-      }
       if (t.payment_rule && t.payment_rule !== "manual") {
         draft.payment_rule = t.payment_rule as any;
       }
@@ -200,6 +194,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: termsData } = useAgencySupplierTerms();
+  const { data: serviceRules } = useSupplierServiceRules();
   const [step, setStep] = useState<WizardStep>("origin");
   const [submitting, setSubmitting] = useState(false);
 
@@ -314,17 +309,13 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       .map((p) => buildDraftFromPair(p, precedence) as DraftProduct)
       .map((d) => {
         const terms = d.operator_id ? termsData?.byOperator.get(d.operator_id) : undefined;
-        if (!terms) return d;
-        const next = { ...d };
-        if (terms.default_commission_type) {
-          next.commission_type = terms.default_commission_type;
-          next.commission_value = terms.default_commission_type === "percentage"
-            ? Number(terms.default_commission_percent || 0)
-            : Number(terms.default_commission_fixed || 0);
-        }
-        if (terms.default_non_commissionable_fees != null) {
-          next.non_commissionable_taxes = Number(terms.default_non_commissionable_fees);
-        }
+        const next: DraftProduct = { ...d, service_key: d.service_key || legacyServiceKey(d.product_type) };
+        // Comissão: regra fornecedor+serviço > comissão geral antiga (identificada) > sem regra (exige definição).
+        const patch = suggestionToPatch(resolveCommissionSuggestion({
+          operatorId: next.operator_id, serviceKey: next.service_key, rules: serviceRules || [], legacy: terms ?? null,
+        }));
+        Object.assign(next, patch ?? { commission_kind: null, commission_rule_source: null });
+        if (!terms) return next;
         if (terms.payment_rule && terms.payment_rule !== "manual") next.payment_rule = terms.payment_rule;
         if (terms.payment_days != null) next.payment_days = Number(terms.payment_days);
         next.requires_invoice = !!terms.requires_invoice;
@@ -334,7 +325,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     // preservados: sem Carteira/Orçamento, eles são a única origem da venda.
     setProducts((prev) => [...prev.filter((p) => !p.source_provenance), ...drafts]);
 
-  }, [origin, pairs, excluded, precedence, termsData]);
+  }, [origin, pairs, excluded, precedence, termsData, serviceRules]);
 
   // Pre-fill the sale metadata from the resolved bundle
   useEffect(() => {
@@ -363,7 +354,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
       case "date": return !!saleDate;
-      case "products": return products.length > 0;
+      case "products": return products.length > 0 && !products.some(productCommissionMissing);
       case "review": return true;
     }
   };
@@ -457,7 +448,8 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
 
       for (const p of products) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _tempId, ...payload } = p;
+        const { _tempId, ...rest } = p;
+        const payload = finalizeProductCommission(rest as any);
         await createSaleProduct({ saleId: sale.id, ...payload } as any);
       }
 

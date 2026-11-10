@@ -17,7 +17,7 @@ import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
 import { ServiceSelect } from "@/components/financial/commission/ServiceSelect";
 import { SaleCommissionFields, useCommissionSuggestion } from "@/components/financial/commission/SaleCommissionFields";
-import { finalizeProductCommission, kindFromStored, legacyServiceKey, validateSaleCommission, SYSTEM_SERVICES } from "@/lib/supplierCommissionRules";
+import { finalizeProductCommission, kindFromStored, legacyServiceKey, validateSaleCommission } from "@/lib/supplierCommissionRules";
 import { NewSaleWizard } from "@/components/financial/NewSaleWizard";
 import { SaleFormDialog } from "@/components/financial/SaleFormDialog";
 import { parseLocalDate } from "@/lib/dateParsing";
@@ -278,8 +278,8 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
   };
 
   const openAddProduct = (saleId: string) => {
-    setSelectedSaleId(saleId);
     resetProductForm();
+    setSelectedSaleId(saleId);
     setIsProductDialogOpen(true);
   };
 
