@@ -17,7 +17,13 @@ const members = query(`SELECT DISTINCT ON (agency_id) agency_id,auth_user_id FRO
 const caller = members[0];
 const foreign = members[1];
 if (!caller || !foreign) throw new Error('Two non-admin agencies are required for isolation regression checks');
+// The read-only gateway role cannot execute this restricted helper. Evaluate its
+// deployed SQL body in-place (without widening its EXECUTE grants).
+const helper = query(`SELECT pg_get_functiondef('public.same_agency_as(uuid)'::regprocedure) AS definition`)[0]?.definition as string;
+const helperBody = helper.split('$function$')[1]?.trim().replace(/^SELECT\s+/i, '').replace(/;$/, '');
+if (!helperBody) throw new Error('Missing deployed agency helper body');
 function evaluate(expression: string, rows: string) {
+  expression = expression.replace(/same_agency_as\(owner\)/g, `(${helperBody.replaceAll('_owner', 'owner')})`);
   const results = query(`WITH claims AS MATERIALIZED (SELECT set_config('request.jwt.claim.sub','${caller.auth_user_id}',true)) SELECT COALESCE((${expression}),false) AS allowed FROM claims CROSS JOIN (${rows}) objects`);
   return results[0]?.allowed;
 }
