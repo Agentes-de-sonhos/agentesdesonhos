@@ -15,7 +15,32 @@ const BARS = 24;
  * transcrição em tempo real e conclusão automática por silêncio. A IA transforma
  * a fala em uma sugestão de oportunidade, revisada no formulário.
  */
-export function VoiceOpportunityButton({ onResult }: { onResult: (p: VoiceOpportunityPrefill) => void }) {
+export interface VoiceCommandContext {
+  stages: { id: string; name: string }[];
+  cards: { id: string; client: string; destination: string; stage: string }[];
+}
+
+export interface VoiceCommandResult {
+  action: "create_opportunity" | "move_stage" | "create_followup" | "add_note" | "unknown";
+  card_id: string | null;
+  stage_id: string | null;
+  follow_up_date: string | null;
+  note: string | null;
+  message: string | null;
+}
+
+export function VoiceOpportunityButton({
+  onResult,
+  getContext,
+  onCommand,
+  label = "Criar oportunidade por voz",
+}: {
+  onResult: (p: VoiceOpportunityPrefill) => void;
+  /** Quando informado, a fala também pode mover cartões, agendar follow-ups e anotar. */
+  getContext?: () => VoiceCommandContext;
+  onCommand?: (r: VoiceCommandResult, transcript: string) => void | Promise<void>;
+  label?: string;
+}) {
   const [state, setState] = useState<"idle" | "listening" | "parsing">("idle");
   const [finalText, setFinalText] = useState("");
   const [interim, setInterim] = useState("");
@@ -58,7 +83,9 @@ export function VoiceOpportunityButton({ onResult }: { onResult: (p: VoiceOpport
   const parse = async (text: string) => {
     setState("parsing");
     try {
-      const { data, error } = await supabase.functions.invoke("kanban-voice-command", { body: { text } });
+      const { data, error } = await supabase.functions.invoke("kanban-voice-command", {
+        body: { text, ...(getContext ? getContext() : {}) },
+      });
       if (error) {
         let msg = "Não foi possível interpretar o áudio.";
         try {
@@ -68,7 +95,12 @@ export function VoiceOpportunityButton({ onResult }: { onResult: (p: VoiceOpport
         toast.error(msg);
         return;
       }
-      onResult({ ...(data?.data ?? {}), notes: data?.data?.notes || `Ditado: ${text}` });
+      const d = data?.data ?? {};
+      if (onCommand && d.action && d.action !== "create_opportunity") {
+        await onCommand(d as VoiceCommandResult, text);
+        return;
+      }
+      onResult({ ...d, notes: d.notes || `Ditado: ${text}` });
     } finally {
       setState("idle");
       setFinalText("");
@@ -183,11 +215,13 @@ export function VoiceOpportunityButton({ onResult }: { onResult: (p: VoiceOpport
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">
-                {state === "listening" ? "Ouvindo você..." : "Preparando a oportunidade..."}
+                {state === "listening" ? "Ouvindo você..." : "Entendendo o comando..."}
               </p>
               <p className="text-xs text-muted-foreground">
                 {state === "listening"
-                  ? "Diga cliente, destino, datas, pessoas e valor. Conclui sozinho após uma pausa."
+                  ? getContext
+                    ? "Ex.: “Mover a Adriana para Orçamento enviado”, “Follow-up do Fernando dia 10 de dezembro” ou uma nova viagem."
+                    : "Diga cliente, destino, datas, pessoas e valor. Conclui sozinho após uma pausa."
                   : "A IA está organizando o que você falou."}
               </p>
             </div>
@@ -234,8 +268,8 @@ export function VoiceOpportunityButton({ onResult }: { onResult: (p: VoiceOpport
       <button
         type="button"
         onClick={toggle}
-        title={state === "listening" ? "Concluir ditado" : "Criar oportunidade por voz"}
-        aria-label={state === "listening" ? "Concluir ditado" : "Criar oportunidade por voz"}
+        title={state === "listening" ? "Concluir ditado" : label}
+        aria-label={state === "listening" ? "Concluir ditado" : label}
         className={cn(
           "flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground",
           state === "listening" && "animate-pulse bg-destructive/10 text-destructive"

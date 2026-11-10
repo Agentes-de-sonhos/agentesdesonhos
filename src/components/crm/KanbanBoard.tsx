@@ -35,7 +35,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { OpportunityCard } from "./OpportunityCard";
 import { OpportunityForm, type VoiceOpportunityPrefill } from "./OpportunityForm";
-import { VoiceOpportunityButton } from "./kanban/VoiceOpportunityButton";
+import { VoiceOpportunityButton, type VoiceCommandContext, type VoiceCommandResult } from "./kanban/VoiceOpportunityButton";
+import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
+import { useQueryClient } from "@tanstack/react-query";
 import { StageColumnHeader } from "./StageColumnHeader";
 import { AddStageColumn } from "./AddStageColumn";
 import { DeleteStageDialog } from "./DeleteStageDialog";
@@ -456,6 +459,79 @@ export function KanbanBoard() {
   };
 
 
+  const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
+  const queryClient = useQueryClient();
+  const clientNameOf = (o: Opportunity) =>
+    (o as any).client?.name || clients.find((c) => c.id === o.client_id)?.name || "";
+
+  const getVoiceContext = (): VoiceCommandContext => ({
+    stages: stages.map((s) => ({ id: s.id, name: s.name })),
+    cards: opportunities.map((o) => ({
+      id: o.id,
+      client: clientNameOf(o),
+      destination: o.destination || "",
+      stage: stages.find((s) => s.id === o.stage_id || s.legacy_key === o.stage)?.name || "",
+    })),
+  });
+
+  const handleVoiceCommand = async (r: VoiceCommandResult) => {
+    const opp = r.card_id ? opportunities.find((o) => o.id === r.card_id) : undefined;
+    const who = opp ? clientNameOf(opp) : "";
+    if (r.action === "unknown" || !opp) {
+      toast.message(r.message || "Não entendi o comando. Tente: “Mover a Adriana para Orçamento enviado”.");
+      return;
+    }
+    if (r.action === "move_stage") {
+      const toStage = stages.find((s) => s.id === r.stage_id);
+      if (!toStage) return void toast.message(r.message || `Para qual coluna devo mover o cartão de ${who}?`);
+      const fromId = stages.find((s) => s.id === opp.stage_id || s.legacy_key === opp.stage)?.id;
+      if (fromId === toStage.id) return void toast.message(`${who} já está em "${toStage.name}".`);
+      await performMove(opp.id, toStage, null, false);
+      toast.success(`${who} movido para "${toStage.name}".`, fromId ? {
+        action: {
+          label: "Desfazer",
+          onClick: () => {
+            const back = stages.find((s) => s.id === fromId);
+            if (back) void performMove(opp.id, back, null, false);
+          },
+        },
+      } : undefined);
+      return;
+    }
+    if (!user) return void toast.error("Faça login novamente.");
+    if (r.action === "create_followup") {
+      if (!r.follow_up_date || !/^\d{4}-\d{2}-\d{2}$/.test(r.follow_up_date)) {
+        return void toast.message(r.message || `Para qual data devo agendar o follow-up de ${who}?`);
+      }
+      const { error } = await supabase.from("opportunity_followups" as any).insert({
+        opportunity_id: opp.id,
+        user_id: agencyOwnerId || user.id,
+        follow_up_date: r.follow_up_date,
+        note: r.note || null,
+      });
+      if (error) return void toast.error("Não foi possível agendar o follow-up.");
+      ["opportunity-followups", "all-followups", "agenda-followups", "agency-events", "opportunities"].forEach((k) =>
+        queryClient.invalidateQueries({ queryKey: [k] })
+      );
+      const [y, m, d] = r.follow_up_date.split("-");
+      toast.success(`Follow-up de ${who} agendado para ${d}/${m}/${y}.`);
+      return;
+    }
+    if (r.action === "add_note") {
+      if (!r.note) return void toast.message(`O que devo anotar no cartão de ${who}?`);
+      const { error } = await supabase.from("opportunity_notes").insert({
+        opportunity_id: opp.id,
+        user_id: user.id,
+        content: r.note,
+      });
+      if (error) return void toast.error("Não foi possível salvar a anotação.");
+      queryClient.invalidateQueries({ queryKey: ["opportunity-notes", opp.id] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-notes-counts"] });
+      toast.success(`Anotação adicionada ao cartão de ${who}.`);
+    }
+  };
+
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
     e.preventDefault();
     const target = dragOver?.stageId === toStage.id ? dragOver : null;
@@ -573,6 +649,14 @@ export function KanbanBoard() {
               </StandardPopupCard>
             </DialogContent>
           </Dialog>
+          <div className="flex h-10 shrink-0 items-center rounded-md border bg-background md:h-8">
+            <VoiceOpportunityButton
+              getContext={getVoiceContext}
+              onCommand={handleVoiceCommand}
+              label="Comando por voz: mover cartão, follow-up, anotação ou nova oportunidade"
+              onResult={(p) => { setVoicePrefill(p); setTargetStage(null); setIsDialogOpen(true); }}
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"
@@ -766,6 +850,9 @@ export function KanbanBoard() {
                                     <Plus className="h-4 w-4" /> Adicionar
                                   </button>
                                   <VoiceOpportunityButton
+                                    getContext={getVoiceContext}
+                                    onCommand={handleVoiceCommand}
+                                    label="Comando por voz"
                                     onResult={(p) => { setVoicePrefill(p); setTargetStage(isFirstStage ? null : stage); setIsDialogOpen(true); }}
                                   />
                                 </div>
