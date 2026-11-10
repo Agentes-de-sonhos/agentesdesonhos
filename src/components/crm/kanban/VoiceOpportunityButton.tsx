@@ -27,6 +27,7 @@ export interface VoiceCommandResult {
   follow_up_date: string | null;
   note: string | null;
   message: string | null;
+  options?: string[];
 }
 
 export function VoiceOpportunityButton({
@@ -41,7 +42,11 @@ export function VoiceOpportunityButton({
   onCommand?: (r: VoiceCommandResult, transcript: string) => void | Promise<void>;
   label?: string;
 }) {
-  const [state, setState] = useState<"idle" | "listening" | "parsing">("idle");
+  const [state, setState] = useState<"idle" | "listening" | "parsing" | "asking">("idle");
+  const [question, setQuestion] = useState("");
+  const [options, setOptions] = useState<string[]>([]);
+  const historyRef = useRef("");
+  const roundsRef = useRef(0);
   const [finalText, setFinalText] = useState("");
   const [interim, setInterim] = useState("");
   const [levels, setLevels] = useState<number[]>(() => Array(BARS).fill(0.08));
@@ -80,8 +85,21 @@ export function VoiceOpportunityButton({
     silenceRef.current = window.setTimeout(() => recRef.current?.stop(), SILENCE_MS);
   };
 
-  const parse = async (text: string) => {
+  const reset = () => {
+    historyRef.current = "";
+    roundsRef.current = 0;
+    setQuestion("");
+    setOptions([]);
+    setFinalText("");
+    setInterim("");
+    setState("idle");
+  };
+
+  const parse = async (said: string) => {
+    const text = historyRef.current ? `${historyRef.current}\nResposta do usuário: ${said}` : said;
     setState("parsing");
+    setFinalText("");
+    setInterim("");
     try {
       const { data, error } = await supabase.functions.invoke("kanban-voice-command", {
         body: { text, ...(getContext ? getContext() : {}) },
@@ -93,18 +111,29 @@ export function VoiceOpportunityButton({
           if (j?.error) msg = j.error;
         } catch { /* mantém mensagem padrão */ }
         toast.error(msg);
+        reset();
         return;
       }
       const d = data?.data ?? {};
+      if (onCommand && d.action === "unknown" && roundsRef.current < 3) {
+        // Diálogo: a IA pergunta e o usuário responde por voz ou clicando.
+        roundsRef.current += 1;
+        historyRef.current = text;
+        setQuestion(d.message || "Não entendi. Pode repetir de outro jeito?");
+        setOptions(Array.isArray(d.options) ? d.options.slice(0, 4) : []);
+        setState("asking");
+        return;
+      }
       if (onCommand && d.action && d.action !== "create_opportunity") {
+        reset();
         await onCommand(d as VoiceCommandResult, text);
         return;
       }
-      onResult({ ...d, notes: d.notes || `Ditado: ${text}` });
-    } finally {
-      setState("idle");
-      setFinalText("");
-      setInterim("");
+      reset();
+      onResult({ ...d, notes: d.notes || `Ditado: ${said}` });
+    } catch {
+      toast.error("Não foi possível interpretar o áudio.");
+      reset();
     }
   };
 
@@ -175,11 +204,8 @@ export function VoiceOpportunityButton({
       stopAudio();
       const t = textRef.current;
       if (t && !cancelledRef.current) void parse(t);
-      else {
-        setState("idle");
-        setFinalText("");
-        setInterim("");
-      }
+      else if (!cancelledRef.current && historyRef.current) setState("asking");
+      else reset();
     };
     recRef.current = rec;
     setState("listening");
@@ -191,12 +217,13 @@ export function VoiceOpportunityButton({
   const finish = () => recRef.current?.stop();
   const cancel = () => {
     cancelledRef.current = true;
-    recRef.current?.abort?.();
+    if (recRef.current && state === "listening") recRef.current.abort?.();
+    reset();
   };
 
   const toggle = () => {
     if (state === "listening") return finish();
-    if (state === "idle") void start();
+    if (state === "idle" || state === "asking") void start();
   };
 
   const overlay =
@@ -211,21 +238,25 @@ export function VoiceOpportunityButton({
                 state === "listening" ? "bg-destructive/15 text-destructive" : "bg-primary/15 text-primary"
               )}
             >
-              {state === "listening" ? <Mic className="h-4 w-4" /> : <Loader2 className="h-4 w-4 animate-spin" />}
+              {state === "parsing" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mic className="h-4 w-4" />}
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold">
-                {state === "listening" ? "Ouvindo você..." : "Entendendo o comando..."}
+                {state === "listening"
+                  ? historyRef.current ? "Pode responder..." : "Ouvindo você..."
+                  : state === "asking" ? "Preciso de um detalhe" : "Entendendo o comando..."}
               </p>
               <p className="text-xs text-muted-foreground">
-                {state === "listening"
+                {state === "asking"
+                  ? "Responda por voz ou toque em uma opção."
+                  : state === "listening"
                   ? getContext
                     ? "Ex.: “Mover a Adriana para Orçamento enviado”, “Follow-up do Fernando dia 10 de dezembro” ou uma nova viagem."
                     : "Diga cliente, destino, datas, pessoas e valor. Conclui sozinho após uma pausa."
                   : "A IA está organizando o que você falou."}
               </p>
             </div>
-            {state === "listening" && (
+            {(state === "listening" || state === "asking") && (
               <Button size="icon" variant="ghost" onClick={cancel} aria-label="Cancelar ditado">
                 <X className="h-4 w-4" />
               </Button>
@@ -242,6 +273,27 @@ export function VoiceOpportunityButton({
               ))}
             </div>
           )}
+          {state === "asking" && (
+            <div className="mt-3 space-y-3">
+              <p className="rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium">{question}</p>
+              {options.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {options.map((o) => (
+                    <Button key={o} size="sm" variant="secondary" onClick={() => void parse(o)}>
+                      {o}
+                    </Button>
+                  ))}
+                </div>
+              )}
+              <div className="flex justify-end gap-2">
+                <Button size="sm" variant="outline" onClick={cancel}>Cancelar</Button>
+                <Button size="sm" onClick={() => void start()} className="gap-1.5">
+                  <Mic className="h-3.5 w-3.5" /> Responder por voz
+                </Button>
+              </div>
+            </div>
+          )}
+          {state !== "asking" && (
           <div className="mt-3 min-h-[2.5rem] rounded-lg bg-muted/60 px-3 py-2 text-sm">
             {finalText || interim ? (
               <>
@@ -249,9 +301,12 @@ export function VoiceOpportunityButton({
                 <span className="text-muted-foreground">{interim}</span>
               </>
             ) : (
-              <span className="text-muted-foreground">Comece a falar...</span>
+              <span className="text-muted-foreground">
+                {state === "parsing" ? "..." : "Comece a falar..."}
+              </span>
             )}
           </div>
+          )}
           {state === "listening" && (
             <div className="mt-3 flex justify-end gap-2">
               <Button size="sm" variant="outline" onClick={cancel}>Cancelar</Button>

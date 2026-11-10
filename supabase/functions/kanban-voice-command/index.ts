@@ -23,7 +23,12 @@ const schema = {
     stage_id: nul("string", { description: "id da coluna destino, somente da lista fornecida" }),
     follow_up_date: nul("string", { description: "YYYY-MM-DD" }),
     note: nul("string", { description: "texto do follow-up ou da anotação" }),
-    message: nul("string", { description: "explicação curta em português quando unknown ou ambíguo" }),
+    message: nul("string", { description: "pergunta curta em português quando unknown ou ambíguo" }),
+    options: {
+      type: "array",
+      items: { type: "string" },
+      description: "até 4 respostas curtas clicáveis para a pergunta (ex.: nomes completos dos cartões, colunas, 'Amanhã', 'Em 3 dias')",
+    },
     client_name: nul("string"),
     destination: nul("string"),
     start_date: nul("string", { description: "YYYY-MM-DD" }),
@@ -34,7 +39,7 @@ const schema = {
     notes: nul("string"),
   },
   required: [
-    "action", "card_id", "stage_id", "follow_up_date", "note", "message", "client_name", "destination",
+    "action", "options", "card_id", "stage_id", "follow_up_date", "note", "message", "client_name", "destination",
     "start_date", "end_date", "adults_count", "children_count", "estimated_value", "notes",
   ],
 };
@@ -52,7 +57,7 @@ Deno.serve(async (req) => {
     if (!u?.user) return json({ error: "Faça login novamente." }, 401);
 
     const body = await req.json().catch(() => null);
-    const text = clean(body?.text, 1000);
+    const text = clean(body?.text, 2000);
     if (!text) return json({ error: "Nada foi entendido no áudio." }, 400);
 
     const stages = (Array.isArray(body?.stages) ? body.stages : []).slice(0, 40)
@@ -75,7 +80,9 @@ Deno.serve(async (req) => {
       "add_note (anotar algo no cartão; card_id + note).\n" +
       "Escolha card_id e stage_id SOMENTE das listas fornecidas, tolerando erros de transcrição e nomes parciais. " +
       "Se houver mais de um cartão compatível, ou faltar dado essencial (ex.: data do follow-up), ou o pedido não fizer sentido, use action unknown " +
-      "e explique em message de forma curta e útil (cite as opções encontradas). Datas sempre no futuro mais próximo coerente. Nunca invente; use null.";
+      "e explique em message de forma curta e útil (cite as opções encontradas). Datas sempre no futuro mais próximo coerente. Nunca invente; use null. " +
+      "O texto pode conter um diálogo: o comando original seguido de 'Resposta do usuário:'. Combine tudo para concluir a ação. " +
+      "Quando perguntar, preencha options com respostas prováveis; caso contrário options vazio.";
 
     const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
