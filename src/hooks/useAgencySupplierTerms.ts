@@ -52,21 +52,17 @@ export function useUpsertSupplierTerms() {
   return useMutation({
     mutationFn: async (input: SupplierTermsInput) => {
       if (!user?.id) throw new Error("Sessão expirada");
-      const payload = {
-        agency_id: user.id,
-        operator_id: input.operator_id,
-        default_commission_type: input.default_commission_type ?? null,
-        default_commission_percent: input.default_commission_percent ?? null,
-        default_commission_fixed: input.default_commission_fixed ?? null,
-        default_non_commissionable_fees: input.default_non_commissionable_fees ?? null,
-        payment_rule: input.payment_rule ?? null,
-        payment_days: input.payment_days ?? null,
-        requires_invoice: !!input.requires_invoice,
-        notes: input.notes ?? null,
-      };
+      // Só envia os campos informados: preserva valores históricos (ex.: taxas padrão antigas)
+      // e a comissão geral antiga quando o formulário não a altera.
+      const payload: Record<string, unknown> = { agency_id: user.id, operator_id: input.operator_id };
+      (Object.keys(input) as (keyof SupplierTermsInput)[]).forEach((k) => {
+        if (k === "operator_id" || input[k] === undefined) return;
+        payload[k] = input[k];
+      });
+      if ("requires_invoice" in input) payload.requires_invoice = !!input.requires_invoice;
       const { data, error } = await supabase
         .from("agency_supplier_terms")
-        .upsert(payload, { onConflict: "agency_id,operator_id" })
+        .upsert(payload as any, { onConflict: "agency_id,operator_id" })
         .select()
         .single();
       if (error) throw error;
