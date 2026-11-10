@@ -852,11 +852,11 @@ function StepProducts({
               <Package className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[10px]">{PRODUCT_TYPES[p.product_type]}</Badge>
+                  <Badge variant="outline" className="text-[10px]">{p.service_label || PRODUCT_TYPES[p.product_type]}</Badge>
                   <p className="font-medium truncate">{p.description || "Sem descrição"}</p>
                 </div>
                 <p className="text-xs text-muted-foreground truncate">
-                  {p.supplier_name || "Fornecedor não informado"} • {fmtCurrency(Number(p.sale_price))} • Comissão {fmtCurrency(productCommission(p))}
+                  {p.supplier_name || "Fornecedor não informado"} • {fmtCurrency(Number(p.sale_price))} • {productCommissionMissing(p) ? <span className="text-destructive">Comissão a definir</span> : <>Comissão {fmtCurrency(productCommission(p))}</>}
                 </p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => onEdit(p)}>
@@ -1070,7 +1070,7 @@ type ProductStep =
 
 const PRODUCT_STEP_ORDER: ProductStep[] = [
   "type", "supplier", "description", "price",
-  "commission", "taxes", "payment", "invoice", "summary",
+  "commission", "payment", "invoice", "summary",
 ];
 
 function ProductWizard({
@@ -1089,6 +1089,7 @@ function ProductWizard({
   const progress = ((stepIndex + 1) / PRODUCT_STEP_ORDER.length) * 100;
 
   const update = (patch: Partial<DraftProduct>) => setData((prev) => ({ ...prev, ...patch }));
+  const { dialog: commissionConfirmDialog } = useCommissionSuggestion(data, update);
 
   const next = () => {
     let nextStep = PRODUCT_STEP_ORDER[stepIndex + 1];
@@ -1104,11 +1105,11 @@ function ProductWizard({
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case "type": return !!data.product_type;
+      case "type": return !!data.service_key;
       case "supplier": return true; // optional
       case "description": return (data.description || "").trim().length > 0;
       case "price": return Number(data.sale_price) > 0;
-      case "commission": return Number(data.commission_value) >= 0;
+      case "commission": return !productCommissionMissing(data);
       case "taxes": return true;
       case "payment": return !!data.payment_rule;
       case "invoice": return true;
@@ -1153,23 +1154,11 @@ function ProductWizard({
           {step === "type" && (
             <div className="space-y-3">
               <h4 className="font-semibold">Qual produto ou serviço foi vendido?</h4>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {Object.entries(PRODUCT_TYPES).map(([key, label]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => update({ product_type: key as ProductType })}
-                    className={cn(
-                      "rounded-lg border-2 p-3 text-sm text-left transition-colors",
-                      data.product_type === key
-                        ? "border-primary bg-primary/5 text-primary font-medium"
-                        : "border-muted hover:border-muted-foreground/30",
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs text-muted-foreground">Escolha do catálogo da agência ou crie um serviço pelo botão +.</p>
+              <ServiceSelect
+                value={data.service_key || (initial.description ? legacyServiceKey(data.product_type) : null)}
+                onChange={(o) => update({ service_key: o.key, service_label: o.label, product_type: o.baseCategory })}
+              />
             </div>
           )}
 
@@ -1191,15 +1180,6 @@ function ProductWizard({
                     const t = termsData?.byOperator.get(v.operator_id);
                     if (t) {
                       setHadTerms(true);
-                      if (t.default_commission_type) {
-                        patch.commission_type = t.default_commission_type as "percentage" | "fixed";
-                        if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
-                          patch.commission_value = Number(t.default_commission_percent);
-                        } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
-                          patch.commission_value = Number(t.default_commission_fixed);
-                        }
-                      }
-                      if (t.default_non_commissionable_fees != null) patch.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
                       if (t.payment_rule && t.payment_rule !== "manual") patch.payment_rule = t.payment_rule as any;
                       if (t.payment_days != null) patch.payment_days = Number(t.payment_days);
                       patch.requires_invoice = !!t.requires_invoice;
@@ -1212,7 +1192,7 @@ function ProductWizard({
               />
               {hadTerms && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
-                  Preenchemos os próximos campos com base nas regras comerciais deste fornecedor. Você pode ajustar apenas para esta venda.
+                  Aplicamos as regras comerciais deste fornecedor (comissão por serviço, recebimento e nota). Você pode ajustar apenas para esta venda.
                 </div>
               )}
             </div>
