@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -367,8 +368,15 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-      )}
+        );
+        if (toolbarEl) return createPortal(actions, toolbarEl);
+        return (
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Vendas</h3>
+            {actions}
+          </div>
+        );
+      })()}
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Vendas" onExport={handleExportSales} />
 
       <NewSaleWizard
