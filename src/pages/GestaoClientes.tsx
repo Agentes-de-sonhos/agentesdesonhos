@@ -112,30 +112,30 @@ function KanbanTabsSurface({
               icon={Users}
             />
           </div>
-        <div className="-mx-1 flex flex-wrap items-center justify-end gap-2 px-1 md:mx-0">
+        <div className="-mx-1 flex flex-nowrap items-center justify-end gap-2 px-1 md:mx-0">
           <TabsList className="inline-flex w-max shrink-0 gap-0.5">
             {can('clients.view') && (
-              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
+              <TabsTrigger value="clientes" title="Clientes" aria-label="Clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Users className="h-4 w-4 shrink-0" />
-                Clientes
+                <span className="hidden xl:inline">Clientes</span>
               </TabsTrigger>
             )}
             {can('opportunities.view') && (
-              <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
+              <TabsTrigger value="funil" title="Oportunidades" aria-label="Oportunidades" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Kanban className="h-4 w-4 shrink-0" />
-                Oportunidades
+                <span className="hidden xl:inline">Oportunidades</span>
               </TabsTrigger>
             )}
             {can('operations.view') && (
-              <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
+              <TabsTrigger value="operacoes" title="Operações" aria-label="Operações" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Briefcase className="h-4 w-4 shrink-0" />
-                Operações
+                <span className="hidden xl:inline">Operações</span>
               </TabsTrigger>
             )}
             {can('dashboard.view') && (
-              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
+              <TabsTrigger value="dashboard" title="Visão Geral" aria-label="Visão Geral" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
-                Visão Geral
+                <span className="hidden xl:inline">Visão Geral</span>
               </TabsTrigger>
             )}
           </TabsList>
@@ -144,7 +144,7 @@ function KanbanTabsSurface({
           <div
             ref={setToolbarEl}
             data-testid="crm-toolbar-slot"
-            className="flex min-w-0 flex-wrap items-center justify-end gap-1.5"
+            className="flex min-w-0 flex-nowrap items-center justify-end gap-1.5"
           />
         </div>
         </div>
