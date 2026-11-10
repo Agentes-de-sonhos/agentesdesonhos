@@ -422,15 +422,20 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
 
             return (
               <Collapsible key={sale.id} open={isExpanded} onOpenChange={() => toggleSaleExpanded(sale.id)}>
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border rounded-xl overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow">
                   <CollapsibleTrigger asChild>
                     <div className="flex items-center justify-between p-4 hover:bg-muted/50 cursor-pointer">
                       <div className="flex items-center gap-4">
                         {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                         <div>
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{sale.client_name}</span>
+                            <span
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground"
+                              style={{ backgroundImage: "linear-gradient(135deg, hsl(var(--fin-vendas)), hsl(var(--fin-comissoes)))" }}
+                            >
+                              {(sale.client_name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase()}
+                            </span>
+                            <span className="font-semibold text-foreground">{sale.client_name}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-3 w-3" /> {sale.destination}
