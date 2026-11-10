@@ -13,9 +13,11 @@ import { TripPeriodField } from "@/components/shared/TripPeriodField";
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
+  /** Etapa onde a operação nasce (rodapé "Adicionar" de cada coluna). */
+  targetStageKey?: string | null;
 }
 
-export function CreateOperationDialog({ open, onOpenChange }: Props) {
+export function CreateOperationDialog({ open, onOpenChange, targetStageKey }: Props) {
   const { clients } = useClients();
   const { createOperation } = useOperations();
   const [clientId, setClientId] = useState("");
@@ -44,6 +46,7 @@ export function CreateOperationDialog({ open, onOpenChange }: Props) {
         travel_end_date: endDate || null,
         passengers_count: pax,
         sale_amount: amount,
+        ...(targetStageKey ? { stage: targetStageKey as any } : {}),
       });
       reset();
       onOpenChange(false);
