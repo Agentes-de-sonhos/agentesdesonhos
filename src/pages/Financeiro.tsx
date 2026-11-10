@@ -29,8 +29,6 @@ import { ReceiptsCenter } from "@/components/financial/receipts/ReceiptsCenter";
 import { ContractsCenter } from "@/components/financial/contracts/ContractsCenter";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const MONTH_NAMES = [
@@ -133,6 +131,7 @@ export default function Financeiro() {
   };
 
   const showPeriodSelector = true;
+  const [showMore, setShowMore] = useState(false);
 
   const tabClass = (isActive: boolean) =>
     cn(
@@ -211,32 +210,24 @@ export default function Financeiro() {
                   </button>
                 );
               })}
-              {(() => {
-                const activeMore = MORE_TABS.find(t => t.key === activeTab);
-                const MoreIcon = activeMore?.icon;
+              {(showMore || MORE_TABS.some(t => t.key === activeTab)) && MORE_TABS.map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.key;
                 return (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className={tabClass(!!activeMore)} aria-label="Mais seções">
-                        {MoreIcon && <MoreIcon className="h-4 w-4" />}
-                        {activeMore && <span>{activeMore.label}</span>}
-                        <ChevronDown className="h-4 w-4" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      {MORE_TABS.map(tab => {
-                        const Icon = tab.icon;
-                        return (
-                          <DropdownMenuItem key={tab.key} onClick={() => handleTabChange(tab.key)} className="gap-2">
-                            <Icon className="h-4 w-4" />
-                            {tab.label}
-                          </DropdownMenuItem>
-                        );
-                      })}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <button key={tab.key} role="tab" aria-selected={isActive} onClick={() => handleTabChange(tab.key)} className={tabClass(isActive)}>
+                    <Icon className="h-4 w-4" />
+                    <span>{tab.label}</span>
+                  </button>
                 );
-              })()}
+              })}
+              <button
+                className={tabClass(false)}
+                onClick={() => setShowMore(v => !v)}
+                aria-label={showMore ? "Recolher seções" : "Mostrar mais seções"}
+                title={showMore ? "Recolher" : "Mais"}
+              >
+                <ChevronRight className={cn("h-4 w-4 transition-transform", showMore && "rotate-180")} />
+              </button>
             </div>
 
             <div>
