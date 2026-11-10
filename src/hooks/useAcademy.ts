@@ -454,51 +454,9 @@ export function useAcademyRanking() {
   const { data: ranking = [], isLoading } = useQuery({
     queryKey: ["academy-ranking"],
     queryFn: async () => {
-      const { data: certData, error: certError } = await supabase
-        .from("user_certificates")
-        .select("user_id");
-      if (certError) throw certError;
-
-      const { data: examData, error: examError } = await supabase
-        .from("user_exam_attempts")
-        .select("user_id, score, passed")
-        .eq("passed", true);
-      if (examError) throw examError;
-
-      const userIds = [...new Set([...certData.map((c: any) => c.user_id), ...examData.map((e: any) => e.user_id)])];
-      if (userIds.length === 0) return [];
-
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles_public")
-        .select("user_id, name, avatar_url, agency_name")
-        .in("user_id", userIds);
-      if (profilesError) throw profilesError;
-
-      const rankingMap = new Map<string, RankingUser>();
-      userIds.forEach((userId) => {
-        const profile = profiles.find((p: any) => p.user_id === userId);
-        const userCerts = certData.filter((c: any) => c.user_id === userId);
-        const userExams = examData.filter((e: any) => e.user_id === userId);
-        const avgScore = userExams.length > 0
-          ? Math.round(userExams.reduce((sum: number, e: any) => sum + e.score, 0) / userExams.length)
-          : 0;
-
-        rankingMap.set(userId, {
-          user_id: userId,
-          name: profile?.name || "Usuário",
-          avatar_url: profile?.avatar_url || null,
-          agency_name: profile?.agency_name || null,
-          trails_completed: userCerts.length,
-          total_score: userCerts.length * 100 + avgScore,
-          avg_exam_score: avgScore,
-        });
-      });
-
-      return Array.from(rankingMap.values()).sort((a, b) => {
-        if (b.trails_completed !== a.trails_completed) return b.trails_completed - a.trails_completed;
-        if (b.avg_exam_score !== a.avg_exam_score) return b.avg_exam_score - a.avg_exam_score;
-        return b.total_score - a.total_score;
-      });
+      const { data, error } = await supabase.rpc("academy_ranking_summary");
+      if (error) throw error;
+      return (data ?? []) as RankingUser[];
     },
   });
 
