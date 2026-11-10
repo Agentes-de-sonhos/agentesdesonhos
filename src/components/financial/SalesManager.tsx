@@ -1,3 +1,4 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
@@ -352,12 +353,19 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
       {allSales.length > 0 && (() => {
         const actions = (
           <div className="flex items-center gap-1.5">
-            <Button size="sm" className="h-8 gap-1.5 px-2.5" onClick={() => setIsWizardOpen(true)} title="Nova Venda" aria-label="Nova Venda">
-              <Plus className="h-4 w-4" /> <span className={toolbarEl ? "hidden 2xl:inline" : ""}>Nova Venda</span>
-            </Button>
+            <TooltipProvider delayDuration={80}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="h-10 min-w-10 gap-2 rounded-xl px-2.5 font-semibold shadow-md transition-all hover:-translate-y-0.5 2xl:px-4" onClick={() => setIsWizardOpen(true)} aria-label="Nova Venda">
+                    <Plus className="h-5 w-5" /> <span className={toolbarEl ? "hidden 2xl:inline" : ""}>Nova Venda</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="2xl:hidden font-medium">Nova Venda</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Mais ações">
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" aria-label="Mais ações">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
