@@ -230,10 +230,16 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
 
   const handleProductSubmit = async () => {
     if (!selectedSaleId && !editingProductId) return;
+    let payload: SaleProductFormData;
+    try {
+      payload = finalizeProductCommission(productFormData as any) as SaleProductFormData;
+    } catch {
+      return; // mensagem de validação já exibida nos campos de comissão
+    }
     if (editingProductId) {
-      await updateSaleProduct({ id: editingProductId, ...productFormData });
+      await updateSaleProduct({ id: editingProductId, ...payload });
     } else {
-      await createSaleProduct({ saleId: selectedSaleId!, ...productFormData });
+      await createSaleProduct({ saleId: selectedSaleId!, ...payload });
     }
     setIsProductDialogOpen(false);
     resetProductForm();
@@ -294,6 +300,15 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
   const estimatedCommission = productFormData.commission_type === "percentage"
     ? commissionBase * (Number(productFormData.commission_value) || 0) / 100
     : Number(productFormData.commission_value) || 0;
+
+  const patchProduct = (p: Partial<SaleProductFormData>) => setProductFormData((prev) => ({ ...prev, ...p }));
+  const { dialog: commissionConfirmDialog } = useCommissionSuggestion(
+    productFormData, patchProduct, `${isProductDialogOpen}-${editingProductId ?? "new"}-${selectedSaleId ?? ""}`,
+  );
+  const productCommissionError = validateSaleCommission(
+    productFormData.commission_kind, productFormData.commission_value,
+    Number(productFormData.sale_price) || 0, Number(productFormData.non_commissionable_taxes) || 0,
+  );
 
   // Auto-calculate expected_date based on payment_rule
   const currentSaleForProduct = useMemo(() => {
@@ -538,7 +553,7 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
                               const commission = calculateProductCommission(product);
                               return (
                                 <TableRow key={product.id}>
-                                  <TableCell className="font-medium">{PRODUCT_TYPES[product.product_type]}</TableCell>
+                                  <TableCell className="font-medium">{(product as any).service_label || PRODUCT_TYPES[product.product_type]}</TableCell>
                                   <TableCell className="text-muted-foreground">{product.description || "-"}</TableCell>
                                   <TableCell className="text-right">{formatCurrency(Number(product.sale_price))}</TableCell>
                                   <TableCell className="text-right text-primary">
@@ -597,11 +612,11 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
             {renderSectionHeader(1, "Dados do Produto", "Tipo e descrição")}
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Tipo de Produto</Label>
-                <Select value={productFormData.product_type} onValueChange={(v) => setProductFormData({ ...productFormData, product_type: v as ProductType })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{Object.entries(PRODUCT_TYPES).map(([key, label]) => (<SelectItem key={key} value={key}>{label}</SelectItem>))}</SelectContent>
-                </Select>
+                <Label>Serviço</Label>
+                <ServiceSelect
+                  value={productFormData.service_key}
+                  onChange={(o) => patchProduct({ service_key: o.key, service_label: o.label, product_type: o.baseCategory })}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Descrição</Label>
@@ -629,17 +644,7 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
                       if (!editingProductId && changedOperator) {
                         const t = termsData?.byOperator.get(v.operator_id!);
                         if (t) {
-                          if (t.default_commission_type) {
-                            next.commission_type = t.default_commission_type as 'percentage' | 'fixed';
-                            if (t.default_commission_type === 'percentage' && t.default_commission_percent != null) {
-                              next.commission_value = Number(t.default_commission_percent);
-                            } else if (t.default_commission_type === 'fixed' && t.default_commission_fixed != null) {
-                              next.commission_value = Number(t.default_commission_fixed);
-                            }
-                          }
-                          if (t.default_non_commissionable_fees != null) {
-                            next.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
-                          }
+                          // Comissão vem da regra fornecedor+serviço (useCommissionSuggestion).
                           if (t.payment_rule && t.payment_rule !== 'manual') {
                             next.payment_rule = t.payment_rule as any;
                           }
@@ -662,42 +667,8 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
 
             {/* Section 2: Commission */}
             {renderSectionHeader(2, "Comissão", "Quanto você recebe")}
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="space-y-2">
-                <Label>Tipo</Label>
-                <Select value={productFormData.commission_type} onValueChange={(v) => setProductFormData({ ...productFormData, commission_type: v as 'percentage' | 'fixed' })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentual (%)</SelectItem>
-                    <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{productFormData.commission_type === 'percentage' ? 'Comissão (%)' : 'Comissão (R$)'}</Label>
-                <Input type="number" value={productFormData.commission_value} onChange={(e) => setProductFormData({ ...productFormData, commission_value: Number(e.target.value) })} placeholder="0" />
-              </div>
-              <div className="space-y-2">
-                <Label>Taxas não comissionáveis</Label>
-                <Input type="number" value={productFormData.non_commissionable_taxes || ""} onChange={(e) => setProductFormData({ ...productFormData, non_commissionable_taxes: Number(e.target.value) })} placeholder="0,00" />
-              </div>
-            </div>
-
-            {/* Commission summary */}
-            <div className="grid gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4 sm:grid-cols-3">
-              <div>
-                <p className="text-xs text-muted-foreground">Preço de venda</p>
-                <p className="text-sm font-semibold">{formatCurrency(Number(productFormData.sale_price) || 0)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Base comissionável</p>
-                <p className="text-sm font-semibold">{formatCurrency(commissionBase)}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Comissão estimada</p>
-                <p className="text-sm font-semibold text-primary">{formatCurrency(estimatedCommission)}</p>
-              </div>
-            </div>
+            <SaleCommissionFields data={productFormData} onPatch={patchProduct} />
+            {commissionConfirmDialog}
 
             {/* Section 3: Advanced (collapsible) */}
             <Collapsible>
@@ -782,7 +753,7 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
 
           <DialogFooter className="pt-2 border-t">
             <Button variant="outline" onClick={() => { setIsProductDialogOpen(false); resetProductForm(); }}>Cancelar</Button>
-            <Button onClick={handleProductSubmit} disabled={isSaving || productFormData.sale_price <= 0}>
+            <Button onClick={handleProductSubmit} disabled={isSaving || productFormData.sale_price <= 0 || !!productCommissionError}>
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {editingProductId ? "Salvar" : "Adicionar"}
             </Button>
