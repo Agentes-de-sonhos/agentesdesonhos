@@ -17031,6 +17031,18 @@ export type Database = {
           training_type: string
         }[]
       }
+      academy_ranking_summary: {
+        Args: never
+        Returns: {
+          agency_name: string
+          avatar_url: string
+          avg_exam_score: number
+          name: string
+          total_score: number
+          trails_completed: number
+          user_id: string
+        }[]
+      }
       admin_agency_activity_ranking: {
         Args: { _end: string; _start: string }
         Returns: Json
