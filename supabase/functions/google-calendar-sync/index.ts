@@ -491,7 +491,8 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!tokenRecord) {
-      return new Response(JSON.stringify({ error: "Google Calendar não conectado" }), { status: 400, headers: corsHeaders });
+      // Not connected is an expected state (auto-triggers fire for every user): skip quietly.
+      return new Response(JSON.stringify({ success: true, skipped: "not_connected" }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (tokenRecord.connection_state === "reconnect_required") {
