@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Plus, Search, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Search, Maximize2, Minimize2, ChevronsLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -33,7 +33,10 @@ export function OperationsModule() {
   const { operations, isLoading, isFetching, moveStage, reorderOperations } = useOperations();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
+  const { stages, createStage, updateStage, duplicateStage, deleteStage, reorderStages } = useOperationStages();
+  const [draggedStageId, setDraggedStageId] = useState<string | null>(null);
+  const [stageDragOverId, setStageDragOverId] = useState<string | null>(null);
+
   const { can, canStage, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
   const canEdit = can('operations.edit');
@@ -43,6 +46,21 @@ export function OperationsModule() {
   const [selectedTab, setSelectedTab] = useState<OperationCardTab>("overview");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageKey: string; targetId: string | null; before: boolean } | null>(null);
+  const [createStageKey, setCreateStageKey] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [draggedHeight, setDraggedHeight] = useState(72);
+  // Preferência manual por coluna; sem preferência, coluna vazia recolhe sozinha.
+  const [collapseOverrides, setCollapseOverrides] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem("crm-operations-collapse-overrides") || "{}"); } catch { return {}; }
+  });
+  const isStageCollapsed = (id: string, count: number) => collapseOverrides[id] ?? count === 0;
+  const toggleCollapsed = (id: string, currentlyCollapsed: boolean) =>
+    setCollapseOverrides((prev) => {
+      const next = { ...prev, [id]: !currentlyCollapsed };
+      try { localStorage.setItem("crm-operations-collapse-overrides", JSON.stringify(next)); } catch { /* sem armazenamento */ }
+      return next;
+    });
+  const openCreate = (stageKey: string | null) => { setCreateStageKey(stageKey); setCreateOpen(true); };
   const [deleteStageTarget, setDeleteStageTarget] = useState<{ id: string; name: string } | null>(null);
   const { isMaximized, toggle: toggleMaximize } = useKanbanMaximize();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,18 +144,39 @@ export function OperationsModule() {
     return m;
   }, [filtered, stages]);
 
+  const prevCountsRef = useRef<Record<string, number>>({});
+  useEffect(() => {
+    const counts: Record<string, number> = {};
+    stages.forEach((st) => { counts[st.id] = operations.filter((o) => o.stage === st.key).length; });
+    const prev = prevCountsRef.current;
+    const flipped = Object.keys(counts).filter((id) => id in prev && (prev[id] === 0) !== (counts[id] === 0));
+    prevCountsRef.current = counts;
+    if (flipped.length) {
+      setCollapseOverrides((cur) => {
+        if (!flipped.some((id) => id in cur)) return cur;
+        const next = { ...cur };
+        flipped.forEach((id) => delete next[id]);
+        try { localStorage.setItem("crm-operations-collapse-overrides", JSON.stringify(next)); } catch { /* */ }
+        return next;
+      });
+    }
+  }, [operations, stages]);
+
   const handleDragStart = (e: React.DragEvent, id: string) => {
     if (isTeamMember && !canEdit) {
       e.preventDefault();
       toast.error(DENY_MESSAGE);
       return;
     }
-    setDraggedId(id);
+    const h = (e.target as HTMLElement)?.getBoundingClientRect?.().height;
+    if (h) setDraggedHeight(Math.round(h));
+    requestAnimationFrame(() => setDraggedId(id));
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, stageKey?: string) => {
     e.preventDefault();
+    if (stageKey && draggedId) setDragOver((prev) => (prev?.stageKey === stageKey ? prev : { stageKey, targetId: null, before: false }));
     e.dataTransfer.dropEffect = "move";
   };
 
@@ -210,9 +249,10 @@ export function OperationsModule() {
 
   const handleColumnDrop = async (e: React.DragEvent, stageKey: string) => {
     e.preventDefault();
-    await performDrop(stageKey, null, false);
+    const id = draggedId;
     setDraggedId(null);
     setDragOver(null);
+    if (id) await performMove(id, stageKey, null, false);
   };
 
   const handleCardDragOver = (e: React.DragEvent, stageKey: string, targetId: string) => {
@@ -233,28 +273,37 @@ export function OperationsModule() {
     e.preventDefault();
     e.stopPropagation();
     const before = dragOver?.before ?? true;
-    await performDrop(stageKey, targetId, before);
+    const id = draggedId;
     setDraggedId(null);
     setDragOver(null);
+    if (id) await performMove(id, stageKey, targetId, before);
   };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3">
 
       <KanbanToolbarSlot>
-        <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            placeholder="Buscar"
-            aria-label="Buscar operações"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="h-10 pl-8 text-sm md:h-8 md:text-xs"
-          />
-        </div>
+        {searchOpen || search ? (
+          <div className="relative w-[150px] shrink-0 lg:w-[190px]">
+            <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              autoFocus
+              placeholder="Buscar"
+              aria-label="Buscar operações"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onBlur={() => { if (!search) setSearchOpen(false); }}
+              className="h-10 pl-8 text-sm md:h-8 md:text-xs"
+            />
+          </div>
+        ) : (
+          <Button variant="outline" size="sm" className="h-10 min-h-11 shrink-0 px-2.5 md:h-8 md:min-h-0" onClick={() => setSearchOpen(true)} title="Buscar" aria-label="Buscar operações">
+            <Search className="h-3.5 w-3.5" />
+          </Button>
+        )}
         {canCreate && (
-          <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" onClick={() => setCreateOpen(true)} title="Nova operação" aria-label="Nova operação">
-            <Plus className="h-3.5 w-3.5" /> Nova
+          <Button size="sm" className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs" onClick={() => openCreate(null)} title="Nova operação" aria-label="Nova operação">
+            <Plus className="h-3.5 w-3.5" /> <span className="hidden 2xl:inline">Nova Operação</span>
           </Button>
         )}
         <Button
@@ -262,9 +311,11 @@ export function OperationsModule() {
           size="sm"
           className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
           onClick={toggleMaximize}
+          title={isMaximized ? "Minimizar" : "Maximizar"}
+          aria-label={isMaximized ? "Minimizar" : "Maximizar"}
         >
           {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-          {isMaximized ? "Minimizar" : "Maximizar"}
+          <span className="hidden 2xl:inline">{isMaximized ? "Minimizar" : "Maximizar"}</span>
         </Button>
       </KanbanToolbarSlot>
 
@@ -275,69 +326,131 @@ export function OperationsModule() {
         ) : (
           <KanbanScrollArea>
             <div
-              className="flex min-h-full items-stretch gap-4"
+              className="flex h-full items-stretch gap-4"
               style={{ minWidth: "max-content" }}
             >
-              {stages.map((stage) => {
+              {stages.map((stage, index) => {
                 const ops = byStage.get(stage.key) || [];
                 const tokens = getStageTokens(stage.color);
                 const stageCanEdit = canStage('operations', stage.id, 'edit');
+                const collapsed = isStageCollapsed(stage.id, ops.length);
+                const placeholder = (
+                  <div aria-hidden className="kanban-drop-placeholder rounded-lg bg-foreground/10 ring-1 ring-inset ring-foreground/10" style={{ height: draggedHeight }} />
+                );
                 return (
                   <div
                     key={stage.id}
-                    onDragOver={handleDragOver}
+                    onDragOverCapture={(e) => {
+                      if (!draggedStageId) return;
+                      e.preventDefault(); e.stopPropagation();
+                      e.dataTransfer.dropEffect = "move";
+                      if (stageDragOverId !== stage.id) setStageDragOverId(stage.id);
+                    }}
+                    onDropCapture={(e) => {
+                      if (!draggedStageId) return;
+                      e.preventDefault(); e.stopPropagation();
+                      const from = stages.findIndex((s) => s.id === draggedStageId);
+                      setDraggedStageId(null); setStageDragOverId(null);
+                      if (from < 0 || from === index) return;
+                      const ids = stages.map((s) => s.id);
+                      const [m] = ids.splice(from, 1);
+                      ids.splice(index, 0, m);
+                      reorderStages(ids);
+                    }}
+                    onDragOver={(e) => handleDragOver(e, stage.key)}
                     onDrop={(e) => handleColumnDrop(e, stage.key)}
-                    className={cn(
-                      "flex w-[290px] min-h-full flex-shrink-0 snap-center md:snap-align-none flex-col rounded-xl border p-3",
-                      tokens.bg,
-                      tokens.border
-                    )}
+                    onDragEnd={() => { setDraggedId(null); setDragOver(null); setDraggedStageId(null); setStageDragOverId(null); }}
+                    className={cn(stageDragOverId === stage.id && draggedStageId !== stage.id && "rounded-xl ring-2 ring-primary/60", draggedStageId === stage.id && "opacity-50", collapsed ? "w-11" : "w-[290px]", "flex h-full min-h-0 flex-shrink-0 flex-col transition-[width] duration-200 snap-center md:snap-align-none")}
                   >
-                    <OperationStageColumnHeader
-                      stage={stage}
-                      count={ops.length}
-                      onRename={(name) => updateStage({ id: stage.id, name })}
-                      onChangeColor={(color) => updateStage({ id: stage.id, color })}
-                      onDuplicate={() => duplicateStage(stage.id)}
-                      onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
-                      canEdit={stageCanEdit}
-                    />
-                    <div className="flex-1 space-y-2.5">
-
-
-                      {ops.map((op) => {
-                        const isIndicator = dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
-                        return (
-                          <div
-                            key={op.id}
-                            onDragOver={(e) => handleCardDragOver(e, stage.key, op.id)}
-                            onDrop={(e) => handleCardDrop(e, stage.key, op.id)}
-                            className={cn(
-                              isIndicator && dragOver?.before && "border-t-2 border-primary rounded-t-sm pt-0.5",
-                              isIndicator && !dragOver?.before && "border-b-2 border-primary rounded-b-sm pb-0.5",
-                              draggedId === op.id && "opacity-40"
-                            )}
-                          >
-                            <OperationCard
-                              operation={op}
-                              onClick={() => { setSelectedTab("overview"); setSelected(op); }}
-                              onDragStart={handleDragStart}
-                              canEdit={canEdit}
-                              moveTargets={moveTargets}
-                              currentStageId={stage.key}
-                              showGenerateWallet={operationStageShowsWallet(stages, stage.key)}
-                              onMoveToStage={(toStageKey) => handleMoveToStage(op, toStageKey)}
-                            />
+                    {collapsed ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleCollapsed(stage.id, collapsed)}
+                        title={`Expandir ${stage.name}`}
+                        aria-label={`Expandir coluna ${stage.name}`}
+                        className={cn(
+                          "flex min-h-[14rem] w-11 flex-col items-center gap-3 self-start rounded-xl border py-3 text-foreground transition-colors hover:brightness-95",
+                          tokens.bg, tokens.border,
+                          dragOver?.stageKey === stage.key && "ring-2 ring-primary/50"
+                        )}
+                      >
+                        <ChevronsLeftRight className="h-4 w-4 text-muted-foreground" />
+                        <span className={cn("text-xs font-semibold [writing-mode:vertical-rl]", tokens.text)}>{stage.name}</span>
+                        <span className="text-[11px] font-medium tabular-nums text-muted-foreground">{ops.length}</span>
+                      </button>
+                    ) : (
+                    <div className={cn("flex w-full max-h-full min-h-0 min-w-0 flex-col self-start rounded-xl border p-3", tokens.bg, tokens.border)}>
+                      <div
+                        className={cn("min-w-0 shrink-0", (!isTeamMember || canEdit) && "cursor-grab active:cursor-grabbing")}
+                        draggable={!isTeamMember || canEdit}
+                        title="Arraste para mudar a ordem da coluna"
+                        onDragStart={(e) => {
+                          if ((e.target as HTMLElement).closest("input,button")) { e.preventDefault(); return; }
+                          e.stopPropagation();
+                          e.dataTransfer.effectAllowed = "move";
+                          e.dataTransfer.setData("text/plain", stage.id);
+                          setDraggedStageId(stage.id);
+                        }}
+                      >
+                        <OperationStageColumnHeader
+                          stage={stage}
+                          count={ops.length}
+                          onRename={(name) => updateStage({ id: stage.id, name })}
+                          onChangeColor={(color) => updateStage({ id: stage.id, color })}
+                          onDuplicate={() => duplicateStage(stage.id)}
+                          onRequestDelete={() => setDeleteStageTarget({ id: stage.id, name: stage.name })}
+                          canEdit={stageCanEdit}
+                          onQuickAdd={index === 0 && canCreate ? () => openCreate(null) : undefined}
+                          onCollapse={() => toggleCollapsed(stage.id, collapsed)}
+                        />
+                      </div>
+                      <div className="kanban-column-scroll -mx-1 min-h-0 min-w-0 flex-initial space-y-2.5 overflow-y-auto overscroll-contain px-1 py-1">
+                        {ops.map((op) => {
+                          const isIndicator = !!draggedId && dragOver?.stageKey === stage.key && dragOver?.targetId === op.id;
+                          return (
+                            <div
+                              key={op.id}
+                              onDragOver={(e) => handleCardDragOver(e, stage.key, op.id)}
+                              onDrop={(e) => handleCardDrop(e, stage.key, op.id)}
+                              className={cn("space-y-2.5", draggedId === op.id && "hidden")}
+                            >
+                              {isIndicator && dragOver?.before && placeholder}
+                              <OperationCard
+                                operation={op}
+                                onClick={() => { setSelectedTab("overview"); setSelected(op); }}
+                                onDragStart={handleDragStart}
+                                canEdit={canEdit}
+                                moveTargets={moveTargets}
+                                currentStageId={stage.key}
+                                showGenerateWallet={operationStageShowsWallet(stages, stage.key)}
+                                onMoveToStage={(toStageKey) => handleMoveToStage(op, toStageKey)}
+                              />
+                              {isIndicator && !dragOver?.before && placeholder}
+                            </div>
+                          );
+                        })}
+                        {!!draggedId && dragOver?.stageKey === stage.key && dragOver.targetId === null && placeholder}
+                        {ops.length === 0 && !(draggedId && dragOver?.stageKey === stage.key) && (
+                          <div className="space-y-1 rounded-lg border-2 border-dashed border-muted-foreground/15 px-3 py-8 text-center text-xs text-muted-foreground/70">
+                            <p className="font-medium text-muted-foreground">Nenhuma operação nesta etapa</p>
+                            <p>Arraste um cartão até aqui para movê-lo.</p>
                           </div>
-                        );
-                      })}
-                      {ops.length === 0 && (
-                        <div className="space-y-1 rounded-lg border-2 border-dashed border-muted-foreground/15 px-3 py-8 text-center text-xs text-muted-foreground/70">
-                          <p className="font-medium text-muted-foreground">Nenhuma operação nesta etapa</p>
-                          <p>Arraste um cartão até aqui para movê-lo.</p>
+                        )}
+                      </div>
+                      {canCreate && (
+                        <div className="mt-2 flex shrink-0 items-center gap-1" data-no-kanban-drag>
+                          <button
+                            type="button"
+                            onClick={() => openCreate(index === 0 ? null : stage.key)}
+                            aria-label={`Adicionar operação em ${stage.name}`}
+                            className="flex h-8 flex-1 items-center gap-1.5 rounded-md px-2 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-background/70 hover:text-foreground"
+                          >
+                            <Plus className="h-4 w-4" /> Adicionar
+                          </button>
                         </div>
                       )}
                     </div>
+                    )}
                   </div>
                 );
               })}
@@ -347,7 +460,7 @@ export function OperationsModule() {
                   const name = prompt("Nome da nova coluna");
                   if (name && name.trim()) createStage({ name: name.trim() });
                 }}
-                className="w-[290px] min-h-full flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3"
+                className="w-[290px] min-h-[14rem] self-start flex-shrink-0 rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30 transition-colors flex flex-col items-center justify-center text-muted-foreground hover:text-primary p-3"
 
               >
                 <Plus className="h-5 w-5 mb-1" />
@@ -358,7 +471,7 @@ export function OperationsModule() {
         )}
       </div>
 
-      <CreateOperationDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <CreateOperationDialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) setCreateStageKey(null); }} targetStageKey={createStageKey} />
       <OperationDetailDialog
         operation={selected}
         open={!!selected}

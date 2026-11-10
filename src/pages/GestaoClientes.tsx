@@ -1,6 +1,7 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Users, Kanban, Briefcase, LayoutDashboard } from "lucide-react";
 import { ClientsModule } from "@/components/crm/ClientsModule";
 import { KanbanBoard } from "@/components/crm/KanbanBoard";
@@ -16,6 +17,22 @@ import { cn } from "@/lib/utils";
 import { KanbanMaximizeProvider, useKanbanMaximize } from "@/components/crm/kanban/KanbanMaximizeContext";
 import { KanbanMaximizeSurface } from "@/components/crm/kanban/KanbanMaximizeSurface";
 import { useAdminNav, type CrmTab } from "@/lib/agencyAdminNav";
+
+/** Botões coloridos no padrão da Gestão Financeira (reaproveita os tokens --fin-*). */
+const CRM_TABS = [
+  { key: "clientes", label: "Clientes", icon: Users, perm: "clients.view", color: "--fin-vendas" },
+  { key: "funil", label: "Oportunidades", icon: Kanban, perm: "opportunities.view", color: "--fin-notas" },
+  { key: "operacoes", label: "Operações", icon: Briefcase, perm: "operations.view", color: "--fin-entradas" },
+  { key: "dashboard", label: "Visão Geral", icon: LayoutDashboard, perm: "dashboard.view", color: "--fin-dashboard" },
+] as const;
+
+/** Título e subtítulo identificam a área ativa. */
+const HEADER: Record<string, { title: string; subtitle: string; icon: typeof Users }> = {
+  clientes: { title: "Gestão de Relacionamento com Clientes", subtitle: "Base de contatos, histórico e cadastro de viajantes.", icon: Users },
+  funil: { title: "Oportunidades", subtitle: "Negociações, orçamentos e fechamento de viagens.", icon: Kanban },
+  operacoes: { title: "Operações", subtitle: "Reservas, emissões, embarques e pós-viagem.", icon: Briefcase },
+  dashboard: { title: "Gestão de Relacionamento com Clientes", subtitle: "Indicadores de atendimento, conversão e metas.", icon: LayoutDashboard },
+};
 
 export default function GestaoClientes() {
   return (
@@ -104,47 +121,52 @@ function KanbanTabsSurface({
 
         {/* Título à esquerda; abas e ações da aba ativa no canto superior direito */}
         <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="shrink-0 flex-1 basis-auto">
             <PageHeader
               pageKey="gestao-clientes"
-              title="Gestão de Relacionamento com Clientes"
-              subtitle="Centralize clientes, oportunidades, operações e metas de vendas em um só lugar."
-              icon={Users}
+              title={HEADER[currentTab]?.title ?? HEADER.clientes.title}
+              subtitle={HEADER[currentTab]?.subtitle ?? HEADER.clientes.subtitle}
+              icon={HEADER[currentTab]?.icon ?? Users}
             />
           </div>
-        <div className="-mx-1 flex flex-wrap items-center justify-end gap-2 px-1 md:mx-0">
-          <TabsList className="inline-flex w-max shrink-0 gap-0.5">
-            {can('clients.view') && (
-              <TabsTrigger value="clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <Users className="h-4 w-4 shrink-0" />
-                Clientes
-              </TabsTrigger>
-            )}
-            {can('opportunities.view') && (
-              <TabsTrigger value="funil" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <Kanban className="h-4 w-4 shrink-0" />
-                Oportunidades
-              </TabsTrigger>
-            )}
-            {can('operations.view') && (
-              <TabsTrigger value="operacoes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <Briefcase className="h-4 w-4 shrink-0" />
-                Operações
-              </TabsTrigger>
-            )}
-            {can('dashboard.view') && (
-              <TabsTrigger value="dashboard" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
-                <LayoutDashboard className="h-4 w-4 shrink-0" />
-                Visão Geral
-              </TabsTrigger>
-            )}
-          </TabsList>
+        <div className="-mx-1 flex flex-nowrap items-center justify-end gap-2 px-1 md:mx-0">
+          <TooltipProvider delayDuration={80}>
+          <div role="tablist" aria-label="Seções do CRM" className="flex shrink-0 flex-nowrap items-center gap-2">
+            {CRM_TABS.filter(t => can(t.perm)).map(t => {
+              const Icon = t.icon;
+              const active = currentTab === t.key;
+              const v = `var(${t.color})`;
+              return (
+                <Tooltip key={t.key}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      role="tab"
+                      value={t.key}
+                      aria-selected={active}
+                      aria-label={t.label}
+                      onClick={() => onTabChange(t.key)}
+                      className="flex h-10 min-w-10 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-2.5 text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md 2xl:px-4"
+                      style={active
+                        ? { backgroundColor: `hsl(${v})`, color: "hsl(var(--primary-foreground))", boxShadow: `0 6px 16px -6px hsl(${v} / 0.6)` }
+                        : { backgroundColor: `hsl(${v} / 0.1)`, color: `hsl(${v})` }}
+                    >
+                      <Icon className="h-5 w-5 shrink-0 2xl:h-[18px] 2xl:w-[18px]" />
+                      <span className="hidden 2xl:inline">{t.label}</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="font-medium 2xl:hidden">{t.label}</TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+          </TooltipProvider>
 
           {/* Ações da aba ativa (busca, + Nova, Maximizar, Importar) */}
           <div
             ref={setToolbarEl}
             data-testid="crm-toolbar-slot"
-            className="flex min-w-0 flex-wrap items-center justify-end gap-1.5"
+            className="flex min-w-0 flex-nowrap items-center justify-end gap-1.5"
           />
         </div>
         </div>

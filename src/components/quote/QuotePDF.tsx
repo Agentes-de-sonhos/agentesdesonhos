@@ -1,3 +1,5 @@
+import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
+import { hotelRates, mealPlanLabel } from "@/lib/hotelRates";
 import { sanitizedDescriptionHtml, descriptionToPlainText } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
@@ -295,6 +297,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       details.push(`${data.hotel_name} — ${data.city}`);
       details.push(`${t("checkIn")}: ${formatDate(data.check_in)} | ${t("checkOut")}: ${formatDate(data.check_out)}`);
       if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
+      if (hotelRefundLabel(data)) details.push(hotelRefundLabel(data) as string);
       if (Array.isArray(data.rooms) && data.rooms.length === 1) {
         details.push(`${t("accommodations")}:`);
         data.rooms.forEach((r: any) => {
@@ -588,6 +591,23 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
               ${rowsHtml}
             </div>
           `;
+        }
+
+        // Tarifas alternativas do mesmo hotel
+        const pdfRates = isHotel ? hotelRates(service.service_data, Number(service.amount) || 0) : [];
+        if (pdfRates.length) {
+          const cards = pdfRates.map((r) => `
+            <div style="flex:1 1 45%;min-width:180px;border:1px solid ${C.border};border-radius:10px;padding:10px 12px;background:${C.tertiary};">
+              <div style="font-size:13px;font-weight:700;color:${C.textT};">${r.label}</div>
+              ${r.meal_plan ? `<div style="font-size:11px;color:${C.mutedT};margin-top:3px;">🍽 ${mealPlanLabel(r.meal_plan)}</div>` : ""}
+              ${r.refundLabel ? `<div style="font-size:11px;margin-top:3px;color:${r.refundable ? C.primaryOnTertiary : C.mutedT};font-weight:600;">${r.refundLabel}</div>` : ""}
+              ${showDetailedPrices ? `<div style="font-size:15px;font-weight:800;color:${C.textT};margin-top:6px;">${formatCurrency(r.price)}</div>` : ""}
+            </div>`).join("");
+          hotelRoomsHtml += `
+            <div class="pdf-block pdf-hotel-rates" style="margin-top:10px;">
+              <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:${C.text};margin:0 0 6px;">Tarifas disponíveis</p>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;">${cards}</div>
+            </div>`;
         }
 
         // Per-service payment display

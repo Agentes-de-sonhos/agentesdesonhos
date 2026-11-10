@@ -20,6 +20,7 @@ import {
   UserRound,
   UsersRound,
   MessagesSquare,
+  Newspaper,
   Wallet,
   WalletCards,
   type LucideIcon,
@@ -147,6 +148,15 @@ export const SITE_ITEMS: MenuItemDef[] = [
     match: (p) => p === "/gestao/site/resorts" || p === "/site/resorts",
   },
 ];
+
+/** Item "Blog": exige o recurso `site_blog` da agência + permissão do módulo. */
+export const SITE_BLOG_ITEM: MenuItemDef = {
+  label: "Blog",
+  to: "/gestao/site/blog",
+  icon: Newspaper,
+  match: (p) => p.startsWith("/gestao/site/blog") || p.startsWith("/site/blog"),
+  permission: "site.blog.manage",
+};
 
 export const USER_ITEMS: MenuItemDef[] = [
   { label: "Minhas Configurações", to: "/gestao/perfil", icon: UserRound },

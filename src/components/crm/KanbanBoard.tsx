@@ -35,7 +35,10 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { OpportunityCard } from "./OpportunityCard";
 import { OpportunityForm, type VoiceOpportunityPrefill } from "./OpportunityForm";
-import { VoiceOpportunityButton } from "./kanban/VoiceOpportunityButton";
+import { VoiceOpportunityButton, type VoiceCommandContext, type VoiceCommandResult } from "./kanban/VoiceOpportunityButton";
+import { useAuth } from "@/hooks/useAuth";
+import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
+import { useQueryClient } from "@tanstack/react-query";
 import { StageColumnHeader } from "./StageColumnHeader";
 import { AddStageColumn } from "./AddStageColumn";
 import { DeleteStageDialog } from "./DeleteStageDialog";
@@ -120,25 +123,31 @@ export function KanbanBoard() {
   } = usePipelineStages();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [filterClient] = useState<string>("all");
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState<{ stageId: string; targetId: string | null; before: boolean } | null>(null);
   const [draggedHeight, setDraggedHeight] = useState(72);
   const [voicePrefill, setVoicePrefill] = useState<VoiceOpportunityPrefill | null>(null);
   const [targetStage, setTargetStage] = useState<PipelineStage | null>(null);
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+  // Preferência manual por coluna (true = recolhida, false = expandida).
+  // Sem preferência: coluna vazia recolhe sozinha; com cartões fica aberta.
+  const [collapseOverrides, setCollapseOverrides] = useState<Record<string, boolean>>(() => {
     try {
-      return new Set(JSON.parse(localStorage.getItem("crm-kanban-collapsed") || "[]"));
+      return JSON.parse(localStorage.getItem("crm-kanban-collapse-overrides") || "{}");
     } catch {
-      return new Set();
+      return {};
     }
   });
-  const toggleCollapsed = (id: string) =>
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      try { localStorage.setItem("crm-kanban-collapsed", JSON.stringify([...next])); } catch { /* sem armazenamento */ }
+  const persistOverrides = (next: Record<string, boolean>) => {
+    try { localStorage.setItem("crm-kanban-collapse-overrides", JSON.stringify(next)); } catch { /* sem armazenamento */ }
+  };
+  const isStageCollapsed = (id: string, count: number) =>
+    collapseOverrides[id] ?? count === 0;
+  const toggleCollapsed = (id: string, currentlyCollapsed: boolean) =>
+    setCollapseOverrides((prev) => {
+      const next = { ...prev, [id]: !currentlyCollapsed };
+      persistOverrides(next);
       return next;
     });
   const resetDrag = () => {
@@ -456,12 +465,86 @@ export function KanbanBoard() {
   };
 
 
+  const { user } = useAuth();
+  const { agencyOwnerId } = useAgencyOwnerId();
+  const queryClient = useQueryClient();
+  const clientNameOf = (o: Opportunity) =>
+    (o as any).client?.name || clients.find((c) => c.id === o.client_id)?.name || "";
+
+  const getVoiceContext = (): VoiceCommandContext => ({
+    stages: stages.map((s) => ({ id: s.id, name: s.name })),
+    cards: opportunities.map((o) => ({
+      id: o.id,
+      client: clientNameOf(o),
+      destination: o.destination || "",
+      stage: stages.find((s) => s.id === o.stage_id || s.legacy_key === o.stage)?.name || "",
+    })),
+  });
+
+  const handleVoiceCommand = async (r: VoiceCommandResult) => {
+    const opp = r.card_id ? opportunities.find((o) => o.id === r.card_id) : undefined;
+    const who = opp ? clientNameOf(opp) : "";
+    if (r.action === "unknown" || !opp) {
+      toast.message(r.message || "Não entendi o comando. Tente: “Mover a Adriana para Orçamento enviado”.");
+      return;
+    }
+    if (r.action === "move_stage") {
+      const toStage = stages.find((s) => s.id === r.stage_id);
+      if (!toStage) return void toast.message(r.message || `Para qual coluna devo mover o cartão de ${who}?`);
+      const fromId = stages.find((s) => s.id === opp.stage_id || s.legacy_key === opp.stage)?.id;
+      if (fromId === toStage.id) return void toast.message(`${who} já está em "${toStage.name}".`);
+      await performMove(opp.id, toStage, null, false);
+      toast.success(`${who} movido para "${toStage.name}".`, fromId ? {
+        action: {
+          label: "Desfazer",
+          onClick: () => {
+            const back = stages.find((s) => s.id === fromId);
+            if (back) void performMove(opp.id, back, null, false);
+          },
+        },
+      } : undefined);
+      return;
+    }
+    if (!user) return void toast.error("Faça login novamente.");
+    if (r.action === "create_followup") {
+      if (!r.follow_up_date || !/^\d{4}-\d{2}-\d{2}$/.test(r.follow_up_date)) {
+        return void toast.message(r.message || `Para qual data devo agendar o follow-up de ${who}?`);
+      }
+      const { error } = await supabase.from("opportunity_followups" as any).insert({
+        opportunity_id: opp.id,
+        user_id: agencyOwnerId || user.id,
+        follow_up_date: r.follow_up_date,
+        note: r.note || null,
+      });
+      if (error) return void toast.error("Não foi possível agendar o follow-up.");
+      ["opportunity-followups", "all-followups", "agenda-followups", "agency-events", "opportunities"].forEach((k) =>
+        queryClient.invalidateQueries({ queryKey: [k] })
+      );
+      const [y, m, d] = r.follow_up_date.split("-");
+      toast.success(`Follow-up de ${who} agendado para ${d}/${m}/${y}.`);
+      return;
+    }
+    if (r.action === "add_note") {
+      if (!r.note) return void toast.message(`O que devo anotar no cartão de ${who}?`);
+      const { error } = await supabase.from("opportunity_notes").insert({
+        opportunity_id: opp.id,
+        user_id: user.id,
+        content: r.note,
+      });
+      if (error) return void toast.error("Não foi possível salvar a anotação.");
+      queryClient.invalidateQueries({ queryKey: ["opportunity-notes", opp.id] });
+      queryClient.invalidateQueries({ queryKey: ["opportunity-notes-counts"] });
+      toast.success(`Anotação adicionada ao cartão de ${who}.`);
+    }
+  };
+
   const handleColumnDrop = async (e: React.DragEvent, toStage: PipelineStage) => {
     e.preventDefault();
     const target = dragOver?.stageId === toStage.id ? dragOver : null;
-    await performDrop(toStage, target?.targetId ?? null, target?.before ?? false);
+    const id = draggedId;
     setDraggedId(null);
     setDragOver(null);
+    if (id) await performMove(id, toStage, target?.targetId ?? null, target?.before ?? false);
   };
 
   const handleCardDragOver = (e: React.DragEvent, stageId: string, targetId: string) => {
@@ -482,9 +565,10 @@ export function KanbanBoard() {
     e.preventDefault();
     e.stopPropagation();
     const before = dragOver?.before ?? true;
-    await performDrop(toStage, targetCardId, before);
+    const id = draggedId;
     setDraggedId(null);
     setDragOver(null);
+    if (id) await performMove(id, toStage, targetCardId, before);
   };
 
   const getTotalValue = (stageId: string) =>
@@ -513,6 +597,29 @@ export function KanbanBoard() {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
+  // Quando uma coluna esvazia (ou recebe o 1º cartão), volta à regra
+  // automática: vazia recolhe, com cartões expande.
+  const prevCountsRef = useRef<Record<string, number>>({});
+  useEffect(() => {
+    if (isLoading) return;
+    const prev = prevCountsRef.current;
+    const changed: string[] = [];
+    for (const st of stages) {
+      const count = getOpportunitiesForStage(st.id).length;
+      const before = prev[st.id];
+      if (before !== undefined && (before === 0) !== (count === 0)) changed.push(st.id);
+      prev[st.id] = count;
+    }
+    if (changed.length) {
+      setCollapseOverrides((cur) => {
+        const next = { ...cur };
+        changed.forEach((id) => delete next[id]);
+        persistOverrides(next);
+        return next;
+      });
+    }
+  });
+
   const handleStageDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -528,13 +635,26 @@ export function KanbanBoard() {
       <div className="flex min-h-0 flex-1 flex-col gap-3">
 
         <KanbanToolbarSlot>
-          <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
+          <Button
+            variant="outline"
+            size="icon"
+            className={`h-10 w-10 shrink-0 md:h-8 md:w-8 xl:hidden ${searchOpen ? "hidden" : ""} ${search ? "border-primary text-primary" : ""}`}
+            title="Buscar"
+            aria-label="Buscar"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search className="h-3.5 w-3.5" />
+          </Button>
+          <div className={`relative w-[170px] shrink-0 lg:w-[190px] ${searchOpen ? "block" : "hidden xl:block"}`}>
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar"
               aria-label="Buscar oportunidades"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoFocus={searchOpen}
+              onBlur={() => { if (!search) setSearchOpen(false); }}
+              onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); setSearchOpen(false); } }}
               className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
@@ -571,14 +691,35 @@ export function KanbanBoard() {
               </StandardPopupCard>
             </DialogContent>
           </Dialog>
+          {canCreateOpp && (
+            <Button
+              size="sm"
+              className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
+              title="Nova oportunidade"
+              aria-label="Nova oportunidade"
+              onClick={() => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); }}
+            >
+              <Plus className="h-3.5 w-3.5" /> <span className="hidden 2xl:inline">Nova Oportunidade</span>
+            </Button>
+          )}
+          <div className="flex h-10 shrink-0 items-center rounded-md border bg-background md:h-8">
+            <VoiceOpportunityButton
+              getContext={getVoiceContext}
+              onCommand={handleVoiceCommand}
+              label="Comando por voz: mover cartão, follow-up, anotação ou nova oportunidade"
+              onResult={(p) => { setVoicePrefill(p); setTargetStage(null); setIsDialogOpen(true); }}
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"
             className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
             onClick={toggleMaximize}
+            title={isMaximized ? "Minimizar" : "Maximizar"}
+            aria-label={isMaximized ? "Minimizar" : "Maximizar"}
           >
             {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-            {isMaximized ? "Minimizar" : "Maximizar"}
+            <span className="hidden 2xl:inline">{isMaximized ? "Minimizar" : "Maximizar"}</span>
           </Button>
         </KanbanToolbarSlot>
 
@@ -630,6 +771,7 @@ export function KanbanBoard() {
                     .filter(s => canStage('opportunities', s.id, 'view'))
                     .map((stage, index) => {
                     const stageOpps = getOpportunitiesForStage(stage.id);
+                    const stageCollapsed = isStageCollapsed(stage.id, stageOpps.length);
                     const overdueCount = stageOpps.filter(hasOverdueFollowUp).length;
                     const tokens = getStageTokens(stage.color);
                     const isFirstStage = index === 0;
@@ -642,7 +784,7 @@ export function KanbanBoard() {
                     const stageCanEdit = canStage('opportunities', stage.id, 'edit');
 
                     return (
-                      <SortableColumn key={stage.id} stage={stage} collapsed={collapsed.has(stage.id)}>
+                      <SortableColumn key={stage.id} stage={stage} collapsed={stageCollapsed}>
                         {({ dragHandleProps, isDragging }) => (
                           <div
                             onDragOver={(e) => handleDragOver(e, stage.id)}
@@ -650,10 +792,10 @@ export function KanbanBoard() {
                             onDragEnd={resetDrag}
                             className="flex h-full min-h-0 flex-col"
                           >
-                            {collapsed.has(stage.id) ? (
+                            {stageCollapsed ? (
                               <button
                                 type="button"
-                                onClick={() => toggleCollapsed(stage.id)}
+                                onClick={() => toggleCollapsed(stage.id, stageCollapsed)}
                                 title={`Expandir ${stage.name}`}
                                 aria-label={`Expandir coluna ${stage.name}`}
                                 className={cn(
@@ -672,14 +814,14 @@ export function KanbanBoard() {
                             ) : (
                             <div
                               className={cn(
-                                "flex max-h-full min-h-0 flex-col self-start rounded-xl border p-3 transition-shadow",
+                                "flex w-full max-h-full min-h-0 min-w-0 flex-col self-start rounded-xl border p-3 transition-shadow",
                                 tokens.bg,
                                 tokens.border,
                                 isDragging && "shadow-xl ring-2 ring-primary/30"
                               )}
                             >
 
-                              <div><div>
+                              <div className="min-w-0 shrink-0">
                               <StageColumnHeader
                                 stage={stage}
                                 count={stageOpps.length}
@@ -692,15 +834,14 @@ export function KanbanBoard() {
                                 }
                                 onDuplicate={() => duplicateStage(stage.id)}
                                 onRequestDelete={() => setDeleteTarget(stage)}
-                                onQuickAdd={isFirstStage ? () => setQuickAddOpen(true) : undefined}
+                                onQuickAdd={isFirstStage && canCreateOpp ? () => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); } : undefined}
                                 isProtected={isProtected}
                                 canEdit={stageCanEdit}
-                                onCollapse={() => toggleCollapsed(stage.id)}
+                                onCollapse={() => toggleCollapsed(stage.id, stageCollapsed)}
                               />
                               </div>
-                              </div>
 
-                              <div className="kanban-column-scroll -mx-1 -mr-2 min-h-0 flex-initial space-y-2.5 overflow-y-auto overscroll-contain px-1 py-1 pr-1.5">
+                              <div className="kanban-column-scroll -mx-1 min-h-0 min-w-0 flex-initial space-y-2.5 overflow-y-auto overscroll-contain px-1 py-1">
 
 
                                 {stageOpps.map((opportunity) => {
@@ -755,7 +896,7 @@ export function KanbanBoard() {
                                 )}
                               </div>
                               {canCreateOpp && (
-                                <div className="mt-2 flex items-center gap-1" data-no-kanban-drag>
+                                <div className="mt-2 flex shrink-0 items-center gap-1" data-no-kanban-drag>
                                   <button
                                     type="button"
                                     onClick={() => { setVoicePrefill(null); setTargetStage(isFirstStage ? null : stage); setIsDialogOpen(true); }}
@@ -765,6 +906,9 @@ export function KanbanBoard() {
                                     <Plus className="h-4 w-4" /> Adicionar
                                   </button>
                                   <VoiceOpportunityButton
+                                    getContext={getVoiceContext}
+                                    onCommand={handleVoiceCommand}
+                                    label="Comando por voz"
                                     onResult={(p) => { setVoicePrefill(p); setTargetStage(isFirstStage ? null : stage); setIsDialogOpen(true); }}
                                   />
                                 </div>

@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useAgencyEntitlements } from "@/hooks/useAgencyEntitlements";
 import { useTeamSession } from "@/contexts/TeamSessionContext";
 import { agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
@@ -26,6 +27,7 @@ import {
   PROJECTS_ITEMS,
   PROJECTS_ROOT,
   SITE_ITEMS,
+  SITE_BLOG_ITEM,
   USER_ITEMS,
   filterMenuByPermission,
   type MenuItemDef,
@@ -48,6 +50,7 @@ export function AgencyAdminSidebar({
 }) {
   const { user, signOut } = useAuth();
   const { can } = usePermissions();
+  const { hasAgencyEntitlement } = useAgencyEntitlements();
   const { member, accessProfile, community } = useTeamSession();
   const workspace = useWorkspace();
   const navigate = useNavigate();
@@ -110,7 +113,10 @@ export function AgencyAdminSidebar({
       projectsItems={PROJECTS_ITEMS}
       agendaItem={AGENDA_ITEM}
       managementItems={filterMenuByPermission(managementItems, can)}
-      siteItems={user?.id && user.id === info.user_id ? SITE_ITEMS : []}
+      siteItems={[
+        ...(hasAgencyEntitlement("site_blog") ? filterMenuByPermission([SITE_BLOG_ITEM], can) : []),
+        ...(user?.id && user.id === info.user_id ? SITE_ITEMS : []),
+      ]}
       userItems={USER_ITEMS}
       projectsTo={PROJECTS_ROOT}
       projectsActive={isProjectsArea}

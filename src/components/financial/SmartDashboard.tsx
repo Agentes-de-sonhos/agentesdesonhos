@@ -244,7 +244,7 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
       </div>
 
       {/* ===== PENDÊNCIAS ===== */}
-      {(salesWithoutProducts.length > 0 || overdueEntries.length > 0 || upcomingIncome.length > 0) && (
+      {(overdueEntries.length > 0 || upcomingIncome.length > 0) && (
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -252,16 +252,6 @@ export function SmartDashboard({ viewMonth, viewYear }: SmartDashboardProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            {salesWithoutProducts.slice(0, 3).map(s => (
-              <button
-                key={s.id}
-                onClick={() => goToTab("vendas")}
-                className="w-full flex items-center justify-between rounded-md border border-amber-500/20 bg-amber-500/5 p-2.5 text-xs text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 transition-colors"
-              >
-                <span>⚠️ Venda "{s.client_name}" sem produtos cadastrados</span>
-                <ExternalLink className="h-3 w-3 shrink-0" />
-              </button>
-            ))}
             {overdueEntries.slice(0, 3).map(e => (
               <button
                 key={e.id}

@@ -1,6 +1,7 @@
 import curtiCaribeCancun from "@/assets/whitelabel/curti-caribe-cancun.png.asset.json";
 import curtiFozIguacu from "@/assets/whitelabel/curti/curti-foz-iguacu.png.asset.json";
 import curtiCruzeiros from "@/assets/whitelabel/curti/curti-cruzeiros.png.asset.json";
+import curtiNovaYork from "@/assets/whitelabel/curti-nova-york.jpg.asset.json";
 import dricaLondon from "@/assets/presentation/drica/london.jpg.asset.json";
 import dricaJapan from "@/assets/presentation/drica/japan.jpg.asset.json";
 import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json";
@@ -63,6 +64,7 @@ import {
 import { resolveSiteProfile, type AgencySectionCopy } from "@/lib/agencySiteProfile";
 import { REQUEST_SERVICES } from "@/lib/agencySiteRequests";
 import { isEditorialTheme, siteContainer } from "@/lib/agencySiteTheme";
+import { isMundoSeoHost } from "@/lib/mundoSeo";
 import { SEO } from "@/components/seo/SEO";
 import { resolveAgencySharePreview } from "@/lib/agencySharePreview";
 import heroPraia from "@/assets/whitelabel/hero-praia.jpg";
@@ -164,6 +166,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   curtiCaribe: curtiCaribeCancun.url,
   curtiBrasil: curtiFozIguacu.url,
   curtiCruzeiros: curtiCruzeiros.url,
+  curtiNovaYork: curtiNovaYork.url,
   orlandoMagicKingdom: destinoOrlandoMk.url,
   portugalBelem: slPortugal.url,
   fernandoNoronha: slNoronha.url,
@@ -1961,7 +1964,7 @@ export default function AgencySiteHome({
   const sharePreview = resolveAgencySharePreview(info.hostname);
   return (
     <>
-      {sharePreview && !profile.presentation ? (
+      {isMundoSeoHost(info.hostname) ? null : sharePreview && !profile.presentation ? (
         <SEO
           title={sharePreview.title}
           exactTitle

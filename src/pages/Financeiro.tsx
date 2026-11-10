@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
   ShoppingBag, ArrowUpCircle, Receipt, Users,
   ChevronLeft, ChevronRight, Calendar, FileText, Truck,
-  ReceiptText, FileSpreadsheet, FileSignature,
+  ReceiptText, FileSpreadsheet, FileSignature, Plus, MoreHorizontal, Download,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useIsTeamMember } from "@/contexts/TeamSessionContext";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,17 @@ import { ReceiptsCenter } from "@/components/financial/receipts/ReceiptsCenter";
 import { ContractsCenter } from "@/components/financial/contracts/ContractsCenter";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAdminNav } from "@/lib/agencyAdminNav";
+
+function Tip({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom" className="2xl:hidden font-medium">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 const MONTH_NAMES = [
   "", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -40,15 +50,17 @@ const MONTH_NAMES = [
 const ALL_TABS_DEF = [
   { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
-  { key: "comissoes", label: "Comissões", icon: Receipt },
   { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
-  { key: "vendedores", label: "Vendedores", icon: Users },
-  { key: "recibos", label: "Recibos", icon: ReceiptText },
-  { key: "faturas", label: "Faturas", icon: FileText },
+  { key: "comissoes", label: "Comissões", icon: Receipt },
   { key: "notas-fiscais", label: "Notas Fiscais", icon: FileSpreadsheet },
-  { key: "contratos", label: "Contratos", icon: FileSignature },
   { key: "fornecedores", label: "Fornecedores", icon: Truck },
+  { key: "vendedores", label: "Vendedores", icon: Users, more: true },
+  { key: "recibos", label: "Recibos", icon: ReceiptText, more: true },
+  { key: "faturas", label: "Faturas", icon: FileText, more: true },
+  { key: "contratos", label: "Contratos", icon: FileSignature, more: true },
 ] as const;
+const MAIN_TABS = ALL_TABS_DEF.filter(t => !("more" in t));
+const MORE_TABS = ALL_TABS_DEF.filter(t => "more" in t);
 
 const ALL_TABS = ["dashboard", ...ALL_TABS_DEF.map(t => t.key)];
 
@@ -129,56 +141,152 @@ export default function Financeiro() {
   };
 
   const showPeriodSelector = true;
+  const [showMore, setShowMore] = useState(false);
+  const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
+  const periodShort = `${MONTH_NAMES[viewMonth].slice(0, 3)}/${String(viewYear).slice(-2)}`;
 
-  const tabClass = (isActive: boolean) =>
-    cn(
-      "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
-      isActive
-        ? "bg-primary text-primary-foreground shadow-sm"
-        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-    );
+  const TAB_COLOR: Record<string, string> = {
+    dashboard: "--fin-dashboard", vendas: "--fin-vendas", entradas: "--fin-entradas",
+    despesas: "--fin-despesas", comissoes: "--fin-comissoes", "notas-fiscais": "--fin-notas",
+    fornecedores: "--fin-fornecedores",
+  };
+  const tabStyle = (key: string, isActive: boolean): CSSProperties => {
+    const v = `var(${TAB_COLOR[key] ?? "--fin-extra"})`;
+    return isActive
+      ? { backgroundColor: `hsl(${v})`, color: "hsl(var(--primary-foreground))", boxShadow: `0 6px 16px -6px hsl(${v} / 0.6)` }
+      : { backgroundColor: `hsl(${v} / 0.1)`, color: `hsl(${v})` };
+  };
+  const tabClass = (_isActive: boolean) =>
+    "flex h-10 min-w-10 items-center justify-center gap-2 px-2.5 2xl:px-4 rounded-xl text-sm font-semibold transition-all whitespace-nowrap hover:-translate-y-0.5 hover:shadow-md";
 
   return (
     <DashboardLayout>
       <div className="space-y-4 animate-fade-in relative">
         <PermissionGate permission="financial.access">
-        <div className="relative">
-          <PageHeader
-            pageKey="financeiro"
-            title="Gestão Financeira"
-            subtitle="Controle simples da sua agência"
-            icon={DollarSign}
-          />
-
+        <TooltipProvider delayDuration={80}>
+        <div className="flex flex-nowrap items-center gap-3">
+          <div className="flex min-w-0 shrink items-center gap-2.5">
+            <DollarSign className="h-8 w-8 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <h1 className="truncate text-2xl font-bold leading-tight">Gestão Financeira</h1>
+              <p className="hidden truncate text-sm text-muted-foreground lg:block">Controle simples da sua agência</p>
+            </div>
+          </div>
 
           {showPeriodSelector && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button variant="outline" size="icon" className="h-10 w-10" onClick={goToPrevMonth} aria-label="Mês anterior">
-                <ChevronLeft className="h-5 w-5" />
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="flex h-10 items-center gap-0.5 rounded-xl border bg-background p-1 shadow-sm">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={goToPrevMonth} aria-label="Mês anterior">
+                <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="text-center min-w-[160px] px-3 py-2 rounded-lg bg-muted/50">
-                <span className="text-base sm:text-lg font-semibold">{periodLabel}</span>
+              <div className="whitespace-nowrap px-2 text-center text-sm font-bold text-primary">
+                <span className="hidden 2xl:inline">{periodLabel}</span>
+                <span className="2xl:hidden">{periodShort}</span>
               </div>
-              <Button variant="outline" size="icon" className="h-10 w-10" onClick={goToNextMonth} aria-label="Próximo mês">
-                <ChevronRight className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={goToNextMonth} aria-label="Próximo mês">
+                <ChevronRight className="h-4 w-4" />
               </Button>
+              </div>
               {!isCurrentMonth && (
-                <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={goToCurrentMonth}>
-                  <Calendar className="h-3 w-3" />
-                  Hoje
-                </Button>
+                <Tip label="Voltar para o mês atual">
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToCurrentMonth} aria-label="Hoje">
+                    <Calendar className="h-4 w-4" />
+                  </Button>
+                </Tip>
               )}
-              <Button
-                variant={activeTab === "dashboard" ? "default" : "outline"}
-                className="gap-1.5"
-                onClick={() => handleTabChange("dashboard")}
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                Visão Geral
-              </Button>
+              <Tip label="Visão Geral">
+                <button
+                  className={tabClass(activeTab === "dashboard")}
+                  style={tabStyle("dashboard", activeTab === "dashboard")}
+                  onClick={() => handleTabChange("dashboard")}
+                  aria-label="Visão Geral"
+                >
+                  <LayoutDashboard className="h-5 w-5 2xl:h-[18px] 2xl:w-[18px]" />
+                  <span className="hidden 2xl:inline">Visão Geral</span>
+                </button>
+              </Tip>
             </div>
           )}
+
+          <div
+            className="flex shrink-0 flex-nowrap items-center gap-2"
+            role="tablist"
+            aria-label="Seções da Gestão Financeira"
+          >
+            {[...MAIN_TABS, ...MORE_TABS.filter(t => t.key === activeTab)].map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.key;
+              return (
+                <Tip key={tab.key} label={tab.label}>
+                  <button
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-label={tab.label}
+                    onClick={() => handleTabChange(tab.key)}
+                    className={tabClass(isActive)}
+                    style={tabStyle(tab.key, isActive)}
+                  >
+                    <Icon className="h-5 w-5 shrink-0 2xl:h-[18px] 2xl:w-[18px]" />
+                    <span className="hidden 2xl:inline">{tab.label}</span>
+                  </button>
+                </Tip>
+              );
+            })}
+            <DropdownMenu open={showMore} onOpenChange={setShowMore}>
+              <Tip label="Mais seções">
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                    aria-label="Mais seções"
+                  >
+                    <ChevronRight className={cn("h-5 w-5 transition-transform", showMore && "rotate-90")} />
+                  </button>
+                </DropdownMenuTrigger>
+              </Tip>
+              <DropdownMenuContent align="end" className="w-52 p-1.5">
+                {MORE_TABS.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <DropdownMenuItem
+                      key={tab.key}
+                      onClick={() => handleTabChange(tab.key)}
+                      className={cn("gap-2.5 rounded-lg py-2 font-medium", isActive && "bg-primary/10 text-primary")}
+                    >
+                      <Icon className="h-[18px] w-[18px]" />
+                      {tab.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div ref={setToolbarEl} className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5">
+            {activeTab === "dashboard" && (
+              <div className="flex items-center gap-1.5">
+                <Tip label="Nova Venda">
+                  <Button className="h-10 min-w-10 gap-2 rounded-xl px-2.5 font-semibold shadow-md transition-all hover:-translate-y-0.5 2xl:px-4" onClick={() => setSearchParams({ tab: "vendas", action: "new" }, { replace: true })} aria-label="Nova Venda">
+                    <Plus className="h-5 w-5" /> <span className="hidden 2xl:inline">Nova Venda</span>
+                  </Button>
+                </Tip>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" aria-label="Mais ações">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleTabChange("vendas")}>
+                      <Download className="h-4 w-4 mr-2" /> Exportar vendas
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+          </div>
         </div>
+        </TooltipProvider>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -186,29 +294,6 @@ export default function Financeiro() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div
-              className="flex items-center gap-1 overflow-x-auto pb-1 -mb-1"
-              role="tablist"
-              aria-label="Seções da Gestão Financeira"
-            >
-              {ALL_TABS_DEF.map(tab => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => handleTabChange(tab.key)}
-                    className={tabClass(isActive)}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-
             <div>
               {activeTab === "dashboard" && (
                 <SmartDashboard viewMonth={viewMonth} viewYear={viewYear} />
@@ -216,7 +301,7 @@ export default function Financeiro() {
               {activeTab === "entradas" && <EntradasManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "despesas" && <SmartExpenseManager viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "faturas" && <InvoicesManager viewMonth={viewMonth} viewYear={viewYear} />}
-              {activeTab === "vendas" && <SalesManager viewMonth={viewMonth} viewYear={viewYear} onMonthChange={(m, y) => { setViewMonth(m); setViewYear(y); }} />}
+              {activeTab === "vendas" && <SalesManager toolbarEl={toolbarEl} viewMonth={viewMonth} viewYear={viewYear} onMonthChange={(m, y) => { setViewMonth(m); setViewYear(y); }} />}
               {activeTab === "comissoes" && <CommissionsCenter viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "recibos" && <ReceiptsCenter viewMonth={viewMonth} viewYear={viewYear} />}
               {activeTab === "notas-fiscais" && <FiscalNotesTab />}

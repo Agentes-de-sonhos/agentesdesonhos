@@ -58,6 +58,14 @@ img {
 
 @layer base {
   :root {
+    --fin-dashboard: 245 70% 58%;
+    --fin-vendas: 221 83% 53%;
+    --fin-entradas: 160 84% 36%;
+    --fin-despesas: 350 80% 56%;
+    --fin-comissoes: 262 70% 56%;
+    --fin-notas: 32 92% 48%;
+    --fin-fornecedores: 189 85% 38%;
+    --fin-extra: 215 20% 45%;
     /* Core palette - Light, airy, travel-inspired */
     --background: 214 20% 94%;
     --foreground: 222 47% 11%;

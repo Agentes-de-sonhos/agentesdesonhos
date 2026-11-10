@@ -289,8 +289,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   campaignCardPresentation: "photoAbove",
   nav: [
     { label: "Início", to: "/" },
-    { label: "Ofertas Novembro", to: "/oportunidades-novembro" },
+    { label: "Oportunidades de Novembro", to: "/oportunidades-novembro" },
     { label: "Especialidades", to: "/#campanhas", children: [
+      { label: "Disney", to: "/disney" },
       { label: "Universal Orlando", to: "/universal" },
       { label: "Xcaret", to: "/xcaret" },
       { label: "Resorts no Brasil", to: "/resorts-brasil" },
@@ -1580,6 +1581,15 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...CURTI_VIAGENS_PREVIEW_PROFILE,
   key: "curtiViagensOfficial",
   presentation: false,
+  destinations: CURTI_VIAGENS_PREVIEW_PROFILE.destinations?.map((destination) =>
+    destination.key === "eua-canada"
+      ? { ...destination, key: "nova-york", image: "curtiNovaYork", label: "Estados Unidos", title: "Nova York", text: "Descubra o melhor dos Estados Unidos com roteiros sob medida, entre cidades vibrantes, praias e experiências inesquecíveis." }
+      : destination,
+  ),
+  copy: {
+    ...CURTI_VIAGENS_PREVIEW_PROFILE.copy,
+    destinations: { ...CURTI_VIAGENS_PREVIEW_PROFILE.copy?.destinations, title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Caribe, Nova York, Europa, resorts e cruzeiros." },
+  },
   seo: { title: "Curti Viagens", description: "Curti Viagens: consultoria completa de viagens em Holambra (SP), desde 2013." },
 };
 

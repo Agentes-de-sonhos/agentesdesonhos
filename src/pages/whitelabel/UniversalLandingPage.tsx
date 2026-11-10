@@ -10,6 +10,7 @@ import { resolveAgencyHeaderBrandPreset, resolveAgencyLogoUrl } from "@/lib/agen
 import { AgencyFooter } from "@/components/whitelabel/AgencySiteLayout";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
+import { mundoSeoPage } from "@/lib/mundoSeo";
 import { SEO } from "@/components/seo/SEO";
 import { DisneyParkMapTrigger, type UniversalMapId } from "@/components/orlando/DisneyParkMapDialog";
 import { universalHotelSlugByName } from "@/components/landing/universal/universalHotelsCatalog";
@@ -168,7 +169,7 @@ export default function UniversalLandingPage({ info, noindex = false }: { info: 
   const agency = info.agency_name ?? "nossa equipe";
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
-      {!noindex && <SEO exactTitle title={`Universal Orlando Resort | ${info.agency_name ?? "Ingressos e hotéis"}`} description="Ingressos, parques, hotéis, CityWalk e eventos especiais da Universal Orlando Resort com consultoria personalizada." image={UNIVERSAL_HERO[2].image} />}
+      {!noindex && !mundoSeoPage(info.hostname, "/universal") && <SEO exactTitle title={`Universal Orlando Resort | ${info.agency_name ?? "Ingressos e hotéis"}`} description="Ingressos, parques, hotéis, CityWalk e eventos especiais da Universal Orlando Resort com consultoria personalizada." image={UNIVERSAL_HERO[2].image} />}
       <Header info={info} />
       <main>
         <Hero />

@@ -1,4 +1,6 @@
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -49,7 +51,7 @@ import { isInMonth } from "@/utils/monthFilter";
 import { saleFinancialGap, SALE_GAP_MESSAGE } from "@/lib/saleFinancialStatus";
 import { toast } from "sonner";
 
-export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
+export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void; toolbarEl?: HTMLElement | null } = {}) {
   const { sales: allSales, saleProducts, isLoading: salesLoading, isFetching: salesFetching, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   // Venda aberta por link direto "?sale=<id>": fica visível mesmo fora do limite
   // da lista, sem duplicar e SOMENTE no mês a que pertence (ou sem filtro).
@@ -348,16 +350,22 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
 
   return (
     <div className="space-y-4">
-      {allSales.length > 0 && (
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Vendas</h3>
-          <div className="flex items-center gap-2">
-            <Button onClick={() => setIsWizardOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" /> Nova Venda
-            </Button>
+      {allSales.length > 0 && (() => {
+        const actions = (
+          <div className="flex items-center gap-1.5">
+            <TooltipProvider delayDuration={80}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button className="h-10 min-w-10 gap-2 rounded-xl px-2.5 font-semibold shadow-md transition-all hover:-translate-y-0.5 2xl:px-4" onClick={() => setIsWizardOpen(true)} aria-label="Nova Venda">
+                    <Plus className="h-5 w-5" /> <span className={toolbarEl ? "hidden 2xl:inline" : ""}>Nova Venda</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="2xl:hidden font-medium">Nova Venda</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Mais ações">
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" aria-label="Mais ações">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -368,8 +376,15 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-      )}
+        );
+        if (toolbarEl) return createPortal(actions, toolbarEl);
+        return (
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Vendas</h3>
+            {actions}
+          </div>
+        );
+      })()}
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Vendas" onExport={handleExportSales} />
 
       <NewSaleWizard
@@ -408,17 +423,6 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
             </Button>
           </div>
         ) : (<>
-          {/* Alert: sales without products */}
-          {(() => {
-            const salesWithoutProducts = sales.filter(s => getProductsForSale(s.id).length === 0);
-            if (salesWithoutProducts.length === 0) return null;
-            return (
-              <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-700 dark:text-amber-400">
-                <Package className="h-4 w-4 mt-0.5 shrink-0" />
-                <span><strong>{salesWithoutProducts.length}</strong> venda{salesWithoutProducts.length > 1 ? "s" : ""} sem produtos cadastrados. Adicione produtos para calcular comissões e entradas automaticamente.</span>
-              </div>
-            );
-          })()}
           {sales.map((sale) => {
             const products = getProductsForSale(sale.id);
             const isExpanded = expandedSales.has(sale.id);
@@ -426,15 +430,20 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
 
             return (
               <Collapsible key={sale.id} open={isExpanded} onOpenChange={() => toggleSaleExpanded(sale.id)}>
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border rounded-xl overflow-hidden bg-card shadow-sm hover:shadow-md transition-shadow">
                   <CollapsibleTrigger asChild>
                     <div className="flex items-center justify-between p-4 hover:bg-muted/50 cursor-pointer">
                       <div className="flex items-center gap-4">
                         {isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
                         <div>
                           <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">{sale.client_name}</span>
+                            <span
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground"
+                              style={{ backgroundImage: "linear-gradient(135deg, hsl(var(--fin-vendas)), hsl(var(--fin-comissoes)))" }}
+                            >
+                              {(sale.client_name || "?").trim().split(/\s+/).slice(0, 2).map(w => w[0]).join("").toUpperCase()}
+                            </span>
+                            <span className="font-semibold text-foreground">{sale.client_name}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <MapPin className="h-3 w-3" /> {sale.destination}

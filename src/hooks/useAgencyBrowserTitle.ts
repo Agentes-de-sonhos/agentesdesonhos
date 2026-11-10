@@ -1,3 +1,4 @@
+import { mundoSeoPage } from "@/lib/mundoSeo";
 import { useEffect } from "react";
 
 const BROWSER_TITLE_BY_HOSTNAME: Record<string, string> = {
@@ -32,7 +33,7 @@ export function useAgencyBrowserTitle(hostname?: string | null) {
   const title = resolveAgencyBrowserTitle(hostname);
 
   useEffect(() => {
-    if (!title) return;
+    if (!title || mundoSeoPage(hostname ?? "", window.location.pathname)) return;
     const previousTitle = document.title;
     document.title = title;
 

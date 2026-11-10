@@ -1,3 +1,4 @@
+import { mundoSeoPage } from "./mundoSeo";
 /**
  * Etapa 4 — URLs amigáveis por slug no host COMPARTILHADO de sites.
  *
@@ -231,5 +232,6 @@ export function shouldNoindexAgencyPath(
 ): boolean {
   if (isTechnicalSharedAgencySiteHost(browserHostname)) return true;
   const clean = (internalPath || "/").split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
+  if (mundoSeoPage(browserHostname, clean)) return false;
   return !INDEXABLE_INTERNAL_PATHS.includes(clean);
 }

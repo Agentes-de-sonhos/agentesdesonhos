@@ -192,6 +192,8 @@ export function useGoogleCalendar() {
             ? "Sincronização recente. Aguarde alguns segundos para forçar de novo."
             : data.skipped === "lock"
             ? "Já existe uma sincronização em andamento."
+            : data.skipped === "not_connected"
+            ? "Google Calendar não está conectado."
             : `Ignorado: ${data.skipped}`
         );
         await checkStatus();

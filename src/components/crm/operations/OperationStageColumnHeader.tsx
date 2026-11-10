@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreVertical, Pencil, Copy, Trash2, Palette, Check, X } from "lucide-react";
+import { MoreHorizontal, Pencil, Copy, Trash2, Palette, Check, X, Plus, ChevronsRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,8 @@ interface Props {
   onDuplicate: () => void | Promise<void>;
   onRequestDelete: () => void;
   canEdit?: boolean;
+  onQuickAdd?: () => void;
+  onCollapse?: () => void;
 }
 
 const COLOR_KEYS = Object.keys(STAGE_COLOR_PALETTE) as StageColor[];
@@ -35,6 +37,8 @@ export function OperationStageColumnHeader({
   onDuplicate,
   onRequestDelete,
   canEdit = true,
+  onQuickAdd,
+  onCollapse,
 }: Props) {
   const tokens = getStageTokens(stage.color);
   const [editing, setEditing] = useState(false);
@@ -63,7 +67,7 @@ export function OperationStageColumnHeader({
   return (
     <div className="group/header">
       <div className={cn("h-1.5 rounded-full mb-3", tokens.bar)} />
-      <div className="flex items-center justify-between mb-3 gap-1">
+      <div className="flex items-center justify-between mb-2 gap-1">
         <div className="flex items-center gap-1 min-w-0 flex-1">
           {editing ? (
             <div className="flex items-center gap-1 flex-1">
@@ -119,14 +123,22 @@ export function OperationStageColumnHeader({
               {stage.name}
             </button>
           )}
-          {!editing && (
-            <Badge variant="secondary" className={cn("text-xs px-1.5 py-0 font-bold", tokens.text)}>
-              {count}
-            </Badge>
-          )}
         </div>
 
-        {!editing && canEdit && (
+        {!editing && (
+          <div className="flex items-center gap-0.5">
+            <span className="px-1 text-sm font-medium tabular-nums text-muted-foreground" aria-label={`${count} cartões`}>{count}</span>
+            {onQuickAdd && (
+              <Button size="icon" variant="ghost" onClick={onQuickAdd} className={cn("h-6 w-6", tokens.text)} aria-label="Nova operação" title="Nova operação">
+                <Plus className="h-4 w-4" />
+              </Button>
+            )}
+            {onCollapse && (
+              <Button size="icon" variant="ghost" onClick={onCollapse} className="h-6 w-6 text-muted-foreground hover:text-foreground" aria-label={`Recolher coluna ${stage.name}`} title="Recolher lista">
+                <ChevronsRightLeft className="h-4 w-4" />
+              </Button>
+            )}
+        {canEdit && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -135,7 +147,7 @@ export function OperationStageColumnHeader({
                 className="h-6 w-6 text-muted-foreground"
                 aria-label="Opções da coluna"
               >
-                <MoreVertical className="h-4 w-4" />
+                <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
@@ -182,6 +194,8 @@ export function OperationStageColumnHeader({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+          </div>
         )}
       </div>
     </div>
