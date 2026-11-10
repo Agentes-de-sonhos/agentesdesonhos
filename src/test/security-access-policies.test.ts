@@ -22,8 +22,13 @@ if (!caller || !foreign) throw new Error('Two non-admin agencies are required fo
 const helper = query(`SELECT pg_get_functiondef('public.same_agency_as(uuid)'::regprocedure) AS definition`)[0]?.definition as string;
 const helperBody = helper.split('$function$')[1]?.trim().replace(/^SELECT\s+/i, '').replace(/;$/, '');
 if (!helperBody) throw new Error('Missing deployed agency helper body');
+const agencyDefinition = query(`SELECT pg_get_functiondef('public.user_agency_id(uuid)'::regprocedure) AS definition`)[0]?.definition as string;
+const agencyBody = agencyDefinition.split('$function$')[1]?.trim().replace(/^SELECT\s+/i, '').replace(/;$/, '');
+if (!agencyBody) throw new Error('Missing deployed agency resolution body');
 function evaluate(expression: string, rows: string) {
   expression = expression.replace(/same_agency_as\(owner\)/g, `(${helperBody.replaceAll('_owner', 'owner')})`);
+  expression = expression.replaceAll('public.user_agency_id(owner)', `(${agencyBody.replaceAll('_uid', 'objects.owner')})`)
+    .replaceAll('public.user_agency_id(auth.uid())', `(${agencyBody.replaceAll('_uid', 'auth.uid()')})`);
   const results = query(`WITH claims AS MATERIALIZED (SELECT set_config('request.jwt.claim.sub','${caller.auth_user_id}',true)) SELECT COALESCE((${expression}),false) AS allowed FROM claims CROSS JOIN (${rows}) objects`);
   return results[0]?.allowed;
 }
