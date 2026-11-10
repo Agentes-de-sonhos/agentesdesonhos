@@ -29,6 +29,8 @@ import { ReceiptsCenter } from "@/components/financial/receipts/ReceiptsCenter";
 import { ContractsCenter } from "@/components/financial/contracts/ContractsCenter";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
 const MONTH_NAMES = [
@@ -40,15 +42,17 @@ const MONTH_NAMES = [
 const ALL_TABS_DEF = [
   { key: "vendas", label: "Vendas", icon: ShoppingBag },
   { key: "entradas", label: "Entradas", icon: ArrowUpCircle },
-  { key: "comissoes", label: "Comissões", icon: Receipt },
   { key: "despesas", label: "Despesas", icon: ArrowDownCircle },
-  { key: "vendedores", label: "Vendedores", icon: Users },
-  { key: "recibos", label: "Recibos", icon: ReceiptText },
-  { key: "faturas", label: "Faturas", icon: FileText },
+  { key: "comissoes", label: "Comissões", icon: Receipt },
   { key: "notas-fiscais", label: "Notas Fiscais", icon: FileSpreadsheet },
-  { key: "contratos", label: "Contratos", icon: FileSignature },
   { key: "fornecedores", label: "Fornecedores", icon: Truck },
+  { key: "vendedores", label: "Vendedores", icon: Users, more: true },
+  { key: "recibos", label: "Recibos", icon: ReceiptText, more: true },
+  { key: "faturas", label: "Faturas", icon: FileText, more: true },
+  { key: "contratos", label: "Contratos", icon: FileSignature, more: true },
 ] as const;
+const MAIN_TABS = ALL_TABS_DEF.filter(t => !("more" in t));
+const MORE_TABS = ALL_TABS_DEF.filter(t => "more" in t);
 
 const ALL_TABS = ["dashboard", ...ALL_TABS_DEF.map(t => t.key)];
 
@@ -191,7 +195,7 @@ export default function Financeiro() {
               role="tablist"
               aria-label="Seções da Gestão Financeira"
             >
-              {ALL_TABS_DEF.map(tab => {
+              {MAIN_TABS.map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.key;
                 return (
@@ -207,6 +211,32 @@ export default function Financeiro() {
                   </button>
                 );
               })}
+              {(() => {
+                const activeMore = MORE_TABS.find(t => t.key === activeTab);
+                const MoreIcon = activeMore?.icon;
+                return (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className={tabClass(!!activeMore)} aria-label="Mais seções">
+                        {MoreIcon && <MoreIcon className="h-4 w-4" />}
+                        {activeMore && <span>{activeMore.label}</span>}
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      {MORE_TABS.map(tab => {
+                        const Icon = tab.icon;
+                        return (
+                          <DropdownMenuItem key={tab.key} onClick={() => handleTabChange(tab.key)} className="gap-2">
+                            <Icon className="h-4 w-4" />
+                            {tab.label}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              })()}
             </div>
 
             <div>
