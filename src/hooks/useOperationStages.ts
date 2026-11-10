@@ -191,7 +191,35 @@ export function useOperationStages() {
     onError: (e: any) => toast.error(e instanceof PermissionDeniedError ? DENY_MESSAGE : (e.message || "Erro ao excluir")),
   });
 
+  const reorderStages = useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      for (let i = 0; i < orderedIds.length; i++) {
+        const { error } = await supabase
+          .from("operation_pipeline_stages" as any)
+          .update({ position: i })
+          .eq("id", orderedIds[i]);
+        if (error) throw error;
+      }
+    },
+    onMutate: async (orderedIds) => {
+      const key = ["operation-pipeline-stages", agencyOwnerId, user?.id];
+      await qc.cancelQueries({ queryKey: key });
+      const previous = qc.getQueryData<OperationPipelineStage[]>(key);
+      if (previous) {
+        const map = new Map(previous.map((s) => [s.id, s]));
+        qc.setQueryData(key, orderedIds.map((id, i) => map.get(id) && { ...map.get(id)!, position: i }).filter(Boolean));
+      }
+      return { previous, key };
+    },
+    onError: (e: any, _v, ctx) => {
+      if (ctx?.previous) qc.setQueryData(ctx.key, ctx.previous);
+      toast.error("Erro ao reordenar colunas", { description: e.message });
+    },
+    onSettled: invalidate,
+  });
+
   return {
+    reorderStages: reorderStages.mutateAsync,
     stages,
     isLoading,
     createStage: createStage.mutateAsync,

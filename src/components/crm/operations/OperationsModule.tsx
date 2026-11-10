@@ -33,7 +33,10 @@ export function OperationsModule() {
   const { operations, isLoading, isFetching, moveStage, reorderOperations } = useOperations();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { stages, createStage, updateStage, duplicateStage, deleteStage } = useOperationStages();
+  const { stages, createStage, updateStage, duplicateStage, deleteStage, reorderStages } = useOperationStages();
+  const [draggedStageId, setDraggedStageId] = useState<string | null>(null);
+  const [stageDragOverId, setStageDragOverId] = useState<string | null>(null);
+
   const { can, canStage, isTeamMember } = usePermissions();
   const canCreate = can('operations.create');
   const canEdit = can('operations.edit');
@@ -337,10 +340,27 @@ export function OperationsModule() {
                 return (
                   <div
                     key={stage.id}
+                    onDragOverCapture={(e) => {
+                      if (!draggedStageId) return;
+                      e.preventDefault(); e.stopPropagation();
+                      e.dataTransfer.dropEffect = "move";
+                      if (stageDragOverId !== stage.id) setStageDragOverId(stage.id);
+                    }}
+                    onDropCapture={(e) => {
+                      if (!draggedStageId) return;
+                      e.preventDefault(); e.stopPropagation();
+                      const from = stages.findIndex((s) => s.id === draggedStageId);
+                      setDraggedStageId(null); setStageDragOverId(null);
+                      if (from < 0 || from === index) return;
+                      const ids = stages.map((s) => s.id);
+                      const [m] = ids.splice(from, 1);
+                      ids.splice(index, 0, m);
+                      reorderStages(ids);
+                    }}
                     onDragOver={(e) => handleDragOver(e, stage.key)}
                     onDrop={(e) => handleColumnDrop(e, stage.key)}
-                    onDragEnd={() => { setDraggedId(null); setDragOver(null); }}
-                    className={cn(collapsed ? "w-11" : "w-[290px]", "flex h-full min-h-0 flex-shrink-0 flex-col transition-[width] duration-200 snap-center md:snap-align-none")}
+                    onDragEnd={() => { setDraggedId(null); setDragOver(null); setDraggedStageId(null); setStageDragOverId(null); }}
+                    className={cn(stageDragOverId === stage.id && draggedStageId !== stage.id && "rounded-xl ring-2 ring-primary/60", draggedStageId === stage.id && "opacity-50", collapsed ? "w-11" : "w-[290px]", "flex h-full min-h-0 flex-shrink-0 flex-col transition-[width] duration-200 snap-center md:snap-align-none")}
                   >
                     {collapsed ? (
                       <button
@@ -360,7 +380,18 @@ export function OperationsModule() {
                       </button>
                     ) : (
                     <div className={cn("flex w-full max-h-full min-h-0 min-w-0 flex-col self-start rounded-xl border p-3", tokens.bg, tokens.border)}>
-                      <div className="min-w-0 shrink-0">
+                      <div
+                        className={cn("min-w-0 shrink-0", (!isTeamMember || canEdit) && "cursor-grab active:cursor-grabbing")}
+                        draggable={!isTeamMember || canEdit}
+                        title="Arraste para mudar a ordem da coluna"
+                        onDragStart={(e) => {
+                          if ((e.target as HTMLElement).closest("input,button")) { e.preventDefault(); return; }
+                          e.stopPropagation();
+                          e.dataTransfer.effectAllowed = "move";
+                          e.dataTransfer.setData("text/plain", stage.id);
+                          setDraggedStageId(stage.id);
+                        }}
+                      >
                         <OperationStageColumnHeader
                           stage={stage}
                           count={ops.length}
