@@ -12,7 +12,7 @@ const clients = read("src/components/crm/ClientsModule.tsx");
 describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
   it("linha superior traz apenas o PageHeader e as abas ficam abaixo", () => {
     const header = page.indexOf("<PageHeader");
-    const mainTabs = page.indexOf('value="clientes"');
+    const mainTabs = page.indexOf('role="tablist"');
     expect(header).toBeGreaterThan(-1);
     expect(header).toBeLessThan(mainTabs);
     expect(page).not.toContain('data-testid="crm-secondary-nav"');
@@ -20,10 +20,10 @@ describe("Toolbar compartilhada do CRM (Gestão de Clientes)", () => {
   });
 
   it("abas principais na ordem Clientes | Oportunidades | Operações | Visão Geral", () => {
-    const cli = page.indexOf('value="clientes"');
-    const funil = page.indexOf('value="funil"');
-    const ops = page.indexOf('value="operacoes"');
-    const dash = page.indexOf('value="dashboard"');
+    const cli = page.indexOf('key: "clientes"');
+    const funil = page.indexOf('key: "funil"');
+    const ops = page.indexOf('key: "operacoes"');
+    const dash = page.indexOf('key: "dashboard"');
     const slot = page.lastIndexOf("setToolbarEl");
     expect(cli).toBeLessThan(funil);
     expect(funil).toBeLessThan(ops);
