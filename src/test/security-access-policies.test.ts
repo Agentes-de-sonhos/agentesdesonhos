@@ -26,9 +26,9 @@ const agencyDefinition = query(`SELECT pg_get_functiondef('public.user_agency_id
 const agencyBody = agencyDefinition.split('$function$')[1]?.trim().replace(/^SELECT\s+/i, '').replace(/;$/, '');
 if (!agencyBody) throw new Error('Missing deployed agency resolution body');
 function evaluate(expression: string, rows: string) {
-  expression = expression.replace(/same_agency_as\(owner\)/g, `(${helperBody.replaceAll('_owner', 'owner')})`);
-  expression = expression.replaceAll('public.user_agency_id(owner)', `(${agencyBody.replaceAll('_uid', 'objects.owner')})`)
-    .replaceAll('public.user_agency_id(auth.uid())', `(${agencyBody.replaceAll('_uid', 'auth.uid()')})`);
+  expression = expression.replace(/same_agency_as\(owner\)/g, `(${helperBody.split('_owner').join('owner')})`);
+  expression = expression.split('public.user_agency_id(owner)').join(`(${agencyBody.split('_uid').join('objects.owner')})`)
+    .split('public.user_agency_id(auth.uid())').join(`(${agencyBody.split('_uid').join('auth.uid()')})`);
   const results = query(`WITH claims AS MATERIALIZED (SELECT set_config('request.jwt.claim.sub','${caller.auth_user_id}',true)) SELECT COALESCE((${expression}),false) AS allowed FROM claims CROSS JOIN (${rows}) objects`);
   return results[0]?.allowed;
 }
@@ -86,7 +86,7 @@ describe('deployed access policy regressions (read-only)', () => {
   it('requires a published quote and explicitly public document for shared reads', () => {
     const p = policy('Public can read shared quote documents');
     // Evaluate the actual stored expression with synthetic parent rows, not client data.
-    const expression = p.qual.replaceAll('quote_documents', 'test_documents').replaceAll('JOIN quotes ', 'JOIN test_quotes ');
+    const expression = p.qual.split('quote_documents').join('test_documents').split('JOIN quotes ').join('JOIN test_quotes ');
     for (const [isPublic, status, allowed] of [[true,'published',true],[false,'published',false],[true,'draft',false]] as const) {
       const rows = query(`WITH test_documents AS (SELECT 'file.pdf'::text file_path, ${isPublic} is_public, 1 quote_id), test_quotes AS (SELECT 1 id,'${status}'::text status) SELECT ${expression} AS allowed FROM (SELECT 'quote-documents'::text bucket_id,'file.pdf'::text name) objects`);
       expect(rows[0]?.allowed).toBe(allowed);
