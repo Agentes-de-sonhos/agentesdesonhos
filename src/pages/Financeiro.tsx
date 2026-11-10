@@ -29,6 +29,7 @@ import { ReceiptsCenter } from "@/components/financial/receipts/ReceiptsCenter";
 import { ContractsCenter } from "@/components/financial/contracts/ContractsCenter";
 import { useFinancial } from "@/hooks/useFinancial";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
 function Tip({ label, children }: { label: string; children: React.ReactNode }) {
@@ -156,7 +157,7 @@ export default function Financeiro() {
       : { backgroundColor: `hsl(${v} / 0.1)`, color: `hsl(${v})` };
   };
   const tabClass = (_isActive: boolean) =>
-    "flex h-10 items-center gap-2 px-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap hover:-translate-y-0.5 hover:shadow-md";
+    "flex h-10 min-w-10 items-center justify-center gap-2 px-2.5 2xl:px-4 rounded-xl text-sm font-semibold transition-all whitespace-nowrap hover:-translate-y-0.5 hover:shadow-md";
 
   return (
     <DashboardLayout>
@@ -173,17 +174,19 @@ export default function Financeiro() {
           </div>
 
           {showPeriodSelector && (
-            <div className="flex shrink-0 items-center gap-1">
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToPrevMonth} aria-label="Mês anterior">
+            <div className="flex shrink-0 items-center gap-2">
+              <div className="flex h-10 items-center gap-0.5 rounded-xl border bg-background p-1 shadow-sm">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={goToPrevMonth} aria-label="Mês anterior">
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <div className="whitespace-nowrap rounded-lg bg-muted/50 px-2 py-1 text-center text-sm font-semibold">
+              <div className="whitespace-nowrap px-2 text-center text-sm font-bold text-primary">
                 <span className="hidden 2xl:inline">{periodLabel}</span>
                 <span className="2xl:hidden">{periodShort}</span>
               </div>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={goToNextMonth} aria-label="Próximo mês">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary" onClick={goToNextMonth} aria-label="Próximo mês">
                 <ChevronRight className="h-4 w-4" />
               </Button>
+              </div>
               {!isCurrentMonth && (
                 <Tip label="Voltar para o mês atual">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={goToCurrentMonth} aria-label="Hoje">
@@ -198,7 +201,7 @@ export default function Financeiro() {
                   onClick={() => handleTabChange("dashboard")}
                   aria-label="Visão Geral"
                 >
-                  <LayoutDashboard className="h-[18px] w-[18px]" />
+                  <LayoutDashboard className="h-5 w-5 2xl:h-[18px] 2xl:w-[18px]" />
                   <span className="hidden 2xl:inline">Visão Geral</span>
                 </button>
               </Tip>
@@ -206,11 +209,11 @@ export default function Financeiro() {
           )}
 
           <div
-            className="flex shrink-0 flex-nowrap items-center gap-0.5"
+            className="flex shrink-0 flex-nowrap items-center gap-2"
             role="tablist"
             aria-label="Seções da Gestão Financeira"
           >
-            {[...MAIN_TABS, ...((showMore || MORE_TABS.some(t => t.key === activeTab)) ? MORE_TABS : [])].map(tab => {
+            {[...MAIN_TABS, ...MORE_TABS.filter(t => t.key === activeTab)].map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.key;
               return (
@@ -223,23 +226,40 @@ export default function Financeiro() {
                     className={tabClass(isActive)}
                     style={tabStyle(tab.key, isActive)}
                   >
-                    <Icon className="h-[18px] w-[18px] shrink-0" />
+                    <Icon className="h-5 w-5 shrink-0 2xl:h-[18px] 2xl:w-[18px]" />
                     <span className="hidden 2xl:inline">{tab.label}</span>
                   </button>
                 </Tip>
               );
             })}
-            <Tip label={showMore ? "Recolher seções" : "Mais seções: Vendedores, Recibos, Faturas, Contratos"}>
-              <button
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-lg border border-primary/40 bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground",
-                )}
-                onClick={() => setShowMore(v => !v)}
-                aria-label={showMore ? "Recolher seções" : "Mostrar mais seções"}
-              >
-                <ChevronRight className={cn("h-4 w-4 transition-transform", showMore && "rotate-180")} />
-              </button>
-            </Tip>
+            <DropdownMenu open={showMore} onOpenChange={setShowMore}>
+              <Tip label="Mais seções">
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                    aria-label="Mais seções"
+                  >
+                    <ChevronRight className={cn("h-5 w-5 transition-transform", showMore && "rotate-90")} />
+                  </button>
+                </DropdownMenuTrigger>
+              </Tip>
+              <DropdownMenuContent align="end" className="w-52 p-1.5">
+                {MORE_TABS.map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <DropdownMenuItem
+                      key={tab.key}
+                      onClick={() => handleTabChange(tab.key)}
+                      className={cn("gap-2.5 rounded-lg py-2 font-medium", isActive && "bg-primary/10 text-primary")}
+                    >
+                      <Icon className="h-[18px] w-[18px]" />
+                      {tab.label}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <div ref={setToolbarEl} className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5" />
