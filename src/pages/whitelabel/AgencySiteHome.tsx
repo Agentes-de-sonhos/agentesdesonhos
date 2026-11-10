@@ -41,9 +41,11 @@ import {
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
+import { CruiseSeasonHomeTeaser } from "@/components/cruise-season/CruiseSeasonHomeTeaser";
 import { NovemberHomeTeaser } from "@/components/campaign/NovemberHomeTeaser";
 
 /** Seção sintética (só O Mundo em Cores), fora do catálogo de seções. */
+const CRUISE_SEASON_TEASER_KEY = "cruiseSeasonTeaser" as AgencySectionKey;
 const NOVEMBER_TEASER_KEY = "novemberTeaser" as AgencySectionKey;
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyVisaConsultSection } from "@/components/whitelabel/AgencyVisaConsultSection";
@@ -560,7 +562,9 @@ export default function AgencySiteHome({
     // O Mundo em Cores: resumo das Oportunidades de Novembro logo antes do Xcaret.
     if (profile.key === "mundoEmCoresBriefing14") {
       const at = resolved.findIndex((s) => s.key === "modules");
-      if (at >= 0) resolved.splice(at, 0, { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" });
+      if (at >= 0) resolved.splice(at, 0,
+        { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" },
+        { ...resolved[at], key: CRUISE_SEASON_TEASER_KEY, label: "Cruzeiros 26/27" });
     }
     return resolved;
   }, [dmc, profile, labPresentation?.sections]);
@@ -690,6 +694,9 @@ export default function AgencySiteHome({
     : null;
 
   const renderSection = (key: AgencySectionKey) => {
+    if (key === CRUISE_SEASON_TEASER_KEY) {
+      return <CruiseSeasonHomeTeaser key={key} container={container} />;
+    }
     if (key === NOVEMBER_TEASER_KEY) {
       return (
         <NovemberHomeTeaser
