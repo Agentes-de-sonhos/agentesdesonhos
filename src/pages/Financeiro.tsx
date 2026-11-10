@@ -144,13 +144,19 @@ export default function Financeiro() {
   const [toolbarEl, setToolbarEl] = useState<HTMLDivElement | null>(null);
   const periodShort = `${MONTH_NAMES[viewMonth].slice(0, 3)}/${String(viewYear).slice(-2)}`;
 
-  const tabClass = (isActive: boolean) =>
-    cn(
-      "flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap",
-      isActive
-        ? "bg-primary text-primary-foreground shadow-sm"
-        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-    );
+  const TAB_COLOR: Record<string, string> = {
+    dashboard: "--fin-dashboard", vendas: "--fin-vendas", entradas: "--fin-entradas",
+    despesas: "--fin-despesas", comissoes: "--fin-comissoes", "notas-fiscais": "--fin-notas",
+    fornecedores: "--fin-fornecedores",
+  };
+  const tabStyle = (key: string, isActive: boolean): React.CSSProperties => {
+    const v = `var(${TAB_COLOR[key] ?? "--fin-extra"})`;
+    return isActive
+      ? { backgroundColor: `hsl(${v})`, color: "hsl(var(--primary-foreground))", boxShadow: `0 6px 16px -6px hsl(${v} / 0.6)` }
+      : { backgroundColor: `hsl(${v} / 0.1)`, color: `hsl(${v})` };
+  };
+  const tabClass = (_isActive: boolean) =>
+    "flex h-10 items-center gap-2 px-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap hover:-translate-y-0.5 hover:shadow-md";
 
   return (
     <DashboardLayout>
@@ -186,16 +192,15 @@ export default function Financeiro() {
                 </Tip>
               )}
               <Tip label="Visão Geral">
-                <Button
-                  variant={activeTab === "dashboard" ? "default" : "outline"}
-                  size="sm"
-                  className="h-8 gap-1.5 px-2.5"
+                <button
+                  className={tabClass(activeTab === "dashboard")}
+                  style={tabStyle("dashboard", activeTab === "dashboard")}
                   onClick={() => handleTabChange("dashboard")}
                   aria-label="Visão Geral"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
+                  <LayoutDashboard className="h-[18px] w-[18px]" />
                   <span className="hidden 2xl:inline">Visão Geral</span>
-                </Button>
+                </button>
               </Tip>
             </div>
           )}
@@ -216,8 +221,9 @@ export default function Financeiro() {
                     aria-label={tab.label}
                     onClick={() => handleTabChange(tab.key)}
                     className={tabClass(isActive)}
+                    style={tabStyle(tab.key, isActive)}
                   >
-                    <Icon className="h-4 w-4 shrink-0" />
+                    <Icon className="h-[18px] w-[18px] shrink-0" />
                     <span className="hidden 2xl:inline">{tab.label}</span>
                   </button>
                 </Tip>
