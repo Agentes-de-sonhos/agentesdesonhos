@@ -127,3 +127,22 @@ export function commissionSnapshot(kind: CommissionKind, value: number | null, s
     commission_amount_snapshot: amount,
   };
 }
+
+/**
+ * Prepara o produto para gravar: valida a comissão e grava o snapshot (tipo, valor e valor efetivo).
+ * Lança erro quando a comissão não foi definida explicitamente.
+ */
+export function finalizeProductCommission<T extends {
+  commission_kind?: CommissionKind | null; commission_value: number; commission_rule_source?: RuleSource | null;
+  sale_price: number; non_commissionable_taxes: number;
+}>(p: T): T {
+  const err = validateSaleCommission(p.commission_kind, p.commission_value, p.sale_price, p.non_commissionable_taxes);
+  if (err) throw new Error(err);
+  return { ...p, ...commissionSnapshot(p.commission_kind!, p.commission_value, p.sale_price, p.non_commissionable_taxes, p.commission_rule_source || "manual") };
+}
+
+/** Para produtos antigos sem snapshot: deriva o tipo a partir do que foi gravado, sem recalcular nada. */
+export function kindFromStored(p: { commission_kind?: string | null; commission_type?: string | null }): CommissionKind {
+  if (p.commission_kind === "percentage" || p.commission_kind === "fixed" || p.commission_kind === "none") return p.commission_kind;
+  return p.commission_type === "fixed" ? "fixed" : "percentage";
+}
