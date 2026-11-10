@@ -38,6 +38,10 @@ import {
 import { useSellers } from "@/hooks/useSellers";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgencySupplierTerms, type SupplierTerms } from "@/hooks/useAgencySupplierTerms";
+import { useSupplierServiceRules } from "@/hooks/useSupplierServiceCatalog";
+import { ServiceSelect } from "@/components/financial/commission/ServiceSelect";
+import { SaleCommissionFields, suggestionToPatch, useCommissionSuggestion } from "@/components/financial/commission/SaleCommissionFields";
+import { calcCommission, finalizeProductCommission, legacyServiceKey, resolveCommissionSuggestion, validateSaleCommission } from "@/lib/supplierCommissionRules";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -89,6 +93,10 @@ const defaultProduct = (): DraftProduct => ({
   non_commissionable_taxes: 0,
   commission_type: "percentage",
   commission_value: 0,
+  service_key: null,
+  service_label: null,
+  commission_kind: null,
+  commission_rule_source: null,
   supplier_name: "",
   operator_id: null,
   payment_rule: "after_sale",
@@ -103,14 +111,11 @@ const defaultProduct = (): DraftProduct => ({
 const fmtCurrency = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 
-const productCommission = (p: SaleProductFormData) => {
-  const taxes = Number(p.non_commissionable_taxes) || 0;
-  const base = (Number(p.sale_price) || 0) - taxes;
-  if (p.commission_type === "percentage") {
-    return base * (Number(p.commission_value) || 0) / 100;
-  }
-  return Number(p.commission_value) || 0;
-};
+const productCommission = (p: SaleProductFormData) =>
+  calcCommission(p.commission_kind ?? null, p.commission_value, Number(p.sale_price) || 0, Number(p.non_commissionable_taxes) || 0).amount;
+
+const productCommissionMissing = (p: SaleProductFormData) =>
+  !!validateSaleCommission(p.commission_kind, p.commission_value, Number(p.sale_price) || 0, Number(p.non_commissionable_taxes) || 0);
 
 // Map a quote_service/trip_service into a DraftProduct, applying agency
 // supplier terms when the source already references a structured operator.
@@ -164,17 +169,6 @@ function serviceToDraftProduct(
   if (draft.operator_id && termsByOperator) {
     const t = termsByOperator.get(draft.operator_id);
     if (t) {
-      if (t.default_commission_type) {
-        draft.commission_type = t.default_commission_type;
-        if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
-          draft.commission_value = Number(t.default_commission_percent);
-        } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
-          draft.commission_value = Number(t.default_commission_fixed);
-        }
-      }
-      if (t.default_non_commissionable_fees != null) {
-        draft.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
-      }
       if (t.payment_rule && t.payment_rule !== "manual") {
         draft.payment_rule = t.payment_rule as any;
       }
@@ -200,6 +194,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: termsData } = useAgencySupplierTerms();
+  const { data: serviceRules } = useSupplierServiceRules();
   const [step, setStep] = useState<WizardStep>("origin");
   const [submitting, setSubmitting] = useState(false);
 
@@ -314,17 +309,13 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       .map((p) => buildDraftFromPair(p, precedence) as DraftProduct)
       .map((d) => {
         const terms = d.operator_id ? termsData?.byOperator.get(d.operator_id) : undefined;
-        if (!terms) return d;
-        const next = { ...d };
-        if (terms.default_commission_type) {
-          next.commission_type = terms.default_commission_type;
-          next.commission_value = terms.default_commission_type === "percentage"
-            ? Number(terms.default_commission_percent || 0)
-            : Number(terms.default_commission_fixed || 0);
-        }
-        if (terms.default_non_commissionable_fees != null) {
-          next.non_commissionable_taxes = Number(terms.default_non_commissionable_fees);
-        }
+        const next: DraftProduct = { ...d, service_key: d.service_key || legacyServiceKey(d.product_type) };
+        // Comissão: regra fornecedor+serviço > comissão geral antiga (identificada) > sem regra (exige definição).
+        const patch = suggestionToPatch(resolveCommissionSuggestion({
+          operatorId: next.operator_id, serviceKey: next.service_key, rules: serviceRules || [], legacy: terms ?? null,
+        }));
+        Object.assign(next, patch ?? { commission_kind: null, commission_rule_source: null });
+        if (!terms) return next;
         if (terms.payment_rule && terms.payment_rule !== "manual") next.payment_rule = terms.payment_rule;
         if (terms.payment_days != null) next.payment_days = Number(terms.payment_days);
         next.requires_invoice = !!terms.requires_invoice;
@@ -334,7 +325,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
     // preservados: sem Carteira/Orçamento, eles são a única origem da venda.
     setProducts((prev) => [...prev.filter((p) => !p.source_provenance), ...drafts]);
 
-  }, [origin, pairs, excluded, precedence, termsData]);
+  }, [origin, pairs, excluded, precedence, termsData, serviceRules]);
 
   // Pre-fill the sale metadata from the resolved bundle
   useEffect(() => {
@@ -363,8 +354,8 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       case "client": return !!client;
       case "destination": return destination.trim().length > 1;
       case "date": return !!saleDate;
-      case "products": return products.length > 0;
-      case "review": return true;
+      case "products": return products.length > 0 && !products.some(productCommissionMissing);
+      case "review": return !products.some(productCommissionMissing);
     }
   };
 
@@ -420,6 +411,11 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
 
   const handleCreate = async () => {
     if (!client) return;
+    const missing = products.find(productCommissionMissing);
+    if (missing) {
+      toast({ title: "Comissão a definir", description: `Defina a comissão de "${missing.description || missing.service_label || "produto"}" antes de concluir.`, variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     try {
       const isImport = origin === "crm" && !!candidate;
@@ -457,7 +453,8 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
 
       for (const p of products) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _tempId, ...payload } = p;
+        const { _tempId, ...rest } = p;
+        const payload = finalizeProductCommission(rest as any);
         await createSaleProduct({ saleId: sale.id, ...payload } as any);
       }
 
@@ -855,11 +852,11 @@ function StepProducts({
               <Package className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-[10px]">{PRODUCT_TYPES[p.product_type]}</Badge>
+                  <Badge variant="outline" className="text-[10px]">{p.service_label || PRODUCT_TYPES[p.product_type]}</Badge>
                   <p className="font-medium truncate">{p.description || "Sem descrição"}</p>
                 </div>
                 <p className="text-xs text-muted-foreground truncate">
-                  {p.supplier_name || "Fornecedor não informado"} • {fmtCurrency(Number(p.sale_price))} • Comissão {fmtCurrency(productCommission(p))}
+                  {p.supplier_name || "Fornecedor não informado"} • {fmtCurrency(Number(p.sale_price))} • {productCommissionMissing(p) ? <span className="text-destructive">Comissão a definir</span> : <>Comissão {fmtCurrency(productCommission(p))}</>}
                 </p>
               </div>
               <Button variant="ghost" size="icon" onClick={() => onEdit(p)}>
@@ -968,13 +965,15 @@ function StepReview({
               <div className="min-w-0">
                 <p className="font-medium truncate">{p.description || PRODUCT_TYPES[p.product_type]}</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {PRODUCT_TYPES[p.product_type]} • {p.supplier_name || "Sem fornecedor"}
+                  {p.service_label || PRODUCT_TYPES[p.product_type]} • {p.supplier_name || "Sem fornecedor"}
                 </p>
               </div>
               <div className="text-right shrink-0 flex items-center gap-2">
                 <div>
                 <p className="font-medium">{fmtCurrency(Number(p.sale_price))}</p>
-                <p className="text-xs text-primary">Comissão {fmtCurrency(productCommission(p))}</p>
+                {productCommissionMissing(p)
+                  ? <p className="text-xs text-destructive">Comissão a definir</p>
+                  : <p className="text-xs text-primary">Comissão {fmtCurrency(productCommission(p))}</p>}
                 </div>
                 {onEditProduct && (
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditProduct(p)}>
@@ -1071,7 +1070,7 @@ type ProductStep =
 
 const PRODUCT_STEP_ORDER: ProductStep[] = [
   "type", "supplier", "description", "price",
-  "commission", "taxes", "payment", "invoice", "summary",
+  "commission", "payment", "invoice", "summary",
 ];
 
 function ProductWizard({
@@ -1090,6 +1089,7 @@ function ProductWizard({
   const progress = ((stepIndex + 1) / PRODUCT_STEP_ORDER.length) * 100;
 
   const update = (patch: Partial<DraftProduct>) => setData((prev) => ({ ...prev, ...patch }));
+  const { dialog: commissionConfirmDialog } = useCommissionSuggestion(data, update);
 
   const next = () => {
     let nextStep = PRODUCT_STEP_ORDER[stepIndex + 1];
@@ -1105,11 +1105,11 @@ function ProductWizard({
 
   const canAdvance = (): boolean => {
     switch (step) {
-      case "type": return !!data.product_type;
+      case "type": return !!data.service_key;
       case "supplier": return true; // optional
       case "description": return (data.description || "").trim().length > 0;
       case "price": return Number(data.sale_price) > 0;
-      case "commission": return Number(data.commission_value) >= 0;
+      case "commission": return !productCommissionMissing(data);
       case "taxes": return true;
       case "payment": return !!data.payment_rule;
       case "invoice": return true;
@@ -1147,6 +1147,7 @@ function ProductWizard({
             <Package className="h-5 w-5 text-primary" />
             Adicionar produto
           </DialogTitle>
+          {commissionConfirmDialog}
           <Progress value={progress} className="h-1.5 mt-2" />
         </DialogHeader>
 
@@ -1154,23 +1155,11 @@ function ProductWizard({
           {step === "type" && (
             <div className="space-y-3">
               <h4 className="font-semibold">Qual produto ou serviço foi vendido?</h4>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {Object.entries(PRODUCT_TYPES).map(([key, label]) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => update({ product_type: key as ProductType })}
-                    className={cn(
-                      "rounded-lg border-2 p-3 text-sm text-left transition-colors",
-                      data.product_type === key
-                        ? "border-primary bg-primary/5 text-primary font-medium"
-                        : "border-muted hover:border-muted-foreground/30",
-                    )}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+              <p className="text-xs text-muted-foreground">Escolha do catálogo da agência ou crie um serviço pelo botão +.</p>
+              <ServiceSelect
+                value={data.service_key || (initial.description ? legacyServiceKey(data.product_type) : null)}
+                onChange={(o) => update({ service_key: o.key, service_label: o.label, product_type: o.baseCategory })}
+              />
             </div>
           )}
 
@@ -1192,15 +1181,6 @@ function ProductWizard({
                     const t = termsData?.byOperator.get(v.operator_id);
                     if (t) {
                       setHadTerms(true);
-                      if (t.default_commission_type) {
-                        patch.commission_type = t.default_commission_type as "percentage" | "fixed";
-                        if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
-                          patch.commission_value = Number(t.default_commission_percent);
-                        } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
-                          patch.commission_value = Number(t.default_commission_fixed);
-                        }
-                      }
-                      if (t.default_non_commissionable_fees != null) patch.non_commissionable_taxes = Number(t.default_non_commissionable_fees);
                       if (t.payment_rule && t.payment_rule !== "manual") patch.payment_rule = t.payment_rule as any;
                       if (t.payment_days != null) patch.payment_days = Number(t.payment_days);
                       patch.requires_invoice = !!t.requires_invoice;
@@ -1213,7 +1193,7 @@ function ProductWizard({
               />
               {hadTerms && (
                 <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
-                  Preenchemos os próximos campos com base nas regras comerciais deste fornecedor. Você pode ajustar apenas para esta venda.
+                  Aplicamos as regras comerciais deste fornecedor (comissão por serviço, recebimento e nota). Você pode ajustar apenas para esta venda.
                 </div>
               )}
             </div>
@@ -1249,66 +1229,8 @@ function ProductWizard({
 
           {step === "commission" && (
             <div className="space-y-3">
-              <h4 className="font-semibold">Como a comissão será calculada?</h4>
-              {hadTerms && (
-                <p className="text-xs text-muted-foreground">
-                  Preenchemos com base nas regras comerciais. Ajuste apenas para esta venda, se necessário.
-                </p>
-              )}
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => update({ commission_type: "percentage" })}
-                  className={cn(
-                    "rounded-lg border-2 p-3 text-sm transition-colors",
-                    data.commission_type === "percentage"
-                      ? "border-primary bg-primary/5 text-primary font-medium"
-                      : "border-muted hover:border-muted-foreground/30",
-                  )}
-                >
-                  Percentual (%)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => update({ commission_type: "fixed" })}
-                  className={cn(
-                    "rounded-lg border-2 p-3 text-sm transition-colors",
-                    data.commission_type === "fixed"
-                      ? "border-primary bg-primary/5 text-primary font-medium"
-                      : "border-muted hover:border-muted-foreground/30",
-                  )}
-                >
-                  Valor fixo (R$)
-                </button>
-              </div>
-              <div className="space-y-2">
-                <Label>{data.commission_type === "percentage" ? "Percentual (%)" : "Valor (R$)"}</Label>
-                <Input
-                  type="number"
-                  value={data.commission_value || ""}
-                  onChange={(e) => update({ commission_value: Number(e.target.value) })}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-          )}
-
-          {step === "taxes" && (
-            <div className="space-y-3">
-              <h4 className="font-semibold">Existe algum valor que não gera comissão?</h4>
-              <p className="text-xs text-muted-foreground">
-                Taxas de embarque, administrativas ou outros valores podem ser descontados da base comissionável. Você pode pular.
-              </p>
-              <Input
-                type="number"
-                value={data.non_commissionable_taxes || ""}
-                onChange={(e) => update({ non_commissionable_taxes: Number(e.target.value) })}
-                placeholder="0,00"
-              />
-              <div className="rounded-lg border border-dashed bg-muted/30 p-3 text-sm">
-                <p>Base comissionável: <strong>{fmtCurrency(base)}</strong></p>
-                <p>Comissão estimada: <strong className="text-primary">{fmtCurrency(commission)}</strong></p>
-              </div>
+              <h4 className="font-semibold">Qual a comissão do fornecedor neste serviço?</h4>
+              <SaleCommissionFields data={data} onPatch={update} />
             </div>
           )}
 
@@ -1408,9 +1330,9 @@ function ProductWizard({
             <div className="space-y-3">
               <h4 className="font-semibold">Resumo do produto</h4>
               <div className="rounded-lg border divide-y text-sm">
-                <Row k="Tipo" v={PRODUCT_TYPES[data.product_type]} />
+                <Row k="Serviço" v={data.service_label || PRODUCT_TYPES[data.product_type]} />
                 <Row k="Fornecedor" v={data.supplier_name || "—"} />
-                <Row k="Serviço" v={data.description || "—"} />
+                <Row k="Descrição" v={data.description || "—"} />
                 <Row k="Preço de venda" v={fmtCurrency(Number(data.sale_price))} />
                 <Row k="Taxas não comissionáveis" v={fmtCurrency(taxes)} />
                 <Row k="Base comissionável" v={fmtCurrency(base)} />
