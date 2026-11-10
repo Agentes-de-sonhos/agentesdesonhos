@@ -355,7 +355,7 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
       case "destination": return destination.trim().length > 1;
       case "date": return !!saleDate;
       case "products": return products.length > 0 && !products.some(productCommissionMissing);
-      case "review": return true;
+      case "review": return !products.some(productCommissionMissing);
     }
   };
 
@@ -411,6 +411,11 @@ export function NewSaleWizard({ open, onOpenChange, onCreated }: NewSaleWizardPr
 
   const handleCreate = async () => {
     if (!client) return;
+    const missing = products.find(productCommissionMissing);
+    if (missing) {
+      toast({ title: "Comissão a definir", description: `Defina a comissão de "${missing.description || missing.service_label || "produto"}" antes de concluir.`, variant: "destructive" });
+      return;
+    }
     setSubmitting(true);
     try {
       const isImport = origin === "crm" && !!candidate;
@@ -960,13 +965,15 @@ function StepReview({
               <div className="min-w-0">
                 <p className="font-medium truncate">{p.description || PRODUCT_TYPES[p.product_type]}</p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {PRODUCT_TYPES[p.product_type]} • {p.supplier_name || "Sem fornecedor"}
+                  {p.service_label || PRODUCT_TYPES[p.product_type]} • {p.supplier_name || "Sem fornecedor"}
                 </p>
               </div>
               <div className="text-right shrink-0 flex items-center gap-2">
                 <div>
                 <p className="font-medium">{fmtCurrency(Number(p.sale_price))}</p>
-                <p className="text-xs text-primary">Comissão {fmtCurrency(productCommission(p))}</p>
+                {productCommissionMissing(p)
+                  ? <p className="text-xs text-destructive">Comissão a definir</p>
+                  : <p className="text-xs text-primary">Comissão {fmtCurrency(productCommission(p))}</p>}
                 </div>
                 {onEditProduct && (
                   <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEditProduct(p)}>
