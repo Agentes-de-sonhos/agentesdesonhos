@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
@@ -149,7 +149,7 @@ export default function Financeiro() {
     despesas: "--fin-despesas", comissoes: "--fin-comissoes", "notas-fiscais": "--fin-notas",
     fornecedores: "--fin-fornecedores",
   };
-  const tabStyle = (key: string, isActive: boolean): React.CSSProperties => {
+  const tabStyle = (key: string, isActive: boolean): CSSProperties => {
     const v = `var(${TAB_COLOR[key] ?? "--fin-extra"})`;
     return isActive
       ? { backgroundColor: `hsl(${v})`, color: "hsl(var(--primary-foreground))", boxShadow: `0 6px 16px -6px hsl(${v} / 0.6)` }
