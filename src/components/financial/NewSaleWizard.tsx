@@ -1147,6 +1147,7 @@ function ProductWizard({
             <Package className="h-5 w-5 text-primary" />
             Adicionar produto
           </DialogTitle>
+          {commissionConfirmDialog}
           <Progress value={progress} className="h-1.5 mt-2" />
         </DialogHeader>
 
@@ -1228,66 +1229,8 @@ function ProductWizard({
 
           {step === "commission" && (
             <div className="space-y-3">
-              <h4 className="font-semibold">Como a comissão será calculada?</h4>
-              {hadTerms && (
-                <p className="text-xs text-muted-foreground">
-                  Preenchemos com base nas regras comerciais. Ajuste apenas para esta venda, se necessário.
-                </p>
-              )}
-              <div className="grid gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => update({ commission_type: "percentage" })}
-                  className={cn(
-                    "rounded-lg border-2 p-3 text-sm transition-colors",
-                    data.commission_type === "percentage"
-                      ? "border-primary bg-primary/5 text-primary font-medium"
-                      : "border-muted hover:border-muted-foreground/30",
-                  )}
-                >
-                  Percentual (%)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => update({ commission_type: "fixed" })}
-                  className={cn(
-                    "rounded-lg border-2 p-3 text-sm transition-colors",
-                    data.commission_type === "fixed"
-                      ? "border-primary bg-primary/5 text-primary font-medium"
-                      : "border-muted hover:border-muted-foreground/30",
-                  )}
-                >
-                  Valor fixo (R$)
-                </button>
-              </div>
-              <div className="space-y-2">
-                <Label>{data.commission_type === "percentage" ? "Percentual (%)" : "Valor (R$)"}</Label>
-                <Input
-                  type="number"
-                  value={data.commission_value || ""}
-                  onChange={(e) => update({ commission_value: Number(e.target.value) })}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-          )}
-
-          {step === "taxes" && (
-            <div className="space-y-3">
-              <h4 className="font-semibold">Existe algum valor que não gera comissão?</h4>
-              <p className="text-xs text-muted-foreground">
-                Taxas de embarque, administrativas ou outros valores podem ser descontados da base comissionável. Você pode pular.
-              </p>
-              <Input
-                type="number"
-                value={data.non_commissionable_taxes || ""}
-                onChange={(e) => update({ non_commissionable_taxes: Number(e.target.value) })}
-                placeholder="0,00"
-              />
-              <div className="rounded-lg border border-dashed bg-muted/30 p-3 text-sm">
-                <p>Base comissionável: <strong>{fmtCurrency(base)}</strong></p>
-                <p>Comissão estimada: <strong className="text-primary">{fmtCurrency(commission)}</strong></p>
-              </div>
+              <h4 className="font-semibold">Qual a comissão do fornecedor neste serviço?</h4>
+              <SaleCommissionFields data={data} onPatch={update} />
             </div>
           )}
 
@@ -1387,9 +1330,9 @@ function ProductWizard({
             <div className="space-y-3">
               <h4 className="font-semibold">Resumo do produto</h4>
               <div className="rounded-lg border divide-y text-sm">
-                <Row k="Tipo" v={PRODUCT_TYPES[data.product_type]} />
+                <Row k="Serviço" v={data.service_label || PRODUCT_TYPES[data.product_type]} />
                 <Row k="Fornecedor" v={data.supplier_name || "—"} />
-                <Row k="Serviço" v={data.description || "—"} />
+                <Row k="Descrição" v={data.description || "—"} />
                 <Row k="Preço de venda" v={fmtCurrency(Number(data.sale_price))} />
                 <Row k="Taxas não comissionáveis" v={fmtCurrency(taxes)} />
                 <Row k="Base comissionável" v={fmtCurrency(base)} />
