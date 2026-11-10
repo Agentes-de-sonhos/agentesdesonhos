@@ -634,13 +634,26 @@ export function KanbanBoard() {
       <div className="flex min-h-0 flex-1 flex-col gap-3">
 
         <KanbanToolbarSlot>
-          <div className="relative w-full min-w-[150px] shrink-0 sm:w-[150px] lg:w-[190px]">
+          <Button
+            variant="outline"
+            size="icon"
+            className={`h-10 w-10 shrink-0 md:h-8 md:w-8 xl:hidden ${searchOpen ? "hidden" : ""} ${search ? "border-primary text-primary" : ""}`}
+            title="Buscar"
+            aria-label="Buscar"
+            onClick={() => setSearchOpen(true)}
+          >
+            <Search className="h-3.5 w-3.5" />
+          </Button>
+          <div className={`relative w-[170px] shrink-0 lg:w-[190px] ${searchOpen ? "block" : "hidden xl:block"}`}>
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
             <Input
               placeholder="Buscar"
               aria-label="Buscar oportunidades"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoFocus={searchOpen}
+              onBlur={() => { if (!search) setSearchOpen(false); }}
+              onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); setSearchOpen(false); } }}
               className="h-10 pl-8 text-sm md:h-8 md:text-xs"
             />
           </div>
@@ -681,9 +694,11 @@ export function KanbanBoard() {
             <Button
               size="sm"
               className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
+              title="Nova oportunidade"
+              aria-label="Nova oportunidade"
               onClick={() => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); }}
             >
-              <Plus className="h-3.5 w-3.5" /> Nova Oportunidade
+              <Plus className="h-3.5 w-3.5" /> <span className="hidden xl:inline">Nova Oportunidade</span>
             </Button>
           )}
           <div className="flex h-10 shrink-0 items-center rounded-md border bg-background md:h-8">
@@ -699,9 +714,11 @@ export function KanbanBoard() {
             size="sm"
             className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
             onClick={toggleMaximize}
+            title={isMaximized ? "Minimizar" : "Maximizar"}
+            aria-label={isMaximized ? "Minimizar" : "Maximizar"}
           >
             {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-            {isMaximized ? "Minimizar" : "Maximizar"}
+            <span className="hidden xl:inline">{isMaximized ? "Minimizar" : "Maximizar"}</span>
           </Button>
         </KanbanToolbarSlot>
 
