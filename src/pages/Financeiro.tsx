@@ -4,7 +4,7 @@ import {
   Loader2, DollarSign, LayoutDashboard, ArrowDownCircle,
   ShoppingBag, ArrowUpCircle, Receipt, Users,
   ChevronLeft, ChevronRight, Calendar, FileText, Truck,
-  ReceiptText, FileSpreadsheet, FileSignature,
+  ReceiptText, FileSpreadsheet, FileSignature, Plus, MoreHorizontal, Download,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -262,7 +262,29 @@ export default function Financeiro() {
             </DropdownMenu>
           </div>
 
-          <div ref={setToolbarEl} className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5" />
+          <div ref={setToolbarEl} className="ml-auto flex shrink-0 flex-nowrap items-center gap-1.5">
+            {activeTab === "dashboard" && (
+              <div className="flex items-center gap-1.5">
+                <Tip label="Nova Venda">
+                  <Button className="h-10 min-w-10 gap-2 rounded-xl px-2.5 font-semibold shadow-md transition-all hover:-translate-y-0.5 2xl:px-4" onClick={() => setSearchParams({ tab: "vendas", action: "new" }, { replace: true })} aria-label="Nova Venda">
+                    <Plus className="h-5 w-5" /> <span className="hidden 2xl:inline">Nova Venda</span>
+                  </Button>
+                </Tip>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl" aria-label="Mais ações">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleTabChange("vendas")}>
+                      <Download className="h-4 w-4 mr-2" /> Exportar vendas
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
+          </div>
         </div>
         </TooltipProvider>
 
