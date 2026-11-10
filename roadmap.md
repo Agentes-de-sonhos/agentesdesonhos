@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Corrigir alertas críticos de RLS/storage, preservar acessos públicos intencionais, validar isolamento e confirmar merge na main; não publicar.
 - [x] Fixar criação de cliente no rodapé da busca e preservar nome digitado; colunas limitadas à largura reservada, sem sobreposição e mantendo altura pelo conteúdo. Conferido em sessão autenticada 1590×935, lista longa simulada e cadastro sem gravar; build OK, 22 testes passaram e 2 testes estruturais do cabeçalho anterior falharam.
 - [x] Fundador elegível à reserva em orçamentos: migration 0061 aplicada, gate Curti confirmado false→true e regressões SQL executadas; 27 testes aprovados e build OK. Aviso administrativo atualizado; nenhuma solicitação/notificação enviada. Fluxo autenticado pela interface não exercitado.
 - [x] Liberar campanha Novembro O Mundo em Cores: bloqueios demonstrativos retirados, somente ofertas publicadas, navegação/WhatsApp e formulário compartilhado; 15 testes aprovados, Radar com envio simulado confirmado, sem overflow em 768/390. Recebimento real no CRM/Twilio não exercitado; mídias CDN não entregues no localhost.
