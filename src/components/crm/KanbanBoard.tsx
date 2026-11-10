@@ -694,7 +694,7 @@ export function KanbanBoard() {
                                 }
                                 onDuplicate={() => duplicateStage(stage.id)}
                                 onRequestDelete={() => setDeleteTarget(stage)}
-                                onQuickAdd={isFirstStage ? () => setQuickAddOpen(true) : undefined}
+                                onQuickAdd={isFirstStage && canCreateOpp ? () => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); } : undefined}
                                 isProtected={isProtected}
                                 canEdit={stageCanEdit}
                                 onCollapse={() => toggleCollapsed(stage.id)}

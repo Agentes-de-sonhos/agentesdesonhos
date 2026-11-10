@@ -169,12 +169,12 @@ export function StageColumnHeader({
                     variant="ghost"
                     onClick={onQuickAdd}
                     className={cn("h-6 w-6", tokens.text)}
-                    aria-label="Adicionar novo cliente"
+                    aria-label="Nova oportunidade"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Adicionar novo cliente</TooltipContent>
+                <TooltipContent>Nova oportunidade</TooltipContent>
               </Tooltip>
             )}
             {overdueCount > 0 && (
