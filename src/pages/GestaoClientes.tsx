@@ -104,7 +104,7 @@ function KanbanTabsSurface({
 
         {/* Título à esquerda; abas e ações da aba ativa no canto superior direito */}
         <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
+          <div className="shrink-0 flex-1 basis-auto">
             <PageHeader
               pageKey="gestao-clientes"
               title="Gestão de Relacionamento com Clientes"
@@ -117,25 +117,25 @@ function KanbanTabsSurface({
             {can('clients.view') && (
               <TabsTrigger value="clientes" title="Clientes" aria-label="Clientes" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Users className="h-4 w-4 shrink-0" />
-                <span className="hidden xl:inline">Clientes</span>
+                <span className="hidden 2xl:inline">Clientes</span>
               </TabsTrigger>
             )}
             {can('opportunities.view') && (
               <TabsTrigger value="funil" title="Oportunidades" aria-label="Oportunidades" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Kanban className="h-4 w-4 shrink-0" />
-                <span className="hidden xl:inline">Oportunidades</span>
+                <span className="hidden 2xl:inline">Oportunidades</span>
               </TabsTrigger>
             )}
             {can('operations.view') && (
               <TabsTrigger value="operacoes" title="Operações" aria-label="Operações" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <Briefcase className="h-4 w-4 shrink-0" />
-                <span className="hidden xl:inline">Operações</span>
+                <span className="hidden 2xl:inline">Operações</span>
               </TabsTrigger>
             )}
             {can('dashboard.view') && (
               <TabsTrigger value="dashboard" title="Visão Geral" aria-label="Visão Geral" className="gap-1.5 whitespace-nowrap px-2.5 text-xs">
                 <LayoutDashboard className="h-4 w-4 shrink-0" />
-                <span className="hidden xl:inline">Visão Geral</span>
+                <span className="hidden 2xl:inline">Visão Geral</span>
               </TabsTrigger>
             )}
           </TabsList>

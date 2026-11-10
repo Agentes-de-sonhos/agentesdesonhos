@@ -699,7 +699,7 @@ export function KanbanBoard() {
               aria-label="Nova oportunidade"
               onClick={() => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); }}
             >
-              <Plus className="h-3.5 w-3.5" /> <span className="hidden xl:inline">Nova Oportunidade</span>
+              <Plus className="h-3.5 w-3.5" /> <span className="hidden 2xl:inline">Nova Oportunidade</span>
             </Button>
           )}
           <div className="flex h-10 shrink-0 items-center rounded-md border bg-background md:h-8">
@@ -719,7 +719,7 @@ export function KanbanBoard() {
             aria-label={isMaximized ? "Minimizar" : "Maximizar"}
           >
             {isMaximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
-            <span className="hidden xl:inline">{isMaximized ? "Minimizar" : "Maximizar"}</span>
+            <span className="hidden 2xl:inline">{isMaximized ? "Minimizar" : "Maximizar"}</span>
           </Button>
         </KanbanToolbarSlot>
 
