@@ -174,7 +174,7 @@ export function StageColumnHeader({
                     <Plus className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Adicionar novo cliente</TooltipContent>
+                <TooltipContent>Nova oportunidade</TooltipContent>
               </Tooltip>
             )}
             {overdueCount > 0 && (
