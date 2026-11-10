@@ -30,14 +30,21 @@ export function suggestionToPatch(s: Suggestion): Patch | null {
  * Sugere a comissão quando fornecedor ou serviço mudam (em qualquer ordem). Não reaplica ao abrir
  * um produto existente; pede confirmação se a comissão foi ajustada manualmente.
  */
-export function useCommissionSuggestion(data: Data, onPatch: (p: Patch) => void) {
+export function useCommissionSuggestion(data: Data, onPatch: (p: Patch) => void, identity: string = "") {
   const { data: rules = [] } = useSupplierServiceRules();
   const { data: terms } = useAgencySupplierTerms();
   const key = `${data.operator_id || ""}|${data.service_key || ""}`;
   const prevKey = useRef(key);
+  const prevIdentity = useRef(identity);
   const [pending, setPending] = useState<Patch | null>(null);
 
   useEffect(() => {
+    // Abrir outro produto (ou um produto gravado) define nova linha de base: nada é reaplicado.
+    if (prevIdentity.current !== identity) {
+      prevIdentity.current = identity;
+      prevKey.current = key;
+      return;
+    }
     if (prevKey.current === key) return;
     prevKey.current = key;
     const s = resolveCommissionSuggestion({
@@ -49,7 +56,7 @@ export function useCommissionSuggestion(data: Data, onPatch: (p: Patch) => void)
     if (data.commission_rule_source === "manual") setPending(patch);
     else onPatch(patch);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, identity]);
 
   const dialog = (
     <AlertDialog open={!!pending} onOpenChange={(o) => !o && setPending(null)}>

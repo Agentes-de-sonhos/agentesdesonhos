@@ -15,6 +15,9 @@ import {
 import { exportFinancialData, prepareSalesExport } from "@/utils/financialExport";
 import { SupplierSelector } from "@/components/financial/SupplierSelector";
 import { useAgencySupplierTerms } from "@/hooks/useAgencySupplierTerms";
+import { ServiceSelect } from "@/components/financial/commission/ServiceSelect";
+import { SaleCommissionFields, useCommissionSuggestion } from "@/components/financial/commission/SaleCommissionFields";
+import { finalizeProductCommission, kindFromStored, legacyServiceKey, validateSaleCommission, SYSTEM_SERVICES } from "@/lib/supplierCommissionRules";
 import { NewSaleWizard } from "@/components/financial/NewSaleWizard";
 import { SaleFormDialog } from "@/components/financial/SaleFormDialog";
 import { parseLocalDate } from "@/lib/dateParsing";
@@ -87,6 +90,7 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
   const defaultProductForm: SaleProductFormData = {
     product_type: "aereo", description: "", sale_price: 0,
     cost_price: 0, non_commissionable_taxes: 0, commission_type: "percentage", commission_value: 0,
+    service_key: null, service_label: null, commission_kind: null, commission_rule_source: null,
     payment_rule: "after_sale", payment_days: 30, requires_invoice: false,
     supplier_name: "", operator_id: null,
   };
@@ -248,6 +252,11 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: 
       sale_price: Number(product.sale_price), cost_price: Number(product.cost_price),
       non_commissionable_taxes: Number((product as any).non_commissionable_taxes) || 0,
       commission_type: product.commission_type, commission_value: Number(product.commission_value),
+      // Abre os valores gravados (snapshot) sem reaplicar regras do fornecedor.
+      service_key: (product as any).service_key || legacyServiceKey(product.product_type),
+      service_label: (product as any).service_label || null,
+      commission_kind: kindFromStored(product as any),
+      commission_rule_source: (product as any).commission_rule_source || null,
       supplier_name: (product as any).supplier_name || "",
       operator_id: (product as any).operator_id || null,
       payment_rule: (product as any).payment_rule || "after_sale",
