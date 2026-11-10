@@ -129,19 +129,24 @@ export function KanbanBoard() {
   const [draggedHeight, setDraggedHeight] = useState(72);
   const [voicePrefill, setVoicePrefill] = useState<VoiceOpportunityPrefill | null>(null);
   const [targetStage, setTargetStage] = useState<PipelineStage | null>(null);
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+  // Preferência manual por coluna (true = recolhida, false = expandida).
+  // Sem preferência: coluna vazia recolhe sozinha; com cartões fica aberta.
+  const [collapseOverrides, setCollapseOverrides] = useState<Record<string, boolean>>(() => {
     try {
-      return new Set(JSON.parse(localStorage.getItem("crm-kanban-collapsed") || "[]"));
+      return JSON.parse(localStorage.getItem("crm-kanban-collapse-overrides") || "{}");
     } catch {
-      return new Set();
+      return {};
     }
   });
-  const toggleCollapsed = (id: string) =>
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      try { localStorage.setItem("crm-kanban-collapsed", JSON.stringify([...next])); } catch { /* sem armazenamento */ }
+  const persistOverrides = (next: Record<string, boolean>) => {
+    try { localStorage.setItem("crm-kanban-collapse-overrides", JSON.stringify(next)); } catch { /* sem armazenamento */ }
+  };
+  const isStageCollapsed = (id: string, count: number) =>
+    collapseOverrides[id] ?? count === 0;
+  const toggleCollapsed = (id: string, currentlyCollapsed: boolean) =>
+    setCollapseOverrides((prev) => {
+      const next = { ...prev, [id]: !currentlyCollapsed };
+      persistOverrides(next);
       return next;
     });
   const resetDrag = () => {
@@ -649,6 +654,15 @@ export function KanbanBoard() {
               </StandardPopupCard>
             </DialogContent>
           </Dialog>
+          {canCreateOpp && (
+            <Button
+              size="sm"
+              className="h-10 min-h-11 shrink-0 gap-1.5 px-3 text-sm md:h-8 md:min-h-0 md:px-2.5 md:text-xs"
+              onClick={() => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); }}
+            >
+              <Plus className="h-3.5 w-3.5" /> Nova Oportunidade
+            </Button>
+          )}
           <div className="flex h-10 shrink-0 items-center rounded-md border bg-background md:h-8">
             <VoiceOpportunityButton
               getContext={getVoiceContext}
@@ -716,6 +730,7 @@ export function KanbanBoard() {
                     .filter(s => canStage('opportunities', s.id, 'view'))
                     .map((stage, index) => {
                     const stageOpps = getOpportunitiesForStage(stage.id);
+                    const stageCollapsed = isStageCollapsed(stage.id, stageOpps.length);
                     const overdueCount = stageOpps.filter(hasOverdueFollowUp).length;
                     const tokens = getStageTokens(stage.color);
                     const isFirstStage = index === 0;
@@ -728,7 +743,7 @@ export function KanbanBoard() {
                     const stageCanEdit = canStage('opportunities', stage.id, 'edit');
 
                     return (
-                      <SortableColumn key={stage.id} stage={stage} collapsed={collapsed.has(stage.id)}>
+                      <SortableColumn key={stage.id} stage={stage} collapsed={stageCollapsed}>
                         {({ dragHandleProps, isDragging }) => (
                           <div
                             onDragOver={(e) => handleDragOver(e, stage.id)}
@@ -736,10 +751,10 @@ export function KanbanBoard() {
                             onDragEnd={resetDrag}
                             className="flex h-full min-h-0 flex-col"
                           >
-                            {collapsed.has(stage.id) ? (
+                            {stageCollapsed ? (
                               <button
                                 type="button"
-                                onClick={() => toggleCollapsed(stage.id)}
+                                onClick={() => toggleCollapsed(stage.id, stageCollapsed)}
                                 title={`Expandir ${stage.name}`}
                                 aria-label={`Expandir coluna ${stage.name}`}
                                 className={cn(
@@ -781,7 +796,7 @@ export function KanbanBoard() {
                                 onQuickAdd={isFirstStage && canCreateOpp ? () => { setVoicePrefill(null); setTargetStage(null); setIsDialogOpen(true); } : undefined}
                                 isProtected={isProtected}
                                 canEdit={stageCanEdit}
-                                onCollapse={() => toggleCollapsed(stage.id)}
+                                onCollapse={() => toggleCollapsed(stage.id, stageCollapsed)}
                               />
                               </div>
 
