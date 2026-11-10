@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -49,7 +50,7 @@ import { isInMonth } from "@/utils/monthFilter";
 import { saleFinancialGap, SALE_GAP_MESSAGE } from "@/lib/saleFinancialStatus";
 import { toast } from "sonner";
 
-export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void } = {}) {
+export function SalesManager({ viewMonth, viewYear, onMonthChange, toolbarEl }: { viewMonth?: number; viewYear?: number; onMonthChange?: (month: number, year: number) => void; toolbarEl?: HTMLElement | null } = {}) {
   const { sales: allSales, saleProducts, isLoading: salesLoading, isFetching: salesFetching, createSale, updateSale, deleteSale, createSaleProduct, updateSaleProduct, deleteSaleProduct, isCreating, isUpdating } = useFinancial();
   // Venda aberta por link direto "?sale=<id>": fica visível mesmo fora do limite
   // da lista, sem duplicar e SOMENTE no mês a que pertence (ou sem filtro).
@@ -348,16 +349,15 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
 
   return (
     <div className="space-y-4">
-      {allSales.length > 0 && (
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Vendas</h3>
-          <div className="flex items-center gap-2">
-            <Button onClick={() => setIsWizardOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" /> Nova Venda
+      {allSales.length > 0 && (() => {
+        const actions = (
+          <div className="flex items-center gap-1.5">
+            <Button size="sm" className="h-8 gap-1.5 px-2.5" onClick={() => setIsWizardOpen(true)} title="Nova Venda" aria-label="Nova Venda">
+              <Plus className="h-4 w-4" /> <span className={toolbarEl ? "hidden 2xl:inline" : ""}>Nova Venda</span>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Mais ações">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Mais ações">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -368,8 +368,15 @@ export function SalesManager({ viewMonth, viewYear, onMonthChange }: { viewMonth
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-      )}
+        );
+        if (toolbarEl) return createPortal(actions, toolbarEl);
+        return (
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Vendas</h3>
+            {actions}
+          </div>
+        );
+      })()}
       <ExportModal open={showExport} onOpenChange={setShowExport} tabName="Vendas" onExport={handleExportSales} />
 
       <NewSaleWizard
