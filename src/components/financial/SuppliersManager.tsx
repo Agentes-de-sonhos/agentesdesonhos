@@ -35,9 +35,9 @@ function termsSummary(t?: SupplierTerms | null) {
   if (!t) return null;
   const parts: string[] = [];
   if (t.default_commission_type === "percentage" && t.default_commission_percent != null) {
-    parts.push(`${t.default_commission_percent}%`);
+    parts.push(`Geral antiga ${t.default_commission_percent}%`);
   } else if (t.default_commission_type === "fixed" && t.default_commission_fixed != null) {
-    parts.push(`R$ ${Number(t.default_commission_fixed).toFixed(2)}`);
+    parts.push(`Geral antiga R$ ${Number(t.default_commission_fixed).toFixed(2)}`);
   }
   if (t.payment_rule) parts.push(PAYMENT_RULE_LABELS[t.payment_rule] || t.payment_rule);
   if (t.requires_invoice) parts.push("NF obrigatória");

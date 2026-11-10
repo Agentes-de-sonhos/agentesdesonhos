@@ -435,6 +435,13 @@
       "when": 1793998575582,
       "tag": "0061_founder_quote_booking_eligibility",
       "breakpoints": true
+    },
+    {
+      "idx": 62,
+      "version": "7",
+      "when": 1794339582893,
+      "tag": "0062_supplier_service_commissions",
+      "breakpoints": true
     }
   ]
 }

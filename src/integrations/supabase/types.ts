@@ -1121,6 +1121,42 @@ export type Database = {
         }
         Relationships: []
       }
+      agency_service_types: {
+        Row: {
+          agency_id: string
+          base_category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          normalized_name: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          base_category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          normalized_name: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          base_category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          normalized_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       agency_showcases: {
         Row: {
           auto_categories: string[] | null
@@ -1276,6 +1312,47 @@ export type Database = {
             columns: ["offer_id"]
             isOneToOne: false
             referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_supplier_service_commissions: {
+        Row: {
+          agency_id: string
+          commission_type: string
+          commission_value: number | null
+          created_at: string
+          id: string
+          operator_id: string
+          service_key: string
+          updated_at: string
+        }
+        Insert: {
+          agency_id: string
+          commission_type: string
+          commission_value?: number | null
+          created_at?: string
+          id?: string
+          operator_id: string
+          service_key: string
+          updated_at?: string
+        }
+        Update: {
+          agency_id?: string
+          commission_type?: string
+          commission_value?: number | null
+          created_at?: string
+          id?: string
+          operator_id?: string
+          service_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_supplier_service_commissions_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "tour_operators"
             referencedColumns: ["id"]
           },
         ]
@@ -13021,6 +13098,9 @@ export type Database = {
       }
       sale_products: {
         Row: {
+          commission_amount_snapshot: number | null
+          commission_kind: string | null
+          commission_rule_source: string | null
           commission_status: string
           commission_type: string
           commission_value: number
@@ -13044,6 +13124,8 @@ export type Database = {
           requires_invoice: boolean | null
           sale_id: string
           sale_price: number
+          service_key: string | null
+          service_label: string | null
           source_kind: string | null
           source_operation_service_id: string | null
           source_provenance: Json
@@ -13054,6 +13136,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          commission_amount_snapshot?: number | null
+          commission_kind?: string | null
+          commission_rule_source?: string | null
           commission_status?: string
           commission_type?: string
           commission_value?: number
@@ -13077,6 +13162,8 @@ export type Database = {
           requires_invoice?: boolean | null
           sale_id: string
           sale_price?: number
+          service_key?: string | null
+          service_label?: string | null
           source_kind?: string | null
           source_operation_service_id?: string | null
           source_provenance?: Json
@@ -13087,6 +13174,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          commission_amount_snapshot?: number | null
+          commission_kind?: string | null
+          commission_rule_source?: string | null
           commission_status?: string
           commission_type?: string
           commission_value?: number
@@ -13110,6 +13200,8 @@ export type Database = {
           requires_invoice?: boolean | null
           sale_id?: string
           sale_price?: number
+          service_key?: string | null
+          service_label?: string | null
           source_kind?: string | null
           source_operation_service_id?: string | null
           source_provenance?: Json

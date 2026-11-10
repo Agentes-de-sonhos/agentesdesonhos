@@ -198,6 +198,13 @@ export interface SaleFormData {
 
 export interface SaleProductFormData {
   product_type: ProductType;
+  /** Serviço do catálogo ("sys:<id>" ou "custom:<uuid>"). */
+  service_key?: string | null;
+  service_label?: string | null;
+  /** Snapshot da comissão usada nesta venda. null/undefined = ainda não definida. */
+  commission_kind?: 'percentage' | 'fixed' | 'none' | null;
+  commission_rule_source?: 'specific' | 'legacy_fallback' | 'manual' | null;
+  commission_amount_snapshot?: number | null;
   description?: string;
   sale_price: number;
   cost_price: number;
