@@ -18,6 +18,7 @@ export function AgencyFeaturedExperienceSection({
   container: string;
 }) {
   const reverse = config.align === "right";
+  const galleryFirstOnMobile = config.mobileGalleryAboveText === true;
   const href = config.ctaHref
     ? config.ctaHref.startsWith("/")
       ? agencySiteHref(config.ctaHref)
@@ -32,7 +33,9 @@ export function AgencyFeaturedExperienceSection({
       data-testid="featured-experience"
     >
       <div className={`${container} grid items-center gap-10 lg:grid-cols-[2fr_3fr] lg:gap-14`}>
-        {/* Celular: chapéu, título, descrição → fotos → destaques e botão. */}
+        {/* Celular: chapéu e título → fotos → parágrafos → destaques e botão
+            quando a agência pede a foto acima do texto (opt-in no perfil);
+            sem o opt-in, a ordem segue chapéu/título/parágrafos → fotos → botão. */}
         <div className={`contents lg:block ${reverse ? "lg:order-2" : ""}`}>
           <div className="order-1 lg:order-none">
           {config.kicker && (
@@ -44,17 +47,22 @@ export function AgencyFeaturedExperienceSection({
           >
             {config.title}
           </h2>
+          </div>
+          <div className={galleryFirstOnMobile ? "order-3 lg:order-none" : "order-1 lg:order-none"}>
           {config.description
             .split(/\n{2,}/)
             .map((p) => p.trim())
             .filter(Boolean)
-            .map((para) => (
-              <p key={para} className="mt-4 text-base leading-relaxed text-muted-foreground">
+            .map((para, i) => (
+              <p
+                key={para}
+                className={`${i === 0 && galleryFirstOnMobile ? "" : "mt-4"} text-base leading-relaxed text-muted-foreground`}
+              >
                 {para}
               </p>
             ))}
           </div>
-          <div className="order-3 lg:order-none">
+          <div className={galleryFirstOnMobile ? "order-4 lg:order-none" : "order-3 lg:order-none"}>
           {config.highlights && config.highlights.length > 0 && (
             <ul className="grid gap-3 sm:grid-cols-2 lg:mt-6">
               {config.highlights.map((h) => (

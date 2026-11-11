@@ -50,6 +50,39 @@ describe("Experiência em destaque", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(4);
   });
 
+  it("O Mundo em Cores: no celular, a foto entra entre o título e os parágrafos", () => {
+    const cfg = resolveSiteProfile("omundoemcores.com.br").featuredExperience!;
+    expect(cfg.mobileGalleryAboveText).toBe(true);
+    const { container } = render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
+    const firstPara = Array.from(container.querySelectorAll("p")).find((p) =>
+      (p.textContent ?? "").startsWith("Em set/2026"),
+    )!;
+    // título = 1, foto = 2, parágrafos = 3, destaques/botão = 4
+    expect(firstPara.parentElement?.className).toContain("order-3");
+    expect(container.querySelector(".order-2")).not.toBeNull();
+    expect(screen.getByRole("link", { name: /Saiba mais sobre este destino/ }).closest("div.mt-8")?.parentElement?.className).toContain(
+      "order-4",
+    );
+    // O primeiro parágrafo não soma margem própria: o vão vem do espaçamento da grade.
+    expect(firstPara.className).not.toContain("mt-4");
+    // Desktop inalterado: as três partes seguem na mesma coluna de texto.
+    expect(firstPara.parentElement?.className).toContain("lg:order-none");
+  });
+
+  it("Destinos com a Ju: sem o opt-in, os parágrafos continuam antes da foto", () => {
+    const cfg = resolveSiteProfile("destinoscomaju.com.br").featuredExperience!;
+    expect(cfg.mobileGalleryAboveText).toBeUndefined();
+    const { container } = render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
+    const firstPara = Array.from(container.querySelectorAll("p")).find((p) =>
+      (p.textContent ?? "").includes(cfg.description.split("\n\n")[0].trim().slice(0, 40)),
+    )!;
+    expect(firstPara.parentElement?.className).toContain("order-1");
+    expect(firstPara.className).toContain("mt-4");
+    expect(screen.getByRole("link", { name: /Saiba mais sobre este destino/ }).closest("div.mt-8")?.parentElement?.className).toContain(
+      "order-3",
+    );
+  });
+
   it("descrição de um parágrafo continua renderizando um único bloco", () => {
     const cfg = resolveSiteProfile("destinoscomaju.com.br").featuredExperience!;
     const { container } = render(<AgencyFeaturedExperienceSection config={cfg} container="" />);
