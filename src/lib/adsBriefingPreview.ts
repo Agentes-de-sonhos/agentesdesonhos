@@ -1934,7 +1934,7 @@ export const ARENA_PREVIEW_INFO: AgencyDomainInfo = {
   on_secondary_color: "#FFFFFF", phone: null, city: "Florianópolis", state: "SC",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
-export const ARENA_PREVIEW_PROFILE = buildGoldStandardProfile("arenaBriefing23", {
+const arenaBaseline = buildGoldStandardProfile("arenaBriefing23", {
   navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
   authority: undefined, testimonials: undefined, conciergePoints: undefined,
@@ -2019,6 +2019,53 @@ export const ARENA_PREVIEW_PROFILE = buildGoldStandardProfile("arenaBriefing23",
   },
   seo: { title: "Prévia para revisão — ARENA TRAVEL GROUP", description: "Prévia técnica da ARENA TRAVEL GROUP; sem envios ou publicação." },
 }, "ARENA TRAVEL GROUP");
+/** Source imagery is temporary and remains attributed to its original owner. */
+const arenaMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
+export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
+  ...arenaMundoSource,
+  key: "arenaBriefing23",
+  heroPresentation: { ...arenaMundoSource.heroPresentation, kicker: "ARENA TRAVEL GROUP · VIAGENS SOB MEDIDA" },
+  hero: arenaMundoSource.hero?.map((slide, index) => ({
+    ...slide,
+    title: arenaBaseline.hero?.[index]?.title ?? slide.title,
+    subtitle: (arenaBaseline.hero?.[index]?.subtitle ?? slide.subtitle).replace(/ Imagem genérica de inspiração\./g, ""),
+  })),
+  signature: arenaBaseline.signature,
+  modules: arenaMundoSource.modules?.map((item, index) => ({
+    ...item,
+    title: arenaBaseline.modules?.[index]?.title ?? item.title,
+    text: (arenaBaseline.modules?.[index]?.text ?? item.text).replace(/ Imagem genérica\./g, ""),
+    service: arenaBaseline.modules?.[index]?.service ?? item.service,
+  })),
+  destinations: arenaMundoSource.destinations?.map((item, index) => {
+    const content = arenaBaseline.destinations?.[index % (arenaBaseline.destinations?.length || 1)];
+    return { ...item, ...content, key: item.key, image: item.image, order: item.order,
+      text: (content?.text ?? item.text).replace(/ Imagem genérica de inspiração\./g, "") };
+  }),
+  about: { ...arenaMundoSource.about, ...arenaBaseline.about, media: undefined,
+    images: arenaMundoSource.about?.images, mural: arenaMundoSource.about?.mural,
+    visitedDestinations: undefined },
+  featuredExperience: arenaMundoSource.featuredExperience ? {
+    ...arenaMundoSource.featuredExperience, kicker: "DESCUBRA A RIVIERA MAYA",
+    title: "Parques e hotéis Xcaret para conhecer em boa companhia",
+    description: "Converse com a Arena Travel Group para planejar parques, hotéis e experiências de acordo com o perfil da sua família ou grupo.",
+    highlights: ["Parques e hotéis", "Famílias e grupos", "Planejamento sob medida"],
+  } : undefined,
+  authority: arenaMundoSource.authority ? { ...arenaMundoSource.authority,
+    companies: arenaMundoSource.authority.companies ? { ...arenaMundoSource.authority.companies,
+      title: "Planeje seu próximo cruzeiro com a Arena Travel Group." } : undefined } : undefined,
+  differentials: arenaBaseline.differentials, conciergeSteps: arenaBaseline.conciergeSteps,
+  faq: arenaBaseline.faq,
+  copy: { ...arenaMundoSource.copy, ...arenaBaseline.copy,
+    destinations: { ...arenaBaseline.copy?.destinations, subtitle: "Resorts, Europa, neve e viagens em grupo, com orientação em cada etapa." },
+    modules: { ...arenaBaseline.copy?.modules, cta: "Conversar com a Arena" },
+    avaliacoes: { title: "Experiências de quem viaja com a Arena" },
+    newsletter: { title: "Novidades da Arena Travel Group", subtitle: "Converse com a equipe sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
+  },
+  footer: { ...arenaBaseline.footer, whatsapp: "(47) 99269-0807", phone: "(47) 99269-0807" },
+  socialStrip: { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/arenatravelgroup/" }] },
+  inspirationDialog: undefined, testimonials: undefined, seo: arenaBaseline.seo,
+};
 ADS_PREVIEW_FIXTURES[ARENA_PREVIEW_JOB_ID] = {
   jobId: ARENA_PREVIEW_JOB_ID, info: ARENA_PREVIEW_INFO, profile: ARENA_PREVIEW_PROFILE,
   notice: "prévia técnica para revisão · vinculação de conta pendente · sem envios ou publicação",
