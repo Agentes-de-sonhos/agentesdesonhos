@@ -113,6 +113,8 @@ export function siteThemeRootClass(hostname?: string | null): string {
     const extra =
       h === "drica-presentation.preview.local" || h === "dricaviagens.com.br" || h === "www.dricaviagens.com.br"
         ? " wl-drica"
+        : h === "briefing-22-v1.preview.local"
+        ? " wl-mundo wl-pristur-mundo"
         : h === "briefing-25-v1.preview.local"
         ? " wl-mundo wl-shopping-mundo"
         : h === "briefing-24-v1.preview.local"
