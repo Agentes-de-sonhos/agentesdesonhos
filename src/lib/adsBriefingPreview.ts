@@ -1865,7 +1865,7 @@ export const PRISTUR_PREVIEW_INFO: AgencyDomainInfo = {
   on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
-export const PRISTUR_PREVIEW_PROFILE = buildGoldStandardProfile("pristurBriefing22", {
+const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   textualWordmark: true,
   navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
@@ -1954,6 +1954,8 @@ export const PRISTUR_PREVIEW_PROFILE = buildGoldStandardProfile("pristurBriefing
   },
   seo: { title: "Prévia para revisão — Pristur Viagens", description: "Prévia técnica da Pristur Viagens. Marca e paleta pendentes; sem envios ou publicação." },
 }, "Pristur Viagens");
+export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = buildMundoReviewProfile("pristurBriefing22", pristurBaseline, "Pristur Viagens", "Priscila Vasconcelos");
+PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038", phone: "(11) 98301-7038" };
 ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID] = {
   jobId: PRISTUR_PREVIEW_JOB_ID, info: PRISTUR_PREVIEW_INFO, profile: PRISTUR_PREVIEW_PROFILE,
   notice: "Pristur Viagens · prévia técnica · marca e paleta pendentes · imagens genéricas · vinculação pendente · sem envios ou publicação",
@@ -2531,3 +2533,9 @@ ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].pages = {
   resorts: { title: "Explore os resorts do Brasil com a Shopping Viagens" }, orlandoTickets: true, editorial: true,
 };
 ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].notice = "Shopping Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
+
+ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].pages = {
+  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Pristur Viagens").replace(/Bardelli/g, "Pristur")]) },
+  resorts: { title: "Explore os resorts do Brasil com a Pristur Viagens" }, orlandoTickets: true, editorial: true,
+};
+ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";

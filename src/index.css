@@ -1801,3 +1801,6 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 
 /* Shopping review: neutral tokens pending confirmed agency palette. */
 .wl-editorial.wl-mundo.wl-shopping-mundo { --primary: 222 47% 11%; --primary-foreground: 0 0% 100%; --wl-navy: 222 47% 11%; --foreground: 222 30% 12%; --muted-foreground: 222 10% 38%; --border: 240 8% 88%; --mc: #0F1729; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6F6F8 100%); }
+
+/* Pristur review: neutral tokens pending confirmed agency palette. */
+.wl-editorial.wl-mundo.wl-pristur-mundo { --primary: 222 47% 11%; --primary-foreground: 0 0% 100%; --wl-navy: 222 47% 11%; --foreground: 222 30% 12%; --muted-foreground: 222 10% 38%; --border: 240 8% 88%; --mc: #0F1729; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6F6F8 100%); }
