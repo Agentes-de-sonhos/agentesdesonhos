@@ -449,6 +449,13 @@
       "when": 1794352549931,
       "tag": "0063_security_scoped_reads_and_storage_writes",
       "breakpoints": true
+    },
+    {
+      "idx": 64,
+      "version": "7",
+      "when": 1794355482795,
+      "tag": "0064_public_quote_document_storage_gate",
+      "breakpoints": true
     }
   ]
 }

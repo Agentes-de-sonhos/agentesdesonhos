@@ -18336,6 +18336,10 @@ export type Database = {
         }
         Returns: string
       }
+      public_quote_document_file_allowed: {
+        Args: { p_file_path: string }
+        Returns: boolean
+      }
       public_slug_alias_matches: {
         Args: { p_agency_slug: string; p_user_id: string }
         Returns: boolean
