@@ -76,7 +76,7 @@ describe("Harmony route page", () => {
     const nav = screen.getByRole("navigation", { name: "Seções" });
     ["O navio", "Experiências", "Cabines", "Roteiros", "Solicitar orçamento ↗"].forEach((t) => expect(within(nav).getByText(t)).toBeInTheDocument());
     expect(document.querySelector(".gallery + .media-credit")).toHaveTextContent(ship.credit);
-    expect(screen.getByText("Não é inventário completo nem consulta de disponibilidade em tempo real.")).toBeInTheDocument();
+    expect(screen.queryByText("Não é inventário completo nem consulta de disponibilidade em tempo real.")).toBeNull();
     expect(screen.getByText(/Ver todas as 18 fotos/)).toBeInTheDocument();
     expect(screen.queryByText(/DEMONSTRATIVO|Simular/i)).toBeNull();
     expect(document.querySelectorAll('a[href^="http"]')).toHaveLength(0);

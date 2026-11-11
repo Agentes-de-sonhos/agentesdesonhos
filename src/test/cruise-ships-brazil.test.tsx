@@ -77,7 +77,7 @@ describe('Brazilian cruise pages', () => {
     for (const selector of ['.gallery + .media-credit', '.experience-media .media-credit', '.cabin-grid + .media-credit', '#albumDialog > .media-credit', '#galleryDialog > .media-credit']) {
       const credit = document.querySelector(selector);
       expect(credit).toHaveTextContent(ship.lineName);
-      expect(credit?.querySelector('a')).toHaveAttribute('href', ship.creditUrl);
+      expect(credit?.querySelector('a')).toBeNull(); expect(credit?.textContent).toContain('Fonte: site oficial da companhia.');
     }
     expect(document.querySelectorAll('.album-grid .media-credit, .lightbox-thumbs .media-credit')).toHaveLength(0);
     if (ship.routes.feed.sailings.length) {
