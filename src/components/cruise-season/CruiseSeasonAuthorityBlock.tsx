@@ -2,8 +2,8 @@ import { ArrowRight, Compass } from 'lucide-react';
 import { agencySiteHref } from '@/lib/agencyContextLink';
 import { cruiseShipPath } from '@/lib/cruiseShips';
 import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
-import diademaExterior from '@/assets/cruise-season/costa-diadema-exterior.jpg.asset.json';
-import buenavistaExterior from '@/assets/cruise-season/buenavista-exterior.jpg.asset.json';
+import diademaExterior from '@/assets/cruise-season/costa-diadema-exterior.jpg';
+import buenavistaExterior from '@/assets/cruise-season/buenavista-exterior.jpg';
 import aerialA from '@/assets/cruise-season/msc-ship-aerial-a.jpg';
 import aerialB from '@/assets/cruise-season/msc-ship-aerial-b.jpg';
 import aerialC from '@/assets/cruise-season/msc-ship-aerial-c.jpg';
@@ -16,15 +16,15 @@ const CARD_PHOTOS: Record<string, { src?: string; asset?: string; illustrative?:
   'msc-divina': { src: aerialA, illustrative: true },
   'msc-splendida': { src: aerialB, illustrative: true },
   'msc-seaview': { src: aerialC, illustrative: true },
-  'costa-diadema': { src: diademaExterior.url },
+  'costa-diadema': { src: diademaExterior },
   'costa-serena': { src: costaAerial, illustrative: true },
-  buenavista: { src: buenavistaExterior.url },
+  buenavista: { src: buenavistaExterior },
 };
 
 /** Season gallery shown inside the dark cruise (authority) section; opt-in per profile. */
 export function CruiseSeasonAuthorityBlock({ container }: { container: string }) {
   return (
-    <div className={`${container} pt-14 pb-10 md:pt-20 md:pb-12`} data-testid="cruise-season-authority">
+    <div className={`${container} pt-14 pb-10 md:pt-20 md:pb-4`} data-testid="cruise-season-authority">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-background">
