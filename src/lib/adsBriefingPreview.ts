@@ -343,6 +343,8 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
     highlights: ["Visita recente ao destino", "Selo Xperts Xcaret", "Parques e hotéis Xcaret", "Planejamento personalizado"],
     ctaLabel: "Saiba mais sobre este destino",
     ctaHref: "/xcaret",
+    // Fernando (11/11/2026): no celular, a montagem vem entre o título e os parágrafos.
+    mobileGalleryAboveText: true,
   },
   hero: [
     { title: "Viagem desenhada para você.", subtitle: "Roteiros sob medida, criados a partir do seu jeito de viajar, com acompanhamento antes, durante e depois.", image: "heroMundoPlacasFoto", focalPoint: "mundoPlacas", order: 1, enabled: true },

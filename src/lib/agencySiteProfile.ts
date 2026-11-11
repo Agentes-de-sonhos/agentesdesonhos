@@ -333,6 +333,11 @@ export interface AgencyFeaturedExperience {
   /** URL da landing; null mantém o botão inativo, sem link fictício. */
   ctaHref?: string | null;
   align?: "left" | "right";
+  /**
+   * Opt-in por agência: no celular, a foto entra entre o título e os parágrafos
+   * (em vez de vir depois deles). No desktop nada muda.
+   */
+  mobileGalleryAboveText?: boolean;
 }
 
 /* ------------------------------ PERFIS ------------------------------ */
