@@ -6,7 +6,7 @@ import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
 /** Season gallery shown inside the dark cruise (authority) section; opt-in per profile. */
 export function CruiseSeasonAuthorityBlock({ container }: { container: string }) {
   return (
-    <div className={`${container} py-14 md:py-24`} data-testid="cruise-season-authority">
+    <div className={`${container} pt-14 pb-10 md:pt-24 md:pb-14`} data-testid="cruise-season-authority">
       <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red))]">Temporada brasileira 2026–2027</p>
