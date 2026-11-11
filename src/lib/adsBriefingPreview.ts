@@ -2134,7 +2134,7 @@ export const INNOVATI_PREVIEW_INFO: AgencyDomainInfo = {
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
 const INSP = "Imagem genérica de inspiração.";
-export const INNOVATI_PREVIEW_PROFILE = buildGoldStandardProfile("innovatiBriefing24", {
+const innovatiBaseline = buildGoldStandardProfile("innovatiBriefing24", {
   navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
   authority: undefined, testimonials: undefined, conciergePoints: undefined,
@@ -2217,6 +2217,54 @@ export const INNOVATI_PREVIEW_PROFILE = buildGoldStandardProfile("innovatiBriefi
   },
   seo: { title: "Prévia para revisão — Innovati Travel", description: "Prévia técnica da Innovati Travel; sem publicação e com ações desativadas." },
 }, "Innovati Travel");
+const innovatiMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
+export const INNOVATI_PREVIEW_PROFILE: AgencySiteProfile = {
+  ...innovatiMundoSource, key: "innovatiBriefing24",
+  nav: innovatiMundoSource.nav?.filter(item => item.to !== "/oportunidades-novembro"),
+  heroPresentation: { ...innovatiMundoSource.heroPresentation, kicker: "INNOVATI TRAVEL · VIAGENS EM FAMÍLIA" },
+  hero: innovatiMundoSource.hero?.map((slide, index) => ({
+    ...slide, title: innovatiBaseline.hero?.[index]?.title ?? slide.title,
+    subtitle: (innovatiBaseline.hero?.[index]?.subtitle ?? slide.subtitle).replace(/ Imagem genérica de inspiração\./g, ""),
+  })),
+  signature: innovatiBaseline.signature,
+  modules: innovatiMundoSource.modules?.map((item, index) => ({
+    ...item, title: innovatiBaseline.modules?.[index]?.title ?? item.title,
+    text: (innovatiBaseline.modules?.[index]?.text ?? item.text).replace(/ Imagem genérica\./g, ""),
+    service: innovatiBaseline.modules?.[index]?.service ?? item.service,
+  })),
+  destinations: innovatiMundoSource.destinations?.map((item, index) => {
+    const content = innovatiBaseline.destinations?.[index];
+    return { ...item, ...(content ?? { key: "resorts-brasil", label: "Brasil", title: "Resorts no Brasil",
+      text: "Hospedagens para descansar e aproveitar no seu ritmo, com orientação da Innovati Travel.", service: "hospedagem" }),
+      key: content?.key ?? (index === 4 ? "eua-canada" : "resorts-brasil"),
+      ...(index === 4 ? { title: "Estados Unidos e Canadá", label: "América do Norte", text: "Roteiros sob medida e experiências para a família, com acompanhamento próximo.", service: "pacotes" } : {}),
+      text: (index === 4 ? "Roteiros sob medida e experiências para a família, com acompanhamento próximo." : content?.text ?? "Resorts no Brasil para aproveitar no seu ritmo.").replace(/ Imagem genérica de inspiração\./g, ""),
+      image: item.image, order: item.order };
+  }),
+  about: { ...innovatiMundoSource.about, ...innovatiBaseline.about, media: undefined,
+    images: innovatiMundoSource.about?.images, mural: innovatiMundoSource.about?.mural,
+    visitedDestinations: undefined, tagline: "Consultoria personalizada · Acompanhamento próximo" },
+  featuredExperience: innovatiMundoSource.featuredExperience ? { ...innovatiMundoSource.featuredExperience,
+    kicker: "DESCUBRA A RIVIERA MAYA", title: "Parques e hotéis Xcaret para a sua próxima viagem",
+    description: "Converse com a Innovati Travel para conhecer as possibilidades de parques, hotéis e experiências Xcaret e planejar uma viagem de acordo com suas preferências.",
+    highlights: ["Parques e hotéis", "Viagens em família", "Planejamento sob medida"] } : undefined,
+  authority: innovatiMundoSource.authority ? { ...innovatiMundoSource.authority,
+    companies: innovatiMundoSource.authority.companies ? { ...innovatiMundoSource.authority.companies,
+      title: "Planeje seu próximo cruzeiro com a Innovati Travel." } : undefined } : undefined,
+  differentials: innovatiBaseline.differentials, conciergeSteps: innovatiBaseline.conciergeSteps,
+  faq: innovatiBaseline.faq,
+  copy: { ...innovatiMundoSource.copy, ...innovatiBaseline.copy,
+    modules: { ...innovatiBaseline.copy?.modules, cta: "Conversar com a Jussara" },
+    concierge: { ...innovatiBaseline.copy?.concierge, cta: "Conversar com a Jussara" },
+    avaliacoes: { title: "Experiências de quem viaja com a Innovati Travel" },
+    testimonials: undefined,
+    newsletter: { title: "Novidades da Innovati Travel", subtitle: "Converse com a Jussara sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
+  },
+  footer: { ...innovatiBaseline.footer, whatsapp: "(11) 91857-8547", phone: "(11) 91857-8547" }, socialStrip: { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/innovatitravel/" }] },
+  testimonials: undefined, inspirationDialog: undefined, seo: innovatiBaseline.seo,
+};
+
+
 ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID] = {
   jobId: INNOVATI_PREVIEW_JOB_ID, info: INNOVATI_PREVIEW_INFO, profile: INNOVATI_PREVIEW_PROFILE,
   notice: "prévia para revisão · sem publicação · ações desativadas",
@@ -2419,3 +2467,10 @@ ADS_PREVIEW_FIXTURES[BAGAGEM_NA_MAO_PREVIEW_JOB_ID].pages = {
   resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão" }, orlandoTickets: true, editorial: true,
 };
 ADS_PREVIEW_FIXTURES[BAGAGEM_NA_MAO_PREVIEW_JOB_ID].notice = "Bagagem na Mão · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação";
+
+// Content pages stay within the isolated Innovati review; no live submissions.
+ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].pages = {
+  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Innovati Travel").replace(/Bardelli/g, "Innovati")]) },
+  resorts: { title: "Explore os resorts do Brasil com a Innovati Travel" }, orlandoTickets: true, editorial: true,
+};
+ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].notice = "Innovati Travel · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação";
