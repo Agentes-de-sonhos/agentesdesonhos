@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE, INNOVATI_PREVIEW_PROFILE, SHOPPING_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_MUNDO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE, INNOVATI_PREVIEW_PROFILE, SHOPPING_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
   | "classic"
@@ -60,6 +60,7 @@ export type AgencySiteProfileKey =
   | "bardelliCurated"
   | "dricaPresentation"
   | "dricaOfficial"
+  | "bardelliMundoPreview"
   | "bardelliPresentation"
   /** Rascunho técnico isolado do briefing 19 (Bagagem na Mão); sem domínio público. */
   | "bagagemNaMaoBriefing19"
@@ -1217,6 +1218,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   /** Host sintético do rascunho briefing-17 — vinculação de domínio pendente. */
   "briefing-17-v1.preview.local": "viajarTirismoBriefing17",
   "drica-presentation.preview.local": "dricaPresentation",
+  "bardelli-mundo.preview.local": "bardelliMundoPreview",
   "bardelli-presentation.preview.local": "bardelliPresentation",
   /** Host sintético do rascunho briefing-19 — cadastro real sem domínio; nada é vinculado. */
   "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
@@ -1251,6 +1253,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   dricaViagensBriefing16: DRICA_VIAGENS_PREVIEW_PROFILE,
   viajarTirismoBriefing17: VIAJAR_TIRISMO_PREVIEW_PROFILE,
   bardelliCurated: BARDELLI_OFFICIAL_PROFILE,
+  bardelliMundoPreview: BARDELLI_MUNDO_PREVIEW_PROFILE,
   bardelliPresentation: BARDELLI_PRESENTATION_PROFILE,
   dricaPresentation: DRICA_PRESENTATION_PROFILE,
   dricaOfficial: DRICA_OFFICIAL_PROFILE,

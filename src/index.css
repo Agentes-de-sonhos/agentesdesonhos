@@ -1787,3 +1787,6 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 
 /* Arena preview: source layout, confirmed black-and-white brand. */
 .wl-editorial.wl-mundo.wl-arena { --primary: 0 0% 0%; --wl-navy: 0 0% 5%; --foreground: 0 0% 12%; --muted-foreground: 0 0% 40%; --border: 0 0% 90%; --mc: #000000; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F4F4F4 100%); }
+
+/* Isolated Bardelli review copy: confirmed red/black branding, source layout. */
+.wl-editorial.wl-mundo.wl-bardelli-mundo { --primary: 358 78% 47%; --primary-foreground: 0 0% 100%; --wl-navy: 0 0% 9%; --foreground: 0 0% 12%; --muted-foreground: 0 0% 40%; --border: 0 0% 90%; --mc: #D71920; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #FFF5F5 100%); }

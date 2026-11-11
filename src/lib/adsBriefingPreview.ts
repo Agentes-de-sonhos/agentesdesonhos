@@ -2293,3 +2293,79 @@ ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID] = {
   notice: "prévia técnica para revisão · logotipo e paleta pendentes · imagens genéricas · sem publicação",
   documentTitle: "Prévia para revisão — Shopping Viagens", realAgency: true,
 };
+
+/** Bardelli review copy; never changes the official tenant or previous presentation. */
+export const BARDELLI_MUNDO_PREVIEW_HOST = "bardelli-mundo.preview.local";
+export const BARDELLI_MUNDO_PREVIEW_JOB_ID = "bardelli-mundo-v1";
+const bardelliMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
+export const BARDELLI_MUNDO_PREVIEW_PROFILE: AgencySiteProfile = {
+  ...bardelliMundoSource, key: "bardelliMundoPreview",
+  nav: bardelliMundoSource.nav?.filter(item => item.to !== "/oportunidades-novembro"),
+  heroPresentation: { ...bardelliMundoSource.heroPresentation, kicker: "BARDELLI VIAGENS · VIAGENS PERSONALIZADAS" },
+  hero: bardelliMundoSource.hero?.map((slide, index) => ({
+    ...slide,
+    title: ["Uma viagem com a sua identidade.", "A Europa no seu ritmo.", "Momentos para viver em boa companhia."][index] ?? slide.title,
+    subtitle: ["Planejamento personalizado para famílias, casais e grupos de amigos, com atenção a cada detalhe.", "Roteiros e experiências escolhidos a partir das suas preferências.", "Parques, resorts e cruzeiros para compartilhar novas histórias."][index] ?? slide.subtitle,
+  })),
+  signature: { ...BARDELLI_OFFICIAL_PROFILE.signature! },
+  modules: bardelliMundoSource.modules?.map((item, index) => ({
+    ...item,
+    title: ["Viagens personalizadas", "Famílias e casais", "Grupos de amigos", "Parques, resorts e cruzeiros"][index] ?? item.title,
+    text: ["Roteiros construídos a partir do perfil, do ritmo e das preferências de quem viaja.", "Planejamento que considera diferentes idades, interesses e momentos.", "Experiências para compartilhar, com logística e serviços organizados.", "Orientação para escolher destinos, hospedagens e experiências que combinam com você."][index] ?? item.text,
+  })),
+  destinations: bardelliMundoSource.destinations?.map((item, index) => ({
+    ...item,
+    key: ["europa", "brasil", "orlando", "cruzeiros", "resorts-internacionais", "resorts-nacionais"][index] ?? item.key,
+    label: ["Europa", "Brasil", "Parques temáticos", "Cruzeiros", "Resorts internacionais", "Resorts no Brasil"][index] ?? item.label,
+    title: ["Europa no seu ritmo", "Descubra o Brasil", "Disney e Universal", "Sua próxima viagem no mar", "Resorts e all-inclusive", "Descanso no Brasil"][index] ?? item.title,
+    text: ["Roteiros personalizados para conhecer cidades, paisagens e experiências europeias.", "Destinos brasileiros com planejamento e atenção aos detalhes.", "Parques, hospedagem e experiências para famílias, casais e amigos.", "Compare companhias, navios, cabines e itinerários com orientação da Bardelli.", "Hospedagens escolhidas de acordo com o perfil e o ritmo da sua viagem.", "Resorts nacionais para aproveitar dias de lazer com tranquilidade."][index] ?? item.text,
+  })),
+  about: { ...bardelliMundoSource.about, ...BARDELLI_OFFICIAL_PROFILE.about,
+    media: undefined, images: bardelliMundoSource.about?.images, mural: bardelliMundoSource.about?.mural,
+    visitedDestinations: undefined, tagline: "Viagens personalizadas · Planejamento com cuidado",
+    badge: { value: "Desde 2008", label: "Bardelli Viagens" } },
+  featuredExperience: bardelliMundoSource.featuredExperience ? {
+    ...bardelliMundoSource.featuredExperience, kicker: "DESCUBRA A RIVIERA MAYA",
+    title: "Parques e hotéis Xcaret para a sua próxima viagem",
+    description: "Converse com a Bardelli Viagens para conhecer as possibilidades de parques, hotéis e experiências Xcaret e planejar uma viagem de acordo com suas preferências.",
+    highlights: ["Parques e hotéis", "Famílias, casais e amigos", "Planejamento personalizado"],
+  } : undefined,
+  authority: bardelliMundoSource.authority ? { ...bardelliMundoSource.authority,
+    companies: bardelliMundoSource.authority.companies ? { ...bardelliMundoSource.authority.companies,
+      title: "Planeje seu próximo cruzeiro com a Bardelli Viagens." } : undefined } : undefined,
+  differentials: [
+    { title: "Conversa próxima", text: "O planejamento começa por entender quem vai viajar e o que deseja viver.", icon: "consultivo" },
+    { title: "Experiência no turismo", text: "Barbara Bardelli reúne 33 anos de experiência no turismo.", icon: "conferido" },
+    { title: "Viagens personalizadas", text: "Destinos, hospedagens e experiências escolhidos conforme o perfil de cada viajante.", icon: "fornecedores" },
+    { title: "Acompanhamento", text: "Orientação antes e durante a viagem, com suporte por WhatsApp.", icon: "acompanhamento" },
+  ],
+  conciergeSteps: ["Uma conversa sobre seus planos, preferências e viajantes.", "Seleção de destinos, hospedagens e serviços.", "Apresentação das opções e ajustes antes das reservas.", "Orientação antes e durante a viagem."],
+  faq: [
+    { q: "Como funciona o planejamento?", a: "Começamos por uma conversa sobre seu perfil, seu ritmo e o que deseja viver. A partir disso, montamos uma proposta personalizada." },
+    { q: "Quais viagens a Bardelli planeja?", a: "Viagens de lazer para famílias, casais e grupos de amigos, incluindo parques temáticos, resorts, cruzeiros e destinos nacionais e internacionais." },
+    { q: "Quem cuida da minha viagem?", a: "Barbara Bardelli, à frente da agência fundada em 2008, reúne 33 anos de experiência no turismo." },
+    { q: "Há suporte durante a viagem?", a: "Sim. O atendimento acompanha você antes e durante a viagem, com suporte por WhatsApp." },
+  ],
+  copy: { ...bardelliMundoSource.copy,
+    modules: { title: "Cada viagem começa por quem vai vivê-la", subtitle: "Planejamento personalizado e atenção a cada escolha.", cta: "Conversar com a Barbara" },
+    destinations: { title: "Destinos para novas histórias", subtitle: "Possibilidades para famílias, casais e grupos de amigos." },
+    differentials: { title: "O cuidado da Bardelli em cada etapa", subtitle: "Experiência, planejamento e atenção aos detalhes." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa à viagem", subtitle: "Você conhece as opções e ajusta os detalhes com a Barbara antes de reservar.", cta: "Conversar com a Barbara" },
+    avaliacoes: { title: "Experiências de quem viaja com a Bardelli" },
+    testimonials: undefined,
+    newsletter: { title: "Novidades da Bardelli Viagens", subtitle: "Converse com a Barbara sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
+  },
+  footer: { ...BARDELLI_OFFICIAL_PROFILE.footer },
+  socialStrip: BARDELLI_OFFICIAL_PROFILE.socialStrip ? JSON.parse(JSON.stringify(BARDELLI_OFFICIAL_PROFILE.socialStrip)) : undefined,
+  testimonials: undefined, inspirationDialog: undefined,
+  seo: { title: "Prévia para revisão — Bardelli Viagens", description: "Nova prévia da Bardelli Viagens com a estrutura do Mundo em Cores." },
+};
+ADS_PREVIEW_FIXTURES[BARDELLI_MUNDO_PREVIEW_JOB_ID] = {
+  jobId: BARDELLI_MUNDO_PREVIEW_JOB_ID,
+  info: { ...BARDELLI_PRESENTATION_INFO, hostname: BARDELLI_MUNDO_PREVIEW_HOST },
+  profile: BARDELLI_MUNDO_PREVIEW_PROFILE,
+  notice: "Bardelli Viagens · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação",
+  documentTitle: "Prévia — Bardelli Viagens", realAgency: true,
+  pages: { xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES },
+    resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, editorial: true },
+};
