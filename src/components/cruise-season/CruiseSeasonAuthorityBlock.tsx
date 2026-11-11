@@ -24,7 +24,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
     const el = listRef.current;
     if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
   };
-  const arrowCls = 'inline-flex h-11 w-11 items-center justify-center rounded-full border border-background/30 bg-background/10 text-background transition hover:bg-background hover:text-[hsl(var(--wl-navy))] disabled:pointer-events-none disabled:opacity-30';
+  const arrowCls = 'h-11 w-11 items-center justify-center rounded-full border border-background/40 bg-[hsl(var(--wl-navy))] text-background transition hover:bg-background hover:text-[hsl(var(--wl-navy))] disabled:pointer-events-none disabled:opacity-0';
   return (
     <div className={`${container} pt-14 pb-10 md:pt-20 md:pb-4`} data-testid="cruise-season-authority">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -37,10 +37,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
         </div>
         <a href={agencySiteHref(SEASON_PATH)} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 lg:self-end">Ver os oito navios <ArrowRight className="h-4 w-4" aria-hidden="true" /></a>
       </div>
-      <div className="mt-8 flex items-center justify-end gap-2">
-        <button type="button" aria-label="Navios anteriores" className={arrowCls} disabled={edges.start} onClick={() => scrollBy(-1)}><ChevronLeft className="h-5 w-5" /></button>
-        <button type="button" aria-label="Próximos navios" className={arrowCls} disabled={edges.end} onClick={() => scrollBy(1)}><ChevronRight className="h-5 w-5" /></button>
-      </div>
+      <div className="relative mt-8">
       <ul
         ref={listRef}
         onScroll={update}
@@ -51,7 +48,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
         onClickCapture={e => { if (drag.current?.moved) { e.preventDefault(); e.stopPropagation(); } drag.current = null; }}
         onDragStart={e => e.preventDefault()}
         aria-label="Galeria dos oito navios"
-        className="mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 md:gap-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 md:gap-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {SEASON_SHIPS.map(ship => {
           const src = seasonCardPhoto(ship);
@@ -73,6 +70,9 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
           );
         })}
       </ul>
+        <button type="button" aria-label="Navios anteriores" className={`${arrowCls} absolute left-0 top-[calc(50%-1.5rem)] z-10 hidden -translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.start} onClick={() => scrollBy(-1)}><ChevronLeft className="h-5 w-5" /></button>
+        <button type="button" aria-label="Próximos navios" className={`${arrowCls} absolute right-0 top-[calc(50%-1.5rem)] z-10 hidden translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.end} onClick={() => scrollBy(1)}><ChevronRight className="h-5 w-5" /></button>
+      </div>
       <p className="mt-4 text-xs text-background/60">Imagens de divulgação e Wikimedia Commons · {Array.from(new Set(SEASON_SHIPS.map(s => s.lineName))).join(' · ')}</p>
       <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
         <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o navio ideal para você?</p>
