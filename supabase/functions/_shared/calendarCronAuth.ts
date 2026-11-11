@@ -30,7 +30,7 @@ export function isAuthorizedInternalCall(
 
 /** Reads the expected cron secret from the vault. Returns null on any failure. */
 export async function fetchCronSecret(
-  supabase: { rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> },
+  supabase: { rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: unknown }> },
 ): Promise<string | null> {
   try {
     const { data, error } = await supabase.rpc("get_calendar_cron_secret");
