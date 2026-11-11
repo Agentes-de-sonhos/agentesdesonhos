@@ -1774,3 +1774,10 @@ body[data-booking-selection-bar] {
 main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 /* Com a barra de abas no topo, o painel do funil não força 100% da tela extra. */
 .min-h-screen:has(> main [data-testid="kanban-scroll-area"]) { min-height: 0; }
+
+/* O Mundo em Cores: espaçamento uniforme (72px por lado) e cruzeiros compactos. */
+.wl-mundo .wl-alt-surface > #experiencia-xcaret { padding-top: 0; padding-bottom: 0; }
+@media (min-width: 768px) {
+  .wl-mundo .wl-alt-surface > #autoridade > [data-testid="cruise-season-authority"] { padding-bottom: 2rem; }
+  .wl-mundo .wl-alt-surface > #autoridade > [data-testid="cruise-season-authority"] + div { padding-top: 2rem; }
+}

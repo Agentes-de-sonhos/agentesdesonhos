@@ -24,7 +24,6 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
     [publicOffers],
   );
   const pageHref = agencySiteHref(`${NOVEMBER_PAGE}#oportunidades`);
-  const radarHref = agencySiteHref(`${NOVEMBER_PAGE}#radar`);
 
   return (
     <section id="ofertas-novembro" className="scroll-mt-24">
@@ -75,18 +74,8 @@ export function NovemberHomeTeaser({ hostname, container, heading }: { hostname:
           <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
         </Button>
 
-        <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 lg:flex-row lg:items-center">
-            <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Compass aria-hidden="true" /></span>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">
-                <strong className="block text-base text-foreground">Não encontrou o destino ou a data que procurava?</strong>
-                Ative o Radar de Oportunidades e nossa equipe busca condições<br className="hidden md:inline" /> para o seu destino, período e orçamento.
-              </p>
-            </div>
-            <Button asChild className="shrink-0 self-start lg:self-auto"><a href={radarHref}>Ativar Radar de Oportunidades</a></Button>
-          </div>
-          <Button asChild variant="outline" className="hidden shrink-0 self-start md:inline-flex">
+        <div className="mt-10 hidden justify-center sm:flex">
+          <Button asChild size="lg" className="h-12 px-8 text-base font-semibold">
             <a href={pageHref}>Ver todas as ofertas <ArrowRight aria-hidden="true" /></a>
           </Button>
         </div>
