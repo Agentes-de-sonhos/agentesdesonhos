@@ -1798,3 +1798,6 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 /* Innovati isolated review: confirmed blue/orange identity, source layout. */
 .wl-editorial.wl-mundo.wl-innovati-mundo { --primary: 214 57% 34%; --primary-foreground: 0 0% 100%; --foreground: 214 25% 14%; --muted-foreground: 214 10% 38%; --border: 214 20% 88%; --mc: #254F86; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #EEF3F9 100%); }
 .wl-editorial.wl-mundo.wl-innovati-mundo .wl-inspiration-cta { background-color: #F98D0D; color: #1A1A1A; }
+
+/* Shopping review: neutral tokens pending confirmed agency palette. */
+.wl-editorial.wl-mundo.wl-shopping-mundo { --primary: 222 47% 11%; --primary-foreground: 0 0% 100%; --wl-navy: 222 47% 11%; --foreground: 222 30% 12%; --muted-foreground: 222 10% 38%; --border: 240 8% 88%; --mc: #0F1729; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6F6F8 100%); }
