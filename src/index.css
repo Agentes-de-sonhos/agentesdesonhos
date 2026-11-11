@@ -1784,3 +1784,6 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   .wl-mundo .wl-alt-surface > #autoridade > [data-testid="cruise-season-authority"] { padding-bottom: 2rem; }
   .wl-mundo .wl-alt-surface > #autoridade > [data-testid="cruise-season-authority"] + div { padding-top: 2rem; }
 }
+
+/* Arena preview: source layout, confirmed black-and-white brand. */
+.wl-editorial.wl-mundo.wl-arena { --primary: 0 0% 0%; --wl-navy: 0 0% 5%; --foreground: 0 0% 12%; --muted-foreground: 0 0% 40%; --border: 0 0% 90%; --mc: #000000; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F4F4F4 100%); }
