@@ -49,10 +49,9 @@ export const INITIAL_GRID_TEMPLATES: Record<string, string> = {
 export const INITIAL_GRID_FALLBACK = "lg:grid-cols-[repeat(auto-fit,minmax(0,minmax(9rem,1fr)))]";
 
 /**
- * Classes de grade do bloco inicial: DUAS colunas já no celular (para que
- * qualquer serviço caiba em no máximo quatro linhas, com pares como
- * Adultos/Crianças lado a lado), 2 no tablet e template único no desktop.
+ * Classes de grade do bloco inicial: uma coluna no celular para acomodar
+ * destinos e calendários, duas no tablet e template único no desktop.
  */
 export function initialGridClass(serviceKey: string): string {
-  return `grid-cols-2 md:grid-cols-2 ${INITIAL_GRID_TEMPLATES[serviceKey] ?? INITIAL_GRID_FALLBACK}`;
+  return `grid-cols-1 md:grid-cols-2 ${INITIAL_GRID_TEMPLATES[serviceKey] ?? INITIAL_GRID_FALLBACK}`;
 }

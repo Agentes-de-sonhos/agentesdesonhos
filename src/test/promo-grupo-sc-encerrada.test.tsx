@@ -290,7 +290,7 @@ describe("Planos — promoção encerrada para novas contratações", () => {
     subState = makeSubscriptionCtx("start", null);
     await renderPlanos();
     expect(screen.queryByText(/Grupo SC/i)).toBeNull();
-    expect(screen.getByText("Assinar Premium")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Começar teste de 15 dias grátis" })).toBeEnabled();
   });
 
   it("promoção expirada volta às opções tradicionais sem cobrança automática", async () => {
@@ -310,7 +310,7 @@ describe("Planos — promoção encerrada para novas contratações", () => {
     subState = makeSubscriptionCtx("start", null, { loading: true });
     await renderPlanos();
     const buttons = screen.getAllByText("Carregando…");
-    expect(buttons.length).toBe(2);
+    expect(buttons.length).toBe(1);
     fireEvent.click(buttons[0].closest("button")!);
     expect(invokeMock).not.toHaveBeenCalled();
   });
@@ -367,4 +367,12 @@ describe("UpgradeDialog — promoção encerrada para novas contratações", () 
     await renderUpgradeDialog();
     expect(screen.getByText("Plano Atual")).toBeTruthy();
   });
+});
+
+it("popup Premium informa o mesmo preço e teste grátis da página Planos", async () => {
+  await renderUpgradeDialog();
+  expect(screen.getByText("R$ 196")).toBeInTheDocument();
+  expect(screen.queryByText("R$ 98")).not.toBeInTheDocument();
+  expect(screen.getByText("15 dias de teste grátis · cancele quando quiser")).toBeInTheDocument();
+  expect(invokeMock).not.toHaveBeenCalled();
 });

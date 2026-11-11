@@ -9,6 +9,7 @@ import { Component, type ReactNode, useEffect } from "react";
 import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { isSiteLabAdminPath, SITELAB_BASE_PATH } from "@/lib/sitelabModels";
 
 /** Contador de instâncias do WorkspaceProvider durante o teste. */
@@ -35,6 +36,7 @@ vi.mock("@/lib/sitelabAccess", async (importOriginal) => {
 
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
+    channel: vi.fn(() => { throw new Error("SiteLab must not subscribe to real agency requests"); }),
     rpc: vi.fn(async () => ({ data: null, error: null })),
     from: vi.fn(() => ({
       select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }),
@@ -160,6 +162,7 @@ async function renderAdminEntry(wrapInRouter = false, catchErrors = false) {
 describe("SiteLab /gestao — árvore autenticada com um único router", { timeout: 30000 }, () => {
   beforeEach(() => {
     workspaceMounts.count = 0;
+    vi.mocked(supabase.channel).mockClear();
     setPath(`${SITELAB_BASE_PATH}/gestao`);
   });
 
@@ -181,6 +184,7 @@ describe("SiteLab /gestao — árvore autenticada com um único router", { timeo
     });
     expect(screen.getByTestId("agency-admin-layout")).toBeInTheDocument();
     expect(workspaceMounts.count).toBe(1);
+    expect(supabase.channel).not.toHaveBeenCalled();
     expect(errors.map(String).join("\n")).not.toMatch(/cannot render a <Router> inside/i);
     /* O fallback do ErrorBoundary global nunca aparece. */
     expect(screen.queryByText("Algo deu errado")).toBeNull();
@@ -195,6 +199,7 @@ describe("SiteLab /gestao — árvore autenticada com um único router", { timeo
       { timeout: 15000 },
     );
     expect(workspaceMounts.count).toBe(1);
+    expect(supabase.channel).not.toHaveBeenCalled();
     expect(window.location.pathname.startsWith(`${SITELAB_BASE_PATH}/gestao`)).toBe(true);
   });
 

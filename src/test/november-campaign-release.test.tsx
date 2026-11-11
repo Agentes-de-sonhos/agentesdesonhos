@@ -10,7 +10,8 @@ vi.mock("@/components/whitelabel/AgencyRequestCenter", () => ({ AgencyRequestCen
 vi.mock("@/components/campaign/OpportunityRadar", () => ({ OpportunityRadar: () => null }));
 vi.mock("@/components/campaign/FeaturedOffers", () => ({ FeaturedOffers: ({ offers }: { offers: Array<{ id: string }> }) => <output data-testid="offer-ids">{JSON.stringify(offers.map(o => o.id))}</output> }));
 
-import NovemberCampaignPreview from "@/pages/whitelabel/NovemberCampaignPreview";
+import { MemoryRouter } from "react-router-dom";
+import NovemberCampaignPreview, { NovemberNavigationBoundary } from "@/pages/whitelabel/NovemberCampaignPreview";
 
 describe("functional Mundo November campaign", () => {
   beforeEach(() => {
@@ -34,5 +35,30 @@ describe("functional Mundo November campaign", () => {
     render(<NovemberCampaignPreview />);
     fireEvent.click(screen.getByRole("button", { name: "Solicitar atendimento" }));
     expect(capture.request).toHaveBeenCalledWith(expect.objectContaining({ hostname: "omundoemcores.com.br", initialService: "pacotes" }));
+  });
+});
+
+describe("isolated campaign navigation", () => {
+  it.each(["/", "/ofertas", "/resorts-brasil"])("reloads the app when leaving for %s", (pathname) => {
+    const original = window.location;
+    const replace = vi.fn();
+    Object.defineProperty(window, "location", { configurable: true, value: { ...original, replace } });
+    try {
+      render(<MemoryRouter initialEntries={[pathname]}><NovemberNavigationBoundary /></MemoryRouter>);
+      expect(replace).toHaveBeenCalledWith(window.location.href);
+    } finally {
+      Object.defineProperty(window, "location", { configurable: true, value: original });
+    }
+  });
+  it("does not reload for campaign filters or its anchors", () => {
+    const original = window.location;
+    const replace = vi.fn();
+    Object.defineProperty(window, "location", { configurable: true, value: { ...original, replace } });
+    try {
+      render(<MemoryRouter initialEntries={["/oportunidades-novembro/?__agency_host=omundoemcores.com.br#ofertas"]}><NovemberNavigationBoundary /></MemoryRouter>);
+      expect(replace).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(window, "location", { configurable: true, value: original });
+    }
   });
 });

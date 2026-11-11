@@ -113,8 +113,8 @@ describe("configurador (componente)", () => {
     expect(invoke).not.toHaveBeenCalled();
   });
 
-  async function reachContact() {
-    render(<UniversalTicketsConfigurator hostname="www.destinoscomaju.com.br" />);
+  async function reachContact(hostname = "www.destinoscomaju.com.br") {
+    render(<UniversalTicketsConfigurator hostname={hostname} />);
     fireEvent.click(screen.getByText("Universal Studios Florida"));
     fireEvent.click(screen.getByText("Universal Islands of Adventure"));
     fireEvent.click(screen.getByRole("button", { name: "Continuar" }));
@@ -132,6 +132,13 @@ describe("configurador (componente)", () => {
     fireEvent.change(screen.getByLabelText("WhatsApp"), { target: { value: "11999999999" } });
     fireEvent.click(screen.getByLabelText("Autorizo o contato"));
   }
+
+  it.each(["omundoemcores.com.br", "100limites.tur.br"])("consentimento não cita outra agência em %s", async (hostname) => {
+    await reachContact(hostname);
+    expect(screen.getByText("Autorizo a agência a entrar em contato sobre esta cotação.")).toBeInTheDocument();
+    expect(screen.queryByText(/Autorizo a Destinos com a Ju/)).toBeNull();
+    expect(invoke).not.toHaveBeenCalled();
+  });
 
   it("sucesso só após retorno positivo", async () => {
     invoke.mockResolvedValue({ data: { success: true }, error: null });

@@ -168,6 +168,24 @@ export function useSupplierTerms(operatorId?: string | null, enabled = true) {
 }
 
 /** Grava a regra financeira confirmada (snapshot) de um serviço do file. */
+/** Supplier identity only: usable after conversion without changing financial rules. */
+export function useServiceSupplier(fileId?: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { serviceId: string; operatorId: string | null; supplierName: string | null }) => {
+      const { error } = await sb.rpc("travel_file_service_set_supplier", {
+        _service_id: input.serviceId,
+        _operator_id: input.operatorId,
+        _supplier_name: input.supplierName,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["travel-file"] });
+    },
+  });
+}
+
 export function useServiceFinancialRule(fileId?: string) {
   const queryClient = useQueryClient();
   return useMutation({

@@ -4,13 +4,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Globe, ArrowRight, X } from "lucide-react";
 import { opportunityDeepLink, useAgencySiteRequestAlerts } from "@/hooks/useAgencySiteRequestAlerts";
+import { useWorkspace } from "@/workspace/WorkspaceProvider";
 import { useAdminNav } from "@/lib/agencyAdminNav";
 
-/**
- * Instância única por página: o painel white label monta este aviso dentro de
- * cada aba do workspace (para ter contexto de rota), e sem esse controle a
- * mesma solicitação abriria vários pop-ups e assinaturas em paralelo.
- */
+/** Legacy app mounts share one routed alert. The agency workspace mounts
+ * WorkspaceSiteRequestAlert once above its tab routers instead. */
 let activeOwner: symbol | null = null;
 
 export function NewSiteRequestAlert() {
@@ -31,7 +29,7 @@ export function NewSiteRequestAlert() {
   }, []);
 
   if (!owner) return null;
-  return <SiteRequestAlertDialog />;
+  return <RoutedSiteRequestAlert />;
 }
 
 function formatDateTime(iso: string) {
@@ -47,8 +45,18 @@ function formatDateTime(iso: string) {
  * pelo site da agência — inclusive dentro da própria Gestão de Oportunidades.
  * Aparece uma única vez por solicitação.
  */
-function SiteRequestAlertDialog() {
+function RoutedSiteRequestAlert() {
   const navigate = useNavigate();
+  return <SiteRequestAlertDialog navigate={navigate} />;
+}
+
+/** Tab changes cannot remove the subscription or navigate a hidden router. */
+export function WorkspaceSiteRequestAlert() {
+  const workspace = useWorkspace();
+  return <SiteRequestAlertDialog navigate={(href) => workspace?.openOrActivateTab(href, "Oportunidades")} />;
+}
+
+function SiteRequestAlertDialog({ navigate }: { navigate: (href: string) => void }) {
   const nav = useAdminNav();
   const { current, pending, dismiss } = useAgencySiteRequestAlerts();
   const chimedRef = useRef<string | null>(null);

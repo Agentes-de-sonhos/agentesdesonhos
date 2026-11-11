@@ -501,7 +501,7 @@ ${items.map((n, i) => `${i + 1}. Título: ${n.titulo_original}\nConteúdo: ${(n.
       method: "POST",
       headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         messages: [
           { role: "system", content: "Curador editorial. Responda apenas com JSON válido." },
           { role: "user", content: prompt },

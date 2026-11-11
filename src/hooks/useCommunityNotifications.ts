@@ -41,9 +41,9 @@ export function useCommunityNotifications() {
       if (actorIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("id, name")
-          .in("id", actorIds);
-        names = new Map((profiles || []).map((p: any) => [p.id as string, (p.name as string) || ""]));
+          .select("user_id, name")
+          .in("user_id", actorIds);
+        names = new Map((profiles || []).map((p: any) => [p.user_id as string, (p.name as string) || ""]));
       }
 
       return rows.map((row) => ({

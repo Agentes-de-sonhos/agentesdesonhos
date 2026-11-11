@@ -135,7 +135,7 @@ B) Sugestões para conferência: itens comuns que costumam não estar incluídos
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         messages: [
           { role: "system", content: systemPrompt },
           {
@@ -191,7 +191,7 @@ B) Sugestões para conferência: itens comuns que costumam não estar incluídos
       `[${traceId}] contract-scope-ai user=${userId} sale=${saleId} field=${field} services=${services.length} items=${items.length} model=google/gemini-2.5-flash`,
     );
 
-    return new Response(JSON.stringify({ field, items, model: "google/gemini-2.5-flash" }), {
+    return new Response(JSON.stringify({ field, items, model: "google/gemini-3.8-flash" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

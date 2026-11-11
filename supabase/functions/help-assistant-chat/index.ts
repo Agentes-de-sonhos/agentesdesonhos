@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 const LOVABLE_AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-2.5-flash";
+const MODEL = "google/gemini-3.8-flash";
 const MAX_MESSAGE_LEN = 1000;
 const MAX_HISTORY = 8;
 const TOP_K = 8;

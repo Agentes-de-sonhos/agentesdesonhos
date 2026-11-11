@@ -998,7 +998,11 @@ export default function AgencySiteHome({
       case "modules":
         {
         if (profile.featuredExperience?.enabled) {
-          return <AgencyFeaturedExperienceSection key={key} config={profile.featuredExperience} container={container} />;
+          return (
+            <div key={key} id={profile.featuredExperience.id === "campanhas" ? undefined : "campanhas"}>
+              <AgencyFeaturedExperienceSection config={profile.featuredExperience} container={container} />
+            </div>
+          );
         }
         const copy = copyFor("modules");
         if (editorial) {

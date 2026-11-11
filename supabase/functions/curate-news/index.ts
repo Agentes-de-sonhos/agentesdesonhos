@@ -155,7 +155,7 @@ ${newsItems.map((n, i) => `${i + 1}. Título: ${n.titulo_original}\nConteúdo: $
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
+      model: "google/gemini-3.8-flash",
       messages: [
         { role: "system", content: "Você é um curador de notícias do trade turístico brasileiro. Responda apenas com JSON válido." },
         { role: "user", content: prompt },

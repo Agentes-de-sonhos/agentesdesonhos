@@ -318,7 +318,7 @@ Deno.serve(async (req) => {
       userContent.push({ type: "image_url", image_url: { url: dataUrl } });
     }
 
-    log("sent_to_ai", { model: "google/gemini-2.5-pro", hasImage: !!fileBase64, hasText: !!text });
+    log("sent_to_ai", { model: "google/gemini-3.8-flash", hasImage: !!fileBase64, hasText: !!text });
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -327,7 +327,7 @@ Deno.serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-3.8-flash",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userContent },

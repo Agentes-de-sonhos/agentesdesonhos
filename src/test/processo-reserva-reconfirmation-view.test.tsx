@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import type { ReactNode } from "react";
 
 import ProcessoReserva from "@/pages/ProcessoReserva";
 import { assessTravelFileReadiness } from "@/lib/travelFileConversion";
+
+let deniedPermissions: string[] = [];
 
 const mocks = vi.hoisted(() => ({
   markViewed: vi.fn().mockResolvedValue(undefined),
@@ -14,6 +16,10 @@ const mocks = vi.hoisted(() => ({
   saveService: vi.fn(),
   addNote: vi.fn(),
   deleteNote: vi.fn(),
+}));
+
+vi.mock("@/components/reservas/ServiceFinancialRuleDialog", () => ({
+  ServiceFinancialRuleDialog: () => <div>Editor de fornecedor aberto</div>,
 }));
 
 vi.mock("@/hooks/useAuth", () => ({
@@ -27,7 +33,7 @@ vi.mock("@/components/layout/DashboardLayout", () => ({
 }));
 
 vi.mock("@/hooks/usePermissions", () => ({
-  usePermissions: () => ({ can: () => true }),
+  usePermissions: () => ({ can: (permission: string) => !deniedPermissions.includes(permission) }),
 }));
 
 vi.mock("@/lib/agencyAdminNav", () => ({
@@ -211,6 +217,9 @@ function renderPage() {
 describe("ProcessoReserva — reconfirmação V2 sem financeiro pré-venda", () => {
   beforeEach(() => {
     Object.values(mocks).forEach((mock) => mock.mockClear());
+    DATA.file = FILE;
+    DATA.services = SERVICES;
+    deniedPermissions = [];
   });
   afterEach(cleanup);
 
@@ -238,4 +247,54 @@ describe("ProcessoReserva — reconfirmação V2 sem financeiro pré-venda", () 
     expect(screen.queryByText(/Econômica/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Confirmar venda e iniciar operação/i })).not.toBeDisabled();
   });
+  it("reserva manual permite registrar custo e comissão sem alterar os demais valores", async () => {
+    DATA.file = { ...FILE, origin: "manual" };
+    renderPage();
+    const cost = screen.getAllByLabelText("Custo")[0];
+    const commission = screen.getAllByLabelText("Comissão")[0];
+    fireEvent.change(cost, { target: { value: "1200" } });
+    fireEvent.blur(cost);
+    await waitFor(() => expect(mocks.saveService).toHaveBeenCalledWith({
+      id: SERVICES[0].id,
+      financials: { reconfirmed_amount: 20000, sold_amount: 20000, cost_amount: 1200, commission_amount: null },
+    }));
+    fireEvent.change(commission, { target: { value: "300" } });
+    fireEvent.blur(commission);
+    await waitFor(() => expect(mocks.saveService).toHaveBeenCalledWith({
+      id: SERVICES[0].id,
+      financials: { reconfirmed_amount: 20000, sold_amount: 20000, cost_amount: null, commission_amount: 300 },
+    }));
+  });
+
+  it("respeita permissões separadas de custo e comissão", () => {
+    DATA.file = { ...FILE, origin: "manual" };
+    deniedPermissions = ["reservations.financial.manage", "financial.commissions.manage"];
+    renderPage();
+    expect(screen.getAllByLabelText("Custo")[0]).toHaveAttribute("readonly");
+    expect(screen.getAllByLabelText("Comissão")[0]).toHaveAttribute("readonly");
+  });
+
+  it("permite informar fornecedor faltante depois de confirmar a venda", () => {
+    DATA.file = { ...FILE, status: "in_operation", operation_id: "op-1" };
+    DATA.services = [{ ...SERVICES[0], supplier_name: null, operator_id: null }];
+    renderPage();
+    fireEvent.click(screen.getByRole("button", { name: "Adicionar fornecedor" }));
+    expect(screen.getByText("Editor de fornecedor aberto")).toBeInTheDocument();
+  });
+
+  it("oferece confirmar fornecedor herdado do orçamento que ainda não foi gravado no serviço", () => {
+    DATA.file = { ...FILE, status: "in_operation", operation_id: "op-1" };
+    DATA.services = [{ ...SERVICES[0], supplier_name: null, operator_id: null,
+      snapshot: { supplier_name: "Operadora do orçamento" } }];
+    renderPage();
+    expect(screen.getByRole("button", { name: "Confirmar fornecedor" })).toBeInTheDocument();
+  });
+
+  it("não oferece fornecedor para quem não pode gerenciar reservas", () => {
+    deniedPermissions = ["reservations.manage"];
+    DATA.services = [{ ...SERVICES[0], supplier_name: null, operator_id: null }];
+    renderPage();
+    expect(screen.queryByRole("button", { name: "Adicionar fornecedor" })).not.toBeInTheDocument();
+  });
+
 });

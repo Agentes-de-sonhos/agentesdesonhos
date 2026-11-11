@@ -28,6 +28,7 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 import SurveyPreview from "./pages/SurveyPreview";
 import { WorkspaceGate } from "@/workspace/WorkspaceGate";
 import { AppUpdateModal } from "./components/common/AppUpdateModal";
+import { LegacyCrmRedirect } from "@/components/routing/LegacyCrmRedirect";
 import { AgencyDomainGate } from "@/components/routing/AgencyDomainGate";
 import { DemoDatesRefresher } from "@/components/demo/DemoDatesRefresher";
 
@@ -394,7 +395,7 @@ const App = () => {
               <Route path="/onboarding" element={<Onboarding />} />
               {/* Rota legada: /crm foi substituída por /gestao-clientes/funil.
                   Redireciona com replace para não poluir o histórico nem criar loop. */}
-              <Route path="/crm" element={<Navigate to="/gestao-clientes/funil" replace />} />
+              <Route path="/crm" element={<LegacyCrmRedirect />} />
               <Route path="/financeiro" element={<Financeiro />} />
               <Route path="/hotel-raio-x" element={<HotelRaioX />} />
               <Route path="/requisitos-viagem" element={<RequisitosViagem />} />

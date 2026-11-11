@@ -371,7 +371,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
           <input type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           <label className="mt-6 flex items-start gap-3 text-sm leading-6 text-muted-foreground">
             <Checkbox checked={consent} onCheckedChange={(v) => setConsent(v === true)} className="mt-1" aria-label="Autorizo o contato" />
-            Autorizo a Destinos com a Ju a entrar em contato sobre esta cotação.
+            {isJu ? "Autorizo a Destinos com a Ju a entrar em contato sobre esta cotação." : "Autorizo a agência a entrar em contato sobre esta cotação."}
           </label>
           <ErrorText>{stepError[6]}</ErrorText>
           {state === "error" && (

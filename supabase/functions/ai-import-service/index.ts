@@ -426,7 +426,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: serviceType === "flight" ? "google/gemini-2.5-pro" : "google/gemini-2.5-flash",
+        model: serviceType === "flight" ? "google/gemini-3.8-flash" : "google/gemini-3.8-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userParts },

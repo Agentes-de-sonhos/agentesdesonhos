@@ -1,0 +1,37 @@
+import { beforeEach, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { FlightAutoImport } from "@/components/trip/FlightAutoImport";
+import { mergeFullAirfareDefaults } from "@/lib/tripFlightImport";
+const { invoke } = vi.hoisted(() => ({ invoke: vi.fn() }));
+vi.mock("@/integrations/supabase/client", () => ({ supabase: { functions: { invoke } } }));
+vi.mock("@/hooks/use-toast", () => ({ useToast: () => ({ toast: vi.fn() }) }));
+vi.mock("@/lib/pdfText", () => ({ extractPdfText: vi.fn(async () => "Bilhete sintético") }));
+const raw = { voos: [{ ordem: 1, numero_voo: "XX123", origem_codigo: "GRU", destino_codigo: "MVD" }], reserva: { localizador: "TEST12" }, passageiros: [{ nome: "Pessoa Teste", bilhete: "0001234567890" }] };
+beforeEach(() => { cleanup(); vi.clearAllMocks(); invoke.mockResolvedValue({ data: raw, error: null }); });
+it.each(["application/pdf", "image/png"])("preserva dados completos e arquivo %s na confirmação", async (type) => {
+  const onImport = vi.fn();
+  const { container } = render(<FlightAutoImport onImport={onImport} />);
+  const file = new File(["synthetic"], type === "application/pdf" ? "teste.pdf" : "teste.png", { type });
+  Object.defineProperty(file, "arrayBuffer", { value: async () => new Uint8Array([1, 2, 3]).buffer });
+  fireEvent.change(container.querySelector('input[type="file"]')!, { target: { files: [file] } });
+  fireEvent.click(screen.getByRole("button", { name: "Extrair com IA" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Preencher Campos Automaticamente" }));
+  expect(onImport).toHaveBeenCalledWith(expect.any(Object), raw, file);
+  const [, capturedRaw, capturedFile] = onImport.mock.calls[0];
+  const defaults = mergeFullAirfareDefaults({}, capturedRaw, capturedFile);
+  expect(defaults.locator_code).toBe("TEST12");
+  expect(defaults.passengers[0].name).toBe("Pessoa Teste");
+  expect(defaults.passengers[0].document).toContain("0001234567890");
+  expect(defaults.__importedFiles).toEqual([file]);
+});
+it("colar texto não anexa arquivo selecionado anteriormente", async () => {
+  const onImport = vi.fn();
+  const { container } = render(<FlightAutoImport onImport={onImport} />);
+  fireEvent.change(container.querySelector('input[type="file"]')!, { target: { files: [new File(["x"], "antigo.pdf", { type: "application/pdf" })] } });
+  await userEvent.click(screen.getByRole("tab", { name: "Colar Texto" }));
+  fireEvent.change(screen.getByRole("textbox"), { target: { value: "Novo bilhete sintético" } });
+  fireEvent.click(screen.getByRole("button", { name: "Extrair Itinerário com IA" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Preencher Campos Automaticamente" }));
+  expect(onImport).toHaveBeenCalledWith(expect.any(Object), raw, null);
+});
