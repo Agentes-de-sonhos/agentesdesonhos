@@ -23,7 +23,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
           <li key={ship.shipSlug} className="w-[78%] shrink-0 snap-start sm:w-[45%] md:w-auto">
             <a href={agencySiteHref(cruiseShipPath(ship))} className="group block overflow-hidden rounded-2xl bg-background shadow-lg ring-1 ring-background/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
               <div className="aspect-[4/3] overflow-hidden">
-                <img src={ship.assets[ship.hero.image] || ship.hero.image} alt={ship.hero.alt} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img src={ship.assets[ship.hero.image] || ship.hero.image} alt={ship.hero.alt} loading="lazy" decoding="async" referrerPolicy="no-referrer" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
               </div>
               <div className="flex items-center justify-between gap-2 px-4 py-3.5">
                 <div className="min-w-0">
