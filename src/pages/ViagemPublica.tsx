@@ -1882,6 +1882,114 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
     }
   };
 
+  // All hooks must run before the invalid-link/password/data guards.
+  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
+  const startDate = tripData ? parseLocal(tripData.start_date) : new Date(0);
+  const endDate = tripData ? parseLocal(tripData.end_date) : new Date(0);
+  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  // Sort by user-defined order_index (with creation-date fallback for legacy records)
+  const services = [...(tripData?.services || [])].sort(
+    (a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0)
+  );
+
+  // Group services by type (entries inside each group preserve order_index)
+  const grouped = services.reduce((acc, s) => {
+    if (!acc[s.service_type]) acc[s.service_type] = [];
+    acc[s.service_type].push(s);
+    return acc;
+  }, {} as Record<TripServiceType, TripService[]>);
+
+  // Tabs: respect user-defined ordering. Types not in TAB_ORDER are appended.
+  const userOrderedTypes = Array.from(
+    new Set(services.map((s) => s.service_type as TripServiceType))
+  );
+  const availableTabs = userOrderedTypes.filter((t) => grouped[t]?.length > 0);
+
+  const voucherCtx: VoucherAccessContext = {
+    slug: tripData?.slug,
+    shareToken: tripData?.share_token || token,
+    password: usedPassword,
+  };
+
+  // Exclusive accordion state — only one section open at a time
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const toggleSection = useCallback((key: string) => {
+    setOpenSection(prev => prev === key ? null : key);
+  }, []);
+
+  // Exclusive accordion for itinerary days
+  const [openDay, setOpenDay] = useState<string | null>(null);
+  const toggleDay = useCallback((key: string) => {
+    setOpenDay(prev => {
+      const next = prev === key ? null : key;
+      if (next) {
+        // When swapping from one open day to another, the Collapsible transition
+        // (close previous + open next) takes ~300 ms. Wait longer so the layout
+        // has fully settled before scrolling, ensuring the new day card snaps to
+        // the correct top position.
+        const delay = prev !== null && prev !== key ? 350 : 60;
+        setTimeout(() => {
+          const el = dayRefs.current[key];
+          if (el && typeof el.scrollIntoView === "function") {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, delay);
+      }
+      return next;
+    });
+  }, []);
+
+  // Index trip services by id so the V2 day-by-day can render a "Ver serviço"
+  // chip on activities linked via linked_trip_service_id.
+  const servicesById = useMemo(() => {
+    const map = new Map<string, TripService>();
+    services.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [services]);
+
+  // Service tapped from an itinerary activity chip — open in a dedicated
+  // overlay (Sheet on mobile / Dialog on desktop) to preserve the itinerary
+  // context. The wallet section accordion is left untouched on purpose.
+  const [activeService, setActiveService] = useState<TripService | null>(null);
+  const handleOpenService = useCallback((service: TripService) => {
+    setActiveService(service);
+  }, []);
+
+  // Quick-Nav now opens services & itinerary inside overlays instead of
+  // scrolling to long inline sections.
+  const [activeGroupType, setActiveGroupType] = useState<TripServiceType | null>(null);
+  const [itineraryOpen, setItineraryOpen] = useState(false);
+
+  // Fetch agency-wide wallet preferences (which modules to show)
+  useEffect(() => {
+    const embedded = (tripData as any)?.wallet_settings;
+    if (embedded && typeof embedded === "object") {
+      setWalletSettings({ ...DEFAULT_WALLET_SETTINGS, ...embedded });
+      return;
+    }
+    // Sem configuração entregue pelo acesso autorizado, usa o padrão do sistema.
+    setWalletSettings({ ...DEFAULT_WALLET_SETTINGS });
+  }, [(tripData as any)?.user_id, (tripData as any)?.wallet_settings]);
+
+  // Weather forecast per day for the itinerary header (cached via useTripWeather)
+  const { weatherByDate: itineraryWeather } = useTripWeather(
+    authenticated ? tripData?.destination : undefined,
+    startDate,
+    endDate,
+  );
+
+  // O payload público da carteira entrega o agente sem os campos de marca:
+  // as cores vêm do cadastro vivo quando o perfil recebido não as traz.
+  const walletBrand = usePublicAgencyBrand((tripData as any)?.user_id, {
+    enabled: !pickBrandProfile([agentProfile as any]),
+  });
+  useAgencyBrandTheme(
+    agencyBrandInputFromProfile(
+      (pickBrandProfile([agentProfile as any, walletBrand as any]) ?? agentProfile) as any,
+    ),
+  );
+
+
   if (!token && !hasPreData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30">
@@ -1996,111 +2104,6 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
 
   if (!tripData) return null;
 
-  const parseLocal = (d: string) => { const [y,m,day] = d.split('-').map(Number); return new Date(y, m-1, day); };
-  const startDate = parseLocal(tripData.start_date);
-  const endDate = parseLocal(tripData.end_date);
-  const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-  // Sort by user-defined order_index (with creation-date fallback for legacy records)
-  const services = [...(tripData.services || [])].sort(
-    (a: any, b: any) => (a.order_index ?? 0) - (b.order_index ?? 0)
-  );
-
-  // Group services by type (entries inside each group preserve order_index)
-  const grouped = services.reduce((acc, s) => {
-    if (!acc[s.service_type]) acc[s.service_type] = [];
-    acc[s.service_type].push(s);
-    return acc;
-  }, {} as Record<TripServiceType, TripService[]>);
-
-  // Tabs: respect user-defined ordering. Types not in TAB_ORDER are appended.
-  const userOrderedTypes = Array.from(
-    new Set(services.map((s) => s.service_type as TripServiceType))
-  );
-  const availableTabs = userOrderedTypes.filter((t) => grouped[t]?.length > 0);
-
-  const voucherCtx: VoucherAccessContext = {
-    slug: tripData.slug,
-    shareToken: tripData.share_token || token,
-    password: usedPassword,
-  };
-
-  // Exclusive accordion state — only one section open at a time
-  const [openSection, setOpenSection] = useState<string | null>(null);
-  const toggleSection = useCallback((key: string) => {
-    setOpenSection(prev => prev === key ? null : key);
-  }, []);
-
-  // Exclusive accordion for itinerary days
-  const [openDay, setOpenDay] = useState<string | null>(null);
-  const toggleDay = useCallback((key: string) => {
-    setOpenDay(prev => {
-      const next = prev === key ? null : key;
-      if (next) {
-        // When swapping from one open day to another, the Collapsible transition
-        // (close previous + open next) takes ~300 ms. Wait longer so the layout
-        // has fully settled before scrolling, ensuring the new day card snaps to
-        // the correct top position.
-        const delay = prev !== null && prev !== key ? 350 : 60;
-        setTimeout(() => {
-          const el = dayRefs.current[key];
-          if (el && typeof el.scrollIntoView === "function") {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-        }, delay);
-      }
-      return next;
-    });
-  }, []);
-
-  // Index trip services by id so the V2 day-by-day can render a "Ver serviço"
-  // chip on activities linked via linked_trip_service_id.
-  const servicesById = useMemo(() => {
-    const map = new Map<string, TripService>();
-    services.forEach((s) => map.set(s.id, s));
-    return map;
-  }, [services]);
-
-  // Service tapped from an itinerary activity chip — open in a dedicated
-  // overlay (Sheet on mobile / Dialog on desktop) to preserve the itinerary
-  // context. The wallet section accordion is left untouched on purpose.
-  const [activeService, setActiveService] = useState<TripService | null>(null);
-  const handleOpenService = useCallback((service: TripService) => {
-    setActiveService(service);
-  }, []);
-
-  // Quick-Nav now opens services & itinerary inside overlays instead of
-  // scrolling to long inline sections.
-  const [activeGroupType, setActiveGroupType] = useState<TripServiceType | null>(null);
-  const [itineraryOpen, setItineraryOpen] = useState(false);
-
-  // Fetch agency-wide wallet preferences (which modules to show)
-  useEffect(() => {
-    const embedded = (tripData as any)?.wallet_settings;
-    if (embedded && typeof embedded === "object") {
-      setWalletSettings({ ...DEFAULT_WALLET_SETTINGS, ...embedded });
-      return;
-    }
-    // Sem configuração entregue pelo acesso autorizado, usa o padrão do sistema.
-    setWalletSettings({ ...DEFAULT_WALLET_SETTINGS });
-  }, [(tripData as any)?.user_id, (tripData as any)?.wallet_settings]);
-
-  // Weather forecast per day for the itinerary header (cached via useTripWeather)
-  const { weatherByDate: itineraryWeather } = useTripWeather(
-    tripData.destination,
-    startDate,
-    endDate,
-  );
-
-  // O payload público da carteira entrega o agente sem os campos de marca:
-  // as cores vêm do cadastro vivo quando o perfil recebido não as traz.
-  const walletBrand = usePublicAgencyBrand((tripData as any)?.user_id, {
-    enabled: !pickBrandProfile([agentProfile as any]),
-  });
-  useAgencyBrandTheme(
-    agencyBrandInputFromProfile(
-      (pickBrandProfile([agentProfile as any, walletBrand as any]) ?? agentProfile) as any,
-    ),
-  );
 
   return (
     <VoucherAccessCtx.Provider value={voucherCtx}>
