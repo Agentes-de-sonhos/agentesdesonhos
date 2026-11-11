@@ -1,8 +1,8 @@
 # Roadmap
 - [x] Segurança: migration 0063 corrige 17 ocorrências; main confirmada em 59e6cac7; ranking agregado conferido na sessão de Fernando; testes de políticas reais e comissões aprovados; sem publicar.
-- [ ] Corrigir hooks de carteiras e conferir os três links existentes + proteção sem tentar senha; frontend sem publicação.
-- [ ] Restaurar anexos públicos publicados via helper restrito compatível com frontend já publicado; validar PDFs reais e negativas sem SELECT anônimo nas tabelas.
-- [ ] Validar ranking agregado como administrador e usuário comum; manter registros individuais protegidos e não publicar.
+- [x] Hooks de carteiras corrigidos: três links reais abriram na prévia sem erros; proteção existente preservada, sem tentar senha. Depende de publicação frontend, não autorizada nesta etapa.
+- [x] Anexos restaurados em produção pela migration 0064: dois PDFs reais abertos/baixados no publicado e preview, três assinaturas negativas; sem SELECT anon nas tabelas.
+- [x] Ranking agregado: UI de admin respondeu 200 com seis usuários; cálculo/permissões de usuário comum e admin aprovados em teste SQL (sem sessão real do comum, gateway usa projeção base). Nova UI depende de publicação, não autorizada nesta etapa.
 - [x] Fixar criação de cliente no rodapé da busca e preservar nome digitado; colunas limitadas à largura reservada, sem sobreposição e mantendo altura pelo conteúdo. Conferido em sessão autenticada 1590×935, lista longa simulada e cadastro sem gravar; build OK, 22 testes passaram e 2 testes estruturais do cabeçalho anterior falharam.
 - [x] Fundador elegível à reserva em orçamentos: migration 0061 aplicada, gate Curti confirmado false→true e regressões SQL executadas; 27 testes aprovados e build OK. Aviso administrativo atualizado; nenhuma solicitação/notificação enviada. Fluxo autenticado pela interface não exercitado.
 - [x] Liberar campanha Novembro O Mundo em Cores: bloqueios demonstrativos retirados, somente ofertas publicadas, navegação/WhatsApp e formulário compartilhado; 15 testes aprovados, Radar com envio simulado confirmado, sem overflow em 768/390. Recebimento real no CRM/Twilio não exercitado; mídias CDN não entregues no localhost.
