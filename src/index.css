@@ -1426,6 +1426,9 @@ body[data-booking-selection-bar] {
    em ações/ícones. Escopo exclusivo `.wl-mundo`. */
 .wl-editorial.wl-mundo {
   --wl-white: 0 0% 100%;
+  /* Azul oficial #245C81 como cor primária (botões/destaques, inclusive páginas de navio). */
+  --primary: 204 56% 32%;
+  --primary-foreground: 0 0% 100%;
   --wl-sand: 200 45% 97%;
   --secondary: 200 45% 97%;
   --accent: 200 45% 96%;
