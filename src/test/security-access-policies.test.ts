@@ -108,6 +108,21 @@ describe('deployed access policy regressions (read-only)', () => {
     const rows = query(`WITH test_documents AS (SELECT 'own/file.pdf'::text file_path, true is_public, 1 quote_id), test_quotes AS (SELECT 1 id,'published'::text status) ${expression} AS allowed`);
     expect(rows[0]?.allowed).toBe(false);
   });
+  it('returns the same aggregate for an ordinary user and admin without private certificate fields', () => {
+    const definition = query(`SELECT pg_get_functiondef('public.academy_ranking_summary()'::regprocedure) AS definition`)[0]?.definition as string;
+    const body = definition.split('$function$')[1]?.trim().replace(/;$/, '');
+    if (!body) throw new Error('Missing ranking body');
+    // Gateway cannot execute the restricted helper/view; use base profiles for
+    // the projection only. Auth predicate uses concrete non-admin/admin IDs.
+    const admin = query(`SELECT user_id FROM user_roles WHERE role='admin' LIMIT 1`)[0];
+    if (!admin) throw new Error('Admin required');
+    const evaluateRanking = (id: string) => query(`SELECT count(*) n, sum(trails_completed) trails FROM (${body.replace(/auth.uid\(\)/g, `'${id}'::uuid`).replace(/public.profiles_public/g, 'public.profiles')}) r(user_id,name,avatar_url,agency_name,trails_completed,total_score,avg_exam_score)`)[0];
+    const ordinary = evaluateRanking(caller.auth_user_id);
+    expect(Number(ordinary.n)).toBeGreaterThan(0);
+    expect(ordinary).toEqual(evaluateRanking(admin.user_id));
+    const expected = query(`SELECT count(DISTINCT user_id) n FROM (SELECT user_id FROM user_certificates UNION SELECT user_id FROM user_exam_attempts WHERE passed) x`)[0];
+    expect(ordinary.n).toBe(expected.n);
+  });
   it('exposes aggregate ranking to authenticated callers but not anonymously', () => {
     const rows = query(`SELECT has_function_privilege('anon','public.academy_ranking_summary()','EXECUTE') AS anonymous,has_function_privilege('authenticated','public.academy_ranking_summary()','EXECUTE') AS authenticated`);
     expect(rows[0]).toEqual({ anonymous: false, authenticated: true });
