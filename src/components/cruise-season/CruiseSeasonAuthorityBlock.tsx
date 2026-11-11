@@ -24,7 +24,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
     const el = listRef.current;
     if (el) el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: 'smooth' });
   };
-  const arrowCls = 'inline-flex h-11 w-11 items-center justify-center rounded-full border border-background/30 bg-background/10 text-background transition hover:bg-background hover:text-[hsl(var(--wl-navy))] disabled:pointer-events-none disabled:opacity-30';
+  const arrowCls = 'h-11 w-11 items-center justify-center rounded-full border border-background/40 bg-[hsl(var(--wl-navy))] text-background transition hover:bg-background hover:text-[hsl(var(--wl-navy))] disabled:pointer-events-none disabled:opacity-0';
   return (
     <div className={`${container} pt-14 pb-10 md:pt-20 md:pb-4`} data-testid="cruise-season-authority">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
