@@ -4,7 +4,7 @@ import divina from '@/assets/cruise-season/msc-divina-exterior.jpg';
 import splendida from '@/assets/cruise-season/msc-splendida-exterior.jpg';
 import seaview from '@/assets/cruise-season/msc-seaview-exterior.jpg';
 import serena from '@/assets/cruise-season/costa-serena-exterior.jpg';
-import type { CruiseShip } from '@/lib/cruiseShips';
+import type { CruiseShipContent as CruiseShip } from '@/lib/cruiseShips/types';
 
 /** Uniform card photo standard for the season gallery: real photo of the whole ship at sea. */
 const LOCAL: Record<string, string> = {
