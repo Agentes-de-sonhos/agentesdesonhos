@@ -119,7 +119,7 @@ import curtiCert14 from "@/assets/whitelabel/curti/curti-certificado-14.jpg.asse
 import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png.asset.json";
 import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
-import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
+const karibuLogo = { url: "/karibu-logo.png" };
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
@@ -1246,7 +1246,74 @@ const karibuBaseline = buildGoldStandardProfile("karibuBriefing21", {
 delete karibuBaseline.dmc;
 delete karibuBaseline.credentials;
 delete karibuBaseline.team;
-export const KARIBU_PREVIEW_PROFILE: AgencySiteProfile = karibuBaseline;
+/** Independent snapshot of the approved source; later edits never mutate Mundo. */
+export const KARIBU_MUNDO_SOURCE_PROFILE: AgencySiteProfile = JSON.parse(
+  JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE),
+);
+
+export const KARIBU_PREVIEW_PROFILE: AgencySiteProfile = {
+  ...KARIBU_MUNDO_SOURCE_PROFILE,
+  key: "karibuBriefing21",
+  // Keep the source imagery and presentation while replacing agency-specific claims.
+  hero: KARIBU_MUNDO_SOURCE_PROFILE.hero?.map((slide, index) => ({
+    ...slide,
+    title: karibuBaseline.hero?.[index]?.title ?? slide.title,
+    subtitle: karibuBaseline.hero?.[index]?.subtitle ?? slide.subtitle,
+  })),
+  signature: karibuBaseline.signature,
+  modules: KARIBU_MUNDO_SOURCE_PROFILE.modules?.map((item, index) => ({
+    ...item,
+    title: karibuBaseline.modules?.[index]?.title ?? item.title,
+    text: karibuBaseline.modules?.[index]?.text ?? item.text,
+    service: karibuBaseline.modules?.[index]?.service ?? item.service,
+  })),
+  destinations: KARIBU_MUNDO_SOURCE_PROFILE.destinations?.map((item, index) => ({
+    ...item,
+    ...(karibuBaseline.destinations?.[index] ?? {
+      title: "Resorts no Brasil", label: "Brasil", text: "Hospedagens com planejamento e acompanhamento da Karibu.",
+    }),
+    image: item.image,
+    order: item.order,
+  })),
+  about: {
+    ...KARIBU_MUNDO_SOURCE_PROFILE.about,
+    ...karibuBaseline.about,
+    media: undefined,
+    images: KARIBU_MUNDO_SOURCE_PROFILE.about?.images,
+    mural: KARIBU_MUNDO_SOURCE_PROFILE.about?.mural,
+    visitedDestinations: undefined,
+  },
+  featuredExperience: KARIBU_MUNDO_SOURCE_PROFILE.featuredExperience ? {
+    ...KARIBU_MUNDO_SOURCE_PROFILE.featuredExperience,
+    kicker: "DESCUBRA A RIVIERA MAYA",
+    title: "Parques e hotéis Xcaret para a sua próxima viagem",
+    description: "Conheça as possibilidades de parques e hotéis Xcaret e converse com a Karibu para planejar uma viagem de acordo com suas preferências.",
+    highlights: ["Parques e hotéis", "Planejamento personalizado", "Atendimento próximo"],
+  } : undefined,
+  authority: KARIBU_MUNDO_SOURCE_PROFILE.authority ? {
+    ...KARIBU_MUNDO_SOURCE_PROFILE.authority,
+    companies: KARIBU_MUNDO_SOURCE_PROFILE.authority.companies ? {
+      ...KARIBU_MUNDO_SOURCE_PROFILE.authority.companies,
+      title: "Encontre seu próximo cruzeiro com a Karibu Viagens.",
+    } : undefined,
+  } : undefined,
+  differentials: karibuBaseline.differentials,
+  conciergeSteps: karibuBaseline.conciergeSteps,
+  faq: karibuBaseline.faq,
+  copy: {
+    ...KARIBU_MUNDO_SOURCE_PROFILE.copy,
+    ...karibuBaseline.copy,
+    modules: { ...karibuBaseline.copy?.modules, cta: "Conversar com a Roseli" },
+    newsletter: { title: "Novidades da Karibu", subtitle: "Converse com a Roseli sobre destinos e oportunidades de viagem.", cta: "Quero saber mais" },
+    avaliacoes: { title: "Experiências de quem viaja com a Karibu" },
+  },
+  footer: { ...karibuBaseline.footer, address: "Avenida Caetano Zamataro, 228, Ponte Grande, Guarulhos/SP", legalName: "Karibu Viagens e Turismo Ltda", cnpj: "13.687.335/0001-71" },
+  // The source's customer reviews, social account and invitation belong to Mundo.
+  testimonials: undefined,
+  socialStrip: undefined,
+  inspirationDialog: undefined,
+  seo: karibuBaseline.seo,
+};
 
 /**
  * Landing Xcaret na prévia O Mundo em Cores: sem fotos ou selos da Juliana
