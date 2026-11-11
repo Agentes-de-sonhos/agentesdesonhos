@@ -271,7 +271,7 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
   authority: {
     sectionLabel: "Cruzeiros",
     companies: {
-      title: "Sua próxima viagem de cruzeiro começa aqui! Na O Mundo em Cores,\nvocê encontra as principais companhias de cruzeiros do mundo.",
+      title: "Na Mundo em Cores, você encontra as principais companhias de cruzeiros do mundo.",
       items: EDITORIAL_ROSE.authority?.companies?.items ?? [],
     },
     kicker: "ESCOLHAS PARA A SUA VIAGEM",
