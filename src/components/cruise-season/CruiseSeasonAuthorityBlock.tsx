@@ -2,24 +2,7 @@ import { ArrowRight, Compass } from 'lucide-react';
 import { agencySiteHref } from '@/lib/agencyContextLink';
 import { cruiseShipPath } from '@/lib/cruiseShips';
 import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
-import diademaExterior from '@/assets/cruise-season/costa-diadema-exterior.jpg';
-import buenavistaExterior from '@/assets/cruise-season/buenavista-exterior.jpg';
-import aerialA from '@/assets/cruise-season/msc-ship-aerial-a.jpg';
-import aerialB from '@/assets/cruise-season/msc-ship-aerial-b.jpg';
-import aerialC from '@/assets/cruise-season/msc-ship-aerial-c.jpg';
-import costaAerial from '@/assets/cruise-season/costa-ship-aerial.jpg';
-
-/** Uniform card photo standard: whole ship at sea. `illustrative` = no official exterior photo yet. */
-const CARD_PHOTOS: Record<string, { src?: string; asset?: string; illustrative?: boolean }> = {
-  'msc-virtuosa': { asset: 'hero' },
-  'msc-musica': { asset: 'hero' },
-  'msc-divina': { src: aerialA, illustrative: true },
-  'msc-splendida': { src: aerialB, illustrative: true },
-  'msc-seaview': { src: aerialC, illustrative: true },
-  'costa-diadema': { src: diademaExterior },
-  'costa-serena': { src: costaAerial, illustrative: true },
-  buenavista: { src: buenavistaExterior },
-};
+import { seasonCardPhoto } from '@/lib/cruiseShips/seasonCardPhotos';
 
 /** Season gallery shown inside the dark cruise (authority) section; opt-in per profile. */
 export function CruiseSeasonAuthorityBlock({ container }: { container: string }) {
@@ -37,14 +20,12 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
       </div>
       <ul aria-label="Galeria dos oito navios" className="mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-4 md:gap-5 md:overflow-visible md:pb-0">
         {SEASON_SHIPS.map(ship => {
-          const photo = CARD_PHOTOS[ship.shipSlug];
-          const src = photo?.src ?? (photo?.asset ? ship.assets[photo.asset] : undefined) ?? ship.assets[ship.hero.image] ?? ship.hero.image;
+          const src = seasonCardPhoto(ship);
           return (
             <li key={ship.shipSlug} className="w-[78%] shrink-0 snap-start sm:w-[45%] md:w-auto">
               <a href={agencySiteHref(cruiseShipPath(ship))} className="group block overflow-hidden rounded-2xl bg-background shadow-lg ring-1 ring-background/10 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={src} alt={`${ship.shipName} navegando`} loading="lazy" decoding="async" referrerPolicy="no-referrer" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  {photo?.illustrative && <span className="absolute bottom-2 right-2 rounded bg-foreground/60 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-background">Imagem ilustrativa</span>}
                 </div>
                 <div className="flex items-center justify-between gap-2 px-4 py-3.5">
                   <div className="min-w-0">
@@ -58,10 +39,10 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
           );
         })}
       </ul>
-      <p className="mt-4 text-xs text-background/60">Imagens de divulgação de {Array.from(new Set(SEASON_SHIPS.map(s => s.lineName))).join(' · ')}</p>
+      <p className="mt-4 text-xs text-background/60">Imagens de divulgação e Wikimedia Commons · {Array.from(new Set(SEASON_SHIPS.map(s => s.lineName))).join(' · ')}</p>
       <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
-        <p className="text-base text-background/90">Em dúvida sobre o navio ideal para você?</p>
-        <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-background/40 px-5 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-background/10"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
+        <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o navio ideal para você?</p>
+        <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
       </div>
     </div>
   );
