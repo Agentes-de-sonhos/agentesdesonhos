@@ -2290,7 +2290,7 @@ export const SHOPPING_PREVIEW_INFO: AgencyDomainInfo = {
   on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
-export const SHOPPING_PREVIEW_PROFILE = buildGoldStandardProfile("shoppingBriefing25", {
+const shoppingBaseline = buildGoldStandardProfile("shoppingBriefing25", {
   textualWordmark: true,
   navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
@@ -2379,6 +2379,8 @@ export const SHOPPING_PREVIEW_PROFILE = buildGoldStandardProfile("shoppingBriefi
   },
   seo: { title: "Prévia para revisão — Shopping Viagens", description: "Prévia técnica da Shopping Viagens. Logotipo e paleta pendentes; sem publicação." },
 }, "Shopping Viagens");
+export const SHOPPING_PREVIEW_PROFILE: AgencySiteProfile = buildMundoReviewProfile("shoppingBriefing25", shoppingBaseline, "Shopping Viagens", "Cristina Vale");
+SHOPPING_PREVIEW_PROFILE.footer = { ...shoppingBaseline.footer, whatsapp: "(11) 94714-8466", phone: "(11) 2096-7777" };
 ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID] = {
   jobId: SHOPPING_PREVIEW_JOB_ID, info: SHOPPING_PREVIEW_INFO, profile: SHOPPING_PREVIEW_PROFILE,
   notice: "prévia técnica para revisão · logotipo e paleta pendentes · imagens genéricas · sem publicação",
@@ -2474,3 +2476,58 @@ ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].pages = {
   resorts: { title: "Explore os resorts do Brasil com a Innovati Travel" }, orlandoTickets: true, editorial: true,
 };
 ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].notice = "Innovati Travel · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação";
+
+/** Review-only configuration copy: keeps source media, applies confirmed agency copy. */
+function buildMundoReviewProfile(
+  key: AgencySiteProfile["key"], baseline: AgencySiteProfile, agency: string, consultant: string,
+): AgencySiteProfile {
+  const source: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
+  const clean = (text?: string) => (text ?? "").replace(/\s*Imagem genérica(?: de inspiração)?\./g, "").trim();
+  return {
+    ...source, key, textualWordmark: baseline.textualWordmark,
+    nav: source.nav?.filter(item => item.to !== "/oportunidades-novembro"),
+    heroPresentation: { ...source.heroPresentation, kicker: agency.toUpperCase() + " · VIAGENS SOB MEDIDA" },
+    hero: source.hero?.map((slide, index) => ({
+      ...slide, title: baseline.hero?.[index]?.title ?? slide.title,
+      subtitle: clean(baseline.hero?.[index]?.subtitle ?? slide.subtitle),
+    })),
+    signature: baseline.signature,
+    modules: source.modules?.map((item, index) => ({
+      ...item, title: baseline.modules?.[index]?.title ?? "Viagens sob medida",
+      text: clean(baseline.modules?.[index]?.text ?? "Planejamento personalizado para o perfil de quem viaja."),
+      service: baseline.modules?.[index]?.service ?? item.service,
+    })),
+    destinations: source.destinations?.map((item, index) => {
+      const own = baseline.destinations?.[index];
+      return { ...item, ...(own ?? { key: "resorts-brasil-review", label: "Brasil", title: "Resorts no Brasil", service: "hospedagem" }),
+        text: clean(own?.text ?? "Resorts para aproveitar no seu ritmo, com orientação da agência."),
+        image: item.image, order: item.order };
+    }),
+    about: { ...source.about, ...baseline.about, media: undefined,
+      images: source.about?.images, mural: source.about?.mural, visitedDestinations: undefined,
+      tagline: "Planejamento personalizado · Atendimento próximo" },
+    featuredExperience: source.featuredExperience ? { ...source.featuredExperience,
+      kicker: "DESCUBRA A RIVIERA MAYA", title: "Parques e hotéis Xcaret para a sua próxima viagem",
+      description: "Converse com a " + agency + " para conhecer as possibilidades de parques, hotéis e experiências Xcaret e planejar uma viagem de acordo com suas preferências.",
+      highlights: ["Parques e hotéis", "Planejamento personalizado", "Atendimento próximo"] } : undefined,
+    authority: source.authority ? { ...source.authority,
+      companies: source.authority.companies ? { ...source.authority.companies,
+        title: "Planeje seu próximo cruzeiro com a " + agency + "." } : undefined } : undefined,
+    differentials: baseline.differentials, conciergeSteps: baseline.conciergeSteps, faq: baseline.faq,
+    copy: { ...source.copy, ...baseline.copy,
+      modules: { ...baseline.copy?.modules, cta: "Conversar com a " + consultant },
+      concierge: { ...baseline.copy?.concierge, cta: "Conversar com a " + consultant },
+      avaliacoes: { title: "Experiências de quem viaja com a " + agency },
+      testimonials: undefined,
+      newsletter: { title: "Novidades da " + agency, subtitle: "Converse com a equipe sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
+    },
+    footer: baseline.footer,
+    socialStrip: baseline.footer?.instagram ? { title: "Siga-nos nas redes", links: [{ network: "instagram", url: baseline.footer.instagram }] } : undefined,
+    testimonials: undefined, inspirationDialog: undefined, seo: baseline.seo,
+  };
+}
+ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].pages = {
+  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Shopping Viagens").replace(/Bardelli/g, "Shopping Viagens")]) },
+  resorts: { title: "Explore os resorts do Brasil com a Shopping Viagens" }, orlandoTickets: true, editorial: true,
+};
+ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].notice = "Shopping Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
