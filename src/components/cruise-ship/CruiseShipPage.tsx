@@ -43,7 +43,7 @@ function openDialog(d: HTMLDialogElement | null) { if (d && !d.open) { if (typeo
 function closeDialog(d: HTMLDialogElement | null) { if (d) { if (typeof d.close === "function") d.close(); else d.removeAttribute("open"); } }
 
 function MediaCredit({ ship }: { ship: CruiseShipContent }) {
-  return <div className="media-line media-credit"><span>{ship.credit}{ship.creditUrl && <> Fonte: <a href={ship.creditUrl} target="_blank" rel="noopener noreferrer">site oficial da companhia</a>.</>}</span></div>;
+  return <div className="media-line media-credit"><span>{ship.credit} Fonte: site oficial da companhia.</span></div>;
 }
 
 export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; hostname: string }) {
@@ -323,7 +323,6 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
             ))}
           </div>
           <MediaCredit ship={ship} />
-          <p className="note">{ship.cabins.note}</p>
         </section>
 
         <section id="csp-roteiros">
@@ -370,16 +369,10 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
               </>)}
             </div>
           </div>
-          <div className="map-explanation" hidden={!!announcement}><strong>Como ler este mapa</strong><p>Os pontos indicam a localização aproximada dos destinos. As linhas mostram somente a sequência das escalas: <strong>não são o trajeto marítimo real</strong> e podem cruzar áreas de terra. O terminal exato, os dias de navegação e a ordem das paradas dependem da saída escolhida.</p></div>
           </> : <div className="csp-route-summaries">
             {ship.routes.summaries?.map((route) => <article key={route.title}><div className="eyebrow">{route.duration}</div><h3>{route.title}</h3><p>{route.text}</p><a className="button" href="#csp-orcamento" onClick={e => { setRouteChoice(`seasonal:${route.title}`); scrollTo("csp-orcamento")(e); }}>Consultar saídas</a></article>)}
             <p className="note">{ship.routes.summaries?.length ? "As escalas apresentadas são alternativas da temporada; não representam uma sequência única. Consulte datas e itinerário completo com a agência." : "Consulte a agência para conhecer os roteiros disponíveis."}</p>
           </div>}
-          {groups.length > 0 && !!ship.routes.summaries?.length && <details className="variant-note"><summary>Panorama dos roteiros da temporada +</summary>
-            {ship.routes.summaries.map(r => <p key={r.title}><strong>{r.title} · {r.duration}.</strong> {r.text}</p>)}
-            <p className="note">O panorama inclui opções anunciadas que podem não estar no calendário selecionado acima. Consulte as datas e a sequência de cada embarque.</p>
-          </details>}
-          <p className="note">Não é inventário completo nem consulta de disponibilidade em tempo real.</p>
         </section>
 
         <section id="csp-orcamento" className="quote">
