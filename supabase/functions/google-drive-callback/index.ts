@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       userId = state.user_id;
       console.log("User ID from state:", userId);
     } catch (e) {
-      const msg = `Erro ao decodificar state: ${e.message}`;
+      const msg = `Erro ao decodificar state: ${e instanceof Error ? e.message : String(e)}`;
       console.error(msg);
       return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
     }
@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
         console.warn("UserInfo fetch failed:", userInfoText);
       }
     } catch (e) {
-      console.warn("Could not fetch Google user info:", e.message);
+      console.warn("Could not fetch Google user info:", e instanceof Error ? e.message : String(e));
     }
 
     // Save tokens
@@ -169,7 +169,7 @@ Deno.serve(async (req) => {
       headers: { "Content-Type": "text/html" },
     });
   } catch (err) {
-    const msg = `Erro inesperado: ${err.message}\nStack: ${err.stack}`;
+    const msg = `Erro inesperado: ${err instanceof Error ? err.message : String(err)}\nStack: ${err instanceof Error ? err.stack : ""}`;
     console.error(msg);
     return new Response(redirectHtml(msg, false), { headers: { "Content-Type": "text/html" } });
   }
