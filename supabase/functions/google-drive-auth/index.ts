@@ -97,7 +97,8 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error(String(err));
     console.error("=== GOOGLE DRIVE AUTH FATAL ERROR ===");
     console.error("Error:", error.message);
     console.error("Stack:", error.stack);
