@@ -1790,3 +1790,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 
 /* Isolated Bardelli review copy: confirmed red/black branding, source layout. */
 .wl-editorial.wl-mundo.wl-bardelli-mundo { --primary: 358 78% 47%; --primary-foreground: 0 0% 100%; --wl-navy: 0 0% 9%; --foreground: 0 0% 12%; --muted-foreground: 0 0% 40%; --border: 0 0% 90%; --mc: #D71920; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #FFF5F5 100%); }
+
+/* Bagagem review: confirmed turquoise/orange identity, source layout. */
+.wl-editorial.wl-mundo.wl-bagagem-mundo { --primary: 179 67% 47%; --primary-foreground: 0 0% 9%; --foreground: 0 0% 12%; --muted-foreground: 0 0% 38%; --border: 179 20% 88%; --mc: #27C7C3; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #E5F8F8 100%); }
+.wl-editorial.wl-mundo.wl-bagagem-mundo .wl-inspiration-cta { background-color: #FF9418; color: #181818; }
