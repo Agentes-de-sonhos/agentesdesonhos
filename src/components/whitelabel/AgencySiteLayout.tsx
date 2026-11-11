@@ -147,7 +147,7 @@ export function AgencyBrandBar({
               </span>
             )}
             {/* Logotipos que já contêm o nome da marca não repetem o wordmark. */}
-            {!resolveSiteProfile(info.hostname).presentation && !headerBrand.logoOnly && !(headerLogoUrl && logoIncludesWordmark(info.hostname)) && (
+            {!resolveSiteProfile(info.hostname).presentation && !resolveSiteProfile(info.hostname).textualWordmark && !headerBrand.logoOnly && !(headerLogoUrl && logoIncludesWordmark(info.hostname)) && (
               <span className="truncate text-lg font-bold tracking-tight text-foreground md:text-xl">
                 <BrandText>{name}</BrandText>
               </span>
