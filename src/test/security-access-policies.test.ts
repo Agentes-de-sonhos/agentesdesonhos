@@ -86,11 +86,27 @@ describe('deployed access policy regressions (read-only)', () => {
   it('requires a published quote and explicitly public document for shared reads', () => {
     const p = policy('Public can read shared quote documents');
     // Evaluate the actual stored expression with synthetic parent rows, not client data.
-    const expression = p.qual.split('quote_documents').join('test_documents').split('JOIN quotes ').join('JOIN test_quotes ');
-    for (const [isPublic, status, allowed] of [[true,'published',true],[false,'published',false],[true,'draft',false]] as const) {
+    const definition = query(`SELECT pg_get_functiondef('public.public_quote_document_file_allowed(text)'::regprocedure) AS definition`)[0]?.definition as string;
+    const body = definition.split('$function$')[1]?.trim().replace(/;$/, '');
+    if (!body) throw new Error('Missing public document gate');
+    const gate = body.replace(/public.quote_documents/g, 'test_documents').replace(/public.quotes/g, 'test_quotes').replace(/p_file_path/g, 'objects.name');
+    const expression = p.qual.replace(/(?:public\.)?public_quote_document_file_allowed\(name\)/g, `(${gate})`);
+    for (const [isPublic, status, allowed] of [[true,'published',true],[false,'published',false],[true,'draft',false],[true,'cancelled',false]] as const) {
       const rows = query(`WITH test_documents AS (SELECT 'file.pdf'::text file_path, ${isPublic} is_public, 1 quote_id), test_quotes AS (SELECT 1 id,'${status}'::text status) SELECT ${expression} AS allowed FROM (SELECT 'quote-documents'::text bucket_id,'file.pdf'::text name) objects`);
       expect(rows[0]?.allowed).toBe(allowed);
     }
+  });
+  it('does not grant anonymous reads on private quote tables', () => {
+    const rows = query(`SELECT has_table_privilege('anon','public.quotes','SELECT') AS quotes,has_table_privilege('anon','public.quote_documents','SELECT') AS documents`);
+    expect(rows[0]).toEqual({quotes: false, documents: false});
+  });
+  it('rejects an unmatched file even if a different document is public', () => {
+    const definition = query(`SELECT pg_get_functiondef('public.public_quote_document_file_allowed(text)'::regprocedure) AS definition`)[0]?.definition as string;
+    const body = definition.split('$function$')[1]?.trim().replace(/;$/, '');
+    if (!body) throw new Error('Missing public document gate');
+    const expression = body.replace(/public.quote_documents/g, 'test_documents').replace(/public.quotes/g, 'test_quotes').replace(/p_file_path/g, "'foreign/file.pdf'");
+    const rows = query(`WITH test_documents AS (SELECT 'own/file.pdf'::text file_path, true is_public, 1 quote_id), test_quotes AS (SELECT 1 id,'published'::text status) ${expression} AS allowed`);
+    expect(rows[0]?.allowed).toBe(false);
   });
   it('exposes aggregate ranking to authenticated callers but not anonymously', () => {
     const rows = query(`SELECT has_function_privilege('anon','public.academy_ranking_summary()','EXECUTE') AS anonymous,has_function_privilege('authenticated','public.academy_ranking_summary()','EXECUTE') AS authenticated`);
