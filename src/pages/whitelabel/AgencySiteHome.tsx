@@ -42,6 +42,7 @@ import {
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
 import { CruiseSeasonHomeTeaser } from "@/components/cruise-season/CruiseSeasonHomeTeaser";
+import { CruiseSeasonAuthorityBlock } from "@/components/cruise-season/CruiseSeasonAuthorityBlock";
 import { NovemberHomeTeaser } from "@/components/campaign/NovemberHomeTeaser";
 
 /** Seção sintética (só O Mundo em Cores), fora do catálogo de seções. */
@@ -563,8 +564,7 @@ export default function AgencySiteHome({
     if (profile.key === "mundoEmCoresBriefing14") {
       const at = resolved.findIndex((s) => s.key === "modules");
       if (at >= 0) resolved.splice(at, 0,
-        { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" },
-        { ...resolved[at], key: CRUISE_SEASON_TEASER_KEY, label: "Cruzeiros 26/27" });
+        { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" });
     }
     return resolved;
   }, [dmc, profile, labPresentation?.sections]);
@@ -888,6 +888,7 @@ export default function AgencySiteHome({
         if (!authority) return null;
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
+            {profile.key === "mundoEmCoresBriefing14" ? <CruiseSeasonAuthorityBlock container={container} /> : (
             <div className={`${container} grid items-center gap-x-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-x-16 md:py-24`}>
               <div className="order-2 mt-8 md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:mt-0">
               {authority.videos?.length ? (
@@ -921,6 +922,7 @@ export default function AgencySiteHome({
                 </Button>
               </div>
             </div>
+            )}
             {authority.companies?.items.length ? (
               <div className={`${container} pb-16 md:pb-24`}>
                 <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
