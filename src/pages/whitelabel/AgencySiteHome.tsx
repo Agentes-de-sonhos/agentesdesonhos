@@ -2108,15 +2108,18 @@ export default function AgencySiteHome({
             </Button>
           )}
           </div>
-          <p
-            className={
-               editorial
-                 ? AGENCY_HERO_SUBTITLE_CLASS
-                 : "mt-3 line-clamp-2 w-full max-w-5xl break-words text-pretty text-[14px] leading-snug text-primary-foreground/85 md:mt-4 md:line-clamp-none md:text-lg"
-            }
-          >
-            {current.subtitle}
-          </p>
+          {/* Shared mobile default for every current and future agency homepage. */}
+          <div className="hidden md:block">
+            <p
+              className={
+                 editorial
+                   ? AGENCY_HERO_SUBTITLE_CLASS
+                   : "mt-3 line-clamp-2 w-full max-w-5xl break-words text-pretty text-[14px] leading-snug text-primary-foreground/85 md:mt-4 md:line-clamp-none md:text-lg"
+              }
+            >
+              {current.subtitle}
+            </p>
+          </div>
           <div
             data-hero-actions-placement={profile.heroPresentation?.actionsPlacement ?? "inline"}
             className={
