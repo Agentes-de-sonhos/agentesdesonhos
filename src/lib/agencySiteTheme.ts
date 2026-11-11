@@ -56,6 +56,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "drica-presentation.preview.local": "siteBaseEditorial",
   "dricaviagens.com.br": "siteBaseEditorial",
   "www.dricaviagens.com.br": "siteBaseEditorial",
+  "bardelli-mundo.preview.local": "siteBaseEditorial",
   "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",
   "www.bardelliviagens.com.br": "siteBaseEditorial",
@@ -112,6 +113,8 @@ export function siteThemeRootClass(hostname?: string | null): string {
     const extra =
       h === "drica-presentation.preview.local" || h === "dricaviagens.com.br" || h === "www.dricaviagens.com.br"
         ? " wl-drica"
+        : h === "bardelli-mundo.preview.local"
+        ? " wl-mundo wl-bardelli-mundo"
         : h === "briefing-23-v1.preview.local"
         ? " wl-mundo wl-arena"
         : h === "briefing-21-v1.preview.local" || h === "briefing-14-v1.preview.local" || h === "omundoemcores.com.br" || h === "www.omundoemcores.com.br"
