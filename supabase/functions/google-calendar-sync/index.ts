@@ -85,7 +85,6 @@ type PushSkipReason =
   | "duplicate_local_signature"
   | "unchanged_since_last_sync"
   | "read_only_mapping"
-  | "provider_origin_not_creatable"
   | "google_created_without_id";
 
 type PullSkipReason =

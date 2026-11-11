@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,7 +110,7 @@ interface ResolvedResource {
 }
 
 async function resolveUrl(
-  adminClient: SupabaseClient,
+  adminClient: ReturnType<typeof createClient>,
   inputUrl: string
 ): Promise<ResolvedResource & { error?: string }> {
   let url: URL;
@@ -266,7 +266,7 @@ async function resolveUrl(
   return { error: "Não foi possível identificar o recurso a partir desta URL", type: "", resource_id: "", owner_id: null, data: {}, resolved_via: "" };
 }
 
-async function getAgencySlug(client: SupabaseClient, userId: string): Promise<string> {
+async function getAgencySlug(client: ReturnType<typeof createClient>, userId: string): Promise<string> {
   const { data } = await client
     .from("profiles")
     .select("agency_name")

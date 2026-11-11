@@ -14,7 +14,7 @@
  *   deslizante de 30 dias, prazo absoluto de 180 dias e rotação a cada 7 dias.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import bcrypt from 'https://esm.sh/bcryptjs@2.4.3'
+import bcrypt from 'npm:bcryptjs@2.4.3'
 import {
   ACCOUNT_ATTEMPT_POLICY,
   type DomainContext,
