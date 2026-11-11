@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MUNDO_EM_CORES_PREVIEW_PROFILE as profile, MUNDO_EM_CORES_PREVIEW_INFO as info, MUNDO_EM_CORES_PREVIEW_HOST as host, DRICA_VIAGENS_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
 import { siteThemeRootClass } from "@/lib/agencySiteTheme";
 
 describe("O Mundo em Cores approved isolated presentation", () => {
@@ -73,5 +74,29 @@ describe("O Mundo em Cores approved isolated presentation", () => {
     expect(profile.signature?.title).toBe("Uma viagem com a sua personalidade.");
     expect(profile.sections?.newsletter).toEqual({ enabled: true, order: 10 });
     expect(profile.socialStrip?.links[0].network).toBe("instagram");
+  });
+
+  it("menu na ordem pedida: Especialidades guarda Cruzeiros 26 e 27, depois Destinos e Sobre", () => {
+    const links = siteNavLinks("www.omundoemcores.com.br");
+    expect(links.map((l) => l.label)).toEqual([
+      "Início",
+      "Oportunidades de Novembro",
+      "Especialidades",
+      "Destinos",
+      "Sobre",
+    ]);
+    const especialidades = links.find((l) => l.label === "Especialidades");
+    expect(especialidades?.children?.map((c) => c.label)).toEqual([
+      "Disney",
+      "Universal Orlando",
+      "Xcaret",
+      "Resorts no Brasil",
+      "Cruzeiros 26 e 27",
+    ]);
+    expect(especialidades?.children?.at(-1)?.to).toBe("/cruzeiros/temporada-brasileira-2026-2027");
+    // O link da temporada não volta duplicado no topo do menu.
+    const seasonPath = "/cruzeiros/temporada-brasileira-2026-2027";
+    expect(links.filter((l) => l.to === seasonPath)).toHaveLength(0);
+    expect(JSON.stringify(links).split(seasonPath).length - 1).toBe(1);
   });
 });

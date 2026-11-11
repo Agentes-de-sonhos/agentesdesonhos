@@ -295,9 +295,9 @@ export const MUNDO_EM_CORES_PREVIEW_PROFILE: AgencySiteProfile = {
       { label: "Universal Orlando", to: "/universal" },
       { label: "Xcaret", to: "/xcaret" },
       { label: "Resorts no Brasil", to: "/resorts-brasil" },
+      { label: "Cruzeiros 26 e 27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
     ] },
     { label: "Destinos", to: "/#destinos" },
-    { label: "Cruzeiros", to: "/#autoridade" },
     { label: "Sobre", to: "/#sobre", children: [
       { label: "Quem somos", to: "/#sobre" },
       { label: "Avaliações do Google", to: "/#avaliacoes" },
