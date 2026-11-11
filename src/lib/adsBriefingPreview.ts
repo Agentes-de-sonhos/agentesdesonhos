@@ -909,7 +909,50 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
 delete bagagemNaMaoBaseline.dmc;
 delete bagagemNaMaoBaseline.credentials;
 delete bagagemNaMaoBaseline.team;
-export const BAGAGEM_NA_MAO_PREVIEW_PROFILE: AgencySiteProfile = bagagemNaMaoBaseline;
+/** Isolated review copy: source imagery stays provisional with original attribution. */
+const bagagemMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
+export const BAGAGEM_NA_MAO_PREVIEW_PROFILE: AgencySiteProfile = {
+  ...bagagemMundoSource, key: "bagagemNaMaoBriefing19",
+  nav: bagagemMundoSource.nav?.filter(item => item.to !== "/oportunidades-novembro"),
+  heroPresentation: { ...bagagemMundoSource.heroPresentation, kicker: "BAGAGEM NA MÃO · UM JEITO NOVO DE VIAJAR" },
+  hero: bagagemMundoSource.hero?.map((slide, index) => ({
+    ...slide, title: bagagemNaMaoBaseline.hero?.[index]?.title ?? slide.title,
+    subtitle: bagagemNaMaoBaseline.hero?.[index]?.subtitle ?? slide.subtitle,
+  })),
+  signature: bagagemNaMaoBaseline.signature,
+  modules: bagagemMundoSource.modules?.map((item, index) => ({
+    ...item, title: bagagemNaMaoBaseline.modules?.[index]?.title ?? item.title,
+    text: bagagemNaMaoBaseline.modules?.[index]?.text ?? item.text,
+    service: bagagemNaMaoBaseline.modules?.[index]?.service ?? item.service,
+  })),
+  destinations: bagagemMundoSource.destinations?.map((item, index) => {
+    const content = bagagemNaMaoBaseline.destinations?.[index];
+    return { ...item, ...(content ?? { key: "resorts-brasil", label: "Brasil", title: "Resorts no Brasil",
+      text: "Hospedagens para descansar e aproveitar no seu ritmo, com orientação da Bagagem na Mão.", service: "hospedagem" }),
+      image: item.image, order: item.order };
+  }),
+  about: { ...bagagemMundoSource.about, ...bagagemNaMaoBaseline.about, media: undefined,
+    images: bagagemMundoSource.about?.images, mural: bagagemMundoSource.about?.mural,
+    visitedDestinations: undefined, tagline: "Viagens sob medida · Escuta e cuidado" },
+  featuredExperience: bagagemMundoSource.featuredExperience ? { ...bagagemMundoSource.featuredExperience,
+    kicker: "DESCUBRA A RIVIERA MAYA", title: "Parques e hotéis Xcaret para a sua próxima viagem",
+    description: "Converse com a Bagagem na Mão para conhecer as possibilidades de parques, hotéis e experiências Xcaret e planejar uma viagem de acordo com suas preferências.",
+    highlights: ["Parques e hotéis", "Viagens em família", "Planejamento sob medida"] } : undefined,
+  authority: bagagemMundoSource.authority ? { ...bagagemMundoSource.authority,
+    companies: bagagemMundoSource.authority.companies ? { ...bagagemMundoSource.authority.companies,
+      title: "Planeje seu próximo cruzeiro com a Bagagem na Mão Viagens." } : undefined } : undefined,
+  differentials: bagagemNaMaoBaseline.differentials, conciergeSteps: bagagemNaMaoBaseline.conciergeSteps,
+  faq: bagagemNaMaoBaseline.faq,
+  copy: { ...bagagemMundoSource.copy, ...bagagemNaMaoBaseline.copy,
+    modules: { ...bagagemNaMaoBaseline.copy?.modules, cta: "Conversar com a Márcia" },
+    concierge: { ...bagagemNaMaoBaseline.copy?.concierge, cta: "Conversar com a Márcia" },
+    avaliacoes: { title: "Experiências de quem viaja com a Bagagem na Mão" },
+    testimonials: undefined,
+    newsletter: { title: "Novidades da Bagagem na Mão", subtitle: "Converse com a Márcia sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
+  },
+  footer: bagagemNaMaoBaseline.footer, socialStrip: bagagemNaMaoBaseline.socialStrip,
+  testimonials: undefined, inspirationDialog: undefined, seo: bagagemNaMaoBaseline.seo,
+};
 
 export const CURTI_VIAGENS_PREVIEW_JOB_ID = "briefing-20-v1";
 export const CURTI_VIAGENS_PREVIEW_PATH = `/ads-briefing-preview/${CURTI_VIAGENS_PREVIEW_JOB_ID}`;
@@ -2369,3 +2412,10 @@ ADS_PREVIEW_FIXTURES[BARDELLI_MUNDO_PREVIEW_JOB_ID] = {
   pages: { xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES },
     resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, editorial: true },
 };
+
+// Shared content pages for the isolated Bagagem review only; no real submissions.
+ADS_PREVIEW_FIXTURES[BAGAGEM_NA_MAO_PREVIEW_JOB_ID].pages = {
+  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Bagagem na Mão Viagens").replace(/Bardelli/g, "Bagagem na Mão")]) },
+  resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão" }, orlandoTickets: true, editorial: true,
+};
+ADS_PREVIEW_FIXTURES[BAGAGEM_NA_MAO_PREVIEW_JOB_ID].notice = "Bagagem na Mão · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação";
