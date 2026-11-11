@@ -2,7 +2,7 @@
 
 Data: 11/11/2026. Base: `03210b3804a1021f1dee738885198fcc8255c95e`.
 
-Pacote para revisão, sem merge, migração aplicada ou publicação. O contador do painel Lovable não foi alterado. Correção no código não significa correção já publicada.
+Pacote para revisão, sem merge, migração aplicada em produção ou publicação. O contador do painel Lovable não foi alterado. Correção no código não significa correção já publicada.
 
 ## Resultado por item
 
@@ -45,18 +45,21 @@ O item 19 exige autorização específica para uma etapa própria de cópia e ex
 
 - Build de produção aprovado, com avisos existentes de CSS, asset em runtime e tamanho de chunks.
 - **162 testes focados aprovados em 25 arquivos.**
-- Suíte ampla: **3.779 aprovados, 59 falhas e 1 ignorado**, em 407 arquivos. As falhas remanescentes também existem na base, portanto a suíte global continua vermelha.
+- Suíte ampla da implementação, antes dos oito cenários adicionais de smoke: **3.779 aprovados, 59 falhas e 1 ignorado**, em 407 arquivos. As falhas remanescentes também existem na base, portanto a suíte global continua vermelha.
+- A repetição ampla adicional foi interrompida: o teste legado fx-rate-converter contém chamada HTTPS ao serviço real configurado em VITE_SUPABASE_URL. Essa chamada foi bloqueada por estar fora da validação isolada. Não houve conclusão dessa repetição nem tentativa de liberar acesso à produção. Os resultados novos são os 37 testes SQL e os 46 smoke isolados descritos abaixo.
 - A suíte security-access-policies, dependente do executável lovable e do banco publicado, foi excluída: o executável não está disponível. Não houve novo scan ou validação de políticas no banco real.
 - Typecheck: os mesmos 13 erros TS2345/RejectExcessProperties da base, nos mesmos arquivos, sem diagnóstico adicional.
 - Testes novos passaram no lint; arquivos antigos mantêm dívida de lint. git diff --check aprovado.
 - O package-lock da base é incoerente com package.json. Dependências instaladas com --ignore-scripts --package-lock=false, sem alterar manifestos ou locks. Não é uma reprodução congelada do lock de produção.
 - Revisão independente confirmou isolamento do fornecedor, capacidades do sorteio, bloqueio de backend em SiteLab e ausência de alterações no acesso a anexos.
-- SQL revisado estaticamente, não executado. Sem QA autenticado/visual publicado ou chamada real de inferência de IA.
+- Validação SQL descartável: **37/37 testes aprovados** em PostgreSQL 17.5 via PGlite 0.3.14, com as duas migrações literais, RLS, roles e helpers reais. Inclui isolamento, permissões, revogação, preservação financeira e rollback de erro após UPDATE. [Harness e comando](../supabase/tests/pr7-migrations/README.md).
+- Smoke React/jsdom: **46/46 cenários aprovados**, com fetch/XHR/WebSocket/HTTP(S)/net/TLS bloqueados e zero tentativas de rede. Inclui navegação, abas, SiteLab, upload, falha/retry/cancelamento do fornecedor e ações mobile. [Comando reproduzível](../scripts/test/README.md). Esses cenários se sobrepõem aos testes anteriores; não devem ser somados como casos distintos.
+- Limites restantes: schema SQL parcial e sentinelas financeiras, sem replay integral do Supabase; autenticação por claim sintética, sem sessão real; sem navegador visual, IA real ou teste ponta a ponta de assinatura/persistência de anexos. Não comprova estado/grants da produção.
 
 ## Implantação pendente
 
-1. Validar em PostgreSQL descartável as migrações drizzle/migrations/0065_reservation_service_supplier.sql e supabase/migrations/20261111130000_agency_team_domain_read.sql. Script SQL sintético de domínio preparado em supabase/tests/agency_team_domain_read.sql, ainda não executado.
-2. Testar anônimo, papel sem permissão, agência própria/alheia, fornecedor global aprovado e ausência de mudanças em snapshots/valores financeiros convertidos.
+1. Validação focada descartável das duas migrações concluída. Antes de implantar, conferir cadeia de migrações, helpers, grants e triggers do ambiente de destino; o teste local não reproduz todo o Supabase.
+2. Completar o smoke autenticado/visual em ambiente de homologação equivalente, incluindo navegação mobile e acesso aos anexos sem senha. Os mecanismos de anexos não foram alterados; testes locais não substituem essa verificação ponta a ponta.
 3. Aplicar migrações aprovadas antes do frontend que chama a nova RPC. Publicar frontend e funções de IA somente após aprovação de implantação.
 4. Fazer smoke test autenticado e de IA ao vivo; revalidar os relatos no ambiente publicado antes de fechá-los.
 
