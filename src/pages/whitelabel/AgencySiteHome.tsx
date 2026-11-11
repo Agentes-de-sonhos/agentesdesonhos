@@ -888,7 +888,7 @@ export default function AgencySiteHome({
         if (!authority) return null;
         return (
           <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
-            {(profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19") ? <CruiseSeasonAuthorityBlock container={container} /> : (
+            {(profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24") ? <CruiseSeasonAuthorityBlock container={container} /> : (
             <div className={`${container} grid items-center gap-x-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-x-16 md:py-24`}>
               <div className="order-2 mt-8 md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:mt-0">
               {authority.videos?.length ? (
@@ -2002,7 +2002,7 @@ export default function AgencySiteHome({
         id="topo"
         className={
           editorial
-            ? (profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19")
+            ? (profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24")
               ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16 lg:h-[500px]"
               : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"

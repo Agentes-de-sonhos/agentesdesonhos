@@ -1794,3 +1794,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 /* Bagagem review: confirmed turquoise/orange identity, source layout. */
 .wl-editorial.wl-mundo.wl-bagagem-mundo { --primary: 179 67% 47%; --primary-foreground: 0 0% 9%; --foreground: 0 0% 12%; --muted-foreground: 0 0% 38%; --border: 179 20% 88%; --mc: #27C7C3; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #E5F8F8 100%); }
 .wl-editorial.wl-mundo.wl-bagagem-mundo .wl-inspiration-cta { background-color: #FF9418; color: #181818; }
+
+/* Innovati isolated review: confirmed blue/orange identity, source layout. */
+.wl-editorial.wl-mundo.wl-innovati-mundo { --primary: 214 57% 34%; --primary-foreground: 0 0% 100%; --foreground: 214 25% 14%; --muted-foreground: 214 10% 38%; --border: 214 20% 88%; --mc: #254F86; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #EEF3F9 100%); }
+.wl-editorial.wl-mundo.wl-innovati-mundo .wl-inspiration-cta { background-color: #F98D0D; color: #1A1A1A; }
