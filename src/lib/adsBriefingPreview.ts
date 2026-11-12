@@ -1696,7 +1696,9 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
   destinations: CURTI_VIAGENS_PREVIEW_PROFILE.destinations?.map((destination) =>
     destination.key === "eua-canada"
       ? { ...destination, key: "nova-york", image: "curtiNovaYork", label: "Estados Unidos", title: "Nova York", text: "Descubra o melhor dos Estados Unidos com roteiros sob medida, entre cidades vibrantes, praias e experiências inesquecíveis." }
-      : destination,
+      : destination.key === "europa"
+        ? { ...destination, key: "italia-em-trem", label: "Itália · Trem", title: "Itália em Trem", text: "Roma, Nápoles, Costa Amalfitana e Puglia em 12 dias, com saídas diárias de abril a outubro de 2027.", href: "/circuitos/italia-em-trem" }
+        : destination,
   ),
   copy: {
     ...CURTI_VIAGENS_PREVIEW_PROFILE.copy,

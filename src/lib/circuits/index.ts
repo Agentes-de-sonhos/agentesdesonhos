@@ -1,3 +1,4 @@
+import { ITALIA_EM_TREM } from "./italiaEmTrem";
 import type { CircuitTour } from "./types";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { CAPITAIS_DA_ITALIA } from "./capitaisDaItalia";
@@ -6,7 +7,7 @@ import { LESTE_EUROPEU_PREMIUM_2026 } from "./lesteEuropeuPremium2026";
 export type { CircuitTour } from "./types";
 
 /** Registro de circuitos. Para incluir um novo, crie o arquivo de dados e adicione aqui. */
-export const CIRCUITS: CircuitTour[] = [LESTE_EUROPEU_PREMIUM_2026, CAPITAIS_DA_ITALIA];
+export const CIRCUITS: CircuitTour[] = [LESTE_EUROPEU_PREMIUM_2026, CAPITAIS_DA_ITALIA, ITALIA_EM_TREM];
 
 export function findCircuit(slug: string | undefined, hostname?: string | null): CircuitTour | undefined {
   const c = CIRCUITS.find((x) => x.slug === slug);

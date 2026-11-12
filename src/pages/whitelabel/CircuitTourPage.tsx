@@ -66,6 +66,8 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         </div>
       </section>
 
+      {c.heroCaption && <p className={`${wrap} py-2 text-xs text-muted-foreground`}>{c.heroCaption}</p>}
+
       {/* Resumo + preço */}
       <section className="wl-alt-gradient"><div className={`${wrap} grid gap-8 py-10 md:grid-cols-[1fr_380px]`}>
         <div>
@@ -87,6 +89,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
           {c.singleSupplement != null && <p className="mt-1 text-sm text-muted-foreground">Suplemento individual: {formatCircuitPrice(c.singleSupplement, c.currency)}</p>}
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>
+          {c.pdfUrl && <Button asChild variant="outline" size="lg" className="mt-4 w-full"><a href={c.pdfUrl} target="_blank" rel="noopener noreferrer" download><Download className="mr-2 h-4 w-4" />Baixar roteiro em PDF</a></Button>}
           {enhanced ? <Button size="lg" className="mt-5 w-full" onClick={scrollToDepartures}><MessageCircle className="mr-2 h-4 w-4" />Solicitar orçamento</Button> : <><Button asChild size="lg" className="mt-5 w-full"><a href={waHref(info, c)} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" />Solicitar cotação</a></Button><Button variant="outline" size="lg" className="mt-2 w-full" onClick={() => window.print()}><Download className="mr-2 h-4 w-4" />Baixar roteiro</Button></>}
         </aside>
       </div></section>
@@ -164,8 +167,8 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
       {/* Saídas */}
       <section id="saidas-garantidas" className="wl-alt-gradient scroll-mt-24"><div className={`${wrap} py-14`}>
         <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
-        <h2 className={h2}>{enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas"}</h2>
-        {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento com a {info.agency_name ?? "agência"}.</p>}
+        <h2 className={h2}>{c.departuresTitle ?? (enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas")}</h2>
+        {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{c.departurePrompt ?? "Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento"} com a {info.agency_name ?? "agência"}.</p>}
         {enhanced ? (
           <div className="relative mt-6">
             <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-card shadow-md hover:bg-primary hover:text-primary-foreground sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>

@@ -27,6 +27,8 @@ export interface CircuitTour {
   cities: string[];
   heroImage: string;
   heroAlt: string;
+  heroCaption?: string;
+  pdfUrl?: string;
   summary: string;
   currency: "EUR" | "USD" | "BRL";
   fromPrice: number;
@@ -39,6 +41,8 @@ export interface CircuitTour {
   itinerary: CircuitDay[];
   departures: { month: string; days: number[] }[];
   departuresNote?: string;
+  departuresTitle?: string;
+  departurePrompt?: string;
   notes?: { title: string; text: string }[];
   faq: { q: string; a: string }[];
 }
