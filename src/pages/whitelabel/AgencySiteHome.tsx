@@ -142,6 +142,7 @@ import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import { agencyBrandInput } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { presentationBlogPosts } from "@/lib/presentationBlogPosts";
+import { usePublicBlogList, usePublicBlogStatus } from "@/hooks/usePublicBlog";
 import {
   AGENCY_CARD_DESCRIPTION_CLASS,
   AGENCY_CARD_TITLE_CLASS,
@@ -510,6 +511,11 @@ export default function AgencySiteHome({
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  // Blog real: a seção aparece sozinha assim que existe o primeiro artigo publicado.
+  const realBlogHost = profile.presentation || profile.demo ? null : hostname;
+  const realBlogStatus = usePublicBlogStatus(realBlogHost).data;
+  const hasRealBlog = !!(realBlogStatus?.enabled && realBlogStatus?.has_posts);
+  const realBlogList = usePublicBlogList(hostname, { q: "", category: "", page: 1 }, hasRealBlog).data;
   const location = (profile.key === "editorialDmc" && profile.footer?.address) || rawLocation;
   // Nota média e total de avaliações do Google (quando o host tem Place
   // configurado) para compor o aggregateRating dos dados estruturados.
@@ -560,6 +566,10 @@ export default function AgencySiteHome({
       typeof dmcOverride === "object"
         ? { ...dmcOverride, enabled: (dmcOverride.enabled ?? true) && !!dmc }
         : { enabled: !!dmc && dmcOverride !== false };
+    if (hasRealBlog) {
+      const cur = overrides.blog;
+      overrides.blog = typeof cur === "object" ? { ...cur, enabled: true } : { enabled: true };
+    }
     const resolved = resolveSections(overrides);
     // O Mundo em Cores: resumo das Oportunidades de Novembro logo antes do Xcaret.
     if (profile.key === "mundoEmCoresBriefing14") {
@@ -568,7 +578,7 @@ export default function AgencySiteHome({
         { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" });
     }
     return resolved;
-  }, [dmc, profile, labPresentation?.sections]);
+  }, [dmc, profile, labPresentation?.sections, hasRealBlog]);
   const modules = useMemo(() => {
     const list = resolveModules(undefined, profile.modules);
     const pick = profile.demo ? labPresentation?.modules : undefined;
@@ -837,7 +847,8 @@ export default function AgencySiteHome({
         }
 
       case "blog": {
-        const posts = presentationBlogPosts(hostname);
+        const real = realBlogList ? [realBlogList.featured, ...realBlogList.items].filter(Boolean).slice(0, 3) : [];
+        const posts = presentationBlogPosts(hostname) ?? real.map((r) => ({ slug: r!.slug, title: r!.title, text: r!.excerpt, image: r!.cover_url ?? "" }));
         if (!posts?.length) return null;
         return (
           <section key={key} id="blog" className="bg-background">
@@ -846,7 +857,7 @@ export default function AgencySiteHome({
               <div className="grid gap-6 md:grid-cols-3">
                 {posts.map((p) => (
                   <a key={p.slug} href={agencySiteHref(`/blog/${p.slug}`)} className="group overflow-hidden rounded-lg border bg-card">
-                    <img src={p.image} alt={p.title} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    {p.image ? <img src={p.image} alt={p.title} loading="lazy" className="aspect-[4/3] w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : null}
                     <div className="p-6">
                       <h3 className="text-xl font-semibold text-foreground">{p.title}</h3>
                       <p className="mt-3 leading-relaxed text-muted-foreground">{p.text}</p>

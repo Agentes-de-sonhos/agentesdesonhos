@@ -70,9 +70,10 @@ export function usePublicBlogStatus(hostname?: string | null) {
   });
 }
 
-export function usePublicBlogList(hostname: string, params: { q: string; category: string; page: number }) {
+export function usePublicBlogList(hostname: string, params: { q: string; category: string; page: number }, enabled = true) {
   return useQuery({
     queryKey: ["public-blog-list", hostname, params],
+    enabled,
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: false,
