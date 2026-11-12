@@ -168,14 +168,14 @@ export function HotelDetailsView({
 
   return (
     <article className="space-y-8 text-foreground">
-      <header>
+      <div>
         {hotel.stars ? <Stars value={hotel.stars} /> : null}
         <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight md:text-4xl">{hotel.name}</h1>
         <p className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground md:text-base">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
           {[hotel.address, hotel.city, hotel.state].filter(Boolean).join(" · ")}
         </p>
-      </header>
+      </div>
 
       <HotelGallery photos={hotel.photos} hotelName={hotel.name} />
 

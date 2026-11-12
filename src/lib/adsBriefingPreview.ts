@@ -2072,7 +2072,10 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   alternateSurfaces: false,
   nav: ["/", "/#destinos", "/#campanhas", "/#sobre"].flatMap(to => {
     const item = arenaMundoSource.nav?.find(entry => entry.to === to);
-    return item ? [{ ...item, children: item.children?.filter(child => !["/xcaret", "/#avaliacoes"].includes(child.to)) }] : [];
+    if (!item) return [];
+    const children = item.children?.filter(child => !["/xcaret", "/#avaliacoes"].includes(child.to));
+    // Ênfase comercial em neve: Club Med na neve abre o menu Especialidades (home inalterada).
+    return [{ ...item, children: item.label === "Especialidades" && children ? [{ label: "Club Med na neve", to: "/club-med-neve" }, ...children] : children }];
   }),
   sections: { ...arenaMundoSource.sections, concierge: { enabled: false }, avaliacoes: { enabled: false } },
   heroPresentation: { ...arenaMundoSource.heroPresentation, kicker: "ARENA TRAVEL GROUP · VIAGENS SOB MEDIDA" },

@@ -42,7 +42,7 @@ export const COUNTRY_ORDER = ["franca", "italia", "suica", "canada", "japao", "c
 export const CLUB_MED_SNOW: ClubMedSnowResort[] = Object.values(files)
   .flatMap((m) => (Array.isArray(m.default) ? m.default : []))
   .filter((r) => r && r.slug && r.name)
-  .sort((a, b) => COUNTRY_ORDER.indexOf(a.countryKey as never) - COUNTRY_ORDER.indexOf(b.countryKey as never) || a.name.localeCompare(b.name, "pt-BR"));
+  .sort((a, b) => COUNTRY_ORDER.indexOf(a.countryKey as never) - COUNTRY_ORDER.indexOf(b.countryKey as never) || (a.kind === b.kind ? 0 : a.kind === "resort" ? -1 : 1) || a.name.localeCompare(b.name, "pt-BR"));
 
 export function getClubMedSnow(slug: string) {
   return CLUB_MED_SNOW.find((r) => r.slug === slug) ?? null;

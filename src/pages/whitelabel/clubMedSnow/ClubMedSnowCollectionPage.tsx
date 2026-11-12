@@ -7,7 +7,8 @@ import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 function ResortCard({ r }: { r: ClubMedSnowResort }) {
   const { data } = useClubMedSnowPlaces(r.slug);
-  const photo = data?.photos?.[0];
+  // Chalé e resort vizinho podem compartilhar o mesmo Place ID: o card do chalé usa outra foto.
+  const photo = data?.photos?.[r.kind === "chalet" ? 1 : 0] ?? data?.photos?.[0];
   return (
     <li>
       <a href={agencySiteHref(`${CLUB_MED_SNOW_BASE}/${r.slug}`)} className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-lg">

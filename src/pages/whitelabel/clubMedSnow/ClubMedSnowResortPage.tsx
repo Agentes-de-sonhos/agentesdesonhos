@@ -103,8 +103,9 @@ function ResortSections({ r }: { r: ClubMedSnowResort }) {
   );
 }
 
-export default function ClubMedSnowResortPage({ info }: { info: AgencyDomainInfo }) {
-  const { slug = "" } = useParams();
+export default function ClubMedSnowResortPage({ info, slugOverride }: { info: AgencyDomainInfo; slugOverride?: string }) {
+  const params = useParams();
+  const slug = slugOverride ?? params.slug ?? "";
   const r = useMemo(() => getClubMedSnow(slug), [slug]);
   const { data: g } = useClubMedSnowPlaces(r?.slug);
   const { submit } = useAgencySiteRequest(info.hostname);
@@ -115,7 +116,7 @@ export default function ClubMedSnowResortPage({ info }: { info: AgencyDomainInfo
     slug: r.slug,
     name: r.name,
     address: g?.address ?? [r.village, r.region].filter(Boolean).join(", "),
-    city: "", state: r.country,
+    city: "", state: g?.address ? "" : r.country,
     photos: (g?.photos ?? []).map((p) => ({ url: p.url, alt: r.name, credit: `${p.credit} · Google` })),
     description: [],
     amenities: r.highlights.map((h) => ({ icon: "leisure" as const, label: h })),
