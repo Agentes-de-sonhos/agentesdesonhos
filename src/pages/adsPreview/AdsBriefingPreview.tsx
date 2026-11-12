@@ -12,6 +12,8 @@ const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPag
 const UsVisaLandingPage = lazy(() => import("@/pages/whitelabel/UsVisaLandingPage"));
 const DmcPortugalLandingPage = lazy(() => import("@/pages/whitelabel/DmcPortugalLandingPage"));
 const AgencyResortPage = lazy(() => import("@/pages/whitelabel/AgencyResortPage"));
+const ClubMedSnowCollectionPage = lazy(() => import("@/pages/whitelabel/clubMedSnow/ClubMedSnowCollectionPage"));
+const ClubMedSnowResortPage = lazy(() => import("@/pages/whitelabel/clubMedSnow/ClubMedSnowResortPage"));
 const BrazilResortsMap = lazy(() => import("@/components/resorts-brasil/BrazilResortsMap").then((m) => ({ default: m.BrazilResortsMap })));
 const OrlandoEditorialGallery = lazy(() => import("@/components/orlando/OrlandoEditorialGallery").then((m) => ({ default: m.OrlandoEditorialGallery })));
 const OrlandoTicketsSection = lazy(() => import("@/components/orlando/OrlandoTicketsSection").then((m) => ({ default: m.OrlandoTicketsSection })));
@@ -99,8 +101,8 @@ export default function AdsBriefingPreview() {
     const backend = import.meta.env.VITE_SUPABASE_URL as string;
     window.fetch = (input, init) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-      // Única exceção: leitura das avaliações públicas do Google (sem escrita).
-      if (backend && url.startsWith(backend) && url.split("?")[0] !== `${backend}/functions/v1/google-place-reviews`) {
+      // Exceções: leituras públicas do Google (avaliações da agência e Club Med na neve), sem escrita.
+      if (backend && url.startsWith(backend) && !["google-place-reviews", "club-med-snow-places"].some((f) => url.split("?")[0] === `${backend}/functions/v1/${f}`)) {
         return Promise.reject(new Error("Prévia de teste: acesso ao backend desativado."));
       }
       return origFetch(input, init);
@@ -120,8 +122,10 @@ export default function AdsBriefingPreview() {
 
   const pages = fixture?.pages ?? {};
   const resortSlug = /^resorts-brasil\/([a-z0-9-]+)$/.exec(subPath)?.[1];
+  const snowSlug = /^club-med-neve\/([a-z0-9-]+)$/.exec(subPath)?.[1];
   const known =
     subPath === "" ||
+    subPath === "club-med-neve" || !!snowSlug ||
     (subPath === "xcaret" && pages.xcaret) ||
     (subPath === "ingressos-orlando" && pages.orlandoTickets) ||
     ((subPath === "resorts-brasil" || resortSlug) && pages.resorts) ||
@@ -146,6 +150,10 @@ export default function AdsBriefingPreview() {
       body = <AgencyPresentationPages page={subPath} info={info} />;
     } else if (subPath === "resorts-brasil") {
       body = <div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap title={pages.resorts?.title} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>;
+    } else if (subPath === "club-med-neve") {
+      body = <ClubMedSnowCollectionPage info={info} />;
+    } else if (snowSlug) {
+      body = <ClubMedSnowResortPage info={info} slugOverride={snowSlug} />;
     } else if (resortSlug) {
       body = <AgencyResortPage info={info} slug={resortSlug} />;
     }

@@ -1,0 +1,598 @@
+[
+ {
+  "slug": "tomamu-hokkaido",
+  "kind": "resort",
+  "name": "Club Med Tomamu Hokkaido",
+  "country": "Japão",
+  "countryKey": "japao",
+  "region": "Hokkaido",
+  "village": "Tomamu",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa. Calendário exato, altitude, extensão das pistas e ski-in/ski-out não foram comprovados na fonte consultada.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Tomamu",
+   "km": null,
+   "note": "Domínio identificado na página oficial; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Design contemporâneo, culinária de Hokkaido e férias na neve em família.",
+  "whyChoose": [
+   {
+    "title": "Base para esquiar em Tomamu",
+    "text": "A página identifica o domínio de Tomamu e inclui aulas coletivas na proposta de inverno. É uma base para organizar a viagem em torno do aprendizado e da prática de esportes de neve."
+   },
+   {
+    "title": "Cozinha com identidade japonesa",
+    "text": "O Yakiniku aparece como destaque gastronômico, junto dos sabores de Hokkaido. A apresentação também menciona aulas e degustações, cujas condições devem ser verificadas separadamente."
+   },
+   {
+    "title": "Lazer aquático depois do esqui",
+    "text": "O resort destaca uma piscina de ondas coberta como opção para as famílias. A combinação permite alternar atividades de montanha e momentos na água, conforme horários e regras de acesso."
+   },
+   {
+    "title": "Quartos assinados",
+    "text": "A decoração é atribuída a Jean Philippe Nuel e se inspira nas quatro estações japonesas. Os ambientes usam cores vivas e uma linguagem contemporânea, diferenciando a hospedagem de um chalé alpino tradicional."
+   },
+   {
+    "title": "Programação cultural e familiar",
+    "text": "A oferta destaca atividades Amazing Family! e uma feira cultural semanal. A Ice Village também é citada como experiência do destino, sem comprovação de inclusão irrestrita de suas atrações."
+   }
+  ],
+  "highlights": [
+   "Domínio de esqui Tomamu",
+   "Yakiniku",
+   "Design de Jean Philippe Nuel",
+   "Piscina de ondas coberta",
+   "Atividades Amazing Family!",
+   "Feira cultural semanal",
+   "Petit Club opcional"
+  ],
+  "location": "O resort fica em Tomamu, na ilha japonesa de Hokkaido. A página oficial apresenta a estadia como uma experiência de inverno que combina o domínio de esqui local, gastronomia regional e atividades familiares.",
+  "accommodation": "Os quartos têm design contemporâneo assinado por Jean Philippe Nuel, com referências às quatro estações do Japão. A página apresenta acomodações Superior, Deluxe e Suítes, sem que todas tenham necessariamente a mesma configuração ou vista.",
+  "dining": "A culinária destaca produtos e sabores de Hokkaido, com Yakiniku entre as experiências apresentadas. Refeições e seleção de bebidas fazem parte do all inclusive; degustações premium e experiências especiais precisam ter suas condições verificadas.",
+  "wellness": "A piscina de ondas coberta é um destaque de lazer, e o all inclusive relaciona acesso à piscina. Horários, deslocamentos e regras locais devem ser confirmados; não foi comprovado um conjunto específico de tratamentos de spa incluídos.",
+  "families": "O Petit Club Med atende crianças de 2 a 3 anos com custo adicional, conforme a página oficial. A oferta inclui monitoria de 4 a 17 anos; confirmar a organização dos grupos e a disponibilidade na data escolhida. Serviços para bebês não equivalem a Baby Club supervisionado, e a idade mínima do snowboard precisa de confirmação específica.",
+  "idealFor": [
+   "famílias com crianças de idades diferentes",
+   "viajantes interessados em gastronomia japonesa",
+   "grupos que combinam esqui e lazer aquático"
+  ],
+  "differentiators": [
+   "Quartos com design assinado",
+   "Combinação de neve e piscina de ondas",
+   "Programação cultural de Hokkaido"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui associado ao domínio Tomamu",
+    "Aulas coletivas de esqui para crianças, adolescentes e adultos",
+    "Aulas coletivas de snowboard para crianças, adolescentes e adultos",
+    "Trilha na neve listada no all inclusive"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard",
+    "Petit Club Med para crianças de 2 a 3 anos"
+   ],
+   "notes": "A comunicação geral anuncia aulas em grupo a partir de 4 anos, sem detalhar a idade mínima de cada modalidade. Confirmar dias de passe e aulas, funcionamento da Ice Village e eventual cobrança de experiências especiais; não presumir transfer incluído."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/tomamu-hokkaido/w",
+    "label": "Página oficial de inverno — Tomamu Hokkaido",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "hokkaido-sahoro",
+  "kind": "resort",
+  "name": "Club Med Hokkaido Sahoro",
+  "country": "Japão",
+  "countryKey": "japao",
+  "region": "Hokkaido",
+  "village": "Sahoro",
+  "status": "confirmado",
+  "statusNote": "Oferta de inverno confirmada na rota oficial /hokkaido-sahoro/w; a inversão /sahoro-hokkaido não funcionou. Datas exatas, altitude, quilômetros de pistas e ski-in/ski-out não foram comprovados.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Sahoro",
+   "km": null,
+   "note": "A página apresenta o Monte Sahoro como cenário da experiência de esqui; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Tradições de Hokkaido, izakaya e momentos em família na montanha.",
+  "whyChoose": [
+   {
+    "title": "Proposta de aprendizado na montanha",
+    "text": "O Monte Sahoro é apresentado como base para aulas guiadas de esqui. A página anuncia turmas de iniciantes começando diariamente nos resorts japoneses, sujeitas à organização local."
+   },
+   {
+    "title": "Culinária em estilo izakaya",
+    "text": "A proposta gastronômica destaca pratos japoneses compartilháveis e produtos de Hokkaido. É uma experiência que favorece refeições em grupo e contato com sabores do destino."
+   },
+   {
+    "title": "Contato com a cultura Ainu",
+    "text": "O resort anuncia atividades práticas relacionadas à cultura Ainu. Esse componente cultural acrescenta conteúdo à viagem além da rotina de pistas e refeições."
+   },
+   {
+    "title": "Piscina e banho ao ar livre",
+    "text": "A piscina coberta e o banho canadense externo aparecem entre os destaques de bem-estar. São alternativas concretas de descanso depois das atividades de neve."
+   },
+   {
+    "title": "Convivência familiar",
+    "text": "A programação destaca caminhadas na neve, momentos de après-ski e um festival semanal. O Petit Club opcional permite atender também famílias com crianças pequenas, conforme vagas e contratação."
+   }
+  ],
+  "highlights": [
+   "Monte Sahoro",
+   "Culinária em estilo izakaya",
+   "Atividades de cultura Ainu",
+   "Piscina coberta",
+   "Banho canadense ao ar livre",
+   "Festival semanal",
+   "Petit Club opcional"
+  ],
+  "location": "Na ilha de Hokkaido, o resort tem o Monte Sahoro como referência para os esportes de inverno. A apresentação oficial enfatiza a paisagem montanhosa, a herança japonesa e a convivência em família.",
+  "accommodation": "A hospedagem integra o resort de montanha apresentado na página oficial. A extração consultada não foi suficiente para descrever com precisão as configurações, dimensões ou vistas de cada categoria; esses atributos devem ser conferidos na acomodação selecionada.",
+  "dining": "O estilo izakaya, com pratos reconfortantes para compartilhar, é um dos diferenciais anunciados. A proposta valoriza ingredientes de Hokkaido e inclui refeições e seleção de bebidas dentro das condições do all inclusive.",
+  "wellness": "A página destaca piscina coberta e banho canadense ao ar livre com vistas para a montanha. A oferta também inclui atividades fora das pistas; serviços e tratamentos não detalhados não devem ser considerados automaticamente gratuitos.",
+  "families": "O Petit Club Med para crianças de 2 a 3 anos é apresentado como opcional pago. A página menciona monitoria incluída de 4 a 17 anos; confirmar os grupos e o calendário para a estadia. Não foi comprovado Baby Club supervisionado, e a idade mínima específica do snowboard não foi estabelecida.",
+  "idealFor": [
+   "famílias que valorizam convivência e programação cultural",
+   "iniciantes em esportes de neve",
+   "viajantes interessados na cultura de Hokkaido"
+  ],
+  "differentiators": [
+   "Referências à cultura Ainu",
+   "Gastronomia em estilo izakaya",
+   "Banho canadense externo e piscina coberta"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui apresentado no all inclusive do produto Sahoro",
+    "Aulas coletivas de esqui para crianças, adolescentes e adultos",
+    "Aulas coletivas de snowboard para crianças, adolescentes e adultos",
+    "Caminhadas guiadas listadas no all inclusive"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard",
+    "Petit Club Med para crianças de 2 a 3 anos"
+   ],
+   "notes": "A página anuncia aulas em grupo a partir de 4 anos sem separar todas as idades por modalidade. Confirmar condições das turmas diárias para iniciantes, dias de passe, equipamentos e logística; não presumir aulas particulares ou transfer incluídos."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/hokkaido-sahoro/w",
+    "label": "Página oficial de inverno — Hokkaido Sahoro",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "kiroro-grand",
+  "kind": "resort",
+  "name": "Club Med Kiroro Grand",
+  "country": "Japão",
+  "countryKey": "japao",
+  "region": "Hokkaido",
+  "village": "Kiroro",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa. Datas exatas, altitude, extensão das pistas e ski-in/ski-out não foram comprovados; um link genérico sobre ski-in/ski-out não comprova essa característica do resort.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Kiroro",
+   "km": null,
+   "note": "Domínio identificado na página oficial; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Floresta encantada, gastronomia de fusão e águas termais em Hokkaido.",
+  "whyChoose": [
+   {
+    "title": "Decoração de floresta encantada",
+    "text": "O conceito do resort e de seus quartos se inspira em uma floresta encantada. A ambientação liga os interiores à natureza de Kiroro sem reproduzir uma vila alpina tradicional."
+   },
+   {
+    "title": "Estrutura voltada às famílias",
+    "text": "A página informa acolhimento de famílias de todas as idades e instalações infantis a partir de 2 anos. O Petit Club pago complementa a programação incluída das crianças maiores."
+   },
+   {
+    "title": "Onsen e banho ao ar livre",
+    "text": "O conteúdo destaca onsen japonês natural e Rotenburo. Esses espaços permitem combinar esporte e uma experiência de banho ligada à cultura local, respeitando regras de uso."
+   },
+   {
+    "title": "Culinária japonesa e francesa",
+    "text": "A gastronomia é apresentada como uma fusão de referências japonesas e francesas. O bufê elaborado pelos chefs é um dos diferenciais destacados na página."
+   },
+   {
+    "title": "Neve e descoberta da natureza",
+    "text": "Além do esqui, o resort apresenta caminhadas para explorar a paisagem de Kiroro. A programação atende quem deseja variar o ritmo da viagem sem limitar a experiência às descidas."
+   }
+  ],
+  "highlights": [
+   "Domínio de esqui Kiroro",
+   "Conceito de floresta encantada",
+   "Onsen japonês",
+   "Rotenburo",
+   "Cozinha de fusão japonesa e francesa",
+   "Quartos voltados às famílias",
+   "Petit Club opcional"
+  ],
+  "location": "O resort fica em Kiroro, na ilha de Hokkaido, cercado por paisagens de montanha. A página o apresenta como base para o domínio de esqui Kiroro e para atividades de descoberta da natureza.",
+  "accommodation": "Os quartos são descritos como espaçosos, contemporâneos e inspirados em florestas encantadas. A oferta apresenta acomodações Superior, Deluxe e Suítes; configuração e capacidade dependem da opção reservada.",
+  "dining": "O destaque é a fusão entre culinária japonesa e francesa, com bufê preparado pelos chefs do resort. Refeições e seleção de bebidas fazem parte do all inclusive, sem comprovação de inclusão irrestrita de todos os itens especiais.",
+  "wellness": "A página apresenta onsen japonês natural, Rotenburo, piscina e Club Med Spa. A existência desses espaços não comprova que todos os tratamentos ou acessos especiais estejam incluídos; confirmar condições e regras locais de banho.",
+  "families": "O Mini Club para crianças de 4 a 10 anos e a programação Teens & Chill Pass para adolescentes a partir de 11 anos são apresentados como incluídos. O Petit Club Med para crianças de 2 a 3 anos tem custo adicional. O acolhimento de bebês não comprova Baby Club supervisionado.",
+  "idealFor": [
+   "famílias com crianças a partir de 2 anos",
+   "viajantes interessados em onsen",
+   "grupos que valorizam gastronomia e atividades de neve"
+  ],
+  "differentiators": [
+   "Ambientação de floresta encantada",
+   "Onsen natural e Rotenburo",
+   "Proposta familiar distinta do Kiroro Peak"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui associado ao domínio Kiroro",
+    "Aulas coletivas de esqui para crianças, adolescentes e adultos",
+    "Aulas coletivas de snowboard para crianças listadas no all inclusive",
+    "Caminhadas guiadas"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard",
+    "Petit Club Med para crianças de 2 a 3 anos"
+   ],
+   "notes": "A relação consultada não permite detalhar todas as turmas de snowboard para adultos e adolescentes. A chamada geral de aulas a partir de 4 anos não deve ser aplicada automaticamente a toda modalidade. Confirmar dias de passe, acesso ao onsen, tratamentos de spa e logística."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/kiroro-grand/w",
+    "label": "Página oficial de inverno — Kiroro Grand",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "kiroro-peak",
+  "kind": "resort",
+  "name": "Club Med Kiroro Peak",
+  "country": "Japão",
+  "countryKey": "japao",
+  "region": "Hokkaido",
+  "village": "Kiroro",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa. A nota de admissão diz a partir de 12 anos, enquanto outro trecho diz acima de 12; confirmar o caso de hóspedes com exatamente 12 anos. Datas exatas, altitude, quilômetros e ski-in/ski-out não foram comprovados.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Kiroro",
+   "km": null,
+   "note": "Domínio identificado na página oficial; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Uma proposta sofisticada de montanha para adultos e adolescentes.",
+  "whyChoose": [
+   {
+    "title": "Ambiente sem crianças pequenas",
+    "text": "A nota de admissão informa hóspedes a partir de 12 anos. Isso diferencia a proposta do Kiroro Grand e favorece viagens de casais ou famílias com adolescentes."
+   },
+   {
+    "title": "Interiores de inspiração artística",
+    "text": "A página descreve uma combinação de tradição japonesa e linguagem contemporânea. O design não convencional é um dos elementos centrais da hospedagem."
+   },
+   {
+    "title": "Gastronomia como parte da experiência",
+    "text": "Refeições gourmet e experiências refinadas aparecem entre os destaques oficiais. A proposta atende quem deseja dar à gastronomia um papel importante na viagem de neve."
+   },
+   {
+    "title": "Esqui no domínio Kiroro",
+    "text": "A oferta associa o resort ao domínio Kiroro e às aulas coletivas de inverno. Isso permite combinar uma hospedagem de atmosfera mais adulta com a prática de esqui e snowboard."
+   },
+   {
+    "title": "Bem-estar no Peak e no Grand",
+    "text": "O conteúdo apresenta sauna e ofurô no Peak, além de instalações no Kiroro Grand acessíveis por transporte. A distinção evita confundir estruturas existentes no próprio hotel com aquelas compartilhadas em outro endereço."
+   }
+  ],
+  "highlights": [
+   "Admissão anunciada a partir de 12 anos",
+   "Domínio de esqui Kiroro",
+   "Design artístico contemporâneo",
+   "Refeições gourmet",
+   "Sauna e ofurô",
+   "Spa by Mandara",
+   "Instalações de bem-estar no Kiroro Grand"
+  ],
+  "location": "O resort fica em Kiroro, em Hokkaido, associado ao domínio de esqui local. A página informa que determinadas instalações de bem-estar ficam no Kiroro Grand e exigem deslocamento por transporte.",
+  "accommodation": "A hospedagem é descrita como um edifício de cinco andares com interiores artísticos que misturam tradição japonesa e elementos contemporâneos. A escolha do quarto deve considerar sua configuração específica; não se deve extrapolar uma dimensão anunciada para todas as acomodações.",
+  "dining": "A página destaca refeições gourmet e uma atmosfera de experiências refinadas. Refeições e seleção de bebidas integram o all inclusive, respeitadas as condições de serviço e os produtos especiais.",
+  "wellness": "A oferta menciona sauna e ofurô, além do Club Med Spa by Mandara com tratamentos pagos. Piscina aquecida, jacuzzi e onsen são descritos no Kiroro Grand, acessíveis por transporte; confirmar funcionamento, regras e condições de acesso.",
+  "families": "A nota explícita informa admissão a partir de 12 anos, mas outro trecho usa acima de 12 anos; confirmar a elegibilidade de quem tem exatamente 12. Não é uma opção para famílias com crianças pequenas, e blocos genéricos sobre aulas a partir de 4 anos não anulam a restrição de hospedagem. Não foram comprovados clubes infantis específicos no Peak.",
+  "idealFor": [
+   "casais",
+   "grupos de amigos adultos",
+   "famílias com adolescentes que atendam à regra de admissão"
+  ],
+  "differentiators": [
+   "Restrição de idade que diferencia o Peak do Grand",
+   "Interiores de inspiração artística",
+   "Experiência gastronômica e de bem-estar com atmosfera mais adulta"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui associado ao domínio Kiroro",
+    "Aulas coletivas de esqui para adultos listadas no all inclusive",
+    "Aulas coletivas de snowboard para adultos e adolescentes"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard",
+    "Tratamentos do Club Med Spa by Mandara"
+   ],
+   "notes": "A restrição de idade do resort prevalece sobre blocos genéricos de aulas infantis. Confirmar turmas de esqui para adolescentes, validade do passe e acesso às instalações do Grand. Não tratar o transporte citado entre instalações como comprovação de transfer aeroportuário incluído."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/kiroro-peak/w",
+    "label": "Página oficial de inverno — Kiroro Peak",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "yabuli",
+  "kind": "resort",
+  "name": "Club Med Yabuli",
+  "country": "China",
+  "countryKey": "china",
+  "region": "Heilongjiang",
+  "village": "Yabuli",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa. Datas exatas, altitude, extensão das pistas e ski-in/ski-out não foram comprovados; uma gôndola no sopé do resort não basta para afirmar ski-in/ski-out.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Yabuli Merge",
+   "km": null,
+   "note": "Denominação publicada na seção de área de esqui; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Esportes de inverno, sabores de Heilongjiang e lazer entre pinheiros.",
+  "whyChoose": [
+   {
+    "title": "Acesso ao domínio de Yabuli",
+    "text": "A página destaca uma gôndola no sopé do resort e orientação de instrutores. É uma informação concreta de acesso, sem garantir saída e retorno ao hotel com esquis nos pés."
+   },
+   {
+    "title": "Cozinha de Heilongjiang",
+    "text": "Macarrão de mung e carne de porco agridoce crocante aparecem entre as especialidades apresentadas. A gastronomia acrescenta uma identidade regional à viagem de neve."
+   },
+   {
+    "title": "Lazer aquático com paisagem",
+    "text": "O conteúdo destaca piscina interna e banho canadense ao ar livre. A vista para montanhas e florestas de pinheiros faz parte da proposta de descanso."
+   },
+   {
+    "title": "Jogos de inverno em família",
+    "text": "Curling e mini-hóquei aparecem nas atividades familiares anunciadas. A programação permite compartilhar momentos na neve mesmo fora das aulas de esqui."
+   },
+   {
+    "title": "Atividades além das descidas",
+    "text": "A apresentação relaciona escalada indoor, ioga e trekking na neve. São alternativas para variar o ritmo e acomodar interesses diferentes no mesmo grupo."
+   }
+  ],
+  "highlights": [
+   "Domínio Yabuli Merge",
+   "Gôndola no sopé do resort",
+   "Culinária de Heilongjiang",
+   "Piscina interna",
+   "Banho canadense ao ar livre",
+   "Escalada indoor",
+   "Jogos de inverno em família"
+  ],
+  "location": "O resort fica em Yabuli, na província chinesa de Heilongjiang. A página o apresenta junto a um domínio de esqui e a uma paisagem de montanhas e floresta de pinheiros, com gôndola no sopé do empreendimento.",
+  "accommodation": "Os quartos são descritos com móveis de madeira, tons naturais e vistas para a montanha e a reserva ao redor. A página apresenta acomodações Deluxe; vista e configuração devem ser conferidas na opção efetivamente reservada.",
+  "dining": "A culinária de Heilongjiang aparece em especialidades como macarrão de mung e porco agridoce crocante. O all inclusive contempla refeições e seleção de bebidas, sem comprovação de que toda experiência gastronômica especial esteja incluída.",
+  "wellness": "Piscina interna, banho canadense externo e fonte termal aparecem na apresentação oficial, assim como Club Med Spa. As condições de acesso e os valores de tratamentos não foram suficientemente detalhados na extração consultada.",
+  "families": "A página apresenta faixas de 2 a 3 e 4 a 10 anos, além de um bloco geral de monitoria de 4 a 17 anos. Como os cartões visíveis não detalham todos os clubes, confirmar atendimento a adolescentes, serviços para menores de 4 anos, cobrança e calendário. Não foi comprovado Baby Club nem Petit Club incluído.",
+  "idealFor": [
+   "famílias que valorizam atividades compartilhadas",
+   "viajantes interessados no nordeste da China",
+   "grupos que querem alternar neve e lazer indoor"
+  ],
+  "differentiators": [
+   "Gôndola junto ao sopé do resort",
+   "Culinária regional de Heilongjiang",
+   "Combinação de jogos familiares e atividades indoor"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui apresentado no all inclusive do produto Yabuli",
+    "Aulas coletivas de esqui para adultos explicitamente listadas",
+    "Aulas em grupo anunciadas de forma geral a partir de 4 anos"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard apresentado sob demanda"
+   ],
+   "notes": "A página relaciona snowboard entre as atividades, mas a extração não permite especificar com segurança todas as turmas incluídas e suas idades. Confirmar modalidades, níveis, abrangência do passe Yabuli Merge, clubes infantis e condições de bem-estar antes da reserva."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/yabuli/w",
+    "label": "Página oficial de inverno — Yabuli",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "beidahu",
+  "kind": "resort",
+  "name": "Club Med Beidahu",
+  "country": "China",
+  "countryKey": "china",
+  "region": "Jilin",
+  "village": "Beidahu",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa. Datas exatas da temporada, altitude, quilômetros de pistas e ski-in/ski-out não foram comprovados na fonte consultada.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Beidahu",
+   "km": null,
+   "note": "Domínio identificado na página oficial e associado aos Jogos Asiáticos de Inverno; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Esqui, acolhimento de montanha e sabores de Dong Bei.",
+  "whyChoose": [
+   {
+    "title": "Domínio com trajetória esportiva",
+    "text": "A página associa Beidahu aos Jogos Asiáticos de Inverno. A experiência oferecida combina esse cenário com orientação dos instrutores do Club Med."
+   },
+   {
+    "title": "Cozinha de fusão Dong Bei",
+    "text": "O destaque gastronômico combina fondue de queijo com bolo de arroz doce. A proposta aproxima uma referência de montanha dos sabores do nordeste chinês."
+   },
+   {
+    "title": "Après-ski para compartilhar",
+    "text": "A programação anunciada inclui feira familiar, DJs nas pistas, waffles e crepes. Esses momentos acrescentam convivência à rotina esportiva."
+   },
+   {
+    "title": "Arquitetura acolhedora",
+    "text": "O resort combina inspiração em chalés com interiores modernos. Os quartos são descritos como espaçosos e aconchegantes, reforçando a atmosfera de retiro na montanha."
+   },
+   {
+    "title": "Opções para crianças pequenas",
+    "text": "O Petit Club pago atende crianças de 2 a 3 anos, enquanto as faixas maiores têm programação incluída anunciada. Essa separação ajuda a planejar o orçamento e o tempo dos adultos nas pistas."
+   }
+  ],
+  "highlights": [
+   "Domínio de esqui Beidahu",
+   "Referência aos Jogos Asiáticos de Inverno",
+   "Culinária de fusão Dong Bei",
+   "Arquitetura inspirada em chalés",
+   "Après-ski familiar",
+   "Spa by Ahava",
+   "Petit Club opcional"
+  ],
+  "location": "O resort fica em Beidahu, na província de Jilin, no nordeste da China. A página destaca o ambiente natural de montanha e associa a paisagem à região da reserva de Songhuahu.",
+  "accommodation": "A arquitetura inspirada em chalés abriga interiores modernos e quartos descritos como espaçosos e acolhedores. A página apresenta categorias Superior, Deluxe e Suíte; capacidade e configuração variam conforme a opção escolhida.",
+  "dining": "A proposta culinária destaca a fusão de Dong Bei, incluindo fondue de queijo com bolo de arroz doce. Refeições e seleção de bebidas integram o all inclusive, respeitadas as condições dos serviços especiais.",
+  "wellness": "O Club Med Spa by Ahava e a hidromassagem aparecem entre os destaques do resort; a página também menciona piscina. A extração não detalha a cobrança de cada tratamento ou acesso, que deve ser consultada separadamente.",
+  "families": "O Mini Club Med de 4 a 10 anos e o Teens & Chill Pass de 11 a 17 anos são anunciados como incluídos. O Petit Club Med para crianças de 2 a 3 anos tem custo adicional. Confirmar vagas, calendário e idades específicas das modalidades de neve; não foi comprovado Baby Club supervisionado.",
+  "idealFor": [
+   "famílias com crianças pequenas e adolescentes",
+   "viajantes interessados em gastronomia regional chinesa",
+   "grupos que valorizam après-ski organizado"
+  ],
+  "differentiators": [
+   "Domínio associado aos Jogos Asiáticos de Inverno",
+   "Gastronomia de fusão Dong Bei",
+   "Programação familiar de après-ski"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui apresentado no all inclusive do produto Beidahu",
+    "Aulas coletivas de esqui anunciadas na oferta de inverno",
+    "Monitoria Mini Club Med de 4 a 10 anos",
+    "Programação Teens & Chill Pass de 11 a 17 anos"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard",
+    "Petit Club Med para crianças de 2 a 3 anos"
+   ],
+   "notes": "A chamada geral de aulas a partir de 4 anos não estabelece a idade mínima de todas as modalidades. Confirmar turmas de snowboard, níveis, validade do passe e eventuais serviços de spa, transfer ou aulas particulares antes de contratar."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/beidahu/w",
+    "label": "Página oficial de inverno — Beidahu",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "changbaishan",
+  "kind": "resort",
+  "name": "Club Med Changbaishan",
+  "country": "China",
+  "countryKey": "china",
+  "region": "Jilin, região de Changbaishan",
+  "village": "Changbaishan",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa, com consulta de disponibilidade. Datas exatas, altitude, quilômetros de pistas e ski-in/ski-out não foram comprovados na fonte consultada.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Changbai Mountain Huamei Ski Resort",
+   "km": null,
+   "note": "Denominação publicada na seção oficial de área de esqui; extensão não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Esportes de neve, águas termais e referências culturais de Changbai.",
+  "whyChoose": [
+   {
+    "title": "Mais de uma modalidade de neve",
+    "text": "A página apresenta esqui, snowboard e esqui cross-country entre as atividades. A variedade permite planejar uma estadia que não dependa exclusivamente de descidas alpinas."
+   },
+   {
+    "title": "Centro de águas termais",
+    "text": "O complexo anunciado tem 3.000 m² e 29 piscinas, com hidroterapia e banhos de ervas chinesas. É um diferencial concreto de infraestrutura, sem implicar que todo tratamento ou acesso especial seja gratuito."
+   },
+   {
+    "title": "Sabores de Changbai",
+    "text": "A gastronomia destaca preparações com ginseng, como chá e sopa de frango. Também são mencionadas especialidades coreanas, ampliando as referências culinárias da viagem."
+   },
+   {
+    "title": "Acomodações com herança Manchu",
+    "text": "Os quartos combinam referências Manchu com elementos contemporâneos. A proposta cria uma identidade visual ligada à região, em vez de apenas reproduzir um hotel alpino."
+   },
+   {
+    "title": "Natureza como parte do roteiro",
+    "text": "A página apresenta o lago Tianchi como possibilidade de descoberta do destino. Passeios desse tipo devem ter acesso, clima, transporte e eventual cobrança verificados, sem serem tratados como excursões incluídas."
+   }
+  ],
+  "highlights": [
+   "Changbai Mountain Huamei Ski Resort",
+   "Esqui cross-country na oferta de atividades",
+   "Centro termal de 3.000 m²",
+   "29 piscinas anunciadas",
+   "Banhos de ervas chinesas",
+   "Culinária com ginseng",
+   "Decoração de inspiração Manchu"
+  ],
+  "location": "No nordeste da China, na região de Changbaishan, o resort combina paisagens de montanha com a proximidade do domínio Changbai Mountain Huamei Ski Resort. O conteúdo oficial também apresenta a natureza regional e o lago Tianchi como referências de descoberta.",
+  "accommodation": "Os quartos misturam herança Manchu e conceitos contemporâneos, com opções descritas com janela ou varanda. A página apresenta acomodações Deluxe e Suítes; vista, varanda e configuração devem ser verificadas na unidade selecionada.",
+  "dining": "A culinária destaca especialidades coreanas e receitas com ginseng de Changbai, incluindo chá e sopa de frango. Esses ingredientes são referências gastronômicas, não promessas de benefícios médicos; refeições e seleção de bebidas seguem as condições do all inclusive.",
+  "wellness": "O centro termal anunciado reúne 3.000 m² e 29 piscinas, incluindo propostas de hidroterapia e banhos de ervas chinesas. A página também apresenta Club Med Spa, fitness e ioga; confirmar regras de acesso e cobrança de tratamentos antes da reserva.",
+  "families": "A página apresenta uma seção de crianças e famílias e anuncia atividades compartilhadas, como workshops e momentos de retorno do esqui. A extração consultada não foi suficiente para comprovar os nomes, idades, calendário e cobrança de todos os clubes; confirmar Baby, Petit, Mini e programação de adolescentes diretamente, sem presumir atendimento incluído.",
+  "idealFor": [
+   "viajantes que combinam neve e águas termais",
+   "casais interessados em gastronomia regional",
+   "famílias dispostas a confirmar previamente os serviços infantis"
+  ],
+  "differentiators": [
+   "Centro termal com dimensões e número de piscinas publicados",
+   "Referências culturais Manchu",
+   "Culinária de Changbai e especialidades coreanas"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Refeições e seleção de bebidas apresentadas no all inclusive",
+    "Hospedagem na categoria contratada"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard apresentado sob demanda"
+   ],
+   "notes": "Esqui, snowboard e cross-country constam da oferta de atividades, mas a evidência extraída não permite discriminar com segurança inclusão do passe, turmas, idades e duração. Esses benefícios devem ser confirmados na proposta de inverno antes de serem publicados como incluídos. Confirmar também acesso ao centro termal, tratamentos, clubes infantis e deslocamentos."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/changbaishan/w",
+    "label": "Página oficial de inverno — Changbaishan",
+    "accessed": "2026-11-12"
+   }
+  ]
+ }
+]

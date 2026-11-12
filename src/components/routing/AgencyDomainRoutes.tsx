@@ -25,6 +25,8 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { resolveContentPages } from "@/lib/agencySiteContentPages";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 
+const ClubMedSnowCollectionPage = lazy(() => import("@/pages/whitelabel/clubMedSnow/ClubMedSnowCollectionPage"));
+const ClubMedSnowResortPage = lazy(() => import("@/pages/whitelabel/clubMedSnow/ClubMedSnowResortPage"));
 const AgencySiteHome = lazy(() => import("@/pages/whitelabel/AgencySiteHome"));
 const AgencyUnderConstruction = lazy(() => import("@/pages/whitelabel/AgencyUnderConstruction"));
 const DestinosComAJuComingSoon = lazy(() => import("@/pages/whitelabel/DestinosComAJuComingSoon"));
@@ -278,6 +280,8 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/ofertas/:slug" element={<AgencyOfferDetail info={info} />} />
             <Route path="/circuitos/:slug" element={<CircuitTourPage info={info} />} />
             {/* Página de navio (compartilhada por todas as agências; pedido entra no CRM do domínio). */}
+            <Route path="/club-med-neve" element={<ClubMedSnowCollectionPage info={info} />} />
+            <Route path="/club-med-neve/:slug" element={<ClubMedSnowResortPage info={info} />} />
             <Route path="/cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
             <Route path="/cruzeiros/:line/:ship" element={<CruiseShipRoutePage info={info} />} />
           </Route>

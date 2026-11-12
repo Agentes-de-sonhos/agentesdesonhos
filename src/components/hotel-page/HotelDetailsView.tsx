@@ -1,6 +1,7 @@
+import type React from "react";
 import { useRef, useState } from "react";
 import {
-  BedDouble, Clock, Dumbbell, ExternalLink, MapPin, PawPrint, ParkingCircle, Baby, Waves,
+  Mountain, Snowflake, Eye, House, CableCar, BedDouble, Clock, Dumbbell, ExternalLink, MapPin, PawPrint, ParkingCircle, Baby, Waves,
   Sparkles, Star, UtensilsCrossed, ConciergeBell, Wifi, Wine, Umbrella, ChevronRight, ChevronLeft, type LucideIcon,
 } from "lucide-react";
 import { HotelGallery } from "./HotelGallery";
@@ -10,7 +11,7 @@ import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest, HotelReview } 
 const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   restaurant: UtensilsCrossed, "room-service": ConciergeBell, spa: Sparkles, gym: Dumbbell,
   pets: PawPrint, pool: Waves, wifi: Wifi, parking: ParkingCircle, kids: Baby,
-  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble,
+  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble, mountain: Mountain, snow: Snowflake, view: Eye, home: House, "cable-car": CableCar,
 };
 
 export function Stars({ value, className }: { value: number; className?: string }) {
@@ -152,8 +153,11 @@ export function ReviewsCarousel({ reviews }: { reviews: HotelReview[] }) {
 }
 
 export function HotelDetailsView({
-  hotel, onSubmitQuote, previewMode, quoteWhatsappUrl,
+  hotel, onSubmitQuote, previewMode, quoteWhatsappUrl, quoteExtras, children,
 }: {
+  quoteExtras?: { key: string; label: string; options: string[] }[];
+  /** Seções adicionais na coluna principal (ex.: benefícios de neve). */
+  children?: React.ReactNode;
   quoteWhatsappUrl?: (req: HotelQuoteRequest) => string | null;
   hotel: HotelPageData;
   onSubmitQuote?: (req: HotelQuoteRequest) => Promise<void>;
@@ -164,18 +168,18 @@ export function HotelDetailsView({
 
   return (
     <article className="space-y-8 text-foreground">
-      <header>
+      <div>
         {hotel.stars ? <Stars value={hotel.stars} /> : null}
         <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight md:text-4xl">{hotel.name}</h1>
         <p className="mt-2 flex items-start gap-1.5 text-sm text-muted-foreground md:text-base">
           <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
           {[hotel.address, hotel.city, hotel.state].filter(Boolean).join(" · ")}
         </p>
-      </header>
+      </div>
 
       <HotelGallery photos={hotel.photos} hotelName={hotel.name} />
 
-      <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={previewMode} whatsappUrl={quoteWhatsappUrl} />
+      <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={previewMode} whatsappUrl={quoteWhatsappUrl} extras={quoteExtras} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 flex flex-col gap-8">
@@ -194,6 +198,8 @@ export function HotelDetailsView({
               <AmenitiesCarousel amenities={hotel.amenities} />
             </section>
           )}
+
+          {children}
 
           {(hotel.checkIn || hotel.checkOut) && (
             <section className="rounded-2xl bg-primary/5 p-5 md:p-6">

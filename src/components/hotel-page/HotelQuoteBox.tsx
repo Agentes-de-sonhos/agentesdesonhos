@@ -40,8 +40,10 @@ function Stepper({ label, value, min, max, onChange }: { label: string; value: n
 }
 
 export function HotelQuoteBox({
-  hotelSlug, hotelName, onSubmit, previewMode, whatsappUrl,
+  hotelSlug, hotelName, onSubmit, previewMode, whatsappUrl, extras,
 }: {
+  /** Campos opcionais de contexto (ex.: nível de esqui). Valores seguem em `req.extras`. */
+  extras?: { key: string; label: string; options: string[] }[];
   /** Link opcional para o cliente continuar a conversa no WhatsApp da agência. */
   whatsappUrl?: (req: HotelQuoteRequest) => string | null;
   hotelSlug: string;
@@ -62,6 +64,7 @@ export function HotelQuoteBox({
   const [consent, setConsent] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [lastReq, setLastReq] = useState<HotelQuoteRequest | null>(null);
+  const [extraVals, setExtraVals] = useState<Record<string, string>>({});
   const needsConsent = !!onSubmit && !previewMode;
 
   const today = todayIso();
@@ -94,6 +97,7 @@ export function HotelQuoteBox({
       const req: HotelQuoteRequest = {
         hotelSlug, hotelName, checkIn, checkOut, adults,
         childrenAges: ages as number[],
+        ...(extras?.length ? { extras: extraVals } : {}),
         contact: parsed.data as HotelQuoteRequest["contact"],
       };
       if (onSubmit) await onSubmit(req);
@@ -139,6 +143,23 @@ export function HotelQuoteBox({
         <Stepper label="Crianças" value={ages.length} min={0} max={6} onChange={setChildren} />
         <Button onClick={start} size="lg" className="col-span-2 h-11 w-full lg:col-span-1 lg:w-auto">Solicitar orçamento</Button>
       </div>
+      {extras?.length ? (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {extras.map((x) => (
+            <label key={x.key} className="text-sm font-medium">
+              {x.label}
+              <select
+                value={extraVals[x.key] ?? ""}
+                onChange={(e) => setExtraVals((v) => ({ ...v, [x.key]: e.target.value }))}
+                className="mt-1.5 h-11 w-full rounded-lg border border-border bg-card px-3 text-sm"
+              >
+                <option value="">Prefiro informar depois</option>
+                {x.options.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </label>
+          ))}
+        </div>
+      ) : null}
 
       {ages.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-3">
