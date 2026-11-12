@@ -1,3 +1,4 @@
+import type React from "react";
 import { useRef, useState } from "react";
 import {
   BedDouble, Clock, Dumbbell, ExternalLink, MapPin, PawPrint, ParkingCircle, Baby, Waves,
@@ -152,8 +153,11 @@ export function ReviewsCarousel({ reviews }: { reviews: HotelReview[] }) {
 }
 
 export function HotelDetailsView({
-  hotel, onSubmitQuote, previewMode, quoteWhatsappUrl,
+  hotel, onSubmitQuote, previewMode, quoteWhatsappUrl, quoteExtras, children,
 }: {
+  quoteExtras?: { key: string; label: string; options: string[] }[];
+  /** Seções adicionais na coluna principal (ex.: benefícios de neve). */
+  children?: React.ReactNode;
   quoteWhatsappUrl?: (req: HotelQuoteRequest) => string | null;
   hotel: HotelPageData;
   onSubmitQuote?: (req: HotelQuoteRequest) => Promise<void>;
@@ -175,7 +179,7 @@ export function HotelDetailsView({
 
       <HotelGallery photos={hotel.photos} hotelName={hotel.name} />
 
-      <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={previewMode} whatsappUrl={quoteWhatsappUrl} />
+      <HotelQuoteBox hotelSlug={hotel.slug} hotelName={hotel.name} onSubmit={onSubmitQuote} previewMode={previewMode} whatsappUrl={quoteWhatsappUrl} extras={quoteExtras} />
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0 flex flex-col gap-8">
@@ -194,6 +198,8 @@ export function HotelDetailsView({
               <AmenitiesCarousel amenities={hotel.amenities} />
             </section>
           )}
+
+          {children}
 
           {(hotel.checkIn || hotel.checkOut) && (
             <section className="rounded-2xl bg-primary/5 p-5 md:p-6">

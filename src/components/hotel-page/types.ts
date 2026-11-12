@@ -57,5 +57,6 @@ export interface HotelQuoteRequest {
   checkOut: string;
   adults: number;
   childrenAges: number[];
+  extras?: Record<string, string>;
   contact: { name: string; whatsapp: string; email: string };
 }

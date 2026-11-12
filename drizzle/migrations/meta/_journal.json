@@ -456,6 +456,13 @@
       "when": 1794355482795,
       "tag": "0064_public_quote_document_storage_gate",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1794490694782,
+      "tag": "0065_club_med_snow_place_cache",
+      "breakpoints": true
     }
   ]
 }

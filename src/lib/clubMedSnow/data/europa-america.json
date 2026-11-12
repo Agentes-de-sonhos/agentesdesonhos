@@ -1,0 +1,259 @@
+[
+ {
+  "slug": "pragelato-sestriere",
+  "kind": "resort",
+  "name": "Club Med Pragelato Sestriere",
+  "country": "Itália",
+  "countryKey": "italia",
+  "region": "Piemonte, Alpes italianos",
+  "village": "Pragelato",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa, com consulta de preços e disponibilidade. Datas exatas da temporada, altitude e ski-in/ski-out não foram comprovados na fonte consultada.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Via Lattea – Sestrière",
+   "km": 400,
+   "note": "A página oficial apresenta 400 km para o domínio franco-italiano; isso não significa que todas as pistas estejam abertas em qualquer data."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Uma vila de chalés e sabores piemonteses para explorar a Via Lattea.",
+  "whyChoose": [
+   {
+    "title": "Hospedagem com atmosfera de vilarejo",
+    "text": "O resort reúne pequenos chalés de madeira em torno de uma fonte, com vielas e pinheiros compondo o cenário. É uma proposta diferente da hospedagem em um único bloco de hotel."
+   },
+   {
+    "title": "Exploração da Via Lattea",
+    "text": "A página oficial associa a experiência ao domínio franco-italiano Via Lattea, apresentado com 400 km de pistas. A variedade permite planejar dias de exploração sem depender de uma única encosta."
+   },
+   {
+    "title": "Cozinha do Piemonte",
+    "text": "A proposta gastronômica destaca especialidades piemontesas, incluindo fondue com trufas. O terraço e a focaccia no aperitivo reforçam a identidade italiana da estadia."
+   },
+   {
+    "title": "Descanso além das pistas",
+    "text": "A apresentação do resort destaca caminhadas entre pinheiros e sauna finlandesa no retorno. O Club Med Spa by PAYOT também aparece na oferta de atividades, sem que isso torne todos os tratamentos incluídos."
+   },
+   {
+    "title": "Aprendizado organizado",
+    "text": "O all inclusive relaciona passe de esqui e aulas coletivas de esqui e snowboard. A página identifica a escola italiana SIS em atividades de neve, facilitando uma viagem centrada em aprender e progredir."
+   }
+  ],
+  "highlights": [
+   "Vila de chalés de madeira",
+   "Domínio Via Lattea – Sestrière",
+   "Culinária piemontesa",
+   "Fondue com trufas",
+   "Sauna finlandesa",
+   "Club Med Spa by PAYOT",
+   "Aulas coletivas de neve"
+  ],
+  "location": "Nos Alpes italianos, na região do Piemonte, o resort ocupa uma vila de chalés em Pragelato. A página oficial o apresenta como base para explorar o domínio Via Lattea – Sestrière e suas paisagens de montanha.",
+  "accommodation": "Os quartos ficam em pequenos chalés de três andares, descritos como tendo no máximo quatro quartos por edifício. A decoração combina ambientes claros, referências ao design italiano e a presença dos pinheiros do lado de fora; a página apresenta acomodações Superior e Deluxe.",
+  "dining": "A gastronomia valoriza o Piemonte, com especialidades como fondue com trufas e focaccia. Refeições e a seleção de bebidas do all inclusive fazem parte da proposta, mas não se deve interpretar isso como inclusão irrestrita de qualquer vinho, bebida ou serviço especial.",
+  "wellness": "A sauna finlandesa e os espaços acolhedores de descanso complementam os dias nas pistas. O Club Med Spa by PAYOT consta na página; valores e condições de tratamentos devem ser consultados separadamente.",
+  "families": "A página apresenta faixas de 2 a 3, 4 a 10, 11 a 13 e 14 a 17 anos e descreve monitoria incluída de 4 a 17 anos. Isso não comprova atendimento gratuito para menores de 4 anos: nome do clube, cobrança, vagas e calendário dessa faixa devem ser confirmados antes da reserva. A idade mínima específica do snowboard não foi comprovada.",
+  "idealFor": [
+   "famílias com crianças em idade de clube infantil",
+   "viajantes que valorizam gastronomia regional",
+   "esquiadores interessados em um domínio franco-italiano"
+  ],
+  "differentiators": [
+   "Acomodações distribuídas em pequenos chalés",
+   "Identidade gastronômica piemontesa",
+   "Associação ao domínio Via Lattea"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui associado ao domínio Via Lattea – Sestrière",
+    "Aulas coletivas de esqui para crianças, adolescentes e adultos",
+    "Aulas coletivas de snowboard mencionadas no all inclusive",
+    "Caminhadas com raquetes mencionadas na programação incluída"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard, apresentado como serviço sob demanda"
+   ],
+   "notes": "A página anuncia aulas em grupo a partir de 4 anos, mas não discrimina essa idade para todas as modalidades; não aplicar automaticamente ao snowboard. Duração e validade do passe, horários, níveis, tratamentos de spa, transfer e aulas particulares exigem confirmação específica."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/pragelato-sestriere/w",
+    "label": "Página oficial de inverno — Pragelato Sestriere",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "saint-moritz-roi-soleil",
+  "kind": "resort",
+  "name": "Club Med Saint-Moritz Roi Soleil",
+  "country": "Suíça",
+  "countryKey": "suica",
+  "region": "Engadina, Alpes suíços",
+  "village": "Saint-Moritz",
+  "status": "confirmado",
+  "statusNote": "A página oficial anual apresenta o produto de esportes de inverno, passe e aulas, com consulta de disponibilidade. A rota /w consultada estava indisponível; isso não indica fechamento do resort. Datas exatas, altitude e ski-in/ski-out não foram comprovados.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Haute-Engadin",
+   "km": null,
+   "note": "Nome publicado na seção de área de esqui. Os 240 km citados em outro trecho referem-se a trilhas de esqui cross-country, não à extensão de pistas alpinas."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Esqui alpino e tradição nórdica na paisagem da Engadina.",
+  "whyChoose": [
+   {
+    "title": "Esqui alpino e nórdico na mesma viagem",
+    "text": "A página apresenta esqui alpino, snowboard e esqui nórdico entre as atividades. É uma alternativa para quem quer combinar modalidades em vez de concentrar toda a estadia em descidas."
+   },
+   {
+    "title": "Paisagem da Engadina",
+    "text": "O conteúdo destaca florestas, lagos e montanhas da região. As trilhas de cross-country aparecem como uma forma própria de explorar esse cenário."
+   },
+   {
+    "title": "Vida de montanha com ambiente urbano",
+    "text": "O resort fica em Saint-Moritz, apresentada com butiques, galerias de arte e tradição alpina. A viagem pode combinar a rotina esportiva com passeios pela cidade."
+   },
+   {
+    "title": "Pausa gastronômica nas encostas",
+    "text": "A página destaca a possibilidade de almoçar em altitude com vista para as montanhas. É um diferencial de experiência, embora horários e funcionamento devam ser verificados na estadia."
+   },
+   {
+    "title": "Alternativas para não esquiadores",
+    "text": "A programação relaciona fitness, atividades na piscina e passeios a pé ou com raquetes. Isso oferece opções a acompanhantes que não pretendem passar todos os dias nas pistas."
+   }
+  ],
+  "highlights": [
+   "Localização em Saint-Moritz",
+   "Domínios Haute-Engadin",
+   "Esqui nórdico",
+   "Paisagens de lagos e florestas",
+   "Almoço nas encostas",
+   "Atividades na piscina",
+   "Passeios com raquetes"
+  ],
+  "location": "O resort está na cidade de Saint-Moritz, na Engadina suíça. A página oficial relaciona a estadia aos domínios Haute-Engadin e destaca tanto a paisagem natural quanto as atrações urbanas da estação.",
+  "accommodation": "A hospedagem ocupa um edifício de seis andares, com quartos descritos como claros, arejados e decorados com móveis discretos. A categoria de quarto Superior aparece na página oficial.",
+  "dining": "O all inclusive apresenta refeições e seleção de bebidas, enquanto o conteúdo editorial destaca o almoço nas encostas. A fonte consultada não permite detalhar com segurança os nomes de todos os restaurantes ou as condições de cada serviço em altitude.",
+  "wellness": "Atividades na piscina, fitness e treino de cardio aparecem entre as opções do resort. Passeios a pé, com raquetes e caminhada nórdica ampliam as alternativas de lazer; não foi comprovada uma oferta específica de tratamentos de spa.",
+  "families": "A seção geral do all inclusive menciona monitoria de 4 a 17 anos, mas a página também exibe cartões genéricos para faixas menores sem detalhar os serviços correspondentes. Confirmar clubes efetivamente operantes, calendário e atendimento a menores de 4 anos antes de reservar; não presumir Baby Club ou Petit Club incluídos.",
+  "idealFor": [
+   "viajantes interessados em esqui nórdico",
+   "casais que combinam esporte e passeios urbanos",
+   "grupos com esquiadores e não esquiadores"
+  ],
+  "differentiators": [
+   "Combinação de modalidades alpinas e nórdicas",
+   "Inserção urbana em Saint-Moritz",
+   "Paisagem de lagos da Engadina"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui apresentado no all inclusive do produto Haute-Engadin",
+    "Aulas coletivas de esqui alpino",
+    "Aulas coletivas de snowboard",
+    "Aulas coletivas de esqui cross-country"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui",
+    "Aluguel de equipamentos de snowboard",
+    "Aluguel de equipamentos de cross-country e raquetes apresentado sob demanda"
+   ],
+   "notes": "A fonte lista instrutores ESS e anuncia aulas em grupo a partir de 4 anos, sem comprovar a idade mínima de cada modalidade. Não extrapolar os 240 km de trilhas nórdicas para pistas alpinas. Confirmar deslocamentos às pistas, validade do passe e funcionamento dos clubes."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/saint-moritz-roi-soleil/y",
+    "label": "Página oficial com oferta de esportes de inverno",
+    "accessed": "2026-11-12"
+   }
+  ]
+ },
+ {
+  "slug": "quebec-charlevoix",
+  "kind": "resort",
+  "name": "Club Med Québec Charlevoix",
+  "country": "Canadá",
+  "countryKey": "canada",
+  "region": "Charlevoix, Québec",
+  "village": "Petite-Rivière-Saint-François",
+  "status": "confirmado",
+  "statusNote": "Página oficial de inverno ativa, com consulta de preços e disponibilidade. Datas exatas da temporada, altitude e ski-in/ski-out não foram comprovados na extração consultada.",
+  "altitude": null,
+  "skiArea": {
+   "name": "Le Massif de Charlevoix",
+   "km": null,
+   "note": "Domínio identificado na página oficial; extensão em quilômetros não comprovada."
+  },
+  "season": null,
+  "skiInSkiOut": null,
+  "tagline": "Esqui com vista para o rio São Lourenço e sabores de Charlevoix.",
+  "whyChoose": [
+   {
+    "title": "Paisagem de rio nas pistas",
+    "text": "A página destaca descidas com vista para o rio St. Lawrence, o São Lourenço. Esse encontro entre montanha e rio diferencia o cenário da viagem."
+   },
+   {
+    "title": "Gastronomia regional",
+    "text": "A proposta culinária valoriza os produtos de Charlevoix e a cozinha do Québec. O poutine aparece entre as referências locais apresentadas pelo resort."
+   },
+   {
+    "title": "Bem-estar com vista",
+    "text": "O conteúdo apresenta spa nórdico, hidromassagem, sauna e sala de vapor voltados para a paisagem do rio. É uma opção concreta para complementar os dias de esqui, sujeita às condições de acesso e cobrança."
+   },
+   {
+    "title": "Decoração ligada ao destino",
+    "text": "Os quartos combinam arquitetura contemporânea com referências às tradições do Québec e à herança indígena. Materiais e detalhes decorativos ajudam a manter a identidade regional dentro da hospedagem."
+   },
+   {
+    "title": "Esporte e descoberta cultural",
+    "text": "Além do domínio Le Massif, a página sugere conhecer a cidade de Québec e seu centro histórico. O passeio deve ser organizado separadamente, sem presumir transporte ou excursão incluídos."
+   }
+  ],
+  "highlights": [
+   "Domínio Le Massif de Charlevoix",
+   "Vista para o rio São Lourenço",
+   "Culinária de Charlevoix",
+   "Referências culturais do Québec",
+   "Spa by SOTHYS",
+   "Programação para famílias",
+   "Espaço Exclusive Collection no resort"
+  ],
+  "location": "Em Petite-Rivière-Saint-François, na região de Charlevoix, o resort fica ao norte da cidade de Québec. A apresentação oficial associa a experiência de esqui ao Le Massif de Charlevoix e às vistas para o rio São Lourenço.",
+  "accommodation": "Os quartos combinam elementos contemporâneos com referências culturais do Québec e de sua herança indígena. A página também divulga um espaço Exclusive Collection com suítes e serviços próprios; isso não transforma automaticamente todas as acomodações ou todo o resort nessa categoria.",
+  "dining": "A cozinha destaca ingredientes de Charlevoix, propostas da fazenda à mesa e especialidades como poutine. Refeições e seleção de bebidas compõem o all inclusive, respeitando as condições de cada restaurante e eventuais produtos especiais.",
+  "wellness": "O Club Med Spa by SOTHYS aparece na oferta, junto da apresentação de um circuito de inspiração nórdica com hidromassagem, sauna e vapor. A página consultada não discrimina suficientemente a cobrança de cada acesso ou tratamento, que deve ser confirmada antes da contratação.",
+  "families": "A página apresenta faixas de 0 a 2, 2 a 3, 4 a 10, 11 a 13 e 14 a 17 anos, além de monitoria incluída de 4 a 17 anos. Os cartões de bebês e crianças menores não comprovam, por si só, Baby Club ou Petit Club gratuitos; confirmar serviços, idade mínima e valores. A idade do snowboard também exige consulta específica.",
+  "idealFor": [
+   "famílias que buscam uma viagem de neve no Canadá",
+   "casais interessados em gastronomia e bem-estar",
+   "viajantes que desejam combinar esqui e Québec"
+  ],
+  "differentiators": [
+   "Pistas com vistas para um grande rio",
+   "Gastronomia regional de Charlevoix",
+   "Espaço Exclusive Collection como opção de hospedagem"
+  ],
+  "snowBenefits": {
+   "included": [
+    "Passe de esqui associado ao Le Massif de Charlevoix",
+    "Aulas coletivas de esqui para crianças, adolescentes e adultos",
+    "Aulas coletivas de snowboard para crianças, adolescentes e adultos",
+    "Caminhadas com raquetes e caminhada nórdica listadas no all inclusive"
+   ],
+   "extra": [
+    "Aluguel de equipamentos de esqui e snowboard apresentado sob demanda"
+   ],
+   "notes": "A página anuncia aulas em grupo a partir de 4 anos sem separar todas as modalidades por idade. Confirmar duração do passe, dias de aula, regras de acesso ao bem-estar, transfer e excursões; nenhum desses detalhes deve ser presumido a partir do termo all inclusive."
+  },
+  "sources": [
+   {
+    "url": "https://www.clubmed.com.br/r/quebec-charlevoix/w",
+    "label": "Página oficial de inverno — Québec Charlevoix",
+    "accessed": "2026-11-12"
+   }
+  ]
+ }
+]

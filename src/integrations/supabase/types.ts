@@ -3280,6 +3280,30 @@ export type Database = {
           },
         ]
       }
+      club_med_place_cache: {
+        Row: {
+          fetched_at: string
+          payload: Json
+          place_id: string | null
+          slug: string
+          status: string
+        }
+        Insert: {
+          fetched_at?: string
+          payload?: Json
+          place_id?: string | null
+          slug: string
+          status?: string
+        }
+        Update: {
+          fetched_at?: string
+          payload?: Json
+          place_id?: string | null
+          slug?: string
+          status?: string
+        }
+        Relationships: []
+      }
       commercial_signatures: {
         Row: {
           created_at: string
