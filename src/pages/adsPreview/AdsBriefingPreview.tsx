@@ -162,6 +162,31 @@ export default function AdsBriefingPreview() {
 
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
+      {fixture.jobId === "briefing-23-v1" && <style>{`
+        [data-ads-preview="briefing-23-v1"] header {
+          background: #000 !important; --foreground: 0 0% 100%; --muted-foreground: 0 0% 80%; --background: 0 0% 0%;
+        }
+        [data-ads-preview="briefing-23-v1"] header > div:first-child > a > span { display: none; }
+        [data-ads-preview="briefing-23-v1"] header img {
+          height: 80px !important; width: auto !important; max-width: 220px !important; object-fit: contain;
+        }
+        [data-ads-preview="briefing-23-v1"] #rodape {
+          background: #000 !important; color: #fff; --wl-ink: 0 0% 100%;
+        }
+        [data-ads-preview="briefing-23-v1"] #rodape img {
+          height: 80px !important; width: auto; max-width: 240px; object-fit: contain;
+        }
+        [data-ads-preview="briefing-23-v1"] #rodape span:has(> img) {
+          background: transparent !important; padding: 0; box-shadow: none;
+        }
+        [data-ads-preview="briefing-23-v1"] #rodape > div:last-child {
+          background: #fff !important; --wl-ink: 0 0% 0%; color: #000;
+        }
+        @media (min-width: 768px) {
+          [data-ads-preview="briefing-23-v1"] header img { height: 100px !important; max-width: 260px !important; }
+          [data-ads-preview="briefing-23-v1"] #rodape img { height: 100px !important; }
+        }
+      `}</style>}
       <div
         role="status"
         className="sticky top-0 z-[100] bg-foreground px-4 py-2 text-center text-sm font-medium text-background"
