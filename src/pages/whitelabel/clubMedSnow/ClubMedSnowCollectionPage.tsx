@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { Mountain, Snowflake } from "lucide-react";
 import { CLUB_MED_SNOW, CLUB_MED_SNOW_BASE, groupByCountry, type ClubMedSnowResort } from "@/lib/clubMedSnow";
-import { useClubMedSnowPlaces } from "@/hooks/useClubMedSnowPlaces";
 import { getClubMedSnowPhotos } from "@/lib/clubMedSnow/photos";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import { CountryFilters } from "./CountryFilters";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 function ResortCard({ r }: { r: ClubMedSnowResort }) {
-  const { data } = useClubMedSnowPlaces(r.slug);
-  const photo = getClubMedSnowPhotos(r.slug)[0] ?? data?.photos?.[0];
+  const photo = getClubMedSnowPhotos(r.slug)[0];
   return (
     <li>
       <a href={agencySiteHref(`${CLUB_MED_SNOW_BASE}/${r.slug}`)} className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-lg">
@@ -68,7 +66,7 @@ export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomain
         ))}
         </div>
         <p className="mt-12 text-xs text-muted-foreground">
-          Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Avaliações e mapas via Google Maps. Fotos selecionadas por imagem e autoria; créditos nas galerias.
+          Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Avaliações e mapas via Google Maps. Fotos oficiais do Club Med, selecionadas por resort; créditos nas galerias.
         </p>
       </div>
     </div>

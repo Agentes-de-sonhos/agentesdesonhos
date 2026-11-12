@@ -100,7 +100,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
       )}
       {photos.some((p) => p.creditUrl) && (
         <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-          Fotos via Google Maps · {Array.from(new Map(photos.filter((p) => p.creditUrl).map((p) => [p.creditUrl, p])).values()).map((p, i) => (
+          {photos.some((p) => p.credit?.endsWith(" · Google Maps")) ? "Fotos via Google Maps · " : "Fotos: "}{Array.from(new Map(photos.filter((p) => p.creditUrl).map((p) => [p.creditUrl, p])).values()).map((p, i) => (
             <span key={p.creditUrl}>{i > 0 ? " · " : ""}<a href={p.creditUrl} target="_blank" rel="noopener noreferrer" className="underline">{p.credit?.replace(/ · Google Maps$/, "")}</a></span>
           ))}
         </p>

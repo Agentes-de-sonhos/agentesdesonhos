@@ -28,6 +28,11 @@ describe("filtro de países do catálogo Club Med", () => {
     expect(screen.getByRole("status")).toHaveTextContent("23 opções de hospedagem em todos os países");
     expect(screen.getByRole("heading", { name: "Itália" })).toBeInTheDocument();
   });
+  it("renderiza capa oficial para todas as 23 opções", () => {
+    render(<ClubMedSnowCollectionPage info={info} />);
+    const covers = screen.getAllByRole("img").filter((img) => img.getAttribute("src")?.includes("production.media.dcx.clubmed"));
+    expect(covers).toHaveLength(23);
+  });
   it("não exibe a nota Google nos cards mesmo quando disponível", () => {
     render(<ClubMedSnowCollectionPage info={info} />);
     expect(screen.queryByText(/Google 4[.,]8/)).not.toBeInTheDocument();
