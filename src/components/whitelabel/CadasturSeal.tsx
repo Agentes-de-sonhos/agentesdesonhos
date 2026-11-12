@@ -9,9 +9,21 @@ import certJu from "@/assets/whitelabel/certificado-cadastur-destinos-com-a-ju.j
 import certCurti from "@/assets/whitelabel/certificado-cadastur-curti.jpg.asset.json";
 import certEssya from "@/assets/whitelabel/certificado-cadastur-essyatur.jpg.asset.json";
 
+interface CadasturCertificate {
+  url: string;
+  agency: string;
+  validityLabel?: string;
+}
+
 /** Certificado por agência autorizada (hostname). */
-export function cadasturCertificateFor(hostname?: string | null) {
+export function cadasturCertificateFor(hostname?: string | null): CadasturCertificate | null {
   const h = hostname ?? "";
+  // Arena: documento enviado pelo proprietário, mantido sem alterar a validade impressa.
+  if (h === "briefing-23-v1.preview.local") return {
+    url: "/arena-travel-group/certificado-cadastur.webp",
+    agency: "Arena Travel Group",
+    validityLabel: "18/09/2024 a 18/09/2026",
+  };
   if (/(^|\.)destinoscomaju\.com\.br$/i.test(h)) return { url: certJu.url, agency: "Destinos com a Ju" };
   if (h === "briefing-14-v1.preview.local" || /(^|\.)omundoemcores\.com\.br$/i.test(h)) return { url: certMundo.url, agency: "O Mundo em Cores" };
   if (/(^|\.)paraisoviagens\.com$/i.test(h)) return { url: certParaiso.url, agency: "Paraíso Viagens" };
@@ -26,7 +38,7 @@ export function cadasturCertificateFor(hostname?: string | null) {
 /** Selo Cadastur clicável que abre o certificado em pop-up (fundo preto 75%). */
 export function CadasturSeal({ className, lazy, hostname }: { className: string; lazy?: boolean; hostname?: string | null }) {
   const [open, setOpen] = useState(false);
-  const certificate = cadasturCertificateFor(hostname) ?? { url: certLimites.url, agency: "100 Limites" };
+  const certificate: CadasturCertificate = cadasturCertificateFor(hostname) ?? { url: certLimites.url, agency: "100 Limites" };
 
   useEffect(() => {
     if (!open) return;
@@ -44,7 +56,10 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
     return <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={`shrink-0 ${className}`} />;
   }
 
-  const tip = `${certificate.agency}, uma Agência de Viagens licenciada pelo Ministério do Turismo`;
+  const tip = certificate.validityLabel
+    ? `${certificate.agency} · validade impressa: ${certificate.validityLabel}`
+    : `${certificate.agency}, uma Agência de Viagens licenciada pelo Ministério do Turismo`;
+  const sealAlt = certificate.validityLabel ? "Certificado Cadastur" : "Somos certificados Cadastur";
 
   return (
     <>
@@ -53,9 +68,10 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Ver certificado Cadastur"
+        data-preview-local="true"
         className="shrink-0 cursor-pointer rounded transition-opacity hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={className} />
+        <img src={cadasturSeal.url} alt={sealAlt} loading={lazy ? "lazy" : undefined} className={className} />
       </button>
       {tip && (
         <span

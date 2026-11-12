@@ -60,7 +60,7 @@ import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
 import { CadasturSeal, cadasturCertificateFor } from "@/components/whitelabel/CadasturSeal";
 
-/** Selo Cadastur: apenas sites autorizados (100 Limites, Destinos com a Ju). */
+/** Selo Cadastur: somente agências com certificado cadastrado no componente compartilhado. */
 const showCadastur = (hostname?: string | null) => cadasturCertificateFor(hostname) !== null;
 
 /** Item de menu do site: pode ter um submenu declarado pelo perfil. */
