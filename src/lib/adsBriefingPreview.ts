@@ -2069,6 +2069,7 @@ const arenaMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_C
 export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   ...arenaMundoSource,
   key: "arenaBriefing23",
+  alternateSurfaces: false,
   nav: ["/", "/#destinos", "/#campanhas", "/#sobre"].flatMap(to => {
     const item = arenaMundoSource.nav?.find(entry => entry.to === to);
     return item ? [{ ...item, children: item.children?.filter(child => !["/xcaret", "/#avaliacoes"].includes(child.to)) }] : [];
