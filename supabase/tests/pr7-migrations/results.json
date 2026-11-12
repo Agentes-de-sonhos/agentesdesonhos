@@ -1,0 +1,183 @@
+{
+  "version": "PostgreSQL 17.5 on aarch64-unknown-linux-gnu, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 3.1.74 (1092ec30a3fb1d46b1782ff1b4db5094d3d06ae5), 32-bit",
+  "runtime": "@electric-sql/pglite@0.3.14",
+  "passed": 37,
+  "failed": 0,
+  "sources": [
+    "supabase/migrations/20260130202930_868edfe2-1eef-4b8f-aaf4-2fe51daf5a87.sql:public.has_role",
+    "supabase/migrations/20260606191615_3dc00dcd-029d-4ca7-8835-58dd6d57192c.sql:public.current_agency_id",
+    "supabase/migrations/20260606191615_3dc00dcd-029d-4ca7-8835-58dd6d57192c.sql:public.is_agency_member",
+    "supabase/migrations/20260606191615_3dc00dcd-029d-4ca7-8835-58dd6d57192c.sql:public.sync_agency_membership_from_team_member",
+    "supabase/migrations/20260805173658_7b7fcfc3-7c30-4409-aad0-b25a1b9d385d.sql:public.user_agency_id",
+    "supabase/migrations/20260805175848_9d18138a-6f24-4df6-b4d5-488c285eb648.sql:public.can_team",
+    "supabase/migrations/20260826140059_3ca8a35b-a2ac-416e-89ad-1cab877581ef.sql:private.agency_owner_ids",
+    "drizzle/migrations/0013_unified_workflow_v2_columns.sql:travel_file_services financial columns and constraints",
+    "supabase/migrations/20260826140059_3ca8a35b-a2ac-416e-89ad-1cab877581ef.sql:private.assert_travel_file_access",
+    "supabase/migrations/20260910134125_05c03245-a001-46b1-83e0-9608a866005b.sql:private.reservations_supplier_allowed",
+    "supabase/migrations/20260807170406_56676354-eefd-488e-b87b-fb65854ddebb.sql:public.agency_has_entitlement",
+    "supabase/migrations/20260910142718_2bb8816f-41fd-44a9-ab9c-c06f393cdf40.sql:public.can_use_reservations_center",
+    "supabase/migrations/20260910142718_2bb8816f-41fd-44a9-ab9c-c06f393cdf40.sql:private.assert_manual_file_gate",
+    "drizzle/migrations/0058_ads_197_full_platform_access.sql:private.reservations_owner_is_eligible",
+    "supabase/migrations/20260910131255_0575d41e-69e7-4e17-90d9-4b1c8d7de4c8.sql:public.log_travel_file_service_manual_change",
+    "supabase/migrations/20260826132805_4766667f-31fb-43ac-a3b8-807e0c969765.sql:public.log_travel_file_service_change",
+    "drizzle/migrations/0065_reservation_service_supplier.sql",
+    "supabase/migrations/20261111130000_agency_team_domain_read.sql"
+  ],
+  "tests": [
+    {
+      "name": "both exact migrations execute on PostgreSQL",
+      "pass": true
+    },
+    {
+      "name": "own private supplier allowed for active authorized team",
+      "pass": true
+    },
+    {
+      "name": "approved active global supplier allowed",
+      "pass": true
+    },
+    {
+      "name": "other agency private supplier denied",
+      "pass": true
+    },
+    {
+      "name": "inactive global supplier denied",
+      "pass": true
+    },
+    {
+      "name": "unapproved global supplier denied",
+      "pass": true
+    },
+    {
+      "name": "missing supplier denied",
+      "pass": true
+    },
+    {
+      "name": "anonymous lacks RPC execute privilege",
+      "pass": true
+    },
+    {
+      "name": "authenticated role without identity denied",
+      "pass": true
+    },
+    {
+      "name": "member missing management permission denied",
+      "pass": true
+    },
+    {
+      "name": "other tenant owner denied",
+      "pass": true
+    },
+    {
+      "name": "financial management permission independently enforced",
+      "pass": true
+    },
+    {
+      "name": "entitlement disabled denies",
+      "pass": true
+    },
+    {
+      "name": "expired entitlement denies",
+      "pass": true
+    },
+    {
+      "name": "manual reservation plan gate enforced",
+      "pass": true
+    },
+    {
+      "name": "manual expired subscription denied",
+      "pass": true
+    },
+    {
+      "name": "future entitlement denied",
+      "pass": true
+    },
+    {
+      "name": "view permission independently enforced",
+      "pass": true
+    },
+    {
+      "name": "blank supplier identity denied",
+      "pass": true
+    },
+    {
+      "name": "trimmed free-text supplier allowed",
+      "pass": true
+    },
+    {
+      "name": "converted sale supplier allowed for owner",
+      "pass": true
+    },
+    {
+      "name": "all financial snapshots, sale, operation and non-identity service fields unchanged",
+      "pass": true
+    },
+    {
+      "name": "exactly four supplier audit events with actor and identity",
+      "pass": true
+    },
+    {
+      "name": "existing history trigger produces no financial/status change event",
+      "pass": true
+    },
+    {
+      "name": "active member reads only active own domain",
+      "pass": true
+    },
+    {
+      "name": "other tenant owner sees only own domain",
+      "pass": true
+    },
+    {
+      "name": "owner retains active and inactive own-domain visibility",
+      "pass": true
+    },
+    {
+      "name": "admin retains all-domain visibility",
+      "pass": true
+    },
+    {
+      "name": "domain anonymous denied",
+      "pass": true
+    },
+    {
+      "name": "domain writes not granted to member",
+      "pass": true
+    },
+    {
+      "name": "domain member denied by RLS even if table write privileges exist",
+      "pass": true
+    },
+    {
+      "name": "domain existing non-SELECT policies remain unchanged",
+      "pass": true
+    },
+    {
+      "name": "domain membership revoked immediately on deactivation",
+      "pass": true
+    },
+    {
+      "name": "domain membership revoked immediately on deletion",
+      "pass": true
+    },
+    {
+      "name": "domain stranger without membership sees nothing",
+      "pass": true
+    },
+    {
+      "name": "audit insert failure rolls back full service row and all events atomically",
+      "pass": true
+    },
+    {
+      "name": "all denied operations leave snapshots and supplier audit count intact",
+      "pass": true
+    }
+  ],
+  "limits": [
+    "Subset schema, not full Supabase migration replay.",
+    "Supabase auth.uid shim reads synthetic session claim; all authorization helpers and membership sync copied literally from repository.",
+    "Base travel_files/services DDL and real history triggers included; unrelated production triggers/extensions/storage are not reproduced.",
+    "Sales/sale_products/operations are synthetic sentinel tables, not complete financial schema.",
+    "No remote database, production credentials, attachments, passwords, URLs or storage accessed."
+  ]
+}

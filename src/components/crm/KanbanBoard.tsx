@@ -437,8 +437,13 @@ export function KanbanBoard() {
 
     // Só após a persistência confirmada (uma vez por movimentação bem-sucedida).
     if (celebrate) fireCelebrationConfetti();
+    return true;
 
   };
+
+  // Toast actions outlive their render: undo needs the current stage snapshot.
+  const latestPerformMove = useRef(performMove);
+  latestPerformMove.current = performMove;
 
   // Reuso direto da lógica do drag and drop (mesma reordenação, permissões e cache).
   const performDrop = async (toStage: PipelineStage, targetCardId: string | null, dropBefore: boolean) => {
@@ -493,13 +498,14 @@ export function KanbanBoard() {
       if (!toStage) return void toast.message(r.message || `Para qual coluna devo mover o cartão de ${who}?`);
       const fromId = stages.find((s) => s.id === opp.stage_id || s.legacy_key === opp.stage)?.id;
       if (fromId === toStage.id) return void toast.message(`${who} já está em "${toStage.name}".`);
-      await performMove(opp.id, toStage, null, false);
+      const moved = await performMove(opp.id, toStage, null, false);
+      if (!moved) return;
       toast.success(`${who} movido para "${toStage.name}".`, fromId ? {
         action: {
           label: "Desfazer",
           onClick: () => {
             const back = stages.find((s) => s.id === fromId);
-            if (back) void performMove(opp.id, back, null, false);
+            if (back) void latestPerformMove.current(opp.id, back, null, false);
           },
         },
       } : undefined);

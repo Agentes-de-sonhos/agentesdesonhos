@@ -74,6 +74,7 @@ import {
   assessTravelFileReadiness,
   describeServicePendingReasons,
   describeStatusTransitionBlock,
+  serviceHasSupplier,
   summarizeReconfirmation,
   isConvertedV2,
   isActiveTravelFileStatus,
@@ -153,6 +154,7 @@ function AmountField({
         {label}
       </label>
       <Input
+        aria-label={label}
         inputMode="decimal"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
@@ -221,6 +223,7 @@ export default function ProcessoReserva() {
   const canMargin = can("financial.view_margin");
   const canCommission = can("financial.commissions.view");
   const canFinancialManage = can("reservations.financial.manage");
+  const canCommissionManage = can("financial.commissions.manage");
 
   const file = data?.file;
   const { notes, addNote, deleteNote } = useTravelFileNotes(id, file?.agency_id);
@@ -829,22 +832,19 @@ export default function ProcessoReserva() {
                     </span>
                   )}
                   <span>Qtd. {service.quantity}</span>
-                  {displayServiceSupplier(service) ? (
+                  {displayServiceSupplier(service) && (
                     <span>Fornecedor: {displayServiceSupplier(service)}</span>
-                  ) : (
-                    unifiedV2 &&
-                    canFinancialManage &&
-                    !isConvertedV2(file) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 gap-1.5 px-2 text-xs"
-                        onClick={() => setRuleEditing(service)}
-                      >
-                        <Plus className="h-3.5 w-3.5" />
-                        Adicionar fornecedor
-                      </Button>
-                    )
+                  )}
+                  {unifiedV2 && canManage && canFinancialManage && !serviceHasSupplier(service) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1.5 px-2 text-xs"
+                      onClick={() => setRuleEditing(service)}
+                    >
+                      <Plus className="h-3.5 w-3.5" />
+                      {displayServiceSupplier(service) ? "Confirmar fornecedor" : "Adicionar fornecedor"}
+                    </Button>
                   )}
                 </div>
 
@@ -919,6 +919,24 @@ export default function ProcessoReserva() {
                         onCommit={(v) => patchServiceAmounts(service, { sold_amount: v })}
                       />
                     </>
+                  )}
+                  {isManual && canMargin && (
+                    <AmountField
+                      label="Custo"
+                      value={service.cost_amount}
+                      currency={service.currency}
+                      readOnly={!canManage || !canFinancialManage}
+                      onCommit={(v) => patchServiceAmounts(service, { cost_amount: v })}
+                    />
+                  )}
+                  {isManual && canCommission && (
+                    <AmountField
+                      label="Comissão"
+                      value={service.commission_amount}
+                      currency={service.currency}
+                      readOnly={!canManage || !canCommissionManage}
+                      onCommit={(v) => patchServiceAmounts(service, { commission_amount: v })}
+                    />
                   )}
                 </div>
 

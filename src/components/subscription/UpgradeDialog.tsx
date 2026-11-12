@@ -42,6 +42,7 @@ interface PlanDisplay {
   icon: React.ReactNode;
   highlighted?: boolean;
   badge?: string;
+  microcopy?: string;
 }
 
 const UPGRADE_PLANS: PlanDisplay[] = [
@@ -62,11 +63,12 @@ const UPGRADE_PLANS: PlanDisplay[] = [
   {
     id: "premium",
     name: "Premium",
-    price: "R$ 98",
+    price: "R$ 196",
     period: "/mês",
     icon: <Crown className="h-5 w-5" />,
     highlighted: true,
     badge: "Mais escolhido",
+    microcopy: "15 dias de teste grátis · cancele quando quiser",
     features: [
       "Tudo do Profissional",
       "CRM completo",
@@ -231,6 +233,8 @@ export function UpgradeDialog({
                   <span className="text-2xl font-bold">{plan.price}</span>
                   <span className="text-sm text-muted-foreground">{plan.period}</span>
                 </div>
+
+                {plan.microcopy && <p className="mb-4 text-sm text-muted-foreground">{plan.microcopy}</p>}
 
                 <div className="space-y-2 mb-5">
                   {plan.features.map((f, i) => (

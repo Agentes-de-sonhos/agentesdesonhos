@@ -45,10 +45,10 @@ describe("funil: arrastar para Fechado abre a confirmação oficial", () => {
   });
 
   it("um único aviso por erro: o menu de mover não repete o toast", () => {
-    const handler = kanban.slice(
-      kanban.indexOf("const handleMoveToStage"),
-      kanban.indexOf("const handleColumnDrop"),
-    );
+    // Only this handler, not the unrelated voice commands that follow it.
+    const handler = kanban.match(/const handleMoveToStage = async[\s\S]*?\n {2}};/)?.[0];
+    expect(handler).toBeDefined();
+    expect(handler).toContain("await performMove(opportunity.id, toStage, null, false)");
     expect(handler).not.toContain("Não foi possível mover o card");
     expect(handler).not.toContain("toast.error");
   });

@@ -58,7 +58,8 @@ describe("grade determinística por serviço", () => {
   it("aplica linha única no desktop e colunas compactas para numéricos", () => {
     for (const service of REQUEST_SERVICES) {
       const cls = initialGridClass(service.key);
-      expect(cls).toContain("grid-cols-2");
+      expect(cls.split(" ")).toContain("grid-cols-1");
+      expect(cls.split(" ")).not.toContain("grid-cols-2");
       expect(cls).toContain("md:grid-cols-2");
       expect(cls).toContain("lg:grid-cols-[");
       // Colunas compactas de adultos/crianças (e dias/noites, quando existem).
@@ -75,5 +76,6 @@ describe("grade determinística por serviço", () => {
     mount("aereo");
     const grid = document.querySelector('[data-testid="wl-initial-grid"]');
     expect(grid?.className).toContain(INITIAL_GRID_TEMPLATES.aereo);
+    expect(screen.getByRole("button", { name: /^Solicitar$/i }).className.split(" ")).toContain("col-span-1");
   });
 });

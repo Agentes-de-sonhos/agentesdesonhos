@@ -23,7 +23,7 @@ import { WorkspaceShell } from "@/workspace/WorkspaceShell";
 import { titleForPath } from "@/workspace/routeTitle";
 import { AgencyCommunityGate } from "./AgencyCommunityGate";
 import { isSiteLabDemoHost } from "@/lib/sitelabModels";
-import { NewSiteRequestAlert } from "@/components/leads/NewSiteRequestAlert";
+import { WorkspaceSiteRequestAlert } from "@/components/leads/NewSiteRequestAlert";
 
 /**
  * Páginas administrativas reutilizadas da plataforma. Comunidade, Academy,
@@ -166,8 +166,6 @@ function AgencyAdminPages({ info, siteLab = false }: { info: AgencyAdminPortalIn
   return (
     <AgencyAdminLayout info={info}>
       {routes}
-      {/* Aviso em tempo real das solicitações recebidas pelo site da agência. */}
-      <NewSiteRequestAlert />
     </AgencyAdminLayout>
   );
 }
@@ -214,6 +212,8 @@ function AgencyAdminWorkspace({
       pinnedRestoreReady={!permLoading}
       canRestorePinnedPath={pinnedGuard}
     >
+      {/* Synthetic SiteLab must not subscribe to real agency requests. */}
+      {!siteLab && !isSiteLabDemoHost(info.hostname) && <WorkspaceSiteRequestAlert />}
       <WorkspaceShell showTabBar={false} toExternalPath={toExternalPath}>
         <AgencyAdminPages info={info} siteLab={siteLab} />
       </WorkspaceShell>

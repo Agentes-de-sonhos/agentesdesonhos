@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MundoSEO } from "@/components/seo/MundoSEO";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { Headphones, Plane, ShieldCheck, Tag } from "lucide-react";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { MUNDO_EM_CORES_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
 import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
 import { agencySiteHref } from "@/lib/agencyContextLink";
-import { isNovemberCampaignAllowed } from "@/lib/novemberCampaignAccess";
+import { isNovemberCampaignAllowed, NOVEMBER_CAMPAIGN_PATH } from "@/lib/novemberCampaignAccess";
 import { CampaignHero } from "@/components/campaign/CampaignHero";
 import { CategoryRail } from "@/components/campaign/CategoryRail";
 import { FeaturedOffers } from "@/components/campaign/FeaturedOffers";
@@ -22,6 +22,17 @@ import NotFound from "@/pages/NotFound";
 import "@/styles/november-campaign.css";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 import mundoFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
+
+// This isolated router has no route table. Leaving it must remount the main app.
+export function NovemberNavigationBoundary() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname.replace(/\/+$/, "") !== NOVEMBER_CAMPAIGN_PATH) {
+      window.location.replace(window.location.href);
+    }
+  }, [pathname]);
+  return null;
+}
 
 const differentials = [
   { icon: Headphones, title: "Atendimento personalizado", text: "Nossa equipe ajuda você a encontrar a melhor opção." },
@@ -51,7 +62,7 @@ export default function NovemberCampaignPreview() {
     if (offer.imageOnly && offer.ctaUrl) window.open(offer.ctaUrl, "_blank", "noopener");
     else if (offer.real && offer.href) window.location.assign(agencySiteHref(offer.href));
   };
-  return <BrowserRouter><div className="november-preview">
+  return <BrowserRouter><NovemberNavigationBoundary /><div className="november-preview">
     <AgencySiteLayout info={{ ...MUNDO_EM_CORES_PREVIEW_INFO, hostname: "omundoemcores.com.br", agency_name: "O Mundo em Cores", phone: MUNDO_WHATSAPP }}>
       <MundoSEO hostname="omundoemcores.com.br" />
       <div className="november-campaign">

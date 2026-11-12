@@ -31,11 +31,11 @@ describe("Fluxo unificado V2 — fiação da interface", () => {
     expect(dialog).toContain("Canal do aceite");
   });
 
-  it("regra financeira do serviço usa hooks dedicados e termos padrão da agência", () => {
+  it("fornecedor operacional usa hook dedicado sem alterar regras financeiras", () => {
     const dialog = read("src/components/reservas/ServiceFinancialRuleDialog.tsx");
-    expect(dialog).toContain("useServiceFinancialRule");
-    expect(dialog).toContain("useSupplierTerms");
-    expect(dialog).toContain("Usar termos padrão da agência");
+    expect(dialog).toContain("useServiceSupplier");
+    expect(dialog).not.toContain("useServiceFinancialRule");
+    expect(dialog).not.toContain("commission_type:");
   });
 
   it("funil do CRM orienta a confirmar pela Central quando há file vinculado (V2)", () => {

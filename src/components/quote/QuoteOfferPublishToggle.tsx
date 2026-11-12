@@ -8,7 +8,7 @@ import { OfferChannelPicker } from "@/components/offers/OfferChannelPicker";
 import { toast } from "sonner";
 
 /**
- * Opt-in explícito por orçamento: começa sempre desligado.
+ * Novos orçamentos começam desligados; ofertas existentes preservam a publicação.
  * Ligar grava `offer_publish_opt_in = true` e `offer_opt_out = false`.
  * As páginas do site são escolhidas aqui mesmo (`offer_display_channels`)
  * e copiadas para a oferta quando ela for criada; se já existir, também é atualizada.
@@ -26,12 +26,9 @@ export function QuoteOfferPublishToggle({
 }) {
   const { enabled } = useOffersEnabled();
   const qc = useQueryClient();
-  const initial = !!optIn && !optOut;
-  const [checked, setChecked] = useState(initial);
+  const [checked, setChecked] = useState(!!optIn && !optOut);
   const [selected, setSelected] = useState<string[]>(channels?.length ? channels : ["ofertas"]);
   const [saving, setSaving] = useState(false);
-  useEffect(() => setChecked(initial), [initial]);
-  useEffect(() => setSelected(channels?.length ? channels : ["ofertas"]), [channels?.join(",")]);
 
   const { data: offer } = useQuery({
     queryKey: ["quote-offer-channels", quoteId],
@@ -47,6 +44,11 @@ export function QuoteOfferPublishToggle({
       return (data as { id: string; display_channels: string[] } | null) ?? null;
     },
   });
+
+  const initial = !optOut && (!!optIn || !!offer);
+  useEffect(() => setChecked(initial), [initial, quoteId]);
+  const effectiveChannels = offer?.display_channels ?? channels;
+  useEffect(() => setSelected(effectiveChannels?.length ? effectiveChannels : ["ofertas"]), [effectiveChannels, quoteId]);
 
   if (!enabled || !quoteId) return null;
 

@@ -304,8 +304,8 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
     setResult(null);
     try {
       const raw = await callItineraryParser({ text: pasteText });
-      setRawResult(raw); setResultFile(null);
-      setRawResult(raw); setResultFile(uploadFile);
+      setRawResult(raw);
+      setResultFile(null);
       const normalized = normalizeRich(raw);
       setResult(normalized);
       toast({
@@ -357,6 +357,8 @@ export function FlightAutoImport({ onImport }: FlightAutoImportProps) {
         fileName: uploadFile.name,
         text: extractedText || undefined,
       });
+      setRawResult(raw);
+      setResultFile(uploadFile);
       const normalized = normalizeRich(raw);
       setResult(normalized);
       toast({

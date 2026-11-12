@@ -77,7 +77,7 @@ ${JSON.stringify(trip_data, null, 2)}
 
 Gere uma análise estruturada em blocos: documentação obrigatória, vistos e autorizações (assumindo nacionalidade brasileira), saúde e vacinas, alertas gerais do destino, links oficiais (URLs reais e verificáveis) e observações. Use confidence "medio" no máximo, pois faltam dados do passageiro. Defina o status geral como "attention" para reforçar a necessidade de validação individual.`;
 
-    const model = "google/gemini-2.5-pro";
+    const model = "google/gemini-3.8-flash";
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { displayServiceSupplier } from "@/lib/travelFileServiceIdentity";
 import type { TravelFileService } from "@/types/travelFile";
-import { useServiceFinancialRule } from "@/hooks/useUnifiedWorkflow";
+import { useServiceSupplier } from "@/hooks/useUnifiedWorkflow";
 
 const NONE_OPERATOR = "__none__";
 
@@ -26,7 +27,7 @@ interface ServiceFinancialRuleDialogProps {
 }
 
 /**
- * Edição operacional do fornecedor antes da venda.
+ * Edição operacional do fornecedor, inclusive após a venda.
  * A Gestão Financeira é o único local para comissão, custo, impostos, nota fiscal
  * e prazos de pagamento depois que a venda é confirmada.
  */
@@ -36,14 +37,14 @@ export function ServiceFinancialRuleDialog({
   fileId,
   service,
 }: ServiceFinancialRuleDialogProps) {
-  const saveRule = useServiceFinancialRule(fileId);
+  const saveRule = useServiceSupplier(fileId);
   const [operatorId, setOperatorId] = useState<string>(service.operator_id ?? NONE_OPERATOR);
-  const [supplierName, setSupplierName] = useState(service.supplier_name ?? "");
+  const [supplierName, setSupplierName] = useState(displayServiceSupplier(service) ?? "");
 
   useEffect(() => {
     if (!open) return;
     setOperatorId(service.operator_id ?? NONE_OPERATOR);
-    setSupplierName(service.supplier_name ?? "");
+    setSupplierName(displayServiceSupplier(service) ?? "");
   }, [open, service]);
 
   const operatorsQuery = useQuery({
@@ -66,19 +67,8 @@ export function ServiceFinancialRuleDialog({
     try {
       await saveRule.mutateAsync({
         serviceId: service.id,
-        payload: {
-          operator_id: realOperatorId,
-          supplier_name: supplierName.trim() || null,
-          commission_type: service.commission_type ?? "none",
-          commission_percent: service.commission_percent ?? null,
-          commission_fixed: service.commission_fixed ?? null,
-          non_commissionable_fees: service.non_commissionable_fees ?? 0,
-          payment_rule: service.payment_rule ?? null,
-          payment_days: service.payment_days ?? null,
-          requires_invoice: service.requires_invoice ?? false,
-          status: service.financial_rule_status ?? "pending",
-          source: "manual",
-        },
+        operatorId: realOperatorId,
+        supplierName: supplierName.trim() || null,
       });
       toast.success("Fornecedor do serviço atualizado.");
       onOpenChange(false);

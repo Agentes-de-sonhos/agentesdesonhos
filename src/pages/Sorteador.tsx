@@ -55,6 +55,7 @@ import {
   evaluateEligibility,
   participantKey,
 } from "@/lib/raffle/eligibility";
+import { capabilitiesFromSnapshot, participantsFromWinnerHistory } from "@/lib/raffle/history";
 import { pickWinners } from "@/lib/raffle/draw";
 import { parseRaffleFile } from "@/lib/raffle/parseFile";
 import { exportWinnersCsv, exportWinnersXlsx, type WinnerRow } from "@/lib/raffle/export";
@@ -94,6 +95,7 @@ export default function Sorteador() {
 
   const [source, setSource] = useState<RaffleSource>("file");
   const [title, setTitle] = useState("Sorteio ao vivo");
+  const [resumedParticipants, setResumedParticipants] = useState<RaffleParticipant[] | null>(null);
   const [fileParticipants, setFileParticipants] = useState<RaffleParticipant[]>([]);
   const [fileCapabilities, setFileCapabilities] = useState<RaffleCapabilities>(EMPTY_CAPABILITIES);
   const [selectedEvent, setSelectedEvent] = useState<AcademyRaffleEvent | null>(null);
@@ -117,8 +119,10 @@ export default function Sorteador() {
     source === "academy_event" ? (selectedEvent?.training_id ?? null) : null,
   );
 
-  const participants =
-    source === "academy_event" ? (participantsQuery.data ?? []) : fileParticipants;
+  const participants = useMemo(
+    () => resumedParticipants ?? (source === "academy_event" ? (participantsQuery.data ?? []) : fileParticipants),
+    [resumedParticipants, source, participantsQuery.data, fileParticipants],
+  );
   const capabilities = source === "academy_event" ? ACADEMY_CAPABILITIES : fileCapabilities;
 
   const previousWinnerKeys = useMemo(
@@ -175,6 +179,7 @@ export default function Sorteador() {
       if (!parsed.rows.length) return toast.error("Planilha vazia.");
       if (!parsed.participants.length)
         return toast.error("Nenhum nome encontrado. Verifique a coluna 'nome'.");
+      setResumedParticipants(null);
       setFileParticipants(parsed.participants);
       setFileCapabilities(parsed.capabilities);
       toast.success(`${parsed.participants.length} participantes carregados.`);
@@ -186,6 +191,7 @@ export default function Sorteador() {
   const handleSourceChange = (next: RaffleSource) => {
     if (next === source) return;
     setSource(next);
+    setResumedParticipants(null);
     // Evita mistura de participantes entre origens.
     setFileParticipants([]);
     setFileCapabilities(EMPTY_CAPABILITIES);
@@ -222,14 +228,31 @@ export default function Sorteador() {
   };
 
   const loadRaffle = async (id: string) => {
-    const { data } = await supabase.from("raffles").select("*").eq("id", id).single();
-    if (!data) return;
+    if (drawingRef.current || spinning) return;
+    const { data, error } = await supabase.from("raffles").select("*").eq("id", id).single();
+    if (error || !data) return void toast.error("Não foi possível carregar o sorteio.");
+    // Never activate a resumed raffle with an unknown winner exclusion list.
+    const { data: savedWinners, error: winnersError } = await supabase
+      .from("raffle_winners")
+      .select("id, winner_name, winner_data")
+      .eq("raffle_id", id);
+    if (winnersError) return void toast.error("Não foi possível carregar os vencedores anteriores. Tente novamente.");
     setRaffleId(data.id);
     setTitle(data.title);
+    const savedParams = data.draw_params as { removeWinners?: boolean } | null;
+    const excludeWinners = savedParams?.removeWinners !== false;
+    setRemoveWinners(excludeWinners);
+    setSessionWinners(excludeWinners ? participantsFromWinnerHistory(savedWinners || []) : []);
     setSource((data.source as RaffleSource) ?? "file");
-    setFileParticipants((data.participants as unknown as RaffleParticipant[]) || []);
+    // Use this raffle's snapshot, never a previously selected Academy event.
+    const savedParticipants = (data.participants as unknown as RaffleParticipant[]) || [];
+    const savedFilters = { ...DEFAULT_RAFFLE_FILTERS, ...(data.filters as Partial<RaffleFilters> || {}) };
+    setResumedParticipants(savedParticipants);
+    setSelectedEvent(null);
+    setFilters(savedFilters);
+    setFileCapabilities(capabilitiesFromSnapshot(savedParticipants, savedFilters));
+    setFileParticipants(savedParticipants);
     setLastWinners([]);
-    setSessionWinners([]);
   };
 
   const runDraw = async () => {
@@ -316,6 +339,7 @@ export default function Sorteador() {
 
   const newRaffle = () => {
     setRaffleId(null);
+    setResumedParticipants(null);
     setLastWinners([]);
     setSessionWinners([]);
     setCurrentName("");
@@ -372,6 +396,7 @@ export default function Sorteador() {
                       onRetry={() => void eventsQuery.refetch()}
                       selectedId={selectedEvent?.training_id ?? null}
                       onSelect={(e) => {
+                        setResumedParticipants(null);
                         setSelectedEvent(e);
                         setSessionWinners([]);
                       }}

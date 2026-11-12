@@ -11,7 +11,7 @@ import {
   RESERVAS_FILTERS,
 } from "@/lib/travelFiles";
 import { nextFileStatus, isFileOverdue } from "@/lib/travelFileWorkflow";
-import type { TravelFile } from "@/types/travelFile";
+import type { TravelFile, TravelFileService } from "@/types/travelFile";
 
 // ---------------------------------------------------------------------------
 // Fixtures 100% sintéticas: nenhum cliente, empresa ou reserva real.
@@ -267,6 +267,26 @@ describe("serviço manual da reserva", () => {
 
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
     expect(onSave.mock.calls[0][0].requestedAmount).toBe(1500.5);
+  });
+
+  it("apagar o preço existente envia zero em vez de omitir a alteração", async () => {
+    const user = userEvent.setup();
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const service = {
+      id: "service-1", file_id: "file-1", service_type: "hotel", product_name: "Hotel",
+      supplier_name: null, city: null, destination: null, country: null,
+      start_date: null, end_date: null, quantity: 1, passengers_count: null,
+      currency: "BRL", requested_amount: 1500, reconfirmed_amount: null,
+      sold_amount: null, cost_amount: null, commission_amount: null,
+      responsible_team_member_id: null, is_required: false, status: "booked",
+      snapshot: {}, created_at: "2026-01-01T00:00:00Z",
+    } satisfies TravelFileService;
+    wrap(<ManualServiceDialog open onOpenChange={() => {}} onSave={onSave} service={service} canEditAmount />);
+    await user.clear(screen.getByLabelText(/Valor/i));
+    await user.click(screen.getByRole("button", { name: /^Salvar/ }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][0].requestedAmount).toBe(0);
+    expect(onSave.mock.calls[0][0].status).toBe("booked");
   });
 
   it("preserva a situação já registrada ao editar e apaga a observação quando esvaziada", async () => {

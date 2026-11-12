@@ -456,6 +456,13 @@
       "when": 1794355482795,
       "tag": "0064_public_quote_document_storage_gate",
       "breakpoints": true
+    },
+    {
+      "idx": 65,
+      "version": "7",
+      "when": 1794355482796,
+      "tag": "0065_reservation_service_supplier",
+      "breakpoints": true
     }
   ]
 }
