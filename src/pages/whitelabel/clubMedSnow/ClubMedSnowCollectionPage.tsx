@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Mountain, Snowflake } from "lucide-react";
 import { CLUB_MED_SNOW, CLUB_MED_SNOW_BASE, groupByCountry, type ClubMedSnowResort } from "@/lib/clubMedSnow";
 import { useClubMedSnowPlaces } from "@/hooks/useClubMedSnowPlaces";
 import { getClubMedSnowPhotos } from "@/lib/clubMedSnow/photos";
 import { agencySiteHref } from "@/lib/agencyContextLink";
+import { CountryFilters } from "./CountryFilters";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 function ResortCard({ r }: { r: ClubMedSnowResort }) {
@@ -27,7 +28,6 @@ function ResortCard({ r }: { r: ClubMedSnowResort }) {
           {r.tagline && <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{r.tagline}</p>}
           <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
             {r.altitude && <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5"><Mountain className="h-3 w-3" aria-hidden />{r.altitude}</span>}
-            {data?.rating ? <span className="rounded-full bg-muted px-2 py-0.5">Google {data.rating.toFixed(1).replace(".", ",")}</span> : null}
             {r.status !== "confirmado" && <span className="rounded-full bg-muted px-2 py-0.5">Disponibilidade a confirmar</span>}
           </div>
         </div>
@@ -38,6 +38,10 @@ function ResortCard({ r }: { r: ClubMedSnowResort }) {
 
 export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomainInfo }) {
   const groups = groupByCountry();
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const visibleGroups = selectedCountries.length ? groups.filter((g) => selectedCountries.includes(g.key)) : groups;
+  const visibleCount = visibleGroups.reduce((total, g) => total + g.items.length, 0);
+  const toggleCountry = (key: string) => setSelectedCountries((current) => current.includes(key) ? current.filter((x) => x !== key) : [...current, key]);
   useEffect(() => { document.title = `Club Med na neve · ${info.agency_name ?? "Viagens"}`; }, [info.agency_name]);
   return (
     <div className="bg-background px-4 py-12 md:py-16">
@@ -48,10 +52,13 @@ export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomain
           {CLUB_MED_SNOW.filter((r) => r.kind === "resort").length} resorts Club Med de montanha na França, Itália, Suíça, Canadá, Japão e China.
           Compare áreas de esqui, clubes infantis e o que está incluído em cada um, e peça seu orçamento direto para {info.agency_name ?? "a agência"}.
         </p>
-        <nav className="mt-6 flex flex-wrap gap-2" aria-label="Países">
-          {groups.map((g) => <a key={g.key} href={`#${g.key}`} className="rounded-full border border-border px-4 py-1.5 text-sm font-medium hover:bg-muted">{g.country}</a>)}
-        </nav>
-        {groups.map((g) => (
+        <CountryFilters countries={groups.map((g) => ({ key: g.key, country: g.country, count: g.items.length }))}
+          selected={selectedCountries} onToggle={toggleCountry} onReset={() => setSelectedCountries([])} />
+        <p role="status" aria-live="polite" aria-atomic="true" className="mt-6 text-sm text-muted-foreground">
+          {visibleCount} {visibleCount === 1 ? "opção de hospedagem" : "opções de hospedagem"}{selectedCountries.length ? ` em ${visibleGroups.map((g) => g.country).join(", ")}` : " em todos os países"}
+        </p>
+        <div id="club-med-snow-results">
+        {visibleGroups.map((g) => (
           <section key={g.key} id={g.key} className="mt-12 scroll-mt-24">
             <h2 className="text-2xl font-semibold md:text-3xl">{g.country}</h2>
             <ul className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -59,6 +66,7 @@ export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomain
             </ul>
           </section>
         ))}
+        </div>
         <p className="mt-12 text-xs text-muted-foreground">
           Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Avaliações e mapas via Google Maps. Fotos selecionadas por imagem e autoria; créditos nas galerias.
         </p>

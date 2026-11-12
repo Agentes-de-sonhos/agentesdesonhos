@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><defs><clipPath id="territory"><path d="M123.13,26.63 L124.35,34.84 L119.51,46.17 L133.84,54.59 L150.00,55.85 L147.49,74.82 L133.53,82.63 L110.10,76.83 L103.24,95.49 L88.15,96.96 L82.66,89.63 L64.90,105.32 L49.63,107.52 L36.00,97.61 L25.12,77.32 L10.00,84.57 L10.47,63.61 L33.63,37.61 L32.61,25.85 L47.05,30.11 L55.74,22.21 L82.68,22.53 L89.18,12.48 L123.13,26.63 Z" fill-rule="evenodd" /></clipPath></defs><g clip-path="url(#territory)"><svg id="flag-icons-ch" viewBox="0 0 640 480" x="10.0" y="12.48" width="140.0" height="95.03999999999999" preserveAspectRatio="none">
+  <g fill-rule="evenodd" stroke-width="1pt">
+    <path fill="red" d="M0 0h640v480H0z" />
+    <g fill="#fff">
+      <path d="M170 195h300v90H170z" />
+      <path d="M275 90h90v300h-90z" />
+    </g>
+  </g>
+</svg></g><path d="M123.13,26.63 L124.35,34.84 L119.51,46.17 L133.84,54.59 L150.00,55.85 L147.49,74.82 L133.53,82.63 L110.10,76.83 L103.24,95.49 L88.15,96.96 L82.66,89.63 L64.90,105.32 L49.63,107.52 L36.00,97.61 L25.12,77.32 L10.00,84.57 L10.47,63.61 L33.63,37.61 L32.61,25.85 L47.05,30.11 L55.74,22.21 L82.68,22.53 L89.18,12.48 L123.13,26.63 Z" stroke="#64748b" stroke-opacity=".35" stroke-width=".7" stroke-linejoin="round" /></svg>
