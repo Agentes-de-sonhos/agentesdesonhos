@@ -166,15 +166,24 @@ export default function AdsBriefingPreview() {
         [data-ads-preview="briefing-23-v1"] header {
           background: #000 !important; --foreground: 0 0% 100%; --muted-foreground: 0 0% 80%; --background: 0 0% 0%;
         }
+        [data-ads-preview="briefing-23-v1"] header > div:first-child {
+          height: auto !important; min-height: 108px; padding-top: 8px; padding-bottom: 8px;
+        }
+        [data-ads-preview="briefing-23-v1"] header > div:first-child > a { flex-shrink: 0; }
+        [data-ads-preview="briefing-23-v1"] #rodape > div:first-child,
+        [data-ads-preview="briefing-23-v1"] #rodape > div:first-child * { color: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #rodape > div:last-child > div {
+          padding-top: 8px !important; padding-bottom: 8px !important; line-height: 1.5; color: #000 !important;
+        }
         [data-ads-preview="briefing-23-v1"] header > div:first-child > a > span { display: none; }
         [data-ads-preview="briefing-23-v1"] header img {
-          height: 80px !important; width: auto !important; max-width: 220px !important; object-fit: contain;
+          height: 92px !important; width: auto !important; max-width: 253px !important; object-fit: contain; flex-shrink: 0;
         }
         [data-ads-preview="briefing-23-v1"] #rodape {
           background: #000 !important; color: #fff; --wl-ink: 0 0% 100%;
         }
         [data-ads-preview="briefing-23-v1"] #rodape img {
-          height: 80px !important; width: auto; max-width: 240px; object-fit: contain;
+          height: 108px !important; width: auto; max-width: 324px; object-fit: contain;
         }
         [data-ads-preview="briefing-23-v1"] #rodape span:has(> img) {
           background: transparent !important; padding: 0; box-shadow: none;
@@ -183,8 +192,9 @@ export default function AdsBriefingPreview() {
           background: #fff !important; --wl-ink: 0 0% 0%; color: #000;
         }
         @media (min-width: 768px) {
-          [data-ads-preview="briefing-23-v1"] header img { height: 100px !important; max-width: 260px !important; }
-          [data-ads-preview="briefing-23-v1"] #rodape img { height: 100px !important; }
+          [data-ads-preview="briefing-23-v1"] header > div:first-child { min-height: 131px; }
+          [data-ads-preview="briefing-23-v1"] header img { height: 115px !important; max-width: 299px !important; }
+          [data-ads-preview="briefing-23-v1"] #rodape img { height: 135px !important; }
         }
       `}</style>}
       <div
