@@ -98,6 +98,13 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
           <Images className="h-4 w-4" /> Ver todas as {total} fotos
         </button>
       )}
+      {photos.some((p) => p.creditUrl) && (
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          Fotos via Google Maps · {Array.from(new Map(photos.filter((p) => p.creditUrl).map((p) => [p.creditUrl, p])).values()).map((p, i) => (
+            <span key={p.creditUrl}>{i > 0 ? " · " : ""}<a href={p.creditUrl} target="_blank" rel="noopener noreferrer" className="underline">{p.credit?.replace(/ · Google Maps$/, "")}</a></span>
+          ))}
+        </p>
+      )}
       {void main}
 
       <Dialog open={open !== null} onOpenChange={(o) => !o && setOpen(null)}>

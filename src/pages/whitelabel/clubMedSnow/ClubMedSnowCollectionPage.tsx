@@ -2,13 +2,13 @@ import { useEffect } from "react";
 import { Mountain, Snowflake } from "lucide-react";
 import { CLUB_MED_SNOW, CLUB_MED_SNOW_BASE, groupByCountry, type ClubMedSnowResort } from "@/lib/clubMedSnow";
 import { useClubMedSnowPlaces } from "@/hooks/useClubMedSnowPlaces";
+import { getClubMedSnowPhotos } from "@/lib/clubMedSnow/photos";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 function ResortCard({ r }: { r: ClubMedSnowResort }) {
   const { data } = useClubMedSnowPlaces(r.slug);
-  // Chalé e resort vizinho podem compartilhar o mesmo Place ID: o card do chalé usa outra foto.
-  const photo = data?.photos?.[r.kind === "chalet" ? 1 : 0] ?? data?.photos?.[0];
+  const photo = getClubMedSnowPhotos(r.slug)[0] ?? data?.photos?.[0];
   return (
     <li>
       <a href={agencySiteHref(`${CLUB_MED_SNOW_BASE}/${r.slug}`)} className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-lg">
@@ -18,7 +18,7 @@ function ResortCard({ r }: { r: ClubMedSnowResort }) {
           ) : (
             <div className="grid h-full place-items-center text-muted-foreground"><Snowflake className="h-10 w-10" aria-hidden /></div>
           )}
-          {photo && <span className="absolute bottom-2 left-2 max-w-[80%] truncate rounded bg-foreground/60 px-1.5 py-0.5 text-[10px] text-background">Foto: {photo.credit} · Google</span>}
+          {photo && <span className="absolute bottom-2 left-2 max-w-[80%] truncate rounded bg-foreground/60 px-1.5 py-0.5 text-[10px] text-background">Foto: {photo.credit}</span>}
           {r.kind === "chalet" && <span className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold">Chalés</span>}
         </div>
         <div className="p-4">
@@ -46,7 +46,7 @@ export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomain
         <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-5xl">Resorts de esqui com tudo organizado</h1>
         <p className="mt-4 max-w-3xl text-muted-foreground md:text-lg">
           {CLUB_MED_SNOW.filter((r) => r.kind === "resort").length} resorts Club Med de montanha na França, Itália, Suíça, Canadá, Japão e China.
-          Compare domínios esquiáveis, clubes infantis e o que está incluído em cada um, e peça seu orçamento direto para {info.agency_name ?? "a agência"}.
+          Compare áreas de esqui, clubes infantis e o que está incluído em cada um, e peça seu orçamento direto para {info.agency_name ?? "a agência"}.
         </p>
         <nav className="mt-6 flex flex-wrap gap-2" aria-label="Países">
           {groups.map((g) => <a key={g.key} href={`#${g.key}`} className="rounded-full border border-border px-4 py-1.5 text-sm font-medium hover:bg-muted">{g.country}</a>)}
@@ -60,7 +60,7 @@ export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomain
           </section>
         ))}
         <p className="mt-12 text-xs text-muted-foreground">
-          Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Fotos e avaliações via Google Maps, com autoria indicada.
+          Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Avaliações e mapas via Google Maps. Fotos selecionadas por imagem e autoria; créditos nas galerias.
         </p>
       </div>
     </div>

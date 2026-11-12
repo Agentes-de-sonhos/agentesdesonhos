@@ -1,0 +1,602 @@
+{
+  "alpe-d-huez": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "6fd9c00bcef5f088c12789422639983378dee45cf238745cb2cd9ea6ad9b2dae",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "e4abacc7b1c8f62c93fa6896d2de34825e93ca71b83ab40d95550b70a3c41f19",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "aded99d218a3950b211ed87f1374f911efc37e952109ae9a6d91b06984142483",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "fa00cd31808132239534818996b104281b4850b4d5546e0ee690bda6fd25f96c",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "814a29336a9c78ffdc51e920313e390d95722742a543ec08cebdcd7b544fb227",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "68c6ad3e54cd0550cdc904efcb202c94e3224cbb55bc735114d5b11df015db4f",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "ed937b25fb2aed3a2957912bc328c497256ca6740ab8fdfda3f1adaa7a90628e",
+        "authorUri": "https://maps.google.com/maps/contrib/103068601162527801442",
+        "credit": "Club Med Alpe d'Huez - French Alps",
+        "alt": "Club Med Alpe d'Huez — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "grand-massif-samoens-morillon": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "fb66cd43358f7e782348fbb1c6fc0f71f267a7539f514adb9fac69ec49831a38",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "d24156f27154c5ba06a6a94648632e9bd4c254a60df70723be04121dcd28c67f",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "508d966f6d205997536917cce8884b2ecd019965636f9f41dce1b3ecfa5cc368",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "72aeb1e363e3ebfbf952f0c42e28d6724cfe9c8aa76951acfa1fbf76a3201b8e",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "8ad58cf08e15685d54176ee9d2bfa4f81e1c05a0f4664a413f4828a9e14813cb",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "1bb82bf0f9c1dd427a32d9ce1e3db73aae1b8b531696006e1258962ced9a785c",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "7bf1fa236fa35b9b3b20479e5d56486e6736fb7a6c0b33e8b9937b84ccc64ae7",
+        "authorUri": "https://maps.google.com/maps/contrib/104413066687466538687",
+        "credit": "Club Med Grand Massif Samoëns Morillon",
+        "alt": "Club Med Grand Massif Samoëns Morillon — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "hokkaido-sahoro": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "88483008133a03fb994b8c89bf1707334cce40c245f7c12a7921ce4ca82c88fc",
+        "authorUri": "https://maps.google.com/maps/contrib/110748632968063999161",
+        "credit": "Club Med Sahoro - Hokkaido",
+        "alt": "Club Med Hokkaido Sahoro — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "1cf206f5f16020d2f8e73bad84ef881a4e422d8acbb78aaaf9724e7fb145fdf8",
+        "authorUri": "https://maps.google.com/maps/contrib/110748632968063999161",
+        "credit": "Club Med Sahoro - Hokkaido",
+        "alt": "Club Med Hokkaido Sahoro — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "b574722b0994cd652c75c5d9ba203f794baa2818cac1a22422364062e6053b21",
+        "authorUri": "https://maps.google.com/maps/contrib/110748632968063999161",
+        "credit": "Club Med Sahoro - Hokkaido",
+        "alt": "Club Med Hokkaido Sahoro — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "a70bbce6d4cce67d98c872e06b7ae508db5956d8d699b27a2bbc58b37e9baff8",
+        "authorUri": "https://maps.google.com/maps/contrib/110748632968063999161",
+        "credit": "Club Med Sahoro - Hokkaido",
+        "alt": "Club Med Hokkaido Sahoro — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "74f63c84c5918f387714d7bc8e24d04099cbaf53b79e357027b3e5ac3cc088cb",
+        "authorUri": "https://maps.google.com/maps/contrib/110748632968063999161",
+        "credit": "Club Med Sahoro - Hokkaido",
+        "alt": "Club Med Hokkaido Sahoro — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "c85ff525a97a1b4ecd501ded9458ea914b57a4b6ef1380501a3917651696f0d8",
+        "authorUri": "https://maps.google.com/maps/contrib/110748632968063999161",
+        "credit": "Club Med Sahoro - Hokkaido",
+        "alt": "Club Med Hokkaido Sahoro — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "kiroro-grand": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "a8a4aea511723ba1be947d4e2630a6ebb4e9315c7507ef8a11255c27a77f33ef",
+        "authorUri": "https://maps.google.com/maps/contrib/109657290589408192337",
+        "credit": "Club Med Kiroro Grand",
+        "alt": "Club Med Kiroro Grand — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "4b3441c9aa1c2ea46659997a8fe67d15319e7485a466e55e0559a046f5ca58c2",
+        "authorUri": "https://maps.google.com/maps/contrib/109657290589408192337",
+        "credit": "Club Med Kiroro Grand",
+        "alt": "Club Med Kiroro Grand — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "04cd7bb6d0ec590ad91488e19f479f176948491468c29941ae8d3e8e424acd1f",
+        "authorUri": "https://maps.google.com/maps/contrib/109657290589408192337",
+        "credit": "Club Med Kiroro Grand",
+        "alt": "Club Med Kiroro Grand — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "41916cd6bb9a961f32941c685d4a0394dc408211240717febe49e317426dc690",
+        "authorUri": "https://maps.google.com/maps/contrib/109657290589408192337",
+        "credit": "Club Med Kiroro Grand",
+        "alt": "Club Med Kiroro Grand — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "320d1ea45619ab93a584f1220fc787e8a29e4c81a2703da2cdd226aef7dfb38f",
+        "authorUri": "https://maps.google.com/maps/contrib/109657290589408192337",
+        "credit": "Club Med Kiroro Grand",
+        "alt": "Club Med Kiroro Grand — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "9fdda9ba42e849929a29fad6b36d09411544fc5743515e8534d52c6a7822e8f6",
+        "authorUri": "https://maps.google.com/maps/contrib/109657290589408192337",
+        "credit": "Club Med Kiroro Grand",
+        "alt": "Club Med Kiroro Grand — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "kiroro-peak": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "a0cb78a13e13bd0ae3b44b32d34adfaad32f056eb8faf8c3076483e7defc3f17",
+        "authorUri": "https://maps.google.com/maps/contrib/112973724542051486427",
+        "credit": "Club Med Kiroro Peak",
+        "alt": "Club Med Kiroro Peak — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "d1ed7b85b7784e5c4dede2c1efefe682816587e07348bb8817c5205e647f63fe",
+        "authorUri": "https://maps.google.com/maps/contrib/112973724542051486427",
+        "credit": "Club Med Kiroro Peak",
+        "alt": "Club Med Kiroro Peak — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "95d9bd86bb249212aa26566c83b2e57e909c8cf6ec80d489c5722aba493cb320",
+        "authorUri": "https://maps.google.com/maps/contrib/112973724542051486427",
+        "credit": "Club Med Kiroro Peak",
+        "alt": "Club Med Kiroro Peak — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "d7814d9050470ec93f941fa779f36141c4f4097489d74b749bc634fd11a452ec",
+        "authorUri": "https://maps.google.com/maps/contrib/112973724542051486427",
+        "credit": "Club Med Kiroro Peak",
+        "alt": "Club Med Kiroro Peak — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "b5efb5665dbe033630f09cde14f0047f0c14fcc088dc63294fd12c269ccb4389",
+        "authorUri": "https://maps.google.com/maps/contrib/112973724542051486427",
+        "credit": "Club Med Kiroro Peak",
+        "alt": "Club Med Kiroro Peak — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "de7124d2963361f615f221aea95b877fde29b52d659caa430a9efd5e656f9f76",
+        "authorUri": "https://maps.google.com/maps/contrib/112973724542051486427",
+        "credit": "Club Med Kiroro Peak",
+        "alt": "Club Med Kiroro Peak — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "la-plagne-2100": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "96977dcaa7511c25c1e5d7866d52a867c2ceade88082307c6ae046db75bab84a",
+        "authorUri": "https://maps.google.com/maps/contrib/114617267533738802769",
+        "credit": "Club Med La Plagne 2100 - French Alps",
+        "alt": "Club Med La Plagne 2100 — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "c9a553472732579aa1be255c58b672c5dcd6c22f78d585077be3fb05d9be96a7",
+        "authorUri": "https://maps.google.com/maps/contrib/114617267533738802769",
+        "credit": "Club Med La Plagne 2100 - French Alps",
+        "alt": "Club Med La Plagne 2100 — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "dffbe90aedec48bef6a407dfeeff34f2e1f7e6a0570d4a3a2a84dcd7b99a7b67",
+        "authorUri": "https://maps.google.com/maps/contrib/114617267533738802769",
+        "credit": "Club Med La Plagne 2100 - French Alps",
+        "alt": "Club Med La Plagne 2100 — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "a6db42eeeab88dfbd830655152be463cfbaa5a748c3e140e77a32d3c748626da",
+        "authorUri": "https://maps.google.com/maps/contrib/114617267533738802769",
+        "credit": "Club Med La Plagne 2100 - French Alps",
+        "alt": "Club Med La Plagne 2100 — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "2b5eb87b8b47b9d2efd6b31b93974f74da7a033397fbcf5b7da7044abab0eec9",
+        "authorUri": "https://maps.google.com/maps/contrib/114617267533738802769",
+        "credit": "Club Med La Plagne 2100 - French Alps",
+        "alt": "Club Med La Plagne 2100 — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "c9e0b0505c1343f70c2bd367aa19aab8606b6b81091a5484f95c90eb47c7e47b",
+        "authorUri": "https://maps.google.com/maps/contrib/114617267533738802769",
+        "credit": "Club Med La Plagne 2100 - French Alps",
+        "alt": "Club Med La Plagne 2100 — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "la-rosiere": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "210d086ff8837ff3f14a8f09a7161f87a0a5344a8712fe6dee11f9db3c8fdb34",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "419ffa223bc302879ddd7a2429bdbeb8d93bf63f4d5c1b3c327b8e50a301adfe",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "e4cbfaedfb3ac665c3ff06384dd51ec198deeab1718c51e9f4d68a15987800f3",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "98f1b8f2b1086774f4156d8f541a695e27e9420af0c0035b6a6810a5f29d2855",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "7764436f81f9752bb753e1137c6ae64c6ba10284e74f936bb4f0576ad4854221",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "f5911d4e4afba45e6e011a906c76ff90c515df6ad37ffa3168475b622894f9fa",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "3c98e33c52a8631f98c82662555d10bdef48a7f5efe685f61e2d7af34007ac7f",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "de10ffd80ce649656ab5e0ebf2767b12b4c9b8148fb23eb41286968cc539dcfd",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "f883c31f66f7008ed6dcb45e2c09061261dd65056e032122941970081c5ae3fe",
+        "authorUri": "https://maps.google.com/maps/contrib/113256991925876058227",
+        "credit": "Club Med La Rosière - French Alps",
+        "alt": "Club Med La Rosière — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "les-arcs-panorama": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "88f9d2c4d1f9c6257b6c45a6a76ea91e1274448994c416a70c3d7669f89d22cb",
+        "authorUri": "https://maps.google.com/maps/contrib/106319264831974315789",
+        "credit": "Club Med Arcs Panorama - French Alps",
+        "alt": "Club Med Les Arcs Panorama — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "b4617bcd5a9a191626eaceeaa4e4c1f7a44f972a9d41327f59e561c19991c6f0",
+        "authorUri": "https://maps.google.com/maps/contrib/106319264831974315789",
+        "credit": "Club Med Arcs Panorama - French Alps",
+        "alt": "Club Med Les Arcs Panorama — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "cadbfb15b59b0a6622c1012b8a276939f6777b45dd990a5fdc15f34ef28dd8c5",
+        "authorUri": "https://maps.google.com/maps/contrib/106319264831974315789",
+        "credit": "Club Med Arcs Panorama - French Alps",
+        "alt": "Club Med Les Arcs Panorama — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "bee6bd16d36ab73a86d6c7f073fe465f08ed2049544ee5386239298c83e79e7d",
+        "authorUri": "https://maps.google.com/maps/contrib/106319264831974315789",
+        "credit": "Club Med Arcs Panorama - French Alps",
+        "alt": "Club Med Les Arcs Panorama — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "1130258e114a53ed878a48af4eca9db35a560aed5a4639cb6fb643a150112d25",
+        "authorUri": "https://maps.google.com/maps/contrib/106319264831974315789",
+        "credit": "Club Med Arcs Panorama - French Alps",
+        "alt": "Club Med Les Arcs Panorama — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "les-chalets-de-valmorel": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "9e9a507e7abc09a531ce27f296804967cb65c7873d83b454fd3300783b1ea258",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "91a43843232424e4e88cfe9bb06960c4bcb3107ec7d0aed6977590dcaf6cd0eb",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "f5c4d24d0649138ecc8783e7a7d535ed65ca043e4f1f88287fbcb6b7af47d6df",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "db3760b3637589b14f08b6f120869e3e3ab8cb17cb0f87bedab64717a79d1cf6",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "7a8621e1fd377319cc96c938b6e35bd1fe6a43dd49939dc398c707e6ed6c5802",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "136889e2e8bad4fcf992d62dd77df3a03d75ebeed4cd31db652a2de6e2c26f8d",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "a31a9d2e80ddd64a68038adad1e4682d1a142062f0bd9290cc0657c5a4011e44",
+        "authorUri": "https://maps.google.com/maps/contrib/108951036640408020587",
+        "credit": "Club Med Valmorel Chalets - French Alps",
+        "alt": "Apartamentos-Chalés de Valmorel — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "peisey-vallandry": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "710b0b623c5ba151814e7b1e398d9a7385fc808b02823454585275a72bce1bdf",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "fff5ee0743eb2d6a79b4e67bfbbb47c12075c26dd3138c87352f93b1b90d1eb2",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "797c1c9cd5a0350310c222a5c90e293dfb24ce53f59edce14b9dedfd556667ac",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "d23456ffbc97cf5a3df3baca1e4328347a9985d6520efb9e2e14b6ba068b297c",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "c51ab47483b69fbe6b77708f5139fa89081b3e58e3cae9540d2a3cf253053e43",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "8e9356c327247c563a1790890a12f6c7734b43651803274c391113c45d8292b1",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "af23820267d3219d4f71ebabace1a385e65ac89beb045d2cfef72235603a7f9a",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "2533cc13ce19439b22d3468ff307efbae931f64d3a03e0c5b474c05e75025643",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "02da42597f59488408f48b908ddd75eb589c96fefcf0bb948865efdf2509b2fd",
+        "authorUri": "https://maps.google.com/maps/contrib/116566642971867107176",
+        "credit": "Club Med Peisey-Vallandry - French Alps",
+        "alt": "Club Med Peisey-Vallandry — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "pragelato-sestriere": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "054f851d8cb55ea88e6d8c42928ec1b89af34b55a1a041a559eb05ff6a728d1b",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "8d666186be3b0f02fbdb68ba6f063a287d25d99e957ddf7dd96902badd22677a",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "03b07289ad499a02618a69ee4df6a5c2748449d91dcca049b38a7f3d8bc0d7a6",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "ff59f3b3889591b6b7c06bcd29a38d15e12a570ff28b89d956975b4e29d12818",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "0d4562fad391f2aee3835d4ee9675eb8348556c751d4a055747637ca956ac124",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "6962074d61a6a275546c6927733ece51cfa0afd02f8991bb31975dc1d089937a",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "b46d4ddb64f91316f65039d12e72d61ca89a3ea5559eceaff46ef72fc4a3df5c",
+        "authorUri": "https://maps.google.com/maps/contrib/112397251194394360718",
+        "credit": "Club Med Pragelato-Sestriere - Italian Alps",
+        "alt": "Club Med Pragelato Sestriere — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "quebec-charlevoix": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "baab895d31d6ced5c6ce915114511a06803591083e2416c217cb6ee5e6d98e53",
+        "authorUri": "https://maps.google.com/maps/contrib/100576913294915611051",
+        "credit": "Club Med Québec-Charlevoix",
+        "alt": "Club Med Québec Charlevoix — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "65893c4e35b698ef0521da1b0751b92c24c9b5bc9aaada9d261c26217a23346b",
+        "authorUri": "https://maps.google.com/maps/contrib/100576913294915611051",
+        "credit": "Club Med Québec-Charlevoix",
+        "alt": "Club Med Québec Charlevoix — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "f8717a4a68e042cb405b7006493ee4df09699701cb5c4bd6188d33f93f30fb4c",
+        "authorUri": "https://maps.google.com/maps/contrib/100576913294915611051",
+        "credit": "Club Med Québec-Charlevoix",
+        "alt": "Club Med Québec Charlevoix — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "d0b80187108760e64c952bb6670a48317e7e1ad0b6bb68796382f343e0a343aa",
+        "authorUri": "https://maps.google.com/maps/contrib/100576913294915611051",
+        "credit": "Club Med Québec-Charlevoix",
+        "alt": "Club Med Québec Charlevoix — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "2cf4bfac1e865978d85a3b0827064c73e491c209bbbaca336064606fbdc228f4",
+        "authorUri": "https://maps.google.com/maps/contrib/100576913294915611051",
+        "credit": "Club Med Québec-Charlevoix",
+        "alt": "Club Med Québec Charlevoix — ambientes e paisagens do hotel"
+      }
+    ]
+  },
+  "saint-moritz-roi-soleil": {
+    "profileReview": "name-and-place-association-checked",
+    "visualReviewDate": "2026-11-12",
+    "photos": [
+      {
+        "uriSha256": "05dc733793544c32f691bc71fe065b7f09a080477121f0a15ef9b81ab832722c",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "c82ad7466ef63e300f1ba1680558a19d3728c689a689227cd63a7fc16e369d84",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "cf68f1e44562c078bf6cb40e2316abab378c525b97f0ad2fa71114bbf777599b",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "a4b708de95161d9377069670a10b0035843a007e203620c11bbc9c62867c1bf9",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "3a9eaccd4485288e9947762bd85260317afcf997982c63cb5ba97c63112d8727",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "79c0535bde7f4a612bd18650d5e014ad9fba664bdc0abe2a84509618c3e4036f",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      },
+      {
+        "uriSha256": "c5fb564774c742f4540599f42ab32d4467810fa2cebba08e479dd73696462525",
+        "authorUri": "https://maps.google.com/maps/contrib/113845873784761975909",
+        "credit": "Club Med Saint-Moritz - Swiss Alps",
+        "alt": "Club Med Saint-Moritz Roi Soleil — ambientes e paisagens do hotel"
+      }
+    ]
+  }
+}

@@ -1,3 +1,4 @@
+import { selectReviewedGooglePhotos, type GoogleHotelPhoto } from "../../supabase/functions/_shared/clubMedGooglePhotos";
 import { useQuery } from "@tanstack/react-query";
 
 export interface ClubMedPlaces {
@@ -5,7 +6,7 @@ export interface ClubMedPlaces {
   placeName?: string | null; address?: string | null;
   rating?: number | null; total?: number | null; mapsUrl?: string | null;
   lat?: number | null; lng?: number | null;
-  photos?: { url: string; credit: string; creditUri?: string | null }[];
+  photos?: GoogleHotelPhoto[];
   reviews?: { author: string; authorUri?: string | null; rating?: number | null; text: string; relativeTime?: string | null }[];
 }
 
@@ -26,7 +27,9 @@ export function useClubMedSnowPlaces(slug: string | undefined) {
         body: JSON.stringify({ slug }),
       });
       if (!res.ok) return null;
-      return (await res.json()) as ClubMedPlaces;
+      // Recheck even if the deployed server predates this curation policy.
+      const { photos, ...details } = await res.json();
+      return { ...details, photos: details.stale ? [] : await selectReviewedGooglePhotos(slug!, photos) } as ClubMedPlaces;
     },
   });
 }

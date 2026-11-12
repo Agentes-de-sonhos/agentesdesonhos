@@ -4,13 +4,14 @@
  */
 export type HotelAmenityIcon =
   | "restaurant" | "room-service" | "spa" | "gym" | "pets" | "pool"
-  | "wifi" | "parking" | "kids" | "beach" | "bar" | "all-inclusive" | "leisure";
+  | "wifi" | "parking" | "kids" | "beach" | "bar" | "all-inclusive" | "leisure" | "mountain" | "snow" | "view" | "home" | "cable-car";
 
 export interface HotelPhoto {
   url: string;
   alt: string;
   /** Autoria exigida pela fonte (ex.: Google). Exibida em cada foto quando presente. */
   credit?: string;
+  creditUrl?: string;
 }
 
 export interface HotelAmenity {

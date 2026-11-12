@@ -3,17 +3,23 @@
  * todos os sites. O navegador envia só o slug do catálogo; a consulta vem da
  * allowlist abaixo. Resultado deduplicado por slug/Place ID na tabela
  * `club_med_place_cache` (service role) e reaproveitado por todos os tenants
- * até expirar (CACHE_HOURS). Imagens NÃO são baixadas nem armazenadas: guardamos
- * apenas o Place ID e as URLs temporárias de foto devolvidas pelo Google, com
- * autoria. A chave nunca sai do servidor.
+ * até expirar (CACHE_HOURS). Avaliações e localização; fotos já coletadas só são devolvidas se
+ * corresponderem à seleção individual de perfil + crédito + URI revisada.
+ * Esta função não consulta novas fotos nem aprova futuras imagens do perfil.
+ * A chave nunca sai do servidor.
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { selectReviewedGooglePhotos } from "../_shared/clubMedGooglePhotos.ts";
 import { QUERIES } from "./queries.ts";
 
 const CACHE_HOURS = 24;
-const MAX_PHOTOS = 10; // limite da Places API por lugar
-const DETAILS_MASK = "id,displayName,formattedAddress,location,rating,userRatingCount,googleMapsUri,reviews,photos";
+const DETAILS_MASK = "id,displayName,formattedAddress,location,rating,userRatingCount,googleMapsUri,reviews";
+
+const reviewedPayload = async (slug: string, payload: Record<string, unknown> = {}) => {
+  const { photos: _photos, ...details } = payload;
+  return { ...details, photos: await selectReviewedGooglePhotos(slug, Array.isArray(_photos) ? _photos : []) };
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" } });
@@ -38,20 +44,12 @@ async function enrich(slug: string, key: string, knownId: string | null) {
     if (!placeId) return { placeId: null, status: "not_found", payload: {} };
   }
   const d = await g(`places/${encodeURIComponent(placeId)}?languageCode=pt-BR`, key, { mask: DETAILS_MASK });
-  const photos = [];
-  for (const p of (d.photos ?? []).slice(0, MAX_PHOTOS)) {
-    try {
-      const m = await g(`${p.name}/media?maxWidthPx=1600&skipHttpRedirect=true`, key);
-      if (m?.photoUri) photos.push({ url: m.photoUri, credit: (p.authorAttributions ?? []).map((a: any) => a.displayName).filter(Boolean).join(", ") || "Google Maps", creditUri: p.authorAttributions?.[0]?.uri ?? null });
-    } catch { /* foto indisponível: segue */ }
-  }
   const payload = {
     placeName: d.displayName?.text ?? null,
     address: d.formattedAddress ?? null,
     rating: d.rating ?? null, total: d.userRatingCount ?? null,
     mapsUrl: d.googleMapsUri ?? null,
     lat: d.location?.latitude ?? null, lng: d.location?.longitude ?? null,
-    photos,
     reviews: (d.reviews ?? []).slice(0, 5).map((r: any) => ({
       author: r.authorAttribution?.displayName ?? "Usuário do Google", authorUri: r.authorAttribution?.uri ?? null,
       rating: r.rating ?? null, text: r.text?.text ?? r.originalText?.text ?? "", relativeTime: r.relativePublishTimeDescription ?? null,
@@ -70,7 +68,7 @@ Deno.serve(async (req) => {
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data: row } = await admin.from("club_med_place_cache").select("*").eq("slug", slug).maybeSingle();
   const fresh = row && Date.now() - new Date(row.fetched_at).getTime() < CACHE_HOURS * 3600_000;
-  if (fresh) return json({ placeId: row.place_id, status: row.status, ...row.payload, cachedAt: row.fetched_at });
+  if (fresh) return json({ placeId: row.place_id, status: row.status, ...await reviewedPayload(slug, row.payload), cachedAt: row.fetched_at });
 
   const KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
   if (!KEY) return json({ error: "Dados do Google indisponíveis no momento." }, 503);
@@ -81,7 +79,7 @@ Deno.serve(async (req) => {
     return json({ placeId: r.placeId, status: r.status, ...r.payload, cachedAt: now });
   } catch (e) {
     console.error("club-med-snow-places", slug, e instanceof Error ? e.message : String(e));
-    if (row) return json({ placeId: row.place_id, status: row.status, ...row.payload, cachedAt: row.fetched_at, stale: true });
+    if (row) return json({ placeId: row.place_id, status: row.status, ...row.payload, photos: [], cachedAt: row.fetched_at, stale: true });
     return json({ error: "Dados do Google indisponíveis no momento." }, 502);
   }
 });
