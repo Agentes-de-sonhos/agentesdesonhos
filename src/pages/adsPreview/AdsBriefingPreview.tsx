@@ -166,6 +166,9 @@ export default function AdsBriefingPreview() {
         [data-ads-preview="briefing-23-v1"] header {
           background: #000 !important; --foreground: 0 0% 100%; --muted-foreground: 0 0% 80%; --background: 0 0% 0%;
         }
+        [data-ads-preview="briefing-23-v1"] header a,
+        [data-ads-preview="briefing-23-v1"] header button { color: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #rodape > div:first-child p.uppercase { color: #a3a3a3 !important; }
         [data-ads-preview="briefing-23-v1"] header > div:first-child {
           height: auto !important; min-height: 108px; padding-top: 8px; padding-bottom: 8px;
         }
