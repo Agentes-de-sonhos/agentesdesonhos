@@ -157,6 +157,7 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
+  arenaRafaelSnow: "/arena-travel-group/hero-rafael-neve.webp",
   dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
   resort: destinoResort,

@@ -106,6 +106,7 @@ export function resolveSections(
  * Mapeamento central em `AgencySiteHome` — nunca imports espalhados.
  */
 export type AgencyImageSlot =
+  | "arenaRafaelSnow"
   | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "curtiCaribe" | "curtiBrasil" | "curtiCruzeiros" | "curtiNovaYork" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"

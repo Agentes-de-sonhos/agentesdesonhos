@@ -2078,6 +2078,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   heroPresentation: { ...arenaMundoSource.heroPresentation, kicker: "ARENA TRAVEL GROUP · VIAGENS SOB MEDIDA" },
   hero: arenaMundoSource.hero?.map((slide, index) => ({
     ...slide,
+    ...(index === 0 ? { image: "arenaRafaelSnow" as const, textWidth: "narrowLeft" as const } : {}),
     title: arenaBaseline.hero?.[index]?.title ?? slide.title,
     subtitle: (arenaBaseline.hero?.[index]?.subtitle ?? slide.subtitle).replace(/ Imagem genérica de inspiração\./g, ""),
   })),

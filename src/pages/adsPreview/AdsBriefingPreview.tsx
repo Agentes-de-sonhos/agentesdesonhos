@@ -163,6 +163,30 @@ export default function AdsBriefingPreview() {
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       {fixture.jobId === "briefing-23-v1" && <style>{`
+        [data-ads-preview="briefing-23-v1"] #topo:has(img[src="/arena-travel-group/hero-rafael-neve.webp"]) > .relative > .relative {
+          width: 48%; max-width: 600px;
+        }
+        [data-ads-preview="briefing-23-v1"] #topo img[src="/arena-travel-group/hero-rafael-neve.webp"] {
+          object-position: 75% center;
+        }
+        @media (max-width: 767px) {
+          [data-ads-preview="briefing-23-v1"] #topo:has(img[src="/arena-travel-group/hero-rafael-neve.webp"]) {
+            background: #000; padding-bottom: 4rem !important;
+          }
+          [data-ads-preview="briefing-23-v1"] #topo:has(img[src="/arena-travel-group/hero-rafael-neve.webp"]) > .absolute {
+            position: relative; height: 260px;
+          }
+          [data-ads-preview="briefing-23-v1"] #topo:has(img[src="/arena-travel-group/hero-rafael-neve.webp"]) > .absolute > [aria-hidden] {
+            display: none;
+          }
+          [data-ads-preview="briefing-23-v1"] #topo:has(img[src="/arena-travel-group/hero-rafael-neve.webp"]) > .relative {
+            padding-top: 24px; padding-bottom: 12px;
+          }
+          [data-ads-preview="briefing-23-v1"] #topo:has(img[src="/arena-travel-group/hero-rafael-neve.webp"]) > .relative > .relative {
+            width: 100%; max-width: none;
+          }
+        }
+
         /* Arena review: solid surfaces; image overlays retain their contrast. */
         [data-ads-preview="briefing-23-v1"] :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) {
           background: #fff !important; background-image: none !important;
