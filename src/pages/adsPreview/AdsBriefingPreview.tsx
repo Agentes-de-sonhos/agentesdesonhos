@@ -163,6 +163,33 @@ export default function AdsBriefingPreview() {
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       {fixture.jobId === "briefing-23-v1" && <style>{`
+        /* Arena review: solid surfaces; image overlays retain their contrast. */
+        [data-ads-preview="briefing-23-v1"] :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) {
+          background: #fff !important; background-image: none !important;
+        }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil, #diferenciais) {
+          background: #fff !important; background-image: none !important;
+        }
+        [data-ads-preview="briefing-23-v1"] :is(#temporada-cruzeiros, #destinos, #faq) {
+          background: #000 !important; background-image: none !important; color: #fff;
+          --foreground: 0 0% 100%; --muted-foreground: 0 0% 100%; --wl-ink: 0 0% 100%;
+          --border: 0 0% 64%; --brand-primary: #fff; --brand-on-primary: #000;
+        }
+        [data-ads-preview="briefing-23-v1"] :is(#destinos, #faq) :is(h2, h3, p),
+        [data-ads-preview="briefing-23-v1"] #faq [data-state] { color: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #temporada-cruzeiros > div > div {
+          background: #000 !important; border-color: #a3a3a3;
+        }
+        [data-ads-preview="briefing-23-v1"] #temporada-cruzeiros :is(h2, p, li a, li span) { color: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #temporada-cruzeiros :is(figcaption, nav a) {
+          background: #000 !important; color: #a3a3a3 !important;
+        }
+        [data-ads-preview="briefing-23-v1"] #temporada-cruzeiros a.inline-flex,
+        [data-ads-preview="briefing-23-v1"] #faq button:not([data-state]) {
+          background: #fff !important; color: #000 !important; border-color: #fff !important;
+        }
+        [data-ads-preview="briefing-23-v1"] #faq button:not([data-state]) * { color: #000 !important; }
+
         [data-ads-preview="briefing-23-v1"] header {
           background: #000 !important; --foreground: 0 0% 100%; --muted-foreground: 0 0% 80%; --background: 0 0% 0%;
         }
