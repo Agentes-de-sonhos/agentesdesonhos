@@ -2069,6 +2069,10 @@ const arenaMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_C
 export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   ...arenaMundoSource,
   key: "arenaBriefing23",
+  nav: arenaMundoSource.nav?.filter(item => item.to !== "/oportunidades-novembro").map(item => ({
+    ...item, children: item.children?.filter(child => !["/xcaret", "/#avaliacoes"].includes(child.to)),
+  })),
+  sections: { ...arenaMundoSource.sections, concierge: { enabled: false }, avaliacoes: { enabled: false } },
   heroPresentation: { ...arenaMundoSource.heroPresentation, kicker: "ARENA TRAVEL GROUP · VIAGENS SOB MEDIDA" },
   hero: arenaMundoSource.hero?.map((slide, index) => ({
     ...slide,
@@ -2090,12 +2094,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   about: { ...arenaMundoSource.about, ...arenaBaseline.about, media: undefined,
     images: arenaMundoSource.about?.images, mural: arenaMundoSource.about?.mural,
     visitedDestinations: undefined },
-  featuredExperience: arenaMundoSource.featuredExperience ? {
-    ...arenaMundoSource.featuredExperience, kicker: "DESCUBRA A RIVIERA MAYA",
-    title: "Parques e hotéis Xcaret para conhecer em boa companhia",
-    description: "Converse com a Arena Travel Group para planejar parques, hotéis e experiências de acordo com o perfil da sua família ou grupo.",
-    highlights: ["Parques e hotéis", "Famílias e grupos", "Planejamento sob medida"],
-  } : undefined,
+  featuredExperience: undefined,
   authority: arenaMundoSource.authority ? { ...arenaMundoSource.authority,
     companies: arenaMundoSource.authority.companies ? { ...arenaMundoSource.authority.companies,
       title: "Planeje seu próximo cruzeiro com a Arena Travel Group." } : undefined } : undefined,
