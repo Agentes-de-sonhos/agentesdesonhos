@@ -1,0 +1,435 @@
+[
+  {
+    "slug": "alpe-d-huez",
+    "collected": 10,
+    "hotelAttributed": 8,
+    "userOrUnknownExcluded": 2,
+    "selected": 7,
+    "selectedIndices": [
+      9,
+      1,
+      2,
+      3,
+      4,
+      7,
+      0
+    ],
+    "accountNames": [
+      "Club Med Alpe d'Huez - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/103068601162527801442"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "beidahu",
+    "collected": 10,
+    "hotelAttributed": 0,
+    "userOrUnknownExcluded": 10,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [],
+    "authorUris": [],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "changbaishan",
+    "collected": 10,
+    "hotelAttributed": 0,
+    "userOrUnknownExcluded": 10,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [],
+    "authorUris": [],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "grand-massif-samoens-morillon",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 7,
+    "selectedIndices": [
+      0,
+      1,
+      3,
+      5,
+      6,
+      7,
+      8
+    ],
+    "accountNames": [
+      "Club Med Grand Massif Samoëns Morillon"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/104413066687466538687"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "hokkaido-sahoro",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 6,
+    "selectedIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "accountNames": [
+      "Club Med Sahoro - Hokkaido"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/110748632968063999161"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "kiroro-grand",
+    "collected": 10,
+    "hotelAttributed": 7,
+    "userOrUnknownExcluded": 3,
+    "selected": 6,
+    "selectedIndices": [
+      6,
+      1,
+      2,
+      4,
+      5,
+      7
+    ],
+    "accountNames": [
+      "Club Med Kiroro Grand"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/109657290589408192337"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "kiroro-peak",
+    "collected": 10,
+    "hotelAttributed": 7,
+    "userOrUnknownExcluded": 3,
+    "selected": 6,
+    "selectedIndices": [
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "accountNames": [
+      "Club Med Kiroro Peak"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/112973724542051486427"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "la-plagne-2100",
+    "collected": 10,
+    "hotelAttributed": 8,
+    "userOrUnknownExcluded": 2,
+    "selected": 6,
+    "selectedIndices": [
+      6,
+      1,
+      3,
+      4,
+      5,
+      8
+    ],
+    "accountNames": [
+      "Club Med La Plagne 2100 - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/114617267533738802769"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "la-rosiere",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 9,
+    "selectedIndices": [
+      4,
+      1,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      0
+    ],
+    "accountNames": [
+      "Club Med La Rosière - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/113256991925876058227"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "les-arcs-panorama",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 5,
+    "selectedIndices": [
+      0,
+      1,
+      2,
+      4,
+      6
+    ],
+    "accountNames": [
+      "Club Med Arcs Panorama - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/106319264831974315789"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "les-chalets-de-grand-massif-samoens-morillon",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Grand Massif Samoëns Morillon"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/104413066687466538687"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "les-chalets-de-valmorel",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 7,
+    "selectedIndices": [
+      0,
+      1,
+      4,
+      5,
+      6,
+      7,
+      9
+    ],
+    "accountNames": [
+      "Club Med Valmorel Chalets - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/108951036640408020587"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "peisey-vallandry",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 9,
+    "selectedIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9
+    ],
+    "accountNames": [
+      "Club Med Peisey-Vallandry - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/116566642971867107176"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "pragelato-sestriere",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 7,
+    "selectedIndices": [
+      4,
+      0,
+      1,
+      2,
+      6,
+      7,
+      9
+    ],
+    "accountNames": [
+      "Club Med Pragelato-Sestriere - Italian Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/112397251194394360718"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "quebec-charlevoix",
+    "collected": 10,
+    "hotelAttributed": 7,
+    "userOrUnknownExcluded": 3,
+    "selected": 5,
+    "selectedIndices": [
+      0,
+      1,
+      4,
+      5,
+      6
+    ],
+    "accountNames": [
+      "Club Med Québec-Charlevoix"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/100576913294915611051"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "saint-moritz-roi-soleil",
+    "collected": 10,
+    "hotelAttributed": 10,
+    "userOrUnknownExcluded": 0,
+    "selected": 7,
+    "selectedIndices": [
+      4,
+      0,
+      1,
+      3,
+      5,
+      8,
+      9
+    ],
+    "accountNames": [
+      "Club Med Saint-Moritz - Swiss Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/113845873784761975909"
+    ],
+    "note": "Perfil público: nome e associação ao estabelecimento conferidos; isso não é certificação de propriedade emitida pelo Google."
+  },
+  {
+    "slug": "serre-chevalier",
+    "collected": 10,
+    "hotelAttributed": 8,
+    "userOrUnknownExcluded": 2,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Serre-Chevalier - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/112873080859825901904"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "tignes",
+    "collected": 10,
+    "hotelAttributed": 8,
+    "userOrUnknownExcluded": 2,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Tignes"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/105213050119113973117"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "tomamu-hokkaido",
+    "collected": 10,
+    "hotelAttributed": 8,
+    "userOrUnknownExcluded": 2,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Tomamu - Hokkaido"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/108051935565968900027"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "val-d-isere",
+    "collected": 10,
+    "hotelAttributed": 1,
+    "userOrUnknownExcluded": 9,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Val d'Isère"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/106502250216497607865"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "val-thorens-sensations",
+    "collected": 10,
+    "hotelAttributed": 7,
+    "userOrUnknownExcluded": 3,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Val Thorens Sensation"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/117012331168556762406"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "valmorel",
+    "collected": 10,
+    "hotelAttributed": 9,
+    "userOrUnknownExcluded": 1,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [
+      "Club Med Valmorel Chalets - French Alps"
+    ],
+    "authorUris": [
+      "https://maps.google.com/maps/contrib/108951036640408020587"
+    ],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  },
+  {
+    "slug": "yabuli",
+    "collected": 10,
+    "hotelAttributed": 0,
+    "userOrUnknownExcluded": 10,
+    "selected": 0,
+    "selectedIndices": [],
+    "accountNames": [],
+    "authorUris": [],
+    "note": "Pendente: não liberar automaticamente por nome de autor, índice ou falta de autoria."
+  }
+]

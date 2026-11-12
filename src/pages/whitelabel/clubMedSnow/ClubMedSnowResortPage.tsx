@@ -77,7 +77,7 @@ export default function ClubMedSnowResortPage({ info, slugOverride }: { info: Ag
     name: r.name,
     address: g?.address ?? [r.village, r.region].filter(Boolean).join(", "),
     city: "", state: g?.address ? "" : r.country,
-    photos: getClubMedSnowPhotos(r.slug),
+    photos: [...getClubMedSnowPhotos(r.slug), ...(g?.photos ?? []).map((p) => ({ url: p.url, alt: p.alt ?? r.name, credit: `${p.credit} · Google Maps`, creditUrl: p.creditUri ?? undefined }))],
     descriptionTitle: `Por que escolher o ${r.name}?`,
     description: snowDescription(r),
     amenities: r.highlights.map((h) => ({ icon: snowHighlightIcon(h), label: h })),

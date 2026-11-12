@@ -3,20 +3,22 @@
  * todos os sites. O navegador envia só o slug do catálogo; a consulta vem da
  * allowlist abaixo. Resultado deduplicado por slug/Place ID na tabela
  * `club_med_place_cache` (service role) e reaproveitado por todos os tenants
- * até expirar (CACHE_HOURS). Apenas avaliações e localização: fotografias
- * são selecionadas separadamente a partir de material oficial autorizado.
+ * até expirar (CACHE_HOURS). Avaliações e localização; fotos já coletadas só são devolvidas se
+ * corresponderem à seleção individual de perfil + crédito + URI revisada.
+ * Esta função não consulta novas fotos nem aprova futuras imagens do perfil.
  * A chave nunca sai do servidor.
  */
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { selectReviewedGooglePhotos } from "../_shared/clubMedGooglePhotos.ts";
 import { QUERIES } from "./queries.ts";
 
 const CACHE_HOURS = 24;
 const DETAILS_MASK = "id,displayName,formattedAddress,location,rating,userRatingCount,googleMapsUri,reviews";
 
-const withoutPhotos = (payload: Record<string, unknown> = {}) => {
+const reviewedPayload = async (slug: string, payload: Record<string, unknown> = {}) => {
   const { photos: _photos, ...details } = payload;
-  return details;
+  return { ...details, photos: await selectReviewedGooglePhotos(slug, Array.isArray(_photos) ? _photos : []) };
 };
 
 const json = (body: unknown, status = 200) =>
@@ -66,7 +68,7 @@ Deno.serve(async (req) => {
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
   const { data: row } = await admin.from("club_med_place_cache").select("*").eq("slug", slug).maybeSingle();
   const fresh = row && Date.now() - new Date(row.fetched_at).getTime() < CACHE_HOURS * 3600_000;
-  if (fresh) return json({ placeId: row.place_id, status: row.status, ...withoutPhotos(row.payload), cachedAt: row.fetched_at });
+  if (fresh) return json({ placeId: row.place_id, status: row.status, ...await reviewedPayload(slug, row.payload), cachedAt: row.fetched_at });
 
   const KEY = Deno.env.get("GOOGLE_PLACES_API_KEY");
   if (!KEY) return json({ error: "Dados do Google indisponíveis no momento." }, 503);
@@ -77,7 +79,7 @@ Deno.serve(async (req) => {
     return json({ placeId: r.placeId, status: r.status, ...r.payload, cachedAt: now });
   } catch (e) {
     console.error("club-med-snow-places", slug, e instanceof Error ? e.message : String(e));
-    if (row) return json({ placeId: row.place_id, status: row.status, ...withoutPhotos(row.payload), cachedAt: row.fetched_at, stale: true });
+    if (row) return json({ placeId: row.place_id, status: row.status, ...row.payload, photos: [], cachedAt: row.fetched_at, stale: true });
     return json({ error: "Dados do Google indisponíveis no momento." }, 502);
   }
 });

@@ -8,7 +8,7 @@ import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 
 function ResortCard({ r }: { r: ClubMedSnowResort }) {
   const { data } = useClubMedSnowPlaces(r.slug);
-  const photo = getClubMedSnowPhotos(r.slug)[0];
+  const photo = getClubMedSnowPhotos(r.slug)[0] ?? data?.photos?.[0];
   return (
     <li>
       <a href={agencySiteHref(`${CLUB_MED_SNOW_BASE}/${r.slug}`)} className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:shadow-lg">
@@ -60,7 +60,7 @@ export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomain
           </section>
         ))}
         <p className="mt-12 text-xs text-muted-foreground">
-          Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Avaliações e mapas via Google Maps. Galerias reservadas a fotografias oficiais aprovadas.
+          Informações conferidas nas páginas oficiais do Club Med; condições de neve dependem do clima e não são garantidas. Avaliações e mapas via Google Maps. Fotos selecionadas por imagem e autoria; créditos nas galerias.
         </p>
       </div>
     </div>

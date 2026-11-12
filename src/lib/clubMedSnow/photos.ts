@@ -9,8 +9,8 @@ export interface OfficialSnowPhoto extends HotelPhoto {
 
 /**
  * Only resort-specific, visually reviewed official media with confirmed rights
- * belongs here. Google photos (including photos credited to a hotel account)
- * must never be used as a fallback. Candidate URLs live in the audit document,
+ * belongs here. Unreviewed Google photos must never be used as a fallback. Google service
+ * media has its own individual-review gate in the shared Google photo policy. Candidate URLs live in the audit document,
  * outside the public gallery, until rights and visual selection are verified.
  */
 export const OFFICIAL_SNOW_PHOTOS: Record<string, OfficialSnowPhoto[]> = {};

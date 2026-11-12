@@ -11,6 +11,7 @@ export interface HotelPhoto {
   alt: string;
   /** Autoria exigida pela fonte (ex.: Google). Exibida em cada foto quando presente. */
   credit?: string;
+  creditUrl?: string;
 }
 
 export interface HotelAmenity {
