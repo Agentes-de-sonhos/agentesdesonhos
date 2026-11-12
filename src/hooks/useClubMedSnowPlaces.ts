@@ -5,7 +5,6 @@ export interface ClubMedPlaces {
   placeName?: string | null; address?: string | null;
   rating?: number | null; total?: number | null; mapsUrl?: string | null;
   lat?: number | null; lng?: number | null;
-  photos?: { url: string; credit: string; creditUri?: string | null }[];
   reviews?: { author: string; authorUri?: string | null; rating?: number | null; text: string; relativeTime?: string | null }[];
 }
 
@@ -26,7 +25,10 @@ export function useClubMedSnowPlaces(slug: string | undefined) {
         body: JSON.stringify({ slug }),
       });
       if (!res.ok) return null;
-      return (await res.json()) as ClubMedPlaces;
+      // The deployed endpoint may still return old cached photo URLs. Discard
+      // them here as well: the catalog only accepts curated official media.
+      const { photos: _photos, ...details } = await res.json();
+      return details as ClubMedPlaces;
     },
   });
 }

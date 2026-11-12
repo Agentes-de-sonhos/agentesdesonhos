@@ -1,7 +1,7 @@
 /**
  * Catálogo compartilhado "Club Med na neve" (todos os sites de agência).
  * Conteúdo editorial verificado nas páginas oficiais do Club Med (fontes e data
- * em cada item). Dados do Google (nota, avaliações, mapa, fotos) vêm do servidor
+ * em cada item). Dados do Google (nota, avaliações, mapa) vêm do servidor
  * `club-med-snow-places`, deduplicados por Place ID para todos os tenants.
  */
 export interface SnowSource { url: string; label: string; accessed: string }

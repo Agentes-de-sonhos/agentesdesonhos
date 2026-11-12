@@ -4,7 +4,7 @@
  */
 export type HotelAmenityIcon =
   | "restaurant" | "room-service" | "spa" | "gym" | "pets" | "pool"
-  | "wifi" | "parking" | "kids" | "beach" | "bar" | "all-inclusive" | "leisure";
+  | "wifi" | "parking" | "kids" | "beach" | "bar" | "all-inclusive" | "leisure" | "mountain" | "snow" | "view" | "home" | "cable-car";
 
 export interface HotelPhoto {
   url: string;

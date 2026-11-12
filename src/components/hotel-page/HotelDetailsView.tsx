@@ -1,7 +1,7 @@
 import type React from "react";
 import { useRef, useState } from "react";
 import {
-  BedDouble, Clock, Dumbbell, ExternalLink, MapPin, PawPrint, ParkingCircle, Baby, Waves,
+  Mountain, Snowflake, Eye, House, CableCar, BedDouble, Clock, Dumbbell, ExternalLink, MapPin, PawPrint, ParkingCircle, Baby, Waves,
   Sparkles, Star, UtensilsCrossed, ConciergeBell, Wifi, Wine, Umbrella, ChevronRight, ChevronLeft, type LucideIcon,
 } from "lucide-react";
 import { HotelGallery } from "./HotelGallery";
@@ -11,7 +11,7 @@ import type { HotelAmenityIcon, HotelPageData, HotelQuoteRequest, HotelReview } 
 const AMENITY_ICONS: Record<HotelAmenityIcon, LucideIcon> = {
   restaurant: UtensilsCrossed, "room-service": ConciergeBell, spa: Sparkles, gym: Dumbbell,
   pets: PawPrint, pool: Waves, wifi: Wifi, parking: ParkingCircle, kids: Baby,
-  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble,
+  beach: Umbrella, bar: Wine, "all-inclusive": BedDouble, leisure: BedDouble, mountain: Mountain, snow: Snowflake, view: Eye, home: House, "cable-car": CableCar,
 };
 
 export function Stars({ value, className }: { value: number; className?: string }) {
