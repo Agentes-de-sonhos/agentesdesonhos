@@ -2091,12 +2091,11 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   }),
   sections: { ...arenaMundoSource.sections, concierge: { enabled: false }, avaliacoes: { enabled: false } },
   heroPresentation: { ...arenaMundoSource.heroPresentation, kicker: "ARENA TRAVEL GROUP · VIAGENS SOB MEDIDA" },
-  hero: arenaMundoSource.hero?.map((slide, index) => ({
-    ...slide,
-    ...(index === 0 ? { image: "arenaRafaelSnow" as const, textWidth: "narrowLeft" as const } : {}),
-    title: arenaBaseline.hero?.[index]?.title ?? slide.title,
-    subtitle: (arenaBaseline.hero?.[index]?.subtitle ?? slide.subtitle).replace(/ Imagem genérica de inspiração\./g, ""),
-  })),
+  hero: [
+    { kicker: "VIAGENS PARA A NEVE", title: "Sua próxima história começa na neve.", subtitle: "Da escolha do destino à hospedagem, planejamos sua viagem para esquiar com orientação e acompanhamento em cada etapa.", image: "arenaRafaelSnow", textWidth: "narrowLeft", order: 1, enabled: true },
+    { kicker: "TEMPO PARA APROVEITAR", title: "Descansar também merece um bom planejamento.", subtitle: "Resorts escolhidos de acordo com o perfil da sua família ou grupo, com atenção à estrutura, à localização e ao que está incluído.", image: "iberostarPraiaDoForte", textWidth: "narrowLeft", order: 2, enabled: true },
+    { kicker: "EUROPA NO SEU RITMO", title: "Novos lugares. Boas companhias. A sua viagem.", subtitle: "Roteiros personalizados para famílias e grupos de amigos, com escolhas que respeitam seus interesses e seu jeito de viajar.", image: "heroVarenna", focalPoint: "varenna", textWidth: "narrowLeft", order: 3, enabled: true },
+  ],
   signature: arenaBaseline.signature,
   modules: arenaMundoSource.modules?.map((item, index) => ({
     ...item,
@@ -2117,8 +2116,46 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     companies: arenaMundoSource.authority.companies ? { ...arenaMundoSource.authority.companies,
       title: "Planeje seu próximo cruzeiro com a Arena Travel Group." } : undefined } : undefined,
   differentials: arenaBaseline.differentials, conciergeSteps: arenaBaseline.conciergeSteps,
-  faq: arenaBaseline.faq,
+  faq: [
+  {
+    "q": "Como a Arena ajuda a planejar minha viagem?",
+    "a": "Tudo começa com uma conversa sobre quem vai viajar, os interesses, as datas e o investimento previsto. A partir disso, a Arena orienta a escolha do destino, prepara o orçamento e organiza as reservas, acompanhando você antes do embarque, durante a viagem e depois do retorno."
+  },
+  {
+    "q": "Quem vai cuidar do meu atendimento?",
+    "a": "O atendimento é feito diretamente pelo proprietário ou pelos sócios da Arena Travel Group. Você conta com uma referência próxima para conversar sobre suas escolhas e acompanhar o planejamento."
+  },
+  {
+    "q": "Vocês organizam viagens para esquiar?",
+    "a": "Sim. Viagens de esqui estão entre os focos da Arena. O planejamento considera o perfil dos viajantes e suas preferências para orientar a escolha do destino, da hospedagem e dos serviços da viagem."
+  },
+  {
+    "q": "Como escolher o resort ideal para minha família?",
+    "a": "A Arena ajuda a comparar as opções considerando quem vai viajar, a estrutura desejada, a localização e os serviços incluídos. Assim, a escolha parte das necessidades da sua família, com orientação sobre as diferenças entre os resorts."
+  },
+  {
+    "q": "Vocês planejam viagens para grupos de amigos e famílias com crianças?",
+    "a": "Sim. Esses estão entre os principais públicos da agência. O planejamento considera os interesses do grupo e as necessidades dos viajantes para organizar hospedagens, deslocamentos e experiências."
+  },
+  {
+    "q": "O roteiro pode ser personalizado?",
+    "a": "Sim. Viagens sob medida estão entre as especialidades da Arena, incluindo destinos internacionais e roteiros pela Europa. As opções são construídas a partir do perfil, das preferências e do investimento previsto para a viagem."
+  },
+  {
+    "q": "Terei suporte se acontecer algum imprevisto durante a viagem?",
+    "a": "Sim. A Arena oferece acompanhamento durante a viagem. Se ocorrer um imprevisto, o responsável pelo seu atendimento acompanha o caso e a tratativa com os fornecedores até a solução."
+  },
+  {
+    "q": "O Rafael conhece os destinos que recomenda?",
+    "a": "A vivência pessoal é uma das bases da consultoria. Muitos dos destinos, hotéis e passeios recomendados já foram conhecidos pessoalmente pelo Rafael. Essa experiência se soma às capacitações e às parcerias com fornecedores para orientar cada indicação."
+  },
+  {
+    "q": "Como começo a planejar minha viagem?",
+    "a": "Você pode preencher uma solicitação pelo site ou entrar em contato pelo WhatsApp, e-mail ou telefone. Conte o que está imaginando, quem vai viajar e quando pretende embarcar para iniciar o planejamento."
+  }
+],
   copy: { ...arenaMundoSource.copy, ...arenaBaseline.copy,
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Antes de fazer as malas", subtitle: "Se a sua dúvida não estiver aqui, converse com a equipe da Arena." },
     destinations: { ...arenaBaseline.copy?.destinations, subtitle: "Resorts, Europa, neve e viagens em grupo, com orientação em cada etapa." },
     modules: { ...arenaBaseline.copy?.modules, cta: "Conversar com a Arena" },
     avaliacoes: { title: "Experiências de quem viaja com a Arena" },

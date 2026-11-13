@@ -1814,8 +1814,7 @@ export default function AgencySiteHome({
                     {copy.title ?? "Perguntas frequentes"}
                   </h2>
                   <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
-                    Se a sua dúvida não estiver aqui, fale com uma consultora da{" "}
-                    <BrandText>{name}</BrandText>.
+                    {copy.subtitle ?? <>Se a sua dúvida não estiver aqui, fale com uma consultora da{" "}<BrandText>{name}</BrandText>.</>}
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     {waHref && !profile.hideFaqWhatsapp ? (
@@ -2095,7 +2094,7 @@ export default function AgencySiteHome({
           {editorial ? (
             <p className="mb-4 inline-flex max-w-full items-center gap-2 whitespace-nowrap text-[clamp(9px,2.6vw,11px)] font-bold uppercase tracking-[0.12em] md:mb-5 md:tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
-               {profile.heroPresentation?.kicker ?? (location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens")}
+               {current.kicker ?? profile.heroPresentation?.kicker ?? (location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens")}
             </p>
           ) : (
             <p className="mb-4 inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-primary-foreground backdrop-blur">

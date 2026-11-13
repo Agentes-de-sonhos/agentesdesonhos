@@ -167,6 +167,7 @@ export interface AgencyHighlight {
 /* ------------------------------- HERO / BANNERS ------------------------------ */
 
 export interface AgencyHeroSlide {
+  kicker?: string;
   title: string;
   /** `{agency}` is replaced by the agency display name. */
   subtitle: string;
@@ -214,6 +215,7 @@ export const DEFAULT_HERO_SLIDES: AgencyHeroSlide[] = [
 ];
 
 export interface ResolvedHeroSlide {
+  kicker?: string;
   title: string;
   subtitle: string;
   image?: string | null;
@@ -241,6 +243,7 @@ export function resolveHeroSlides(
   const list = source.length ? source : DEFAULT_HERO_SLIDES.slice(0, HERO_MIN_SLIDES);
 
   return list.map((s) => ({
+    kicker: s.kicker,
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
     image: (s.image ? imageSlots?.[s.image] : undefined) ?? coverImageUrl ?? fallbackImage ?? null,
