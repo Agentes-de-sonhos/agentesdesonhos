@@ -1311,6 +1311,17 @@ function PublicQuoteDocuments({
       await downloadDoc(doc);
       return;
     }
+    const isPdf = resolveDocumentPreviewKind(doc.file_type, doc.file_name) === "pdf";
+    const isMobile = typeof window !== "undefined" && window.matchMedia?.("(max-width: 767px), (pointer: coarse)").matches;
+    if (isPdf && isMobile) {
+      // Celular: abre o PDF direto no leitor do navegador, sem a tela "Abrir".
+      const win = window.open("", "_blank");
+      const url = await signDoc(doc, false);
+      if (!url) { win?.close(); return; }
+      if (win) win.location.href = url;
+      else window.location.href = url;
+      return;
+    }
     setViewerDoc(doc);
     setViewerUrl(null);
     setViewerLoading(true);
