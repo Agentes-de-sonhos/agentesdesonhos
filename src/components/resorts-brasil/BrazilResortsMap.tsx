@@ -151,6 +151,7 @@ export function BrazilResortsMap({
                 <g
                   key={uf}
                   data-region={n ? REGION_OF[uf] : undefined}
+                  data-map-region={REGION_OF[uf]}
                   data-active={active || undefined}
                   role={n ? "button" : undefined}
                   tabIndex={n ? 0 : -1}

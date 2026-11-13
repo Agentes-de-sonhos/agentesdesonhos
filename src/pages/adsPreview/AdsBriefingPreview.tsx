@@ -160,7 +160,7 @@ export default function AdsBriefingPreview() {
     } else if (pages.editorial && /^(ofertas|blog|politicas|termos|area-do-cliente)/.test(subPath)) {
       body = <AgencyPresentationPages page={subPath} info={info} />;
     } else if (subPath === "resorts-brasil") {
-      body = <div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap title={pages.resorts?.title} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>;
+      body = <div id="resorts-brasil" className="mx-auto max-w-6xl px-4 py-12 md:py-20"><BrazilResortsMap title={pages.resorts?.title} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>;
     } else if (subPath === "club-med-neve") {
       body = <ClubMedSnowCollectionPage info={info} />;
     } else if (snowSlug) {
@@ -183,35 +183,35 @@ export default function AdsBriefingPreview() {
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       {fixture.jobId === "briefing-23-v1" && <style>{`
         /* Arena: regional map palette, with monochrome counts and controls. */
-        [data-ads-preview="briefing-23-v1"] #resorts {
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) {
           --primary: 0 0% 0%; --primary-foreground: 0 0% 100%;
           --foreground: 0 0% 0%; --muted-foreground: 0 0% 40%;
           --card: 0 0% 100%; --background: 0 0% 100%;
           --border: 0 0% 83%; --muted: 0 0% 95%;
           --brand-primary: #000; --brand-on-primary: #fff;
         }
-        [data-ads-preview="briefing-23-v1"] #resorts .wl-kicker { color: #000 !important; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-map-region="n"] { --arena-map-region: #b8d8a6; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-map-region="ne"] { --arena-map-region: #f4d77e; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-map-region="co"] { --arena-map-region: #dfbd95; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-map-region="se"] { --arena-map-region: #a8cfdf; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-map-region="s"] { --arena-map-region: #c7b6d9; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-map-region] > path {
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) .wl-kicker { color: #000 !important; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-map-region="n"] { --arena-map-region: #b8d8a6; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-map-region="ne"] { --arena-map-region: #f4d77e; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-map-region="co"] { --arena-map-region: #dfbd95; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-map-region="se"] { --arena-map-region: #a8cfdf; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-map-region="s"] { --arena-map-region: #c7b6d9; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-map-region] > path {
           fill: var(--arena-map-region) !important; stroke: #fff;
         }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region]:is(:hover, :focus-visible) > path { filter: brightness(.94) saturate(1.15); }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region][data-active] > path { filter: brightness(.88) saturate(1.3); stroke: #333; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region] circle { fill: #000 !important; stroke: #fff !important; }
-        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region] text { fill: #fff !important; }
-        [data-ads-preview="briefing-23-v1"] #resorts button[data-region] {
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-region]:is(:hover, :focus-visible) > path { filter: brightness(.94) saturate(1.15); }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-region][data-active] > path { filter: brightness(.88) saturate(1.3); stroke: #333; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-region] circle { fill: #000 !important; stroke: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) svg g[data-region] text { fill: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) button[data-region] {
           background: #fff !important; color: #000 !important; border-color: #d4d4d4 !important;
         }
-        [data-ads-preview="briefing-23-v1"] #resorts button[data-region][data-active],
-        [data-ads-preview="briefing-23-v1"] #resorts .wl-resorts-btn {
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) button[data-region][data-active],
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) .wl-resorts-btn {
           background: #000 !important; color: #fff !important; border-color: #000 !important;
         }
-        [data-ads-preview="briefing-23-v1"] #resorts .wl-resorts-btn:hover { background: #333 !important; }
-        [data-ads-preview="briefing-23-v1"] #resorts .wl-resorts-btn svg { color: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) .wl-resorts-btn:hover { background: #333 !important; }
+        [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) .wl-resorts-btn svg { color: #fff !important; }
 
         @media (min-width: 768px) {
           [data-ads-preview="briefing-23-v1"] #topo > .relative > .relative {
