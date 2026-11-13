@@ -74,3 +74,11 @@
   .csi .csi-itinerary, .csi-itinerary .csi-map, .csi-itinerary .csi-card-arrow svg { transition: none; }
   .csi .csi-itinerary:hover, .csi .csi-itinerary:focus-within, .csi-itinerary:hover .csi-map, .csi-itinerary:focus-within .csi-map, .csi-itinerary:hover .csi-card-arrow svg, .csi-itinerary:focus-within .csi-card-arrow svg { transform: none; }
 }
+
+.csi-all { min-height: 48px; font-size: .875rem; line-height: 1.4; justify-content: center; white-space: nowrap; }
+.csi-ship-footer { display: flex; justify-content: flex-end; }
+.csi-ship-footer .csi-all { margin-top: 1rem; }
+.csi-gallery-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1rem; }
+.csi-gallery-footer .csi-note { margin: 0; flex: 1; }
+.csi-gallery-footer .csi-all { flex-shrink: 0; margin-top: 0; }
+@media(max-width: 639px) { .csi-gallery-footer { flex-wrap: wrap; } .csi-gallery-footer .csi-note { flex-basis: 100%; } .csi-gallery-footer .csi-all { margin-left: auto; } }

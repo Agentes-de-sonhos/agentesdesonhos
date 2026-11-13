@@ -36,7 +36,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
           <h2 id="cruise-home-title" className="mt-5 text-3xl font-semibold leading-tight text-background md:text-[2.4rem] lg:whitespace-nowrap">O próximo destino começa a bordo.</h2>
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-background/80 md:text-base">Oito navios. Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC, Costa e Corazul para a temporada brasileira.</p>
         </div>
-        <a href={agencySiteHref(SEASON_PATH)} className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 self-start rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 lg:self-end">Ver os oito navios <ArrowRight className="h-4 w-4" aria-hidden="true" /></a>
+
       </div>
       <div className="relative mt-8">
       <ul
@@ -74,12 +74,19 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
         <button type="button" aria-label="Navios anteriores" className={`${arrowCls} absolute left-0 top-[calc(50%-1.5rem)] z-10 hidden -translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.start} onClick={() => scrollBy(-1)}><ChevronLeft className="h-5 w-5" /></button>
         <button type="button" aria-label="Próximos navios" className={`${arrowCls} absolute right-0 top-[calc(50%-1.5rem)] z-10 hidden translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.end} onClick={() => scrollBy(1)}><ChevronRight className="h-5 w-5" /></button>
       </div>
-      <p className="mt-4 text-xs text-background/60">Imagens de divulgação e Wikimedia Commons · {Array.from(new Set(SEASON_SHIPS.map(s => s.lineName))).join(' · ')}</p>
+      <div className="csi-ship-footer"><a href={agencySiteHref(SEASON_PATH)} className="csi-all">Ver os oito navios <ArrowRight size={18} aria-hidden="true" /></a></div>
       <div className="csi-authority text-background"><SeasonGalleries showShips={false} /></div>
-      <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
-        <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o navio ideal para você?</p>
-        <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
-      </div>
+
     </div>
   );
+}
+
+/** Placed after the company logos by the shared homepage. */
+export function CruiseSeasonHelp({ container }: { container: string }) {
+  return <div className={`${container} pb-14 md:pb-20`} data-testid="cruise-season-help">
+      <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
+        <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o cruzeiro ideal para você?</p>
+        <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
+      </div>
+  </div>;
 }
