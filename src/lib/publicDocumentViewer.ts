@@ -37,3 +37,10 @@ export function resolveDocumentPreviewKind(
 export function canPreviewInline(fileType?: string | null, fileName?: string | null): boolean {
   return resolveDocumentPreviewKind(fileType, fileName) !== "download";
 }
+
+/** Nome exibido ao cliente, sem a extensão do arquivo (".pdf", ".jpeg"...). */
+export function displayDocumentName(fileName?: string | null): string {
+  const name = (fileName || "").trim();
+  const stripped = name.replace(/\.[a-z0-9]{1,5}$/i, "");
+  return stripped || name;
+}

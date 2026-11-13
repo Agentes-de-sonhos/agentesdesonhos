@@ -83,20 +83,23 @@ describe("OrcamentoPublico anexos em caixa expansível", () => {
 
     // Recolhida por padrão: o arquivo não aparece ao abrir o orçamento.
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText("voucher-hotel.pdf")).not.toBeInTheDocument();
+    expect(screen.queryByText("voucher-hotel")).not.toBeInTheDocument();
 
     fireEvent.click(toggle);
 
     await waitFor(() => {
       expect(toggle).toHaveAttribute("aria-expanded", "true");
-      expect(screen.getByText("voucher-hotel.pdf")).toBeInTheDocument();
+      expect(screen.getByText("voucher-hotel")).toBeInTheDocument();
     });
+    // Nome sem extensão e linha inteira abre o anexo.
+    expect(screen.queryByText("voucher-hotel.pdf")).not.toBeInTheDocument();
+    expect(screen.getByTestId("public-document-row")).toHaveTextContent("voucher-hotel");
 
     // Recolhe novamente ao clicar de novo.
     fireEvent.click(toggle);
     await waitFor(() => {
       expect(toggle).toHaveAttribute("aria-expanded", "false");
-      expect(screen.queryByText("voucher-hotel.pdf")).not.toBeInTheDocument();
+      expect(screen.queryByText("voucher-hotel")).not.toBeInTheDocument();
     });
   });
 });

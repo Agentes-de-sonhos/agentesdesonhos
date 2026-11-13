@@ -7,6 +7,16 @@ import {
   SIGNED_URL_TTL_SECONDS,
 } from "@/lib/publicDocumentViewer";
 
+import { displayDocumentName } from "@/lib/publicDocumentViewer";
+
+describe("nome exibido do anexo", () => {
+  it("remove a extensão", () => {
+    expect(displayDocumentName("motorhome-utah-nevada.pdf")).toBe("motorhome-utah-nevada");
+    expect(displayDocumentName("Lista de compras 1.jpeg")).toBe("Lista de compras 1");
+    expect(displayDocumentName("sem-extensao")).toBe("sem-extensao");
+  });
+});
+
 describe("visualizador de anexos do orçamento público", () => {
   it("classifica formatos corretamente", () => {
     expect(resolveDocumentPreviewKind("application/pdf", "voucher.pdf")).toBe("pdf");

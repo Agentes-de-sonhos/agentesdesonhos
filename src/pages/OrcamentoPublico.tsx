@@ -29,7 +29,7 @@ import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 import { PublicDocumentViewer } from "@/components/quote/PublicDocumentViewer";
 import { cn } from "@/lib/utils";
-import { canPreviewInline, SIGNED_URL_TTL_SECONDS } from "@/lib/publicDocumentViewer";
+import { canPreviewInline, SIGNED_URL_TTL_SECONDS, displayDocumentName, resolveDocumentPreviewKind } from "@/lib/publicDocumentViewer";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { descriptionToPlainText } from "@/lib/richDescription";
@@ -1359,44 +1359,49 @@ function PublicQuoteDocuments({
         <ul className="divide-y divide-border/40">
           {documents.map((doc) => {
             const Icon = getDocIcon(doc.file_type, doc.file_name);
+            const isPdf = resolveDocumentPreviewKind(doc.file_type, doc.file_name) === "pdf";
             return (
               <li
                 key={doc.id}
-                className="flex items-center gap-3 px-5 sm:px-6 py-4 bg-white hover:bg-muted/30 transition-colors"
+                className="flex items-center gap-2 pr-3 sm:pr-4 bg-white hover:bg-muted/30 transition-colors"
               >
-                <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate" title={doc.file_name}>
-                    {doc.file_name}
-                  </p>
-                  {doc.file_size ? (
-                    <p className="text-xs text-muted-foreground">{formatDocSize(doc.file_size)}</p>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 px-2.5 text-xs"
-                    onClick={() => openDoc(doc)}
-                    title={t("viewTitle")}
-                  >
-                    <Eye className="h-4 w-4 sm:mr-1.5" />
-                    <span className="hidden sm:inline">{t("viewLabel")}</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-9 px-2.5 text-xs"
-                    onClick={() => downloadDoc(doc)}
-                    title={t("downloadTitle")}
-                  >
-                    <Download className="h-4 w-4 sm:mr-1.5" />
-                    <span className="hidden sm:inline">{t("downloadLabel")}</span>
-                  </Button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => openDoc(doc)}
+                  title={t("viewTitle")}
+                  data-testid="public-document-row"
+                  className="flex flex-1 min-w-0 items-center gap-3 pl-5 sm:pl-6 py-4 text-left"
+                >
+                  <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    {isPdf ? (
+                      <span className="flex flex-col items-center leading-none text-primary">
+                        <FileText className="h-4 w-4" />
+                        <span className="mt-0.5 text-[9px] font-bold tracking-wide">PDF</span>
+                      </span>
+                    ) : (
+                      <Icon className="h-5 w-5 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground line-clamp-3 break-words leading-snug">
+                      {displayDocumentName(doc.file_name)}
+                    </p>
+                    {doc.file_size ? (
+                      <p className="text-xs text-muted-foreground mt-0.5">{formatDocSize(doc.file_size)}</p>
+                    ) : null}
+                  </div>
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 px-2.5 text-xs shrink-0"
+                  onClick={() => downloadDoc(doc)}
+                  title={t("downloadTitle")}
+                  aria-label={t("downloadTitle")}
+                >
+                  <Download className="h-4 w-4 sm:mr-1.5" />
+                  <span className="hidden sm:inline">{t("downloadLabel")}</span>
+                </Button>
               </li>
             );
           })}

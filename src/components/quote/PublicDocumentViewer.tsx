@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, X } from "lucide-react";
-import { resolveDocumentPreviewKind } from "@/lib/publicDocumentViewer";
+import { Download, ExternalLink, Loader2, X } from "lucide-react";
+import { displayDocumentName, resolveDocumentPreviewKind } from "@/lib/publicDocumentViewer";
 
 export interface PublicViewerDocument {
   id: string;
@@ -46,10 +46,18 @@ export function PublicDocumentViewer({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         data-testid="public-document-viewer"
-        className="max-w-[min(96vw,1100px)] h-[92vh] sm:h-[88vh] p-0 gap-0 overflow-hidden"
+        className="flex flex-col w-screen max-w-none h-[100dvh] sm:w-[96vw] sm:max-w-[1100px] sm:h-[92vh] sm:rounded-lg p-0 gap-0 overflow-hidden"
       >
         <div className="flex items-center gap-2 border-b px-4 py-3">
-          <DialogTitle className="flex-1 truncate text-sm font-semibold">{doc.file_name}</DialogTitle>
+          <DialogTitle className="flex-1 truncate text-sm font-semibold">{displayDocumentName(doc.file_name)}</DialogTitle>
+          {kind === "pdf" && signedUrl ? (
+            <Button asChild variant="ghost" size="sm" className="h-9">
+              <a href={signedUrl} target="_blank" rel="noopener noreferrer" aria-label="Abrir em tela cheia">
+                <ExternalLink className="h-4 w-4 sm:mr-1.5" />
+                <span className="hidden sm:inline">Tela cheia</span>
+              </a>
+            </Button>
+          ) : null}
           {allowDownload && onDownload ? (
             <Button variant="ghost" size="sm" onClick={onDownload} className="h-9">
               <Download className="mr-1.5 h-4 w-4" />
@@ -58,8 +66,8 @@ export function PublicDocumentViewer({
           ) : null}
           <DialogDescription className="sr-only">Anexo do orçamento aberto dentro da própria página.</DialogDescription>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-9" aria-label={closeLabel}>
-            <X className="mr-1.5 h-4 w-4" />
-            {closeLabel}
+            <X className="h-5 w-5 sm:mr-1.5" />
+            <span className="hidden sm:inline">{closeLabel}</span>
           </Button>
         </div>
         <div className="flex-1 overflow-auto bg-muted/30">
