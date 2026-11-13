@@ -8,6 +8,7 @@ import { EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
 import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
 import dricaNewsletterLondon from "@/assets/presentation/drica/london-newsletter.jpg";
+import arenaRafaelSnowboard from "@/assets/arena-rafael-snowboard.webp.asset.json";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
@@ -2168,6 +2169,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     newsletter: { title: "Novidades da Arena Travel Group", subtitle: "Converse com a equipe sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
   },
   footer: { ...arenaBaseline.footer, whatsapp: "(47) 99269-0807", phone: "(47) 99269-0807" },
+  newsletterMedia: { src: arenaRafaelSnowboard.url, alt: "Rafael Souza com prancha de snowboard na neve" },
   socialStrip: { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/arenatravelgroup/" }] },
   inspirationDialog: undefined, testimonials: undefined, seo: arenaBaseline.seo,
 };

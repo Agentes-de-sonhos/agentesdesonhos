@@ -239,6 +239,16 @@ export default function AdsBriefingPreview() {
           [data-ads-preview="briefing-23-v1"] #cotacao { margin-top: 0 !important; }
         }
 
+        /* Arena #novidades: foto do Rafael com rosto visível; botão preto, texto e seta brancos. */
+        [data-ads-preview="briefing-23-v1"] #novidades .wl-inspiration-cta {
+          background-color: #000 !important; color: #fff !important; border-color: #000 !important;
+        }
+        [data-ads-preview="briefing-23-v1"] #novidades .wl-inspiration-cta:hover {
+          background-color: #333 !important; border-color: #333 !important;
+        }
+        [data-ads-preview="briefing-23-v1"] #novidades .wl-inspiration-cta svg { color: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #novidades .wl-newsletter-card img { object-position: center 22%; }
+
         /* Arena review: solid surfaces; image overlays retain their contrast. */
         [data-ads-preview="briefing-23-v1"] :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) {
           background: #fff !important; background-image: none !important;
