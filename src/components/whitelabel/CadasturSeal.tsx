@@ -56,9 +56,7 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
     return <img src={cadasturSeal.url} alt="Somos certificados Cadastur" loading={lazy ? "lazy" : undefined} className={`shrink-0 ${className}`} />;
   }
 
-  const tip = certificate.validityLabel
-    ? `${certificate.agency} · validade impressa: ${certificate.validityLabel}`
-    : `${certificate.agency}, uma Agência de Viagens licenciada pelo Ministério do Turismo`;
+  const tip = `${certificate.agency}, uma Agência de Viagens licenciada pelo Ministério do Turismo`;
   const sealAlt = certificate.validityLabel ? "Certificado Cadastur" : "Somos certificados Cadastur";
 
   return (
@@ -76,9 +74,9 @@ export function CadasturSeal({ className, lazy, hostname }: { className: string;
       {tip && (
         <span
           role="tooltip"
-          className="pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border bg-popover px-4 py-2.5 text-center text-sm leading-snug text-popover-foreground opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
+          className="wl-cadastur-tooltip pointer-events-none absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-lg border px-4 py-2.5 text-center text-sm leading-snug opacity-0 shadow-lg transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100"
         >
-          <span className="block font-semibold text-primary">Certificado CADASTUR</span>
+          <span className="block font-semibold">Certificado CADASTUR</span>
           {tip}
         </span>
       )}

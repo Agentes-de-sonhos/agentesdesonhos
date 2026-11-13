@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import { CLUB_MED_SNOW, CLUB_MED_SNOW_BASE, groupByCountry } from "@/lib/clubMedSnow";
 import { agencySiteHref } from "@/lib/agencyContextLink";
@@ -9,6 +10,20 @@ export function ClubMedSnowHomeSection({ config, container, agencyName }: {
   container: string;
   agencyName: string;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || typeof IntersectionObserver === "undefined") return;
+    let visible = false;
+    const observer = new IntersectionObserver(([entry]) => {
+      visible = !!entry?.isIntersecting && entry.intersectionRatio >= 0.35;
+      if (visible) {
+        void video.play().then(() => { if (!visible) video.pause(); }).catch(() => {});
+      } else video.pause();
+    }, { threshold: 0.35 });
+    observer.observe(video);
+    return () => { visible = false; observer.disconnect(); video.pause(); };
+  }, [config.videoUrl]);
   const countries = groupByCountry();
   const resorts = CLUB_MED_SNOW.filter((r) => r.kind === "resort").length;
   return (
@@ -34,8 +49,10 @@ export function ClubMedSnowHomeSection({ config, container, agencyName }: {
         <div>
           <div className="relative aspect-video overflow-hidden rounded-2xl bg-black">
             <video
+              ref={videoRef}
               src={config.videoUrl}
               controls
+              muted
               playsInline
               preload="metadata"
               controlsList="nodownload noremoteplayback"
@@ -44,7 +61,6 @@ export function ClubMedSnowHomeSection({ config, container, agencyName }: {
               className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">Vídeo: Club Med · canal oficial.</p>
         </div>
       </div>
     </section>

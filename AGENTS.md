@@ -7,7 +7,7 @@
 - Flight/hotel cards and opt-in styles: public-only. Why: protects admin, other services and secure access.
 - Magic Kingdom maps: on-demand same-origin iframe, CDN image pointers, origin-checked Escape; at 100% full column width and natural height (iframe owns scroll). Why: height containment shrank the approved map.
 - Other parks share one static engine: category-scoped IDs, independent anchors (all highlighted), no guessed pins, native-pixel/lossless maps, full pages kept. Why: no invented pins or overlapping entries.
-- Orlando editorial gallery: public tickets, allowlisted Ju/100 Limites hosts only, outside wizard; CDN pointers with official credits. Why: tenant isolation.
+- Orlando editorial gallery: public tickets only, explicit host allowlist including Arena's synthetic preview, outside home/wizard; CDN pointers with official credits. Why: tenant isolation and preview-safe reuse.
 - Tenant hero variants, photo-above campaigns and visited strips use shared opt-in components, safe defaults and scoped preview styles. Why: tenant isolation, no duplicated engine.
 - Hero slide image credits travel through the shared resolver; replacement media uses preview-specific slots, with source/license evidence in docs. Why: attributable media without replacing other tenants' approved assets.
 - ADS briefing e-mail: server-to-server Edge Function `ads-briefing-email` with relay-token auth (SHA-256 in private `ads_briefing_integration`), service-role-only queue + run tables; retries piggyback on the `product-landing-lead-emails` cron. Why: owner-only internal trigger, no public/tenant surface.

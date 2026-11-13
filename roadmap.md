@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Arena finalização: tooltip Cadastur global, vídeo por visibilidade, Universal/galeria Orlando, frase cruzeiros e rodapé; desktop/mobile validados sem erros, sem publicar. WhatsApp configurado preservado, ações externas continuam bloqueadas na prévia sintética.
+- [ ] Arena publicação: vínculo real de conta/slug/domínio ausente na consulta somente leitura; aguarda associação real autorizada.
 - [x] Arena briefing-23-v1: três banners e nove respostas conferidos desktop/mobile; largura limitada, título mobile descoberto; fotos 2/3 licenciadas CC BY/CC BY-SA com créditos e CDN, oito testes focados passaram, build automático OK; sem publicar. Suíte antiga de prévias: seis falhas de Helmet/contexto, fora do pedido.
 - [x] Segurança: migration 0063 corrige 17 ocorrências; main confirmada em 59e6cac7; ranking agregado conferido na sessão de Fernando; testes de políticas reais e comissões aprovados; sem publicar.
 - [x] Hooks de carteiras corrigidos: três links reais abriram na prévia sem erros; proteção existente preservada, sem tentar senha. Depende de publicação frontend, não autorizada nesta etapa.

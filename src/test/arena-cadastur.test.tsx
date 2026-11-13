@@ -8,7 +8,8 @@ describe("certificado Cadastur Arena", () => {
     render(<CadasturSeal hostname="briefing-23-v1.preview.local" className="h-7" />);
     const button = screen.getByRole("button", { name: "Ver certificado Cadastur" });
     expect(button).toHaveAttribute("data-preview-local", "true");
-    expect(screen.getByRole("tooltip")).toHaveTextContent("18/09/2024 a 18/09/2026");
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Arena Travel Group, uma Agência de Viagens licenciada pelo Ministério do Turismo");
+    expect(screen.getByRole("tooltip")).not.toHaveTextContent("18/09/2024");
     fireEvent.click(button);
     expect(screen.getByRole("img", { name: "Certificado Cadastur da Arena Travel Group" })).toHaveAttribute("src", "/arena-travel-group/certificado-cadastur.webp");
     fireEvent.keyDown(window, { key: "Escape" });

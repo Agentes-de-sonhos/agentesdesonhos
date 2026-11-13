@@ -2126,7 +2126,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   featuredExperience: undefined,
   authority: arenaMundoSource.authority ? { ...arenaMundoSource.authority,
     companies: arenaMundoSource.authority.companies ? { ...arenaMundoSource.authority.companies,
-      title: "Planeje seu próximo cruzeiro com a Arena Travel Group." } : undefined } : undefined,
+      title: "Na Arena Travel Group, você encontra as principais companhias marítimas. Planeje seu próximo cruzeiro." } : undefined } : undefined,
   differentials: arenaBaseline.differentials, conciergeSteps: arenaBaseline.conciergeSteps,
   faq: [
   {
@@ -2173,7 +2173,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     avaliacoes: { title: "Experiências de quem viaja com a Arena" },
     newsletter: { title: "Novidades da Arena Travel Group", subtitle: "Converse com a equipe sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
   },
-  footer: { ...arenaBaseline.footer, whatsapp: "(47) 99269-0807", phone: "(47) 99269-0807" },
+  footer: { ...arenaBaseline.footer, whatsapp: "(47) 99269-0807", phone: "(47) 99269-0807", phoneHidden: true, legalName: "ARENA TRAVEL GROUP LTDA", cnpj: "57.332.735/0001-30" },
   newsletterMedia: { src: arenaRafaelSnowboard.url, alt: "Rafael Souza com prancha de snowboard na neve" },
   socialStrip: { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/arenatravelgroup/" }] },
   inspirationDialog: undefined, testimonials: undefined, seo: arenaBaseline.seo,

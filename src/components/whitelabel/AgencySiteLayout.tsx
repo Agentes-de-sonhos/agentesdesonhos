@@ -434,10 +434,10 @@ export function AgencyFooter({
           <div className="text-center md:text-left">
             <p className="wl-footer-title text-[11px] font-bold uppercase tracking-[0.18em]">Atendimento</p>
             <ul className="mt-5 space-y-3">
-              {wa && !footer?.phone ? (
+              {footerWhatsapp && (!footer?.phone || footer?.phoneHidden) ? (
                 <li>
                   <a
-                    href={`https://wa.me/${wa}`}
+                    href={`https://wa.me/${footerWhatsapp.startsWith("55") ? footerWhatsapp : `55${footerWhatsapp}`}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 py-0.5 text-[15px] transition-colors hover:text-[hsl(var(--wl-ink))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[hsl(var(--wl-ink))]"
@@ -446,7 +446,7 @@ export function AgencyFooter({
                   </a>
                 </li>
               ) : null}
-              {(footer?.phone || info.phone) ? (
+              {(!footer?.phoneHidden && (footer?.phone || info.phone)) ? (
                 <li>
                   <a href={`tel:+55${(footer?.phone ?? info.phone ?? "").replace(/\D/g, "")}`} className="inline-flex items-center gap-2 py-0.5 text-[15px] hover:text-[hsl(var(--wl-ink))]">
                     <Phone className="h-4 w-4 shrink-0 wl-accent-icon" aria-hidden="true" /> {footer?.phone ?? info.phone}

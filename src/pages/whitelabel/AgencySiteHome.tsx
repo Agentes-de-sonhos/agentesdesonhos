@@ -966,8 +966,12 @@ export default function AgencySiteHome({
             )}
             {authority.companies?.items.length ? (
               <div className={`${container} ${seasonEnabled ? "pt-6 pb-8 md:pt-10 md:pb-12" : "pb-16 md:pb-24"}`}>
-                {seasonEnabled && <p className="mb-3 text-center text-[15px] leading-relaxed text-background/80 md:text-base">Na {info.agency_name || "nossa agência"}, você encontra as principais companhias marítimas.</p>}
-                <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
+                {profile.key === "arenaBriefing23" ? (
+                  <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
+                ) : <>
+                  {seasonEnabled && <p className="mb-3 text-center text-[15px] leading-relaxed text-background/80 md:text-base">Na {info.agency_name || "nossa agência"}, você encontra as principais companhias marítimas.</p>}
+                  <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
+                </>}
                 <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 md:gap-5">
                   {authority.companies.items.map((c, i, arr) => (
                     <li key={c.name} className={`flex aspect-[3/2] items-center justify-center overflow-hidden rounded-2xl bg-background p-3 shadow-lg ring-1 ring-background/10 transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl ${arr.length % 2 === 1 && i === arr.length - 1 ? "col-span-2 mx-auto w-[calc(50%-0.5rem)] sm:col-span-1 sm:mx-0 sm:w-auto" : ""}`}>
