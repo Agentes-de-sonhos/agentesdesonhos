@@ -33,14 +33,15 @@ export function ClubMedSnowHomeSection({ config, container, agencyName }: {
         </div>
         <div>
           <div className="relative aspect-video overflow-hidden rounded-2xl bg-black">
-            <iframe
-              title="Club Med — férias de esqui"
-              src={`https://www.youtube-nocookie.com/embed/${config.youtubeId}?rel=0&hl=pt&cc_lang_pref=pt&playsinline=1`}
-              className="absolute inset-0 h-full w-full border-0"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-              loading="lazy"
+            <video
+              src={config.videoUrl}
+              controls
+              playsInline
+              preload="metadata"
+              controlsList="nodownload noremoteplayback"
+              disablePictureInPicture
+              aria-label="Club Med — férias de esqui"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
           <p className="mt-3 text-xs text-muted-foreground">Vídeo: Club Med · canal oficial.</p>

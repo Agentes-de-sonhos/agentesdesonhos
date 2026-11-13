@@ -9,6 +9,7 @@ import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.js
 import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
 import dricaNewsletterLondon from "@/assets/presentation/drica/london-newsletter.jpg";
 import arenaRafaelSnowboard from "@/assets/arena-rafael-snowboard-action.webp.asset.json";
+import clubMedSkiVideo from "@/assets/whitelabel/club-med-all-inclusive-ski-vacations.mp4.asset.json";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
@@ -2080,7 +2081,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   key: "arenaBriefing23",
   clubMedSnowHome: {
     enabled: true,
-    youtubeId: "C-4BqbfgBe0",
+    videoUrl: clubMedSkiVideo.url,
   },
   alternateSurfaces: false,
   nav: ["/", "/#destinos", "/#campanhas", "/#sobre"].flatMap(to => {

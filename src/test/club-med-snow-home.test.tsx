@@ -6,9 +6,16 @@ vi.mock("@/lib/agencyContextLink", () => ({ agencySiteHref: (path: string) => pa
 afterEach(cleanup);
 
 describe("chamada Club Med na home Arena", () => {
-  it("mostra o vídeo diretamente, sem foto do Rafael", () => {
+  it("mostra o vídeo MP4 em player próprio, sem iframe nem foto do Rafael", () => {
     const { container } = render(<ClubMedSnowHomeSection config={ARENA_PREVIEW_PROFILE.clubMedSnowHome!} container="max-w-6xl" agencyName="Arena Travel Group" />);
-    expect(screen.getByTitle("Club Med — férias de esqui")).toHaveAttribute("src", expect.stringContaining("youtube-nocookie.com/embed/C-4BqbfgBe0"));
+    const video = screen.getByLabelText("Club Med — férias de esqui");
+    expect(video.tagName).toBe("VIDEO");
+    expect(video).toHaveAttribute("src", expect.stringContaining("club-med-all-inclusive-ski-vacations.mp4"));
+    expect(video).toHaveAttribute("controls");
+    expect(video).toHaveAttribute("playsinline");
+    expect(video).toHaveAttribute("preload", "metadata");
+    expect(video).not.toHaveAttribute("autoplay");
+    expect(container.querySelector("iframe")).toBeNull();
     expect(screen.queryByAltText(/Rafael Souza/)).not.toBeInTheDocument();
     expect(container.querySelector('img[src*="rafael"]')).toBeNull();
   });

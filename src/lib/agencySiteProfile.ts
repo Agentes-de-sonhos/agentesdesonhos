@@ -228,7 +228,7 @@ export interface AgencySiteProfile {
   /** Optional photo-above/content-below campaign cards; absent preserves overlays. */
   campaignCardPresentation?: "photoAbove";
   /** Replaces the first modules section with a snow catalogue introduction, opt-in only. */
-  clubMedSnowHome?: { enabled: boolean; youtubeId: string };
+  clubMedSnowHome?: { enabled: boolean; videoUrl: string };
   highlights?: AgencyHighlight[];
   differentials?: AgencyDifferential[];
   faq?: { q: string; a: string }[];
