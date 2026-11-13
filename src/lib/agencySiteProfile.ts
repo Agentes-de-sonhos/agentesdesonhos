@@ -229,6 +229,10 @@ export interface AgencySiteProfile {
   campaignCardPresentation?: "photoAbove";
   /** Replaces the first modules section with a snow catalogue introduction, opt-in only. */
   clubMedSnowHome?: { enabled: boolean; videoUrl: string };
+  /** Opt-in: mantém a ordem configurada dos destinos (sem sorteio). */
+  destinationsFixedOrder?: boolean;
+  /** Opt-in: créditos de fotos licenciadas exibidos uma vez abaixo da galeria de destinos. */
+  destinationCredits?: { title: string; author: string; source: string; license: string; licenseUrl: string }[];
   highlights?: AgencyHighlight[];
   differentials?: AgencyDifferential[];
   faq?: { q: string; a: string }[];

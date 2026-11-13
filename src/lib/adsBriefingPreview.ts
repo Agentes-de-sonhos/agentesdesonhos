@@ -2105,15 +2105,22 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     text: (arenaBaseline.modules?.[index]?.text ?? item.text).replace(/ Imagem genérica\./g, ""),
     service: arenaBaseline.modules?.[index]?.service ?? item.service,
   })),
-  destinations: arenaMundoSource.destinations?.map((item, index) => {
-    const content = arenaBaseline.destinations?.[index % (arenaBaseline.destinations?.length || 1)];
-    return { ...item, ...content, key: item.key, image: item.image, order: item.order,
-      text: (content?.text ?? item.text).replace(/ Imagem genérica de inspiração\./g, "") };
-  }).concat([{
-    key: "arena-orlando-disney", image: "arenaRafaelMickey", title: "Orlando Disney", label: "Parques",
-    text: "Parques Disney em Orlando planejados com ingressos, hospedagem e roteiro para cada perfil.",
-    service: "pacotes", href: "/disney", imageFit: "contain", ctaLabel: "Conhecer Disney", enabled: true, order: 7,
-  }]),
+  destinationsFixedOrder: true,
+  destinations: [
+    { key: "arena-alpes-franceses", image: "arenaMontBlanc", label: "Neve", title: "Alpes Franceses", text: "Chamonix, Mont Blanc e estações de esqui com hospedagem, aulas e equipamentos planejados para o seu grupo.", service: "pacotes", href: "/club-med-neve?pais=franca", ctaLabel: "Ver neve na França", enabled: true, order: 1 },
+    { key: "arena-suica", image: "arenaMatterhorn", label: "Europa", title: "Suíça", text: "Montanhas, trens panorâmicos e cidades alpinas em roteiros personalizados.", service: "pacotes", enabled: true, order: 2 },
+    { key: "arena-italia", image: "arenaVarennaLicensed", label: "Europa", title: "Itália", text: "Lagos, cidades históricas e gastronomia em uma viagem no seu ritmo.", service: "pacotes", enabled: true, order: 3 },
+    { key: "arena-resorts-brasil", image: "arenaIberostarLicensed", label: "Resorts", title: "Resorts no Brasil", text: "Resorts à beira-mar para famílias e grupos, com estrutura e serviços incluídos.", service: "hospedagem", href: "/resorts-brasil", ctaLabel: "Ver resorts", enabled: true, order: 4 },
+    { key: "arena-caribe-all-inclusive", image: "arenaPuntaCana", label: "All inclusive", title: "Caribe all inclusive", text: "Praias do Caribe com resorts all inclusive escolhidos para o seu perfil.", service: "pacotes", enabled: true, order: 5 },
+    { key: "arena-disney-orlando", image: "arenaRafaelMickey", label: "Parques", title: "Disney Orlando", text: "Parques Disney em Orlando planejados com ingressos, hospedagem e roteiro para cada perfil.", service: "pacotes", href: "/disney", imageFit: "contain", ctaLabel: "Conhecer Disney", enabled: true, order: 6 },
+  ],
+  destinationCredits: [
+    { title: "Alpes Franceses", author: "CCXKnight", source: "https://commons.wikimedia.org/wiki/File:Mont_Blanc_from_Chamonix_-_panoramio.jpg", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/" },
+    { title: "Suíça", author: "Svein-Magne Tunli (Smtunli)", source: "https://commons.wikimedia.org/wiki/File:Matterhorn_above_Zermatt_photo_by_Svein-Magne_Tunli_-_tunliweb.no.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+    { title: "Itália", author: "Renatoongania", source: "https://commons.wikimedia.org/w/index.php?curid=81725575", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+    { title: "Resorts no Brasil", author: "Antonio Bermudez Chi…", source: "https://commons.wikimedia.org/w/index.php?curid=47399645", license: "CC BY 3.0", licenseUrl: "https://creativecommons.org/licenses/by/3.0/" },
+    { title: "Caribe all inclusive", author: "Magnus Bråth", source: "https://commons.wikimedia.org/wiki/File:Hard_Rock_Hotel_%26_Casino_Punta_Cana.jpg", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0/" },
+  ],
   about: { ...arenaMundoSource.about, ...arenaBaseline.about, media: undefined,
     kicker: "QUEM SOMOS",
     title: "A paixão por viajar. O cuidado de quem conhece.",
@@ -2168,7 +2175,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
 ],
   copy: { ...arenaMundoSource.copy, ...arenaBaseline.copy,
     faq: { kicker: "DÚVIDAS FREQUENTES", title: "Antes de fazer as malas", subtitle: "Se a sua dúvida não estiver aqui, converse com a equipe da Arena." },
-    destinations: { ...arenaBaseline.copy?.destinations, subtitle: "Resorts, Europa, neve e viagens em grupo, com orientação em cada etapa." },
+    destinations: { ...arenaBaseline.copy?.destinations, subtitle: "Alpes Franceses, Suíça, Itália, resorts no Brasil, Caribe all inclusive e Disney Orlando." },
     modules: { ...arenaBaseline.copy?.modules, cta: "Conversar com a Arena" },
     avaliacoes: { title: "Experiências de quem viaja com a Arena" },
     newsletter: { title: "Novidades da Arena Travel Group", subtitle: "Converse com a equipe sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },

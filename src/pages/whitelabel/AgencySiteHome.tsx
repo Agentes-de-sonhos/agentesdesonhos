@@ -126,6 +126,9 @@ import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte
 import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
 import arenaRafaelMickey from "@/assets/arena-rafael-mickey-orlando.jpg.asset.json";
 import arenaNoronha from "@/assets/ads-preview/arena/noronha-banner-panoramico.png.asset.json";
+import arenaMontBlanc from "@/assets/ads-preview/arena/mont-blanc-chamonix.webp.asset.json";
+import arenaMatterhorn from "@/assets/ads-preview/arena/matterhorn-zermatt.webp.asset.json";
+import arenaPuntaCana from "@/assets/ads-preview/arena/punta-cana-resort.webp.asset.json";
 import arenaVarennaLicensed from "@/assets/ads-preview/arena/varenna-commercial.webp.asset.json";
 import arenaRafaelSnow from "@/assets/hero-rafael-neve.webp.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
@@ -169,6 +172,9 @@ const DESTINATION_IMAGES: Record<string, string> = {
   arenaVarennaLicensed: arenaVarennaLicensed.url,
   arenaNoronha: arenaNoronha.url,
   arenaRafaelMickey: arenaRafaelMickey.url,
+  arenaMontBlanc: arenaMontBlanc.url,
+  arenaMatterhorn: arenaMatterhorn.url,
+  arenaPuntaCana: arenaPuntaCana.url,
   dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
   resort: destinoResort,
@@ -596,7 +602,7 @@ export default function AgencySiteHome({
   }, [profile, labPresentation?.modules]);
   const destinations = useMemo(() => {
     const list = resolveDestinations(undefined, profile.destinations);
-    if (list.length < 2) return list;
+    if (list.length < 2 || profile.destinationsFixedOrder) return list;
     // Padrão para todos os sites: sorteio a cada visita, estável durante a leitura.
     const shuffled = [...list];
     for (let i = shuffled.length - 1; i > 0; i -= 1) {
@@ -1180,6 +1186,7 @@ export default function AgencySiteHome({
                     <Card
                       key={d.key}
                       {...(cardProps as Record<string, unknown>)}
+                      data-destination={d.key}
                       className={`group relative w-[80vw] shrink-0 snap-start overflow-hidden rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[58vw] md:w-auto ${
                         i === 0
                           ? "md:col-span-2 md:row-span-2"
@@ -1210,13 +1217,25 @@ export default function AgencySiteHome({
                           <p className={`mt-2 hidden w-full max-w-2xl text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
                         <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
-                          {d.href ? "Ver circuito" : "Solicitar proposta"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                          {d.ctaLabel ?? (d.href ? "Ver circuito" : "Solicitar proposta")} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                         </span>
                       </div>
                     </Card>
                     );
                   })}
                 </div>
+                {profile.destinationCredits?.length ? (
+                  <p data-testid="destination-credits" className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
+                    Fotos:{" "}
+                    {profile.destinationCredits.map((c, ci) => (
+                      <Fragment key={c.title}>
+                        {ci > 0 && " · "}
+                        {c.title} — {c.author}, <a href={c.source} target="_blank" rel="noopener noreferrer" className="underline">Wikimedia Commons</a>, <a href={c.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{c.license}</a>
+                      </Fragment>
+                    ))}
+                    {" "}· redimensionadas/recortadas.
+                  </p>
+                ) : null}
                 {(copy.note || copy.extraCta) && (
                   <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     {copy.note && <p className="max-w-2xl text-[15px] leading-relaxed text-foreground/80">{copy.note}</p>}

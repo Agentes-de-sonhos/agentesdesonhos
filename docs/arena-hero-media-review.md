@@ -27,3 +27,9 @@ Only the technical preview changes. No production publication. Approved hero mes
 - Pointer: `src/assets/ads-preview/arena/varenna-commercial.webp.asset.json`. Visible author/source/license/change credit; exact URLs in tooltip. No posing people or prominent faces in inspected photo.
 
 Metadata checked using Commons imageinfo/extmetadata API. CDN binaries registered with lovable-assets; original downloads stay outside the repository.
+## Destinations gallery (six fixed cards)
+- Alpes Franceses: "Mont Blanc from Chamonix" (panoramio), author CCXKnight, https://commons.wikimedia.org/wiki/File:Mont_Blanc_from_Chamonix_-_panoramio.jpg, CC BY-SA 3.0, original 3984×2410 → WebP 2000px. Pointer `mont-blanc-chamonix.webp.asset.json`.
+- Suíça: "Matterhorn above Zermatt", author Svein-Magne Tunli (Smtunli), https://commons.wikimedia.org/wiki/File:Matterhorn_above_Zermatt_photo_by_Svein-Magne_Tunli_-_tunliweb.no.jpg, CC BY-SA 4.0, original 2048×1365 → WebP 1600px. Pointer `matterhorn-zermatt.webp.asset.json`.
+- Caribe all inclusive: "Hard Rock Hotel & Casino Punta Cana", author Magnus Bråth, https://commons.wikimedia.org/wiki/File:Hard_Rock_Hotel_%26_Casino_Punta_Cana.jpg, CC BY 2.0, 800×486 → WebP. Chosen over "Punta Cana, Dominican Republic (Resort)" (Ryancoke2020, CC BY-SA 4.0) because that file is only 604×453 and shows walking guests. Pointer `punta-cana-resort.webp.asset.json`.
+- Itália and Resorts no Brasil reuse the Varenna and Iberostar assets above with their existing licenses; Disney Orlando reuses the owner-supplied Rafael/Mickey original (contain, no credit needed).
+- No posing people in the new photos. Credits shown once below the gallery (`destinationCredits`).
