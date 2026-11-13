@@ -180,6 +180,35 @@ export default function AdsBriefingPreview() {
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       {fixture.jobId === "briefing-23-v1" && <style>{`
+        /* Arena resort collection: monochrome brand, without inherited regional colors. */
+        [data-ads-preview="briefing-23-v1"] #resorts {
+          --primary: 0 0% 0%; --primary-foreground: 0 0% 100%;
+          --foreground: 0 0% 0%; --muted-foreground: 0 0% 40%;
+          --card: 0 0% 100%; --background: 0 0% 100%;
+          --border: 0 0% 83%; --muted: 0 0% 95%;
+          --brand-primary: #000; --brand-on-primary: #fff;
+        }
+        [data-ads-preview="briefing-23-v1"] #resorts .wl-kicker { color: #000 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg[aria-label="Mapa do Brasil por estado"] g > path {
+          fill: #f0f0f0 !important; stroke: #fff;
+        }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region] > path { fill: #d4d4d4 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region]:is(:hover, :focus-visible) > path { fill: #a3a3a3 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region][data-active] > path { fill: #000 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region] circle { fill: #000 !important; stroke: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region] text { fill: #fff !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region][data-active] circle { fill: #fff !important; stroke: #000 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts svg g[data-region][data-active] text { fill: #000 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts button[data-region] {
+          background: #fff !important; color: #000 !important; border-color: #d4d4d4 !important;
+        }
+        [data-ads-preview="briefing-23-v1"] #resorts button[data-region][data-active],
+        [data-ads-preview="briefing-23-v1"] #resorts .wl-resorts-btn {
+          background: #000 !important; color: #fff !important; border-color: #000 !important;
+        }
+        [data-ads-preview="briefing-23-v1"] #resorts .wl-resorts-btn:hover { background: #333 !important; }
+        [data-ads-preview="briefing-23-v1"] #resorts .wl-resorts-btn svg { color: #fff !important; }
+
         @media (min-width: 768px) {
           [data-ads-preview="briefing-23-v1"] #topo > .relative > .relative {
             width: 48%; max-width: 600px;
