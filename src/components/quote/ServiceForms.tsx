@@ -1620,6 +1620,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
                   <SelectItem value="economico">Econômico</SelectItem><SelectItem value="compacto">Compacto</SelectItem>
                   <SelectItem value="intermediario">Intermediário</SelectItem><SelectItem value="suv">SUV</SelectItem>
                   <SelectItem value="luxo">Luxo</SelectItem><SelectItem value="van">Van</SelectItem>
+                  <SelectItem value="motorhome">Motorhome</SelectItem>
                 </SelectContent>
               </Select><FormMessage /></FormItem>
           )} />

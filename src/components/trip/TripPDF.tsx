@@ -182,7 +182,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
     case "car_rental":
       if (data.rental_company) details.push(`${t("fldLocadora")}: ${data.rental_company}`);
       if (data.reservation_code) details.push(`${t("fldReserva")}: ${data.reservation_code}`);
-      const catLabels: Record<string, string> = { economico: t("carEconomico"), compacto: t("carCompacto"), intermediario: t("carIntermediario"), suv: t("carSuv"), premium: t("carPremium"), luxo: t("carLuxo"), van: t("carVan") };
+      const catLabels: Record<string, string> = { economico: t("carEconomico"), compacto: t("carCompacto"), intermediario: t("carIntermediario"), suv: t("carSuv"), premium: t("carPremium"), luxo: t("carLuxo"), van: t("carVan"), motorhome: "Motorhome" };
       details.push(`${t("fldCategoria")}: ${catLabels[data.car_type] || data.car_type || ''}`);
       if (data.car_model) details.push(`${t("fldModelo")}: ${data.car_model}`);
       if (data.transmission) details.push(`${t("fldTransmissao")}: ${data.transmission === 'automatico' ? t("transmAutomatico") : t("transmManual")}`);

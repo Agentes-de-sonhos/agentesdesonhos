@@ -134,6 +134,7 @@ function normalizeDate(raw: string | undefined, yearHint: number): string {
 
 /** Map vehicle category/model → existing select values used by the manual form */
 const CAR_TYPE_MAP: Array<[RegExp, string]> = [
+  [/motorhome|motor home|campervan|trailer/i, "motorhome"],
   [/minivan|m(í|i)nivan|van/i, "minivan"],
   [/pickup|caminhonete/i, "pickup"],
   [/suv|jipe/i, "suv"],

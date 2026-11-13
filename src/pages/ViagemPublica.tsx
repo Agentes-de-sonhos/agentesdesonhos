@@ -526,7 +526,7 @@ function getServiceDetails(service: TripService, locale: PublicLocale = "pt-BR")
       if (data.transmission) carDetails.push(`${t('fldTransmissao')}: ${data.transmission === 'automatico' ? t('transmAutomatico') : t('transmManual')}`);
       if (data.pickup_location) carDetails.push(`${t('fldRetirada')}: ${data.pickup_location}`);
       if (data.dropoff_location && data.dropoff_location !== data.pickup_location) carDetails.push(`${t('fldDevolucao')}: ${data.dropoff_location}`);
-      const catLabels: Record<string, string> = { economico: t('carEconomico'), compacto: t('carCompacto'), intermediario: t('carIntermediario'), suv: t('carSuv'), premium: t('carPremium'), luxo: t('carLuxo'), van: t('carVan') };
+      const catLabels: Record<string, string> = { economico: t('carEconomico'), compacto: t('carCompacto'), intermediario: t('carIntermediario'), suv: t('carSuv'), premium: t('carPremium'), luxo: t('carLuxo'), van: t('carVan'), motorhome: "Motorhome" };
       const catLabel = catLabels[data.car_type] || data.car_type || '';
       const pickupCity = data.pickup_city || data.pickup_location || '';
       const dropoffCity = data.dropoff_city || data.dropoff_location || '';
