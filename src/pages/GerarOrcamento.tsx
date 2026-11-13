@@ -1,3 +1,4 @@
+import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
 import { DuplicateServiceContext } from "@/components/quote/ServiceCard";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -1983,11 +1984,10 @@ export default function GerarOrcamento() {
 
                   <div className="space-y-1.5 rounded-xl border bg-card p-4 shadow-sm">
                     <Label className="text-sm">Observações adicionais de pagamento</Label>
-                    <Textarea
+                    <RichTextareaWithTemplate
                       placeholder="Ex: Parcelamento sem juros. Desconto especial para pagamento via Pix."
                       value={paymentTerms}
-                      onChange={(e) => setPaymentTerms(e.target.value)}
-                      rows={3}
+                      onValueChange={setPaymentTerms}
                     />
                   </div>
 

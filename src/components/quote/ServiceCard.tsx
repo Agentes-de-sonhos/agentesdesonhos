@@ -267,7 +267,7 @@ export function ServiceCard({ service, onDelete, onEdit, isDeleting, dragHandle,
                   })()}
 
                 </div>
-                <p className="font-medium break-words whitespace-pre-wrap">{getServiceDescription(service)}</p>
+                <div className="font-medium break-words"><FormattedText>{String(getServiceDescription(service) ?? "")}</FormattedText></div>
               </div>
             </div>
             <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto sm:flex-nowrap sm:shrink-0">

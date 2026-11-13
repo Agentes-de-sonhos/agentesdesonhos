@@ -1,3 +1,4 @@
+import { FormattedText } from "@/components/ui/formatted-text";
 import { useMemo } from "react";
 import {
   Plane, Building2, Ship, MapPin, Shield, Car, Ticket, TrainFront,
@@ -438,7 +439,7 @@ export function PublicInvestmentSummary({
                     </ul>
                   </div>
                 )}
-                {paymentTerms && <p className="leading-relaxed">{paymentTerms}</p>}
+                {paymentTerms && <div className="leading-relaxed"><FormattedText>{paymentTerms}</FormattedText></div>}
               </div>
             </div>
           </div>

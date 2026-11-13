@@ -1147,7 +1147,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         ${quote.show_investment_section !== false && quote.payment_terms ? `
           <div class="pdf-block payment-terms" style="border:1px solid ${C.border};border-radius:20px;padding:22px 24px;margin-bottom:20px;background:#ffffff;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
             <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:3px;color:${C.primary};margin-bottom:10px;">💳 ${t("paymentConditions")}</p>
-            <p style="font-size:13px;color:${C.muted};line-height:1.6;white-space:pre-wrap;">${quote.payment_terms}</p>
+            <div class="pdf-rich" style="font-size:13px;color:${C.muted};line-height:1.6;word-break:break-word;">${sanitizedDescriptionHtml(quote.payment_terms)}</div>
           </div>
         ` : ""}
 
