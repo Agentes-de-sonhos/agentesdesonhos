@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, ExternalLink, Loader2, X } from "lucide-react";
+import { Download, Loader2, MoreVertical, Printer, X } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { displayDocumentName, resolveDocumentPreviewKind } from "@/lib/publicDocumentViewer";
 
 export interface PublicViewerDocument {
@@ -46,28 +47,38 @@ export function PublicDocumentViewer({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         data-testid="public-document-viewer"
-        className="flex flex-col w-screen max-w-none h-[100dvh] sm:w-[96vw] sm:max-w-[1100px] sm:h-[92vh] sm:rounded-lg p-0 gap-0 overflow-hidden"
+        className="[&>button.absolute]:hidden flex flex-col w-screen max-w-none h-[100dvh] sm:w-[96vw] sm:max-w-[1100px] sm:h-[92vh] sm:rounded-lg p-0 gap-0 overflow-hidden"
       >
-        <div className="flex items-center gap-2 border-b px-4 py-3">
+        <div className="flex items-center gap-1 border-b px-4 py-2">
           <DialogTitle className="flex-1 truncate text-sm font-semibold">{displayDocumentName(doc.file_name)}</DialogTitle>
-          {kind === "pdf" && signedUrl ? (
-            <Button asChild variant="ghost" size="sm" className="h-9">
-              <a href={signedUrl} target="_blank" rel="noopener noreferrer" aria-label="Abrir em tela cheia">
-                <ExternalLink className="h-4 w-4 sm:mr-1.5" />
-                <span className="hidden sm:inline">Tela cheia</span>
-              </a>
-            </Button>
-          ) : null}
-          {allowDownload && onDownload ? (
-            <Button variant="ghost" size="sm" onClick={onDownload} className="h-9">
-              <Download className="mr-1.5 h-4 w-4" />
-              {downloadLabel}
-            </Button>
-          ) : null}
           <DialogDescription className="sr-only">Anexo do orçamento aberto dentro da própria página.</DialogDescription>
-          <Button variant="ghost" size="sm" onClick={onClose} className="h-9" aria-label={closeLabel}>
-            <X className="h-5 w-5 sm:mr-1.5" />
-            <span className="hidden sm:inline">{closeLabel}</span>
+          {(allowDownload && onDownload) || (kind === "pdf" && signedUrl) ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Mais opções">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[100]">
+                {allowDownload && onDownload ? (
+                  <DropdownMenuItem onSelect={onDownload}>
+                    <Download className="mr-2 h-4 w-4" />
+                    {downloadLabel}
+                  </DropdownMenuItem>
+                ) : null}
+                {kind === "pdf" && signedUrl ? (
+                  <DropdownMenuItem asChild>
+                    <a href={signedUrl} target="_blank" rel="noopener noreferrer">
+                      <Printer className="mr-2 h-4 w-4" />
+                      Imprimir / abrir no navegador
+                    </a>
+                  </DropdownMenuItem>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : null}
+          <Button variant="ghost" size="icon" onClick={onClose} className="h-9 w-9" aria-label={closeLabel}>
+            <X className="h-5 w-5" />
           </Button>
         </div>
         <div className="flex-1 overflow-auto bg-muted/30">
@@ -98,7 +109,7 @@ export function PublicDocumentViewer({
             </div>
           ) : (
             <iframe
-              src={signedUrl}
+              src={`${signedUrl}#toolbar=0&navpanes=0`}
               title={doc.file_name}
               data-testid="public-document-frame"
               onError={() => setErrored(true)}

@@ -73,7 +73,7 @@ describe("visualizador de anexos do orçamento público", () => {
     expect(screen.queryByTestId("public-document-viewer")).toBeNull();
   });
 
-  it("fechar volta ao orçamento e baixar só aparece quando permitido", () => {
+  it("fechar volta ao orçamento e baixar só aparece quando permitido", async () => {
     const onClose = vi.fn();
     const onDownload = vi.fn();
     render(
@@ -87,7 +87,9 @@ describe("visualizador de anexos do orçamento público", () => {
     );
     fireEvent.click(screen.getByLabelText("Fechar"));
     expect(onClose).toHaveBeenCalled();
-    fireEvent.click(screen.getByText("Baixar"));
+    expect(screen.getAllByLabelText("Fechar")).toHaveLength(1);
+    fireEvent.keyDown(screen.getByLabelText("Mais opções"), { key: "Enter" });
+    fireEvent.click(await screen.findByText("Baixar"));
     expect(onDownload).toHaveBeenCalled();
   });
 });
