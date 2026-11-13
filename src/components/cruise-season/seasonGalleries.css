@@ -23,3 +23,10 @@
 @media (min-width: 640px) { .csi-card { flex-basis: calc((100% - 1rem) / 2); } }
 @media (min-width: 1024px) { .csi-card { flex-basis: calc((100% - 3rem) / 4); } }
 @media (prefers-reduced-motion: reduce) { .csi-rail { scroll-behavior: auto; } }
+
+/* Match the existing eight-ship gallery in the shared dark home section. */
+.csi-authority .csi-card { flex-basis: 78%; border-color: hsl(var(--background) / .25); }
+.csi-authority .csi-photo { aspect-ratio: 16/10; }
+@media (min-width: 640px) { .csi-authority .csi-card { flex-basis: 45%; } }
+@media (min-width: 768px) { .csi-authority .csi-rail { gap: 1.25rem; } .csi-authority .csi-card { flex-basis: 30%; } }
+@media (min-width: 1024px) { .csi-authority .csi-card { flex-basis: 23.5%; } }

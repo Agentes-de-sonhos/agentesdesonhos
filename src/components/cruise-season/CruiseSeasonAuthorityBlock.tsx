@@ -3,6 +3,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
 import { agencySiteHref } from '@/lib/agencyContextLink';
 import { cruiseShipPath } from '@/lib/cruiseShips';
 import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
+import { SeasonGalleries } from './SeasonGalleries';
 import { seasonCardPhoto } from '@/lib/cruiseShips/seasonCardPhotos';
 
 /** Season gallery shown inside the dark cruise (authority) section; opt-in per profile. */
@@ -74,6 +75,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
         <button type="button" aria-label="Próximos navios" className={`${arrowCls} absolute right-0 top-[calc(50%-1.5rem)] z-10 hidden translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.end} onClick={() => scrollBy(1)}><ChevronRight className="h-5 w-5" /></button>
       </div>
       <p className="mt-4 text-xs text-background/60">Imagens de divulgação e Wikimedia Commons · {Array.from(new Set(SEASON_SHIPS.map(s => s.lineName))).join(' · ')}</p>
+      <div className="csi-authority text-background"><SeasonGalleries showShips={false} /></div>
       <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
         <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o navio ideal para você?</p>
         <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
