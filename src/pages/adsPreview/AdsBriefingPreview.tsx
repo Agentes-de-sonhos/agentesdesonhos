@@ -184,6 +184,15 @@ export default function AdsBriefingPreview() {
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       {fixture.jobId === "briefing-23-v1" && <style>{`
+        [data-ads-preview="briefing-23-v1"] .cruise-season .cs-intro {
+          background: #000; color: #fff;
+        }
+        [data-ads-preview="briefing-23-v1"] .cruise-season .cs-intro :is(h1, .cs-kicker) {
+          color: #fff !important;
+        }
+        [data-ads-preview="briefing-23-v1"] .cruise-season .cs-intro .cs-kicker::before {
+          content: none;
+        }
         /* Arena: regional map palette, with monochrome counts and controls. */
         [data-ads-preview="briefing-23-v1"] :is(#resorts, #resorts-brasil) {
           --primary: 0 0% 0%; --primary-foreground: 0 0% 100%;

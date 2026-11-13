@@ -2088,7 +2088,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     const item = arenaMundoSource.nav?.find(entry => entry.to === to);
     if (!item) return [];
     const children = item.children?.filter(child => !["/xcaret", "/#avaliacoes"].includes(child.to));
-    return [{ ...item, children: item.label === "Especialidades" ? [
+    return [...(to === "/#sobre" ? [{ label: "Cruzeiros nacionais 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" }] : []), { ...item, children: item.label === "Especialidades" ? [
       { label: "Club Med na neve", to: "/#campanhas" },
       { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
       { label: "Resorts no Brasil", to: "/#resorts" },
