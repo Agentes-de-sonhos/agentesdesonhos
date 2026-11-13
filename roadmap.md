@@ -1,4 +1,5 @@
 # Roadmap
+- [x] Arena briefing-23-v1: três banners e nove respostas conferidos desktop/mobile; largura limitada, título mobile descoberto; fotos 2/3 licenciadas CC BY/CC BY-SA com créditos e CDN, oito testes focados passaram, build automático OK; sem publicar. Suíte antiga de prévias: seis falhas de Helmet/contexto, fora do pedido.
 - [x] Segurança: migration 0063 corrige 17 ocorrências; main confirmada em 59e6cac7; ranking agregado conferido na sessão de Fernando; testes de políticas reais e comissões aprovados; sem publicar.
 - [x] Hooks de carteiras corrigidos: três links reais abriram na prévia sem erros; proteção existente preservada, sem tentar senha. Depende de publicação frontend, não autorizada nesta etapa.
 - [x] Anexos restaurados em produção pela migration 0064: dois PDFs reais abertos/baixados no publicado e preview, três assinaturas negativas; sem SELECT anon nas tabelas.

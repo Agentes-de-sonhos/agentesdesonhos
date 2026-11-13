@@ -9,6 +9,7 @@
 - Other parks share one static engine: category-scoped IDs, independent anchors (all highlighted), no guessed pins, native-pixel/lossless maps, full pages kept. Why: no invented pins or overlapping entries.
 - Orlando editorial gallery: public tickets, allowlisted Ju/100 Limites hosts only, outside wizard; CDN pointers with official credits. Why: tenant isolation.
 - Tenant hero variants, photo-above campaigns and visited strips use shared opt-in components, safe defaults and scoped preview styles. Why: tenant isolation, no duplicated engine.
+- Hero slide image credits travel through the shared resolver; replacement media uses preview-specific slots, with source/license evidence in docs. Why: attributable media without replacing other tenants' approved assets.
 - ADS briefing e-mail: server-to-server Edge Function `ads-briefing-email` with relay-token auth (SHA-256 in private `ads_briefing_integration`), service-role-only queue + run tables; retries piggyback on the `product-landing-lead-emails` cron. Why: owner-only internal trigger, no public/tenant surface.
 - ADS previews: path-keyed local fixtures, synthetic hostnames, shared white-label renderer; technical hosts only, shared catalog routes and local controls enabled; external actions/submissions/backend blocked, including synthetic request hosts. Why: complete navigation for review without touching tenants.
 - Unconfirmed preview brands opt into a textual wordmark and shared neutral SiteLab tokens without logo assets or tenant links. Why: visual review must not invent an official identity.

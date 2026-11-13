@@ -107,6 +107,7 @@ export function resolveSections(
  */
 export type AgencyImageSlot =
   | "arenaRafaelSnow"
+  | "arenaIberostarLicensed" | "arenaVarennaLicensed"
   | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "curtiCaribe" | "curtiBrasil" | "curtiCruzeiros" | "curtiNovaYork" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
@@ -168,6 +169,7 @@ export interface AgencyHighlight {
 
 export interface AgencyHeroSlide {
   kicker?: string;
+  imageCredit?: { author: string; source: string; license: string; licenseUrl: string };
   title: string;
   /** `{agency}` is replaced by the agency display name. */
   subtitle: string;
@@ -216,6 +218,7 @@ export const DEFAULT_HERO_SLIDES: AgencyHeroSlide[] = [
 
 export interface ResolvedHeroSlide {
   kicker?: string;
+  imageCredit?: AgencyHeroSlide["imageCredit"];
   title: string;
   subtitle: string;
   image?: string | null;
@@ -244,6 +247,7 @@ export function resolveHeroSlides(
 
   return list.map((s) => ({
     kicker: s.kicker,
+    imageCredit: s.imageCredit,
     title: s.title.replace(/\{agency\}/g, agencyName),
     subtitle: s.subtitle.replace(/\{agency\}/g, agencyName),
     image: (s.image ? imageSlots?.[s.image] : undefined) ?? coverImageUrl ?? fallbackImage ?? null,

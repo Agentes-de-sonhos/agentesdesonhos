@@ -180,28 +180,34 @@ export default function AdsBriefingPreview() {
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
       {fixture.jobId === "briefing-23-v1" && <style>{`
-        [data-ads-preview="briefing-23-v1"] #topo:has(img[src$="/hero-rafael-neve.webp"]) > .relative > .relative {
-          width: 48%; max-width: 600px;
+        @media (min-width: 768px) {
+          [data-ads-preview="briefing-23-v1"] #topo > .relative > .relative {
+            width: 48%; max-width: 600px;
+          }
+          [data-ads-preview="briefing-23-v1"] #topo > .relative { padding-top: 40px; }
+          [data-ads-preview="briefing-23-v1"] #topo h1 { max-width: 100%; font-size: 44px; line-height: 1.06; }
         }
         [data-ads-preview="briefing-23-v1"] #topo img[src$="/hero-rafael-neve.webp"] {
           object-position: 75% center;
         }
         @media (max-width: 767px) {
-          [data-ads-preview="briefing-23-v1"] #topo:has(img[src$="/hero-rafael-neve.webp"]) {
-            background: #000; padding-bottom: 4rem !important;
+          [data-ads-preview="briefing-23-v1"] #topo {
+            background: hsl(var(--wl-navy)); padding-bottom: 2.5rem !important;
           }
-          [data-ads-preview="briefing-23-v1"] #topo:has(img[src$="/hero-rafael-neve.webp"]) > .absolute {
+          [data-ads-preview="briefing-23-v1"] #topo > .absolute {
             position: relative; height: 260px;
           }
-          [data-ads-preview="briefing-23-v1"] #topo:has(img[src$="/hero-rafael-neve.webp"]) > .absolute > [aria-hidden] {
+          [data-ads-preview="briefing-23-v1"] #topo > .absolute > [aria-hidden] {
             display: none;
           }
-          [data-ads-preview="briefing-23-v1"] #topo:has(img[src$="/hero-rafael-neve.webp"]) > .relative {
+          [data-ads-preview="briefing-23-v1"] #topo > .relative {
             padding-top: 24px; padding-bottom: 12px;
           }
-          [data-ads-preview="briefing-23-v1"] #topo:has(img[src$="/hero-rafael-neve.webp"]) > .relative > .relative {
+          [data-ads-preview="briefing-23-v1"] #topo > .relative > .relative {
             width: 100%; max-width: none;
           }
+          [data-ads-preview="briefing-23-v1"] #topo h1 { -webkit-line-clamp: unset; }
+          [data-ads-preview="briefing-23-v1"] #cotacao { margin-top: 0 !important; }
         }
 
         /* Arena review: solid surfaces; image overlays retain their contrast. */

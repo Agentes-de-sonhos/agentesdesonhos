@@ -123,6 +123,9 @@ import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-c
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
 import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
 import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
+import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
+import arenaVarennaLicensed from "@/assets/ads-preview/arena/varenna-commercial.webp.asset.json";
+import arenaRafaelSnow from "@/assets/hero-rafael-neve.webp.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import mundoHeroGrupoVideo from "@/assets/whitelabel/mundo-hero-grupo.mp4.asset.json";
 import mundoHeroEuropaVideo from "@/assets/whitelabel/mundo-hero-europa.mp4.asset.json";
@@ -159,7 +162,9 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
-  arenaRafaelSnow: "/__l5e/assets-v1/264ac6c0-5871-48ef-9946-172caf14f3b1/hero-rafael-neve.webp",
+  arenaRafaelSnow: arenaRafaelSnow.url,
+  arenaIberostarLicensed: arenaIberostarLicensed.url,
+  arenaVarennaLicensed: arenaVarennaLicensed.url,
   dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
   resort: destinoResort,
@@ -2135,6 +2140,11 @@ export default function AgencySiteHome({
               {current.subtitle}
             </p>
           </div>
+          {current.imageCredit && (
+            <p className="wl-hero-credit mt-3 text-[10px] leading-relaxed text-primary-foreground" title={`${current.imageCredit.source} · ${current.imageCredit.licenseUrl}`}>
+              Foto: {current.imageCredit.author} · <a href={current.imageCredit.source} target="_blank" rel="noopener noreferrer" className="underline">Fonte</a> · <a href={current.imageCredit.licenseUrl} target="_blank" rel="noopener noreferrer" className="underline">{current.imageCredit.license}</a> · recorte/WebP
+            </p>
+          )}
           <div
             data-hero-actions-placement={profile.heroPresentation?.actionsPlacement ?? "inline"}
             className={
