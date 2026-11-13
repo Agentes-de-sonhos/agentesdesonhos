@@ -247,7 +247,7 @@ export default function AdsBriefingPreview() {
           background-color: #333 !important; border-color: #333 !important;
         }
         [data-ads-preview="briefing-23-v1"] #novidades .wl-inspiration-cta svg { color: #fff !important; }
-        [data-ads-preview="briefing-23-v1"] #novidades .wl-newsletter-card img { object-position: center 22%; }
+        [data-ads-preview="briefing-23-v1"] #novidades .wl-newsletter-card img { object-position: center; }
 
         /* Arena review: solid surfaces; image overlays retain their contrast. */
         [data-ads-preview="briefing-23-v1"] :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) {

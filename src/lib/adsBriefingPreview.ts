@@ -8,7 +8,7 @@ import { EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
 import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
 import dricaNewsletterLondon from "@/assets/presentation/drica/london-newsletter.jpg";
-import arenaRafaelSnowboard from "@/assets/arena-rafael-snowboard.webp.asset.json";
+import arenaRafaelSnowboard from "@/assets/arena-rafael-snowboard-action.webp.asset.json";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 import type { AgencyDomainInfo } from "@/lib/agencyDomains";
 import { XCARET_IMAGES, type XcaretImage } from "@/components/landing/xcaret/content";
