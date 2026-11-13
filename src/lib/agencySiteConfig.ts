@@ -108,6 +108,7 @@ export function resolveSections(
 export type AgencyImageSlot =
   | "arenaRafaelSnow"
   | "arenaIberostarLicensed" | "arenaNoronha" | "arenaMontanhas" | "arenaVarennaLicensed" | "arenaRafaelMickey" | "arenaMontBlanc" | "arenaMatterhorn" | "arenaPuntaCana"
+  | "arenaAlpesUser" | "arenaSuicaUser" | "arenaVenezaUser" | "arenaResortsUser" | "arenaCaribeUser"
   | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "curtiCaribe" | "curtiBrasil" | "curtiCruzeiros" | "curtiNovaYork" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"

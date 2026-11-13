@@ -130,6 +130,11 @@ import arenaMontanhas from "@/assets/ads-preview/arena/montanhas-banner-panorami
 import arenaMontBlanc from "@/assets/ads-preview/arena/mont-blanc-chamonix.webp.asset.json";
 import arenaMatterhorn from "@/assets/ads-preview/arena/matterhorn-zermatt.webp.asset.json";
 import arenaPuntaCana from "@/assets/ads-preview/arena/punta-cana-resort.webp.asset.json";
+import arenaAlpesUser from "@/assets/ads-preview/arena/arena-alpes-franceses-novo.png.asset.json";
+import arenaSuicaUser from "@/assets/ads-preview/arena/arena-suica-novo.png.asset.json";
+import arenaVenezaUser from "@/assets/ads-preview/arena/arena-veneza-italia-novo.png.asset.json";
+import arenaResortsUser from "@/assets/ads-preview/arena/arena-resorts-brasil-novo.png.asset.json";
+import arenaCaribeUser from "@/assets/ads-preview/arena/arena-caribe-all-inclusive-novo.png.asset.json";
 import arenaVarennaLicensed from "@/assets/ads-preview/arena/varenna-commercial.webp.asset.json";
 import arenaRafaelSnow from "@/assets/hero-rafael-neve.webp.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
@@ -177,6 +182,11 @@ const DESTINATION_IMAGES: Record<string, string> = {
   arenaMontBlanc: arenaMontBlanc.url,
   arenaMatterhorn: arenaMatterhorn.url,
   arenaPuntaCana: arenaPuntaCana.url,
+  arenaAlpesUser: arenaAlpesUser.url,
+  arenaSuicaUser: arenaSuicaUser.url,
+  arenaVenezaUser: arenaVenezaUser.url,
+  arenaResortsUser: arenaResortsUser.url,
+  arenaCaribeUser: arenaCaribeUser.url,
   dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
   resort: destinoResort,
