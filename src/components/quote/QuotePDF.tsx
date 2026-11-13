@@ -317,9 +317,14 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
       if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
       break;
     case "car_rental":
-      details.push(`${t("tipo")}: ${data.car_type} | ${data.days} ${pluralize(locale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`);
-      details.push(`${t("retirada")}: ${data.pickup_location}`);
-      details.push(`${t("devolucao")}: ${data.dropoff_location}`);
+      {
+        const typeLbl = carTypeLabelPDF(data.car_type);
+        const parts = [typeLbl ? `${t("tipo")}: ${typeLbl}` : "", data.days ? `${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""].filter(Boolean);
+        if (typeLbl) details.push(parts.join(" | "));
+        else if (parts.length) details.push(parts[0]);
+      }
+      if (data.pickup_location) details.push(`${t("retirada")}: ${data.pickup_location}`);
+      if (data.dropoff_location) details.push(`${t("devolucao")}: ${data.dropoff_location}`);
       if (data.notes) details.push(`${t("obs")}: ${data.notes}`);
       break;
     case "transfer":
@@ -387,6 +392,17 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
   return details;
 }
 
+export function carTypeLabelPDF(v: unknown): string {
+  const k = String(v || "").trim();
+  if (!k) return "";
+  const map: Record<string, string> = { economico: "Econômico", compacto: "Compacto", intermediario: "Intermediário", suv: "SUV", premium: "Premium", luxo: "Luxo", van: "Van", motorhome: "Motorhome" };
+  return map[k.toLowerCase()] || k.charAt(0).toUpperCase() + k.slice(1);
+}
+
+export function docDisplayNamePDF(name: string): string {
+  return (name || "").replace(/\.(pdf|jpe?g|png|webp|gif|heic|docx?|xlsx?)$/i, "");
+}
+
 function generateAgencyHeader(profile: AgentProfile | null, t: ReturnType<typeof translateQuote>): string {
   const C = getQuotePdfTokens(profile);
   if (!profile?.agency_logo_url) {
@@ -401,7 +417,7 @@ function generateAgencyHeader(profile: AgentProfile | null, t: ReturnType<typeof
   return `
       <div style="text-align:center;padding:4px 0 2px;background:#ffffff;">
       <img src="${profile.agency_logo_url}" alt="${profile.agency_name || "Logo"}"
-        style="max-height:180px;max-width:520px;object-fit:contain;display:block;margin:0 auto;" />
+        style="max-height:110px;max-width:360px;object-fit:contain;display:block;margin:0 auto;" />
     </div>
   `;
 }
@@ -421,26 +437,19 @@ function generateAgentSignature(profile: AgentProfile | null, t: ReturnType<type
     ? `https://wa.me/${whatsappNumber.startsWith("55") ? whatsappNumber : `55${whatsappNumber}`}`
     : "";
 
+  const avatarSmall = avatarHtml.replace(/width:96px;height:96px/g, "width:58px;height:58px").replace(/font-size:36px/g, "font-size:22px").replace(/border:4px solid [^;]+;/, "");
   return `
-    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid ${C.border};border-radius:16px;background:#ffffff;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
-      <div style="background:linear-gradient(90deg,${C.tertiary},${C.tertiary});padding:8px 18px;text-align:center;">
-        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:3px;color:${C.primaryOnTertiary};margin:0;">${t("yourConsultant")}</p>
-      </div>
-      <div style="padding:14px 18px;text-align:center;">
-        ${avatarHtml.replace(/width:96px;height:96px/g, "width:68px;height:68px").replace(/font-size:36px/g, "font-size:26px")}
-        <p style="font-size:17px;font-weight:800;color:${C.primary};margin:8px 0 1px;">${profile.name}</p>
-        ${profile.agency_name ? `<p style="font-size:12px;color:${C.muted};margin:0;font-weight:500;">${profile.agency_name}</p>` : ""}
-        ${profile.city || profile.state ? `<p style="font-size:11px;color:${C.faint};margin:2px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
-        ${
-          whatsappLink
-            ? `<div style="margin-top:10px;">
-                <a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 24px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 6px 16px rgba(37,211,102,0.35);">
-                  💬 ${t("whatsappCta")}
-                </a>
-              </div>`
-            : ""
-        }
-      </div>
+    <div class="pdf-block agent-signature" style="margin-top:14px;border:1px solid ${C.border};border-radius:16px;background:#ffffff;padding:14px 18px;">
+      <table style="width:100%;border-collapse:collapse;"><tr>
+        <td style="width:72px;vertical-align:middle;">${avatarSmall}</td>
+        <td style="vertical-align:middle;">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:${C.muted};margin:0;">${t("yourConsultant")}</p>
+          <p style="font-size:16px;font-weight:800;color:${C.text};margin:2px 0 0;">${profile.name}</p>
+          ${profile.agency_name ? `<p style="font-size:12px;color:${C.muted};margin:0;">${profile.agency_name}</p>` : ""}
+          ${profile.city || profile.state ? `<p style="font-size:11px;color:${C.faint};margin:1px 0 0;">${[profile.city, profile.state].filter(Boolean).join(", ")}</p>` : ""}
+        </td>
+        ${whatsappLink ? `<td style="vertical-align:middle;text-align:right;white-space:nowrap;"><a href="${whatsappLink}" target="_blank" style="display:inline-block;background:#25D366;color:#ffffff;padding:9px 20px;border-radius:9999px;font-size:13px;font-weight:700;text-decoration:none;">${t("whatsappCta")}</a></td>` : ""}
+      </tr></table>
     </div>
   `;
 }
@@ -525,7 +534,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         switch (service.service_type) {
           case "flight": summary = `${data.airline || ""}${data.origin_city ? ` | ${data.origin_city} → ${data.destination_city}` : ""}`.trim(); break;
           case "hotel": summary = `${data.hotel_name || ""}${data.city ? ` — ${data.city}` : ""}`; break;
-          case "car_rental": summary = `${data.car_type || ""}${data.days ? ` | ${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""}`; break;
+          case "car_rental": summary = [carTypeLabelPDF(data.car_type), data.days ? `${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""].filter(Boolean).join(" | "); break;
           case "transfer": summary = `${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")}${data.location ? ` — ${data.location}` : ""}`; break;
           case "attraction": summary = [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name || ""; break;
           case "insurance": summary = data.provider || ""; break;
@@ -1066,24 +1075,17 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                 <p style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2.5px;color:${C.primaryOnTertiary};margin:0;">${t("attachments")}</p>
                 <p style="font-size:14px;font-weight:700;color:${C.textT};margin:1px 0 0;">${t("quoteDocuments")}</p>
               </div>
-              <span style="font-size:11px;color:${C.faint};">${quoteDocuments.length} ${pluralize(locale, quoteDocuments.length, { one: t("fileOne"), other: t("fileOther") })}</span>
+              <span style="font-size:11px;font-weight:600;color:${C.mutedT};">${quoteDocuments.length} ${pluralize(locale, quoteDocuments.length, { one: t("fileOne"), other: t("fileOther") })}</span>
             </div>
-            <table style="width:100%;border-collapse:collapse;">
-              ${quoteDocuments.map((doc, idx) => `
-                <tr style="${idx > 0 ? "border-top:1px solid ${C.border};" : ""}">
-                  <td style="padding:12px 18px;vertical-align:middle;width:44px;">
-                    <div style="width:36px;height:36px;border-radius:10px;background:${C.tertiary};display:inline-flex;align-items:center;justify-content:center;font-size:16px;">${emojiForDoc(doc.file_name, doc.file_type)}</div>
-                  </td>
-                  <td style="padding:12px 8px 12px 0;vertical-align:middle;">
-                    <p style="font-size:13px;font-weight:600;color:${C.text};margin:0;word-break:break-word;">${(doc.file_name || "").replace(/</g, "&lt;")}</p>
-                    ${doc.file_size ? `<p style="font-size:11px;color:${C.faint};margin:2px 0 0;">${formatDocSizePDF(doc.file_size)}</p>` : ""}
-                  </td>
-                  <td style="padding:12px 18px;vertical-align:middle;text-align:right;white-space:nowrap;">
-                    ${doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="font-size:12px;font-weight:600;color:${C.primary};text-decoration:none;border:1px solid ${C.primary};border-radius:999px;padding:6px 12px;">${t("open")}</a>` : ""}
-                  </td>
-                </tr>
-              `).join("")}
-            </table>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;padding:14px 18px;">
+              ${quoteDocuments.map((doc) => {
+                const isPdfDoc = /pdf/i.test(doc.file_type || "") || /\.pdf$/i.test(doc.file_name || "");
+                const name = docDisplayNamePDF(doc.file_name || "").replace(/</g, "&lt;");
+                const inner = `<span style="font-size:16px;flex-shrink:0;">${isPdfDoc ? "📄" : "🖼️"}</span><span style="min-width:0;"><span style="display:block;font-size:12px;font-weight:700;color:${C.primary};">${isPdfDoc ? "Abrir PDF" : "Abrir foto"}</span><span style="display:block;font-size:11px;color:${C.muted};word-break:break-word;">${name}${doc.file_size ? ` · ${formatDocSizePDF(doc.file_size)}` : ""}</span></span>`;
+                const st = `display:inline-flex;gap:8px;align-items:center;max-width:100%;border:1px solid ${C.border};background:${C.tertiary};border-radius:10px;padding:7px 12px;text-decoration:none;break-inside:avoid;`;
+                return doc.signedUrl ? `<a href="${doc.signedUrl}" target="_blank" rel="noopener" style="${st}">${inner}</a>` : `<span style="${st}">${inner}</span>`;
+              }).join("")}
+            </div>
           </div>
         ` : ""}
 
