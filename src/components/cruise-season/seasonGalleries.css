@@ -90,3 +90,9 @@
 
 /* Lift only the availability note; keep the approved button placement. */
 .csi-gallery-footer .csi-note { align-self: flex-start; margin-top: -.5rem; }
+
+/* Subtle structure inside the white itinerary card. */
+.csi-itinerary .csi-origin { align-self: flex-start; background: #f2f2f2; border-radius: .375rem; padding: .35rem .6rem; margin: .25rem 0 .75rem; font-weight: 500; }
+.csi-port-arrow { display: inline-block; vertical-align: -.15em; margin: 0 .35rem; }
+.csi-month-badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .5rem; }
+.csi .csi-month-badge { display: inline-flex; align-items: center; border: 1px solid #111; border-radius: .375rem; padding: .2rem .45rem; color: #111; background: #fff; font-size: .75rem; font-weight: 500; line-height: 1.4; white-space: nowrap; }
