@@ -20,9 +20,9 @@ export function cadasturCertificateFor(hostname?: string | null): CadasturCertif
   const h = hostname ?? "";
   // Arena: documento enviado pelo proprietário, mantido sem alterar a validade impressa.
   if (h === "briefing-23-v1.preview.local") return {
-    url: "/arena-travel-group/certificado-cadastur.webp",
+    url: "/arena-travel-group/certificado-cadastur-2026-2028.webp",
     agency: "Arena Travel Group",
-    validityLabel: "18/09/2024 a 18/09/2026",
+    validityLabel: "13/11/2026 a 13/11/2028",
   };
   if (/(^|\.)destinoscomaju\.com\.br$/i.test(h)) return { url: certJu.url, agency: "Destinos com a Ju" };
   if (h === "briefing-14-v1.preview.local" || /(^|\.)omundoemcores\.com\.br$/i.test(h)) return { url: certMundo.url, agency: "O Mundo em Cores" };

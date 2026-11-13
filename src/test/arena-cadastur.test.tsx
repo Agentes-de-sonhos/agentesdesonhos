@@ -11,7 +11,7 @@ describe("certificado Cadastur Arena", () => {
     expect(screen.getByRole("tooltip")).toHaveTextContent("Arena Travel Group, uma Agência de Viagens licenciada pelo Ministério do Turismo");
     expect(screen.getByRole("tooltip")).not.toHaveTextContent("18/09/2024");
     fireEvent.click(button);
-    expect(screen.getByRole("img", { name: "Certificado Cadastur da Arena Travel Group" })).toHaveAttribute("src", "/arena-travel-group/certificado-cadastur.webp");
+    expect(screen.getByRole("img", { name: "Certificado Cadastur da Arena Travel Group" })).toHaveAttribute("src", "/arena-travel-group/certificado-cadastur-2026-2028.webp");
     fireEvent.keyDown(window, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
