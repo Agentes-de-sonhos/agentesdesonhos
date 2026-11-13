@@ -28,7 +28,7 @@ export default function CruiseItinerariesPage({ info }: { info: AgencyDomainInfo
   };
   return <main className="csi csi-catalog">
     <nav aria-label="Você está aqui"><a href={agencySiteHref('/')}>Início</a> / <a href={agencySiteHref('/cruzeiros/temporada-brasileira-2026-2027')}>Temporada brasileira</a> / Roteiros</nav>
-    <header><p>Temporada brasileira 2026/2027</p><h1>Encontre o seu roteiro de cruzeiro</h1><p>Explore os itinerários cadastrados da MSC, Costa e Corazul. Escolha o roteiro para conhecer o navio e solicitar seu orçamento.</p></header>
+    <div className="csi-catalog-intro"><p>Temporada brasileira 2026/2027</p><h1>Encontre o seu roteiro de cruzeiro</h1><p>Explore os itinerários cadastrados da MSC, Costa e Corazul. Escolha o roteiro para conhecer o navio e solicitar seu orçamento.</p></div>
     <section aria-label="Filtros de roteiros" className="csi-filters">{fields.map(field => <label key={field.key}>{field.label}<select value={filters[field.key]} onChange={e => change(field.key, e.target.value)}><option value="">Todos</option>{field.values.map(v => <option key={v} value={v}>{field.labelFor?.(v) ?? v}</option>)}</select></label>)}</section>
     <button type="button" onClick={() => { setFilters(emptyItineraryFilters); setLimit(12); }}>Limpar filtros</button>
     <p role="status" className="mt-4">{results.length} {results.length === 1 ? 'roteiro encontrado' : 'roteiros encontrados'}</p>

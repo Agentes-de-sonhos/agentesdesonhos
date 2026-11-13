@@ -53,3 +53,8 @@
 .csi-catalog button { border: 1px solid currentColor; border-radius: .5rem; padding: .65rem 1rem; }
 @media(max-width: 767px) { .csi-carousel > .csi-prev { left: -10px; } .csi-carousel > .csi-next { right: -10px; } }
 .csi-authority .csi-carousel > button { background: hsl(var(--wl-navy)); color: hsl(var(--background)); border-color: hsl(var(--background) / .4); }
+
+.csi-catalog { width: 100%; background: #fff; color: #111; overflow-wrap: anywhere; }
+.csi-catalog :is(h1, .csi-catalog-intro p, nav) { color: #111; }
+.csi-catalog-intro { position: static; background: #fff; color: #111; padding: 1rem 0; }
+.csi-catalog .csi-filters { grid-template-columns: repeat(auto-fit,minmax(min(100%,180px),1fr)); }
