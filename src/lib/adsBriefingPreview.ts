@@ -2104,7 +2104,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
       text: (content?.text ?? item.text).replace(/ Imagem genérica de inspiração\./g, "") };
   }),
   about: { ...arenaMundoSource.about, ...arenaBaseline.about, media: undefined,
-    images: [{ src: "/arena-travel-group/rafael-neve.webp", alt: "Rafael Souza na neve, com equipamento de snowboard", position: "center" }], mural: undefined,
+    images: [{ src: "/arena-travel-group/equipe-teleferico-neve.png", alt: "Equipe da Arena Travel Group em um teleférico na neve", position: "center" }], mural: undefined,
     visitedDestinations: undefined },
   featuredExperience: undefined,
   authority: arenaMundoSource.authority ? { ...arenaMundoSource.authority,
