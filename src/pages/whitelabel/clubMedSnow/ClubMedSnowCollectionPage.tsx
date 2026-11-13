@@ -18,7 +18,6 @@ function ResortCard({ r }: { r: ClubMedSnowResort }) {
           ) : (
             <div className="grid h-full place-items-center text-muted-foreground"><Snowflake className="h-10 w-10" aria-hidden /></div>
           )}
-          {photo && <span className="absolute bottom-2 left-2 max-w-[80%] truncate rounded bg-foreground/60 px-1.5 py-0.5 text-[10px] text-background">Foto: {photo.credit}</span>}
           {r.kind === "chalet" && <span className="absolute left-3 top-3 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold">Chalés</span>}
         </div>
         <div className="p-4">

@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { HotelPhoto } from "./types";
 
 function Credit({ text }: { text: string }) {
+  if (text.trim().toLowerCase() === "club med") return null;
   return <span className="absolute bottom-2 left-2 max-w-[70%] truncate rounded bg-foreground/60 px-1.5 py-0.5 text-[10px] text-background" data-testid="photo-credit">Foto: {text}</span>;
 }
 
@@ -136,7 +137,7 @@ export function HotelGallery({ photos, hotelName }: { photos: HotelPhoto[]; hote
                 </>
               )}
               <div className="flex items-center justify-between px-4 py-3 text-sm">
-                <span>{photos[open].alt}{photos[open].credit && <span className="ml-2 opacity-80" data-testid="photo-credit">· Foto: {photos[open].credit}</span>}</span>
+                <span>{photos[open].alt}{photos[open].credit && photos[open].credit.trim().toLowerCase() !== "club med" && <span className="ml-2 opacity-80" data-testid="photo-credit">· Foto: {photos[open].credit}</span>}</span>
                 <span>{open + 1} / {total}</span>
               </div>
             </div>

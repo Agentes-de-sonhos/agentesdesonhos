@@ -124,7 +124,7 @@ export function HotelQuoteBox({
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-[1fr_1fr_150px_150px_auto] lg:items-end">
+      <div className={`mt-5 grid grid-cols-2 gap-3 sm:gap-4 lg:items-end ${extras?.length ? "lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_150px]" : "lg:grid-cols-[1fr_1fr_150px_150px_auto]"}`}>
         <div>
           <Label htmlFor="hq-in" className="text-sm font-medium">Entrada</Label>
           <div className="relative mt-1.5">
@@ -141,23 +141,24 @@ export function HotelQuoteBox({
         </div>
         <Stepper label="Adultos" value={adults} min={1} max={10} onChange={setAdults} />
         <Stepper label="Crianças" value={ages.length} min={0} max={6} onChange={setChildren} />
-        <Button onClick={start} size="lg" className="col-span-2 h-11 w-full lg:col-span-1 lg:w-auto">Solicitar orçamento</Button>
+        {!extras?.length && <Button onClick={start} size="lg" className="col-span-2 h-11 w-full lg:col-span-1 lg:w-auto">Solicitar orçamento</Button>}
       </div>
       {extras?.length ? (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-3 grid min-w-0 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
           {extras.map((x) => (
-            <label key={x.key} className="text-sm font-medium">
+            <label key={x.key} className="min-w-0 text-sm font-medium">
               {x.label}
               <select
                 value={extraVals[x.key] ?? ""}
                 onChange={(e) => setExtraVals((v) => ({ ...v, [x.key]: e.target.value }))}
-                className="mt-1.5 h-11 w-full rounded-lg border border-border bg-card px-3 text-sm"
+                className="mt-1.5 h-11 w-full min-w-0 rounded-lg border border-border bg-card px-3 text-sm"
               >
                 <option value="">Prefiro informar depois</option>
                 {x.options.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
             </label>
           ))}
+          <Button onClick={start} size="lg" className="h-11 w-full sm:col-span-2 lg:col-span-1 lg:w-auto">Solicitar orçamento</Button>
         </div>
       ) : null}
 
