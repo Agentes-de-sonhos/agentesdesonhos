@@ -2109,7 +2109,11 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     const content = arenaBaseline.destinations?.[index % (arenaBaseline.destinations?.length || 1)];
     return { ...item, ...content, key: item.key, image: item.image, order: item.order,
       text: (content?.text ?? item.text).replace(/ Imagem genérica de inspiração\./g, "") };
-  }),
+  }).concat([{
+    key: "arena-orlando-disney", image: "arenaRafaelMickey", title: "Orlando Disney", label: "Parques",
+    text: "Parques Disney em Orlando planejados com ingressos, hospedagem e roteiro para cada perfil.",
+    service: "pacotes", href: "/disney", imageFit: "contain", ctaLabel: "Conhecer Disney", enabled: true, order: 7,
+  }]),
   about: { ...arenaMundoSource.about, ...arenaBaseline.about, media: undefined,
     kicker: "QUEM SOMOS",
     title: "A paixão por viajar. O cuidado de quem conhece.",

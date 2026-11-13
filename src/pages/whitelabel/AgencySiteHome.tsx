@@ -124,6 +124,7 @@ import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino
 import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
 import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
 import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
+import arenaRafaelMickey from "@/assets/arena-rafael-mickey-orlando.jpg.asset.json";
 import arenaVarennaLicensed from "@/assets/ads-preview/arena/varenna-commercial.webp.asset.json";
 import arenaRafaelSnow from "@/assets/hero-rafael-neve.webp.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
@@ -165,6 +166,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,
+  arenaRafaelMickey: arenaRafaelMickey.url,
   dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
   resort: destinoResort,
@@ -1145,6 +1147,33 @@ export default function AgencySiteHome({
                     const cardProps = d.href
                       ? { href: agencySiteHref(d.href) }
                       : { type: "button" as const, onClick: () => openRequest(d.service) };
+                    if (d.imageFit === "contain") {
+                      return (
+                        <Card
+                          key={d.key}
+                          {...(cardProps as Record<string, unknown>)}
+                          data-destination={d.key}
+                          className={`group flex w-[80vw] shrink-0 snap-start flex-col overflow-hidden rounded-xl bg-[hsl(220_12%_10%)] text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:w-[58vw] md:w-auto md:flex-row ${
+                            i === destinations.length - 1 && destinations.length % 2 === 1 ? "md:col-span-2" : ""
+                          }`}
+                        >
+                          <img
+                            src={DESTINATION_IMAGES[d.image]}
+                            alt={d.label ? `${d.title} — ${d.label}` : d.title}
+                            loading="lazy"
+                            className="h-[360px] w-full object-contain md:h-full md:w-auto md:max-w-[45%]"
+                          />
+                          <div className="flex flex-1 flex-col justify-end p-6">
+                            <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-background/80">{d.label}</span>
+                            <h3 className={`mt-2 text-xl text-background ${AGENCY_CARD_TITLE_CLASS}`}>{d.title}</h3>
+                            <p className={`mt-2 hidden text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
+                            <span className="mt-4 inline-flex items-center self-start border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
+                              {d.ctaLabel ?? "Saiba mais"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                            </span>
+                          </div>
+                        </Card>
+                      );
+                    }
                     return (
                     <Card
                       key={d.key}

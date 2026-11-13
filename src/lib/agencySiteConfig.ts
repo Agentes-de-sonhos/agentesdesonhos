@@ -107,7 +107,7 @@ export function resolveSections(
  */
 export type AgencyImageSlot =
   | "arenaRafaelSnow"
-  | "arenaIberostarLicensed" | "arenaVarennaLicensed"
+  | "arenaIberostarLicensed" | "arenaVarennaLicensed" | "arenaRafaelMickey"
   | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "caribeMexico" | "curtiCaribe" | "curtiBrasil" | "curtiCruzeiros" | "curtiNovaYork" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
@@ -333,6 +333,10 @@ export interface AgencyDestination {
   service: string;
   /** Link opcional para uma página interna (ex.: circuito); substitui o pedido de proposta. */
   href?: string;
+  /** Opt-in: "contain" mostra a foto inteira com texto em área separada (sem cobrir pessoas). */
+  imageFit?: "contain";
+  /** Texto opcional do link quando `href` não é um circuito. */
+  ctaLabel?: string;
   enabled: boolean;
   order: number;
 }
