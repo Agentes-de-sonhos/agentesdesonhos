@@ -3,11 +3,11 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/list-clients.ts
 import { createClient } from "npm:@supabase/supabase-js@^2.93.3";
-import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z } from "npm:zod@^3.23.8";
 function supabaseForUser(ctx) {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
@@ -45,7 +45,7 @@ var list_clients_default = defineTool({
 
 // src/lib/mcp/tools/list-quotes.ts
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.93.3";
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z2 } from "npm:zod@^3.23.8";
 function supabaseForUser2(ctx) {
   return createClient2(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
@@ -80,7 +80,7 @@ var list_quotes_default = defineTool2({
 
 // src/lib/mcp/tools/list-trips.ts
 import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.93.3";
-import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z3 } from "npm:zod@^3.23.8";
 function supabaseForUser3(ctx) {
   return createClient3(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
@@ -118,7 +118,7 @@ var list_trips_default = defineTool3({
 
 // src/lib/mcp/tools/list-itineraries.ts
 import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.93.3";
-import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z4 } from "npm:zod@^3.23.8";
 function supabaseForUser4(ctx) {
   return createClient4(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
@@ -149,7 +149,7 @@ var list_itineraries_default = defineTool4({
 });
 
 // src/lib/mcp/tools/admin-platform-metrics.ts
-import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/_admin.ts
 import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.93.3";
@@ -245,7 +245,7 @@ var admin_platform_metrics_default = defineTool5({
 });
 
 // src/lib/mcp/tools/admin-users-count-by-plan.ts
-import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.0";
 var admin_users_count_by_plan_default = defineTool6({
   name: "get_users_count_by_plan",
   title: "Admin: usu\xE1rios por plano",
@@ -273,7 +273,7 @@ var admin_users_count_by_plan_default = defineTool6({
 });
 
 // src/lib/mcp/tools/admin-list-premium-users.ts
-import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z5 } from "npm:zod@^3.23.8";
 var admin_list_premium_users_default = defineTool7({
   name: "list_premium_users",
@@ -340,7 +340,7 @@ var admin_list_premium_users_default = defineTool7({
 });
 
 // src/lib/mcp/tools/admin-subscription-metrics.ts
-import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.20.0";
 var PLAN_PRICE_BRL = {
   essencial: 0,
   profissional: 97,
@@ -393,7 +393,7 @@ var admin_subscription_metrics_default = defineTool8({
 });
 
 // src/lib/mcp/tools/admin-new-users-by-period.ts
-import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool9 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z6 } from "npm:zod@^3.23.8";
 function bucketKey(d, group) {
   if (group === "day") return d.toISOString().slice(0, 10);
@@ -436,7 +436,7 @@ var admin_new_users_by_period_default = defineTool9({
 });
 
 // src/lib/mcp/tools/admin-active-agencies.ts
-import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool10 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z7 } from "npm:zod@^3.23.8";
 var admin_active_agencies_default = defineTool10({
   name: "get_active_agencies",
@@ -516,5 +516,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.1/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.0/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
