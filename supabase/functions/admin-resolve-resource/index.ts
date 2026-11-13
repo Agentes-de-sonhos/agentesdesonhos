@@ -1,4 +1,9 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+// Loose client type: createClient() without a Database generic yields
+// SupabaseClient<any, "public", any>; ReturnType<typeof createClient> picks the
+// wrong overload and collapses row types to never.
+type AdminClient = SupabaseClient<any, "public", any>;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -110,7 +115,7 @@ interface ResolvedResource {
 }
 
 async function resolveUrl(
-  adminClient: ReturnType<typeof createClient>,
+  adminClient: AdminClient,
   inputUrl: string
 ): Promise<ResolvedResource & { error?: string }> {
   let url: URL;
@@ -266,7 +271,7 @@ async function resolveUrl(
   return { error: "Não foi possível identificar o recurso a partir desta URL", type: "", resource_id: "", owner_id: null, data: {}, resolved_via: "" };
 }
 
-async function getAgencySlug(client: ReturnType<typeof createClient>, userId: string): Promise<string> {
+async function getAgencySlug(client: AdminClient, userId: string): Promise<string> {
   const { data } = await client
     .from("profiles")
     .select("agency_name")
