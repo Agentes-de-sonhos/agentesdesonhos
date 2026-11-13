@@ -17,7 +17,13 @@ Only the technical preview changes. No production publication. Approved hero mes
 - Pointer: `src/assets/ads-preview/arena/iberostar-bahia.webp.asset.json`. No posing people or prominent faces in inspected photo.
 - Official Iberostar alternative was rejected: Commons page 203053378 has an unprocessed VRT permission ticket and explicitly says “Do not reuse (yet)”, despite CC BY metadata. No inference of authorization from an official website alone.
 
-## Replacement slide 3
+## Replacement slide 3 (hero order 3) — current state
+- Image: user-supplied AI-generated panorama of mountains, forest and wildflowers (`arena-montanhas-banner-panoramico.png`, 2172×724). Approved by the owner on 2026-11-13.
+- Generated image: no author, source or license credit is displayed, and none was invented.
+- Pointer: `src/assets/ads-preview/arena/montanhas-banner-panoramico.png.asset.json`, slot `arenaMontanhas`.
+- The previous slide 3 photograph (Varenna / Lake Como, Renatoongania, CC BY-SA 4.0) is no longer used in the hero; its credit was removed from that slide. The photograph itself stays in use in the Destinos gallery (Itália card) with the evidence recorded below.
+
+## Varenna photograph (now Destinos gallery — Itália card)
 - Photograph: Panorama monte fopp perledo como lake, Varenna / Vezio / Lake Como, taken 25 August 2019.
 - Author: Renatoongania. Self-published work.
 - Source: https://commons.wikimedia.org/w/index.php?curid=81725575

@@ -2096,7 +2096,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   hero: [
     { kicker: "VIAGENS PARA A NEVE", title: "Sua próxima história começa na neve.", subtitle: "Da escolha do destino à hospedagem, planejamos sua viagem para esquiar com orientação e acompanhamento em cada etapa.", image: "arenaRafaelSnow", textWidth: "narrowLeft", order: 1, enabled: true },
     { kicker: "TEMPO PARA APROVEITAR", title: "Descansar também merece um bom planejamento.", subtitle: "Destinos escolhidos de acordo com o perfil da sua família ou grupo, com atenção à estrutura, à localização e ao que está incluído.", image: "arenaNoronha", textWidth: "narrowLeft", order: 2, enabled: true },
-    { kicker: "EUROPA NO SEU RITMO", title: "Novos lugares. Boas companhias. A sua viagem.", subtitle: "Roteiros personalizados para famílias e grupos de amigos, com escolhas que respeitam seus interesses e seu jeito de viajar.", image: "arenaVarennaLicensed", imageCredit: { author: "Renatoongania · Varenna / Lago de Como", source: "https://commons.wikimedia.org/w/index.php?curid=81725575", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" }, textWidth: "narrowLeft", order: 3, enabled: true },
+    { kicker: "EUROPA NO SEU RITMO", title: "Novos lugares. Boas companhias. A sua viagem.", subtitle: "Roteiros personalizados para famílias e grupos de amigos, com escolhas que respeitam seus interesses e seu jeito de viajar.", image: "arenaMontanhas", textWidth: "narrowLeft", order: 3, enabled: true },
   ],
   signature: arenaBaseline.signature,
   modules: arenaMundoSource.modules?.map((item, index) => ({

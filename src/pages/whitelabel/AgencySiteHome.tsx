@@ -126,6 +126,7 @@ import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte
 import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
 import arenaRafaelMickey from "@/assets/arena-rafael-mickey-orlando.jpg.asset.json";
 import arenaNoronha from "@/assets/ads-preview/arena/noronha-banner-panoramico.png.asset.json";
+import arenaMontanhas from "@/assets/ads-preview/arena/montanhas-banner-panoramico.png.asset.json";
 import arenaMontBlanc from "@/assets/ads-preview/arena/mont-blanc-chamonix.webp.asset.json";
 import arenaMatterhorn from "@/assets/ads-preview/arena/matterhorn-zermatt.webp.asset.json";
 import arenaPuntaCana from "@/assets/ads-preview/arena/punta-cana-resort.webp.asset.json";
@@ -171,6 +172,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,
   arenaNoronha: arenaNoronha.url,
+  arenaMontanhas: arenaMontanhas.url,
   arenaRafaelMickey: arenaRafaelMickey.url,
   arenaMontBlanc: arenaMontBlanc.url,
   arenaMatterhorn: arenaMatterhorn.url,
