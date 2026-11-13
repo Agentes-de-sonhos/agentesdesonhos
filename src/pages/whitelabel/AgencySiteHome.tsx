@@ -928,7 +928,7 @@ export default function AgencySiteHome({
         if (!authority) return null;
         const seasonEnabled = profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22";
         return (
-          <section key={key} id="autoridade" className="bg-[hsl(var(--wl-navy))] text-background">
+          <section key={key} id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
             {seasonEnabled ? <CruiseSeasonAuthorityBlock container={container} /> : (
             <div className={`${container} grid items-center gap-x-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-x-16 md:py-24`}>
               <div className="order-2 mt-8 md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:mt-0">

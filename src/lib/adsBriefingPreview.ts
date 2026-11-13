@@ -2092,7 +2092,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
       { label: "Club Med na neve", to: "/#campanhas" },
       { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
       { label: "Resorts no Brasil", to: "/#resorts" },
-      { label: "Cruzeiros 26 e 27", to: "/#temporada-cruzeiros" },
+      { label: "Cruzeiros no Brasil 26/27", to: "/#autoridade" },
     ] : children }];
   }),
   sections: { ...arenaMundoSource.sections, resorts: { enabled: true, order: 4.75 }, concierge: { enabled: false }, avaliacoes: { enabled: false } },
