@@ -28,6 +28,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { formatPaymentMethodsInline } from "@/lib/paymentMethods";
 import { DestinationIntroPublic } from "@/components/quote/DestinationIntroPublic";
 import { PublicDocumentViewer } from "@/components/quote/PublicDocumentViewer";
+import { cn } from "@/lib/utils";
 import { canPreviewInline, SIGNED_URL_TTL_SECONDS } from "@/lib/publicDocumentViewer";
 import { BrandText } from "@/components/ui/brand-text";
 import { FormattedText } from "@/components/ui/formatted-text";
@@ -1281,6 +1282,7 @@ function PublicQuoteDocuments({
   const [viewerDoc, setViewerDoc] = useState<PublicDocument | null>(null);
   const [viewerUrl, setViewerUrl] = useState<string | null>(null);
   const [viewerLoading, setViewerLoading] = useState(false);
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false);
 
   const signDoc = async (doc: PublicDocument, download: boolean) => {
     const { data, error } = await supabase.storage
@@ -1328,7 +1330,12 @@ function PublicQuoteDocuments({
   return (
     <section className="space-y-3 animate-fade-up">
       <div className="rounded-2xl border border-border/40 bg-white shadow-sm overflow-hidden">
-        <div className="flex items-center gap-3 px-5 sm:px-6 py-4 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/40">
+        <button
+          type="button"
+          onClick={() => setAttachmentsOpen((v) => !v)}
+          aria-expanded={attachmentsOpen}
+          className="w-full flex items-center gap-3 px-5 sm:px-6 py-4 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-border/40 text-left hover:bg-primary/10 transition-colors"
+        >
           <div className="h-9 w-9 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center shadow-sm">
             <Paperclip className="h-4 w-4 text-primary" />
           </div>
@@ -1341,7 +1348,14 @@ function PublicQuoteDocuments({
           <span className="text-xs text-muted-foreground hidden sm:inline">
             {documents.length} {documents.length === 1 ? "arquivo" : "arquivos"}
           </span>
-        </div>
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 text-muted-foreground transition-transform duration-200 shrink-0",
+              attachmentsOpen && "rotate-180",
+            )}
+          />
+        </button>
+        {attachmentsOpen && (
         <ul className="divide-y divide-border/40">
           {documents.map((doc) => {
             const Icon = getDocIcon(doc.file_type, doc.file_name);
@@ -1387,6 +1401,7 @@ function PublicQuoteDocuments({
             );
           })}
         </ul>
+        )}
       </div>
       <PublicDocumentViewer
         doc={viewerDoc}
