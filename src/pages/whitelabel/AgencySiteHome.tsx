@@ -125,6 +125,7 @@ import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
 import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
 import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
 import arenaRafaelMickey from "@/assets/arena-rafael-mickey-orlando.jpg.asset.json";
+import arenaNoronha from "@/assets/ads-preview/arena/noronha-banner-panoramico.png.asset.json";
 import arenaVarennaLicensed from "@/assets/ads-preview/arena/varenna-commercial.webp.asset.json";
 import arenaRafaelSnow from "@/assets/hero-rafael-neve.webp.asset.json";
 import heroVarenna from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
@@ -166,6 +167,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,
+  arenaNoronha: arenaNoronha.url,
   arenaRafaelMickey: arenaRafaelMickey.url,
   dricaLondon: dricaLondon.url, dricaJapan: dricaJapan.url, dricaPrague: dricaPrague.url,
   litoral: destinoLitoral,
