@@ -14,7 +14,7 @@ import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
 import PublicDomainRoot, { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
 import { resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
-import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
+import { AgencyBrandSpinner, agencyLoaderBackdropClass, isAgencyLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
 
 import { useNoindex } from "@/hooks/useNoindex";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -25,11 +25,12 @@ const MundoEmCoresComingSoon = lazy(() => import("@/pages/whitelabel/MundoEmCore
 const BardelliViagensComingSoon = lazy(() => import("@/pages/whitelabel/BardelliViagensComingSoon"));
 
 /** Mesma camada fixa em todas as etapas do 1º carregamento: o logo nunca muda de posição. */
-const Spinner = () => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-[hsl(0_0%_100%)]">
-    <AgencyBrandSpinner size="lg" />
-  </div>
-);
+const Spinner = () =>
+  isAgencyLoaderSuppressed() ? null : (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${agencyLoaderBackdropClass()}`}>
+      <AgencyBrandSpinner size="lg" />
+    </div>
+  );
 
 /** Host compartilhado sem slug válido: nada é revelado sobre os tenants. */
 function SharedHostIndex() {

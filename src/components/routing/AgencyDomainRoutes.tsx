@@ -23,7 +23,7 @@ import { useNoindex } from "@/hooks/useNoindex";
 import { AgencySitePasswordGate } from "@/components/whitelabel/AgencySitePasswordGate";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { resolveContentPages } from "@/lib/agencySiteContentPages";
-import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
+import { AgencyBrandSpinner, agencyLoaderBackdropClass, isAgencyLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
 
 const ClubMedSnowCollectionPage = lazy(() => import("@/pages/whitelabel/clubMedSnow/ClubMedSnowCollectionPage"));
 const ClubMedSnowResortPage = lazy(() => import("@/pages/whitelabel/clubMedSnow/ClubMedSnowResortPage"));
@@ -79,11 +79,12 @@ function DmcLegacyRedirect({ anchor }: { anchor: string }) {
 }
 
 /** Mesma camada fixa do 1º carregamento (AgencyDomainGate): o logo não salta. */
-const Fallback = () => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-[hsl(0_0%_100%)]">
-    <AgencyBrandSpinner size="lg" />
-  </div>
-);
+const Fallback = () =>
+  isAgencyLoaderSuppressed() ? null : (
+    <div className={`fixed inset-0 z-50 flex items-center justify-center ${agencyLoaderBackdropClass()}`}>
+      <AgencyBrandSpinner size="lg" />
+    </div>
+  );
 
 /** Navegação interna: cabeçalho/rodapé ficam; só a área do conteúdo aguarda, sem logo. */
 const ContentFallback = () => <div className="min-h-[60vh]" aria-busy="true" />;
