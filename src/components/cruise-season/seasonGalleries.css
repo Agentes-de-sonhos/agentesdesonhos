@@ -87,3 +87,6 @@
 .csi-rail:has(.csi-itinerary), .csi-results { align-items: flex-start; }
 .csi .csi-itinerary { align-self: flex-start; }
 .csi-itinerary .csi-card-arrow { margin-top: .5rem; padding-top: 0; }
+
+/* Lift only the availability note; keep the approved button placement. */
+.csi-gallery-footer .csi-note { align-self: flex-start; margin-top: -.5rem; }
