@@ -152,15 +152,7 @@ export function ServiceModal(props: Props) {
     image_url?: string,
     image_urls?: string[],
   ) => {
-    const hasSupplier = Boolean(supplier.operator_id || (supplier.supplier_name && supplier.supplier_name.trim()));
-    if (!hasSupplier) {
-      pendingSubmitRef.current = (sup?: SupplierSelectorValue) =>
-        doSubmit(service_data, amount, option_label, description, image_url, image_urls, sup);
-      setPendingSupplier({ operator_id: null, supplier_name: "" });
-      setLinkMode(false);
-      setConfirmOpen(true);
-      return;
-    }
+    // Sem pergunta sobre fornecedor: salva direto (vínculo segue opcional no formulário).
     return doSubmit(service_data, amount, option_label, description, image_url, image_urls);
   };
 
