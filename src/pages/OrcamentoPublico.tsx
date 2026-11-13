@@ -164,7 +164,7 @@ function getServiceSummary(service: QuoteService): string {
   switch (service.service_type) {
     case "flight": return `${data.airline} | ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return `${data.hotel_name} — ${data.city}`;
-    case "car_rental": return `${data.car_type} | ${data.days} ${pluralize(publicLocale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`;
+    case "car_rental": return `${carTypeLabel(data.car_type)} | ${data.days} ${pluralize(publicLocale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`;
     case "transfer": return `${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")} — ${data.location}`;
     case "attraction": return [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name;
     case "insurance": return data.provider;
@@ -187,7 +187,7 @@ function getServiceName(service: QuoteService): string {
   switch (service.service_type) {
     case "flight": return `${data.airline} — ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return data.hotel_name;
-    case "car_rental": return data.car_type;
+    case "car_rental": return carTypeLabel(data.car_type);
     case "transfer": return data.location;
     case "attraction": return data.product_name || data.name;
     case "insurance": return data.provider;
@@ -672,7 +672,7 @@ function CarBody({ data }: { data: any }) {
   return (
     <div className="space-y-4">
       <div className="min-w-0">
-        <div className="text-base font-semibold text-foreground tracking-tight">{data.car_type}</div>
+        <div className="text-base font-semibold text-foreground tracking-tight">{carTypeLabel(data.car_type)}</div>
         {data.rental_company && <div className="text-xs text-muted-foreground mt-0.5">{data.rental_company}</div>}
       </div>
       <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 space-y-3">
@@ -991,14 +991,14 @@ function CollapsibleServiceCard({
     <>
       <div className="flex items-center gap-3">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ring-black/10"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm ring-1 ring-black/10"
           style={SERVICE_ICON_STYLE}
         >
           {getServiceIcon(service)}
         </div>
         <div className="flex flex-col items-start gap-0.5">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold uppercase tracking-wide">{getServiceLabel(service)}</span>
+            <span className="text-sm font-bold uppercase tracking-wide text-left">{getServiceLabel(service)}</span>
             {service.option_label && (
               <Badge variant="secondary" className="text-xs gap-1 ring-1 ring-black/10" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
                 <Tag className="h-3 w-3" />
@@ -1430,6 +1430,15 @@ function PublicQuoteDocuments({
       />
     </section>
   );
+}
+
+const CAR_TYPE_LABELS: Record<string, string> = {
+  economico: "Econômico", compacto: "Compacto", intermediario: "Intermediário", suv: "SUV",
+  premium: "Premium", luxo: "Luxo", van: "Van", motorhome: "Motorhome",
+};
+function carTypeLabel(value: unknown): string {
+  const v = typeof value === "string" ? value : "";
+  return CAR_TYPE_LABELS[v.trim().toLowerCase()] ?? v;
 }
 
 export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentProfileOverride, agencySlugOverride, accessCodeOverride }: { tokenOverride?: string; quoteOverride?: Quote; agentProfileOverride?: AgentProfile | null; agencySlugOverride?: string; accessCodeOverride?: string } = {}) {
