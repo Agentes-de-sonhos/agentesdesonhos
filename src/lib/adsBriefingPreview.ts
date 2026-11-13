@@ -1657,7 +1657,13 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
 };
 
 export function resolveAdsPreviewFixture(jobId?: string): AdsBriefingPreviewFixture | null {
-  return jobId ? ADS_PREVIEW_FIXTURES[jobId] ?? null : null;
+  const fixture = jobId ? ADS_PREVIEW_FIXTURES[jobId] : null;
+  if (!fixture) return null;
+  // Every review shares the complete catalog; retain agency-specific overrides.
+  fixture.pages = { resorts: { title: "Explore os resorts do Brasil" }, orlandoTickets: true,
+    visa: true, dmc: true, xcaret: { slots: GENERIC_XCARET_SLOTS },
+    editorial: true, ...fixture.pages };
+  return fixture;
 }
 
 /** O Mundo em Cores: fotos próprias nos cards "Natureza que surpreende" e "Tempo para curtir o Caribe". */

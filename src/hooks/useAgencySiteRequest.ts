@@ -43,6 +43,11 @@ export function useAgencySiteRequest(hostname: string) {
 
   const submit = useCallback(
     async (payload: Record<string, unknown>) => {
+      if (hostname.endsWith(".preview.local")) {
+        setError("Prévia para revisão: nenhum dado será enviado.");
+        setState("error");
+        return { error: true as const };
+      }
       setState("submitting");
       setError(null);
       try {

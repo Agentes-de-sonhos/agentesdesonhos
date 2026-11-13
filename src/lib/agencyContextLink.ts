@@ -74,7 +74,9 @@ export function withAgencyContext(path: string, hostname: string, search: string
 /** Versão de conveniência baseada na URL atual do navegador. */
 export function agencyContextHref(path: string): string {
   if (typeof window === "undefined") return path;
-  return withAgencyContext(path, window.location.hostname, window.location.search);
+  const contextual = withAgencyContext(path, window.location.hostname, window.location.search);
+  const previewBase = /^\/ads-briefing-preview\/[a-z0-9-]+/i.exec(window.location.pathname)?.[0];
+  return previewBase ? withAgencyBasePath(previewBase, contextual) : contextual;
 }
 
 /**
