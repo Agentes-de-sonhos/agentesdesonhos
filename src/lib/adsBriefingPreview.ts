@@ -2090,7 +2090,7 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
     // Ênfase comercial em neve: catálogo e chamada na primeira seção da home.
     return [{ ...item, children: item.label === "Especialidades" && children ? [{ label: "Club Med na neve", to: "/club-med-neve" }, ...children] : children }];
   }),
-  sections: { ...arenaMundoSource.sections, concierge: { enabled: false }, avaliacoes: { enabled: false } },
+  sections: { ...arenaMundoSource.sections, resorts: { enabled: true, order: 4.75 }, concierge: { enabled: false }, avaliacoes: { enabled: false } },
   heroPresentation: { ...arenaMundoSource.heroPresentation, kicker: "ARENA TRAVEL GROUP · VIAGENS SOB MEDIDA" },
   hero: [
     { kicker: "VIAGENS PARA A NEVE", title: "Sua próxima história começa na neve.", subtitle: "Da escolha do destino à hospedagem, planejamos sua viagem para esquiar com orientação e acompanhamento em cada etapa.", image: "arenaRafaelSnow", textWidth: "narrowLeft", order: 1, enabled: true },
