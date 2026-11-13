@@ -3043,7 +3043,6 @@ function TransferForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing,
                   <SelectItem value="sedan">Sedan</SelectItem>
                   <SelectItem value="suv">SUV</SelectItem>
                   <SelectItem value="van">Van</SelectItem>
-                  <SelectItem value="motorhome">Motorhome</SelectItem>
                   <SelectItem value="minibus">Micro-ônibus</SelectItem>
                   <SelectItem value="onibus">Ônibus</SelectItem>
                 </SelectContent>
