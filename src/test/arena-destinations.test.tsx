@@ -15,18 +15,19 @@ describe("Arena destinations gallery", () => {
     const mundo = new Set((MUNDO_EM_CORES_PREVIEW_PROFILE.destinations ?? []).map(d => d.image));
     imgs.forEach(i => expect(mundo.has(i)).toBe(false));
   });
-  it("Disney Orlando keeps the full Mickey photo and links to /disney", () => {
+  it("Disney Orlando uses the standard full-card photo and links to /disney", () => {
     const disney = list[5];
     expect(disney.image).toBe("arenaRafaelMickey");
-    expect(disney.imageFit).toBe("contain");
+    expect(disney.imageFit).toBeUndefined();
+    expect(disney.imagePosition).toBe("center 40%");
     expect(disney.href).toBe("/disney");
   });
   it("Alps and Resorts link to existing pages", () => {
     expect(list[0].href).toBe("/club-med-neve?pais=franca");
     expect(list[3].href).toBe("/resorts-brasil");
   });
-  it("credits every licensed photo once", () => {
-    expect(ARENA_PREVIEW_PROFILE.destinationCredits?.map(c => c.title)).toEqual(APPROVED.slice(0, 5));
+  it("omits the requested gallery credit line", () => {
+    expect(ARENA_PREVIEW_PROFILE.destinationCredits).toBeUndefined();
   });
   it("does not change other sites", () => {
     expect(MUNDO_EM_CORES_PREVIEW_PROFILE.destinationsFixedOrder).toBeUndefined();

@@ -1197,6 +1197,7 @@ export default function AgencySiteHome({
                     >
                       <img
                         src={DESTINATION_IMAGES[d.image]}
+                        style={d.imagePosition ? { objectPosition: d.imagePosition } : undefined}
                         alt={d.label ? `${d.title} — ${d.label}` : d.title}
                         loading="lazy"
                         className="h-[360px] w-full object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.03] md:h-full"

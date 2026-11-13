@@ -335,6 +335,8 @@ export interface AgencyDestination {
   href?: string;
   /** Opt-in: "contain" mostra a foto inteira com texto em área separada (sem cobrir pessoas). */
   imageFit?: "contain";
+  /** Foco opcional da foto dentro do recorte do card. */
+  imagePosition?: string;
   /** Texto opcional do link quando `href` não é um circuito. */
   ctaLabel?: string;
   enabled: boolean;
