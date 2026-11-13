@@ -125,6 +125,7 @@ export default function AdsBriefingPreview() {
   const known =
     subPath === "" ||
     /^(circuitos\/[a-z0-9-]+|cruzeiros\/temporada-brasileira-2026-2027|cruzeiros\/[a-z0-9-]+\/[a-z0-9-]+|disney|universal|(?:disney|universal)\/hoteis\/[a-z0-9-]+)$/.test(subPath) ||
+    subPath === "cruzeiros/encontre-seu-cruzeiro" ||
     subPath === "club-med-neve" || !!snowSlug ||
     (subPath === "xcaret" && pages.xcaret) ||
     (subPath === "ingressos-orlando" && pages.orlandoTickets) ||
@@ -144,7 +145,8 @@ export default function AdsBriefingPreview() {
       body = <Routes>
         <Route path="circuitos/:slug" element={<CircuitTourPage info={info} />} />
         <Route path="cruzeiros/temporada-brasileira-2026-2027/roteiros" element={<CruiseItinerariesPage info={info} />} />
-            <Route path="cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
+            <Route path="cruzeiros/encontre-seu-cruzeiro" element={<CruiseSeasonPage info={info} assistantOnly />} />
+        <Route path="cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
         <Route path="cruzeiros/:line/:ship" element={<CruiseShipRoutePage info={info} />} />
         <Route path="universal" element={<UniversalLandingPage info={info} noindex embedded />} />
         <Route path="disney" element={<DisneyLandingPage info={info} embedded />} />

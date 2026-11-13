@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
 import { agencySiteHref } from '@/lib/agencyContextLink';
 import { cruiseShipPath } from '@/lib/cruiseShips';
-import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
+import { CRUISE_FINDER_PATH, SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
 import { SeasonGalleries } from './SeasonGalleries';
 import { seasonCardPhoto } from '@/lib/cruiseShips/seasonCardPhotos';
 
@@ -86,7 +86,7 @@ export function CruiseSeasonHelp({ container }: { container: string }) {
   return <div className={`${container} pb-14 md:pb-20`} data-testid="cruise-season-help">
       <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
         <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o cruzeiro ideal para você?</p>
-        <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
+        <a href={agencySiteHref(CRUISE_FINDER_PATH)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
       </div>
   </div>;
 }

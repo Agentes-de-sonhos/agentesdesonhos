@@ -1,5 +1,6 @@
 import { CRUISE_SHIPS } from './index';
 import type { CruiseShipContent, CruiseSailing } from './types';
+export const CRUISE_FINDER_PATH = '/cruzeiros/encontre-seu-cruzeiro';
 export const SEASON_PATH = '/cruzeiros/temporada-brasileira-2026-2027';
 export const SEASON_SHIPS = CRUISE_SHIPS.filter(s => s.routes.feed.sailings.some(v => v.date >= '2026-11-01' && v.date <= '2027-04-30') && s.lineSlug !== 'royal-caribbean');
 export type SeasonPreferences = { month: string; port: string; duration: string; interests: string[] };

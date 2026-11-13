@@ -1,7 +1,7 @@
 import { ArrowRight, Compass } from 'lucide-react';
 import { agencySiteHref } from '@/lib/agencyContextLink';
 import { SeasonGalleries } from './SeasonGalleries';
-import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
+import { CRUISE_FINDER_PATH, SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
 
 /** Home opt-in is owned by AgencySiteHome; all branding comes from the tenant. */
 export function CruiseSeasonHomeTeaser({ container }: { container: string }) {
@@ -15,7 +15,7 @@ export function CruiseSeasonHomeTeaser({ container }: { container: string }) {
           <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">Oito navios. Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC, Costa e Corazul para a temporada brasileira.</p>
           <div className="mt-7 flex flex-col gap-3 md:flex-row md:flex-wrap">
             <a href={agencySiteHref(SEASON_PATH)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-primary)]">Ver os oito navios <ArrowRight className="h-4 w-4" aria-hidden="true"/></a>
-            <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:bg-background"><Compass className="h-4 w-4" aria-hidden="true"/>Qual cruzeiro combina com você?</a>
+            <a href={agencySiteHref(CRUISE_FINDER_PATH)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:bg-background"><Compass className="h-4 w-4" aria-hidden="true"/>Qual cruzeiro combina com você?</a>
           </div>
         </div>
         <figure className="hidden flex-col md:flex"><div className="relative min-h-[250px] flex-1 lg:min-h-[380px]">

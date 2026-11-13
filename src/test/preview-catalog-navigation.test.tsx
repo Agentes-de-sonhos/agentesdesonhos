@@ -33,6 +33,15 @@ describe('complete preview catalog',()=>{
   fireEvent.click(screen.getByRole('button',{name:/Continuar/}));
   expect(await screen.findByText('De onde gostaria de embarcar?')).toBeInTheDocument();
  });
+ it('opens the standalone finder without season galleries',async()=>{
+  open('cruzeiros/encontre-seu-cruzeiro');
+  expect(await screen.findByRole('heading',{level:1,name:'Qual cruzeiro combina com você?'})).toBeInTheDocument();
+  expect(screen.queryByRole('region',{name:'Os oito navios da temporada'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('list',{name:'Roteiros para a sua próxima viagem'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('link',{name:/Conheça .* e seus roteiros/})).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button',{name:/Continuar/}));
+  expect(await screen.findByText('De onde gostaria de embarcar?')).toBeInTheDocument();
+ });
  it('keeps external actions and submits blocked',async()=>{
   open('cruzeiros/temporada-brasileira-2026-2027');
   await screen.findByText('Qual cruzeiro combina com você?');

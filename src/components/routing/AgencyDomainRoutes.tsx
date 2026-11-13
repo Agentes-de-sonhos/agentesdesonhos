@@ -284,7 +284,8 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/club-med-neve" element={<ClubMedSnowCollectionPage info={info} />} />
             <Route path="/club-med-neve/:slug" element={<ClubMedSnowResortPage info={info} />} />
             <Route path="/cruzeiros/temporada-brasileira-2026-2027/roteiros" element={<CruiseItinerariesPage info={info} />} />
-            <Route path="/cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
+            <Route path="/cruzeiros/encontre-seu-cruzeiro" element={<CruiseSeasonPage info={info} assistantOnly />} />
+        <Route path="/cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
             <Route path="/cruzeiros/:line/:ship" element={<CruiseShipRoutePage info={info} />} />
           </Route>
 

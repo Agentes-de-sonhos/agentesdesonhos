@@ -13,7 +13,7 @@ const steps = ['Quando viajar', 'Embarque', 'Duração', 'Viajantes', 'Preferên
 const initial: SeasonPreferences = { month:'', port:'', duration:'', interests:[] };
 const periodLabel = (v:string) => v ? new Date(v+'-01T12:00:00Z').toLocaleDateString('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}) : 'Tenho flexibilidade';
 const dateLabel = (v:string) => v.split('-').reverse().join('/');
-export default function CruiseSeasonPage({info}:{info:AgencyDomainInfo}) {
+export default function CruiseSeasonPage({info, assistantOnly = false}:{info:AgencyDomainInfo; assistantOnly?:boolean}) {
  const href = (path:string) => agencyContextHref(path);
  const [prefs,setPrefs] = useState(initial); const [step,setStep] = useState(0);
  const [adults,setAdults] = useState(2); const [ages,setAges] = useState<string[]>([]);
@@ -27,7 +27,7 @@ export default function CruiseSeasonPage({info}:{info:AgencyDomainInfo}) {
  const chosen=choice?.sailings[0];
  const travelersValid=Number.isInteger(adults)&&adults>=1&&adults<=20&&ages.every(a=>/^(?:[0-9]|1[0-7])$/.test(a));
  const valid=validCruiseQuote({name,phone,email:'',period:prefs.month,adults,children:ages.length,ages:ages.join(','),cabin:'',consent});
- useEffect(()=>{document.title=`Cruzeiros Brasil 2026–2027 · ${info.agency_name || 'Sua agência'}`;window.scrollTo(0,0);},[info.agency_name]);
+ useEffect(()=>{document.title=`${assistantOnly ? 'Qual cruzeiro combina com você?' : 'Cruzeiros Brasil 2026–2027'} · ${info.agency_name || 'Sua agência'}`;window.scrollTo(0,0);},[info.agency_name,assistantOnly]);
  const advance=(n:number)=>{setStep(n);setSelected('');reset();requestAnimationFrame(()=>heading.current?.focus());};
  const send=async(e:React.FormEvent)=>{e.preventDefault();if(!valid||presentation||sending.current)return;sending.current=true;
   try {await submit({service_key:'cruzeiros',service_label:'Cruzeiros · Temporada brasileira 2026/2027',lead_name:name.trim(),lead_phone:phone,lead_email:'',preferred_channel:'WhatsApp',destination:choice?.ship.shipName||'Temporada brasileira 2026/2027',consent,consent_version:'v1',honeypot:trap,
@@ -36,12 +36,14 @@ export default function CruiseSeasonPage({info}:{info:AgencyDomainInfo}) {
    details:{origem:'Site / Temporada brasileira 2026/2027',navio:choice?.ship.shipName||'Quero ajuda para escolher',companhia:choice?.ship.lineName||'',periodo_desejado:prefs.month||'Flexível',porto_embarque:prefs.port||'Flexível',duracao:prefs.duration||'Flexível',preferencias:prefs.interests.join(', '),adultos:adults,criancas:ages.length,idades_criancas:ages.join(', '),data_exemplo:chosen?.date||'',roteiro_exemplo:chosen?.ports.join(' → ')||''}});
   } finally {sending.current=false;}};
  return <main className="cruise-season">
-  <nav className="cs-breadcrumb" aria-label="Você está aqui"><Link to={href('/')}>Início</Link><span>/</span><span>Temporada brasileira de cruzeiros</span></nav>
+  <nav className="cs-breadcrumb" aria-label="Você está aqui"><Link to={href('/')}>Início</Link><span>/</span><span>{assistantOnly ? "Encontre seu cruzeiro" : "Temporada brasileira de cruzeiros"}</span></nav>
+  {!assistantOnly && <>
   <header className="cs-intro"><p className="cs-kicker">Temporada brasileira 2026–2027</p><h1>Seu próximo destino<br/>começa a bordo.</h1><p>Conheça os oito navios, explore os roteiros e encontre a viagem que combina com você.</p><a className="cs-textlink" href="#cs-assistente">Quero ajuda para escolher →</a></header>
   <section aria-label="Os oito navios da temporada" className="cs-grid">{SEASON_SHIPS.map(ship=><article className="cs-card" key={ship.shipSlug}><Link to={href(cruiseShipPath(ship))} aria-label={`Conheça ${ship.shipName} e seus roteiros`}><img src={seasonCardPhoto(ship)} alt={`${ship.shipName} navegando`} loading="lazy"/><div><h2>{ship.shipName}</h2><p>{ship.lineName}</p><span className="cs-card-button">Conheça o navio e os roteiros <span aria-hidden="true">→</span></span></div></Link></article>)}</section>
   <p className="cs-credit">Imagens de divulgação: {Array.from(new Map(SEASON_SHIPS.map(s=>[s.lineName,s])).values()).map((s,i)=><span key={s.lineName}>{i>0?' · ':''}<a href={s.creditUrl} target="_blank" rel="noreferrer">{s.lineName}</a></span>)}.</p>
   <SeasonGalleries showShips={false} />
-  <section id="cs-assistente" className="cs-assistant" aria-labelledby="cs-assistant-title"><p className="cs-kicker">Encontre sua próxima viagem</p><h2 id="cs-assistant-title">Qual cruzeiro combina com você?</h2><p>Conte um pouco sobre sua viagem. Nós ajudamos a encontrar as melhores opções.</p>
+  </>}
+  <section id="cs-assistente" className="cs-assistant" aria-labelledby="cs-assistant-title"><p className="cs-kicker">Encontre sua próxima viagem</p>{assistantOnly ? <h1 id="cs-assistant-title">Qual cruzeiro combina com você?</h1> : <h2 id="cs-assistant-title">Qual cruzeiro combina com você?</h2>}<p>Conte um pouco sobre sua viagem. Nós ajudamos a encontrar as melhores opções.</p>
    <ol className="cs-progress" aria-label="Etapas">{steps.map((s,i)=><li key={s} aria-current={step===i?'step':undefined} className={i<=step?'is-active':''}><span>{i+1}</span>{s}</li>)}</ol>
    <div className="cs-step" key={step}>
     <h3 ref={heading} tabIndex={-1}>{['Quando você quer viajar?','De onde gostaria de embarcar?','Quantas noites tem em mente?','Quem vai com você?','O que mais importa nessa viagem?','Estas opções combinam com sua busca'][step]}</h3>
