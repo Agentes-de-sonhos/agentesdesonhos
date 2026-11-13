@@ -60,7 +60,8 @@
         var map = {
           "curtiviagens.com.br": C, "dricaviagens.com.br": D, "bardelliviagens.com.br": B,
           "omundoemcores.com.br": M, "destinoscomaju.com.br": J, "100limites.tur.br": L,
-          "paraisoviagens.com": P, "essyatur.com.br": E
+          "paraisoviagens.com": P, "essyatur.com.br": E,
+          "arenatravelgroup.com.br": { t: "Arena Travel Group", i: "/arena-travel-group/favicon.png" }
         };
         try {
           var h = location.hostname.toLowerCase();
@@ -71,7 +72,7 @@
           // The fallback title must already exist: assigning document.title
           // before its markup was parsed created a second <title> element.
           document.title = b.t;
-          var links = document.querySelectorAll('link[rel~="icon"]');
+          var links = document.querySelectorAll(b.i === '/arena-travel-group/favicon.png' ? 'link[rel~="icon"], link[rel="apple-touch-icon"], link[rel="mask-icon"]' : 'link[rel~="icon"]');
           for (var k = 0; k < links.length; k++) links[k].parentNode.removeChild(links[k]);
           var l = document.createElement("link");
           l.rel = "icon"; l.href = b.i;

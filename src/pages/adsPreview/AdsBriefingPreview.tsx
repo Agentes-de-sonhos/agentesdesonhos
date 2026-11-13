@@ -4,6 +4,7 @@ import { agencySiteHref } from "@/lib/agencyContextLink";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import { isTechnicalPreviewHost, isCompletePresentationHost, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
 import { AgencyPresentationPages } from "@/components/whitelabel/AgencyPresentationPages";
+import { resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 const CircuitTourPage = lazy(() => import("@/pages/whitelabel/CircuitTourPage"));
@@ -41,7 +42,7 @@ export default function AdsBriefingPreview() {
     ? isCompletePresentationHost(window.location.hostname)
     : isTechnicalPreviewHost(window.location.hostname);
   const [notice, setNotice] = useState(false);
-  useAgencyFavicon(allowed ? fixture?.info.logo_url : null);
+  useAgencyFavicon(allowed && fixture ? resolveAgencyFaviconUrl(fixture.info) : null);
 
   useEffect(() => {
     if (!allowed || !fixture) return;

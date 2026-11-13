@@ -67,6 +67,9 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
+  "arenatravelgroup.com.br": "/arena-travel-group/favicon.png",
+  "www.arenatravelgroup.com.br": "/arena-travel-group/favicon.png",
+  "briefing-23-v1.preview.local": "/arena-travel-group/favicon.png",
   /** Pin vermelho com globo e avião da 100 Limites (aba do navegador). */
   "100limites.tur.br": limitesFavicon.url,
   "www.100limites.tur.br": limitesFavicon.url,

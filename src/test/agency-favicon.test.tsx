@@ -38,6 +38,18 @@ describe("useAgencyFavicon", () => {
     expect(document.querySelector("#agency-favicon")).not.toBeNull();
   });
 
+  it("usa apenas a imagem Arena sem ícones concorrentes de toque", () => {
+    const touch = document.createElement("link");
+    touch.rel = "apple-touch-icon";
+    touch.href = "/apple-touch-icon.png";
+    document.head.appendChild(touch);
+    const { unmount } = renderHook(() => useAgencyFavicon("/arena-travel-group/favicon.png"));
+    expect(document.head.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')).toHaveLength(1);
+    expect(new URL(document.querySelector<HTMLLinkElement>("#agency-favicon")!.href).pathname).toBe("/arena-travel-group/favicon.png");
+    unmount();
+    expect(document.head.querySelector('link[rel="apple-touch-icon"]')).toBe(touch);
+  });
+
   it("restaura os ícones originais ao desmontar", () => {
     const { unmount } = renderHook(() => useAgencyFavicon("https://cdn.exemplo.com/logo.png"));
     unmount();

@@ -22,7 +22,7 @@ export function useAgencyFavicon(logoUrl?: string | null) {
     if (!logoUrl) return;
 
     const previousLinks = Array.from(
-      document.head.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]'),
+      document.head.querySelectorAll<HTMLLinkElement>(logoUrl === '/arena-travel-group/favicon.png' ? 'link[rel~="icon"], link[rel="apple-touch-icon"], link[rel="mask-icon"]' : 'link[rel~="icon"]'),
     ).map((link) => ({ link, nextSibling: link.nextSibling }));
 
     previousLinks.forEach(({ link }) => link.remove());
