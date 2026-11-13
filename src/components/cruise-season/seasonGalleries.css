@@ -30,3 +30,26 @@
 @media (min-width: 640px) { .csi-authority .csi-card { flex-basis: 45%; } }
 @media (min-width: 768px) { .csi-authority .csi-rail { gap: 1.25rem; } .csi-authority .csi-card { flex-basis: 30%; } }
 @media (min-width: 1024px) { .csi-authority .csi-card { flex-basis: 23.5%; } }
+.csi-rail { scrollbar-width: none; }
+.csi-rail::-webkit-scrollbar { display: none; }
+.csi-carousel { position: relative; }
+.csi-carousel > button { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid currentColor; border-radius: 50%; color: inherit; background: hsl(var(--background)); box-shadow: 0 3px 10px #0002; }
+.csi-carousel > .csi-prev { left: -22px; }
+.csi-carousel > .csi-next { right: -22px; }
+.csi-carousel > button:disabled { visibility: hidden; }
+.csi-all { display: inline-flex; align-items: center; gap: .75rem; border: 1px solid currentColor; border-radius: .5rem; padding: .8rem 1.2rem; margin-top: 1.5rem; font-weight: 600; }
+.csi .csi-itinerary { --brand-primary: #111; background: #fff; color: #111; border-color: #ddd; }
+.csi .csi-itinerary :is(a, h4, p, span, strong) { color: #111; }
+/* Override Arena's broad white-text rule only inside the white itinerary cards. */
+[data-ads-preview="briefing-23-v1"] #temporada-cruzeiros .csi .csi-itinerary :is(a, h4, p, span, strong) { color: #111 !important; }
+.csi-catalog { max-width: 1280px; margin: auto; padding: 2rem clamp(1rem,4vw,3rem) 4rem; }
+.csi-catalog h1 { font-size: clamp(2rem,4vw,3rem); font-weight: 600; line-height: 1.15; margin: 1rem 0; }
+.csi-filters { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); margin: 2rem 0 1rem; }
+.csi-filters label { display: grid; gap: .4rem; font-size: .85rem; font-weight: 600; }
+.csi-filters select { min-width: 0; width: 100%; border: 1px solid #aaa; border-radius: .5rem; padding: .75rem; background: #fff; color: #111; font-weight: 400; }
+.csi-results { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit,minmax(min(100%,260px),1fr)); padding: 0; list-style: none; margin: 1.5rem 0; }
+.csi-results .csi-card { min-width: 0; }
+.csi-results .csi-photo { aspect-ratio: 16/10; }
+.csi-catalog button { border: 1px solid currentColor; border-radius: .5rem; padding: .65rem 1rem; }
+@media(max-width: 767px) { .csi-carousel > .csi-prev { left: -10px; } .csi-carousel > .csi-next { right: -10px; } }
+.csi-authority .csi-carousel > button { background: hsl(var(--wl-navy)); color: hsl(var(--background)); border-color: hsl(var(--background) / .4); }

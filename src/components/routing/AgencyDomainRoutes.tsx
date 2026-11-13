@@ -47,6 +47,7 @@ const Limites100LegalPreviewPage = lazy(() => import("@/pages/whitelabel/Limites
 import { isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 const XcaretLandingPage = lazy(() => import("@/pages/whitelabel/XcaretLandingPage"));
 const CircuitTourPage = lazy(() => import("@/pages/whitelabel/CircuitTourPage"));
+const CruiseItinerariesPage = lazy(() => import("@/pages/whitelabel/CruiseItinerariesPage"));
 const CruiseSeasonPage = lazy(() => import("@/pages/whitelabel/CruiseSeasonPage"));
 const CruiseShipRoutePage = lazy(() => import("@/pages/whitelabel/CruiseShipRoutePage"));
 const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
@@ -282,6 +283,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {/* Página de navio (compartilhada por todas as agências; pedido entra no CRM do domínio). */}
             <Route path="/club-med-neve" element={<ClubMedSnowCollectionPage info={info} />} />
             <Route path="/club-med-neve/:slug" element={<ClubMedSnowResortPage info={info} />} />
+            <Route path="/cruzeiros/temporada-brasileira-2026-2027/roteiros" element={<CruiseItinerariesPage info={info} />} />
             <Route path="/cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
             <Route path="/cruzeiros/:line/:ship" element={<CruiseShipRoutePage info={info} />} />
           </Route>

@@ -9,6 +9,7 @@ export interface SeasonItinerary {
   groupId: string;
   variantIndex: number;
   nights: number;
+  region: string;
   ports: string[];
   months: string[];
 }
@@ -22,7 +23,7 @@ export function seasonItineraries(today = brazilToday(), ships = SEASON_SHIPS): 
         const dates = variant.sailings.filter(s => eligible.has(s)).map(s => s.date);
         if (!dates.length || variant.ports.length < 2 || variant.ports.some(port => !ship.routes.coordinates[port])) return [];
         return [{ id: `${ship.shipSlug}-${group.id}-${variantIndex}`, ship, groupId: group.id, variantIndex,
-          nights: group.n, ports: variant.ports, months: [...new Set(dates.map(d => d.slice(0, 7)))].sort() }];
+          nights: group.n, region: group.region, ports: variant.ports, months: [...new Set(dates.map(d => d.slice(0, 7)))].sort() }];
       }));
   });
 }
@@ -42,3 +43,5 @@ export function seasonItineraryPath(option: SeasonItinerary) {
 }
 
 export const seasonMonthLabel = (month: string) => new Date(`${month}-01T12:00:00Z`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+export const SEASON_ITINERARIES_PATH = '/cruzeiros/temporada-brasileira-2026-2027/roteiros';

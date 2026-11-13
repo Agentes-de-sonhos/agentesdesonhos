@@ -7,6 +7,7 @@ import { AgencyPresentationPages } from "@/components/whitelabel/AgencyPresentat
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
 
 const CircuitTourPage = lazy(() => import("@/pages/whitelabel/CircuitTourPage"));
+const CruiseItinerariesPage = lazy(() => import("@/pages/whitelabel/CruiseItinerariesPage"));
 const CruiseSeasonPage = lazy(() => import("@/pages/whitelabel/CruiseSeasonPage"));
 const CruiseShipRoutePage = lazy(() => import("@/pages/whitelabel/CruiseShipRoutePage"));
 const UniversalLandingPage = lazy(() => import("@/pages/whitelabel/UniversalLandingPage"));
@@ -142,7 +143,8 @@ export default function AdsBriefingPreview() {
     if (/^(circuitos|cruzeiros|disney|universal)(\/|$)/.test(subPath)) {
       body = <Routes>
         <Route path="circuitos/:slug" element={<CircuitTourPage info={info} />} />
-        <Route path="cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
+        <Route path="cruzeiros/temporada-brasileira-2026-2027/roteiros" element={<CruiseItinerariesPage info={info} />} />
+            <Route path="cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
         <Route path="cruzeiros/:line/:ship" element={<CruiseShipRoutePage info={info} />} />
         <Route path="universal" element={<UniversalLandingPage info={info} noindex />} />
         <Route path="disney" element={<DisneyLandingPage info={info} />} />
