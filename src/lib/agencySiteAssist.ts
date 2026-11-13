@@ -81,6 +81,7 @@ const DRICA_ASSIST: AgencyAssistConfig = {
 
 /** Hosts com atendimento programado (root e www da mesma agência). */
 const ASSIST_BY_HOST: Record<string, AgencyAssistConfig> = {
+  "arenatravelgroup.com.br": DRICA_ASSIST,
   "destinoscomaju.com.br": DESTINOS_ASSIST,
   "dricaviagens.com.br": DRICA_ASSIST,
   "drica-presentation.preview.local": DRICA_ASSIST,

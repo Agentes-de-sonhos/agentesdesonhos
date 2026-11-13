@@ -1,4 +1,5 @@
 # Architecture rules
+- Arena official hosts resolve a non-demo profile derived from the approved briefing through AgencyDomainRoutes; approved CSS is scoped to wl-arena, never to preview transport. Why: preserve presentation while keeping synthetic identities and submission blocks isolated.
 - Public quote attachment Storage reads use the boolean-only `public_quote_document_file_allowed` SECURITY DEFINER gate (exact file, explicitly public document, published parent), with no anonymous table SELECT; listing RPCs retain token/code/expiry validation. Why: repair signing for the already-published frontend without changing existing shared links or exposing private rows.
 - Academy shared ranking reads only the authenticated aggregate RPC `academy_ranking_summary`; raw progress, achievements and certificate rows remain owner/admin scoped. Why: ranking must not expose another user's certificate URLs or learning history.
 - Quote booking eligibility is computed by the shared agency server gate; admin status exposes plan eligibility separately from the literal premium label. Why: historical plans can qualify without changing subscriptions or caller/team checks.

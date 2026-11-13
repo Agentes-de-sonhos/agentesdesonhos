@@ -72,6 +72,7 @@ export type AgencySiteProfileKey =
   | "pristurBriefing22"
   | "shoppingBriefing25"
   | "arenaBriefing23"
+  | "arenaOfficial"
   | "innovatiBriefing24"
   /** Prévia Essyatur na estrutura da Curti (host sintético). */
   | "essyaCurtiPreview"
@@ -1198,6 +1199,8 @@ const ESSYA_CURATED: AgencySiteProfile = {
 };
 
 const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
+  "arenatravelgroup.com.br": "arenaOfficial",
+  "www.arenatravelgroup.com.br": "arenaOfficial",
 
   "100limites.tur.br": "editorialDmc",
   "www.100limites.tur.br": "editorialDmc",
@@ -1269,6 +1272,13 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,
   pristurBriefing22: PRISTUR_PREVIEW_PROFILE,
   arenaBriefing23: ARENA_PREVIEW_PROFILE,
+  arenaOfficial: {
+    ...ARENA_PREVIEW_PROFILE,
+    key: "arenaOfficial",
+    demo: false,
+    presentation: false,
+    seo: { title: "Arena Travel Group", description: "Viagens sob medida para famílias e grupos, resorts, Europa e experiências na neve com a Arena Travel Group." },
+  },
   innovatiBriefing24: INNOVATI_PREVIEW_PROFILE,
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,

@@ -196,6 +196,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
    * indexáveis conforme a configuração atual do tenant.
    */
   const { pathname } = useLocation();
+  const arena = resolveSiteProfile(info.hostname).key === "arenaOfficial";
   useNoindex(
     typeof window !== "undefined" &&
       shouldNoindexAgencyPath(window.location.hostname, pathname),
@@ -263,17 +264,17 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             <Route path="/xcaret" element={<XcaretLandingPage info={info} slots={MUNDO_EM_CORES_XCARET_SLOTS} textRewrites={MUNDO_EM_CORES_XCARET_REWRITES} cardImages={MUNDO_EM_CORES_XCARET_CARDS} />} />
           )}
           {isUniversalLandingEnabled(info.hostname) && (
-            <Route path="/universal" element={<UniversalLandingPage info={info} />} />
+            <Route path="/universal" element={arena ? <AgencySiteLayout info={info}><UniversalLandingPage info={info} embedded /></AgencySiteLayout> : <UniversalLandingPage info={info} />} />
           )}
           {/* Disney: liberada para todas as agências. */}
           {isDisneyPreviewRouteEnabled(info.hostname) && (
-            <Route path="/disney" element={<DisneyLandingPage info={info} />} />
+            <Route path="/disney" element={arena ? <AgencySiteLayout info={info}><DisneyLandingPage info={info} embedded /></AgencySiteLayout> : <DisneyLandingPage info={info} />} />
           )}
 
           {/* Página de oferta: mesmo chrome, porém SEM qualquer atalho para WhatsApp. */}
           <Route
             element={
-              <AgencySiteLayout info={info} noWhatsapp>
+              <AgencySiteLayout info={info} noWhatsapp={!arena}>
                 <Suspense fallback={<ContentFallback />}><Outlet /></Suspense>
               </AgencySiteLayout>
             }

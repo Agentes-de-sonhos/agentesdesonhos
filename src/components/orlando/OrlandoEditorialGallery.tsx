@@ -28,8 +28,8 @@ const PHOTOS = [
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
-  const clearPhotos = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br|curtiviagens\.com\.br|essyatur\.com\.br)$/i.test(hostname.replace(/\.$/, "")) || hostname === "briefing-20-v1.preview.local" || hostname === "essya-curti-v1.preview.local" || hostname === "briefing-23-v1.preview.local";
-  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local", "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local", "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local", "briefing-23-v1.preview.local"].includes(hostname.toLowerCase().replace(/\.$/, ""));
+  const clearPhotos = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br|curtiviagens\.com\.br|essyatur\.com\.br)$/i.test(hostname.replace(/\.$/, "")) || hostname === "briefing-20-v1.preview.local" || hostname === "essya-curti-v1.preview.local" || ["briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname);
+  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local", "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local", "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
 
   useEffect(() => {
     if (!allowed || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;

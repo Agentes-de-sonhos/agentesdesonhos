@@ -30,8 +30,11 @@ import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.pn
 import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.json";
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
 import curtiFavicon from "@/assets/whitelabel/favicon-curti-viagens-2.png.asset.json";
+import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
+  "arenatravelgroup.com.br": arenaLogo.url,
+  "www.arenatravelgroup.com.br": arenaLogo.url,
   "destinoscomaju.com.br": destinosComAJuLogo.url,
   "www.destinoscomaju.com.br": destinosComAJuLogo.url,
   /** Versão horizontal recortada e transparente do logotipo oficial. */
@@ -96,6 +99,8 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
  * Quando true, a apresentação NÃO repete o nome ao lado do logotipo.
  */
 const LOGO_WITH_WORDMARK_HOSTS = new Set([
+  "arenatravelgroup.com.br",
+  "www.arenatravelgroup.com.br",
   "paraisoviagens.com",
   "www.paraisoviagens.com",
   "faeviagens.com.br",

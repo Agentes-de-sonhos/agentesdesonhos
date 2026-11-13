@@ -137,7 +137,6 @@ import { canonicalAgencySiteRedirectUrl } from "@/lib/agencySlugRouting";
 const root = document.getElementById("root");
 
 const homeBrands: Record<string, { name: string; logo: string; logoBackground?: string }> = {
-  "arenatravelgroup.com.br": { name: "Arena Travel Group", logo: "/arena-travel-group/logo.jpeg" },
   "innovati.tur.br": { name: "Innovati Travel", logo: "/innovati-travel/logo.png", logoBackground: "#fff" },
 };
 const homeBrand = homeBrands[window.location.hostname.replace(/^www\./, "")];

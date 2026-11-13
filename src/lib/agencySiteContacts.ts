@@ -31,6 +31,8 @@ const PARAISO_CONTACTS: AgencySiteContacts = {
 };
 
 const CONTACTS_BY_HOSTNAME: Record<string, AgencySiteContacts> = {
+  "arenatravelgroup.com.br": { email: "arenatravel@arenatravelgroup.com.br", instagram: "https://www.instagram.com/arenatravelgroup/", instagramLabel: "@arenatravelgroup", phone: "5547992690807" },
+  "www.arenatravelgroup.com.br": { email: "arenatravel@arenatravelgroup.com.br", instagram: "https://www.instagram.com/arenatravelgroup/", instagramLabel: "@arenatravelgroup", phone: "5547992690807" },
   "paraisoviagens.com": PARAISO_CONTACTS,
   "www.paraisoviagens.com": PARAISO_CONTACTS,
   "bardelliviagens.com.br": BARDELLI_CONTACTS,

@@ -26,6 +26,8 @@ export type AgencySiteThemeKey =
   | "essyaEditorial";
 
 const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
+  "arenatravelgroup.com.br": "siteBaseEditorial",
+  "www.arenatravelgroup.com.br": "siteBaseEditorial",
   "100limites.tur.br": "travelEditorial",
   "www.100limites.tur.br": "travelEditorial",
   "paraisoviagens.com": "luxuryEditorial",
@@ -123,7 +125,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-mundo wl-bagagem-mundo"
         : h === "bardelli-mundo.preview.local"
         ? " wl-mundo wl-bardelli-mundo"
-        : h === "briefing-23-v1.preview.local"
+        : h === "briefing-23-v1.preview.local" || h === "arenatravelgroup.com.br" || h === "www.arenatravelgroup.com.br"
         ? " wl-mundo wl-arena"
         : h === "briefing-21-v1.preview.local" || h === "briefing-14-v1.preview.local" || h === "omundoemcores.com.br" || h === "www.omundoemcores.com.br"
         ? " wl-mundo"

@@ -926,7 +926,7 @@ export default function AgencySiteHome({
       case "authority": {
         const authority = profile.authority;
         if (!authority) return null;
-        const seasonEnabled = profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22";
+        const seasonEnabled = profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22";
         return (
           <section key={key} id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
             {seasonEnabled ? <CruiseSeasonAuthorityBlock container={container} /> : (
@@ -966,7 +966,7 @@ export default function AgencySiteHome({
             )}
             {authority.companies?.items.length ? (
               <div className={`${container} ${seasonEnabled ? "pt-6 pb-8 md:pt-10 md:pb-12" : "pb-16 md:pb-24"}`}>
-                {profile.key === "arenaBriefing23" ? (
+                {(profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") ? (
                   <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
                 ) : <>
                   {seasonEnabled && <p className="mb-3 text-center text-[15px] leading-relaxed text-background/80 md:text-base">Na {info.agency_name || "nossa agência"}, você encontra as principais companhias marítimas.</p>}
@@ -2092,7 +2092,7 @@ export default function AgencySiteHome({
         id="topo"
         className={
           editorial
-            ? (profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || profile.key === "arenaBriefing23" || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22")
+            ? (profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22")
               ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16 lg:h-[500px]"
               : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"

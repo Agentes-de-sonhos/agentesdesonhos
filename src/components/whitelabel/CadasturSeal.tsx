@@ -19,7 +19,7 @@ interface CadasturCertificate {
 export function cadasturCertificateFor(hostname?: string | null): CadasturCertificate | null {
   const h = hostname ?? "";
   // Arena: documento enviado pelo proprietário, mantido sem alterar a validade impressa.
-  if (h === "briefing-23-v1.preview.local") return {
+  if (["briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(h)) return {
     url: "/arena-travel-group/certificado-cadastur-2026-2028.webp",
     agency: "Arena Travel Group",
     validityLabel: "13/11/2026 a 13/11/2028",
