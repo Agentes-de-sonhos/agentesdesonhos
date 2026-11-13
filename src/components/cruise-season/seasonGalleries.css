@@ -58,3 +58,19 @@
 .csi-catalog :is(h1, .csi-catalog-intro p, nav) { color: #111; }
 .csi-catalog-intro { position: static; background: #fff; color: #111; padding: 1rem 0; }
 .csi-catalog .csi-filters { grid-template-columns: repeat(auto-fit,minmax(min(100%,180px),1fr)); }
+
+/* Ocean fills the SVG's side gutters while retaining the complete, uncropped map. */
+.csi-map { background: #eaf1f4; }
+.csi .csi-itinerary { transition: transform 300ms, box-shadow 300ms; }
+.csi .csi-itinerary:hover, .csi .csi-itinerary:focus-within { transform: translateY(-4px); box-shadow: 0 18px 30px #0003; }
+.csi-itinerary .csi-map { transition: transform 700ms; }
+.csi-itinerary:hover .csi-map, .csi-itinerary:focus-within .csi-map { transform: scale(1.05); }
+.csi-itinerary .csi-card-arrow { justify-content: flex-end; min-height: 20px; padding-top: .25rem; line-height: 1; }
+.csi-itinerary .csi-card-arrow svg { transition: transform 300ms; }
+.csi-itinerary:hover .csi-card-arrow svg, .csi-itinerary:focus-within .csi-card-arrow svg { transform: translateX(4px); }
+.csi-itinerary .csi-copy { padding-bottom: .85rem; }
+.csi-rail { padding-top: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .csi .csi-itinerary, .csi-itinerary .csi-map, .csi-itinerary .csi-card-arrow svg { transition: none; }
+  .csi .csi-itinerary:hover, .csi .csi-itinerary:focus-within, .csi-itinerary:hover .csi-map, .csi-itinerary:focus-within .csi-map, .csi-itinerary:hover .csi-card-arrow svg, .csi-itinerary:focus-within .csi-card-arrow svg { transform: none; }
+}

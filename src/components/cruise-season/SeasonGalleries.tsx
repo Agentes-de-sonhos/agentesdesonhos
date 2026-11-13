@@ -35,6 +35,6 @@ export function SeasonGalleries({ showShips = true }: { showShips?: boolean }) {
         <div className="csi-copy"><p className="csi-meta">{ship.lineName}</p><h4>{ship.shipName}</h4><span className="csi-link">Conheça o navio <ArrowRight size={16} aria-hidden="true" /></span></div>
       </a>
     </li>)}</Gallery><p className="csi-note">Imagens de divulgação: MSC Cruzeiros, Costa Cruzeiros e Corazul.</p></>}
-    {options.length > 0 && <><Gallery label="Roteiros para a sua próxima viagem">{options.map(option => <SeasonItineraryCard key={option.id} option={option} />)}</Gallery><p className="csi-note">Seleção aleatória de itinerários cadastrados. Mapas esquemáticos das escalas; não representam o trajeto de navegação. Datas, cabines e disponibilidade serão confirmadas pela agência.</p><a className="csi-all" href={agencySiteHref(SEASON_ITINERARIES_PATH)}>Ver todos os roteiros <ArrowRight size={18} aria-hidden="true" /></a></>}
+    {options.length > 0 && <><Gallery label="Roteiros para a sua próxima viagem">{options.map(option => <SeasonItineraryCard key={option.id} option={option} />)}</Gallery><p className="csi-note">Datas, cabines e disponibilidade serão confirmadas pela agência.</p><a className="csi-all" href={agencySiteHref(SEASON_ITINERARIES_PATH)}>Ver todos os roteiros <ArrowRight size={18} aria-hidden="true" /></a></>}
   </div>;
 }

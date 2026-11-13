@@ -11,7 +11,7 @@ export function SeasonItineraryCard({ option }: { option: SeasonItinerary }) {
         <h4>{option.nights} noites · {option.ports.slice(1, -1).join(' + ') || option.ports.at(-1)}</h4>
         <p className="csi-origin">Saída de {option.ports[0]}</p><p className="csi-ports">{option.ports.join(' → ')}</p>
         <p className="csi-months"><strong>Meses com saídas</strong><br />{option.months.map(seasonMonthLabel).join(' · ')}</p>
-        <span className="csi-link">Conhecer roteiro e pedir orçamento <ArrowRight size={16} aria-hidden="true" /></span>
+        <span className="csi-link csi-card-arrow" aria-hidden="true"><ArrowRight size={20} /></span>
       </div>
     </a>
   </li>;
