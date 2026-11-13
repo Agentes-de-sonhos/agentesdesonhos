@@ -17,6 +17,16 @@ beforeAll(() => {
 });
 afterEach(cleanup);
 describe('Brazilian cruise pages', () => {
+  it('opens a gallery link on its exact itinerary and retains it for the quote', () => {
+    const ship = ships.find(s => buildItineraryGroups(s.routes.feed.sailings, s.routes).some(g => g.variants.length > 1))!;
+    const group = buildItineraryGroups(ship.routes.feed.sailings, ship.routes).find(g => g.variants.length > 1)!;
+    window.history.replaceState({}, '', `/?itinerary=${group.id}&variant=1`);
+    render(<CruiseShipPage ship={ship} hostname="review.preview.local" />);
+    expect(document.querySelector('#itineraryMap')).toHaveAttribute('aria-label', `Mapa: ${group.region} · ${group.n} noites · ${group.variants[1].ports.slice(1, -1).join(' → ')}`);
+    expect(document.querySelector('select[name="roteiro"]')).toHaveValue(group.id);
+    expect(document.querySelector('select[name="ordem"]')).toHaveValue('1');
+    window.history.replaceState({}, '', '/');
+  });
   it('registers eight distinct routes and resolves every referenced photo', () => {
     expect(ships).toHaveLength(8);
     expect(new Set(ships.map(cruiseShipPath)).size).toBe(8);

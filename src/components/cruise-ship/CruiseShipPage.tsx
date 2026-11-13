@@ -105,16 +105,28 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
   /* ---------------- Itineraries ---------------- */
   const groups = useMemo(() => buildItineraryGroups(ship.routes.feed.sailings, ship.routes), [ship]);
   const announcements = useMemo(() => ship.routes.announcements ?? [], [ship]);
-  const [region, setRegion] = useState(ship.routes.regions[0]);
+  const entry = useMemo(() => {
+    const query = new URLSearchParams(window.location.search);
+    const selected = groups.find(g => g.id === query.get("itinerary"));
+    const index = Number(query.get("variant") ?? 0);
+    return { group: selected, variant: selected && Number.isInteger(index) && index >= 0 && index < selected.variants.length ? index : 0 };
+  }, [groups]);
+  useEffect(() => {
+    if (!entry.group || window.location.hash !== "#csp-roteiros") return;
+    const frame = requestAnimationFrame(() => document.getElementById("csp-roteiros")?.scrollIntoView({ block: "start" }));
+    return () => cancelAnimationFrame(frame);
+  }, [entry]);
+  const [region, setRegion] = useState(entry.group?.region ?? ship.routes.regions[0]);
   const nightsOptions = useMemo(() => [...new Set([...groups.filter((g) => g.region === region).map((g) => g.n), ...announcements.filter(a => a.region === region).map(a => a.n)])].sort((a, b) => a - b), [groups, announcements, region]);
-  const [nights, setNights] = useState<number>(nightsOptions[0]);
+  const [nights, setNights] = useState<number>(entry.group?.n ?? nightsOptions[0]);
   const combos = useMemo(() => groups.filter((g) => g.region === region && g.n === nights), [groups, region, nights]);
   const announcedCombos = useMemo(() => announcements.filter(a => a.region === region && a.n === nights), [announcements, region, nights]);
-  const [comboId, setComboId] = useState<string>(combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : ""));
-  const [order, setOrder] = useState(0);
-  useEffect(() => { setNights(nightsOptions[0]); }, [nightsOptions]);
-  useEffect(() => { setComboId(combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : "")); }, [combos, announcedCombos]);
-  useEffect(() => { setOrder(0); }, [comboId]);
+  const [comboId, setComboId] = useState<string>(entry.group?.id ?? combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : ""));
+  const [order, setOrder] = useState(entry.variant);
+  const previousCombo = useRef(comboId);
+  useEffect(() => { setNights(current => nightsOptions.includes(current) ? current : nightsOptions[0]); }, [nightsOptions]);
+  useEffect(() => { setComboId(current => combos.some(g => g.id === current) || announcedCombos.some(a => `announced:${a.id}` === current) ? current : combos[0]?.id ?? (announcedCombos[0] ? `announced:${announcedCombos[0].id}` : "")); }, [combos, announcedCombos]);
+  useEffect(() => { if (previousCombo.current !== comboId) setOrder(0); previousCombo.current = comboId; }, [comboId]);
   const group = groups.find((g) => g.id === comboId) ?? null;
   const announcement = announcements.find(a => `announced:${a.id}` === comboId);
   const variant = group?.variants[order] ?? group?.variants[0] ?? null;
@@ -206,8 +218,8 @@ export function CruiseShipPage({ ship, hostname }: { ship: CruiseShipContent; ho
     setTravelMonth(month); setTravelYear(year);
     setForm(f => ({ ...f, period: month && year ? year + "-" + month : "" }));
   };
-  const [routeChoice, setRouteChoice] = useState<string>("");
-  const [routeVariant, setRouteVariant] = useState<number | null>(null);
+  const [routeChoice, setRouteChoice] = useState<string>(entry.group?.id ?? "");
+  const [routeVariant, setRouteVariant] = useState<number | null>(entry.group ? entry.variant : null);
   const [routeDate, setRouteDate] = useState<string>("");
   const [honeypot, setHoneypot] = useState("");
   const inFlight = useRef(false);

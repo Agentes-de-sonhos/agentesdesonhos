@@ -1,6 +1,6 @@
 import { ArrowRight, Compass } from 'lucide-react';
 import { agencySiteHref } from '@/lib/agencyContextLink';
-import { cruiseShipPath } from '@/lib/cruiseShips';
+import { SeasonGalleries } from './SeasonGalleries';
 import { SEASON_PATH, SEASON_SHIPS } from '@/lib/cruiseShips/season';
 
 /** Home opt-in is owned by AgencySiteHome; all branding comes from the tenant. */
@@ -13,30 +13,6 @@ export function CruiseSeasonHomeTeaser({ container }: { container: string }) {
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)]">Temporada brasileira 2026–2027</p>
           <h2 id="cruise-home-title" className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl">Seu próximo destino<br/>começa a bordo.</h2>
           <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">Oito navios. Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC, Costa e Corazul para a temporada brasileira.</p>
-          <figure className="mt-6 min-w-0 md:hidden">
-            <ul
-              aria-label="Galeria dos oito navios"
-              tabIndex={0}
-              className="flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain pb-3"
-            >
-              {SEASON_SHIPS.map(ship => (
-                <li key={ship.shipSlug} className="w-[86%] shrink-0 snap-start">
-                  <a href={agencySiteHref(cruiseShipPath(ship))} className="block">
-                    <img
-                      src={ship.assets[ship.hero.image] || ship.hero.image}
-                      alt={ship.hero.alt}
-                      loading="lazy"
-                      className="aspect-[4/3] w-full rounded-lg object-cover"
-                    />
-                    <span className="mt-2 block font-semibold">{ship.shipName}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-            <figcaption className="mt-2 text-xs text-muted-foreground">
-              Imagens de divulgação de {Array.from(new Set(SEASON_SHIPS.map(ship => ship.lineName))).join(' · ')}
-            </figcaption>
-          </figure>
           <div className="mt-7 flex flex-col gap-3 md:flex-row md:flex-wrap">
             <a href={agencySiteHref(SEASON_PATH)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-primary)]">Ver os oito navios <ArrowRight className="h-4 w-4" aria-hidden="true"/></a>
             <a href={agencySiteHref(`${SEASON_PATH}#cs-assistente`)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:bg-background"><Compass className="h-4 w-4" aria-hidden="true"/>Qual cruzeiro combina com você?</a>
@@ -46,7 +22,7 @@ export function CruiseSeasonHomeTeaser({ container }: { container: string }) {
           <img src={hero.assets[hero.hero.image]} alt="MSC Virtuosa em navegação" loading="lazy" className="h-full w-full object-cover absolute inset-0"/>
           </div><figcaption className="bg-background px-4 py-3 text-xs text-muted-foreground">MSC Virtuosa · Imagem: MSC Cruzeiros / Divulgação</figcaption></figure>
       </div>
-      <nav aria-label="Navios da temporada brasileira" className="mt-6 hidden flex-wrap justify-center md:flex gap-x-5 gap-y-3">{SEASON_SHIPS.map(ship=><a key={ship.shipSlug} href={agencySiteHref(cruiseShipPath(ship))} className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-[var(--brand-primary)] hover:underline">{ship.shipName}</a>)}</nav>
+      <SeasonGalleries />
     </div>
   </section>;
 }

@@ -7,6 +7,7 @@ import { seasonCardPhoto } from '@/lib/cruiseShips/seasonCardPhotos';
 import { SEASON_SHIPS, INTERESTS, availableSailings, recommendSeason, type SeasonPreferences } from '@/lib/cruiseShips/season';
 import { validCruiseQuote } from '@/lib/cruiseShips/quoteRequest';
 import { useAgencySiteRequest } from '@/hooks/useAgencySiteRequest';
+import { SeasonGalleries } from '@/components/cruise-season/SeasonGalleries';
 import './CruiseSeasonPage.css';
 const steps = ['Quando viajar', 'Embarque', 'Duração', 'Viajantes', 'Preferências'];
 const initial: SeasonPreferences = { month:'', port:'', duration:'', interests:[] };
@@ -39,6 +40,7 @@ export default function CruiseSeasonPage({info}:{info:AgencyDomainInfo}) {
   <header className="cs-intro"><p className="cs-kicker">Temporada brasileira 2026–2027</p><h1>Seu próximo destino<br/>começa a bordo.</h1><p>Conheça os oito navios, explore os roteiros e encontre a viagem que combina com você.</p><a className="cs-textlink" href="#cs-assistente">Quero ajuda para escolher →</a></header>
   <section aria-label="Os oito navios da temporada" className="cs-grid">{SEASON_SHIPS.map(ship=><article className="cs-card" key={ship.shipSlug}><Link to={href(cruiseShipPath(ship))} aria-label={`Conheça ${ship.shipName} e seus roteiros`}><img src={seasonCardPhoto(ship)} alt={`${ship.shipName} navegando`} loading="lazy"/><div><h2>{ship.shipName}</h2><p>{ship.lineName}</p><span className="cs-card-button">Conheça o navio e os roteiros <span aria-hidden="true">→</span></span></div></Link></article>)}</section>
   <p className="cs-credit">Imagens de divulgação: {Array.from(new Map(SEASON_SHIPS.map(s=>[s.lineName,s])).values()).map((s,i)=><span key={s.lineName}>{i>0?' · ':''}<a href={s.creditUrl} target="_blank" rel="noreferrer">{s.lineName}</a></span>)}.</p>
+  <SeasonGalleries showShips={false} />
   <section id="cs-assistente" className="cs-assistant" aria-labelledby="cs-assistant-title"><p className="cs-kicker">Encontre sua próxima viagem</p><h2 id="cs-assistant-title">Qual cruzeiro combina com você?</h2><p>Conte um pouco sobre sua viagem. Nós ajudamos a encontrar as melhores opções.</p>
    <ol className="cs-progress" aria-label="Etapas">{steps.map((s,i)=><li key={s} aria-current={step===i?'step':undefined} className={i<=step?'is-active':''}><span>{i+1}</span>{s}</li>)}</ol>
    <div className="cs-step" key={step}>
