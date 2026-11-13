@@ -33,7 +33,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
           <p className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-background">
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--wl-red))]" aria-hidden="true" />Temporada brasileira 2026/2027
           </p>
-          <h2 id="cruise-home-title" className="mt-5 text-3xl font-semibold leading-tight text-background md:text-[2.4rem]">Seu próximo destino começa a bordo.<span className="mt-2 block">Viva a temporada brasileira 2026/2027.</span></h2>
+          <h2 id="cruise-home-title" className="mt-5 text-3xl font-semibold leading-tight text-background md:text-[2.4rem]">Viva a Temporada Brasileira 2026-2027</h2>
           <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-background/80 md:text-base">Oito navios. Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC, Costa e Corazul para a temporada brasileira.</p>
         </div>
 
