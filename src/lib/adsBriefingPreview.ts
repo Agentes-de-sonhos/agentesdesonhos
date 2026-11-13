@@ -2109,6 +2109,12 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
       text: (content?.text ?? item.text).replace(/ Imagem genérica de inspiração\./g, "") };
   }),
   about: { ...arenaMundoSource.about, ...arenaBaseline.about, media: undefined,
+    kicker: "QUEM SOMOS",
+    title: "A paixão por viajar. O cuidado de quem conhece.",
+    text: "A Arena Travel Group nasceu da paixão por viajar e compartilhar descobertas. Depois de encerrar sua carreira como atleta profissional de futebol, Rafael Souza trouxe para o turismo a experiência de ter morado em diferentes partes do mundo e viajado por mais de 40 países.\n\nNos últimos anos, essa vivência se transformou em ajuda próxima a amigos e familiares: indicar destinos, hotéis e passeios de acordo com o perfil e a curiosidade de cada um, despertando a vontade de explorar novas culturas. Em 2024, esse cuidado deu origem à Arena, em Florianópolis (SC).\n\nHoje, planejamos viagens sob medida para famílias e grupos de amigos, com destaque para resorts e all inclusive, Europa e experiências na neve. Combinamos conhecimento dos destinos, roteiros personalizados e atenção às condições de cada viagem, com orientação antes do embarque, acompanhamento durante a experiência e contato depois do retorno.\n\nQueremos que você encontre na Arena alguém de confiança para cuidar dos detalhes da sua próxima aventura. Vamos embarcar juntos nessa jornada?",
+    ownerName: "Rafael Souza",
+    tagline: "Mais de 40 países na bagagem. Novas histórias para viver com você.",
+    badge: { value: "Desde 2024", label: "Arena Travel Group" },
     images: [{ src: "/arena-travel-group/equipe-teleferico-neve.png", alt: "Equipe da Arena Travel Group em um teleférico na neve", position: "center" }], mural: undefined,
     visitedDestinations: undefined },
   featuredExperience: undefined,
