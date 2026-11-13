@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getClubMedSnowPhotos } from "@/lib/clubMedSnow/photos";
+import { snowDescription } from "@/lib/clubMedSnow/presentation";
 import { CLUB_MED_SNOW, getClubMedSnow } from "@/lib/clubMedSnow";
 
 describe("catálogo Club Med na neve", () => {
@@ -36,6 +37,12 @@ describe("catálogo Club Med na neve", () => {
       }
     }
     expect(getClubMedSnowPhotos("unknown")).toEqual([]);
+  });
+  it("explica os diferenciais ao viajante sem narrar a pesquisa ou atribuir opiniões não verificadas", () => {
+    for (const resort of CLUB_MED_SNOW) {
+      const copy = [...resort.whyChoose.map(reason => `${reason.title} ${reason.text}`), ...snowDescription(resort)].join(" ");
+      expect(copy, resort.slug).not.toMatch(/página|conteúdo|fonte consultada|extração|site (?:oficial|destaca|diz)|apresentação oficial|segundo as avaliações/i);
+    }
   });
   it("nunca promete neve garantida", () => {
     expect(JSON.stringify(CLUB_MED_SNOW).toLowerCase()).not.toMatch(/neve garantida(?! não)/);
