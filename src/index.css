@@ -1882,6 +1882,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
         }
         .wl-arena #novidades .wl-inspiration-cta svg { color: #fff !important; }
         .wl-arena #novidades .wl-newsletter-card img { object-position: center; }
+        .wl-arena #novidades .wl-newsletter-card :is(.wl-kicker, .wl-kicker svg, h2, h2 + p) { color: #000 !important; }
 
         /* Arena review: solid surfaces; image overlays retain their contrast. */
         .wl-arena :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) {
