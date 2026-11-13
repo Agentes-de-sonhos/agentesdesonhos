@@ -1,3 +1,4 @@
+import { ClubMedSnowHomeSection } from "@/components/whitelabel/ClubMedSnowHomeSection";
 import curtiCaribeCancun from "@/assets/whitelabel/curti-caribe-cancun.png.asset.json";
 import curtiFozIguacu from "@/assets/whitelabel/curti/curti-foz-iguacu.png.asset.json";
 import curtiCruzeiros from "@/assets/whitelabel/curti/curti-cruzeiros.png.asset.json";
@@ -1008,6 +1009,9 @@ export default function AgencySiteHome({
       }
 
       case "modules":
+        if (profile.clubMedSnowHome?.enabled) {
+          return <ClubMedSnowHomeSection key={key} config={profile.clubMedSnowHome} container={container} agencyName={name} />;
+        }
         {
         if (profile.featuredExperience?.enabled) {
           return <AgencyFeaturedExperienceSection key={key} config={profile.featuredExperience} container={container} />;

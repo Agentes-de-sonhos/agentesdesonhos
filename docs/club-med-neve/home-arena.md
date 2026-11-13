@@ -1,0 +1,9 @@
+# Chamada Club Med na home Arena
+
+Opt-in `clubMedSnowHome` no perfil da Arena: substitui o conteúdo da seção `modules` (Prioridades), primeira seção depois do banner, sem duplicar os cards e sem mudar outras agências. Reutiliza catálogo, contagem de resorts, países e mapas oficiais já cadastrados. Links internos abrem o catálogo e seus países; `#campanhas` permanece como âncora do menu.
+
+À esquerda, foto já autorizada do acervo Arena (`public/arena-travel-group/rafael-neve.webp`), com botão para abrir o player oficial. Vídeo selecionado: https://www.youtube.com/watch?v=C-4BqbfgBe0 — “Club Med - All-inclusive Ski Vacations”, canal verificado Club Med, duração exibida de 15 segundos. Metadados também confirmados no oEmbed público do YouTube. Não foi localizada versão curta em português na pesquisa; não se afirma que o áudio seja em português. A reprodução ficou em buffering neste navegador de inspeção; não foi possível conferir a trilha/narração. O player oficial é incorporado sob demanda via youtube-nocookie, com interface/legendas preferenciais em português e controles nativos. Não há download, edição nem hospedagem do vídeo por nós. Isso não equivale a declaração de licença comercial aberta. O visitante pode voltar à foto sem sair da página.
+
+Fontes oficiais de pesquisa do produto: https://www.clubmed.com.br/l/neve-by-club-med e https://www.clubmed.ch/l/ski-holiday-package?locale=en-CH . A segunda página aponta para outro vídeo oficial (`giWl4Wr7RtM`), de 1min43s; optou-se pelo clipe de 15s para a chamada inicial. Sem preços, promessa de neve, equipamentos ou inclusão irrestrita de serviços.
+
+Verificação: build concluído; cinco testes passaram, cobrindo vídeo apenas após clique, retorno à foto, links, mapas e opt-in da Arena. Prévia sincronizada pelo GitHub, sem geração/créditos Lovable e sem publicação em produção. O selo Cadastur e as alterações anteriores foram preservados.

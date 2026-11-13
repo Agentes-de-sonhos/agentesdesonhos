@@ -2071,12 +2071,19 @@ const arenaMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_C
 export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   ...arenaMundoSource,
   key: "arenaBriefing23",
+  clubMedSnowHome: {
+    enabled: true,
+    youtubeId: "C-4BqbfgBe0",
+    fallbackImage: "/arena-travel-group/rafael-neve.webp",
+    fallbackAlt: "Rafael Souza, da Arena Travel Group, na neve com seu snowboard",
+    fallbackCredit: "Foto: acervo Arena Travel Group.",
+  },
   alternateSurfaces: false,
   nav: ["/", "/#destinos", "/#campanhas", "/#sobre"].flatMap(to => {
     const item = arenaMundoSource.nav?.find(entry => entry.to === to);
     if (!item) return [];
     const children = item.children?.filter(child => !["/xcaret", "/#avaliacoes"].includes(child.to));
-    // Ênfase comercial em neve: Club Med na neve abre o menu Especialidades (home inalterada).
+    // Ênfase comercial em neve: catálogo e chamada na primeira seção da home.
     return [{ ...item, children: item.label === "Especialidades" && children ? [{ label: "Club Med na neve", to: "/club-med-neve" }, ...children] : children }];
   }),
   sections: { ...arenaMundoSource.sections, concierge: { enabled: false }, avaliacoes: { enabled: false } },
