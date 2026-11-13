@@ -179,14 +179,14 @@ function HotelsGallery() {
   );
 }
 
-export default function DisneyLandingPage({ info }: { info: AgencyDomainInfo }) {
+export default function DisneyLandingPage({ info, embedded = false }: { info: AgencyDomainInfo; embedded?: boolean }) {
   useAgencySiteThemeOnBody(info.hostname);
   const mundoSeo = !!mundoSeoPage(info.hostname, "/disney");
   useNoindex(!mundoSeo);
   useEffect(() => { if (mundoSeo) return; document.title = `Walt Disney World Resort | ${info.agency_name ?? "Ingressos e hotéis"}`; }, [info.agency_name, mundoSeo]);
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
-      <Header info={info} />
+      {!embedded && <Header info={info} />}
       <main>
         <Hero />
         <section id="ingressos" className="scroll-mt-24 wl-alt-gradient py-16 md:py-20"><div className={W}><DisneyTicketsConfigurator hostname={info.hostname} /></div></section>
@@ -275,7 +275,7 @@ export default function DisneyLandingPage({ info }: { info: AgencyDomainInfo }) 
           </div>
         </section>
       </main>
-      <AgencyFooter info={info} />
+      {!embedded && <AgencyFooter info={info} />}
     </div>
   );
 }

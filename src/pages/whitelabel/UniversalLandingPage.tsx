@@ -164,13 +164,13 @@ function Hero() {
   );
 }
 
-export default function UniversalLandingPage({ info, noindex = false }: { info: AgencyDomainInfo; noindex?: boolean }) {
+export default function UniversalLandingPage({ info, noindex = false, embedded = false }: { info: AgencyDomainInfo; noindex?: boolean; embedded?: boolean }) {
   useAgencySiteThemeOnBody(info.hostname);
   const agency = info.agency_name ?? "nossa equipe";
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
       {!noindex && !mundoSeoPage(info.hostname, "/universal") && <SEO exactTitle title={`Universal Orlando Resort | ${info.agency_name ?? "Ingressos e hotéis"}`} description="Ingressos, parques, hotéis, CityWalk e eventos especiais da Universal Orlando Resort com consultoria personalizada." image={UNIVERSAL_HERO[2].image} />}
-      <Header info={info} />
+      {!embedded && <Header info={info} />}
       <main>
         <Hero />
 
@@ -265,7 +265,7 @@ export default function UniversalLandingPage({ info, noindex = false }: { info: 
           </div>
         </section>
       </main>
-      <AgencyFooter info={info} />
+      {!embedded && <AgencyFooter info={info} />}
     </div>
   );
 }

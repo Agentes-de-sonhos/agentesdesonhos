@@ -146,8 +146,8 @@ export default function AdsBriefingPreview() {
         <Route path="cruzeiros/temporada-brasileira-2026-2027/roteiros" element={<CruiseItinerariesPage info={info} />} />
             <Route path="cruzeiros/temporada-brasileira-2026-2027" element={<CruiseSeasonPage info={info} />} />
         <Route path="cruzeiros/:line/:ship" element={<CruiseShipRoutePage info={info} />} />
-        <Route path="universal" element={<UniversalLandingPage info={info} noindex />} />
-        <Route path="disney" element={<DisneyLandingPage info={info} />} />
+        <Route path="universal" element={<UniversalLandingPage info={info} noindex embedded />} />
+        <Route path="disney" element={<DisneyLandingPage info={info} embedded />} />
         <Route path="universal/hoteis/:slug" element={<AgencyResortPage info={info} resolve={getUniversalHotelPage} backHref="/universal" kind="Hotel" />} />
         <Route path="disney/hoteis/:slug" element={<DisneyHotelPage info={info} />} />
       </Routes>;
