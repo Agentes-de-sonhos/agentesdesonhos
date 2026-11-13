@@ -64,7 +64,7 @@ export default function AdsBriefingPreview() {
         e.preventDefault();
         e.stopImmediatePropagation();
         const [path, hash] = href.split("#");
-        navigate(path.split("?")[0]);
+        navigate(path);
         window.setTimeout(() => {
           if (hash) document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
           else window.scrollTo(0, 0);

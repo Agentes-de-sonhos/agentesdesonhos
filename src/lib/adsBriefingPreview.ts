@@ -2074,9 +2074,6 @@ export const ARENA_PREVIEW_PROFILE: AgencySiteProfile = {
   clubMedSnowHome: {
     enabled: true,
     youtubeId: "C-4BqbfgBe0",
-    fallbackImage: "/arena-travel-group/rafael-neve.webp",
-    fallbackAlt: "Rafael Souza, da Arena Travel Group, na neve com seu snowboard",
-    fallbackCredit: "Foto: acervo Arena Travel Group.",
   },
   alternateSurfaces: false,
   nav: ["/", "/#destinos", "/#campanhas", "/#sobre"].flatMap(to => {

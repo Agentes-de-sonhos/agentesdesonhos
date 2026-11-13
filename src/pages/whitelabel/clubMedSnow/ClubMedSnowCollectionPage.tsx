@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Mountain, Snowflake } from "lucide-react";
 import { CLUB_MED_SNOW, CLUB_MED_SNOW_BASE, groupByCountry, type ClubMedSnowResort } from "@/lib/clubMedSnow";
 import { getClubMedSnowPhotos } from "@/lib/clubMedSnow/photos";
@@ -36,10 +37,17 @@ function ResortCard({ r }: { r: ClubMedSnowResort }) {
 
 export default function ClubMedSnowCollectionPage({ info }: { info: AgencyDomainInfo }) {
   const groups = groupByCountry();
-  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCountries = [...new Set(searchParams.getAll("pais"))].filter((key) => groups.some((group) => group.key === key));
+  const setSelectedCountries = (next: string[]) => setSearchParams((current) => {
+    const updated = new URLSearchParams(current);
+    updated.delete("pais");
+    next.forEach((country) => updated.append("pais", country));
+    return updated;
+  }, { replace: true, preventScrollReset: true });
   const visibleGroups = selectedCountries.length ? groups.filter((g) => selectedCountries.includes(g.key)) : groups;
   const visibleCount = visibleGroups.reduce((total, g) => total + g.items.length, 0);
-  const toggleCountry = (key: string) => setSelectedCountries((current) => current.includes(key) ? current.filter((x) => x !== key) : [...current, key]);
+  const toggleCountry = (key: string) => setSelectedCountries(selectedCountries.includes(key) ? selectedCountries.filter((x) => x !== key) : [...selectedCountries, key]);
   useEffect(() => { document.title = `Club Med na neve · ${info.agency_name ?? "Viagens"}`; }, [info.agency_name]);
   return (
     <div className="bg-background px-4 py-12 md:py-16">

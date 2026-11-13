@@ -1,3 +1,4 @@
+import { MemoryRouter } from "react-router-dom";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import ClubMedSnowCollectionPage from "@/pages/whitelabel/clubMedSnow/ClubMedSnowCollectionPage";
@@ -10,7 +11,7 @@ const info = { agency_name: "Arena Travel Group", hostname: "preview.local" } as
 
 describe("filtro de países do catálogo Club Med", () => {
   it("filtra, combina países, desmarca e restaura o catálogo inteiro", () => {
-    render(<ClubMedSnowCollectionPage info={info} />);
+    render(<MemoryRouter><ClubMedSnowCollectionPage info={info} /></MemoryRouter>);
     expect(screen.getByRole("button", { name: "França" })).toHaveAttribute("data-preview-local", "true");
     expect(screen.getByRole("button", { name: "Todos os países" })).toHaveAttribute("data-preview-local", "true");
     expect(screen.getByRole("heading", { name: "Itália" })).toBeInTheDocument();
@@ -28,13 +29,25 @@ describe("filtro de países do catálogo Club Med", () => {
     expect(screen.getByRole("status")).toHaveTextContent("23 opções de hospedagem em todos os países");
     expect(screen.getByRole("heading", { name: "Itália" })).toBeInTheDocument();
   });
+  it("abre somente o país indicado no link da home e permite limpar o filtro", () => {
+    render(<MemoryRouter initialEntries={["/club-med-neve?pais=japao&agency_host=preview.local"]}><ClubMedSnowCollectionPage info={info} /></MemoryRouter>);
+    expect(screen.getByRole("status")).toHaveTextContent("4 opções de hospedagem em Japão");
+    expect(screen.queryByRole("heading", { name: "França" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Japão" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Todos os países" }));
+    expect(screen.getByRole("status")).toHaveTextContent("23 opções de hospedagem em todos os países");
+  });
+  it("ignora país inválido na URL", () => {
+    render(<MemoryRouter initialEntries={["/club-med-neve?pais=desconhecido"]}><ClubMedSnowCollectionPage info={info} /></MemoryRouter>);
+    expect(screen.getByRole("status")).toHaveTextContent("23 opções de hospedagem em todos os países");
+  });
   it("renderiza capa oficial para todas as 23 opções", () => {
-    render(<ClubMedSnowCollectionPage info={info} />);
+    render(<MemoryRouter><ClubMedSnowCollectionPage info={info} /></MemoryRouter>);
     const covers = screen.getAllByRole("img").filter((img) => img.getAttribute("src")?.includes("production.media.dcx.clubmed"));
     expect(covers).toHaveLength(23);
   });
   it("não exibe a nota Google nos cards mesmo quando disponível", () => {
-    render(<ClubMedSnowCollectionPage info={info} />);
+    render(<MemoryRouter><ClubMedSnowCollectionPage info={info} /></MemoryRouter>);
     expect(screen.queryByText(/Google 4[.,]8/)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Club Med Pragelato Sestriere/ })).toHaveAttribute("href", "/club-med-neve/pragelato-sestriere");
   });
