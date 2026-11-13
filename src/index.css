@@ -1867,23 +1867,10 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
           object-position: 75% center;
         }
         @media (max-width: 767px) {
-          .wl-arena #topo {
-            background: hsl(var(--wl-navy)); padding-bottom: 2.5rem !important;
-          }
-          .wl-arena #topo > .absolute {
-            position: relative; height: 260px;
-          }
-          .wl-arena #topo > .absolute > [aria-hidden] {
-            display: none;
-          }
-          .wl-arena #topo > .relative {
-            padding-top: 24px; padding-bottom: 12px;
-          }
           .wl-arena #topo > .relative > .relative {
             width: 100%; max-width: none;
           }
           .wl-arena #topo h1 { -webkit-line-clamp: unset; }
-          .wl-arena #cotacao { margin-top: 0 !important; }
         }
 
         /* Arena #novidades: foto do Rafael com rosto visível; botão preto, texto e seta brancos. */
