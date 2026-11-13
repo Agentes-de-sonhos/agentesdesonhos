@@ -15,8 +15,7 @@ export function SeasonItineraryCard({ option }: { option: SeasonItinerary }) {
       <div className="csi-copy"><p className="csi-meta">{option.ship.shipName} · {option.ship.lineName}</p>
         <h4>{option.nights} noites · {option.ports.slice(1, -1).join(' + ') || option.ports.at(-1)}</h4>
         <p className="csi-origin">Saída de {option.ports[0]}</p><p className="csi-ports">{option.ports.map((port, index) => <span key={`${index}-${port}`}>{index > 0 && <ArrowRight className="csi-port-arrow" size={14} strokeWidth={3} aria-hidden="true" />}{port}</span>)}</p>
-        <div className="csi-months"><strong>Meses com saídas</strong><div className="csi-month-badges">{option.months.map(month => <time key={month} dateTime={month} className="csi-month-badge" title={seasonMonthLabel(month)} aria-label={seasonMonthLabel(month)}>{shortMonth(month)}</time>)}</div></div>
-        <span className="csi-link csi-card-arrow" aria-hidden="true"><ArrowRight size={20} /></span>
+        <div className="csi-months"><strong>Meses com saídas</strong><div className="csi-month-row"><div className="csi-month-badges">{option.months.map(month => <time key={month} dateTime={month} className="csi-month-badge" title={seasonMonthLabel(month)} aria-label={seasonMonthLabel(month)}>{shortMonth(month)}</time>)}</div><span className="csi-link csi-card-arrow" aria-hidden="true"><ArrowRight size={20} /></span></div></div>
       </div>
     </a>
   </li>;

@@ -83,10 +83,14 @@
 .csi-gallery-footer .csi-all { flex-shrink: 0; margin-top: 0; }
 @media(max-width: 639px) { .csi-gallery-footer { flex-wrap: wrap; } .csi-gallery-footer .csi-note { flex-basis: 100%; } .csi-gallery-footer .csi-all { margin-left: auto; } }
 
-/* Let each itinerary end just after its own content instead of stretching to the tallest card. */
-.csi-rail:has(.csi-itinerary), .csi-results { align-items: flex-start; }
-.csi .csi-itinerary { align-self: flex-start; }
-.csi-itinerary .csi-card-arrow { margin-top: .5rem; padding-top: 0; }
+/* Cards share the height of the longest itinerary, without a separate arrow row. */
+.csi-rail:has(.csi-itinerary), .csi-results { align-items: stretch; }
+.csi .csi-itinerary { align-self: stretch; }
+.csi-results { grid-auto-rows: 1fr; }
+.csi-itinerary .csi-months { margin-top: auto; padding-top: .4rem; }
+.csi-month-row { display: flex; align-items: flex-end; gap: .75rem; }
+.csi-month-row .csi-month-badges { flex: 1; min-width: 0; }
+.csi-month-row .csi-card-arrow { flex: 0 0 20px; margin: 0; padding: 0; align-self: flex-end; }
 
 /* Lift only the availability note; keep the approved button placement. */
 .csi-gallery-footer .csi-note { align-self: flex-start; margin-top: -.5rem; }
