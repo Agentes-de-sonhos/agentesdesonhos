@@ -926,7 +926,10 @@ export default function AgencySiteHome({
       case "authority": {
         const authority = profile.authority;
         if (!authority) return null;
-        const seasonEnabled = profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22";
+        // Curti: set to false to restore the original authority content below.
+        // The original profile (text, videos and companies) stays intact in standby.
+        const curtiSeasonEnabled = true;
+        const seasonEnabled = (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22";
         return (
           <section key={key} id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
             {seasonEnabled ? <CruiseSeasonAuthorityBlock container={container} /> : (
