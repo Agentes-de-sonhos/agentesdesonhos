@@ -1,0 +1,59 @@
+{
+  "gmail_message_id": "1a1e014ead948893",
+  "items": [
+    {
+      "slug": "secrets-the-vine-cancun-novembro-2026",
+      "status": "artwork_reviewed",
+      "source": "WhatsApp Image 2026-11-14 at 10.18.31.jpeg"
+    },
+    {
+      "slug": "rede-happy-hoteis-nordeste-brasilia-novembro-2026",
+      "status": "pending_clarification",
+      "hotels": [
+        {
+          "name": "Happy Hotel Manaíra",
+          "source": "WhatsApp Image 2026-11-15 at 11.48.48.jpeg",
+          "installments": 15,
+          "payment": 176,
+          "computed_total": 2640,
+          "stated_total": 2653
+        },
+        {
+          "name": "Happy Hotel Pajuçara",
+          "source": "WhatsApp Image 2026-11-15 at 11.48.46.jpeg",
+          "installments": 15,
+          "payment": 211,
+          "computed_total": 3165,
+          "stated_total": 3175
+        },
+        {
+          "name": "Happy Ponta Negra Express",
+          "source": "WhatsApp Image 2026-11-15 at 11.45.17.jpeg",
+          "installments": 15,
+          "payment": 154,
+          "computed_total": 2310,
+          "stated_total": 2322
+        },
+        {
+          "name": "Happy Hotel Ancoradouro",
+          "source": "WhatsApp Image 2026-11-15 at 11.44.43.jpeg",
+          "installments": 15,
+          "payment": 105,
+          "computed_total": 1575,
+          "stated_total": 1589,
+          "printed_departure": "23/02/20267"
+        }
+      ],
+      "additional_hotels": [
+        {
+          "name": "Happy Hotel Brisa do Mar",
+          "price": "Valores sob consulta"
+        },
+        {
+          "name": "Happy Hotel Garvey",
+          "price": "Valores sob consulta"
+        }
+      ]
+    }
+  ]
+}
