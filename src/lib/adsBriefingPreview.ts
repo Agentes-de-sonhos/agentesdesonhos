@@ -996,12 +996,18 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
   featuredExperience: undefined,
   nav: [
     { label: "Início", to: "/" },
-    { label: "Sobre", to: "/#sobre" },
     { label: "Destinos", to: "/#destinos" },
-    { label: "Parques Orlando", to: "/ingressos-orlando" },
-    { label: "Cruzeiros", to: "/#autoridade" },
-    { label: "Resorts Brasil", to: "/#resorts" },
+    { label: "Especialidades", to: "/#autoridade", children: [
+      { label: "Parques Orlando", to: "/ingressos-orlando" },
+      { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
+      { label: "Resorts Brasil", to: "/#resorts" },
+    ] },
     { label: "Blog", to: "/blog" },
+    { label: "Sobre", to: "/#sobre", children: [
+      { label: "Quem Somos", to: "/#sobre" },
+      { label: "Avaliações do Google", to: "/#avaliacoes" },
+      { label: "Dúvidas Frequentes", to: "/#faq" },
+    ] },
   ],
   sections: {
     // Ordem pedida por Fernando (02/11/2026).
