@@ -9,6 +9,7 @@ import dricaPrague from "@/assets/presentation/drica/prague-city.jpg.asset.json"
 import capitaisItaliaHero from "@/assets/circuits/capitais-italia-hero.jpg";
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
+import { CurtiGtaInsuranceBanner } from "@/components/whitelabel/CurtiGtaInsuranceBanner";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { useAgencyResortCuration } from "@/lib/resortCuration";
 import { AgencySportsEventsSection } from "@/components/whitelabel/AgencySportsEventsSection";
@@ -985,6 +986,9 @@ export default function AgencySiteHome({
               </div>
             ) : null}
             {seasonEnabled && <CruiseSeasonHelp container={container} />}
+            {(profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20") && (
+              <CurtiGtaInsuranceBanner container={container} onQuote={() => openRequest("seguro")} />
+            )}
           </section>
         );
       }
