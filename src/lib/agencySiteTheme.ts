@@ -56,6 +56,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-23-v1.preview.local": "siteBaseEditorial",
   "briefing-24-v1.preview.local": "siteBaseEditorial",
   "briefing-25-v1.preview.local": "siteBaseEditorial",
+  "shoppingviagens.com.br": "siteBaseEditorial",
+  "www.shoppingviagens.com.br": "siteBaseEditorial",
   "essya-curti-v1.preview.local": "siteBaseEditorial",
   "drica-presentation.preview.local": "siteBaseEditorial",
   "dricaviagens.com.br": "siteBaseEditorial",
@@ -119,7 +121,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-drica"
         : h === "briefing-22-v1.preview.local"
         ? " wl-mundo wl-pristur-mundo"
-        : h === "briefing-25-v1.preview.local"
+        : h === "briefing-25-v1.preview.local" || h === "shoppingviagens.com.br" || h === "www.shoppingviagens.com.br"
         ? " wl-mundo wl-shopping-mundo"
         : h === "briefing-24-v1.preview.local" || h === "innovati.tur.br" || h === "www.innovati.tur.br"
         ? " wl-mundo wl-innovati-mundo"

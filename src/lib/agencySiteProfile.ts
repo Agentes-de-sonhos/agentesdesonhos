@@ -71,6 +71,7 @@ export type AgencySiteProfileKey =
   | "karibuBriefing21"
   | "pristurBriefing22"
   | "shoppingBriefing25"
+  | "shoppingOfficial"
   | "arenaBriefing23"
   | "arenaOfficial"
   | "innovatiBriefing24"
@@ -1244,6 +1245,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "innovati.tur.br": "innovatiOfficial",
   "www.innovati.tur.br": "innovatiOfficial",
   "briefing-25-v1.preview.local": "shoppingBriefing25",
+  "shoppingviagens.com.br": "shoppingOfficial",
+  "www.shoppingviagens.com.br": "shoppingOfficial",
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
   "dricaviagens.com.br": "dricaOfficial",
   "www.dricaviagens.com.br": "dricaOfficial",
@@ -1291,6 +1294,13 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
+  shoppingOfficial: {
+    ...SHOPPING_PREVIEW_PROFILE,
+    key: "shoppingOfficial",
+    demo: false,
+    presentation: false,
+    seo: { title: "Shopping Viagens", description: "Viagens sob medida desde 2002: cruzeiros, Itália, resorts no Nordeste, Caribe e Estados Unidos com a Shopping Viagens." },
+  },
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
   essyaOfficial: ESSYA_OFFICIAL_PROFILE,
 };
