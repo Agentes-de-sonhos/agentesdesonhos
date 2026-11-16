@@ -74,6 +74,7 @@ export type AgencySiteProfileKey =
   | "arenaBriefing23"
   | "arenaOfficial"
   | "innovatiBriefing24"
+  | "innovatiOfficial"
   /** Prévia Essyatur na estrutura da Curti (host sintético). */
   | "essyaCurtiPreview"
   /** Essyatur — site oficial em essyatur.com.br (estrutura da Curti). */
@@ -1240,6 +1241,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-22-v1.preview.local": "pristurBriefing22",
   "briefing-23-v1.preview.local": "arenaBriefing23",
   "briefing-24-v1.preview.local": "innovatiBriefing24",
+  "innovati.tur.br": "innovatiOfficial",
+  "www.innovati.tur.br": "innovatiOfficial",
   "briefing-25-v1.preview.local": "shoppingBriefing25",
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
   "dricaviagens.com.br": "dricaOfficial",
@@ -1280,6 +1283,13 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     seo: { title: "Arena Travel Group", description: "Viagens sob medida para famílias e grupos, resorts, Europa e experiências na neve com a Arena Travel Group." },
   },
   innovatiBriefing24: INNOVATI_PREVIEW_PROFILE,
+  innovatiOfficial: {
+    ...INNOVATI_PREVIEW_PROFILE,
+    key: "innovatiOfficial",
+    demo: false,
+    presentation: false,
+    seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
+  },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
   essyaOfficial: ESSYA_OFFICIAL_PROFILE,

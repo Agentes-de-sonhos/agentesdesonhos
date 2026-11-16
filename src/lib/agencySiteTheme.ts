@@ -28,6 +28,8 @@ export type AgencySiteThemeKey =
 const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "arenatravelgroup.com.br": "siteBaseEditorial",
   "www.arenatravelgroup.com.br": "siteBaseEditorial",
+  "innovati.tur.br": "siteBaseEditorial",
+  "www.innovati.tur.br": "siteBaseEditorial",
   "100limites.tur.br": "travelEditorial",
   "www.100limites.tur.br": "travelEditorial",
   "paraisoviagens.com": "luxuryEditorial",
@@ -119,7 +121,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-mundo wl-pristur-mundo"
         : h === "briefing-25-v1.preview.local"
         ? " wl-mundo wl-shopping-mundo"
-        : h === "briefing-24-v1.preview.local"
+        : h === "briefing-24-v1.preview.local" || h === "innovati.tur.br" || h === "www.innovati.tur.br"
         ? " wl-mundo wl-innovati-mundo"
         : h === "briefing-19-v1.preview.local"
         ? " wl-mundo wl-bagagem-mundo"
