@@ -16,7 +16,7 @@
     },
     {
       "slug": "rede-happy-hoteis-nordeste-brasilia-novembro-2026",
-      "status": "ready_to_publish",
+      "status": "completed",
       "hotels": [
         {
           "name": "Happy Hotel Manaíra",
@@ -29,7 +29,17 @@
           "confirmed_departure": "2027-02-21",
           "slug": "happy-hotel-manaira-novembro-2026",
           "approved_total": 2640,
-          "status": "ready_to_publish"
+          "status": "completed",
+          "asset_commit": "09330ab6fa63eebd8dd4f1d094103d0ae9a407da",
+          "verified_public_host": "omundoemcores.com.br",
+          "verified_channels": [
+            "novembro"
+          ],
+          "public_image_http": 200,
+          "public_image_matches_reviewed_webp": true,
+          "published_at": "2026-11-16 15:18:18.410109+00",
+          "expires_at": "2026-11-23 15:18:18.410109+00",
+          "public_url": "https://omundoemcores.com.br/ofertas/happy-hotel-manaira-novembro-2026"
         },
         {
           "name": "Happy Hotel Pajuçara",
@@ -42,7 +52,17 @@
           "confirmed_departure": "2027-02-22",
           "slug": "happy-hotel-pajucara-novembro-2026",
           "approved_total": 3165,
-          "status": "ready_to_publish"
+          "status": "completed",
+          "asset_commit": "09330ab6fa63eebd8dd4f1d094103d0ae9a407da",
+          "verified_public_host": "omundoemcores.com.br",
+          "verified_channels": [
+            "novembro"
+          ],
+          "public_image_http": 200,
+          "public_image_matches_reviewed_webp": true,
+          "published_at": "2026-11-16 15:18:18.410109+00",
+          "expires_at": "2026-11-23 15:18:18.410109+00",
+          "public_url": "https://omundoemcores.com.br/ofertas/happy-hotel-pajucara-novembro-2026"
         },
         {
           "name": "Happy Ponta Negra Express",
@@ -55,7 +75,17 @@
           "confirmed_departure": "2027-02-20",
           "slug": "happy-ponta-negra-express-novembro-2026",
           "approved_total": 2310,
-          "status": "ready_to_publish"
+          "status": "completed",
+          "asset_commit": "09330ab6fa63eebd8dd4f1d094103d0ae9a407da",
+          "verified_public_host": "omundoemcores.com.br",
+          "verified_channels": [
+            "novembro"
+          ],
+          "public_image_http": 200,
+          "public_image_matches_reviewed_webp": true,
+          "published_at": "2026-11-16 15:18:18.410109+00",
+          "expires_at": "2026-11-23 15:18:18.410109+00",
+          "public_url": "https://omundoemcores.com.br/ofertas/happy-ponta-negra-express-novembro-2026"
         },
         {
           "name": "Happy Hotel Ancoradouro",
@@ -68,7 +98,17 @@
           "confirmed_departure": "2027-02-23",
           "slug": "happy-hotel-ancoradouro-novembro-2026",
           "approved_total": 1575,
-          "status": "ready_to_publish"
+          "status": "completed",
+          "asset_commit": "09330ab6fa63eebd8dd4f1d094103d0ae9a407da",
+          "verified_public_host": "omundoemcores.com.br",
+          "verified_channels": [
+            "novembro"
+          ],
+          "public_image_http": 200,
+          "public_image_matches_reviewed_webp": true,
+          "published_at": "2026-11-16 15:18:18.410109+00",
+          "expires_at": "2026-11-23 15:18:18.410109+00",
+          "public_url": "https://omundoemcores.com.br/ofertas/happy-hotel-ancoradouro-novembro-2026"
         }
       ],
       "additional_hotels": [
@@ -104,8 +144,11 @@
       "stages": [
         "processing",
         "artwork_reviewed",
-        "ready_to_publish"
-      ]
+        "ready_to_publish",
+        "completed"
+      ],
+      "completed_scope": "Quatro lâminas originais Happy autorizadas pelo proprietário; hotéis adicionais sem lâmina não publicados.",
+      "publication_script": "docs/operations/2026-11-16-mundo-happy.sql"
     }
   ]
 }
