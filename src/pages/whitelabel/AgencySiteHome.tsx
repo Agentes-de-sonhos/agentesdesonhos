@@ -932,7 +932,8 @@ export default function AgencySiteHome({
         const curtiSeasonEnabled = true;
         const seasonEnabled = (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || profile.key === "karibuBriefing21" || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || profile.key === "bardelliMundoPreview" || profile.key === "bagagemNaMaoBriefing19" || profile.key === "innovatiBriefing24" || profile.key === "shoppingBriefing25" || profile.key === "pristurBriefing22";
         return (
-          <section key={key} id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
+          <Fragment key={key}>
+          <section id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
             {seasonEnabled ? <CruiseSeasonAuthorityBlock container={container} /> : (
             <div className={`${container} grid items-center gap-x-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-x-16 md:py-24`}>
               <div className="order-2 mt-8 md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:mt-0">
@@ -986,10 +987,13 @@ export default function AgencySiteHome({
               </div>
             ) : null}
             {seasonEnabled && <CruiseSeasonHelp container={container} />}
-            {(profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20") && (
-              <CurtiGtaInsuranceBanner container={container} onQuote={() => openRequest("seguro")} />
-            )}
           </section>
+          {(profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20") && (
+            <section aria-label="Seguro Viagem GTA" className="bg-background py-10 md:py-14">
+              <CurtiGtaInsuranceBanner container={container} />
+            </section>
+          )}
+          </Fragment>
         );
       }
 
