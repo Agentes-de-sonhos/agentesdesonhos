@@ -24,7 +24,9 @@
           "installments": 15,
           "payment": 176,
           "computed_total": 2640,
-          "stated_total": 2653
+          "stated_total": 2653,
+          "printed_departure": "21/02/2027",
+          "confirmed_departure": "2027-02-21"
         },
         {
           "name": "Happy Hotel Pajuçara",
@@ -32,7 +34,9 @@
           "installments": 15,
           "payment": 211,
           "computed_total": 3165,
-          "stated_total": 3175
+          "stated_total": 3175,
+          "printed_departure": "22/02/2027",
+          "confirmed_departure": "2027-02-22"
         },
         {
           "name": "Happy Ponta Negra Express",
@@ -40,7 +44,9 @@
           "installments": 15,
           "payment": 154,
           "computed_total": 2310,
-          "stated_total": 2322
+          "stated_total": 2322,
+          "printed_departure": "20/02/20267",
+          "confirmed_departure": "2027-02-20"
         },
         {
           "name": "Happy Hotel Ancoradouro",
@@ -49,7 +55,8 @@
           "payment": 105,
           "computed_total": 1575,
           "stated_total": 1589,
-          "printed_departure": "23/02/20267"
+          "printed_departure": "23/02/20267",
+          "confirmed_departure": "2027-02-23"
         }
       ],
       "additional_hotels": [
@@ -61,7 +68,13 @@
           "name": "Happy Hotel Garvey",
           "price": "Valores sob consulta"
         }
-      ]
+      ],
+      "departure_year_confirmation": {
+        "year": 2027,
+        "confirmed_by": "agency_owner",
+        "confirmed_on": "2026-11-16"
+      },
+      "pending_reason": "Confirmar quais valores prevalecem: parcelas anunciadas ou totais informados. O ano das quatro saídas foi confirmado como 2027."
     }
   ]
 }
