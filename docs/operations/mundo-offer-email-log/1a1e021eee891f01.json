@@ -75,7 +75,7 @@
     {
       "item_id": "6",
       "slug": "grand-palladium-imbassai-2027-06-10",
-      "status": "pending_clarification",
+      "status": "ready_to_publish",
       "start_date": "2027-06-10",
       "nights": 5,
       "installments": 15,
@@ -83,7 +83,18 @@
       "calculated_total_brl": 5685,
       "printed_total_brl": 5696.4,
       "air_from_sao_paulo_confirmed": true,
-      "round_trip_transfer_confirmed": true
+      "round_trip_transfer_confirmed": true,
+      "source": "WhatsApp Image 2026-11-14 at 18.27.32.jpeg",
+      "approved_total_brl": 5685,
+      "owner_authorized_on": "2026-11-16",
+      "authorization_scope": "Somente saída de 10/06/2027, 15x R$379, aéreo, 5 noites e traslados.",
+      "family_selection_claim_included": false,
+      "child_gratuity_claim_included": false,
+      "stages": [
+        "processing",
+        "artwork_reviewed",
+        "ready_to_publish"
+      ]
     },
     {
       "item_id": "7",
