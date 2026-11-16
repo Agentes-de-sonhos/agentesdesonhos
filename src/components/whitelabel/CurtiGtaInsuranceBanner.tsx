@@ -14,7 +14,7 @@ const BENEFITS = [
 export function CurtiGtaInsuranceBanner({ container }: { container: string }) {
   return (
     <div className={container}>
-      <div className="relative overflow-hidden rounded-3xl shadow-xl ring-1 ring-foreground/10 md:aspect-[6/1]">
+      <div className="relative mx-auto w-full overflow-hidden rounded-3xl md:w-[77%] shadow-xl ring-1 ring-foreground/10 md:aspect-[4.62/1]">
         <img src={gtaFundo.url} alt="" aria-hidden loading="lazy" className="absolute inset-0 h-full w-full object-cover object-right" />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/85 to-background/40 md:bg-gradient-to-r md:from-background/95 md:via-background/80 md:to-background/0" />
         <div className="relative flex h-full flex-col gap-4 p-5 md:max-w-[50%] md:flex-row md:items-center md:gap-6 md:px-8 md:py-4">
