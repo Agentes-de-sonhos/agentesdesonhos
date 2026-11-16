@@ -175,7 +175,7 @@ const flightSchema = z.object({
 
 interface FlightSegmentInput {
   origin_airport: string; origin_city: string; destination_airport: string; destination_city: string;
-  flight_date: string; departure_time: string; arrival_time: string; flight_number: string;
+  flight_date: string; arrival_date?: string; departure_time: string; arrival_time: string; flight_number: string;
   airline: string; terminal: string; gate: string; segment_type: 'ida' | 'conexao' | 'volta';
 }
 
@@ -677,6 +677,10 @@ function FlightForm({ onSubmit, onCancel, isLoading, defaultValues, isEditing, i
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Chegada</label>
                 <Input className="mt-1" type="time" value={seg.arrival_time} onChange={(e) => updateSegment(i, 'arrival_time', e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground">Data de chegada (se outro dia)</label>
+                <Input className="mt-1" type="date" value={seg.arrival_date || ''} onChange={(e) => updateSegment(i, 'arrival_date', e.target.value)} />
               </div>
               <div>
                 <label className="text-xs font-medium text-muted-foreground">Terminal</label>

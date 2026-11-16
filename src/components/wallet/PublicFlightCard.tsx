@@ -64,10 +64,16 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
     </section>
     <div className="space-y-4">
       {segments.map((seg, i) => <section key={i} className="rounded-2xl border border-border bg-card p-4 sm:p-5" aria-label={`${t("fldVoo")} ${i + 1}`}>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary">{seg.segment_type === "volta" ? t("segVolta") : seg.segment_type === "conexao" ? t("segConexao") : t("fldIda")}{seg.flight_date ? ` · ${date(seg.flight_date)}` : ""}</span>
-          <span className="inline-flex items-center gap-2 text-sm font-semibold"><AirlineLogo airline={seg.airline || data.main_airline || data.airline} flightNumber={seg.flight_number} />{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>
-        </div>
+        {(() => {
+          const label = <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary">{seg.segment_type === "volta" ? t("segVolta") : seg.segment_type === "conexao" ? t("segConexao") : t("fldIda")}{seg.flight_date ? ` · ${date(seg.flight_date)}` : ""}</span>;
+          const airline = <span className="inline-flex items-center gap-2 text-sm font-semibold"><AirlineLogo airline={seg.airline || data.main_airline || data.airline} flightNumber={seg.flight_number} />{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>;
+          const nextDay = !!seg.arrival_date && seg.arrival_date !== seg.flight_date;
+          return nextDay ? <div data-testid="flight-next-day-header" className="mb-4 grid grid-cols-1 items-center gap-2 sm:grid-cols-[1fr_auto_1fr]">
+            <div className="justify-self-start">{label}</div>
+            <div className="justify-self-start sm:justify-self-center">{airline}</div>
+            <span className="justify-self-start rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary sm:justify-self-end">{locale === "pt-BR" ? "Chegada" : locale.startsWith("es") ? "Llegada" : "Arrival"} · {date(seg.arrival_date)}</span>
+          </div> : <div className="mb-4 flex flex-wrap items-center justify-between gap-2">{label}{airline}</div>;
+        })()}
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 sm:gap-4">
           <div className="min-w-0 max-w-[5.5rem] sm:w-32 sm:max-w-[9rem]"><p className="text-2xl font-bold leading-none sm:text-3xl">{seg.departure_time || "—"}</p><p className="mt-2 text-base font-bold">{seg.origin_airport || "—"}</p><p className="text-sm text-muted-foreground">{seg.origin_city || ""}</p></div>
           <div data-testid="flight-route-track" className="flex h-7 w-full min-w-0 items-center sm:h-8" aria-hidden="true">

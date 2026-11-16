@@ -167,6 +167,7 @@ function WalletCoverPicker({
   isSaving?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const { toast } = useToast();
   const current: string | null = trip?.wallet_cover_url || null;
   // Candidatos guardam a referência persistida (URL do Storage ou `gplace://`)
   // junto do place_id do serviço, para que a exibição possa ser resolvida sem
@@ -194,6 +195,50 @@ function WalletCoverPicker({
   const [searchInput, setSearchInput] = useState<string>(initialQuery);
   const [internetPhotos, setInternetPhotos] = useState<Array<{ photo_url: string; thumb_url: string; source: string }>>([]);
   const [loadingPhotos, setLoadingPhotos] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const coverFileRef = useRef<HTMLInputElement>(null);
+  const MAX_COVER_PHOTOS = 15;
+  const MORE_VARIANTS = ["paisagem", "turismo", "cidade", "pontos turísticos"];
+  const loadMorePhotos = async () => {
+    const q = query.trim();
+    if (q.length < 2 || internetPhotos.length >= MAX_COVER_PHOTOS) return;
+    setLoadingMore(true);
+    const seen = new Set(internetPhotos.map((p) => p.photo_url));
+    let next = [...internetPhotos];
+    try {
+      for (const v of MORE_VARIANTS) {
+        if (next.length - internetPhotos.length >= 5 || next.length >= MAX_COVER_PHOTOS) break;
+        const { data } = await supabase.functions.invoke("activity-photo", { body: { query: `${q} ${v}`, destination: `${q} ${v}`, limit: 5 } });
+        for (const ph of ((data?.photos ?? []) as typeof internetPhotos)) {
+          if (!ph?.photo_url || seen.has(ph.photo_url) || next.length >= MAX_COVER_PHOTOS) continue;
+          seen.add(ph.photo_url); next.push(ph);
+        }
+      }
+      photoCache.set(q, next);
+      setInternetPhotos(next);
+      if (next.length === internetPhotos.length) toast({ title: "Nenhuma foto nova encontrada" });
+    } catch { toast({ title: "Erro ao buscar mais fotos", variant: "destructive" }); }
+    finally { setLoadingMore(false); }
+  };
+  const uploadCoverFile = async (file?: File) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast({ title: "Selecione uma imagem JPG, PNG ou WEBP", variant: "destructive" }); return; }
+    if (file.size > 5 * 1024 * 1024) { toast({ title: "Imagem maior que 5MB", variant: "destructive" }); return; }
+    setUploadingCover(true);
+    try {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) throw new Error("Faça login novamente.");
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${auth.user.id}/trip-covers/${trip?.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("quote-images").upload(path, file, { contentType: file.type });
+      if (error) throw error;
+      const { data } = supabase.storage.from("quote-images").getPublicUrl(path);
+      await onChange(data.publicUrl);
+      setOpen(false);
+    } catch (e: any) { toast({ title: "Erro ao enviar imagem", description: e?.message, variant: "destructive" }); }
+    finally { setUploadingCover(false); if (coverFileRef.current) coverFileRef.current.value = ""; }
+  };
   const photoCache = useState(() => new Map<string, Array<{ photo_url: string; thumb_url: string; source: string }>>())[0];
 
   const runInternetSearch = async (term: string) => {
@@ -312,6 +357,15 @@ function WalletCoverPicker({
             </div>
           )}
 
+          <div className="flex flex-wrap items-center gap-2">
+            <AgencyLibraryPicker existingUrls={current ? [current] : []} maxSelectable={1} onAdd={async (urls) => { if (urls[0]) { await onChange(urls[0]); setOpen(false); } }} />
+            <input ref={coverFileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => uploadCoverFile(e.target.files?.[0])} />
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" disabled={uploadingCover} onClick={() => coverFileRef.current?.click()}>
+              {uploadingCover ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+              Meu computador
+            </Button>
+          </div>
+
           {/* Automática */}
           <button
             type="button"
@@ -375,6 +429,14 @@ function WalletCoverPicker({
                     </button>
                   );
                 })}
+              </div>
+            )}
+            {internetPhotos.length > 0 && internetPhotos.length < MAX_COVER_PHOTOS && (
+              <div className="flex justify-center pt-1">
+                <Button type="button" variant="outline" size="sm" disabled={loadingMore} onClick={loadMorePhotos} className="gap-1.5">
+                  {loadingMore && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Ver mais fotos ({internetPhotos.length}/{MAX_COVER_PHOTOS})
+                </Button>
               </div>
             )}
           </div>

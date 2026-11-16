@@ -65,6 +65,8 @@ export interface TripFlightSegment {
   origin_airport_name?: string;
   destination_airport_name?: string;
   flight_date: string;
+  /** Data de chegada quando difere da partida (voo noturno). */
+  arrival_date?: string;
   departure_time: string;
   arrival_time: string;
   flight_number: string;
