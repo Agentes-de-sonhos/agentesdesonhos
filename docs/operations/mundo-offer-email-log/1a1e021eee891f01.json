@@ -2,9 +2,9 @@
   "gmail_message_id": "1a1e021eee891f01",
   "agency_owner_id": "428500de-552a-411b-9663-71f8bb2e4f37",
   "hostname": "omundoemcores.com.br",
-  "status": "pending_clarification",
+  "status": "partially_completed",
   "title": "Grand Palladium Imbassaí",
-  "reason": "Em cada anexo, a soma das parcelas diverge do total por pessoa. Confirmar valores e a quais tarifas se aplica o Family Selection.",
+  "reason": "Somente a oferta de 10/06/2027 foi autorizada e publicada. As outras seis permanecem pendentes; valores e aplicabilidade Family Selection não confirmados.",
   "common_terms": "All Inclusive. Valores em reais por pessoa em apartamento duplo, sujeitos a disponibilidade, para as datas indicadas. Taxas e serviços não incluídos. Promoção não cumulativa e não aplicável a grupos.",
   "items": [
     {
@@ -75,7 +75,7 @@
     {
       "item_id": "6",
       "slug": "grand-palladium-imbassai-2027-06-10",
-      "status": "ready_to_publish",
+      "status": "completed",
       "start_date": "2027-06-10",
       "nights": 5,
       "installments": 15,
@@ -93,8 +93,20 @@
       "stages": [
         "processing",
         "artwork_reviewed",
-        "ready_to_publish"
-      ]
+        "ready_to_publish",
+        "completed"
+      ],
+      "asset_commit": "651cc237a575cbb5e0e3c8605f044d300c96a6ed",
+      "public_url": "https://omundoemcores.com.br/ofertas/grand-palladium-imbassai-2027-06-10",
+      "verified_public_host": "omundoemcores.com.br",
+      "verified_channels": [
+        "novembro"
+      ],
+      "public_image_http": 200,
+      "public_image_matches_reviewed_webp": true,
+      "published_at": "2026-11-16T15:31:57.661541+00:00",
+      "expires_at": "2026-11-23T15:31:57.661541+00:00",
+      "publication_script": "docs/operations/2026-11-16-mundo-grand-palladium-junho.sql"
     },
     {
       "item_id": "7",
@@ -110,6 +122,8 @@
       "round_trip_transfer_confirmed": false
     }
   ],
-  "image_generated": false,
-  "published": false
+  "image_generated": true,
+  "published": true,
+  "published_count": 1,
+  "pending_count": 6
 }
