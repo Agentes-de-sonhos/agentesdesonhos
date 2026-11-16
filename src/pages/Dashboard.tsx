@@ -3,7 +3,8 @@ const FeedbackPopup = lazy(() => import("@/components/feedback/FeedbackPopup").t
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useGamification } from "@/hooks/useGamification";
-import { Loader2, User, LogOut } from "lucide-react";
+import { Loader2, User, LogOut, Users, Newspaper } from "lucide-react";
+import { MobileCollapsibleSection } from "@/components/dashboard/MobileCollapsibleSection";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { DashboardContainer } from "@/components/dashboard/DashboardContainer";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -11,6 +12,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 // Lazy load heavy dashboard cards to reduce initial bundle
 const UpcomingAgendaEventsCard = lazy(() => import("@/components/dashboard/UpcomingAgendaEventsCard").then(m => ({ default: m.UpcomingAgendaEventsCard })));
 const CommunitySocialFeed = lazy(() => import("@/components/dashboard/CommunitySocialFeed").then(m => ({ default: m.CommunitySocialFeed })));
+const CuratedNewsFeed = lazy(() => import("@/components/dashboard/CuratedNewsFeed").then(m => ({ default: m.CuratedNewsFeed })));
 const TripRemindersCard = lazy(() => import("@/components/dashboard/TripRemindersCard").then(m => ({ default: m.TripRemindersCard })));
 import { ExchangeRateCard } from "@/components/dashboard/ExchangeRateCard";
 import { NotificationsDropdown } from "@/components/dashboard/NotificationsDropdown";
@@ -136,11 +138,20 @@ export default function Dashboard() {
               <div className="flex h-full min-h-0 min-w-0 flex-col [&>*]:h-full [&>*]:min-h-0"><TripRemindersCard /></div>
             )}
           </section>
-          {can("community.public.view") && (
-            <section className="w-full min-w-0 px-2 sm:px-4 md:px-0" data-dashboard-section="community">
-              <CommunitySocialFeed />
-            </section>
-          )}
+          <section className="grid w-full items-start gap-4 px-2 sm:gap-6 sm:px-4 md:px-0 lg:grid-cols-2" data-dashboard-section="news-community">
+            {can("community.public.view") && (
+              <div className="order-2 min-w-0 lg:order-1" data-dashboard-section="community">
+                <MobileCollapsibleSection title="Comunidade" icon={Users} iconClassName="text-primary">
+                  <CommunitySocialFeed />
+                </MobileCollapsibleSection>
+              </div>
+            )}
+            <div className="order-1 min-w-0 lg:order-2" data-dashboard-section="news">
+              <MobileCollapsibleSection title="Notícias do Trade" icon={Newspaper} iconClassName="text-[hsl(var(--section-news))]">
+                <CuratedNewsFeed />
+              </MobileCollapsibleSection>
+            </div>
+          </section>
         </Suspense>
       </DashboardContainer>
     </DashboardLayout>
