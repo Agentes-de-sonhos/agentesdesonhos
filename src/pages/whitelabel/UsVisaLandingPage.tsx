@@ -55,8 +55,12 @@ function fmtDate(v?: string | null) {
 
 export default function UsVisaLandingPage({ info, presentation = false }: { info: AgencyDomainInfo; presentation?: boolean }) {
   const wa = agencyWhatsappNumber(info);
+  // Só a 100 Limites usa a Amanda; demais agências usam o próprio nome e a foto do passaporte.
+  const isDmc = /100limites/.test(info.hostname || "");
+  const generic = presentation || !isDmc;
+  const brand = generic ? info.agency_name : "100 Limites";
   const waHref = wa
-    ? `https://wa.me/${wa}?text=${encodeURIComponent("Olá, Amanda! Gostaria de saber mais sobre a assessoria de visto americano.")}`
+    ? `https://wa.me/${wa}?text=${encodeURIComponent(generic ? "Olá! Gostaria de saber mais sobre a assessoria de visto americano." : "Olá, Amanda! Gostaria de saber mais sobre a assessoria de visto americano.")}`
     : null;
   const { data, isLoading } = useUsVisaPublicInfo(!presentation);
 
@@ -64,7 +68,7 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
     waHref ? (
       <Button asChild size="lg" className={cn("wl-visa-cta", className)}>
         <a href={waHref} target="_blank" rel="noopener noreferrer">
-          <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" /> Falar com a Amanda pelo WhatsApp
+          <MessageCircle className="mr-2 h-5 w-5" aria-hidden="true" /> {generic ? "Falar pelo WhatsApp" : "Falar com a Amanda pelo WhatsApp"}
         </a>
       </Button>
     ) : null;
@@ -77,7 +81,7 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
     <>
       <SEO
         noindex={presentation}
-        title={`Assessoria de visto americano B1/B2 | ${presentation ? info.agency_name : "100 Limites"}`}
+        title={`Assessoria de visto americano B1/B2 | ${brand}`}
         description="Orientações sobre o visto de turismo e negócios B1/B2: documentos, formulário, agendamento e entrevista."
       />
 
@@ -93,15 +97,15 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
               Sua viagem aos Estados Unidos começa com um processo bem organizado.
             </p>
             <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-              {presentation ? info.agency_name : "A 100 Limites"} ajuda você a entender os documentos, o formulário e os atendimentos necessários para
-              solicitar seu visto americano de turismo e negócios — B1/B2. {presentation ? "Converse com a equipe para esclarecer suas" : "Conte com a Amanda para esclarecer suas"}
+              {generic ? `A ${info.agency_name}` : "A 100 Limites"} ajuda você a entender os documentos, o formulário e os atendimentos necessários para
+              solicitar seu visto americano de turismo e negócios — B1/B2. {generic ? "Converse com a equipe para esclarecer suas" : "Conte com a Amanda para esclarecer suas"}
               dúvidas e se preparar com mais tranquilidade.
             </p>
             <UsVisaProposalDialog hostname={info.hostname} whatsapp={wa} presentation={presentation} label="Solicitar uma proposta" className="mt-7 w-full sm:w-auto" />
           </div>
           <img
-            src={presentation ? visaPassport : amandaNy.url}
-            alt={presentation ? "Passaporte brasileiro e símbolos dos Estados Unidos" : "Amanda Larini, da 100 Limites, diante da Estátua da Liberdade em Nova York"}
+            src={generic ? visaPassport : amandaNy.url}
+            alt={generic ? "Passaporte brasileiro e símbolos dos Estados Unidos" : "Amanda Larini, da 100 Limites, diante da Estátua da Liberdade em Nova York"}
             width={1086}
             height={1448}
             className="wl-visa-photo mx-auto h-auto w-full max-w-md rounded-2xl"
@@ -159,7 +163,7 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
               </a>
             </div>
             <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
-              <p className="font-semibold">Assessoria {presentation ? info.agency_name : "100 Limites"}</p>
+              <p className="font-semibold">Assessoria {brand}</p>
               <UsVisaProposalDialog hostname={info.hostname} whatsapp={wa} presentation={presentation} className="mt-3 w-full sm:w-auto" />
               <p className="mt-2 text-sm text-muted-foreground">Valor apresentado conforme o seu caso.</p>
             </div>
@@ -242,7 +246,7 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
           <h2 className="text-2xl font-extrabold md:text-3xl">Vamos começar a planejar sua viagem?</h2>
           <Cta className="mt-6 w-full sm:w-auto" />
           <p className="mx-auto mt-8 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-            {presentation ? "Apresentação ilustrativa de assessoria privada e independente, sujeita à confirmação da agência, sem vínculo com a Embaixada ou os Consulados dos" : "A 100 Limites presta assessoria privada e independente, sem vínculo com a Embaixada ou os Consulados dos"}
+            {presentation ? "Apresentação ilustrativa de assessoria privada e independente, sujeita à confirmação da agência, sem vínculo com a Embaixada ou os Consulados dos" : `A ${brand} presta assessoria privada e independente, sem vínculo com a Embaixada ou os Consulados dos`}
             Estados Unidos. Não há garantia de aprovação, antecipação de datas ou prazo de emissão. Fontes oficiais:{" "}
             <a href={FEES_URL} target="_blank" rel="noopener noreferrer" className="underline">taxas</a> ·{" "}
             <a href={WAITS_URL} target="_blank" rel="noopener noreferrer" className="underline">tempos de espera</a>.

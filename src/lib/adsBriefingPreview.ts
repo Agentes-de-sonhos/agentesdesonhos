@@ -992,7 +992,8 @@ export const CURTI_VIAGENS_PREVIEW_INFO: AgencyDomainInfo = {
 
 const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", {
   navDensity: "compact",
-  visaHome: false,
+  // Visto americano após Parques e Ingressos (pedido de Fernando, 16/11/2026).
+  visaHome: true,
   featuredExperience: undefined,
   nav: [
     { label: "Início", to: "/" },

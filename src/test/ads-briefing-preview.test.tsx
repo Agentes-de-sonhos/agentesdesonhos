@@ -309,7 +309,7 @@ describe("briefing-20-v1 (Curti Viagens)", () => {
     const f = resolveAdsPreviewFixture("briefing-20-v1")!;
     const p = f.profile;
     expect(p.hideConciergeActions).toBe(true);
-    expect(p.visaHome).toBe(false);
+    expect(p.visaHome).toBe(true);
     expect(p.featuredExperience).toBeUndefined();
     expect(p.dmc).toBeUndefined();
     expect(p.credentials).toBeUndefined();
