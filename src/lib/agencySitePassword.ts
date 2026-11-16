@@ -16,6 +16,7 @@ import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
   "f6a304ca-5f0f-4d3d-8c1b-0cf7e5f9ab77": "Innovati Travel",
   "dd79ad45-c06b-4196-9ef6-53da902f1996": "Shopping Viagens",
+  "d5107f83-e137-4f3f-bcd3-9a6a0faed2b5": "Bardelli Viagens",
 };
 
 export const SITE_UNLOCK_TTL_MS = 7 * 24 * 60 * 60 * 1000;

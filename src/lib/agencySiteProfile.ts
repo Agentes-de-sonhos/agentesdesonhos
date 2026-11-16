@@ -69,6 +69,8 @@ export type AgencySiteProfileKey =
   | "curtiViagensOfficial"
   /** Rascunho técnico isolado do briefing 21 (Karibu); sem domínio público, vínculo pendente. */
   | "karibuBriefing21"
+  | "karibuOfficial"
+  | "bardelliMundoOfficial"
   | "pristurBriefing22"
   | "shoppingBriefing25"
   | "shoppingOfficial"
@@ -1239,6 +1241,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "www.curtiviagens.com.br": "curtiViagensOfficial",
   /** Host sintético do rascunho briefing-21 — sem cadastro encontrado por CNPJ; nada vinculado. */
   "briefing-21-v1.preview.local": "karibuBriefing21",
+  "kaributurismo.com.br": "karibuOfficial",
+  "www.kaributurismo.com.br": "karibuOfficial",
   "briefing-22-v1.preview.local": "pristurBriefing22",
   "briefing-23-v1.preview.local": "arenaBriefing23",
   "briefing-24-v1.preview.local": "innovatiBriefing24",
@@ -1250,8 +1254,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
   "dricaviagens.com.br": "dricaOfficial",
   "www.dricaviagens.com.br": "dricaOfficial",
-  "bardelliviagens.com.br": "bardelliCurated",
-  "www.bardelliviagens.com.br": "bardelliCurated",
+  "bardelliviagens.com.br": "bardelliMundoOfficial",
+  "www.bardelliviagens.com.br": "bardelliMundoOfficial",
 };
 
 const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
@@ -1276,6 +1280,20 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
   curtiViagensOfficial: CURTI_VIAGENS_OFFICIAL_PROFILE,
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,
+  karibuOfficial: {
+    ...KARIBU_PREVIEW_PROFILE,
+    key: "karibuOfficial",
+    demo: false,
+    presentation: false,
+    seo: { title: "Karibu Viagens e Turismo", description: "Cruzeiros, destinos internacionais e nacionais com planejamento e suporte da Karibu Viagens, em Guarulhos (SP)." },
+  },
+  bardelliMundoOfficial: {
+    ...BARDELLI_MUNDO_PREVIEW_PROFILE,
+    key: "bardelliMundoOfficial",
+    demo: false,
+    presentation: false,
+    seo: { ...BARDELLI_OFFICIAL_PROFILE.seo! },
+  },
   pristurBriefing22: PRISTUR_PREVIEW_PROFILE,
   arenaBriefing23: ARENA_PREVIEW_PROFILE,
   arenaOfficial: {

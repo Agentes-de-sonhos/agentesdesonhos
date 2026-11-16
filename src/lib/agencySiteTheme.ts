@@ -52,6 +52,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "curtiviagens.com.br": "siteBaseEditorial",
   "www.curtiviagens.com.br": "siteBaseEditorial",
   "briefing-21-v1.preview.local": "siteBaseEditorial",
+  "kaributurismo.com.br": "siteBaseEditorial",
+  "www.kaributurismo.com.br": "siteBaseEditorial",
   "briefing-22-v1.preview.local": "siteBaseEditorial",
   "briefing-23-v1.preview.local": "siteBaseEditorial",
   "briefing-24-v1.preview.local": "siteBaseEditorial",
@@ -127,11 +129,11 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-mundo wl-innovati-mundo"
         : h === "briefing-19-v1.preview.local"
         ? " wl-mundo wl-bagagem-mundo"
-        : h === "bardelli-mundo.preview.local"
+        : h === "bardelli-mundo.preview.local" || h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
         ? " wl-mundo wl-bardelli-mundo"
         : h === "briefing-23-v1.preview.local" || h === "arenatravelgroup.com.br" || h === "www.arenatravelgroup.com.br"
         ? " wl-mundo wl-arena"
-        : h === "briefing-21-v1.preview.local" || h === "briefing-14-v1.preview.local" || h === "omundoemcores.com.br" || h === "www.omundoemcores.com.br"
+        : h === "briefing-21-v1.preview.local" || h === "kaributurismo.com.br" || h === "www.kaributurismo.com.br" || h === "briefing-14-v1.preview.local" || h === "omundoemcores.com.br" || h === "www.omundoemcores.com.br"
         ? " wl-mundo"
         : h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
           ? " wl-bardelli wl-bardelli-official"
