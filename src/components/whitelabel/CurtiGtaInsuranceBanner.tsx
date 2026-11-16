@@ -24,11 +24,11 @@ export function CurtiGtaInsuranceBanner({ container }: { container: string }) {
             <p className="mt-1 text-sm leading-snug text-[hsl(224_30%_30%)]">
               Imprevistos acontecem. Viaje tranquilo com o <strong className="font-semibold">Seguro Viagem GTA</strong>.
             </p>
-            <ul className="mt-3 grid grid-cols-2 gap-y-2 md:grid-cols-4 md:divide-x md:divide-[hsl(224_64%_24%/0.15)]">
+            <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 md:gap-x-6">
               {BENEFITS.map(({ icon: Icon, label }) => (
-                <li key={label} className="flex items-center gap-1.5 px-2 first:pl-0">
+                <li key={label} className="flex min-w-0 items-center gap-2">
                   <Icon className="h-5 w-5 shrink-0 text-[hsl(224_64%_24%)]" strokeWidth={1.75} />
-                  <span className="text-[11px] font-semibold leading-tight text-[hsl(224_64%_24%)]">{label}</span>
+                  <span className="text-[11px] font-semibold leading-tight md:whitespace-nowrap text-[hsl(224_64%_24%)]">{label}</span>
                 </li>
               ))}
             </ul>
