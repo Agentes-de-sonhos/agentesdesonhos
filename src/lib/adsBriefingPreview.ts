@@ -2623,3 +2623,34 @@ ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].pages = {
   resorts: { title: "Explore os resorts do Brasil com a Pristur Viagens" }, orlandoTickets: true, editorial: true,
 };
 ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
+
+/* IM&M Viagens e Turismo (immturismo.com.br): O Mundo em Cores model with a
+ * textual wordmark; logo/palette and editorial facts pending. Generic copy only. */
+const immBaseline = buildGoldStandardProfile("immOfficial", {
+  textualWordmark: true,
+  navDensity: "compact", visaHome: false, featuredExperience: undefined,
+  dmc: undefined, credentials: undefined, team: undefined,
+  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+  sections: {
+    dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
+    testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
+    newsletter: { enabled: false }, authority: { enabled: false },
+  },
+  heroPresentation: { kicker: "SÃO PAULO · SP", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "IM&M Viagens e Turismo", subtitle: "Planejamento de viagens com atendimento próximo.", image: "europa", order: 1, enabled: true },
+    { title: "Cruzeiros", subtitle: "Companhias, navios e roteiros com orientação.", image: "cruzeiro", order: 2, enabled: true },
+    { title: "Resorts", subtitle: "Descanso planejado no Brasil e no exterior.", image: "resort", order: 3, enabled: true },
+  ],
+  about: {
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Ivete Meneghello Milazzotto",
+    text: "A IM&M Viagens e Turismo atende em São Paulo (SP), com planejamento de viagens nacionais e internacionais.\n\nCada roteiro é organizado a partir do perfil de quem viaja, com orientação na escolha de destinos, hospedagens e experiências.\n\nO atendimento acompanha o cliente do primeiro contato ao retorno da viagem.",
+    media: "hidden", showLocation: true, ownerName: "Ivete Meneghello Milazzotto",
+  },
+  footer: { description: "Planejamento de viagens com atendimento próximo.", address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true },
+  seo: { title: "IM&M Viagens e Turismo", description: "Planejamento de viagens, cruzeiros e resorts com a IM&M Viagens e Turismo, em São Paulo (SP)." },
+}, "IM&M Viagens e Turismo");
+export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
+  ...buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto"),
+  demo: false, presentation: false, seo: immBaseline.seo,
+};

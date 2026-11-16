@@ -18,6 +18,7 @@ const PROTECTED = new Set([
   "dd79ad45-c06b-4196-9ef6-53da902f1996",
   "d5107f83-e137-4f3f-bcd3-9a6a0faed2b5",
   "19746f35-d222-4a3f-b9eb-9920d01ab883",
+  "2119703a-e00e-4b85-a6b0-e912479eb99a",
 ]);
 
 const enc = new TextEncoder();

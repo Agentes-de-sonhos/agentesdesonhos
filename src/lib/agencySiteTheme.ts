@@ -52,6 +52,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "curtiviagens.com.br": "siteBaseEditorial",
   "www.curtiviagens.com.br": "siteBaseEditorial",
   "briefing-21-v1.preview.local": "siteBaseEditorial",
+  "immturismo.com.br": "siteBaseEditorial",
+  "www.immturismo.com.br": "siteBaseEditorial",
   "bagagemnamao.com.br": "siteBaseEditorial",
   "www.bagagemnamao.com.br": "siteBaseEditorial",
   "kaributurismo.com.br": "siteBaseEditorial",
@@ -125,7 +127,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-drica"
         : h === "briefing-22-v1.preview.local"
         ? " wl-mundo wl-pristur-mundo"
-        : h === "briefing-25-v1.preview.local" || h === "shoppingviagens.com.br" || h === "www.shoppingviagens.com.br"
+        : h === "briefing-25-v1.preview.local" || h === "shoppingviagens.com.br" || h === "www.shoppingviagens.com.br" || h === "immturismo.com.br" || h === "www.immturismo.com.br"
         ? " wl-mundo wl-shopping-mundo"
         : h === "briefing-24-v1.preview.local" || h === "innovati.tur.br" || h === "www.innovati.tur.br"
         ? " wl-mundo wl-innovati-mundo"

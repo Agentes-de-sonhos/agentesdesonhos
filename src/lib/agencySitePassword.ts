@@ -18,6 +18,7 @@ export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
   "dd79ad45-c06b-4196-9ef6-53da902f1996": "Shopping Viagens",
   "d5107f83-e137-4f3f-bcd3-9a6a0faed2b5": "Bardelli Viagens",
   "19746f35-d222-4a3f-b9eb-9920d01ab883": "Bagagem na Mão Viagens",
+  "2119703a-e00e-4b85-a6b0-e912479eb99a": "IM&M Viagens e Turismo",
 };
 
 export const SITE_UNLOCK_TTL_MS = 7 * 24 * 60 * 60 * 1000;

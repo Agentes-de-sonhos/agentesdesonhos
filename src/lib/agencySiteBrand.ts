@@ -127,6 +127,8 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "curtiviagens.com.br",
   "www.curtiviagens.com.br",
   "briefing-21-v1.preview.local",
+  "immturismo.com.br",
+  "www.immturismo.com.br",
   "bagagemnamao.com.br",
   "www.bagagemnamao.com.br",
   "kaributurismo.com.br",
