@@ -58,6 +58,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "briefing-17-v1.preview.local": viajarTirismoLogo.url,
   /** Briefing 19 — logo enviado, limitado ao host sintético da prévia. */
   "briefing-19-v1.preview.local": bagagemNaMaoLogo.url,
+  "bagagemnamao.com.br": bagagemNaMaoLogo.url,
+  "www.bagagemnamao.com.br": bagagemNaMaoLogo.url,
   "briefing-20-v1.preview.local": curtiViagensLogo.url,
   "curtiviagens.com.br": curtiViagensLogo.url,
   "www.curtiviagens.com.br": curtiViagensLogo.url,
@@ -125,6 +127,8 @@ const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "curtiviagens.com.br",
   "www.curtiviagens.com.br",
   "briefing-21-v1.preview.local",
+  "bagagemnamao.com.br",
+  "www.bagagemnamao.com.br",
   "kaributurismo.com.br",
   "www.kaributurismo.com.br",
   "bardelliviagens.com.br",

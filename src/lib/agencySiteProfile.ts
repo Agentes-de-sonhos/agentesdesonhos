@@ -64,6 +64,7 @@ export type AgencySiteProfileKey =
   | "bardelliPresentation"
   /** Rascunho técnico isolado do briefing 19 (Bagagem na Mão); sem domínio público. */
   | "bagagemNaMaoBriefing19"
+  | "bagagemNaMaoOfficial"
   /** Rascunho técnico isolado do briefing 20 (Curti Viagens); sem domínio público. */
   | "curtiViagensBriefing20"
   | "curtiViagensOfficial"
@@ -1235,6 +1236,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "bardelli-presentation.preview.local": "bardelliPresentation",
   /** Host sintético do rascunho briefing-19 — cadastro real sem domínio; nada é vinculado. */
   "briefing-19-v1.preview.local": "bagagemNaMaoBriefing19",
+  "bagagemnamao.com.br": "bagagemNaMaoOfficial",
+  "www.bagagemnamao.com.br": "bagagemNaMaoOfficial",
   /** Host sintético do rascunho briefing-20 — nada é vinculado ao cadastro real. */
   "briefing-20-v1.preview.local": "curtiViagensBriefing20",
   "curtiviagens.com.br": "curtiViagensOfficial",
@@ -1277,6 +1280,13 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   dricaPresentation: DRICA_PRESENTATION_PROFILE,
   dricaOfficial: DRICA_OFFICIAL_PROFILE,
   bagagemNaMaoBriefing19: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
+  bagagemNaMaoOfficial: {
+    ...BAGAGEM_NA_MAO_PREVIEW_PROFILE,
+    key: "bagagemNaMaoOfficial",
+    demo: false,
+    presentation: false,
+    seo: { title: "Bagagem na Mão Viagens", description: "Orlando, Nova York, cruzeiros e viagens em família com planejamento e suporte da Bagagem na Mão Viagens, no Rio de Janeiro." },
+  },
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
   curtiViagensOfficial: CURTI_VIAGENS_OFFICIAL_PROFILE,
   karibuBriefing21: KARIBU_PREVIEW_PROFILE,

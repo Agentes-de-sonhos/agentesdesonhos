@@ -52,6 +52,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "curtiviagens.com.br": "siteBaseEditorial",
   "www.curtiviagens.com.br": "siteBaseEditorial",
   "briefing-21-v1.preview.local": "siteBaseEditorial",
+  "bagagemnamao.com.br": "siteBaseEditorial",
+  "www.bagagemnamao.com.br": "siteBaseEditorial",
   "kaributurismo.com.br": "siteBaseEditorial",
   "www.kaributurismo.com.br": "siteBaseEditorial",
   "briefing-22-v1.preview.local": "siteBaseEditorial",
@@ -127,7 +129,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-mundo wl-shopping-mundo"
         : h === "briefing-24-v1.preview.local" || h === "innovati.tur.br" || h === "www.innovati.tur.br"
         ? " wl-mundo wl-innovati-mundo"
-        : h === "briefing-19-v1.preview.local"
+        : h === "briefing-19-v1.preview.local" || h === "bagagemnamao.com.br" || h === "www.bagagemnamao.com.br"
         ? " wl-mundo wl-bagagem-mundo"
         : h === "bardelli-mundo.preview.local" || h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
         ? " wl-mundo wl-bardelli-mundo"
