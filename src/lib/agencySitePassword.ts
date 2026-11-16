@@ -13,7 +13,9 @@ import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import { isAgencyAdminPath } from "@/lib/agencyAdmin";
 
 /** Ativar/desativar aqui. owner user_id → rótulo interno. */
-export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {};
+export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
+  "94ea21ef-a2fe-4ee1-9a8f-e72497c662c6": "Innovati Travel",
+};
 
 export const SITE_UNLOCK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
