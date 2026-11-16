@@ -22,6 +22,16 @@ function Section({ title, icon, children }: { title: string; icon: ReactNode; ch
   </section>;
 }
 
+export function resolveArrivalDate(seg: { flight_date?: string; arrival_date?: string; departure_time?: string; arrival_time?: string }): string | undefined {
+  if (seg.arrival_date) return seg.arrival_date;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(seg.flight_date || "");
+  const toMin = (v?: string) => { const t = /^(\d{1,2}):(\d{2})/.exec(v || ""); return t ? +t[1] * 60 + +t[2] : null; };
+  const dep = toMin(seg.departure_time), arr = toMin(seg.arrival_time);
+  if (!m || dep === null || arr === null || arr >= dep) return undefined;
+  const d = new Date(+m[1], +m[2] - 1, +m[3] + 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function PublicFlightCard({ service, access, locale = "pt-BR" }: { service: TripService; access: ServiceDocumentsAccess; locale?: PublicLocale }) {
   const data = service.service_data as Partial<TripFlightData>;
   const t = tWallet(locale);
@@ -67,11 +77,12 @@ export function PublicFlightCard({ service, access, locale = "pt-BR" }: { servic
         {(() => {
           const label = <span className="rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary">{seg.segment_type === "volta" ? t("segVolta") : seg.segment_type === "conexao" ? t("segConexao") : t("fldIda")}{seg.flight_date ? ` · ${date(seg.flight_date)}` : ""}</span>;
           const airline = <span className="inline-flex items-center gap-2 text-sm font-semibold"><AirlineLogo airline={seg.airline || data.main_airline || data.airline} flightNumber={seg.flight_number} />{seg.airline || data.main_airline || data.airline}{seg.flight_number ? ` · ${seg.flight_number}` : ""}</span>;
-          const nextDay = !!seg.arrival_date && seg.arrival_date !== seg.flight_date;
+          const arrivalDate = resolveArrivalDate(seg);
+          const nextDay = !!arrivalDate && arrivalDate !== seg.flight_date;
           return nextDay ? <div data-testid="flight-next-day-header" className="mb-4 grid grid-cols-1 items-center gap-2 sm:grid-cols-[1fr_auto_1fr]">
             <div className="justify-self-start">{label}</div>
             <div className="justify-self-start sm:justify-self-center">{airline}</div>
-            <span className="justify-self-start rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary sm:justify-self-end">{locale === "pt-BR" ? "Chegada" : locale.startsWith("es") ? "Llegada" : "Arrival"} · {date(seg.arrival_date)}</span>
+            <span className="justify-self-start rounded-lg bg-primary/10 px-2.5 py-1 text-xs font-bold uppercase text-primary sm:justify-self-end">{locale === "pt-BR" ? "Chegada" : locale.startsWith("es") ? "Llegada" : "Arrival"} · {date(arrivalDate)}</span>
           </div> : <div className="mb-4 flex flex-wrap items-center justify-between gap-2">{label}{airline}</div>;
         })()}
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-2 sm:gap-4">

@@ -17,3 +17,16 @@ describe("data de chegada na passagem pública", () => {
     expect(screen.queryByTestId("flight-next-day-header")).toBeNull();
   });
 });
+
+import { resolveArrivalDate } from "@/components/wallet/PublicFlightCard";
+describe("resolveArrivalDate", () => {
+  it("chegada após meia-noite vira o dia seguinte", () => {
+    expect(resolveArrivalDate({ flight_date: "2026-11-27", departure_time: "15:55", arrival_time: "00:30" })).toBe("2026-11-28");
+  });
+  it("mesmo dia não gera data", () => {
+    expect(resolveArrivalDate({ flight_date: "2026-11-27", departure_time: "08:00", arrival_time: "12:00" })).toBeUndefined();
+  });
+  it("data manual tem prioridade", () => {
+    expect(resolveArrivalDate({ flight_date: "2026-11-27", arrival_date: "2026-11-29", departure_time: "15:55", arrival_time: "00:30" })).toBe("2026-11-29");
+  });
+});
