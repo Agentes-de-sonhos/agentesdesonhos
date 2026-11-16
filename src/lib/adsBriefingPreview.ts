@@ -1701,6 +1701,13 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...CURTI_VIAGENS_PREVIEW_PROFILE,
   key: "curtiViagensOfficial",
   presentation: false,
+  authority: CURTI_VIAGENS_PREVIEW_PROFILE.authority ? {
+    ...CURTI_VIAGENS_PREVIEW_PROFILE.authority,
+    companies: CURTI_VIAGENS_PREVIEW_PROFILE.authority.companies ? {
+      ...CURTI_VIAGENS_PREVIEW_PROFILE.authority.companies,
+      title: "Aqui você encontra as principais companhias marítimas:",
+    } : undefined,
+  } : undefined,
   destinations: CURTI_VIAGENS_PREVIEW_PROFILE.destinations?.map((destination) =>
     destination.key === "eua-canada"
       ? { ...destination, key: "nova-york", image: "curtiNovaYork", label: "Estados Unidos", title: "Nova York", text: "Descubra o melhor dos Estados Unidos com roteiros sob medida, entre cidades vibrantes, praias e experiências inesquecíveis." }
