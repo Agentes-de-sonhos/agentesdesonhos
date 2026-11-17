@@ -16,7 +16,8 @@ const CONSULADOS = ["Brasília", "São Paulo", "Rio de Janeiro", "Recife", "Port
  * Envia pela mesma Edge Function segura da Central de Solicitações: o tenant
  * é resolvido no servidor pelo hostname e o lead chega ao CRM + e-mail da agência.
  */
-export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a proposta", className = "", presentation = false }: {
+export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a proposta", className = "", presentation = false, agencyName }: {
+  agencyName?: string;
   hostname: string;
   whatsapp: string | null;
   label?: string;
@@ -70,7 +71,10 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
     if (!o && sent) { setSent(false); reset(); }
   };
 
-  const waText = `Olá, Amanda! Acabei de pedir uma proposta de assessoria de visto americano B1/B2 pelo site. Nome: ${f.name}`;
+  const isDmc = /100limites/.test(hostname);
+  const brand = isDmc ? "100 Limites" : (agencyName || "agência");
+  const who = isDmc ? "a Amanda" : "nossa equipe";
+  const waText = `Olá${isDmc ? ", Amanda" : ""}! Acabei de pedir uma proposta de assessoria de visto americano B1/B2 pelo site. Nome: ${f.name}`;
 
   return (
     <>
@@ -86,7 +90,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
               </div>
               <DialogTitle className="mt-4">Solicitação enviada!</DialogTitle>
               <DialogDescription className="mt-2">
-                {presentation ? "Apresentação sem envio de solicitação." : "A Amanda recebeu seu pedido e retorna com a proposta da assessoria de visto americano."}
+                {presentation ? "Apresentação sem envio de solicitação." : `A ${isDmc ? "Amanda" : brand} recebeu seu pedido e retorna com a proposta da assessoria de visto americano.`}
               </DialogDescription>
               {whatsapp && (
                 <Button asChild size="lg" className="mt-6">
@@ -101,7 +105,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
               <DialogHeader>
                 <DialogTitle>{label}</DialogTitle>
                 <DialogDescription>
-                  {presentation ? "Conte quem viaja para revisar o pedido B1/B2. Formulário ilustrativo, sem envio ou cobrança." : "Conte rapidamente quem viaja e a Amanda retorna com a proposta da assessoria B1/B2. Nada é cobrado agora."}
+                  {presentation ? "Conte quem viaja para revisar o pedido B1/B2. Formulário ilustrativo, sem envio ou cobrança." : `Conte rapidamente quem viaja e ${who} retorna com a proposta da assessoria B1/B2. Nada é cobrado agora.`}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={send} className="grid gap-3 sm:grid-cols-2">
@@ -142,7 +146,7 @@ export function UsVisaProposalDialog({ hostname, whatsapp, label = "Consulte a p
                 </div>
                 <label className="flex items-start gap-2 text-xs text-muted-foreground sm:col-span-2">
                   <input type="checkbox" className="mt-0.5" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
-                  {presentation ? `Exemplo de consentimento para contato da ${hostname === "drica-presentation.preview.local" ? "Drica Viagens" : "Bardelli Viagens"} — nenhum dado será enviado nesta apresentação.` : "Autorizo a 100 Limites a usar meus dados para retornar com a proposta, conforme a privacidade do site."}
+                  {presentation ? `Exemplo de consentimento para contato da ${hostname === "drica-presentation.preview.local" ? "Drica Viagens" : "Bardelli Viagens"} — nenhum dado será enviado nesta apresentação.` : `Autorizo a ${brand} a usar meus dados para retornar com a proposta, conforme a política de privacidade do site.`}
                 </label>
                 {(formError || error) && <p className="text-sm font-medium text-destructive sm:col-span-2" role="alert">{formError ?? error}</p>}
                 <Button type="submit" size="lg" disabled={state === "submitting"} className="wl-visa-proposal sm:col-span-2">

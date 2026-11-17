@@ -101,7 +101,7 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
               solicitar seu visto americano de turismo e negócios — B1/B2. {generic ? "Converse com a equipe para esclarecer suas" : "Conte com a Amanda para esclarecer suas"}
               dúvidas e se preparar com mais tranquilidade.
             </p>
-            <UsVisaProposalDialog hostname={info.hostname} whatsapp={wa} presentation={presentation} label="Solicitar uma proposta" className="mt-7 w-full sm:w-auto" />
+            <UsVisaProposalDialog agencyName={info.agency_name} hostname={info.hostname} whatsapp={wa} presentation={presentation} label="Solicitar uma proposta" className="mt-7 w-full sm:w-auto" />
           </div>
           <img
             src={generic ? visaPassport : amandaNy.url}
@@ -164,7 +164,7 @@ export default function UsVisaLandingPage({ info, presentation = false }: { info
             </div>
             <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">
               <p className="font-semibold">Assessoria {brand}</p>
-              <UsVisaProposalDialog hostname={info.hostname} whatsapp={wa} presentation={presentation} className="mt-3 w-full sm:w-auto" />
+              <UsVisaProposalDialog agencyName={info.agency_name} hostname={info.hostname} whatsapp={wa} presentation={presentation} className="mt-3 w-full sm:w-auto" />
               <p className="mt-2 text-sm text-muted-foreground">Valor apresentado conforme o seu caso.</p>
             </div>
             <div className="wl-visa-card rounded-xl border border-border/60 bg-card p-5">

@@ -73,7 +73,7 @@ export function AgencyVisaConsultSection({
           )}
           {state === "success" ? (
             <p className="flex items-center gap-2 text-sm font-semibold md:col-span-2" role="status">
-              <CheckCircle2 className="h-5 w-5 text-primary" aria-hidden="true" /> Recebemos seu pedido. A Amanda vai entrar em contato.
+              <CheckCircle2 className="h-5 w-5 text-primary" aria-hidden="true" /> Recebemos seu pedido. {/100limites/.test(hostname) ? "A Amanda" : "Nossa equipe"} vai entrar em contato.
             </p>
           ) : open && (
             <div className="grid gap-3 md:col-span-2 md:grid-cols-3">
