@@ -1000,6 +1000,7 @@ const curtiViagensBaseline = buildGoldStandardProfile("curtiViagensBriefing20", 
     { label: "Destinos", to: "/#destinos" },
     { label: "Especialidades", to: "/#autoridade", children: [
       { label: "Parques Orlando", to: "/ingressos-orlando" },
+      { label: "Visto Americano", to: "/visto-americano" },
       { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
       { label: "Resorts Brasil", to: "/#resorts" },
     ] },
