@@ -2628,7 +2628,7 @@ ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévi
 /* IM&M Viagens e Turismo (immturismo.com.br): O Mundo em Cores model with a
  * textual wordmark; logo/palette and editorial facts pending. Generic copy only. */
 const immBaseline = buildGoldStandardProfile("immOfficial", {
-  textualWordmark: true,
+  textualWordmark: false,
   navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
   authority: undefined, testimonials: undefined, conciergePoints: undefined,
