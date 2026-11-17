@@ -94,7 +94,8 @@ export function useClients() {
     },
     onError: (error) => {
       if (error?.name === 'PermissionDeniedError') return;
-      toast({ title: "Erro ao criar cliente", description: error.message, variant: "destructive" });
+      const aborted = error?.name === "AbortError" || /abort/i.test(String(error?.message || ""));
+      toast({ title: "Erro ao criar cliente", description: aborted ? "A conexão foi interrompida antes de concluir. Tente novamente." : error.message, variant: "destructive" });
     },
   });
 

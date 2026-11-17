@@ -84,13 +84,25 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
     setIsOpen(false);
   };
 
-  const handleQuickCreate = async () => {
-    const result = await createClient({
+  const submittingRef = useRef(false);
+  const handleQuickCreate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (submittingRef.current || newName.trim().length < 2) return;
+    submittingRef.current = true;
+    let result: Client | undefined;
+    try {
+      result = await createClient({
       name: newName,
       phone: newPhone || null,
       email: newEmail || null,
       status: "lead",
-    });
+      });
+    } catch {
+      return;
+    } finally {
+      submittingRef.current = false;
+    }
     if (result) {
       onChange({ id: result.id, name: result.name });
       setQuery(result.name);
@@ -186,7 +198,7 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
           <DialogHeader>
             <DialogTitle>Cadastro Rápido de Cliente</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <form className="space-y-4" onSubmit={handleQuickCreate}>
             <div className="space-y-2">
               <Label>Nome *</Label>
               <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Nome do cliente" />
@@ -200,13 +212,13 @@ export function ClientSelector({ value, onChange, required, error }: ClientSelec
               <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="email@exemplo.com" type="email" />
             </div>
             <Button
+              type="submit"
               className="w-full"
-              onClick={handleQuickCreate}
               disabled={isCreating || newName.length < 2}
             >
               {isCreating ? "Criando..." : "Criar e Selecionar"}
             </Button>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </>
