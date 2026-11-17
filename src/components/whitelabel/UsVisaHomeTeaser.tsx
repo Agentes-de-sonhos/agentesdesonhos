@@ -66,7 +66,7 @@ export function UsVisaHomeTeaser({ presentation = false }: { presentation?: bool
             </h2>
             <p className="mt-4 text-[15px] leading-relaxed text-foreground/75">
               Escolha a cidade e consulte a espera para a próxima entrevista de visto de turismo e negócios (B1/B2).
-              {presentation ? "Atendimento e condições a confirmar com a agência." : "A Amanda orienta você em cada etapa."}
+              {presentation ? "Atendimento e condições a confirmar com a agência." : " A Curti Viagens orienta você em cada etapa."}
             </p>
             <img
               src={visaPassportImg}
