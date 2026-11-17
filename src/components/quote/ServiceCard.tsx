@@ -62,7 +62,7 @@ function getServiceDescription(service: QuoteService): string {
   switch (service.service_type) {
     case "flight": return `${data.origin_city} → ${data.destination_city} (${data.airline})`;
     case "hotel": return `${data.hotel_name} - ${data.city}`;
-    case "car_rental": return `${data.car_type} - ${data.days} diária(s)`;
+    case "car_rental": return [data.car_model?.trim(), data.car_type ? (String(data.car_type).length <= 3 ? String(data.car_type).toUpperCase() : String(data.car_type).charAt(0).toUpperCase() + String(data.car_type).slice(1)) : "", `${data.days} diária(s)`].filter(Boolean).join(" • ");
     case "transfer": return `${data.transfer_type === "round_trip" ? "Ida e Volta" : data.transfer_type === "arrival" ? "Chegada" : "Saída"} - ${data.location}`;
     case "attraction": return `${data.name} (${data.quantity || 1}x)`;
     case "insurance": return `${data.provider} - ${data.coverage}`;

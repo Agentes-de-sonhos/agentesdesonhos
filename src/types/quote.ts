@@ -227,6 +227,8 @@ export interface CarRentalData {
   dropoff_date?: string;
   dropoff_time?: string;
   car_type: string;
+  /** Modelo do veículo, ex.: "Mazda CX-5 ou similar". */
+  car_model?: string;
   days: number;
   price: number;
   notes: string;

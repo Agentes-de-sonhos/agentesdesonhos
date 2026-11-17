@@ -319,6 +319,7 @@ function getServiceDetails(service: QuoteService, t: ReturnType<typeof translate
     case "car_rental":
       {
         const typeLbl = carTypeLabelPDF(data.car_type);
+        if (data.car_model?.trim()) details.push(`Veículo: ${data.car_model.trim()}`);
         const parts = [typeLbl ? `${t("tipo")}: ${typeLbl}` : "", data.days ? `${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""].filter(Boolean);
         if (typeLbl) details.push(parts.join(" | "));
         else if (parts.length) details.push(parts[0]);
@@ -534,7 +535,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
         switch (service.service_type) {
           case "flight": summary = `${data.airline || ""}${data.origin_city ? ` | ${data.origin_city} → ${data.destination_city}` : ""}`.trim(); break;
           case "hotel": summary = `${data.hotel_name || ""}${data.city ? ` — ${data.city}` : ""}`; break;
-          case "car_rental": summary = [carTypeLabelPDF(data.car_type), data.days ? `${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""].filter(Boolean).join(" | "); break;
+          case "car_rental": summary = [data.car_model?.trim(), carTypeLabelPDF(data.car_type), data.days ? `${data.days} ${pluralize(locale, Number(data.days) || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}` : ""].filter(Boolean).join(" | "); break;
           case "transfer": summary = `${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")}${data.location ? ` — ${data.location}` : ""}`; break;
           case "attraction": summary = [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name || ""; break;
           case "insurance": summary = data.provider || ""; break;

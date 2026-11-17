@@ -155,7 +155,7 @@ function mapCarRental(d: CarRentalData): { type: TripServiceType; data: TripServ
       dropoff_location: d.dropoff_location || "", dropoff_address: "", dropoff_city: "", dropoff_country: "",
       dropoff_date: d.dropoff_date || "", dropoff_time: d.dropoff_time || "",
       dropoff_instructions: "", dropoff_late_policy: "",
-      car_type: d.car_type || "", car_model: "", transmission: "", fuel_type: "",
+      car_type: d.car_type || "", car_model: d.car_model || "", transmission: "", fuel_type: "",
       doors: "", passenger_capacity: "", luggage_capacity: "", plate: "", car_notes: "",
       basic_insurance: "", full_insurance: "", third_party_protection: "", theft_protection: "",
       damage_protection: "", deductible: "", insurance_coverage: "", insurance_notes: "",

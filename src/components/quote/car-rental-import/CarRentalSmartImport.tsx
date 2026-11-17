@@ -260,6 +260,7 @@ export function parsedCarToCarData(p: ParsedCarRental): Partial<CarRentalData> {
     dropoff_date: dropoff,
     dropoff_time: p.hora_devolucao || "",
     car_type: mapCarType(p.categoria_veiculo || p.modelo_veiculo),
+    car_model: p.modelo_veiculo || "",
     days: computedDays || 1,
     price: total,
     notes: notes.join("\n"),

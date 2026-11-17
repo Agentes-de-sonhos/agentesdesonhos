@@ -1480,6 +1480,7 @@ const carRentalSchema = z.object({
   dropoff_date: z.date().optional().nullable(),
   dropoff_time: z.string().optional(),
   car_type: z.string().optional(),
+  car_model: z.string().optional(),
   days: z.number().optional(),
   price: z.number().min(0),
   notes: z.string().optional(),
@@ -1505,6 +1506,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
       dropoff_date: init?.dropoff_date ? parseLocalDate(init.dropoff_date) : tripEndDate || new Date(),
       dropoff_time: init?.dropoff_time || "10:00",
       car_type: init?.car_type || "",
+      car_model: init?.car_model || "",
       option_label: initialData?.option_label || "",
       days: init?.days || 1,
       price: init?.price || initialData?.amount || 0,
@@ -1542,6 +1544,7 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
       dropoff_date: formatLocalDateStr(values.dropoff_date),
       dropoff_time: values.dropoff_time || "",
       car_type: values.car_type,
+      car_model: values.car_model?.trim() || "",
       days: values.days,
       price: values.price,
       notes: values.notes || "",
@@ -1612,6 +1615,9 @@ function CarRentalForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripSta
           </div>
         )}
 
+        <FormField control={form.control} name="car_model" render={({ field }) => (
+          <FormItem><FormLabel>Modelo do Veículo</FormLabel><FormControl><Input placeholder="Ex: Mazda CX-5 ou similar" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField control={form.control} name="car_type" render={({ field }) => (
             <FormItem><FormLabel>Tipo de Carro</FormLabel>

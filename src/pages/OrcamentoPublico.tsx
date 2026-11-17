@@ -164,7 +164,7 @@ function getServiceSummary(service: QuoteService): string {
   switch (service.service_type) {
     case "flight": return `${data.airline} | ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return `${data.hotel_name} — ${data.city}`;
-    case "car_rental": return `${carTypeLabel(data.car_type)} | ${data.days} ${pluralize(publicLocale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`;
+    case "car_rental": return `${data.car_model?.trim() ? `${data.car_model.trim()} | ` : ""}${carTypeLabel(data.car_type)} | ${data.days} ${pluralize(publicLocale, data.days || 1, { one: t("dailyRateOne"), other: t("dailyRateOther") })}`;
     case "transfer": return `${data.transfer_type === "round_trip" ? t("roundTrip") : data.transfer_type === "arrival" ? t("chegada") : t("saida")} — ${data.location}`;
     case "attraction": return [data.product_name, data.ticket_type].filter(Boolean).join(" | ") || data.name;
     case "insurance": return data.provider;
@@ -187,7 +187,7 @@ function getServiceName(service: QuoteService): string {
   switch (service.service_type) {
     case "flight": return `${data.airline} — ${data.origin_city} → ${data.destination_city}`;
     case "hotel": return data.hotel_name;
-    case "car_rental": return carTypeLabel(data.car_type);
+    case "car_rental": return data.car_model?.trim() || carTypeLabel(data.car_type);
     case "transfer": return data.location;
     case "attraction": return data.product_name || data.name;
     case "insurance": return data.provider;
@@ -672,7 +672,8 @@ function CarBody({ data }: { data: any }) {
   return (
     <div className="space-y-4">
       <div className="min-w-0">
-        <div className="text-base font-semibold text-foreground tracking-tight">{carTypeLabel(data.car_type)}</div>
+        <div className="text-base font-semibold text-foreground tracking-tight">{data.car_model?.trim() || carTypeLabel(data.car_type)}</div>
+        {data.car_model?.trim() && carTypeLabel(data.car_type) && <div className="text-xs text-muted-foreground mt-0.5">{carTypeLabel(data.car_type)}</div>}
         {data.rental_company && <div className="text-xs text-muted-foreground mt-0.5">{data.rental_company}</div>}
       </div>
       <div className="rounded-xl border border-border/40 bg-muted/20 px-4 py-3 space-y-3">
