@@ -2,7 +2,7 @@
  "almenat": {
   "description": [
    "O Almenat é uma escolha para quem quer sair do ritmo de São Paulo sem transformar a viagem em uma longa jornada. Em Embu das Artes, o hotel ocupa uma área cercada pela Mata Atlântica e combina essa presença do verde com arquitetura contemporânea. A proposta interessa a casais, famílias e grupos que desejam trocar a rotina por alguns dias de convivência, lazer e descanso.",
-   "A experiência vai além de encontrar uma piscina para relaxar. O boliche é um diferencial para reunir pessoas de idades diferentes, enquanto as piscinas coberta e externa e as áreas esportivas permitem variar o programa. Os espaços do hotel favorecem tanto uma tarde de atividades quanto uma pausa entre as refeições, sem exigir um roteiro cheio de deslocamentos.",
+   "A experiência vai além de encontrar uma piscina para relaxar. O boliche é um diferencial para reunir pessoas de idades diferentes, enquanto as piscinas coberta e externa e as áreas esportivas permitem variar o programa. Os espaços do hotel favorecem tanto uma tarde de atividades quanto uma pausa entre as refeições, sem exigir um roteiro cheio de deslocamentos. O boliche está sujeito à disponibilidade e programação; confirme as condições antes da reserva.",
    "Outro atrativo é a possibilidade de combinar a hospedagem com o lado cultural de Embu das Artes, conhecido pelo artesanato e pela produção artística. Você pode dedicar parte da viagem à cidade e reservar outra parte para aproveitar o hotel. Essa combinação de natureza, lazer e proximidade de um destino cultural torna o Almenat interessante para uma escapada com mais personalidade."
   ],
   "amenities": [
@@ -14,7 +14,7 @@
    {
     "icon": "kids",
     "label": "Boliche no hotel",
-    "description": "Uma opção de lazer para reunir família e amigos."
+    "description": "Uma opção de lazer para reunir família e amigos. Sujeito à disponibilidade e programação."
    },
    {
     "icon": "spa",
@@ -137,35 +137,35 @@
  },
  "clara-resorts": {
   "description": [
-   "O Clara Dourado é uma escolha para quem deseja trocar a cidade por uma viagem em que o contato com a natureza aparece no programa de cada dia. No interior paulista, o resort reúne paisagem de campo, áreas verdes e atividades que interessam a diferentes idades. Sua proposta combina conforto e lazer com oportunidades de explorar, brincar e compartilhar experiências ao ar livre.",
-   "As opções de aventura dão personalidade à hospedagem: tirolesa, arvorismo, cavalgadas e atividades no lago permitem fazer mais do que alternar refeições e piscina. Cada família pode escolher seu ritmo, participando das experiências disponíveis ou reservando momentos para apenas aproveitar os espaços do resort. A programação cria possibilidades para crianças e adultos encontrarem seus próprios interesses durante a viagem.",
-   "As acomodações também variam, incluindo opções na Vila do Lago e categorias com piscina privativa. A gastronomia completa o conjunto e ajuda a transformar os encontros à mesa em parte das férias. Para famílias que procuram natureza com uma estrutura organizada de lazer, o Clara Dourado oferece uma experiência em que a paisagem participa da hospedagem, acompanhando tanto os dias de aventura quanto as pausas para descanso."
+   "O Clara Ibiúna combina natureza, conforto e lazer às margens da Represa de Itupararanga, em Ibiúna, no interior de São Paulo. A paisagem da represa acompanha a estadia e dá personalidade a uma viagem que pode alternar descanso, atividades ao ar livre e momentos em família.",
+   "A programação reúne possibilidades como trilhas, tirolesa, arvorismo, caiaque e stand-up paddle, além de piscinas e espaços de recreação. As experiências variam conforme a programação e as condições de operação; algumas atividades exigem agendamento e são cobradas à parte. A proximidade da água é um dos diferenciais desta unidade.",
+   "As acomodações têm propostas diferentes, incluindo categorias na Vila da Mata e voltadas para a represa. A gastronomia e o SPA by L’Occitane complementam os dias de lazer, com tratamentos contratados à parte. O Clara Ibiúna interessa a quem deseja aproveitar o cenário natural com uma estrutura que oferece programas para diferentes ritmos de viagem."
   ],
   "amenities": [
    {
     "icon": "leisure",
-    "label": "Aventura na natureza",
-    "description": "Tirolesa, arvorismo e outras experiências ampliam o programa da viagem."
+    "label": "Represa de Itupararanga",
+    "description": "A paisagem da represa é parte da identidade do Clara Ibiúna."
    },
    {
     "icon": "leisure",
-    "label": "Atividades no lago",
-    "description": "Opções como caiaque e stand-up paddle aproximam o lazer da paisagem."
+    "label": "Natureza e aventura",
+    "description": "Trilhas, tirolesa e arvorismo conforme programação e condições de operação."
    },
    {
-    "icon": "leisure",
-    "label": "Cavalgadas",
-    "description": "Uma oportunidade de aproveitar o ambiente de campo."
+    "icon": "pool",
+    "label": "Piscinas e lazer aquático",
+    "description": "Ambientes de piscina e atividades na represa para variar os dias."
    },
    {
-    "icon": "leisure",
-    "label": "Vila do Lago",
-    "description": "Categorias de acomodação com diferentes propostas de conforto."
+    "icon": "home",
+    "label": "Vila da Mata e categorias com vista",
+    "description": "Acomodações com características distintas, escolhidas no momento da reserva."
    },
    {
     "icon": "spa",
-    "label": "Lazer em família",
-    "description": "Programação e espaços para compartilhar experiências entre gerações."
+    "label": "SPA by L’Occitane",
+    "description": "Tratamentos de bem-estar mediante agendamento e cobrança à parte."
    }
   ]
  },
@@ -240,7 +240,7 @@
  "cyan-resort": {
   "description": [
    "O Cyan Resort é uma escolha prática para quem quer aproveitar alguns dias de lazer no interior de São Paulo com opções dentro e fora do hotel. Em Itupeva, sua localização próxima a parques e ao Outlet Premium permite combinar hospedagem, entretenimento e compras. Ao mesmo tempo, a estrutura do resort oferece motivos para reservar dias inteiros apenas para ficar e aproveitar a viagem em família.",
-   "As piscinas são parte importante da experiência, com uma área em estilo prainha e uma opção coberta e aquecida. A recreação atende diferentes idades, enquanto as quadras de beach tennis e outros espaços esportivos ampliam as possibilidades para os adultos. O jardim secreto acrescenta um ambiente mais reservado, interessante para uma pausa entre os momentos de maior movimento.",
+   "As piscinas são parte importante da experiência, com uma área em estilo prainha e uma opção coberta climatizada. A recreação atende diferentes idades, enquanto as quadras de beach tennis e outros espaços esportivos ampliam as possibilidades para os adultos. O jardim secreto acrescenta um ambiente mais reservado, interessante para uma pausa entre os momentos de maior movimento.",
    "A pensão completa concentra café da manhã, almoço e jantar no hotel e facilita o planejamento dos dias. Você pode alternar uma saída para os parques com outro dia de piscina e atividades, sem mudar de hospedagem. Essa flexibilidade torna o Cyan especialmente interessante para famílias que desejam uma viagem com variedade, aproveitando o resort como destino e também como base para explorar as atrações de Itupeva."
   ],
   "amenities": [
@@ -251,7 +251,7 @@
    },
    {
     "icon": "pool",
-    "label": "Piscina coberta e aquecida",
+    "label": "Piscina coberta climatizada",
     "description": "Mais uma opção para os momentos de descanso."
    },
    {
@@ -274,7 +274,7 @@
  "fazenda-dona-carolina": {
   "description": [
    "Na Fazenda Dona Carolina, a história não aparece apenas na decoração: ela faz parte do lugar em que você se hospeda. Em Itatiba, a antiga fazenda de café reúne construções históricas, natureza preservada e uma proposta de lazer que mantém o ambiente rural presente. É uma escolha para famílias e casais que querem descansar com conforto, mas também viver experiências ligadas à identidade da propriedade.",
-   "As atividades permitem explorar a fazenda de maneiras diferentes, com cavalgadas, passeios de charrete, caiaque e opções de aventura. O contato com a produção de café e de cachaça acrescenta conteúdo à viagem e ajuda a compreender o lugar além da paisagem. Para quem gosta de destinos com histórias para contar, esses momentos tornam a hospedagem mais interessante do que uma sequência de atividades genéricas.",
+   "As atividades permitem explorar a fazenda de maneiras diferentes, com cavalgadas, passeios de charrete, caiaque e opções de aventura. O contato com a produção de café e de cachaça acrescenta conteúdo à viagem e ajuda a compreender o lugar além da paisagem. Para quem gosta de destinos com histórias para contar, esses momentos tornam a hospedagem mais interessante do que uma sequência de atividades genéricas. Cavalgadas e passeios de charrete são cobrados à parte.",
    "A gastronomia acompanha essa atmosfera, do café da manhã colonial aos restaurantes e aos ambientes de encontro. Você pode dedicar parte do dia ao lazer e reservar outra parte para aproveitar a arquitetura, o verde e uma refeição sem pressa. O conjunto faz da Dona Carolina uma opção para quem valoriza uma viagem de campo com memória, personalidade e diferentes formas de aproveitar o tempo junto."
   ],
   "amenities": [
@@ -291,7 +291,7 @@
    {
     "icon": "leisure",
     "label": "Cavalgadas e charrete",
-    "description": "Atividades que preservam o caráter rural da viagem."
+    "description": "Atividades que preservam o caráter rural da viagem. Cobrança à parte."
    },
    {
     "icon": "spa",
@@ -580,7 +580,7 @@
  "mavsa": {
   "description": [
    "O Mavsa é uma escolha para quem busca uma viagem em que gastronomia, lazer e entretenimento estejam concentrados no próprio resort. Em Cesário Lange, a proposta all inclusive permite organizar férias em família ou encontros entre amigos com menos decisões sobre o programa de cada dia. A estrutura ampla e os ambientes tematizados ajudam a fazer da hospedagem uma parte importante do destino.",
-   "A Cidade dos Sonhos reúne jogos e ambientes infantis, enquanto as piscinas e as atividades no lago permitem variar o ritmo da estadia. Há espaço para acompanhar a programação, aproveitar as piscinas e dedicar tempo a experiências compartilhadas. A proposta também valoriza o entretenimento, com atividades e apresentações conforme o calendário, interessante para quem gosta de férias com movimento e diferentes programas ao longo do dia.",
+   "A Cidade dos Sonhos reúne jogos e ambientes infantis, enquanto as piscinas e as atividades no lago permitem variar o ritmo da estadia. Há espaço para acompanhar a programação, aproveitar as piscinas e dedicar tempo a experiências compartilhadas. A proposta também valoriza o entretenimento, com atividades e apresentações conforme o calendário, interessante para quem gosta de férias com movimento e diferentes programas ao longo do dia. Alguns jogos da Cidade dos Sonhos são cobrados à parte.",
    "A gastronomia e as bebidas dentro do sistema contratado acompanham essa experiência, favorecendo os encontros entre uma atividade e outra. Para quem parte da região de São Paulo, o interior oferece uma mudança de cenário sem depender de viagem aérea. O Mavsa se destaca para famílias e grupos que querem aproveitar intensamente o resort, alternando lazer, refeições e convivência em uma hospedagem de proposta abrangente."
   ],
   "amenities": [
@@ -597,7 +597,7 @@
    {
     "icon": "leisure",
     "label": "Cidade dos Sonhos",
-    "description": "Jogos e ambientes infantis acrescentam uma identidade própria ao lazer."
+    "description": "Jogos e ambientes infantis acrescentam uma identidade própria ao lazer. Alguns jogos são cobrados à parte."
    },
    {
     "icon": "kids",
@@ -818,7 +818,7 @@
  "le-canton": {
   "description": [
    "No Le Canton, a viagem à serra ganha um cenário de vila suíça, com jardins, construções temáticas e um castelo. Em Teresópolis, construções inspiradas nas vilas suíças, jardins e um castelo ajudam a criar uma atmosfera lúdica, que combina especialmente com férias em família. O destino reúne diferentes hotéis e permite escolher a hospedagem de acordo com o tipo de ambiente e de experiência que você procura.",
-   "O Parc Magique é um dos elementos que dão personalidade ao complexo: um parque de diversões coberto, pensado para acrescentar outro programa aos dias de resort. As piscinas climatizadas, as atividades de lazer e os espaços para crianças ampliam essa variedade. Mais do que depender de um passeio externo para entreter a família, a proposta é encontrar diferentes possibilidades no destino.",
+   "O Parc Magique é um dos elementos que dão personalidade ao complexo: um parque de diversões coberto, pensado para acrescentar outro programa aos dias de resort. As piscinas climatizadas, as atividades de lazer e os espaços para crianças ampliam essa variedade. Mais do que depender de um passeio externo para entreter a família, a proposta é encontrar diferentes possibilidades no destino. Parc Magique, spa e algumas atividades podem ter cobrança separada, conforme o pacote contratado.",
    "O descanso dos adultos também tem espaço, com gastronomia, paisagem de montanha e o SPA by L’Occitane. Você pode dividir o dia entre acompanhar as brincadeiras, aproveitar uma refeição e reservar uma pausa para si. Como Village, Magique e Fazenda têm propostas distintas, a escolha do hotel importa: ela ajuda a ajustar a viagem entre o clima de vila, a proximidade das atrações e a vivência do campo."
   ],
   "amenities": [
@@ -830,7 +830,7 @@
    {
     "icon": "kids",
     "label": "Parc Magique",
-    "description": "Um parque de diversões coberto amplia os programas em família."
+    "description": "Um parque de diversões coberto amplia os programas em família. Consulte inclusões e cobranças do pacote."
    },
    {
     "icon": "leisure",
@@ -845,7 +845,7 @@
    {
     "icon": "spa",
     "label": "SPA by L’Occitane",
-    "description": "Uma opção para reservar uma pausa de bem-estar durante a estadia."
+    "description": "Uma opção para reservar uma pausa de bem-estar durante a estadia. Consulte inclusões e cobranças do pacote."
    }
   ]
  },
@@ -1157,7 +1157,7 @@
  },
  "mabu-hoteis-resorts": {
   "description": [
-   "Águas termais e o Blue Park fazem da hospedagem no Mabu uma parte importante das férias em Foz. As águas termais, provenientes do Aquífero Guarani, dão identidade à experiência e permitem reservar dias para o próprio hotel. A proposta combina especialmente com famílias que querem alternar os passeios pelo destino com momentos de descanso e diversão na água.",
+   "Águas termais e o Blue Park fazem da hospedagem no Mabu Thermas Grand Resort uma parte importante das férias em Foz. As águas termais, provenientes do Aquífero Guarani, dão identidade à experiência e permitem reservar dias para o próprio hotel. A proposta combina especialmente com famílias que querem alternar os passeios pelo destino com momentos de descanso e diversão na água.",
    "O Blue Park acrescenta outro programa à viagem, com atrações que ampliam as possibilidades de lazer do complexo. As condições de acesso previstas na hospedagem ajudam a definir como incluí-lo no roteiro. Dentro do resort, as áreas de piscina e os ambientes para diferentes idades permitem variar o dia, enquanto a gastronomia cria oportunidades para reunir novamente a família entre uma atividade e outra.",
    "Foz oferece atrações que podem ocupar boa parte da viagem, mas o Mabu permite deixar períodos livres para aproveitar a base escolhida. Você pode planejar uma saída para conhecer a região e reservar o dia seguinte para o hotel e o parque aquático. Essa combinação faz sentido para quem valoriza águas termais, entretenimento e conforto, buscando uma estadia em que o resort também tenha lugar nas lembranças das férias."
   ],
@@ -1599,7 +1599,7 @@
  },
  "costa-do-sauipe-resorts": {
   "description": [
-   "Na Costa do Sauípe, a escolha da viagem começa pelo hotel: o complexo reúne unidades com diferentes propostas de férias. No litoral norte da Bahia, a paisagem combina mar, coqueiros e áreas naturais, criando um cenário para viagens em família, encontros entre amigos e períodos de descanso a dois. A experiência começa pela escolha do hotel, pois as unidades têm propostas e categorias diferentes.",
+   "Esta ficha apresenta o Terra Resort, uma das unidades da Costa do Sauípe. Na Costa do Sauípe, a escolha da viagem começa pelo hotel: o complexo reúne unidades com diferentes propostas de férias. No litoral norte da Bahia, a paisagem combina mar, coqueiros e áreas naturais, criando um cenário para viagens em família, encontros entre amigos e períodos de descanso a dois. A experiência começa pela escolha do hotel, pois as unidades têm propostas e categorias diferentes.",
    "O sistema all inclusive e as estruturas de lazer ajudam a organizar os dias ao redor de refeições, piscinas e atividades. A Vila Nova da Praia acrescenta um ambiente de encontro e entretenimento ao destino, com uma atmosfera que remete à Bahia. Essa variedade permite alternar momentos no hotel escolhido com programas disponíveis no complexo, conforme as condições de acesso da hospedagem.",
    "Para quem viaja em grupo, o interesse está em encontrar diferentes maneiras de aproveitar o mesmo lugar. É possível dedicar parte do dia ao mar e reservar outro período para a programação ou para uma refeição com todos. Sauípe faz sentido quando você deseja uma viagem com bastante estrutura e cenário litorâneo, escolhendo a categoria que melhor combina com o conforto, o estilo de férias e a companhia."
   ],
@@ -2551,7 +2551,7 @@
  },
  "rio-quente-resorts": {
   "description": [
-   "No Rio Quente, nascentes termais e parques aquáticos transformam a água no centro das férias. O destino reúne diferentes hotéis e experiências em um complexo ligado às nascentes da região, criando uma proposta que combina descanso e diversão aquática. O interesse começa pela escolha da hospedagem, pois as unidades têm localizações, categorias e condições de acesso que influenciam o roteiro.",
+   "Esta ficha apresenta o Hotel Pousada, uma das unidades do Rio Quente Resorts. No Rio Quente, nascentes termais e parques aquáticos transformam a água no centro das férias. O destino reúne diferentes hotéis e experiências em um complexo ligado às nascentes da região, criando uma proposta que combina descanso e diversão aquática. O interesse começa pela escolha da hospedagem, pois as unidades têm localizações, categorias e condições de acesso que influenciam o roteiro.",
    "O Parque das Fontes é uma das experiências que dão identidade ao destino, com águas termais e ambientes para aproveitar a natureza. O Hot Park acrescenta outro ritmo à viagem, com atrações de lazer que permitem alternar períodos tranquilos e programas mais ativos. Essa combinação interessa especialmente a famílias e grupos que desejam ter várias maneiras de aproveitar a água durante a estadia.",
    "Os hotéis oferecem bases diferentes para viver essas experiências, por isso vale ajustar a escolha ao tipo de conforto e à dinâmica de férias desejada. Você pode reservar dias para as atrações e deixar períodos mais livres para o descanso e os encontros à mesa. Rio Quente faz sentido para quem valoriza um destino em que a natureza das águas e a estrutura dos parques participam juntas das lembranças da viagem."
   ],
