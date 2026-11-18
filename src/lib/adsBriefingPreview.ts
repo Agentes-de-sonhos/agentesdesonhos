@@ -1991,6 +1991,7 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
     newsletter: { enabled: true, order: 10 }, authority: { enabled: false },
     avaliacoes: { enabled: false }, testimonials: { enabled: false } },
   nav: pristurBaseline.nav,
+  cruiseSeasonInNav: false,
   copy: { ...pristurBaseline.copy },
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
