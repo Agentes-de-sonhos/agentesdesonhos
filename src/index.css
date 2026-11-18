@@ -1811,8 +1811,48 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 /* Shopping review: neutral tokens pending confirmed agency palette. */
 .wl-editorial.wl-mundo.wl-shopping-mundo { --primary: 222 47% 11%; --primary-foreground: 0 0% 100%; --wl-navy: 222 47% 11%; --foreground: 222 30% 12%; --muted-foreground: 222 10% 38%; --border: 240 8% 88%; --mc: #0F1729; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6F6F8 100%); }
 
-/* Pristur review: neutral tokens pending confirmed agency palette. */
-.wl-editorial.wl-mundo.wl-pristur-mundo { --primary: 222 47% 11%; --primary-foreground: 0 0% 100%; --wl-navy: 222 47% 11%; --foreground: 222 30% 12%; --muted-foreground: 222 10% 38%; --border: 240 8% 88%; --mc: #0F1729; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6F6F8 100%); }
+/* Pristur: azul escuro nas ações e azul esverdeado em detalhes e fundos suaves. */
+.wl-editorial.wl-mundo.wl-pristur-mundo {
+  --primary: 252 55% 28%;
+  --primary-foreground: 0 0% 100%;
+  --wl-navy: 252 55% 28%;
+  --wl-ink: 252 55% 28%;
+  --wl-red: 184 89% 27%;
+  --foreground: 252 30% 16%;
+  --muted-foreground: 252 10% 38%;
+  --border: 185 22% 88%;
+  --mc: #30206D;
+  --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 45%, #EAF8F9 100%);
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo .wl-alt-surface:has(> :is(#destinos, #resorts, #diferenciais, #faq)) {
+  background-color: #FFFFFF !important;
+  background-image: linear-gradient(180deg, #FFFFFF 45%, #EAF8F9 100%) !important;
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo #rodape {
+  background-image: linear-gradient(180deg, #FFFFFF 50%, #EAF8F9 100%) !important;
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo :is(#destinos, #resorts, #diferenciais, #faq, #atendimento) .wl-kicker {
+  color: #087B84 !important;
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo .wl-inspiration-cta {
+  background-color: #30206D;
+  color: #FFFFFF;
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo .wl-inspiration-cta:hover { background-color: #241850; }
+.wl-editorial.wl-mundo.wl-pristur-mundo #atendimento .wl-steps-card .wl-step-num {
+  background-color: #0EAEBB !important;
+  color: #182044 !important;
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo button[data-region][data-active] {
+  background-color: #30206D !important;
+  border-color: #30206D !important;
+  color: #FFFFFF !important;
+}
+@media (max-width: 767.98px) {
+  .wl-editorial.wl-mundo.wl-pristur-mundo .wl-alt-surface:has(> :is(#destinos, #resorts, #diferenciais, #faq)) {
+    background-image: linear-gradient(180deg, #FFFFFF 45%, #EAF8F9 100%) !important;
+  }
+}
 
 /* Arena approved presentation: shared by official hosts and isolated briefing. */
 
