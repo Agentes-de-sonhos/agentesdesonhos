@@ -2627,6 +2627,7 @@ ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].pages = {
 ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].notice = "Shopping Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
 
 ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].pages = {
+  xcaret: undefined, // página Xcaret desligada a pedido de Fernando (18/11/2026)
   resorts: { title: "Explore os resorts do Brasil com a Pristur Viagens" }, orlandoTickets: true, editorial: true,
 };
 ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
