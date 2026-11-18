@@ -13,6 +13,7 @@ import curtiLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import essyaLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
+import pristurLogo from "@/assets/whitelabel/logo-pristur.png.asset.json";
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
 const CEM_LIMITES_MARK =
@@ -23,6 +24,7 @@ const ARENA_MARK = "/arena-travel-group/logo.jpeg";
 const ARENA_HOSTS = new Set(["arenatravelgroup.com.br", "www.arenatravelgroup.com.br"]);
 
 const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
+  "briefing-22-v1.preview.local": pristurLogo.url,
   "destinoscomaju.com.br": destinosComAJuSymbol.url,
   "www.destinoscomaju.com.br": destinosComAJuSymbol.url,
   "100limites.tur.br": CEM_LIMITES_MARK,
@@ -51,6 +53,7 @@ const HOME_AND_PUBLIC_ONLY = new Set([
 
 /** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
 const BREATHE_HOSTNAMES = new Set([
+  "briefing-22-v1.preview.local",
   "paraisoviagens.com", "www.paraisoviagens.com",
   "omundoemcores.com.br", "www.omundoemcores.com.br", "briefing-14-v1.preview.local",
   ...HOME_AND_PUBLIC_ONLY,

@@ -6,6 +6,9 @@ import { PRISTUR_PREVIEW_HOST, PRISTUR_PREVIEW_INFO, PRISTUR_PREVIEW_PROFILE, re
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { resolveSiteTheme, siteThemeRootClass } from "@/lib/agencySiteTheme";
 import AdsBriefingPreview from "@/pages/adsPreview/AdsBriefingPreview";
+import { resolveAgencyLogoOverride, resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
+import { cadasturCertificateFor } from "@/components/whitelabel/CadasturSeal";
+import { resolveAgencySpinnerMark } from "@/components/whitelabel/AgencyBrandSpinner";
 
 vi.mock("@/pages/NotFound", () => ({ default: () => <p>Not found</p> }));
 afterEach(cleanup);
@@ -33,11 +36,11 @@ describe("Pristur briefing-22-v1", () => {
     expect(PRISTUR_PREVIEW_PROFILE.footer?.legalName).toBeUndefined();
     expect(PRISTUR_PREVIEW_PROFILE.footer?.address).toBe("São Paulo/SP");
   });
-  it("uses the shared neutral theme and only a textual wordmark", () => {
+  it("uses the shared neutral theme with the supplied official logo", () => {
     expect(PRISTUR_PREVIEW_INFO.logo_url).toBeNull();
-    expect(PRISTUR_PREVIEW_PROFILE.textualWordmark).toBe(true);
+    expect(PRISTUR_PREVIEW_PROFILE.textualWordmark).toBe(false);
     expect(resolveSiteTheme(PRISTUR_PREVIEW_HOST)).toBe("siteBaseEditorial");
-    expect(siteThemeRootClass(PRISTUR_PREVIEW_HOST)).toBe(siteThemeRootClass("sitelab.local"));
+    expect(resolveAgencyLogoOverride(PRISTUR_PREVIEW_HOST)).toContain("logo-pristur.png");
   });
   it("does not enable unconfirmed reviews, certifications, team or offers", () => {
     for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc", "newsletter", "authority"] as const) expect(PRISTUR_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
@@ -86,6 +89,14 @@ describe("Pristur briefing-22-v1", () => {
   });
 });
 describe("Pristur — seções escolhidas por Fernando", () => {
+  it("keeps supplied branding and certificate scoped to the synthetic preview", () => {
+    expect(resolveAgencySpinnerMark(PRISTUR_PREVIEW_HOST)).toBe(resolveAgencyLogoOverride(PRISTUR_PREVIEW_HOST));
+    expect(resolveAgencyFaviconUrl(PRISTUR_PREVIEW_INFO)).toBe("/pristur/favicon.png");
+    expect(cadasturCertificateFor(PRISTUR_PREVIEW_HOST)?.agency).toBe("Pristur Viagens");
+    expect(cadasturCertificateFor(PRISTUR_PREVIEW_HOST)?.url).toContain("certificado-cadastur-pristur.png");
+    expect(resolveAgencyLogoOverride("pristur.preview.local")).toBeNull();
+    expect(cadasturCertificateFor("pristur.preview.local")).toBeNull();
+  });
   it("sem Xcaret e sem Avaliações do Google na home e no menu", () => {
     expect(PRISTUR_PREVIEW_PROFILE.featuredExperience).toBeUndefined();
     expect(PRISTUR_PREVIEW_PROFILE.sections?.avaliacoes).toEqual({ enabled: false });

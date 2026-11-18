@@ -1891,7 +1891,7 @@ export const PRISTUR_PREVIEW_INFO: AgencyDomainInfo = {
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
 const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
-  textualWordmark: true,
+  textualWordmark: false,
   navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
   authority: undefined, testimonials: undefined, conciergePoints: undefined,
@@ -1977,7 +1977,7 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     instagram: "https://www.instagram.com/priturismo/", instagramLabel: "@priturismo",
     address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true,
   },
-  seo: { title: "Prévia para revisão — Pristur Viagens", description: "Prévia técnica da Pristur Viagens. Marca e paleta pendentes; sem envios ou publicação." },
+  seo: { title: "Prévia para revisão — Pristur Viagens", description: "Prévia técnica da Pristur Viagens com logo oficial. Paleta em revisão; sem envios ou publicação." },
 }, "Pristur Viagens");
 export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = buildMundoReviewProfile("pristurBriefing22", pristurBaseline, "Pristur Viagens", "Priscila Vasconcelos");
 PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038", phone: "(11) 98301-7038" };
@@ -2630,7 +2630,7 @@ ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].pages = {
   xcaret: undefined, // página Xcaret desligada a pedido de Fernando (18/11/2026)
   resorts: { title: "Explore os resorts do Brasil com a Pristur Viagens" }, orlandoTickets: true, editorial: true,
 };
-ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
+ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logo oficial e Cadastur · paleta em revisão · fotos do modelo provisórias · sem publicação";
 
 /* IM&M Viagens e Turismo (immturismo.com.br): O Mundo em Cores model with a
  * textual wordmark; logo/palette and editorial facts pending. Generic copy only. */

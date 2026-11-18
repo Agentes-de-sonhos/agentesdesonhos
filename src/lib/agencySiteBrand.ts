@@ -32,9 +32,11 @@ import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.
 import bardelliFavicon from "@/assets/whitelabel/favicon-bardelli-viagens.png.asset.json";
 import curtiFavicon from "@/assets/whitelabel/favicon-curti-viagens-2.png.asset.json";
 import immLogo from "@/assets/whitelabel/logo-imm-viagens.png.asset.json";
+import pristurLogo from "@/assets/whitelabel/logo-pristur.png.asset.json";
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
+  "briefing-22-v1.preview.local": pristurLogo.url,
   "immturismo.com.br": immLogo.url,
   "www.immturismo.com.br": immLogo.url,
   "arenatravelgroup.com.br": arenaLogo.url,
@@ -75,6 +77,7 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
+  "briefing-22-v1.preview.local": "/pristur/favicon.png",
   "arenatravelgroup.com.br": "/arena-travel-group/favicon.png",
   "www.arenatravelgroup.com.br": "/arena-travel-group/favicon.png",
   "briefing-23-v1.preview.local": "/arena-travel-group/favicon.png",
@@ -110,6 +113,7 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
  * Quando true, a apresentação NÃO repete o nome ao lado do logotipo.
  */
 const LOGO_WITH_WORDMARK_HOSTS = new Set([
+  "briefing-22-v1.preview.local",
   "immturismo.com.br",
   "www.immturismo.com.br",
   "arenatravelgroup.com.br",

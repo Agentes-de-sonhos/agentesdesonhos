@@ -6,6 +6,7 @@ import { isTechnicalPreviewHost, isCompletePresentationHost, resolveAdsPreviewFi
 import { AgencyPresentationPages } from "@/components/whitelabel/AgencyPresentationPages";
 import { resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
+import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 
 const CircuitTourPage = lazy(() => import("@/pages/whitelabel/CircuitTourPage"));
 const CruiseItinerariesPage = lazy(() => import("@/pages/whitelabel/CruiseItinerariesPage"));
@@ -42,6 +43,13 @@ export default function AdsBriefingPreview() {
     ? isCompletePresentationHost(window.location.hostname)
     : isTechnicalPreviewHost(window.location.hostname);
   const [notice, setNotice] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
+  const pristurHome = allowed && fixture?.info.hostname === "briefing-22-v1.preview.local" && subPath === "";
+  useEffect(() => {
+    if (!pristurHome || introDone) return;
+    const timer = window.setTimeout(() => setIntroDone(true), 1800);
+    return () => window.clearTimeout(timer);
+  }, [pristurHome, introDone]);
   useAgencyFavicon(allowed && fixture ? resolveAgencyFaviconUrl(fixture.info) : null);
 
   useEffect(() => {
@@ -184,6 +192,11 @@ export default function AdsBriefingPreview() {
 
   return (
     <div className="min-h-screen bg-background" data-ads-preview={fixture.jobId}>
+      {pristurHome && !introDone && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-card">
+          <AgencyBrandSpinner hostname={fixture.info.hostname} size="lg" />
+        </div>
+      )}
 
       <div
         role="status"
