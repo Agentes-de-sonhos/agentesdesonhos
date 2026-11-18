@@ -1898,10 +1898,10 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   sections: {
     dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
     testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
-    newsletter: { enabled: false }, authority: { enabled: false },
+    newsletter: { enabled: true, order: 10 }, authority: { enabled: false },
   },
   nav: [
-    { label: "Início", to: "/" }, { label: "Especialidades", to: "/#assinatura" },
+    { label: "Início", to: "/" }, { label: "Consultoria", to: "/#assinatura" },
     { label: "Destinos", to: "/#destinos" }, { label: "Parques Orlando", to: "/#ingressos-orlando" },
     { label: "Resorts", to: "/#resorts" }, { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
   ],
@@ -1912,9 +1912,9 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     { title: "Seu descanso merece atenção aos detalhes.", subtitle: "Resorts, Caribe e destinos pelo Brasil com orientação para escolher o que combina com a sua viagem.", image: "resort", order: 3, enabled: true },
   ],
   signature: {
-    kicker: "ATENDIMENTO QUE ACOMPANHA VOCÊ",
-    title: "Mais do que reservar: planejar e estar por perto.",
-    text: "Da escolha do destino às orientações antes de embarcar, a Priscila cuida dos detalhes com você. Durante a viagem, ela continua acompanhando o que for necessário; depois do retorno, o contato permanece aberto.",
+    kicker: "CONSULTORIA DE VIAGENS COM A PRISCILA",
+    title: "Uma viagem pensada para você, com alguém por perto em cada etapa.",
+    text: "A Pristur começa ouvindo quem vai viajar, o que deseja viver e o que precisa considerar. A Priscila ajuda a escolher destinos, hospedagens e experiências, orienta antes do embarque e continua em contato durante a viagem e depois do retorno. Assim, cada detalhe faz sentido para os seus planos.",
   },
   destinations: [
     { key: "eua-canada", image: "parques", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Orlando, parques e outras possibilidades para viajar em família, a dois ou com amigos.", service: "pacotes", enabled: true, order: 1 },
@@ -1969,6 +1969,7 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     differentials: { kicker: "POR QUE VIAJAR COM A PRISTUR", title: "Atenção que continua depois da reserva", subtitle: "Da primeira conversa ao retorno, você sabe com quem contar." },
     concierge: { kicker: "COMO FUNCIONA", title: "Da ideia ao retorno", subtitle: "Você conversa com a Priscila e constrói a viagem com orientação em cada etapa." },
     faq: { kicker: "DÚVIDAS FREQUENTES", title: "Para planejar com tranquilidade" },
+    newsletter: { kicker: "NOVIDADES DA PRISTUR", title: "Inspiração para a sua próxima viagem", subtitle: "Receba novidades sobre destinos, parques e resorts para descobrir novas possibilidades de viagem com a Pristur.", cta: "Quero receber novidades" },
   },
   footer: {
     email: "consultoriapristurviagens@gmail.com",
@@ -1981,15 +1982,22 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
 }, "Pristur Viagens");
 export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   ...buildMundoReviewProfile("pristurBriefing22", pristurBaseline, "Pristur Viagens", "Priscila Vasconcelos"),
-  // O briefing não apresenta cruzeiros como especialidade nem um grupo de novidades.
+  // O briefing não apresenta cruzeiros como especialidade nem grupo de WhatsApp.
   // Evite também o retrato/mural da consultora do site usado como modelo.
   sections: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.sections,
-    authority: { enabled: false }, newsletter: { enabled: false },
+    signature: { enabled: true, order: 1 }, modules: { enabled: false },
+    destinations: { enabled: true, order: 2 }, orlando: { enabled: true, order: 3 },
+    resorts: { enabled: true, order: 4 }, about: { enabled: true, order: 5 },
+    newsletter: { enabled: true, order: 10 }, authority: { enabled: false },
     avaliacoes: { enabled: false }, testimonials: { enabled: false } },
+  nav: pristurBaseline.nav,
+  copy: { ...pristurBaseline.copy },
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
   modules: pristurBaseline.modules?.slice(0, 4),
   heroPresentation: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.heroPresentation, kicker: "PRISTUR VIAGENS · CONSULTORIA DE VIAGENS" },
+  socialStrip: { title: "Acompanhe a Pristur no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/priturismo/" }] },
+  inspirationDialog: { title: "Receber novidades da Pristur", description: "Informe seus dados para receber novidades sobre destinos e viagens da Pristur.", notice: "Prévia para revisão: nenhum dado será enviado agora." },
 };
 PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038" };
 // Fernando (18/11/2026): sem Xcaret, sem Novembro e sem Avaliações do Google por enquanto.
