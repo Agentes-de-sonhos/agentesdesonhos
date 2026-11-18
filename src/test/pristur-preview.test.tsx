@@ -85,3 +85,14 @@ describe("Pristur briefing-22-v1", () => {
     form.remove(); a.remove(); result.unmount();
   });
 });
+describe("Pristur — seções escolhidas por Fernando", () => {
+  it("sem Xcaret e sem Avaliações do Google na home e no menu", () => {
+    expect(PRISTUR_PREVIEW_PROFILE.featuredExperience).toBeUndefined();
+    expect(PRISTUR_PREVIEW_PROFILE.sections?.avaliacoes).toEqual({ enabled: false });
+    const links = JSON.stringify(PRISTUR_PREVIEW_PROFILE.nav);
+    expect(links).not.toContain("/xcaret");
+    expect(links).not.toContain("/#avaliacoes");
+    expect(links).not.toContain("/oportunidades-novembro");
+    expect(resolveAdsPreviewFixture("briefing-22-v1")?.pages?.xcaret).toBeUndefined();
+  });
+});
