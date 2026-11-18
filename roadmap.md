@@ -101,3 +101,4 @@
 - [ ] Financeiro (atomicidade): criação de venda + serviços ainda não é transacional nem idempotente — aguardando aprovação da proposta de RPC no servidor (sem migração aplicada)
 - [x] Página de Links (Bio): /links em todos os domínios de agência reaproveitando o cartão virtual do dono; menu renomeado; link do domínio no painel; sem publicar.
 - [x] Xcaret O Mundo em Cores: no celular, a montagem entra entre o título e os dois parágrafos (opt-in mobileGalleryAboveText só no perfil Mundo); 7 testes, build OK, ordem conferida em 393px e desktop inalterado; Ju segue com parágrafos antes da foto; sem publicar.
+- [x] Menu Paraíso Viagens: "Cruzeiros 26/27" removido do menu via opt-out declarativo cruiseSeasonInNav; teste novo aprovado, home conferida no navegador em 1280 com o endereço real (menu sem o item), demais tenants preservados, build OK; sem publicar.
