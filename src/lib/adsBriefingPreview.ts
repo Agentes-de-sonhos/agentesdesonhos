@@ -8,6 +8,7 @@ import { EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
 import bardelliNewsletterPhoto from "@/assets/whitelabel/hero-praia.jpg";
 import dricaNewsletterLondon from "@/assets/presentation/drica/london-newsletter.jpg";
+import pristurNewsletterWing from "@/assets/whitelabel/mundo-newsletter-wing.jpg.asset.json";
 import arenaRafaelSnowboard from "@/assets/arena-rafael-snowboard-action.webp.asset.json";
 import clubMedSkiVideo from "@/assets/whitelabel/club-med-all-inclusive-ski-vacations.mp4.asset.json";
 import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
@@ -1901,9 +1902,15 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     newsletter: { enabled: true, order: 10 }, authority: { enabled: false },
   },
   nav: [
-    { label: "Início", to: "/" }, { label: "Consultoria", to: "/#assinatura" },
-    { label: "Destinos", to: "/#destinos" }, { label: "Parques Orlando", to: "/#ingressos-orlando" },
-    { label: "Resorts", to: "/#resorts" }, { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+    { label: "Início", to: "/" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Especialidades", to: "/#assinatura" },
+    { label: "Parques Orlando / Disney", to: "/ingressos-orlando" },
+    { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
+    { label: "Resorts Brasil", to: "/resorts-brasil" },
+    { label: "Sobre", to: "/#sobre", children: [
+      { label: "Quem Somos", to: "/#sobre" }, { label: "Dúvidas Frequentes", to: "/#faq" },
+    ] },
   ],
   heroPresentation: { kicker: "CONSULTORIA DE VIAGENS · SÃO PAULO", overlay: "strongLeft", titleWeight: "regular" },
   hero: [
@@ -1982,22 +1989,24 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
 }, "Pristur Viagens");
 export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   ...buildMundoReviewProfile("pristurBriefing22", pristurBaseline, "Pristur Viagens", "Priscila Vasconcelos"),
-  // O briefing não apresenta cruzeiros como especialidade nem grupo de WhatsApp.
+  // Temporada de cruzeiros habilitada por solicitação posterior de Fernando;
+  // o briefing não apresenta grupo de WhatsApp.
   // Evite também o retrato/mural da consultora do site usado como modelo.
   sections: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.sections,
     signature: { enabled: true, order: 1 }, modules: { enabled: false },
     destinations: { enabled: true, order: 2 }, orlando: { enabled: true, order: 3 },
     resorts: { enabled: true, order: 4 }, about: { enabled: true, order: 5 },
-    newsletter: { enabled: true, order: 10 }, authority: { enabled: false },
+    authority: { enabled: true, order: 3.5 }, newsletter: { enabled: true, order: 10 },
     avaliacoes: { enabled: false }, testimonials: { enabled: false } },
   nav: pristurBaseline.nav,
-  cruiseSeasonInNav: false,
+  cruiseSeasonInNav: true,
   copy: { ...pristurBaseline.copy },
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
   modules: pristurBaseline.modules?.slice(0, 4),
   heroPresentation: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.heroPresentation, kicker: "PRISTUR VIAGENS · CONSULTORIA DE VIAGENS" },
   socialStrip: { title: "Acompanhe a Pristur no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/priturismo/" }] },
+  newsletterMedia: { src: pristurNewsletterWing.url, alt: "Vista do céu e da asa de um avião pela janela" },
   inspirationDialog: { title: "Receber novidades da Pristur", description: "Informe seus dados para receber novidades sobre destinos e viagens da Pristur.", notice: "Prévia para revisão: nenhum dado será enviado agora." },
 };
 PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038" };

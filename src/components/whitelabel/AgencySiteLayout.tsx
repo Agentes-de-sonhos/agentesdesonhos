@@ -534,9 +534,11 @@ export function AgencyFooter({
      * do cabeçalho. Demais tenants seguem com o acabamento atual.
      */
     const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22";
-    const footerLogoClass = plainFooterLogo
-      ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
-      : "h-12 w-auto max-w-[200px] object-contain";
+    const footerLogoClass = profile.key === "pristurBriefing22"
+      ? "h-[72px] w-auto max-w-[300px] object-contain"
+      : plainFooterLogo
+        ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
+        : "h-12 w-auto max-w-[200px] object-contain";
     return (
       <footer id="rodape" className={footerShellClass}>
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.75fr)_minmax(0,1.35fr)_minmax(0,0.75fr)] md:gap-10`}>
