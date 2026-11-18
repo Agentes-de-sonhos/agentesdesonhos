@@ -1865,6 +1865,15 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   background-color: #F0FAFB !important;
   background-image: linear-gradient(120deg, #FFFFFF 0%, #F0FAFB 100%) !important;
 }
+.wl-editorial.wl-mundo.wl-pristur-mundo #novidades .wl-newsletter-card > div > div:last-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to right, #F0FAFB 0%, rgb(240 250 251 / 0.8) 18%, transparent 70%);
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo #novidades .wl-newsletter-card img { object-position: center 45%; }
 .wl-editorial.wl-mundo.wl-pristur-mundo #novidades .wl-newsletter-card :is(h2, p:not(.wl-kicker)) { color: #30206D !important; }
 .wl-editorial.wl-mundo.wl-pristur-mundo #novidades .wl-kicker,
 .wl-editorial.wl-mundo.wl-pristur-mundo #novidades .wl-kicker svg { color: #087B84 !important; }
@@ -1878,6 +1887,9 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 @media (max-width: 767.98px) {
   .wl-editorial.wl-mundo.wl-pristur-mundo .wl-alt-surface:has(> :is(#destinos, #resorts, #diferenciais, #faq)) {
     background-image: linear-gradient(180deg, #FFFFFF 45%, #F0FAFB 100%) !important;
+  }
+  .wl-editorial.wl-mundo.wl-pristur-mundo #novidades .wl-newsletter-card > div > div:last-child::before {
+    background: linear-gradient(to bottom, #F0FAFB 0%, rgb(240 250 251 / 0.6) 22%, transparent 65%);
   }
 }
 
