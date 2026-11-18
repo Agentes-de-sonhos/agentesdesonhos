@@ -9,6 +9,9 @@ import AdsBriefingPreview from "@/pages/adsPreview/AdsBriefingPreview";
 import { resolveAgencyLogoOverride, resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
 import { cadasturCertificateFor } from "@/components/whitelabel/CadasturSeal";
 import { resolveAgencySpinnerMark } from "@/components/whitelabel/AgencyBrandSpinner";
+import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
+import { resolveSections } from "@/lib/agencySiteConfig";
+import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 
 vi.mock("@/pages/NotFound", () => ({ default: () => <p>Not found</p> }));
 afterEach(cleanup);
@@ -32,18 +35,21 @@ describe("Pristur briefing-22-v1", () => {
     expect(PRISTUR_PREVIEW_INFO.is_primary).toBe(false);
     expect(PRISTUR_PREVIEW_INFO.phone).toBeNull();
     expect(PRISTUR_PREVIEW_INFO.cnpj).toBeNull();
-    expect(PRISTUR_PREVIEW_PROFILE.footer?.cnpj).toBeUndefined();
-    expect(PRISTUR_PREVIEW_PROFILE.footer?.legalName).toBeUndefined();
+    expect(PRISTUR_PREVIEW_PROFILE.footer?.cnpj).toBe("57.385.871/0001-98");
+    expect(PRISTUR_PREVIEW_PROFILE.footer?.legalName).toBe("Priscila Vasconcelos");
     expect(PRISTUR_PREVIEW_PROFILE.footer?.address).toBe("São Paulo/SP");
   });
-  it("uses the shared neutral theme with the supplied official logo", () => {
+  it("uses the shared editorial theme with the supplied logo and brand palette", () => {
     expect(PRISTUR_PREVIEW_INFO.logo_url).toBeNull();
     expect(PRISTUR_PREVIEW_PROFILE.textualWordmark).toBe(false);
     expect(resolveSiteTheme(PRISTUR_PREVIEW_HOST)).toBe("siteBaseEditorial");
     expect(resolveAgencyLogoOverride(PRISTUR_PREVIEW_HOST)).toContain("logo-pristur.png");
+    expect(PRISTUR_PREVIEW_INFO.primary_color).toBe("#30206D");
   });
   it("does not enable unconfirmed reviews, certifications, team or offers", () => {
-    for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc", "newsletter", "authority"] as const) expect(PRISTUR_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
+    for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc"] as const) expect(PRISTUR_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
+    expect(PRISTUR_PREVIEW_PROFILE.sections?.authority).toEqual({ enabled: true, order: 3.5 });
+    expect(PRISTUR_PREVIEW_PROFILE.sections?.newsletter).toEqual({ enabled: true, order: 10 });
     expect(PRISTUR_PREVIEW_PROFILE.team).toBeUndefined();
     expect(PRISTUR_PREVIEW_PROFILE.credentials).toBeUndefined();
     expect(PRISTUR_PREVIEW_PROFILE.visaHome).toBe(false);
@@ -52,7 +58,8 @@ describe("Pristur briefing-22-v1", () => {
   it("retains the authorized founding year and public contacts", () => {
     expect(PRISTUR_PREVIEW_PROFILE.about?.badge?.value).toBe("Desde 2009");
     expect(PRISTUR_PREVIEW_PROFILE.about?.ownerName).toBe("Priscila Vasconcelos");
-    expect(PRISTUR_PREVIEW_PROFILE.footer?.phone).toBe("WhatsApp 11 98301-7038");
+    expect(PRISTUR_PREVIEW_PROFILE.footer?.phoneHidden).toBe(true);
+    expect(PRISTUR_PREVIEW_PROFILE.footer?.whatsapp).toBe("(11) 98301-7038");
     expect(PRISTUR_PREVIEW_PROFILE.footer?.email).toBe("consultoriapristurviagens@gmail.com");
     expect(PRISTUR_PREVIEW_PROFILE.footer?.instagramLabel).toBe("@priturismo");
   });
@@ -105,5 +112,17 @@ describe("Pristur — seções escolhidas por Fernando", () => {
     expect(links).not.toContain("/#avaliacoes");
     expect(links).not.toContain("/oportunidades-novembro");
     expect(resolveAdsPreviewFixture("briefing-22-v1")?.pages?.xcaret).toBeUndefined();
+  });
+  it("includes the cruise section and Orlando landing in the requested navigation", () => {
+    const links = siteNavLinks(PRISTUR_PREVIEW_HOST);
+    expect(links.map(({ label }) => label)).toEqual([
+      "Início", "Destinos", "Especialidades", "Parques Orlando / Disney",
+      "Cruzeiros 26/27", "Resorts Brasil", "Sobre",
+    ]);
+    expect(links.at(-1)?.children?.map(({ label }) => label)).toEqual(["Quem Somos", "Dúvidas Frequentes"]);
+    expect(isUniversalLandingEnabled(PRISTUR_PREVIEW_HOST)).toBe(true);
+    expect(resolveSections(PRISTUR_PREVIEW_PROFILE.sections).map(({ key }) => key))
+      .toEqual(["signature", "destinations", "orlando", "authority", "resorts", "about", "differentials", "concierge", "faq", "newsletter"]);
+    expect(PRISTUR_PREVIEW_PROFILE.newsletterMedia?.src).toContain("mundo-newsletter-wing.jpg");
   });
 });
