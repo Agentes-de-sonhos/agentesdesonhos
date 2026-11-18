@@ -3,6 +3,7 @@ import { resolveProfileKey, resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { resolveSiteTheme, siteThemeRootClass, isEditorialTheme, isLuxuryTheme } from "@/lib/agencySiteTheme";
 import { resolveSections, resolveModules, resolveDestinations, resolveHeroSlides } from "@/lib/agencySiteConfig";
 import { isConstructionPreviewBypass, shouldRenderUnderConstruction } from "@/lib/agencySiteStatus";
+import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
 
 describe("perfis white label por hostname", () => {
   it("mapeia 100 Limites para editorialDmc e Paraíso para luxuryCurated", () => {
@@ -26,6 +27,16 @@ describe("perfis white label por hostname", () => {
   it("perfil classic não muda nada nos defaults compartilhados", () => {
     expect(resolveSiteProfile("outraagencia.com.br").sections).toBeUndefined();
     expect(resolveSections()).toEqual(resolveSections({}));
+  });
+
+  it("menu da Paraíso não lista a temporada de cruzeiros, demais tenants sim", () => {
+    const paraiso = siteNavLinks("paraisoviagens.com");
+    expect(paraiso.some((l) => l.to === "/cruzeiros/temporada-brasileira-2026-2027")).toBe(false);
+    expect(JSON.stringify(paraiso)).not.toContain("Cruzeiros 26/27");
+    expect(paraiso.map((l) => l.label)).toContain("Área do Cliente");
+
+    const outra = siteNavLinks("outraagencia.com.br");
+    expect(outra.some((l) => l.to === "/cruzeiros/temporada-brasileira-2026-2027")).toBe(true);
   });
 });
 

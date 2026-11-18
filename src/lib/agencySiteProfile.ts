@@ -195,6 +195,11 @@ export interface AgencySiteProfile {
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
   navDensity?: "default" | "compact";
   /**
+   * Opt-out do link automático "Cruzeiros 26/27" no menu. O default é incluir
+   * (nenhum tenant muda); perfis que não vendem a temporada retiram o item.
+   */
+  cruiseSeasonInNav?: boolean;
+  /**
    * Perfil DEMONSTRATIVO (laboratório): libera conteúdo de exemplo em seções
    * normalmente condicionadas a dados reais e ativa a chrome do catálogo.
    * Nenhum tenant real usa esta marcação.
@@ -361,6 +366,9 @@ const CLASSIC: AgencySiteProfile = { key: "classic" };
 /** Paraíso Viagens — curadoria de luxo, sem DMC e sem depoimentos. */
 const LUXURY_CURATED: AgencySiteProfile = {
   key: "luxuryCurated",
+  // A Paraíso não trabalha a temporada nacional de cruzeiros: sem o item
+  // automático "Cruzeiros 26/27" no menu (pedido de Fernando, 18/11/2026).
+  cruiseSeasonInNav: false,
   nav: [
     { label: "Início", to: "/" },
     {
