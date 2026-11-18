@@ -530,10 +530,10 @@ export function AgencyFooter({
       ? "border-t border-[hsl(var(--wl-ink)_/_0.1)] bg-background"
       : "border-t border-[var(--brand-border,hsl(var(--wl-ink)_/_0.12))] bg-[var(--brand-tertiary,hsl(var(--wl-sand)))]";
     /**
-     * O Mundo em Cores (prévia): logotipo do rodapé sem moldura/sombra e na
-     * mesma caixa do cabeçalho. Demais tenants seguem com o acabamento atual.
+     * Logotipos de prévias específicas sem moldura/sombra, na mesma caixa
+     * do cabeçalho. Demais tenants seguem com o acabamento atual.
      */
-    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14";
+    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22";
     const footerLogoClass = plainFooterLogo
       ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
       : "h-12 w-auto max-w-[200px] object-contain";

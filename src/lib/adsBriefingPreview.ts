@@ -1883,11 +1883,11 @@ export const PRISTUR_PREVIEW_INFO: AgencyDomainInfo = {
   hostname: PRISTUR_PREVIEW_HOST,
   agency_name: "Pristur Viagens", owner_name: "Priscila Vasconcelos",
   logo_url: null, cover_image_url: null,
-  // Shared wl-site-base neutral fallbacks (222 47% 11%, 240 12% 97%),
-  // not an official palette. Explicit values prevent platform-blue fallback.
-  primary_color: "#0F1729", secondary_color: "#0F1729",
-  tertiary_color: "#F6F6F8", secondary_auto: false, tertiary_auto: false,
-  on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
+  // Cores de apresentação extraídas da arte: azul escuro para ações e
+  // azul esverdeado para detalhes, com superfícies muito claras.
+  primary_color: "#30206D", secondary_color: "#0EAEBB",
+  tertiary_color: "#EAF8F9", secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: "#182044", phone: null, city: "São Paulo", state: "SP",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
 const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
@@ -1971,12 +1971,13 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     faq: { kicker: "DÚVIDAS FREQUENTES", title: "Para planejar com tranquilidade" },
   },
   footer: {
-    description: "Viagens planejadas com atenção, orientação e acompanhamento da Priscila, do primeiro contato ao retorno.",
-    phone: "WhatsApp 11 98301-7038", email: "consultoriapristurviagens@gmail.com",
+    email: "consultoriapristurviagens@gmail.com",
     instagram: "https://www.instagram.com/priturismo/", instagramLabel: "@priturismo",
     address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true,
+    legalName: "Priscila Vasconcelos", cnpj: "57.385.871/0001-98",
+    descriptionHidden: true, phoneHidden: true, whatsappLabel: "Falar pelo WhatsApp",
   },
-  seo: { title: "Prévia para revisão — Pristur Viagens", description: "Prévia técnica da Pristur Viagens com logo oficial. Paleta em revisão; sem envios ou publicação." },
+  seo: { title: "Prévia para revisão — Pristur Viagens", description: "Prévia técnica da Pristur Viagens com logo e cores da marca; sem envios ou publicação." },
 }, "Pristur Viagens");
 export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   ...buildMundoReviewProfile("pristurBriefing22", pristurBaseline, "Pristur Viagens", "Priscila Vasconcelos"),
@@ -1990,7 +1991,7 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   modules: pristurBaseline.modules?.slice(0, 4),
   heroPresentation: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.heroPresentation, kicker: "PRISTUR VIAGENS · CONSULTORIA DE VIAGENS" },
 };
-PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038", phone: "(11) 98301-7038" };
+PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038" };
 // Fernando (18/11/2026): sem Xcaret, sem Novembro e sem Avaliações do Google por enquanto.
 PRISTUR_PREVIEW_PROFILE.featuredExperience = undefined;
 PRISTUR_PREVIEW_PROFILE.sections = { ...PRISTUR_PREVIEW_PROFILE.sections, avaliacoes: { enabled: false }, testimonials: { enabled: false } };
@@ -2640,7 +2641,7 @@ ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].pages = {
   xcaret: undefined, // página Xcaret desligada a pedido de Fernando (18/11/2026)
   resorts: { title: "Explore os resorts do Brasil com a Pristur Viagens" }, orlandoTickets: true, editorial: true,
 };
-ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logo oficial e Cadastur · paleta em revisão · fotos do modelo provisórias · sem publicação";
+ADS_PREVIEW_FIXTURES[PRISTUR_PREVIEW_JOB_ID].notice = "Pristur Viagens · prévia para revisão · logo e cores da marca · fotos do modelo provisórias · sem publicação";
 
 /* IM&M Viagens e Turismo (immturismo.com.br): O Mundo em Cores model with a
  * textual wordmark; logo/palette and editorial facts pending. Generic copy only. */
