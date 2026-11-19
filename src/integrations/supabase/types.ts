@@ -11093,6 +11093,39 @@ export type Database = {
         }
         Relationships: []
       }
+      pristur_site_unlock_rate: {
+        Row: {
+          failures: number
+          singleton: boolean
+          window_started_at: string
+        }
+        Insert: {
+          failures?: number
+          singleton?: boolean
+          window_started_at?: string
+        }
+        Update: {
+          failures?: number
+          singleton?: boolean
+          window_started_at?: string
+        }
+        Relationships: []
+      }
+      pristur_site_unlock_tokens: {
+        Row: {
+          expires_at: string
+          token_hash: string
+        }
+        Insert: {
+          expires_at: string
+          token_hash: string
+        }
+        Update: {
+          expires_at?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       product_landing_lead_deliveries: {
         Row: {
           attempts: number
@@ -18348,6 +18381,10 @@ export type Database = {
           trip_title: string
           version: number
         }[]
+      }
+      pristur_site_unlock: {
+        Args: { p_action: string; p_password?: string; p_token?: string }
+        Returns: Json
       }
       process_offer_expirations: { Args: never; Returns: number }
       product_landing_next_notify_at: {
