@@ -77,6 +77,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   const profileKey = resolveSiteProfile(hostname ?? "").key as string;
   const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20"].includes(profileKey);
   const isEssya = ["essyaCurtiPreview", "essyaOfficial"].includes(profileKey);
+  const isPristur = profileKey === "pristurBriefing22";
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);
@@ -219,16 +220,24 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
             <img src={essyaCristiane.url} alt="Cristiane Serro Azul, da Essyatur" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: "center 45%" }} />
           </span>
         )}
-        <div className={isJu || isMundo || isCurti || isEssya ? "text-center sm:text-left" : "w-full text-center"}>
+        {isPristur && (
+          <span className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full md:h-32 md:w-32">
+            <img src="/pristur/priscila-universal.webp" alt="Priscila Vasconcelos com o globo da Universal ao fundo" className="h-full w-full object-cover" />
+          </span>
+        )}
+        <div className={isJu || isMundo || isCurti || isEssya || isPristur ? "text-center sm:text-left" : "w-full text-center"}>
           {isJu && <p className="text-sm font-semibold text-primary">Oi, eu sou a Ju!</p>}
           {isMundo && <p className="text-sm font-semibold text-primary">Oi, eu sou a Vanessa!</p>}
           {isCurti && <p className="text-sm font-semibold text-primary">Oi, eu sou o Ricardo!</p>}
           {isEssya && <p className="text-sm font-semibold text-primary">Oi, eu sou a Cristiane.</p>}
+          {isPristur && <p className="text-sm font-semibold text-primary">Olá, eu sou a Priscila!</p>}
           <h2 className="mt-1 text-balance text-3xl font-semibold leading-tight md:text-4xl">Vamos encontrar o seu ingresso?</h2>
           <p className="mt-3 text-pretty leading-7 text-muted-foreground">{isJu
             ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano."
             : isEssya
               ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu monto a cotação com o ingresso certo para o seu plano."
+              : isPristur
+                ? "Me conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Eu ajudo você a escolher o ingresso para o seu plano."
               : "Conte quais parques você quer conhecer, quando vai estar em Orlando e quantos dias quer aproveitar. Montamos a cotação com o ingresso certo para o seu plano."}</p>
         </div>
       </div>
