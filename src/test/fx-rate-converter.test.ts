@@ -16,7 +16,7 @@ const call = (qs: string) => fetch(`${FN_URL}${qs}`, { headers: { apikey: KEY } 
 describe('allowlist e validação', () => {
   it('cobre exatamente as moedas do conversor, incluindo ARS e CLP', () => {
     expect([...FX_ALLOWED_CURRENCIES].sort()).toEqual(
-      ['ARS', 'AUD', 'BRL', 'CAD', 'CHF', 'CLP', 'EUR', 'GBP', 'JPY', 'MXN', 'USD'].sort(),
+      ['ARS', 'AUD', 'BRL', 'CAD', 'CHF', 'CLP', 'COP', 'EUR', 'GBP', 'JPY', 'MXN', 'USD'].sort(),
     );
     expect(isFxCurrency('ARS')).toBe(true);
     expect(isFxCurrency('CLP')).toBe(true);
@@ -66,7 +66,7 @@ describe('Edge Function fx-rate (integração)', () => {
     }
   }, 30000);
 
-  it.each(['ARS', 'CLP', 'USD', 'EUR'])('retorna taxa válida para %s→BRL', async (from) => {
+  it.each(['ARS', 'CLP', 'COP', 'USD', 'EUR'])('retorna taxa válida para %s→BRL', async (from) => {
     const res = await call(`?from=${from}&to=BRL`);
     expect(res.status).toBe(200);
     const body = await res.json();

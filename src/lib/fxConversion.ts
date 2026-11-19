@@ -16,6 +16,7 @@ export const FX_ALLOWED_CURRENCIES = [
   'MXN',
   'ARS',
   'CLP',
+  'COP',
 ] as const;
 
 export type FxCurrency = (typeof FX_ALLOWED_CURRENCIES)[number];

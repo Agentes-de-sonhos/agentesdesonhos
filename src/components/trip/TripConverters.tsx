@@ -47,6 +47,15 @@ const COUNTRY_CURRENCY: Record<string, { code: string; symbol: string; name: str
   "japao": { code: "JPY", symbol: "¥", name: "Iene" },
   "japan": { code: "JPY", symbol: "¥", name: "Iene" },
   "argentina": { code: "ARS", symbol: "$", name: "Peso Argentino" },
+  "colômbia": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "colombia": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "bogotá": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "bogota": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "cartagena": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "medellín": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "medellin": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "san andrés": { code: "COP", symbol: "$", name: "Peso Colombiano" },
+  "san andres": { code: "COP", symbol: "$", name: "Peso Colombiano" },
   "chile": { code: "CLP", symbol: "$", name: "Peso Chileno" },
   "méxico": { code: "MXN", symbol: "$", name: "Peso Mexicano" },
   "mexico": { code: "MXN", symbol: "$", name: "Peso Mexicano" },
@@ -68,6 +77,7 @@ const CURRENCIES = [
   { code: "ARS", symbol: "$", name: "Peso Argentino" },
   { code: "CLP", symbol: "$", name: "Peso Chileno" },
   { code: "MXN", symbol: "$", name: "Peso Mexicano" },
+  { code: "COP", symbol: "$", name: "Peso Colombiano" },
 ];
 
 function currencyName(code: string, locale: PublicLocale): string {

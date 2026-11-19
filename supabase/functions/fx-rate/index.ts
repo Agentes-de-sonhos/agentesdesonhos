@@ -25,6 +25,7 @@ const ALLOWED = [
   "MXN",
   "ARS",
   "CLP",
+  "COP",
 ] as const;
 
 /** Moedas publicadas pelo Frankfurter (BCE) — ARS e CLP ficam de fora. */
