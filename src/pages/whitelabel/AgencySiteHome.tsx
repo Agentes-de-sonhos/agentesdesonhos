@@ -120,6 +120,7 @@ import slNoronha from "@/assets/whitelabel/100-limites/destino-fernando-noronha.
 import slCancun from "@/assets/whitelabel/100-limites/destino-cancun.jpg.asset.json";
 import slMendoza from "@/assets/whitelabel/100-limites/destino-mendoza.jpg.asset.json";
 import destinoOrlandoMk from "@/assets/whitelabel/destinos-com-a-ju/destino-orlando-mk.avif.asset.json";
+import disneyMagicKingdomOfficial from "@/assets/disney/official/magic-kingdom.jpg.asset.json";
 import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
 import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
@@ -177,6 +178,9 @@ const DESTINATION_IMAGES: Record<string, string> = {
   pristurHeroDisney: "/pristur/hero-disney.jpg",
   pristurHeroCruzeiros: "/pristur/hero-cruzeiros.jpg",
   pristurHeroCaribe: "/pristur/hero-caribe.jpg",
+  pristurPuntaCana: "/pristur/destino-punta-cana.jpg",
+  pristurGramado: "/pristur/destino-gramado.jpg",
+  pristurDisneyPartners: disneyMagicKingdomOfficial.url,
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,

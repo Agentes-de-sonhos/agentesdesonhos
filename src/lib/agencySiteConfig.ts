@@ -116,7 +116,7 @@ export type AgencyImageSlot =
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago" | "paraisoTanzania" | "paraisoEslovenia"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites"
-  | "pristurHeroDisney" | "pristurHeroCruzeiros" | "pristurHeroCaribe";
+  | "pristurHeroDisney" | "pristurHeroCruzeiros" | "pristurHeroCaribe" | "pristurPuntaCana" | "pristurGramado" | "pristurDisneyPartners";
 
 export interface AgencyModule {
   key: string;
