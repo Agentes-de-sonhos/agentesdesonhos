@@ -1922,8 +1922,12 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   ],
   signature: {
     kicker: "CONSULTORIA DE VIAGENS COM A PRISCILA",
-    title: "Uma viagem pensada para você, com alguém por perto em cada etapa.",
-    text: "A Pristur começa ouvindo quem vai viajar, o que deseja viver e o que precisa considerar. A Priscila ajuda a escolher destinos, hospedagens e experiências, orienta antes do embarque e continua em contato durante a viagem e depois do retorno. Assim, cada detalhe faz sentido para os seus planos.",
+    title: "Viagens feitas sob medida, com alguém ao seu lado em cada etapa.",
+    text: "A Pristur nasceu de uma convicção simples: uma boa viagem começa por uma boa conversa. Por isso, antes de sugerir qualquer destino, a Priscila quer conhecer você: quem vai viajar, o que você deseja viver, quais são suas prioridades e o que precisa ser levado em conta, seja o orçamento, o ritmo, a companhia ou aquele detalhe que faz toda a diferença.",
+    continuation: {
+      title: "Um planejamento feito a quatro mãos.",
+      text: "Com esse olhar atento, a Priscila constrói o roteiro junto com você. Ela ajuda a escolher destinos, hospedagens e experiências que combinam com o seu jeito de viajar, explica as opções com clareza e ajusta o plano quantas vezes for preciso. Você participa das decisões, e ela cuida do restante.",
+    },
   },
   destinations: [
     { key: "punta-cana", image: "pristurPuntaCana", label: "Caribe", title: "Punta Cana", text: "Mar azul, praias de areia clara e dias de descanso no Caribe. A Pristur ajuda você a escolher a hospedagem e a organizar cada etapa da viagem.", service: "pacotes", enabled: true, order: 1 },
