@@ -5,7 +5,7 @@ vi.mock('@/lib/cruiseShips/harmonyAssets', () => ({ HARMONY_ASSETS: {} }));
 vi.mock('leaflet', () => ({ default: null }));
 vi.mock('leaflet/dist/leaflet.css', () => ({}));
 vi.mock('@/hooks/useAgencySiteRequest', () => ({ useAgencySiteRequest: () => ({ state: 'idle', submit: vi.fn(), reset: vi.fn() }) }));
-import { CRUISE_SHIPS, findCruiseShip, cruiseShipPath } from '@/lib/cruiseShips';
+import { ALL_CRUISE_SHIPS as CRUISE_SHIPS, findCruiseShip, cruiseShipPath } from '@/lib/cruiseShips';
 import { buildItineraryGroups } from '@/lib/cruiseShips/itineraryGroups';
 import { CruiseShipPage } from '@/components/cruise-ship/CruiseShipPage';
 const ships = CRUISE_SHIPS.filter(s => s.lineSlug !== 'royal-caribbean');
@@ -31,7 +31,7 @@ describe('Brazilian cruise pages', () => {
     expect(ships).toHaveLength(8);
     expect(new Set(ships.map(cruiseShipPath)).size).toBe(8);
     for (const s of ships) {
-      expect(findCruiseShip(s.lineSlug, s.shipSlug)).toBe(s);
+      if (s.shipSlug !== 'buenavista') expect(findCruiseShip(s.lineSlug, s.shipSlug)).toBe(s);
       const keys = [s.hero.image, s.albumTile.image, ...s.tiles.map(t => t.photo), ...s.photos.map(p => p.key), ...s.experiences.tabs.map(t => t.image), ...s.cabins.items.flatMap(c => c.image ? [c.image] : [])];
       for (const k of keys) expect(s.assets[k], `${s.shipName}/${k}`).toMatch(/^https:\/\//);
     }
@@ -195,5 +195,14 @@ describe('Brazilian cruise pages', () => {
     const start = s.photos.findIndex(p => s.assets[p.key] === s.assets[s.hero.image]);
     const previous = (start - 1 + s.photos.length) % s.photos.length;
     expect(document.querySelector('#largePhoto')).toHaveAttribute('src', s.assets[s.photos[previous].key]);
+  });
+});
+
+describe('navios ocultos', () => {
+  it('Buena Vista (Corazul) fica oculto em todos os sites, com dados preservados', async () => {
+    const mod = await import('@/lib/cruiseShips');
+    expect(mod.CRUISE_SHIPS.some(s => s.shipSlug === 'buenavista')).toBe(false);
+    expect(mod.findCruiseShip('corazul', 'buenavista')).toBeNull();
+    expect(mod.ALL_CRUISE_SHIPS.some(s => s.shipSlug === 'buenavista')).toBe(true);
   });
 });

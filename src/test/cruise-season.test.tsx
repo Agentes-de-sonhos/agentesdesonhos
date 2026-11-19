@@ -9,14 +9,14 @@ vi.mock('@/hooks/useAgencySiteRequest',()=>({useAgencySiteRequest:()=>({submit,s
 beforeAll(()=>{window.scrollTo=vi.fn();Element.prototype.scrollIntoView=vi.fn();});
 const base={month:'',port:'',duration:'',interests:[]};
 describe('Brazil season assistant',()=>{
- it('contains exactly the eight Brazilian ships',()=>expect(SEASON_SHIPS).toHaveLength(8));
+ it('contains the seven visible Brazilian ships (Buena Vista hidden)',()=>expect(SEASON_SHIPS).toHaveLength(7));
  it('only offers future, non-conflicting departures',()=>{for(const s of SEASON_SHIPS)for(const v of availableSailings(s,'2026-11-10')){expect(v.date>='2026-11-10').toBe(true);expect(v.status).not.toBe('conflict');}});
  it('never relaxes hard constraints because of preferences',()=>{const p={month:'2027-01',port:'Santos',duration:'week',interests:['Diversão']};const rs=recommendSeason(p,'2026-11-10');expect(rs.length).toBeGreaterThan(0);for(const r of rs)for(const s of r.sailings){expect(s.date.startsWith(p.month)).toBe(true);expect(s.ports[0]).toBe(p.port);expect(s.n>=6&&s.n<=7).toBe(true);}});
  it('returns no match for impossible filters, rather than suggesting an incompatible ship',()=>expect(recommendSeason({...base,port:'Porto inexistente'},'2026-11-10')).toEqual([]));
  it('does not suggest expired seasons',()=>expect(recommendSeason(base,'2027-05-01')).toEqual([]));
  it('collects ages before results and submits context to the shared agency flow',async()=>{
  render(<MemoryRouter><CruiseSeasonPage info={{hostname:'agency.example',agency_name:'Agência'} as AgencyDomainInfo}/></MemoryRouter>);
- expect(screen.getAllByRole('article')).toHaveLength(8);
+ expect(screen.getAllByRole('article')).toHaveLength(7);
  for(let i=0;i<3;i++)fireEvent.click(screen.getByRole('button',{name:'Continuar →'}));
  fireEvent.change(screen.getByLabelText('Crianças'),{target:{value:'1'}});expect(screen.getByRole('button',{name:'Continuar →'})).toBeDisabled();
  fireEvent.change(screen.getByLabelText('Idade da criança 1 na viagem'),{target:{value:'7'}});fireEvent.click(screen.getByRole('button',{name:'Continuar →'}));

@@ -10,7 +10,7 @@ describe('season itinerary gallery', () => {
     expect(selected).toHaveLength(8);
     expect(new Set(selected.map(o => o.id)).size).toBe(8);
     expect(options.map(o => o.id)).toEqual(original);
-    expect(new Set(options.map(o => o.ship.lineSlug))).toEqual(new Set(['msc', 'costa', 'corazul']));
+    expect(new Set(options.map(o => o.ship.lineSlug))).toEqual(new Set(['msc', 'costa']));
   });
   it('keeps exact port order, nights and months tied to eligible departures', () => {
     for (const option of options) {

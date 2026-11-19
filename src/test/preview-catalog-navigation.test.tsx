@@ -36,7 +36,7 @@ describe('complete preview catalog',()=>{
  it('opens the standalone finder without season galleries',async()=>{
   open('cruzeiros/encontre-seu-cruzeiro');
   expect(await screen.findByRole('heading',{level:1,name:'Qual cruzeiro combina com você?'})).toBeInTheDocument();
-  expect(screen.queryByRole('region',{name:'Os oito navios da temporada'})).not.toBeInTheDocument();
+  expect(screen.queryByRole('region',{name:'Os navios da temporada'})).not.toBeInTheDocument();
   expect(screen.queryByRole('list',{name:'Roteiros para a sua próxima viagem'})).not.toBeInTheDocument();
   expect(screen.queryByRole('link',{name:/Conheça .* e seus roteiros/})).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button',{name:/Continuar/}));
