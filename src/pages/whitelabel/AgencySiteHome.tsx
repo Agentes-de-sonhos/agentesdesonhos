@@ -925,6 +925,16 @@ export default function AgencySiteHome({
                 <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
                   {s.text}
                 </p>
+                {s.continuation && (
+                  <>
+                    <h3 className="mt-8 text-xl font-semibold leading-snug text-foreground md:text-2xl">
+                      {s.continuation.title}
+                    </h3>
+                    <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
+                      {s.continuation.text}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </section>
