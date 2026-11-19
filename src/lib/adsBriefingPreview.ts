@@ -1925,11 +1925,12 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     text: "A Pristur começa ouvindo quem vai viajar, o que deseja viver e o que precisa considerar. A Priscila ajuda a escolher destinos, hospedagens e experiências, orienta antes do embarque e continua em contato durante a viagem e depois do retorno. Assim, cada detalhe faz sentido para os seus planos.",
   },
   destinations: [
-    { key: "eua-canada", image: "parques", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Orlando, parques e outras possibilidades para viajar em família, a dois ou com amigos.", service: "pacotes", enabled: true, order: 1 },
-    { key: "brasil", image: "brasil", label: "Pelo Brasil", title: "Destinos nacionais", text: "Praias, cidades e roteiros escolhidos de acordo com o seu tempo e suas preferências.", service: "pacotes", enabled: true, order: 2 },
-    { key: "resorts", image: "resort", label: "Descanso", title: "Resorts no Brasil", text: "Encontre o resort que faz sentido para a sua família, para uma viagem a dois ou com amigos.", service: "hospedagem", enabled: true, order: 3 },
-    { key: "gramado", image: "brasil", label: "Serra Gaúcha", title: "Gramado", text: "Uma viagem para descobrir a Serra Gaúcha com hospedagem e passeios planejados para você.", service: "pacotes", enabled: true, order: 4 },
-    { key: "caribe", image: "litoral", label: "Caribe", title: "Caribe", text: "Praias e opções all inclusive para descansar com o apoio da Pristur em cada etapa.", service: "pacotes", enabled: true, order: 5 },
+    { key: "punta-cana", image: "pristurPuntaCana", label: "Caribe", title: "Punta Cana", text: "Mar azul, praias de areia clara e dias de descanso no Caribe. A Pristur ajuda você a escolher a hospedagem e a organizar cada etapa da viagem.", service: "pacotes", enabled: true, order: 1 },
+    { key: "iberostar-praia-do-forte", image: "iberostarPraiaDoForte", label: "Resorts", title: "Iberostar Selection Praia do Forte", text: "Dias à beira-mar na Bahia, com estrutura all inclusive para descansar e aproveitar em família ou a dois.", service: "hospedagem", enabled: true, order: 2 },
+    { key: "gramado", image: "pristurGramado", label: "Serra Gaúcha", title: "Gramado", text: "Paisagens, passeios e sabores da Serra Gaúcha em um roteiro planejado para o seu jeito de viajar.", service: "pacotes", enabled: true, order: 3 },
+    { key: "disney-orlando", image: "pristurDisneyPartners", label: "Estados Unidos", title: "Disney em Orlando", text: "Parques, hospedagem e experiências para viver em família, com orientação em cada escolha.", service: "pacotes", enabled: true, order: 4 },
+    { key: "cruzeiros-europa", image: "heroSantoriniShip", label: "Cruzeiros", title: "Cruzeiros pela Europa", text: "Descubra diferentes destinos europeus em uma viagem de navio, com roteiro e companhia escolhidos para você.", service: "cruzeiros", enabled: true, order: 5 },
+    { key: "foz-do-iguacu", image: "curtiBrasil", label: "Pelo Brasil", title: "Foz do Iguaçu", text: "A força das Cataratas e outros passeios da região com planejamento para aproveitar cada dia.", service: "pacotes", enabled: true, order: 6 },
   ],
   modules: [
     { key: "orlando", title: "Orlando e parques", text: "Uma viagem em família com atenção aos ingressos, à hospedagem e ao ritmo de cada pessoa.", image: "parques", service: "ingressos", enabled: true, order: 1 },
@@ -1965,7 +1966,7 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   faq: [
     { q: "Vou falar diretamente com a Priscila?", a: "Sim. A Priscila é a fundadora e consultora da Pristur e acompanha o planejamento e as etapas da viagem." },
     { q: "A Pristur organiza viagens para famílias?", a: "Sim. Viagens em família e parques estão entre as especialidades, além de destinos nacionais e internacionais para casais e grupos de amigos." },
-    { q: "Quais destinos posso planejar com a agência?", a: "Entre os destaques estão Orlando, Estados Unidos e Canadá, resorts no Brasil, Gramado, Caribe e outros destinos nacionais." },
+    { q: "Quais destinos posso planejar com a agência?", a: "Entre os destaques estão Punta Cana, Praia do Forte, Gramado, Disney em Orlando, cruzeiros pela Europa e Foz do Iguaçu. A Pristur também ajuda a planejar outros destinos conforme o seu perfil." },
     { q: "Há suporte durante a viagem?", a: "Sim. A Priscila acompanha o viajante e, se surgir um imprevisto, permanece em contato para ajudar a buscar uma solução." },
     { q: "Como começo a planejar?", a: "Conte pelo WhatsApp quem vai viajar, o destino desejado e o que é importante para você. A Priscila conversa sobre as possibilidades e os próximos passos." },
     { q: "Como entro em contato?", a: "Pelo WhatsApp (11) 98301-7038 ou pelo e-mail consultoriapristurviagens@gmail.com. No Instagram, a agência está como @priturismo." },
@@ -2004,6 +2005,10 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   copy: { ...pristurBaseline.copy },
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
+  destinationCredits: [
+    { title: "Punta Cana (Cap Cana)", author: "Mary Mark Ockerbloom", source: "https://commons.wikimedia.org/wiki/File:Beach_near_Santuary_Cap_Cana,_Dominican_Republic.jpg", license: "CC0 1.0", licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/" },
+    { title: "Gramado (Lago Negro)", author: "Leone Melo", source: "https://commons.wikimedia.org/wiki/File:Lago_Negro_em_Gramado.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+  ],
   modules: pristurBaseline.modules?.slice(0, 4),
   hero: pristurBaseline.hero,
   heroPresentation: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.heroPresentation, kicker: "PRISTUR VIAGENS · CONSULTORIA DE VIAGENS" },
