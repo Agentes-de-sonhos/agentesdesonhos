@@ -13,6 +13,7 @@ vi.mock("@/integrations/supabase/client", () => ({ supabase: {} }));
 const ju = "destinoscomaju.com.br";
 const www = `www.${ju}`;
 const mundo = "omundoemcores.com.br";
+const lovablePreview = "id-preview--dd6dbb29-4840-49e0-a65f-51c17806d3f9.lovable.app";
 const info = { hostname: www, agency_name: "Destinos com a Ju" } as AgencyDomainInfo;
 const makeOffer = (n: number, channels?: string[], category = "praias") => ({
   slug: `oferta-${n}`, title: `Oferta ${n}`, image_only: true, campaign_category: category, channels,
@@ -22,9 +23,9 @@ beforeEach(() => mock.usePublicOffers.mockReturnValue({ data: [], isLoading: fal
 
 describe("Pink Friday", () => {
   it("habilita a campanha apenas nos dois domínios exatos da Ju", () => {
-    expect(PINK_FRIDAY_LIVE_ENABLED).toBe(true);
-    expect(pinkFridayMode(ju, ju)).toBe("live");
-    expect(pinkFridayMode(ju, ju, "", false)).toBeNull();
+    expect(PINK_FRIDAY_LIVE_ENABLED).toBe(false);
+    expect(pinkFridayMode(ju, ju)).toBeNull();
+    expect(pinkFridayMode(www, www)).toBeNull();
     expect(pinkFridayMode(ju, ju, "", true)).toBe("live");
     expect(pinkFridayMode(www, ju, "", true)).toBe("live");
     expect(pinkFridayMode(ju, www, `?__agency_host=${mundo}`, true)).toBe("live");
@@ -41,6 +42,17 @@ describe("Pink Friday", () => {
     expect(pinkFridayMode(ju, "localhost")).toBeNull();
     expect(pinkFridayMode(ju, "localhost", `?__agency_host=${mundo}`)).toBeNull();
     expect(pinkFridayMode(ju, "preview--project.lovable.app", `?__agency_host=${ju}`)).toBeNull();
+  });
+
+  it("aceita apenas a prévia exata do Lovable com o contexto da Ju", () => {
+    expect(pinkFridayMode(www, lovablePreview, `?__agency_host=${www}`)).toBe("preview");
+    expect(pinkFridayMode(ju, lovablePreview, `?__agency_host=${ju}`, true)).toBe("preview");
+    expect(pinkFridayMode(www, lovablePreview)).toBeNull();
+    expect(pinkFridayMode(www, lovablePreview, `?__agency_host=${mundo}`)).toBeNull();
+    expect(pinkFridayMode(mundo, lovablePreview, `?__agency_host=${www}`)).toBeNull();
+    expect(pinkFridayMode(www, `${lovablePreview}.example.com`, `?__agency_host=${www}`)).toBeNull();
+    expect(pinkFridayMode(www, "agentesdesonhos.lovable.app", `?__agency_host=${www}`)).toBeNull();
+    expect(pinkFridayMode(www, www, `?__agency_host=${www}`)).toBeNull();
   });
 
   it("preserva os canais antigos e só seleciona ofertas atribuídas à campanha", () => {
