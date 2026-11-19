@@ -92,6 +92,7 @@ export interface AgencySignatureContent {
   kicker: string;
   title: string;
   text: string;
+  continuation?: { title: string; text: string };
 }
 
 /** Associações, selos e credenciais verificadas (nunca inventadas). */
