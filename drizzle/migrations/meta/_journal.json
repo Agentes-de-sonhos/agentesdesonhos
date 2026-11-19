@@ -463,6 +463,13 @@
       "when": 1794490694782,
       "tag": "0065_club_med_snow_place_cache",
       "breakpoints": true
+    },
+    {
+      "idx": 66,
+      "version": "7",
+      "when": 1795119654209,
+      "tag": "0066_itinerary_day_city",
+      "breakpoints": true
     }
   ]
 }

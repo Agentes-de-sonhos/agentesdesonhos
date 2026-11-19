@@ -41,7 +41,7 @@ import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { PublishReviewDialog } from "@/components/itinerary/PublishReviewDialog";
 import { useItineraries } from "@/hooks/useItineraries";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
-import { useTripWeather } from "@/hooks/useTripWeather";
+import { useItineraryDaysWeather } from "@/hooks/useTripWeather";
 import { parseLocalDate } from "@/lib/dateParsing";
 import { ItineraryFormData, Itinerary, ItineraryDay } from "@/types/itinerary";
 import { supabase } from "@/integrations/supabase/client";
@@ -171,7 +171,7 @@ export default function CriarRoteiro() {
   // Weather for current itinerary (used for PDF + future UI)
   const wxStart = currentItinerary ? parseLocalDate(currentItinerary.startDate) : new Date();
   const wxEnd = currentItinerary ? parseLocalDate(currentItinerary.endDate) : new Date();
-  const { weatherByDate } = useTripWeather(currentItinerary?.destination, wxStart, wxEnd);
+  const { weatherByDate } = useItineraryDaysWeather(currentItinerary?.destination, currentItinerary?.days, wxStart, wxEnd);
 
   useEffect(() => {
     if (user?.id) {
@@ -295,6 +295,16 @@ export default function CriarRoteiro() {
 
   // Apenas campos explicitamente mapeados são enviados ao banco.
   // Novos campos precisam ser adicionados manualmente aqui.
+  const handleUpdateDayCity = async (dayId: string, city: string) => {
+    const value = city.trim() || null;
+    const { error } = await supabase.from("itinerary_days").update({ city: value }).eq("id", dayId);
+    if (error) {
+      toast.error("Não foi possível salvar a cidade do dia.");
+      return;
+    }
+    setCurrentItinerary((cur) => cur ? { ...cur, days: cur.days.map((d) => d.id === dayId ? { ...d, city: value } : d) } : cur);
+  };
+
   const handleUpdateActivity = (activityId: string, updates: Partial<Record<string, unknown>>) => {
     const dbUpdates: Record<string, unknown> = {};
     if (updates.title !== undefined) dbUpdates.title = updates.title;
@@ -955,6 +965,7 @@ export default function CriarRoteiro() {
                 itineraryId={currentItinerary.id}
                 days={currentItinerary.days}
                 onUpdateActivity={handleUpdateActivity}
+                onUpdateDayCity={handleUpdateDayCity}
                 onDeleteActivity={handleDeleteActivity}
                 onAddActivity={handleAddActivity}
                 onMoveActivity={handleMoveActivity}

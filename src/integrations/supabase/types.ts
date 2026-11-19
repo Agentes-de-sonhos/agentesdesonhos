@@ -7491,6 +7491,7 @@ export type Database = {
       }
       itinerary_days: {
         Row: {
+          city: string | null
           created_at: string
           date: string
           day_number: number
@@ -7499,6 +7500,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          city?: string | null
           created_at?: string
           date: string
           day_number: number
@@ -7507,6 +7509,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          city?: string | null
           created_at?: string
           date?: string
           day_number?: number

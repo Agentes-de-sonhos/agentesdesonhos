@@ -34,7 +34,7 @@ import { TripConverters } from "@/components/trip/TripConverters";
 import { ServiceImageCarousel } from "@/components/quote/ServiceImageCarousel";
 import { useResolvedServiceImage } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
-import { useTripWeather } from "@/hooks/useTripWeather";
+import { useTripWeather, useItineraryDaysWeather } from "@/hooks/useTripWeather";
 import { verifyTripAccess } from "@/hooks/useTrips";
 import { buildVoucherProxyUrl } from "@/lib/itineraryAssetUrl";
 import type { Trip, TripService, TripServiceType } from "@/types/trip";
@@ -1766,6 +1766,7 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
                 id: d.id,
                 dayNumber: d.day_number ?? (richDays.length + 1),
                 date: d.date,
+                city: d.city ?? null,
                 activities: dayActivities,
               });
             }
@@ -1972,8 +1973,9 @@ export default function ViagemPublica({ preLoadedTrip, preLoadedAgent, preLoaded
   }, [(tripData as any)?.user_id, (tripData as any)?.wallet_settings]);
 
   // Weather forecast per day for the itinerary header (cached via useTripWeather)
-  const { weatherByDate: itineraryWeather } = useTripWeather(
+  const { weatherByDate: itineraryWeather } = useItineraryDaysWeather(
     authenticated ? tripData?.destination : undefined,
+    authenticated ? v2Days ?? undefined : undefined,
     startDate,
     endDate,
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format, differenceInDays } from "date-fns";
 
 export interface DayWeather {
@@ -112,7 +112,7 @@ export function useTripWeather(
   const [timezone, setTimezone] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!destination) return;
+    if (!destination) { setData({}); setTimezone(undefined); return; }
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -227,4 +227,51 @@ export function useTripWeather(
   }, [destination, startDate.getTime(), endDate.getTime()]);
 
   return { weatherByDate: data, timezone };
+}
+
+/** Resolves the city used for one itinerary day (day city, else trip destination). */
+export function dayWeatherCity(dayCity: string | null | undefined, destination: string | undefined): string | undefined {
+  const c = (dayCity || "").trim();
+  return c || destination || undefined;
+}
+
+/**
+ * Per-day weather: days with their own `city` get that city's forecast; the
+ * others use the itinerary destination. Up to 6 distinct extra cities.
+ */
+export function useItineraryDaysWeather(
+  destination: string | undefined,
+  days: { date: string; city?: string | null }[] | undefined,
+  startDate: Date,
+  endDate: Date,
+) {
+  const base = useTripWeather(destination, startDate, endDate);
+  const list = days ?? [];
+  const extraKey = useMemo(() => {
+    const set = new Set<string>();
+    list.forEach((d) => {
+      const c = (d.city || "").trim();
+      if (c && c.toLowerCase() !== (destination || "").trim().toLowerCase()) set.add(c);
+    });
+    return Array.from(set).slice(0, 6).join("|");
+  }, [list.map((d) => d.city || "").join("|"), destination]);
+  const c = extraKey ? extraKey.split("|") : [];
+  const w0 = useTripWeather(c[0], startDate, endDate).weatherByDate;
+  const w1 = useTripWeather(c[1], startDate, endDate).weatherByDate;
+  const w2 = useTripWeather(c[2], startDate, endDate).weatherByDate;
+  const w3 = useTripWeather(c[3], startDate, endDate).weatherByDate;
+  const w4 = useTripWeather(c[4], startDate, endDate).weatherByDate;
+  const w5 = useTripWeather(c[5], startDate, endDate).weatherByDate;
+  const byCity: Record<string, Record<string, DayWeather>> = {};
+  [w0, w1, w2, w3, w4, w5].forEach((w, i) => { if (c[i]) byCity[c[i]] = w; });
+
+  const weatherByDate: Record<string, DayWeather> = { ...base.weatherByDate };
+  list.forEach((d) => {
+    const city = (d.city || "").trim();
+    if (city && byCity[city]) {
+      const wx = byCity[city][d.date];
+      if (wx) weatherByDate[d.date] = wx; else delete weatherByDate[d.date];
+    }
+  });
+  return { weatherByDate, timezone: base.timezone };
 }

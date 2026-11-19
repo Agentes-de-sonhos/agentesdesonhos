@@ -254,10 +254,31 @@ function ActivityDragPreview({ activity }: { activity: Activity }) {
   );
 }
 
+function DayCityInput({ initial, placeholder, onSave }: { initial: string; placeholder: string; onSave: (v: string) => void | Promise<void> }) {
+  const [value, setValue] = useState(initial);
+  const commit = () => { if (value.trim() !== initial.trim()) void onSave(value); };
+  return (
+    <div className="mt-2 flex items-center gap-1.5">
+      <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <Input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+        placeholder={placeholder}
+        aria-label="Cidade do dia"
+        className="h-8 w-full max-w-xs text-sm"
+      />
+    </div>
+  );
+}
+
 interface ItineraryEditorProps {
   itineraryId?: string;
   days: ItineraryDay[];
   onUpdateActivity: (activityId: string, updates: Partial<Activity>) => void;
+  /** Saves the optional city of a day (empty = itinerary destination). */
+  onUpdateDayCity?: (dayId: string, city: string) => Promise<void> | void;
   onDeleteActivity: (activityId: string) => void;
   onAddActivity: (dayId: string, activity: Omit<Activity, "id" | "orderIndex" | "isApproved">) => void;
   onMoveActivity?: (activityId: string, dayId: string, period: "manha" | "tarde" | "noite") => void;
@@ -284,6 +305,7 @@ export function ItineraryEditor({
   itineraryId,
   days,
   onUpdateActivity,
+  onUpdateDayCity,
   onDeleteActivity,
   onAddActivity,
   onMoveActivity,
@@ -587,6 +609,14 @@ export function ItineraryEditor({
                   <CardDescription>
                     {formatItineraryDayHeader(parseLocalDate(day.date))}
                   </CardDescription>
+                  {onUpdateDayCity && day.id && (
+                    <DayCityInput
+                      key={`${day.id}:${day.city ?? ""}`}
+                      initial={day.city ?? ""}
+                      placeholder={aiContext?.destination ? `Cidade do dia (padrão: ${aiContext.destination})` : "Cidade do dia (opcional)"}
+                      onSave={(v) => onUpdateDayCity(day.id!, v)}
+                    />
+                  )}
                 </div>
                 <div className="flex w-full flex-wrap items-center justify-end gap-1 sm:w-auto">
                   {day.dayNumber === 1 && !allApproved && (

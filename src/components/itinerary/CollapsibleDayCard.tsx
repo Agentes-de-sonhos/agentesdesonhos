@@ -120,6 +120,7 @@ export function CollapsibleDayCard({
               {t("pdfDayLabel", { number: day.dayNumber })}
             </span>
             <span className="text-xs text-muted-foreground font-medium truncate w-full">
+              {day.city ? <span className="font-semibold text-foreground/80">{day.city} · </span> : null}
               {dateFormatted}
               {!isOpen && totalActivities > 0 && (
                 <span className="text-muted-foreground/60"> · {activitiesCountLabel(locale, totalActivities)}</span>

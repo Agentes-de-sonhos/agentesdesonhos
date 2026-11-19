@@ -175,7 +175,7 @@ export function generatePDFContent(
           <div style="width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,0.85);display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#0f766e;box-shadow:0 1px 2px rgba(0,0,0,0.06);">${day.dayNumber}</div>
           <div style="min-width:0;flex:1;">
             <p style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#0f766e;margin:0;line-height:1.2;">${t("pdfDayLabel", { number: String(day.dayNumber) })}</p>
-            <p style="font-size:12px;color:#0f766e;opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;">${formatPublicItineraryDayHeader(parseLocalDate(day.date), locale)}</p>
+            <p style="font-size:12px;color:#0f766e;opacity:0.75;margin:2px 0 0;font-weight:500;line-height:1.3;">${day.city ? `<strong>${String(day.city).replace(/[<>&"]/g, "")}</strong> · ` : ""}${formatPublicItineraryDayHeader(parseLocalDate(day.date), locale)}</p>
           </div>
           </div>
           ${wxChip}

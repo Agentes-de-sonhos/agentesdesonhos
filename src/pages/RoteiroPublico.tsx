@@ -17,7 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { AgentProfile } from "@/hooks/useAgentProfile";
 import { FormattedText } from "@/components/ui/formatted-text";
 import { LocalClock, weatherIconFor } from "@/components/trip/TripCalendar";
-import { useTripWeather, type DayWeather } from "@/hooks/useTripWeather";
+import { useItineraryDaysWeather, type DayWeather } from "@/hooks/useTripWeather";
 import { PASSENGER_INTEREST_LABELS } from "@/types/itinerary";
 import { useActivityPhoto } from "@/hooks/useActivityPhoto";
 import { CollapsibleDayCard } from "@/components/itinerary/CollapsibleDayCard";
@@ -141,7 +141,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
   const weatherDestination = itinerary?.destination;
   const weatherStart = itinerary ? parseLocalDate(itinerary.startDate) : new Date();
   const weatherEnd = itinerary ? parseLocalDate(itinerary.endDate) : new Date();
-  const { weatherByDate, timezone } = useTripWeather(weatherDestination, weatherStart, weatherEnd);
+  const { weatherByDate, timezone } = useItineraryDaysWeather(weatherDestination, itinerary?.days, weatherStart, weatherEnd);
 
   const loadItinerary = async (shareToken: string) => {
     try {
@@ -180,6 +180,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
             id: day.id as string,
             dayNumber: day.day_number as number,
             date: day.date as string,
+            city: (day.city as string | null) ?? null,
             activities: (activities || []).map((a) => {
               const tripAct = tripActMap.get(a.title);
               return {

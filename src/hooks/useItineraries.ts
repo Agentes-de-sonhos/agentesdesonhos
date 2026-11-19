@@ -121,6 +121,7 @@ export function useItineraries() {
           id: day.id as string,
           dayNumber: day.day_number as number,
           date: day.date as string,
+          city: ((day as any).city as string | null) ?? null,
           activities: (activities || []).map((a) => ({
             id: a.id as string,
             period: a.period as Activity["period"],

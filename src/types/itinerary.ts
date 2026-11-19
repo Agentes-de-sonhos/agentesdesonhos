@@ -224,6 +224,8 @@ export interface ItineraryDay {
   id?: string;
   dayNumber: number;
   date: string;
+  /** Optional city for this day (e.g. Cartagena). Empty = itinerary destination. */
+  city?: string | null;
   activities: Activity[];
 }
 
