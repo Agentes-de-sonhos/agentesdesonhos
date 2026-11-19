@@ -24,6 +24,7 @@ export const PASSWORD_PROTECTED_TENANTS: Record<string, string> = {
 };
 
 export const SITE_UNLOCK_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const PRISTUR_TENANT = "0c61893e-0e8c-4d98-a1f5-4d2fd3c357ab";
 
 export function isTenantPasswordProtected(userId?: string | null): boolean {
   return !!userId && Object.prototype.hasOwnProperty.call(PASSWORD_PROTECTED_TENANTS, userId);
@@ -108,10 +109,31 @@ async function call(body: Record<string, unknown>): Promise<UnlockResult> {
   }
 }
 
+/** The Pristur gate is an isolated database RPC; other tenants keep their Edge Function. */
+async function callPristur(action: "unlock" | "verify", value: string): Promise<UnlockResult> {
+  try {
+    const { data, error } = await supabase.rpc("pristur_site_unlock" as any, {
+      p_action: action,
+      p_password: action === "unlock" ? value : null,
+      p_token: action === "verify" ? value : null,
+    });
+    if (error) return { status: "unavailable" };
+    const d = (data ?? null) as { ok?: boolean; token?: string; exp?: number } | null;
+    if (d?.ok === true && typeof d.token === "string" && typeof d.exp === "number") {
+      return { status: "ok", token: d.token, exp: d.exp };
+    }
+    return { status: "invalid" };
+  } catch {
+    return { status: "unavailable" };
+  }
+}
+
 export function unlockWithPassword(userId: string, password: string): Promise<UnlockResult> {
+  if (userId === PRISTUR_TENANT) return callPristur("unlock", password);
   return call({ action: "unlock", tenant: userId, password });
 }
 
 export function verifyUnlockToken(userId: string, token: string): Promise<UnlockResult> {
+  if (userId === PRISTUR_TENANT) return callPristur("verify", token);
   return call({ action: "verify", tenant: userId, token });
 }
