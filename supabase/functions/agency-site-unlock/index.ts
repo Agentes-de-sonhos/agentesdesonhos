@@ -20,7 +20,11 @@ const PROTECTED = new Set([
   "19746f35-d222-4a3f-b9eb-9920d01ab883",
   "2119703a-e00e-4b85-a6b0-e912479eb99a",
   "45af6989-38fd-4446-9a58-f87cc9acea63",
+  "0c61893e-0e8c-4d98-a1f5-4d2fd3c357ab",
 ]);
+
+// Apenas o hash fica no código; a senha da Pristur não é compartilhada com outros sites.
+const PRISTUR_PASSWORD_SHA256 = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
 
 const enc = new TextEncoder();
 
@@ -79,7 +83,7 @@ Deno.serve(async (req) => {
       if (!password || password.length > 200) return json({ ok: false }, 200);
       // Senha própria por tenant (opcional): SITE_UNLOCK_PASSWORD_SHA256_<uuid sem hífens>.
       const perTenant = Deno.env.get(`SITE_UNLOCK_PASSWORD_SHA256_${tenant.replace(/-/g, "")}`);
-      const expected = (perTenant || Deno.env.get("SITE_UNLOCK_PASSWORD_SHA256") || DEFAULT_PASSWORD_SHA256).trim().toLowerCase();
+      const expected = (perTenant || (tenant === "0c61893e-0e8c-4d98-a1f5-4d2fd3c357ab" ? PRISTUR_PASSWORD_SHA256 : null) || Deno.env.get("SITE_UNLOCK_PASSWORD_SHA256") || DEFAULT_PASSWORD_SHA256).trim().toLowerCase();
       const provided = hex(await crypto.subtle.digest("SHA-256", enc.encode(password)));
       if (!safeEqual(provided, expected)) return json({ ok: false }, 200);
       const exp = Math.floor(Date.now() / 1000) + TTL_SECONDS;

@@ -65,7 +65,7 @@ type StepId = "pick" | "period" | "days" | "hopper" | "water" | "summary" | "con
 export function DisneyTicketsConfigurator({ hostname }: { hostname: string }) {
   const { submit, state, error, reset, simulated } = useDisneyPreviewRequest(hostname);
   const isJu = isJuUniversalProfile(hostname);
-  const isPristur = resolveSiteProfile(hostname).key === "pristurBriefing22";
+  const isPristur = ["pristurBriefing22", "pristurOfficial"].includes(resolveSiteProfile(hostname).key);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);

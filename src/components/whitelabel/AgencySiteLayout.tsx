@@ -533,8 +533,8 @@ export function AgencyFooter({
      * Logotipos de prévias específicas sem moldura/sombra, na mesma caixa
      * do cabeçalho. Demais tenants seguem com o acabamento atual.
      */
-    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22";
-    const footerLogoClass = profile.key === "pristurBriefing22"
+    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
+    const footerLogoClass = profile.key === "pristurBriefing22" || profile.key === "pristurOfficial"
       ? "h-[72px] w-auto max-w-[300px] object-contain"
       : plainFooterLogo
         ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName

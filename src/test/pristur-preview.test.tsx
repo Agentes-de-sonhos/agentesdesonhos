@@ -12,6 +12,8 @@ import { resolveAgencySpinnerMark } from "@/components/whitelabel/AgencyBrandSpi
 import { siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
 import { resolveSections } from "@/lib/agencySiteConfig";
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
+import { isTenantPasswordProtected } from "@/lib/agencySitePassword";
+import { isAgencySearchExcluded } from "@/lib/agencySearchExclusions";
 
 vi.mock("@/pages/NotFound", () => ({ default: () => <p>Not found</p> }));
 afterEach(cleanup);
@@ -21,6 +23,25 @@ function preview(hostname = "localhost", suffix = "") {
   return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/ads-briefing-preview/briefing-22-v1${suffix}`]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></MemoryRouter></QueryClientProvider>);
 }
 describe("Pristur briefing-22-v1", () => {
+  it("links only the official domains to the real profile and password gate", () => {
+    for (const host of ["pristur.com.br", "www.pristur.com.br"]) {
+      const profile = resolveSiteProfile(host);
+      expect(profile.key).toBe("pristurOfficial");
+      expect(profile.demo).toBe(false);
+      expect(profile.presentation).toBe(false);
+      expect(profile.footer?.legalLinksDisabled).toBe(false);
+      expect(profile.inspirationDialog?.notice).toBeUndefined();
+      expect(resolveSiteTheme(host)).toBe(resolveSiteTheme(PRISTUR_PREVIEW_HOST));
+      expect(siteThemeRootClass(host)).toBe(siteThemeRootClass(PRISTUR_PREVIEW_HOST));
+      expect(resolveAgencyLogoOverride(host)).toBe(resolveAgencyLogoOverride(PRISTUR_PREVIEW_HOST));
+      expect(cadasturCertificateFor(host)?.agency).toBe("Pristur Viagens");
+      expect(isUniversalLandingEnabled(host)).toBe(true);
+      expect(isAgencySearchExcluded(host, "/")).toBe(true);
+      expect(isAgencySearchExcluded(host, "/disney")).toBe(true);
+    }
+    expect(isTenantPasswordProtected("0c61893e-0e8c-4d98-a1f5-4d2fd3c357ab")).toBe(true);
+    expect(isTenantPasswordProtected(PRISTUR_PREVIEW_INFO.user_id)).toBe(false);
+  });
   it("resolves only the exact job and synthetic host", () => {
     expect(resolveAdsPreviewFixture("briefing-22-v1")?.profile).toBe(PRISTUR_PREVIEW_PROFILE);
     expect(resolveSiteProfile("briefing-22-v1.preview.local")).toBe(PRISTUR_PREVIEW_PROFILE);

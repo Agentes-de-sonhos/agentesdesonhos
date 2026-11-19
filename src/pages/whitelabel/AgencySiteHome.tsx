@@ -930,7 +930,7 @@ export default function AgencySiteHome({
         // Curti: set to false to restore the original authority content below.
         // The original profile (text, videos and companies) stays intact in standby.
         const curtiSeasonEnabled = true;
-        const seasonEnabled = (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22";
+        const seasonEnabled = (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
         return (
           <Fragment key={key}>
           <section id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
@@ -2103,7 +2103,7 @@ export default function AgencySiteHome({
         id="topo"
         className={
           editorial
-            ? (profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22")
+            ? (profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial")
               ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16 lg:h-[500px]"
               : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"

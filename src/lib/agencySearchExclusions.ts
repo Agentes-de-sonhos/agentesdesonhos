@@ -11,5 +11,6 @@ const MUNDO_EXCLUDED_PATHS = new Set([
 export function isAgencySearchExcluded(hostname: string, pathname: string): boolean {
   const host = hostname.trim().toLowerCase();
   const path = pathname.split(/[?#]/)[0].replace(/\/+$/, "") || "/";
+  if (host === "pristur.com.br" || host === "www.pristur.com.br") return true;
   return MUNDO_HOSTS.has(host) && MUNDO_EXCLUDED_PATHS.has(path);
 }
