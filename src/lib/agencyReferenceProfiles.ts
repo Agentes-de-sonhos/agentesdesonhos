@@ -313,7 +313,7 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
   },
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
-    title: "Uma história construída por paixão, experiência e proximidade",
+    title: "Consultoria de viagens",
     text: "A Destinos com a Ju nasceu em 2013, quando Juliana Neves Sanches transformou sua paixão por viagens em uma agência dedicada a criar experiências personalizadas.\n\nAo longo dos anos, Juliana construiu um repertório especialmente forte em Disney, Universal, viagens internacionais e cruzeiros. É especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em alto-mar, incluindo viagens com MSC, Norwegian e Royal Caribbean.\n\nHoje, a Destinos com a Ju atende diferentes perfis de viajantes, sempre com a mesma essência: ouvir com atenção, planejar cada detalhe e acompanhar o cliente do primeiro contato ao retorno.",
     image: "destinosStorefrontFront",
     images: [
