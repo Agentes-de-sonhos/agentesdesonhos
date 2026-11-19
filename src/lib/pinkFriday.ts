@@ -2,8 +2,8 @@ import { agencyContextHost } from "@/lib/agencyContextLink";
 import { normalizeHostname } from "@/lib/agencyDomains";
 import { offerInChannel, type PublicOffer } from "@/lib/offers";
 
-// Habilitar só depois de aprovar a capa, as primeiras ofertas e a revisão da campanha.
-export const PINK_FRIDAY_LIVE_ENABLED = false;
+// A seção e a página podem estar no ar antes de a agência cadastrar ofertas.
+export const PINK_FRIDAY_LIVE_ENABLED = true;
 export const PINK_FRIDAY_PATH = "/pink-friday";
 export const PINK_FRIDAY_CHANNEL = "pink-friday";
 export const PINK_FRIDAY_MAIN_HOST = "www.destinoscomaju.com.br";
