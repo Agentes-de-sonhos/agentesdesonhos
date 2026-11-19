@@ -129,7 +129,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
           { label: "Xcaret", to: "/#experiencia-xcaret" },
           { label: "Parques e Experiências", to: "/#ingressos-orlando" },
           { label: "Resorts no Brasil", to: "/#resorts" },
-          { label: "Cruzeiros", to: "/#autoridade" },
+          { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
         ],
       },
       { label: "Inspirações", to: "/#destinos" },
