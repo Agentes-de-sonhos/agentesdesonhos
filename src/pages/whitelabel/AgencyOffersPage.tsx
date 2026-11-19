@@ -105,8 +105,9 @@ const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
 
 const ALL = "__all";
 
-export function usePublicOffers(hostname: string) {
+export function usePublicOffers(hostname: string, enabled = true) {
   return useQuery({
+    enabled,
     queryKey: ["public-offers", hostname],
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,

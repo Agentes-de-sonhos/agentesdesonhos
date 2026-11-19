@@ -1,0 +1,60 @@
+/* Campaign colors stay inside this component; the Ju theme and other tenants retain their own tokens. */
+.pink-friday {
+  --pink-ink: #06264e;
+  --pink-main: #c80063;
+  --pink-bright: #f00078;
+  --pink-blush: #fff1f7;
+  --pink-line: #eed7e3;
+  color: var(--pink-ink);
+  background: white;
+  line-height: 1.5;
+}
+.pink-friday :is(a, button):focus-visible { outline: 3px solid var(--pink-ink); outline-offset: 4px; }
+.pink-friday-container { width: min(calc(100% - 2rem), 75rem); margin-inline: auto; }
+.pink-friday-mark { display: inline-flex; align-items: center; gap: .08em; font-weight: 900; letter-spacing: -.075em; font-size: clamp(2.7rem, 7vw, 5.5rem); line-height: 1.1; white-space: nowrap; }
+.pink-friday-mark > :first-child { color: var(--pink-ink); }
+.pink-friday-mark > :last-child { margin-left: .14em; padding: .18em .39em; color: white; background: var(--pink-main); border-radius: .45em; font-size: .67em; letter-spacing: -.025em; }
+.pink-friday-hero { padding-block: clamp(2.75rem, 7vw, 6rem); background: var(--pink-blush); overflow: hidden; }
+.pink-friday-hero-grid { display: grid; grid-template-columns: 1.06fr 1fr; align-items: center; gap: clamp(1.75rem, 4vw, 4rem); }
+.pink-friday-hero-copy { display: grid; justify-items: start; gap: 1rem; }
+.pink-friday-eyebrow { display: flex; align-items: center; gap: .55rem; text-transform: uppercase; color: #a30051; font-size: .76rem; letter-spacing: .15em; font-weight: 800; }
+.pink-friday-hero-subtitle { max-width: 19ch; font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 800; letter-spacing: -.038em; line-height: 1.15; }
+.pink-friday-hero-image, .pink-friday-hero-art { width: 100%; aspect-ratio: 4/3; border-radius: 1.75rem; }
+.pink-friday-hero-image { object-fit: cover; }
+.pink-friday-hero-art { display: grid; place-items: center; position: relative; overflow: hidden; background: linear-gradient(135deg, #ffb6da 0%, var(--pink-bright) 68%, var(--pink-main) 100%); }
+.pink-friday-hero-art span { width: 76%; aspect-ratio: 1; border: 2px solid #fff8; border-radius: 40%; transform: rotate(-28deg); position: absolute; }
+.pink-friday-hero-art span:nth-child(2) { width: 61%; transform: translate(34%, -16%) rotate(22deg); }
+.pink-friday-hero-art span:nth-child(3) { width: 42%; transform: translate(-70%, 61%) rotate(52deg); }
+.pink-friday-button { display: inline-flex; justify-content: center; align-items: center; gap: .65rem; padding: .82rem 1.25rem; border-radius: 999px; background: var(--pink-main); color: white; font-weight: 800; min-height: 44px; text-align: center; }
+.pink-friday-button:hover { background: #a90053; }
+.pink-friday-teaser, .pink-friday-list, .pink-friday-closing { padding-block: clamp(2.5rem, 6vw, 5rem); }
+.pink-friday-teaser { background: linear-gradient(115deg, white, var(--pink-blush)); }
+.pink-friday-teaser .pink-friday-mark { font-size: clamp(2rem, 6vw, 3.4rem); }
+.pink-friday-teaser-intro { display: flex; justify-content: space-between; align-items: end; gap: 1.1rem; }
+.pink-friday-teaser-intro h2, .pink-friday-list h2 { font-weight: 850; font-size: clamp(1.6rem, 3vw, 2.8rem); line-height: 1.15; letter-spacing: -.04em; margin: .52rem 0; }
+.pink-friday-list { scroll-margin-top: 6.5rem; }
+.pink-friday-list h2 { margin-bottom: 1.2rem; }
+.pink-friday-filters { display: flex; flex-wrap: wrap; gap: .6rem; margin-block-end: 1.3rem; }
+.pink-friday-filters button { min-height: 44px; padding: .34rem 1rem; border: 1px solid var(--pink-line); border-radius: 999px; background: white; font-weight: 700; }
+.pink-friday-filters button[aria-pressed=true] { background: var(--pink-main); border-color: var(--pink-main); color: white; }
+.pink-friday-offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 1rem; }
+.pink-friday-home-offers { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 1.6rem; }
+.pink-friday-card { overflow: hidden; display: flex; flex-direction: column; background: white; border: 1px solid var(--pink-line); border-radius: 1.15rem; }
+.pink-friday-card-image { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.pink-friday-card-flyer .pink-friday-card-image { height: auto; aspect-ratio: auto; }
+.pink-friday-card-content { align-items: start; display: grid; gap: .42rem; padding: 1rem; flex: auto; }
+.pink-friday-card-content h3 { font-size: 1.15rem; font-weight: 850; }
+.pink-friday-card-content p { display: flex; align-items: center; gap: .35rem; font-size: .92rem; }
+.pink-friday-card-content p svg { flex-shrink: 0; }
+.pink-friday-card-content strong { color: #a30051; font-size: 1.35rem; }
+.pink-friday-card-action { display: inline-flex; min-height: 44px; gap: .4rem; align-items: center; align-self: end; color: #a30051; font-weight: 800; }
+.pink-friday-card-action:hover { text-decoration: underline; }
+.pink-friday-empty { background: var(--pink-blush); border-radius: 1rem; padding: 1rem 1.25rem; }
+.pink-friday-terms { display: block; margin-top: 1rem; }
+.pink-friday-closing { background: var(--pink-blush); }
+@media (max-width: 46rem) {
+  .pink-friday-hero-grid { grid-template-columns: 1fr; }
+  .pink-friday-teaser-intro { align-items: start; flex-direction: column; }
+  .pink-friday-home-offers { overflow-x: auto; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: min(83%, 19rem); scroll-snap-type: x mandatory; padding: .3rem; }
+  .pink-friday-home-offers > * { scroll-snap-align: start; }
+}

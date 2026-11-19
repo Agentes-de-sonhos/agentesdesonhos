@@ -35,6 +35,8 @@ const AgencyPreviewGate = lazy(() => import("@/pages/whitelabel/AgencyPreviewGat
 const AgencyClientArea = lazy(() => import("@/pages/whitelabel/AgencyClientArea"));
 const AgencyAdminArea = lazy(() => import("@/components/whitelabel/admin/AgencyAdminArea"));
 const VitrinePublica = lazy(() => import("@/pages/VitrinePublica"));
+import { PINK_FRIDAY_PATH, pinkFridayMode } from "@/lib/pinkFriday";
+const PinkFridayPage = lazy(() => import("@/pages/whitelabel/PinkFridayPage"));
 const AgencyOffersPage = lazy(() => import("@/pages/whitelabel/AgencyOffersPage"));
 const AgencyOfferDetail = lazy(() => import("@/pages/whitelabel/AgencyOfferDetail"));
 const OrcamentoPublicoV2 = lazy(() => import("@/pages/OrcamentoPublicoV2"));
@@ -198,6 +200,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
    */
   const { pathname } = useLocation();
   const arena = resolveSiteProfile(info.hostname).key === "arenaOfficial";
+  const pinkFriday = typeof window === "undefined" ? null : pinkFridayMode(info.hostname, window.location.hostname, window.location.search);
   useNoindex(
     typeof window !== "undefined" &&
       shouldNoindexAgencyPath(window.location.hostname, pathname),
@@ -304,6 +307,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
             {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
             <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />
             <Route path="/ofertas" element={<AgencyOffersPage info={info} />} />
+            {pinkFriday && <Route path={PINK_FRIDAY_PATH} element={<PinkFridayPage info={info} preview={pinkFriday === "preview"} />} />}
             <Route path="/ingressos-orlando" element={<div className="wl-orlando-page"><OrlandoEditorialGallery hostname={info.hostname} /><OrlandoTicketsSection hostname={info.hostname} phone={info.phone} mode="page" /></div>} />
             {resolveSiteProfile(info.hostname).resortsMap?.enabled && (
               <Route path="/resorts-brasil" element={<div className="mx-auto max-w-6xl px-4 py-12 md:py-20"><CuratedResortsMap hostname={info.hostname} {...(resolveSiteProfile(info.hostname).key === "editorialDmc" ? { title: "Explore os resorts do Brasil com a 100 Limites" } : {})} resortHref={(slug) => agencySiteHref(`/resorts-brasil/${slug}`)} /></div>} />

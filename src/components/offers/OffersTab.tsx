@@ -26,6 +26,7 @@ import {
   type OfferPanelFilter,
 } from "@/lib/offers";
 import { cn } from "@/lib/utils";
+import { isPinkFridayAgency, PINK_FRIDAY_LIVE_ENABLED } from "@/lib/pinkFriday";
 
 const FILTERS: { key: OfferPanelFilter | "requests"; label: string }[] = [
   { key: "active", label: "Ativas" },
@@ -275,8 +276,9 @@ export function OffersTab() {
         onOpenChange={(v) => !v && setEditor(null)}
         mode={editor?.mode ?? "manual"}
         offer={editor?.offer ?? null}
+        allowPinkFriday={PINK_FRIDAY_LIVE_ENABLED && isPinkFridayAgency(siteHost)}
       />
-      <ImageOfferDialog open={!!imageEditor} onOpenChange={(v) => !v && setImageEditor(null)} offer={imageEditor?.offer ?? null} />
+      <ImageOfferDialog open={!!imageEditor} onOpenChange={(v) => !v && setImageEditor(null)} offer={imageEditor?.offer ?? null} allowPinkFriday={PINK_FRIDAY_LIVE_ENABLED && isPinkFridayAgency(siteHost)} />
 
       <Dialog open={pickQuote} onOpenChange={setPickQuote}>
         <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">

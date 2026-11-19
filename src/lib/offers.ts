@@ -257,6 +257,7 @@ export function filterPublicOffers(offers: PublicOffer[], f: OfferFilters): Publ
 export const OFFER_CHANNELS = [
   { id: "ofertas", label: "Página Ofertas" },
   { id: "novembro", label: "Oportunidades de Novembro" },
+  { id: "pink-friday", label: "Pink Friday" },
 ] as const;
 export type OfferChannel = (typeof OFFER_CHANNELS)[number]["id"];
 

@@ -46,10 +46,13 @@ import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyF
 import { CruiseSeasonHomeTeaser } from "@/components/cruise-season/CruiseSeasonHomeTeaser";
 import { CruiseSeasonAuthorityBlock, CruiseSeasonHelp } from "@/components/cruise-season/CruiseSeasonAuthorityBlock";
 import { NovemberHomeTeaser } from "@/components/campaign/NovemberHomeTeaser";
+import { PinkFridayHome } from "@/components/campaign/PinkFriday";
+import { pinkFridayMode } from "@/lib/pinkFriday";
 
 /** Seção sintética (só O Mundo em Cores), fora do catálogo de seções. */
 const CRUISE_SEASON_TEASER_KEY = "cruiseSeasonTeaser" as AgencySectionKey;
 const NOVEMBER_TEASER_KEY = "novemberTeaser" as AgencySectionKey;
+const PINK_FRIDAY_TEASER_KEY = "pinkFridayTeaser" as AgencySectionKey;
 import { AgencyDmcSection } from "@/components/whitelabel/AgencyDmcSection";
 import { AgencyVisaConsultSection } from "@/components/whitelabel/AgencyVisaConsultSection";
 import { UsVisaHomeTeaser } from "@/components/whitelabel/UsVisaHomeTeaser";
@@ -540,6 +543,7 @@ export default function AgencySiteHome({
   const wa = agencyWhatsappNumber(info);
   const rawLocation = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
+  const pinkFriday = typeof window === "undefined" ? null : pinkFridayMode(hostname, window.location.hostname, window.location.search);
   const { data: resortCuration } = useAgencyResortCuration(hostname);
   const editorial = isEditorialTheme(hostname);
   const container = siteContainer(editorial);
@@ -613,8 +617,13 @@ export default function AgencySiteHome({
       if (at >= 0) resolved.splice(at, 0,
         { ...resolved[at], key: NOVEMBER_TEASER_KEY, label: "Ofertas Novembro" });
     }
+    if (pinkFriday && !profile.demo && !profile.presentation) {
+      const at = resolved.findIndex((s) => s.key === "modules");
+      if (at < 0) resolved.unshift({ key: PINK_FRIDAY_TEASER_KEY, label: "Pink Friday", enabled: true, order: -1 });
+      else resolved.splice(at, 0, { ...resolved[at], key: PINK_FRIDAY_TEASER_KEY, label: "Pink Friday" });
+    }
     return resolved;
-  }, [dmc, profile, labPresentation?.sections, hasRealBlog]);
+  }, [dmc, profile, labPresentation?.sections, hasRealBlog, pinkFriday]);
   const modules = useMemo(() => {
     const list = resolveModules(undefined, profile.modules);
     const pick = profile.demo ? labPresentation?.modules : undefined;
@@ -743,6 +752,9 @@ export default function AgencySiteHome({
   const renderSection = (key: AgencySectionKey) => {
     if (key === CRUISE_SEASON_TEASER_KEY) {
       return <CruiseSeasonHomeTeaser key={key} container={container} />;
+    }
+    if (key === PINK_FRIDAY_TEASER_KEY && pinkFriday) {
+      return <PinkFridayHome key={key} hostname={hostname} preview={pinkFriday === "preview"} />;
     }
     if (key === NOVEMBER_TEASER_KEY) {
       return (
