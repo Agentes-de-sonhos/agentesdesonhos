@@ -1843,6 +1843,13 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   background-color: #0EAEBB !important;
   color: #FFFFFF !important;
 }
+/* Aproxima a pergunta da fileira de logotipos da temporada de cruzeiros. */
+.wl-editorial.wl-mundo.wl-pristur-mundo .wl-alt-surface > #autoridade > [data-testid="cruise-season-companies"] {
+  padding-bottom: 1.25rem;
+}
+.wl-editorial.wl-mundo.wl-pristur-mundo .wl-alt-surface > #autoridade > [data-testid="cruise-season-help"] {
+  padding-top: 0;
+}
 .wl-editorial.wl-mundo.wl-pristur-mundo svg g[data-map-region="n"] { --arena-map-region: #b8d8a6; }
 .wl-editorial.wl-mundo.wl-pristur-mundo svg g[data-map-region="ne"] { --arena-map-region: #f4d77e; }
 .wl-editorial.wl-mundo.wl-pristur-mundo svg g[data-map-region="co"] { --arena-map-region: #dfbd95; }
