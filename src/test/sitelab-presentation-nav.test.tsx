@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { DEFAULT_SECTIONS, type AgencySectionKey } from "@/lib/agencySiteConfig";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
-import { NAV_LINKS, siteNavLinks } from "@/components/whitelabel/AgencySiteLayout";
+import { NAV_LINKS, siteNavLinks, withCruiseSeasonLink } from "@/components/whitelabel/AgencySiteLayout";
 import { SITELAB_DEMO_HOSTNAME as HOST } from "@/lib/sitelabModels";
 import {
   EMPTY_PRESENTATION,
@@ -48,15 +48,18 @@ describe("disponibilidade real das seções no laboratório", () => {
     });
     expect(hidden.has("hero") || hidden.has("requests")).toBe(false);
     expect(home).toContain("{showHero && (");
-    expect(home).toContain("<div hidden={!showRequests}>");
+    expect(home).toContain("hidden={!showRequests}>");
     expect(home).toContain("const labPick = profile.demo ? labPresentation?.sections : undefined;");
   });
 });
 
 describe("menu da demonstração", () => {
   it("todo link de seção do menu base aponta para uma seção conhecida", () => {
+    /* Páginas próprias (fora da home) não precisam apontar para uma seção. */
+    const STANDALONE = ["/ofertas", "/cruzeiros/temporada-brasileira-2026-2027"];
     for (const l of siteNavLinks(HOST)) {
       if (l.to === "/" || l.to === "/area-do-cliente") continue;
+      if (STANDALONE.includes(l.to)) continue;
       expect(navTargetSection(l.to)).not.toBeNull();
     }
   });
@@ -67,7 +70,8 @@ describe("menu da demonstração", () => {
       sections: { requests: false, modules: false, offers: false, about: false, concierge: false },
     });
     const nav = filterNavForSections(siteNavLinks(HOST), visible).map((l) => l.to);
-    expect(nav).toEqual(["/", "/area-do-cliente"]);
+    /* A página da temporada de cruzeiros não é seção da home: continua no menu. */
+    expect(nav).toEqual(["/", "/cruzeiros/temporada-brasileira-2026-2027", "/area-do-cliente"]);
   });
 
   it("com o padrão, o menu fica igual ao base", () => {
@@ -87,7 +91,7 @@ describe("menu da demonstração", () => {
 
 describe("isolamento dos clientes", () => {
   it("menus de tenants reais seguem inalterados (sem override)", () => {
-    expect(siteNavLinks("outra-agencia.com.br")).toEqual(NAV_LINKS);
+    expect(siteNavLinks("outra-agencia.com.br")).toEqual(withCruiseSeasonLink(NAV_LINKS));
     expect(siteNavLinks("destinoscomaju.com.br")).toEqual(resolveSiteProfile("destinoscomaju.com.br").nav);
   });
 
@@ -125,6 +129,9 @@ describe("tela Apresentação", () => {
     const saved = loadPresentation("sitelab-base");
     expect(saved.sections.hero).toBe(false);
     expect(saved.sections.requests).toBe(false);
-    expect(screen.getByTestId("sections-summary").textContent).toMatch(/de 18 blocos disponíveis/);
+    /* O editor soma os 2 blocos de abertura (hero + Central) aos demais disponíveis. */
+    const available =
+      2 + DEFAULT_SECTIONS.filter((s) => !sitelabUnavailableReason(s.key, lab, HOST)).length;
+    expect(screen.getByTestId("sections-summary").textContent).toContain(`de ${available} blocos disponíveis`);
   });
 });

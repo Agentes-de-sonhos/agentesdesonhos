@@ -217,7 +217,6 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
       ],
     },
     { label: "Inspirações", to: "/#destinos" },
-    { label: "Ofertas", to: "/ofertas" },
     {
       label: "Quem somos",
       to: "/#sobre",
