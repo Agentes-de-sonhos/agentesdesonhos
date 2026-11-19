@@ -127,6 +127,7 @@ const karibuLogo = { url: "/karibu-logo.png" };
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
 import viajeNaMagiaLogo from "@/assets/ads-preview/briefing-27-v1-logo.jpg.asset.json";
+import rbTourLogo from "@/assets/ads-preview/briefing-29-v1-logo.png.asset.json";
 import roteirosDaTerraLogo from "@/assets/ads-preview/briefing-28-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
@@ -2922,4 +2923,119 @@ ADS_PREVIEW_FIXTURES["briefing-28-v1"] = {
   notice: "ROTEIROS DA TERRA · prévia técnica · catálogos ilustrativos, sem oferta ou operação confirmada · contatos e envios bloqueados",
   documentTitle: "Prévia — ROTEIROS DA TERRA",
   pages: { resorts: { title: "Explore os resorts do Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
+};
+
+/** Briefing 29: presentation identity only; no account/domain association. */
+export const RB_TOUR_PREVIEW_HOST = "briefing-29-v1.preview.local";
+export const RB_TOUR_PREVIEW_PATH = "/ads-briefing-preview/briefing-29-v1";
+export const RB_TOUR_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad29",
+  agency_slug: "", public_slug: null, hostname: RB_TOUR_PREVIEW_HOST, is_primary: false,
+  agency_name: "RB TOUR", owner_name: "Regis Brissi",
+  logo_url: rbTourLogo.url, cover_image_url: null,
+  primary_color: "#0f3a57", secondary_color: "#bec4c5",
+  tertiary_color: deriveTertiaryColor("#0f3a57"), secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: "#0f3a57", phone: null, city: "Barueri", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const RB_TOUR_PREVIEW_PROFILE = buildGoldStandardProfile("rbTourBriefing29", {
+  textualWordmark: false, navDensity: "compact", cruiseSeasonInNav: false,
+  sections: { team: false, avaliacoes: false, testimonials: false },
+  team: undefined, testimonials: undefined,
+  credentials: {
+    kicker: "CADASTUR", title: "Cadastro informado pela RB TOUR",
+    text: "Número Cadastur confirmado no briefing. Apresentação textual, sem certificado ou imagem documental.",
+    items: [{ key: "cadastur", name: "Cadastur", text: "26.005703.10.0001-1" }],
+  },
+  heroPresentation: { kicker: "BARUERI · SP · DESDE 2004", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "RB TOUR", subtitle: "Sonhe. Deseje. Imagine. A RB Tour leva você lá! Planejamento completo para o cliente viajar com tranquilidade.", image: "heroVarenna", enabled: true, order: 1 },
+    { title: "Viagens sob medida", subtitle: "Brasil, Caribe e México, América do Sul e destinos internacionais como inspiração para o seu próximo roteiro.", image: "litoral", enabled: true, order: 2 },
+    { title: "Luxo e experiências exclusivas", subtitle: "Curadoria criteriosa e planejamento detalhado para famílias, casais e clientes de alto padrão.", image: "safari", enabled: true, order: 3 },
+  ],
+  nav: [
+    { label: "Início", to: "/" }, { label: "Destinos", to: "/#destinos" },
+    { label: "Especialidades", to: "/#assinatura", children: [
+      { label: "Resorts no Brasil", to: "/resorts-brasil" }, { label: "Club Med e neve", to: "/club-med-neve" },
+      { label: "Xcaret", to: "/xcaret" }, { label: "Orlando", to: "/ingressos-orlando" },
+      { label: "Cruzeiros", to: "/#autoridade" }, { label: "Visto americano", to: "/visto-americano" },
+      { label: "Portugal · inspiração", to: "/dmc-portugal" },
+    ] },
+    { label: "Sobre", to: "/#sobre" }, { label: "Atendimento", to: "/#atendimento" },
+    { label: "Inspirações", to: "/ofertas" }, { label: "Blog", to: "/blog" },
+  ],
+  signature: {
+    kicker: "O JEITO RB TOUR DE PLANEJAR", title: "Consultoria completa para diferentes viagens",
+    text: "Sonhe. Deseje. Imagine. A RB Tour leva você lá! A consultoria começa pelos seus interesses e pelo que você deseja viver. Viagens sob medida, luxo e experiências exclusivas e destinos internacionais fazem parte de uma proposta que reúne curadoria criteriosa, planejamento detalhado e especialização profunda.",
+    continuation: { title: "Da inspiração ao pós-viagem", text: "Famílias com crianças, casais e clientes de alto padrão encontram um planejamento que considera seu perfil. Regis Brissi, fundador, e especialistas conforme o produto e a etapa conduzem o atendimento por WhatsApp e videochamada, com suporte durante toda a viagem." },
+  },
+  modules: [
+    { key: "sob-medida", title: "Viagens sob medida", text: "Planejamento detalhado que considera o perfil, os interesses e o ritmo dos viajantes.", service: "pacotes", image: "heroVarenna", enabled: true, order: 1 },
+    { key: "resorts", title: "Resorts e all inclusive", text: "Inspirações no Brasil, Caribe e México para descansar em família ou a dois, sem oferta vigente nesta prévia.", service: "hospedagem", image: "resort", enabled: true, order: 2 },
+    { key: "luxo", title: "Luxo e hotéis boutique", text: "Conforto, personalidade e experiências exclusivas entre as prioridades da curadoria.", service: "hospedagem", image: "villa", enabled: true, order: 3 },
+    { key: "neve", title: "Club Med e neve", text: "Inspirações para viagens à montanha. Produtos do catálogo compartilhado, sem preço ou disponibilidade presumidos.", service: "pacotes", image: "europa", enabled: true, order: 4 },
+    { key: "exoticos", title: "Destinos exóticos e safári", text: "Paisagens e experiências como ponto de partida para um roteiro internacional sob medida.", service: "pacotes", image: "safari", enabled: true, order: 5 },
+    { key: "italia", title: "Itália e destinos internacionais", text: "Cultura, cidades e paisagens reunidas com atenção aos seus planos e às escolhas de cada etapa.", service: "pacotes", image: "heroVarenna", enabled: true, order: 6 },
+  ],
+  destinations: [
+    { key: "brasil", title: "Brasil", label: "Descobertas nacionais", text: "Praias, paisagens e resorts como inspiração para diferentes viagens pelo país.", image: "brasil", service: "pacotes", enabled: true, order: 1 },
+    { key: "caribe-mexico", title: "Caribe e México", label: "Resorts e all inclusive", text: "Descanso e experiências em família ou a dois. Imagem regional ilustrativa, sem representar uma oferta vigente.", image: "litoral", service: "pacotes", enabled: true, order: 2 },
+    { key: "america-sul", title: "América do Sul", label: "Novas paisagens", text: "Culturas e paisagens para um roteiro personalizado. Fotografia regional de inspiração.", image: "mendoza", service: "pacotes", enabled: true, order: 3 },
+    { key: "italia", title: "Itália", label: "Europa", text: "Cidades, cultura e paisagens entre as prioridades da RB TOUR para viagens internacionais.", image: "heroVarenna", service: "pacotes", enabled: true, order: 4 },
+    { key: "safari", title: "Safári e destinos exóticos", label: "Experiências exclusivas", text: "Inspiração editorial para novas descobertas, sem roteiro fechado, preço ou disponibilidade fictícios.", image: "safari", service: "pacotes", enabled: true, order: 5 },
+  ],
+  highlights: [
+    { title: "Famílias com crianças", text: "Interesses e ritmos de cada pessoa como ponto de partida para o planejamento.", service: "pacotes", cta: "Explorar em família" },
+    { title: "Viagens a dois", text: "Tempo juntos e experiências escolhidas conforme as preferências do casal.", service: "pacotes", cta: "Inspirar a próxima viagem" },
+    { title: "Luxo e alto padrão", text: "Curadoria criteriosa para escolhas que valorizam conforto e experiências exclusivas.", service: "pacotes", cta: "Explorar possibilidades" },
+  ],
+  about: {
+    kicker: "NOSSA HISTÓRIA", title: "RB TOUR: uma trajetória no turismo desde 1997", image: "heroVarenna",
+    text: "A trajetória de Regis Brissi no turismo começou em 1997. Depois de experiências em companhia aérea, operadora, hotel e agência, a RB Tour foi criada em 2004. Em Barueri/SP, essa história dá origem a uma proposta de consultoria completa para diferentes viagens e de planejamento completo para o cliente viajar com tranquilidade.\n\nViagens sob medida, luxo e experiências exclusivas e destinos internacionais são suas especialidades. Famílias com crianças, casais e clientes de alto padrão estão entre os principais perfis atendidos. Brasil, Caribe e México, América do Sul, resorts e all inclusive, Club Med e neve, hotéis boutique, safári, destinos exóticos e Itália orientam as prioridades de planejamento.\n\nRegis Brissi, fundador, e especialistas conforme o produto e a etapa conduzem o atendimento por WhatsApp e videochamada. Curadoria criteriosa, planejamento detalhado, especialização profunda e suporte durante toda a viagem compõem o cuidado da inspiração ao pós-viagem. Sonhe. Deseje. Imagine. A RB Tour leva você lá!",
+    badge: { value: "Desde 2004", label: "RB TOUR" }, ownerName: "Regis Brissi", showLocation: true,
+    tagline: "Regis Brissi · Fundador · Turismo desde 1997",
+  },
+  differentials: [
+    { title: "Curadoria criteriosa", text: "Escolhas orientadas pelo perfil de quem viaja e pelas experiências desejadas.", icon: "consultivo" },
+    { title: "Planejamento detalhado", text: "Atenção ao roteiro e aos detalhes que conectam cada etapa da viagem.", icon: "conferido" },
+    { title: "Especialização profunda", text: "Regis Brissi e especialistas conforme o produto e a etapa do planejamento.", icon: "fornecedores" },
+    { title: "Suporte durante toda a viagem", text: "Atendimento da inspiração ao pós-viagem por WhatsApp e videochamada.", icon: "acompanhamento" },
+  ],
+  hideConciergeWhatsapp: true, hideFaqWhatsapp: true,
+  conciergePoints: [
+    { key: "inspiracao", title: "1. Conhecer seus planos", text: "Regis Brissi e especialistas conversam sobre quem viaja e o que deseja viver." },
+    { key: "curadoria", title: "2. Selecionar possibilidades", text: "Curadoria criteriosa conforme o perfil, o produto e os interesses da viagem." },
+    { key: "planejamento", title: "3. Planejar os detalhes", text: "Planejamento detalhado e atendimento por WhatsApp e videochamada." },
+    { key: "suporte", title: "4. Acompanhar a viagem", text: "Suporte durante toda a viagem, da inspiração ao pós-viagem." },
+  ],
+  conciergeSteps: ["Compartilhe seus planos com Regis e os especialistas.", "Conheça possibilidades alinhadas ao seu perfil.", "Construa um planejamento atento aos detalhes.", "Conte com suporte durante a viagem e no pós-viagem."],
+  requestCenter: { title: "Central de solicitações", support: "Como você imagina sua próxima viagem?", notice: "Prévia técnica: formulário simulado, sem envio de dados.", submitLabel: "Revisar", titlePlacement: "above-card" },
+  faq: [
+    { q: "Quem atende na RB TOUR?", a: "Regis Brissi, fundador, e especialistas conforme o produto e a etapa, por WhatsApp e videochamada." },
+    { q: "Quando começou a história da agência?", a: "A atuação no turismo começou em 1997. A RB Tour foi criada em 2004, após experiência em companhia aérea, operadora, hotel e agência." },
+    { q: "Quais são as especialidades?", a: "Viagens sob medida, luxo e experiências exclusivas e destinos internacionais. Famílias com crianças, casais e clientes de alto padrão estão entre os principais perfis atendidos." },
+    { q: "Quais destinos e experiências são prioritários?", a: "Brasil, Caribe e México, América do Sul, resorts e all inclusive, viagens de luxo, Club Med e neve, destinos exóticos, hotéis boutique, safári e Itália." },
+    { q: "Há suporte durante a viagem?", a: "Sim. O atendimento informado pela RB TOUR vai da inspiração ao pós-viagem, com suporte durante toda a viagem. Canais e condições específicas são combinados com a agência." },
+    { q: "Os produtos apresentados estão disponíveis para reserva?", a: "Esta é uma apresentação técnica. As experiências e catálogos são inspirações, sem preços ou disponibilidade fictícios; solicitações, contatos e ações comerciais estão bloqueados." },
+    { q: "Quais são os contatos públicos?", a: "WhatsApp 11 99236-3862, atendimento@rbtour.com.br e Instagram @rbtourviagens. Barueri/SP. Site informado: rbtour.com.br, apenas referência textual, sem vínculo de domínio nesta prévia." },
+  ],
+  copy: {
+    modules: { kicker: "ESPECIALIDADES", title: "Viagens com a sua personalidade", subtitle: "Sob medida, luxo e experiências exclusivas. Inspirações sem preço ou disponibilidade presumidos." },
+    destinations: { kicker: "DESTINOS", title: "Seu próximo roteiro começa na inspiração", subtitle: "Brasil, Caribe e México, América do Sul, Itália e destinos exóticos." },
+    highlights: { kicker: "MOMENTOS DE VIAGEM", title: "Uma viagem para cada momento", subtitle: "Famílias com crianças, casais e clientes de luxo ou alto padrão." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Detalhes que fazem parte da viagem", subtitle: "Curadoria criteriosa, planejamento detalhado, suporte e especialização profunda." },
+    concierge: { kicker: "ATENDIMENTO", title: "Da inspiração ao pós-viagem", subtitle: "Regis Brissi e especialistas conforme o produto e a etapa; WhatsApp e videochamada." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Conheça a proposta da RB TOUR" },
+    newsletter: { title: "Receba inspirações de viagem", subtitle: "Formulário demonstrativo, sem inscrição ou envio nesta prévia." },
+  },
+  footer: { description: "Consultoria completa para diferentes viagens. Sonhe. Deseje. Imagine. A RB Tour leva você lá!", email: "atendimento@rbtour.com.br", whatsapp: "11 99236-3862", instagram: "https://www.instagram.com/rbtourviagens/", instagramLabel: "@rbtourviagens", phoneHidden: true, showLocation: true, legalLinksDisabled: true },
+  seo: { title: "Prévia — RB TOUR", description: "Apresentação técnica isolada da RB TOUR para revisão, sem envios, vínculo de identidade ou publicação." },
+}, "RB TOUR");
+if (RB_TOUR_PREVIEW_PROFILE.dmc) RB_TOUR_PREVIEW_PROFILE.dmc.cta = "Explorar Portugal";
+ADS_PREVIEW_FIXTURES["briefing-29-v1"] = {
+  jobId: "briefing-29-v1", info: RB_TOUR_PREVIEW_INFO, profile: RB_TOUR_PREVIEW_PROFILE,
+  realAgency: true, strictBackendBlock: true,
+  notice: "RB TOUR · prévia técnica · experiências ilustrativas, sem preços ou disponibilidade · contatos e envios bloqueados",
+  documentTitle: "Prévia — RB TOUR",
+  pages: { resorts: { title: "Inspirações em resorts no Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
 };

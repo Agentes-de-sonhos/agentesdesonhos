@@ -79,6 +79,7 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 };
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
+  "briefing-29-v1.preview.local": "/rb-tour/favicon.png",
   "briefing-28-v1.preview.local": "/roteiros-da-terra/favicon.png",
   "briefing-27-v1.preview.local": "/viaje-na-magia/favicon.png",
   "briefing-22-v1.preview.local": "/pristur/favicon.png",
@@ -119,6 +120,7 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
  * Quando true, a apresentação NÃO repete o nome ao lado do logotipo.
  */
 const LOGO_WITH_WORDMARK_HOSTS = new Set([
+  "briefing-29-v1.preview.local",
   "briefing-28-v1.preview.local",
   "briefing-27-v1.preview.local",
   "briefing-22-v1.preview.local",
