@@ -1,3 +1,4 @@
+import brandUsaAmbassador from "@/assets/whitelabel/brand-usa-global-ambassador-2026.png.asset.json";
 import momentFamily from "@/assets/100limites-moment-family.jpg";
 import momentHoneymoon from "@/assets/100limites-moment-honeymoon.jpg";
 import momentFriends from "@/assets/100limites-moment-friends.jpg";
@@ -321,6 +322,12 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
 
     badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
     ownerName: "Juliana Neves Sanches e Equipe",
+    credential: {
+      src: brandUsaAmbassador.url,
+      alt: "Selo Brand USA Global Ambassador 2026",
+      title: "Embaixadora Global Brand USA 2026",
+      text: "Chancela internacional concedida pelo órgão oficial de promoção do turismo dos Estados Unidos, atestando capacitação contínua, profunda autoridade e curadoria especializada no planejamento de viagens pelo país.",
+    },
   },
   differentials: [
     { title: "Atendimento conduzido de perto", text: "A Juliana participa do planejamento e acompanha pessoalmente cada cliente durante as principais etapas da viagem.", icon: "consultivo" },

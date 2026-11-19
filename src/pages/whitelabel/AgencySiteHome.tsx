@@ -1405,6 +1405,15 @@ export default function AgencySiteHome({
                       ))}
                     </ul>
                   )}
+                  {aboutCopy?.credential && (
+                    <div className="mt-8 flex items-center gap-5">
+                      <img src={aboutCopy.credential.src} alt={aboutCopy.credential.alt} loading="lazy" className="h-16 w-auto shrink-0 object-contain md:h-20" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{aboutCopy.credential.title}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{aboutCopy.credential.text}</p>
+                      </div>
+                    </div>
+                  )}
                   <div className="mt-8 space-y-2 border-t border-foreground/10 pt-6">
                     {(aboutCopy?.ownerName ?? info.owner_name) && (
                       <p className="text-sm text-muted-foreground">

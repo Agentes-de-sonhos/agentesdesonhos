@@ -311,6 +311,8 @@ export interface AgencySiteProfile {
     showLocation?: boolean;
     /** Nome exibido em "Atendimento com"; ausente mantém o nome do cadastro. */
     ownerName?: string;
+    /** Credencial oficial confirmada (selo + texto), exibida antes da assinatura. */
+    credential?: { src: string; alt: string; title: string; text: string };
   };
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
