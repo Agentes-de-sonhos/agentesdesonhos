@@ -1,0 +1,1 @@
+- Day city: optional `itinerary_days.city` (blank = destination) drives per-day weather. Why: multi-city forecasts.
