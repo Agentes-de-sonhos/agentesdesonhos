@@ -127,6 +127,7 @@ const karibuLogo = { url: "/karibu-logo.png" };
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
 import viajeNaMagiaLogo from "@/assets/ads-preview/briefing-27-v1-logo.jpg.asset.json";
+import roteirosDaTerraLogo from "@/assets/ads-preview/briefing-28-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
@@ -2819,4 +2820,106 @@ ADS_PREVIEW_FIXTURES["briefing-27-v1"] = {
   notice: "Viaje na Magia Turismo · prévia para revisão · solicitações simuladas · sem envios ou publicação",
   documentTitle: "Prévia — Viaje na Magia Turismo",
   pages: { dmc: false, editorial: false, xcaret: { slots: GENERIC_XCARET_SLOTS }, visa: true, orlandoTickets: true, resorts: { title: "Explore os resorts do Brasil" } },
+};
+
+/** Briefing 28: identity belongs only to the local fixture, never to an account. */
+export const ROTEIROS_DA_TERRA_PREVIEW_HOST = "briefing-28-v1.preview.local";
+export const ROTEIROS_DA_TERRA_PREVIEW_PATH = "/ads-briefing-preview/briefing-28-v1";
+export const ROTEIROS_DA_TERRA_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad28",
+  agency_slug: "", public_slug: null, hostname: ROTEIROS_DA_TERRA_PREVIEW_HOST, is_primary: false,
+  agency_name: "ROTEIROS DA TERRA", owner_name: "Andrea Machado Terra",
+  logo_url: roteirosDaTerraLogo.url, cover_image_url: null,
+  primary_color: "#23314D", secondary_color: "#F8E1E5",
+  tertiary_color: deriveTertiaryColor("#23314D"), secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: "#23314D", phone: null, city: "Rio de Janeiro", state: "RJ",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const ROTEIROS_DA_TERRA_PREVIEW_PROFILE = buildGoldStandardProfile("roteirosDaTerraBriefing28", {
+  textualWordmark: false, navDensity: "compact", cruiseSeasonInNav: false,
+  sections: { credentials: false, team: false, avaliacoes: false, testimonials: false },
+  credentials: undefined, team: undefined, testimonials: undefined,
+  heroPresentation: { kicker: "RIO DE JANEIRO · RJ · DESDE 2019", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "ROTEIROS DA TERRA", subtitle: "Planejamento completo para o cliente viajar com tranquilidade.", image: "heroVarenna", enabled: true, order: 1 },
+    { title: "Viagens sob medida", subtitle: "Europa, Ásia, Oceania, África e América do Sul entre as prioridades do seu planejamento.", image: "dricaJapan", enabled: true, order: 2 },
+    { title: "Luxo e experiências exclusivas", subtitle: "Consultoria completa para diferentes viagens, com Andrea Machado Terra.", image: "safari", enabled: true, order: 3 },
+  ],
+  signature: {
+    kicker: "O JEITO ROTEIROS DA TERRA DE PLANEJAR", title: "Consultoria completa para diferentes viagens",
+    text: "Viagens sob medida, luxo e experiências exclusivas e viagens internacionais compõem as especialidades da ROTEIROS DA TERRA. O planejamento parte dos seus interesses e das escolhas que tornam cada viagem pessoal, com uma proposta de consultoria completa para diferentes viagens.",
+    continuation: { title: "Seu próximo roteiro, pensado para você", text: "Europa, Ásia e Oceania, África e América do Sul estão entre as prioridades da agência. Destinos, culturas e paisagens servem de inspiração para uma conversa com Andrea Machado Terra sobre a viagem que você deseja planejar." },
+  },
+  modules: [
+    { key: "sob-medida", title: "Viagens sob medida", text: "Planejamento alinhado aos seus interesses e ao roteiro que deseja construir.", service: "pacotes", image: "heroVarenna", enabled: true, order: 1 },
+    { key: "luxo", title: "Luxo e experiências exclusivas", text: "Inspirações para conversar sobre conforto, estilo de viagem e escolhas pessoais.", service: "pacotes", image: "villa", enabled: true, order: 2 },
+    { key: "internacionais", title: "Viagens internacionais", text: "Europa, Ásia/Oceania, África e América do Sul entre as prioridades editoriais.", service: "pacotes", image: "dricaJapan", enabled: true, order: 3 },
+    { key: "europa", title: "Itália e Portugal", text: "Cidades, paisagens e cultura para inspirar seu planejamento pela Europa.", service: "pacotes", image: "portugalBelem", enabled: true, order: 4 },
+    { key: "africa", title: "África do Sul e Marrocos", text: "Diferentes paisagens e culturas entre os destinos citados pela agência.", service: "pacotes", image: "safari", enabled: true, order: 5 },
+    { key: "america-sul", title: "Atacama, Peru e Patagônia", text: "Inspirações sul-americanas para uma viagem desenhada com atenção aos seus planos.", service: "pacotes", image: "mendoza", enabled: true, order: 6 },
+  ],
+  destinations: [
+    { key: "europa", title: "Itália e Portugal", label: "Europa", text: "História, cidades e paisagens entre os destinos citados para viagens sob medida.", image: "heroVarenna", service: "pacotes", enabled: true, order: 1 },
+    { key: "asia", title: "Japão, Tailândia e Maldivas", label: "Ásia · prioridade também para Oceania", text: "Culturas e experiências diversas como inspiração para o seu roteiro. Fotografia compartilhada de Kyoto, Japão.", image: "dricaJapan", service: "pacotes", enabled: true, order: 2 },
+    { key: "africa", title: "África do Sul e Marrocos", label: "África", text: "Dois destinos entre as prioridades da agência. Imagem de safári ilustrativa do acervo compartilhado.", image: "safari", service: "pacotes", enabled: true, order: 3 },
+    { key: "america-sul", title: "Atacama, Peru e Patagônia", label: "América do Sul", text: "Paisagens e culturas para inspirar novas viagens. Imagem regional ilustrativa do acervo compartilhado, sem representar os três destinos.", image: "mendoza", service: "pacotes", enabled: true, order: 4 },
+    { key: "luxo", title: "Luxo no seu estilo", label: "Experiências exclusivas", text: "Conforto e experiências como ponto de partida para conversar sobre suas preferências. Imagem ilustrativa, sem oferta ou disponibilidade.", image: "villa", service: "pacotes", enabled: true, order: 5 },
+  ],
+  highlights: [
+    { title: "Seu próprio ritmo", text: "Inspiração editorial: tempo e interesses como ponto de partida para o roteiro.", service: "pacotes", cta: "Revisar planejamento" },
+    { title: "Novas culturas", text: "Inspiração editorial: diferentes destinos e experiências para conhecer.", service: "pacotes", cta: "Explorar possibilidades" },
+    { title: "Escolhas pessoais", text: "Inspiração editorial: conforto e estilo de viagem em uma proposta sob medida.", service: "pacotes", cta: "Revisar possibilidades" },
+  ],
+  about: {
+    kicker: "CONHEÇA A AGÊNCIA", title: "Desde 2019, ROTEIROS DA TERRA", image: "heroVarenna",
+    text: "A ROTEIROS DA TERRA foi fundada em 2019 por Andrea Machado Terra, no Rio de Janeiro/RJ. A agência apresenta uma proposta de consultoria completa para diferentes viagens, com planejamento completo para o cliente viajar com tranquilidade.\n\nViagens sob medida, luxo e experiências exclusivas e viagens internacionais são suas especialidades. Europa, Ásia e Oceania, África, América do Sul e luxo orientam as prioridades editoriais. África do Sul, Marrocos, Tailândia, Maldivas, Japão, Itália, Portugal, Atacama, Peru e Patagônia estão entre os destinos citados.\n\nAndrea Machado Terra conduz o atendimento via WhatsApp, vídeo e telefone. A conversa sobre seus planos é o ponto de partida para conhecer a proposta da agência. Canais, condições e etapas específicas do atendimento são combinados diretamente, sem compromissos operacionais adicionais nesta apresentação.",
+    badge: { value: "Desde 2019", label: "ROTEIROS DA TERRA" }, ownerName: "Andrea Machado Terra", showLocation: false,
+    tagline: "Andrea Machado Terra · Fundadora",
+  },
+  differentials: [
+    { title: "Atendimento com Andrea", text: "Andrea Machado Terra, fundadora, atende via WhatsApp, vídeo e telefone.", icon: "consultivo" },
+    { title: "Viagens sob medida", text: "Uma das especialidades da agência, com planejamento para diferentes viagens.", icon: "conferido" },
+    { title: "Luxo e experiências exclusivas", text: "Especialidade voltada a escolhas pessoais e diferentes estilos de viagem.", icon: "fornecedores" },
+    { title: "Viagens internacionais", text: "Europa, Ásia/Oceania, África e América do Sul entre as prioridades.", icon: "acompanhamento" },
+  ],
+  hideConciergeWhatsapp: true, hideFaqWhatsapp: true,
+  conciergePoints: [
+    { key: "contato", title: "Conversar com Andrea", text: "Atendimento informado: WhatsApp, vídeo e telefone." },
+    { key: "interesses", title: "Compartilhar seus interesses", text: "Etapa editorial de apresentação para conhecer o roteiro desejado." },
+    { key: "possibilidades", title: "Explorar possibilidades", text: "Etapa ilustrativa; opções e condições dependem de confirmação com a agência." },
+    { key: "planejamento", title: "Combinar o planejamento", text: "Etapa ilustrativa; escopo e condições são combinados diretamente com Andrea." },
+  ],
+  conciergeSteps: ["Atendimento com Andrea via WhatsApp, vídeo e telefone.", "Etapa ilustrativa: conversar sobre seus interesses.", "Etapa ilustrativa: explorar possibilidades de roteiro.", "Condições e etapas específicas a combinar com a agência."],
+  requestCenter: { title: "Central de solicitações", support: "Conte como imagina sua próxima viagem.", notice: "Prévia técnica: formulário simulado, sem envio de dados.", submitLabel: "Revisar", titlePlacement: "above-card" },
+  faq: [
+    { q: "Quem atende na ROTEIROS DA TERRA?", a: "Andrea Machado Terra, fundadora da agência, via WhatsApp, vídeo e telefone." },
+    { q: "Quando a agência foi fundada?", a: "Em 2019. A cidade informada é Rio de Janeiro/RJ." },
+    { q: "Quais são as especialidades?", a: "Viagens sob medida, luxo e experiências exclusivas e viagens internacionais." },
+    { q: "Quais regiões são prioritárias?", a: "Europa, Ásia/Oceania, África e América do Sul, além de viagens de luxo." },
+    { q: "Quais destinos inspiram os roteiros?", a: "África do Sul, Marrocos, Tailândia, Maldivas, Japão, Itália, Portugal, Atacama, Peru e Patagônia estão entre os destinos citados." },
+    { q: "Os produtos desta prévia são ofertas disponíveis?", a: "Não. Os catálogos e continuidades do padrão ouro são uma apresentação técnica. Serviços, disponibilidade, condições e etapas de atendimento precisam de confirmação com a agência." },
+    { q: "Quais são os contatos públicos?", a: "WhatsApp +55 21 98897-4969 e e-mail andrea@roteirosdaterra.com.br. Site informado: roteirosdaterra.com.br, apenas como referência textual. Contatos, formulários e ações comerciais estão bloqueados nesta prévia." },
+  ],
+  copy: {
+    modules: { kicker: "ESPECIALIDADES", title: "Viagens com a sua personalidade", subtitle: "Sob medida, luxo e experiências exclusivas e viagens internacionais." },
+    destinations: { kicker: "DESTINOS PRIORITÁRIOS", title: "Destinos que inspiram novas histórias", subtitle: "Europa, Ásia/Oceania, África, América do Sul e luxo." },
+    highlights: { kicker: "INSPIRAÇÕES EDITORIAIS", title: "Diferentes formas de viver uma viagem", subtitle: "Conteúdo ilustrativo de apresentação, sem oferta comercial." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Consultoria para diferentes viagens", subtitle: "As especialidades e o atendimento informados pela ROTEIROS DA TERRA." },
+    concierge: { kicker: "ATENDIMENTO", title: "Uma conversa com Andrea", subtitle: "WhatsApp, vídeo e telefone; etapas ilustrativas sujeitas à confirmação." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Conheça a proposta da agência" },
+    newsletter: { title: "Receba novidades e oportunidades", subtitle: "Formulário demonstrativo, sem inscrição ou envio nesta prévia." },
+  },
+  footer: { description: "Consultoria completa para diferentes viagens", email: "andrea@roteirosdaterra.com.br", whatsapp: "+55 21 98897-4969", phone: "+55 21 98897-4969", showLocation: false, legalLinksDisabled: true },
+  seo: { title: "Prévia — ROTEIROS DA TERRA", description: "Apresentação técnica isolada da ROTEIROS DA TERRA para revisão, sem envio ou publicação." },
+}, "ROTEIROS DA TERRA");
+// Short local CTA keeps the inherited Portugal presentation within mobile width.
+if (ROTEIROS_DA_TERRA_PREVIEW_PROFILE.dmc) {
+  ROTEIROS_DA_TERRA_PREVIEW_PROFILE.dmc.cta = "Explorar Portugal";
+}
+ADS_PREVIEW_FIXTURES["briefing-28-v1"] = {
+  jobId: "briefing-28-v1", info: ROTEIROS_DA_TERRA_PREVIEW_INFO, profile: ROTEIROS_DA_TERRA_PREVIEW_PROFILE,
+  realAgency: true, strictBackendBlock: true,
+  notice: "ROTEIROS DA TERRA · prévia técnica · catálogos ilustrativos, sem oferta ou operação confirmada · contatos e envios bloqueados",
+  documentTitle: "Prévia — ROTEIROS DA TERRA",
+  pages: { resorts: { title: "Explore os resorts do Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
 };
