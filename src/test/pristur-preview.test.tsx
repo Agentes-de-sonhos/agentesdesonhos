@@ -140,9 +140,9 @@ describe("Pristur — seções escolhidas por Fernando", () => {
       "Início", "Destinos", "Especialidades", "Sobre",
     ]);
     expect(links[2].children).toEqual([
-      { label: "Parques Orlando / Disney", to: "/ingressos-orlando" },
-      { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
-      { label: "Resorts no Brasil", to: "/resorts-brasil" },
+      { label: "Parques Orlando / Disney", to: "/#ingressos-orlando" },
+      { label: "Cruzeiros 26/27", to: "/#autoridade" },
+      { label: "Resorts no Brasil", to: "/#resorts" },
     ]);
     expect(links.at(-1)?.children?.map(({ label }) => label)).toEqual(["Quem Somos", "Dúvidas Frequentes"]);
     expect(PRISTUR_PREVIEW_PROFILE.authority?.companies?.title).toBe("Na Pristur Viagens, você encontra as principais companhias marítimas. Planeje seu próximo cruzeiro!");

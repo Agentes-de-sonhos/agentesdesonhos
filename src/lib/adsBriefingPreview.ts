@@ -1894,7 +1894,7 @@ export const PRISTUR_PREVIEW_INFO: AgencyDomainInfo = {
 };
 const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   textualWordmark: false,
-  navDensity: "compact", visaHome: false, featuredExperience: undefined, cruiseSeasonInNav: false,
+  navDensity: "compact", visaHome: false, featuredExperience: undefined,
   dmc: undefined, credentials: undefined, team: undefined,
   authority: undefined, testimonials: undefined, conciergePoints: undefined,
   sections: {
@@ -2004,7 +2004,7 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
     authority: { enabled: true, order: 3.5 }, newsletter: { enabled: true, order: 10 },
     avaliacoes: { enabled: false }, testimonials: { enabled: false } },
   nav: pristurBaseline.nav,
-  cruiseSeasonInNav: true,
+  cruiseSeasonInNav: false,
   copy: { ...pristurBaseline.copy },
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
