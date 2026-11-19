@@ -1894,7 +1894,7 @@ export const PRISTUR_PREVIEW_INFO: AgencyDomainInfo = {
 };
 const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   textualWordmark: false,
-  navDensity: "compact", visaHome: false, featuredExperience: undefined,
+  navDensity: "compact", visaHome: false, featuredExperience: undefined, cruiseSeasonInNav: false,
   dmc: undefined, credentials: undefined, team: undefined,
   authority: undefined, testimonials: undefined, conciergePoints: undefined,
   sections: {
@@ -1906,9 +1906,9 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     { label: "Início", to: "/" },
     { label: "Destinos", to: "/#destinos" },
     { label: "Especialidades", to: "/#assinatura", children: [
-      { label: "Parques Orlando / Disney", to: "/ingressos-orlando" },
-      { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
-      { label: "Resorts no Brasil", to: "/resorts-brasil" },
+      { label: "Parques Orlando / Disney", to: "/#ingressos-orlando" },
+      { label: "Cruzeiros 26/27", to: "/#autoridade" },
+      { label: "Resorts no Brasil", to: "/#resorts" },
     ] },
     { label: "Sobre", to: "/#sobre", children: [
       { label: "Quem Somos", to: "/#sobre" }, { label: "Dúvidas Frequentes", to: "/#faq" },

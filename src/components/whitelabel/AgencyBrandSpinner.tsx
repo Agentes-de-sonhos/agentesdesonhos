@@ -25,6 +25,8 @@ const ARENA_HOSTS = new Set(["arenatravelgroup.com.br", "www.arenatravelgroup.co
 
 const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "briefing-22-v1.preview.local": pristurLogo.url,
+  "pristur.com.br": pristurLogo.url,
+  "www.pristur.com.br": pristurLogo.url,
   "destinoscomaju.com.br": destinosComAJuSymbol.url,
   "www.destinoscomaju.com.br": destinosComAJuSymbol.url,
   "100limites.tur.br": CEM_LIMITES_MARK,
@@ -49,6 +51,7 @@ const HOME_AND_PUBLIC_ONLY = new Set([
   "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local",
   "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local",
   ...ARENA_HOSTS,
+  "pristur.com.br", "www.pristur.com.br",
 ]);
 
 /** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
