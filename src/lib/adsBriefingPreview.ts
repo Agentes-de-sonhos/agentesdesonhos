@@ -126,6 +126,7 @@ import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.
 const karibuLogo = { url: "/karibu-logo.png" };
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
+import viajeNaMagiaLogo from "@/assets/ads-preview/briefing-27-v1-logo.jpg.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
 
 export const ADS_PREVIEW_JOB_ID = "ads-email-test-v1";
@@ -1580,6 +1581,8 @@ export interface AdsBriefingPreviewFixture {
   notice: string;
   documentTitle: string;
   realAgency: boolean;
+  /** Opt-in: block even public backend exceptions in an isolated review. */
+  strictBackendBlock?: boolean;
   /** Páginas internas opcionais da prévia (off por padrão). */
   pages?: {
     xcaret?: { slots: XcaretMediaSlots; textRewrites?: [string, string][] };
@@ -2709,4 +2712,111 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto"),
   demo: false, presentation: false, seo: immBaseline.seo,
+};
+
+/** Local identity: deliberately never uses the existing account or public slug. */
+export const VIAJE_NA_MAGIA_PREVIEW_HOST = "briefing-27-v1.preview.local";
+export const VIAJE_NA_MAGIA_PREVIEW_PATH = "/ads-briefing-preview/briefing-27-v1";
+export const VIAJE_NA_MAGIA_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad27",
+  agency_slug: "", public_slug: null, hostname: VIAJE_NA_MAGIA_PREVIEW_HOST, is_primary: false,
+  agency_name: "Viaje na Magia Turismo", owner_name: "Elisangela Silva",
+  logo_url: viajeNaMagiaLogo.url, cover_image_url: null,
+  primary_color: "#164f76", secondary_color: "#ffffff",
+  tertiary_color: deriveTertiaryColor("#164f76"), secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: "#164f76", phone: null, city: "Franco da Rocha", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const VIAJE_NA_MAGIA_PREVIEW_PROFILE = buildGoldStandardProfile("viajeNaMagiaBriefing27", {
+  textualWordmark: false, navDensity: "compact", cruiseSeasonInNav: false,
+  // Keep the specialty rail instead of replacing it with an unrelated home campaign.
+  featuredExperience: undefined,
+  sections: { avaliacoes: false, testimonials: false, credentials: false, team: false, dmc: false, offers: false, blog: false, newsletter: false },
+  dmc: undefined, credentials: undefined, team: undefined, testimonials: undefined,
+  heroPresentation: { kicker: "FRANCO DA ROCHA · SP · DESDE 2020", overlay: "strongLeft", titleWeight: "regular" },
+  hero: [
+    { title: "Viaje na Magia Turismo", subtitle: "Planejamento completo para o cliente viajar com tranquilidade.", image: "orlandoMagicKingdom", enabled: true, order: 1 },
+    { title: "O sonho de Orlando começa no planejamento", subtitle: "Parques e entretenimento com escolhas que respeitam o ritmo de toda a família.", image: "parques", enabled: true, order: 2 },
+    { title: "Novos destinos, a mesma atenção aos detalhes", subtitle: "Cruzeiros e viagens internacionais para casais, famílias e grupos de amigos.", image: "heroSantoriniShip", enabled: true, order: 3 },
+  ],
+  nav: [
+    { label: "Início", to: "/" }, { label: "Destinos", to: "/#destinos" },
+    { label: "Especialidades", to: "/#assinatura", children: [
+      { label: "Parques Orlando", to: "/#ingressos-orlando" }, { label: "Cruzeiros", to: "/#autoridade" },
+      { label: "Resorts no Brasil", to: "/#resorts" }, { label: "Xcaret", to: "/xcaret" }, { label: "Visto Americano", to: "/visto-americano" },
+    ] },
+    { label: "Sobre", to: "/#sobre", children: [{ label: "Nossa história", to: "/#sobre" }, { label: "Como funciona", to: "/#atendimento" }, { label: "Dúvidas frequentes", to: "/#faq" }] },
+  ],
+  signature: {
+    kicker: "O JEITO VIAJE NA MAGIA DE PLANEJAR", title: "Seu sonho também é importante para nós",
+    text: "Uma viagem começa muito antes do embarque. Ela começa na vontade de viver algo especial com as pessoas que você ama. Na Viaje na Magia Turismo, planejamento, estudo e atualização constante ajudam a transformar esse desejo em escolhas possíveis, com orientação para cada etapa.",
+    continuation: { title: "Tranquilidade para aproveitar cada momento", text: "Entendemos quem vai viajar, os interesses e o ritmo do grupo. A partir dessa conversa, organizamos destinos, reservas e orientações para que você participe das escolhas e viaje com suporte antes, durante e depois do retorno." },
+  },
+  modules: [
+    { key: "familias", title: "Famílias e parques", text: "Orlando e Disney com planejamento para reunir diferentes gerações e respeitar o ritmo de cada viajante.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 1 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Roteiros, navios e cabines comparados com atenção ao perfil de quem embarca.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 2 },
+    { key: "internacionais", title: "Destinos internacionais", text: "Estados Unidos, Canadá, América do Sul e Europa em roteiros personalizados.", service: "pacotes", image: "europa", enabled: true, order: 3 },
+    { key: "entretenimento", title: "Parques e entretenimento", text: "Dias de diversão organizados junto à hospedagem, aos deslocamentos e aos momentos de descanso.", service: "ingressos", image: "parques", enabled: true, order: 4 },
+    { key: "america-sul", title: "América do Sul", text: "Argentina, Chile e Brasil entre as prioridades para descobrir paisagens e culturas.", service: "pacotes", image: "mendoza", enabled: true, order: 5 },
+    { key: "europa", title: "Europa no seu ritmo", text: "Cidades e experiências reunidas conforme os interesses e o tempo disponível para a viagem.", service: "pacotes", image: "heroVarenna", enabled: true, order: 6 },
+  ],
+  destinations: [
+    { key: "eua", title: "Estados Unidos e Canadá", label: "América do Norte", text: "Parques, entretenimento e descobertas culturais em um planejamento personalizado.", image: "orlandoMagicKingdom", service: "pacotes", enabled: true, order: 1 },
+    { key: "orlando", title: "Orlando e Disney", label: "Famílias e parques", text: "O sonho que inspirou a agência, organizado com cuidado para toda a família.", image: "parques", service: "ingressos", enabled: true, order: 2 },
+    { key: "cruzeiros", title: "Viagens de cruzeiro", label: "No mar", text: "Novos destinos e momentos a bordo, com orientação para escolher roteiro e cabine.", image: "heroSantoriniShip", service: "cruzeiros", enabled: true, order: 3 },
+    { key: "america-sul", title: "Argentina, Chile e Brasil", label: "América do Sul", text: "Paisagens e experiências sul-americanas para explorar com planejamento e apoio.", image: "mendoza", service: "pacotes", enabled: true, order: 4 },
+    { key: "europa", title: "Europa", label: "Destinos internacionais", text: "História, cultura e cidades que podem fazer parte da sua próxima viagem.", image: "heroVarenna", service: "pacotes", enabled: true, order: 5 },
+  ],
+  highlights: [
+    { title: "Casais", text: "Tempo juntos e experiências que combinam com os interesses dos dois.", service: "pacotes", cta: "Planejar a dois" },
+    { title: "Famílias multigeracionais", text: "Avós, pais e filhos com atenção aos diferentes ritmos e necessidades.", service: "pacotes", cta: "Planejar em família" },
+    { title: "Grupos de amigos", text: "Planos compartilhados, organização e descobertas em boa companhia.", service: "pacotes", cta: "Planejar com amigos" },
+  ],
+  about: {
+    kicker: "NOSSA HISTÓRIA", title: "Desde 2020, sonhos que merecem cuidado", image: "orlandoMagicKingdom",
+    text: "A Viaje na Magia Turismo nasceu do propósito de ajudar famílias a realizarem o sonho de Orlando e Disney. Em Franco da Rocha, SP, a agência acredita que viajar é possível com planejamento, estudo e atualização constante: conhecer as opções e organizar cada etapa torna o sonho mais próximo.\n\nElisangela Silva, Consultora de Viagens, conduz o atendimento pelo WhatsApp, e-mail, videochamada e presencialmente. A conversa começa pelo que é importante para você: quem vai viajar, o que deseja viver e como construir um roteiro que respeite suas prioridades.\n\nO cuidado continua no planejamento, nas reservas e nas orientações antes do embarque. Durante a viagem, você conta com acompanhamento; após o retorno, o contato permanece. Quero que o cliente sinta que o sonho dele também é importante para mim!",
+    badge: { value: "Desde 2020", label: "Viaje na Magia Turismo" }, ownerName: "Elisangela Silva", showLocation: true,
+    tagline: "Planejamento · Reservas · Orientações · Acompanhamento",
+  },
+  differentials: [
+    { title: "Atendimento pelo especialista", text: "Elisangela Silva acompanha suas escolhas com atenção aos seus planos.", icon: "consultivo" },
+    { title: "Roteiros personalizados", text: "Destinos, hospedagem e experiências alinhados ao perfil dos viajantes.", icon: "conferido" },
+    { title: "Especialização e parceiros", text: "Estudo e atualização em destinos e produtos, com parceiros consolidados.", icon: "fornecedores" },
+    { title: "Suporte durante a viagem", text: "Orientações antes do embarque, acompanhamento durante a viagem e contato após o retorno.", icon: "acompanhamento" },
+  ],
+  hideConciergeWhatsapp: true, hideFaqWhatsapp: true,
+  conciergePoints: [
+    { key: "conversa", title: "1. Conhecer seus planos", text: "WhatsApp, e-mail, videochamada ou atendimento presencial para entender o sonho e os viajantes." },
+    { key: "planejamento", title: "2. Planejar e reservar", text: "Roteiro personalizado, comparação das opções e organização das reservas." },
+    { key: "orientacoes", title: "3. Preparar o embarque", text: "Orientações e conferência dos detalhes antes de começar a viagem." },
+    { key: "suporte", title: "4. Acompanhar e ouvir", text: "Acompanhamento durante a viagem e contato após o retorno para saber como foi." },
+  ],
+  conciergeSteps: ["Conte seus planos à Elisangela.", "Construímos o roteiro e organizamos as reservas.", "Você recebe orientações antes do embarque.", "Seguimos em contato durante a viagem e após o retorno."],
+  requestCenter: { title: "Central de solicitações", support: "Conte como imagina sua próxima viagem.", notice: "Prévia técnica: formulário simulado, sem envio de dados.", submitLabel: "Revisar", titlePlacement: "above-card" },
+  faq: [
+    { q: "Quem atende na Viaje na Magia Turismo?", a: "Elisangela Silva, Consultora de Viagens, com atendimento por WhatsApp, e-mail, videochamada e presencial em Franco da Rocha, SP." },
+    { q: "A agência planeja viagens para diferentes gerações?", a: "Sim. Casais, famílias multigeracionais e grupos de amigos estão entre os perfis atendidos. O roteiro considera os interesses e o ritmo dos viajantes." },
+    { q: "Orlando e Disney são especialidades?", a: "Sim. A agência nasceu do propósito de ajudar famílias a realizarem esse sonho, com planejamento, estudo e atualização constante." },
+    { q: "Quais destinos estão entre as prioridades?", a: "Estados Unidos e Canadá, parques e entretenimento, cruzeiros, Argentina, Chile, Brasil e Europa." },
+    { q: "Como funciona o planejamento de um cruzeiro?", a: "A consultoria ajuda a comparar navios, roteiros e cabines conforme o perfil dos viajantes e as datas pretendidas. Condições são confirmadas na proposta, sem preços ou disponibilidade presumidos." },
+    { q: "Há acompanhamento durante a viagem?", a: "Sim. O atendimento reúne planejamento, reservas, orientações antes do embarque, acompanhamento durante a viagem e contato após o retorno." },
+    { q: "Como entro em contato?", a: "WhatsApp (11) 98402-8192 ou e-mail viajenamagia@gmail.com. Nesta prévia, os contatos são informativos: ações externas e solicitações ficam bloqueadas." },
+  ],
+  copy: {
+    modules: { kicker: "ESPECIALIDADES", title: "O que você sonha viver?", subtitle: "Famílias e parques, cruzeiros e destinos internacionais com planejamento completo." },
+    destinations: { kicker: "DESTINOS PRIORITÁRIOS", title: "Destinos que inspiram novas histórias", subtitle: "Estados Unidos, Canadá, América do Sul e Europa entre as prioridades da sua próxima viagem." },
+    highlights: { kicker: "QUEM VIAJA CONOSCO", title: "Uma viagem para cada companhia", subtitle: "Casais, famílias multigeracionais e grupos de amigos." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Cuidado em cada escolha", subtitle: "Atendimento pelo especialista e apoio do planejamento ao retorno." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Planejamento completo com Elisangela Silva, Consultora de Viagens." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Viajar com tranquilidade começa aqui" },
+  },
+  footer: { description: "Planejamento completo para o cliente viajar com tranquilidade", email: "viajenamagia@gmail.com", whatsapp: "(11) 98402-8192", address: "Franco da Rocha/SP", showLocation: true, legalLinksDisabled: true },
+  seo: { title: "Prévia — Viaje na Magia Turismo", description: "Apresentação técnica da Viaje na Magia Turismo para revisão, sem envios ou publicação." },
+}, "Viaje na Magia Turismo");
+ADS_PREVIEW_FIXTURES["briefing-27-v1"] = {
+  jobId: "briefing-27-v1", info: VIAJE_NA_MAGIA_PREVIEW_INFO, profile: VIAJE_NA_MAGIA_PREVIEW_PROFILE,
+  realAgency: true, strictBackendBlock: true,
+  notice: "Viaje na Magia Turismo · prévia para revisão · solicitações simuladas · sem envios ou publicação",
+  documentTitle: "Prévia — Viaje na Magia Turismo",
+  pages: { dmc: false, editorial: false, xcaret: { slots: GENERIC_XCARET_SLOTS }, visa: true, orlandoTickets: true, resorts: { title: "Explore os resorts do Brasil" } },
 };

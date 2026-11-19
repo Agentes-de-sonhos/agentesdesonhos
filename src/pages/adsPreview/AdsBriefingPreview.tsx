@@ -110,7 +110,7 @@ export default function AdsBriefingPreview() {
     window.fetch = (input, init) => {
       const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
       // Exceções: leituras públicas do Google (avaliações da agência e Club Med na neve), sem escrita.
-      if (backend && url.startsWith(backend) && !["google-place-reviews", "club-med-snow-places"].some((f) => url.split("?")[0] === `${backend}/functions/v1/${f}`)) {
+      if (backend && url.startsWith(backend) && (fixture.strictBackendBlock || !["google-place-reviews", "club-med-snow-places"].some((f) => url.split("?")[0] === `${backend}/functions/v1/${f}`))) {
         return Promise.reject(new Error("Prévia de teste: acesso ao backend desativado."));
       }
       return origFetch(input, init);

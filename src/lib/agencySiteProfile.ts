@@ -35,6 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
+import { VIAJE_NA_MAGIA_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_MUNDO_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE, INNOVATI_PREVIEW_PROFILE, SHOPPING_PREVIEW_PROFILE, IMM_OFFICIAL_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
@@ -76,6 +77,7 @@ export type AgencySiteProfileKey =
   | "pristurBriefing22"
   | "pristurOfficial"
   | "shoppingBriefing25"
+  | "viajeNaMagiaBriefing27"
   | "shoppingOfficial"
   | "arenaBriefing23"
   | "arenaOfficial"
@@ -1267,6 +1269,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "innovati.tur.br": "innovatiOfficial",
   "www.innovati.tur.br": "innovatiOfficial",
   "briefing-25-v1.preview.local": "shoppingBriefing25",
+  "briefing-27-v1.preview.local": "viajeNaMagiaBriefing27",
   "shoppingviagens.com.br": "shoppingOfficial",
   "www.shoppingviagens.com.br": "shoppingOfficial",
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
@@ -1350,6 +1353,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
+  viajeNaMagiaBriefing27: VIAJE_NA_MAGIA_PREVIEW_PROFILE,
   shoppingOfficial: {
     ...SHOPPING_PREVIEW_PROFILE,
     key: "shoppingOfficial",

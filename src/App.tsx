@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { isSiteLabAdminPath } from "@/lib/sitelabModels";
 import { NOVEMBER_CAMPAIGN_PATH } from "@/lib/novemberCampaignAccess";
 const CruiseShipsPreview = lazy(() => import("@/pages/whitelabel/CruiseShipsPreview"));
@@ -200,6 +200,10 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  // This draft must never mount tenant/auth/billing providers, even with an override query.
+  if (/^\/ads-briefing-preview\/briefing-27-v1(?:\/|$)/.test(window.location.pathname)) {
+    return <QueryClientProvider client={queryClient}><TooltipProvider><Toaster /><Sonner /><ErrorBoundary><BrowserRouter><Suspense fallback={<PageFallback />}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></Suspense></BrowserRouter></ErrorBoundary></TooltipProvider></QueryClientProvider>;
+  }
   // Isolated route before tenant/auth providers: local identity only, no CRM/network.
   // The page checks the strict preview-host + agency context allowlist; production = 404.
   if (window.location.pathname.replace(/\/+$/, "") === NOVEMBER_CAMPAIGN_PATH) {
