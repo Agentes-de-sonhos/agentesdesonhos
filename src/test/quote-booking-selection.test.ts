@@ -132,3 +132,16 @@ describe("validação de contato", () => {
     ).toMatch(/aceitar/i);
   });
 });
+
+import { bookingHidesAmounts } from "@/lib/quoteBookingSelection";
+describe("carrinho respeita apresentação do investimento", () => {
+  it("oculta valores no valor total consolidado", () => {
+    expect(bookingHidesAmounts({ investment_summary_layout: "consolidated" })).toBe(true);
+  });
+  it("oculta valores com preços detalhados desligados", () => {
+    expect(bookingHidesAmounts({ investment_summary_layout: "ungrouped", show_detailed_prices: false })).toBe(true);
+  });
+  it("mantém valores em detalhado por serviço", () => {
+    expect(bookingHidesAmounts({ investment_summary_layout: "ungrouped", show_detailed_prices: true })).toBe(false);
+  });
+});

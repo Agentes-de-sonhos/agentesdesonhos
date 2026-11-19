@@ -28,6 +28,17 @@ export interface BookingSelectionModel {
   allServices: QuoteService[];
 }
 
+/**
+ * O carrinho segue a mesma apresentação que o cliente viu: com "Valor total do
+ * orçamento" (consolidado) ou preços detalhados desligados, nenhum valor por
+ * serviço é exibido na solicitação de reserva.
+ */
+export function bookingHidesAmounts(quote: any): boolean {
+  if (hidesIndividualAmounts(quote)) return true;
+  if (quote?.show_detailed_prices === false) return true;
+  return quote?.investment_summary_layout === "consolidated";
+}
+
 const modeOf = (s: QuoteService): QuoteSelectionMode =>
   (s.selection_mode as QuoteSelectionMode) || "optional";
 
@@ -49,7 +60,7 @@ export function buildBookingSelectionModel(
 
   return {
     packageMode,
-    hideAmounts: hidesIndividualAmounts(quote),
+    hideAmounts: bookingHidesAmounts(quote),
     requiredServices: list.filter((s) => !groupedIds.has(s.id) && modeOf(s) === "required"),
     optionalServices: list.filter((s) => !groupedIds.has(s.id) && modeOf(s) !== "required"),
     groups: grouped,
