@@ -34,7 +34,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--wl-red))]" aria-hidden="true" />Temporada brasileira 2026/2027
           </p>
           <h2 id="cruise-home-title" className="mt-5 text-3xl font-semibold leading-tight text-background md:text-[2.4rem]">Viva a Temporada Brasileira 2026-2027</h2>
-          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-background/80 md:text-base">Oito navios. Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC, Costa e Corazul para a temporada brasileira.</p>
+          <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-background/80 md:text-base">Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC e Costa para a temporada brasileira.</p>
         </div>
 
       </div>
@@ -48,7 +48,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
         onPointerLeave={() => { if (listRef.current) listRef.current.style.scrollSnapType = ''; if (drag.current && !drag.current.moved) drag.current = null; }}
         onClickCapture={e => { if (drag.current?.moved) { e.preventDefault(); e.stopPropagation(); } drag.current = null; }}
         onDragStart={e => e.preventDefault()}
-        aria-label="Galeria dos oito navios"
+        aria-label="Galeria dos navios"
         className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 md:gap-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {SEASON_SHIPS.map(ship => {
@@ -74,7 +74,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
         <button type="button" aria-label="Navios anteriores" className={`${arrowCls} absolute left-0 top-[calc(50%-1.5rem)] z-10 hidden -translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.start} onClick={() => scrollBy(-1)}><ChevronLeft className="h-5 w-5" /></button>
         <button type="button" aria-label="Próximos navios" className={`${arrowCls} absolute right-0 top-[calc(50%-1.5rem)] z-10 hidden translate-x-1/2 -translate-y-1/2 shadow-lg md:inline-flex`} disabled={edges.end} onClick={() => scrollBy(1)}><ChevronRight className="h-5 w-5" /></button>
       </div>
-      <div className="csi-ship-footer"><a href={agencySiteHref(SEASON_PATH)} className="csi-all">Ver os oito navios <ArrowRight size={18} aria-hidden="true" /></a></div>
+      <div className="csi-ship-footer"><a href={agencySiteHref(SEASON_PATH)} className="csi-all">Ver os navios <ArrowRight size={18} aria-hidden="true" /></a></div>
       <div className="csi-authority text-background"><SeasonGalleries showShips={false} /></div>
 
     </div>

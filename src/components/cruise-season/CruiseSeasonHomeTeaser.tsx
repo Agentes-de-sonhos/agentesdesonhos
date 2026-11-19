@@ -12,9 +12,9 @@ export function CruiseSeasonHomeTeaser({ container }: { container: string }) {
         <div className="flex min-w-0 flex-col justify-center p-6 md:p-10 lg:p-12">
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--brand-primary)]">Temporada brasileira 2026–2027</p>
           <h2 id="cruise-home-title" className="mt-4 text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl">Seu próximo destino<br/>começa a bordo.</h2>
-          <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">Oito navios. Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC, Costa e Corazul para a temporada brasileira.</p>
+          <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">Diferentes formas de viver o mar. Conheça as experiências, as cabines e os roteiros da MSC e Costa para a temporada brasileira.</p>
           <div className="mt-7 flex flex-col gap-3 md:flex-row md:flex-wrap">
-            <a href={agencySiteHref(SEASON_PATH)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-primary)]">Ver os oito navios <ArrowRight className="h-4 w-4" aria-hidden="true"/></a>
+            <a href={agencySiteHref(SEASON_PATH)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-on-primary)] transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--brand-primary)]">Ver os navios <ArrowRight className="h-4 w-4" aria-hidden="true"/></a>
             <a href={agencySiteHref(CRUISE_FINDER_PATH)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[var(--brand-primary)] px-5 py-3 text-sm font-semibold text-[var(--brand-primary)] transition-colors hover:bg-background"><Compass className="h-4 w-4" aria-hidden="true"/>Qual cruzeiro combina com você?</a>
           </div>
         </div>

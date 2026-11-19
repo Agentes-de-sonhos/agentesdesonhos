@@ -1,3 +1,4 @@
+import brandUsaAmbassador from "@/assets/whitelabel/brand-usa-global-ambassador-2026.png.asset.json";
 import momentFamily from "@/assets/100limites-moment-family.jpg";
 import momentHoneymoon from "@/assets/100limites-moment-honeymoon.jpg";
 import momentFriends from "@/assets/100limites-moment-friends.jpg";
@@ -212,11 +213,10 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
         { label: "Xcaret", to: "/#experiencia-xcaret" },
         { label: "Parques e Experiências", to: "/#ingressos-orlando" },
         { label: "Resorts no Brasil", to: "/#resorts" },
-        { label: "Cruzeiros", to: "/#autoridade" },
+        { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
       ],
     },
     { label: "Inspirações", to: "/#destinos" },
-    { label: "Ofertas", to: "/ofertas" },
     {
       label: "Quem somos",
       to: "/#sobre",
@@ -286,7 +286,7 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
   authority: {
     sectionLabel: "Cruzeiros",
     companies: {
-      title: "Sua próxima viagem de cruzeiro começa aqui! Na Destinos com a Ju,\nvocê encontra as principais companhias de cruzeiros do mundo.",
+      title: "Na Destinos com a Ju, você encontra as principais companhias de cruzeiros do mundo.\nSua próxima viagem de cruzeiro começa aqui! ",
       items: [
         { name: "Disney Cruise Line", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/Disney%20Cruise%20Lines.jpg.webp?itok=S4CUbtvJ" },
         { name: "MSC Cruzeiros", logo: "https://cruising.org/sites/default/files/styles/wide/public/2025-03/MSC%20Cruises.jpg.webp?itok=yN8zIFPZ" },
@@ -312,7 +312,7 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
   },
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
-    title: "Uma história construída por paixão, experiência e proximidade",
+    title: "Consultoria de viagens",
     text: "A Destinos com a Ju nasceu em 2013, quando Juliana Neves Sanches transformou sua paixão por viagens em uma agência dedicada a criar experiências personalizadas.\n\nAo longo dos anos, Juliana construiu um repertório especialmente forte em Disney, Universal, viagens internacionais e cruzeiros. É especialista em Disney Cruise Line e já vivenciou mais de 18 experiências em alto-mar, incluindo viagens com MSC, Norwegian e Royal Caribbean.\n\nHoje, a Destinos com a Ju atende diferentes perfis de viajantes, sempre com a mesma essência: ouvir com atenção, planejar cada detalhe e acompanhar o cliente do primeiro contato ao retorno.",
     image: "destinosStorefrontFront",
     images: [
@@ -321,6 +321,12 @@ export const EDITORIAL_ROSE: AgencySiteProfile = {
 
     badge: { value: "Desde 2013", label: "Experiência, planejamento e cuidado em cada viagem." },
     ownerName: "Juliana Neves Sanches e Equipe",
+    credential: {
+      src: brandUsaAmbassador.url,
+      alt: "Selo Brand USA Global Ambassador 2026",
+      title: "Embaixadora Global Brand USA 2026",
+      text: "Chancela internacional concedida pelo órgão oficial de promoção do turismo dos Estados Unidos, atestando capacitação contínua, profunda autoridade e curadoria especializada no planejamento de viagens pelo país.",
+    },
   },
   differentials: [
     { title: "Atendimento conduzido de perto", text: "A Juliana participa do planejamento e acompanha pessoalmente cada cliente durante as principais etapas da viagem.", icon: "consultivo" },

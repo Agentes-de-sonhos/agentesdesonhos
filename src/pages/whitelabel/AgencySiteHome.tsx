@@ -959,7 +959,9 @@ export default function AgencySiteHome({
         // Curti: set to false to restore the original authority content below.
         // The original profile (text, videos and companies) stays intact in standby.
         const curtiSeasonEnabled = true;
-        const seasonEnabled = (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
+        // Destinos com a Ju: set juSeasonEnabled to false to restore the original cruise authority block (kept intact in the profile).
+        const juSeasonEnabled = true;
+        const seasonEnabled = (juSeasonEnabled && profile.key === "editorialRose") || (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
         return (
           <Fragment key={key}>
           <section id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
@@ -1416,6 +1418,15 @@ export default function AgencySiteHome({
                         </li>
                       ))}
                     </ul>
+                  )}
+                  {aboutCopy?.credential && (
+                    <div className="mt-8 flex items-center gap-5">
+                      <img src={aboutCopy.credential.src} alt={aboutCopy.credential.alt} loading="lazy" className="h-16 w-auto shrink-0 object-contain md:h-20" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground">{aboutCopy.credential.title}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{aboutCopy.credential.text}</p>
+                      </div>
+                    </div>
                   )}
                   <div className="mt-8 space-y-2 border-t border-foreground/10 pt-6">
                     {(aboutCopy?.ownerName ?? info.owner_name) && (

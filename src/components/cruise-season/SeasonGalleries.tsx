@@ -30,12 +30,12 @@ function Gallery({ label, description, children }: { label: string; description?
 export function SeasonGalleries({ showShips = true }: { showShips?: boolean }) {
   const [options] = useState(() => sampleSeasonItineraries(seasonItineraries(), 8));
   return <div className="csi">
-    {showShips && <><Gallery label="Conheça os oito navios">{SEASON_SHIPS.map(ship => <li key={ship.shipSlug} className="csi-card">
+    {showShips && <><Gallery label="Conheça os navios">{SEASON_SHIPS.map(ship => <li key={ship.shipSlug} className="csi-card">
       <a href={agencySiteHref(cruiseShipPath(ship))}>
         <img src={seasonCardPhoto(ship)} alt={`${ship.shipName} em navegação`} loading="lazy" className="csi-photo" />
         <div className="csi-copy"><p className="csi-meta">{ship.lineName}</p><h4>{ship.shipName}</h4><span className="csi-link">Conheça o navio <ArrowRight size={16} aria-hidden="true" /></span></div>
       </a>
-    </li>)}</Gallery><p className="csi-note">Imagens de divulgação: MSC Cruzeiros, Costa Cruzeiros e Corazul.</p></>}
+    </li>)}</Gallery><p className="csi-note">Imagens de divulgação: MSC Cruzeiros e Costa Cruzeiros.</p></>}
     {options.length > 0 && <><Gallery label="Roteiros para a sua próxima viagem" description="Encontre o roteiro ideal para viver sua próxima viagem a bordo.">{options.map(option => <SeasonItineraryCard key={option.id} option={option} />)}</Gallery><div className="csi-gallery-footer"><p className="csi-note">Datas, cabines e disponibilidade serão confirmadas pela agência.</p><a className="csi-all" href={agencySiteHref(SEASON_ITINERARIES_PATH)}>Ver todos os roteiros <ArrowRight size={18} aria-hidden="true" /></a></div></>}
   </div>;
 }

@@ -118,7 +118,7 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
     }
   });
 
-  it("mantém o menu com Especialidades, Ofertas acessível e Área do Cliente como ação separada", () => {
+  it("mantém o menu com Especialidades e Área do Cliente como ação separada, sem o item Ofertas", () => {
     expect(siteNavLinks(JU_HOSTS[0])).toEqual([
       { label: "Início", to: "/" },
       {
@@ -129,11 +129,10 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
           { label: "Xcaret", to: "/#experiencia-xcaret" },
           { label: "Parques e Experiências", to: "/#ingressos-orlando" },
           { label: "Resorts no Brasil", to: "/#resorts" },
-          { label: "Cruzeiros", to: "/#autoridade" },
+          { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
         ],
       },
       { label: "Inspirações", to: "/#destinos" },
-      { label: "Ofertas", to: "/ofertas" },
       {
         label: "Quem somos",
         to: "/#sobre",
@@ -145,6 +144,8 @@ describe("Destinos com a Ju — perfil editorial completo e isolado", () => {
       },
       { label: "Área do Cliente", to: "/area-do-cliente" },
     ]);
+    // O item saiu do menu, mas a rota continua existindo.
+    expect(siteNavLinks(JU_HOSTS[0]).some((l) => l.to === "/ofertas")).toBe(false);
   });
 
   it("oferece Universal Orlando Resort como a primeira especialidade, antes de Xcaret", () => {
