@@ -51,7 +51,8 @@ export function PinkFridayCard({ offer, href, onSelect }: {
 
 export function PinkFridayHome({ hostname, preview }: Props) {
   const { offers } = usePinkOffers({ hostname, preview });
-  const pageHref = agencySiteHref(`${PINK_FRIDAY_PATH}#ofertas-pink-friday`);
+  const pageHref = agencySiteHref(PINK_FRIDAY_PATH);
+  const offersHref = agencySiteHref(`${PINK_FRIDAY_PATH}#ofertas-pink-friday`);
   return <section id="pink-friday" className="pink-friday pink-friday-teaser" aria-labelledby="pink-friday-home-title">
     <div className="pink-friday-container">
       <div className="pink-friday-teaser-intro">
@@ -60,10 +61,10 @@ export function PinkFridayHome({ hostname, preview }: Props) {
           <h2 id="pink-friday-home-title">Sua próxima viagem começa aqui</h2>
           <p>{description}</p>
         </div>
-        <a className="pink-friday-button" href={pageHref}>Ver todas as ofertas <ArrowRight size={18} aria-hidden="true" /></a>
+        <a className="pink-friday-button" href={pageHref}>Ver campanha <ArrowRight size={18} aria-hidden="true" /></a>
       </div>
       {!!offers.length && <div className="pink-friday-offers pink-friday-home-offers">
-        {offers.slice(0, 4).map(offer => <PinkFridayCard key={offer.id} offer={offer} href={pageHref} />)}
+        {offers.slice(0, 4).map(offer => <PinkFridayCard key={offer.id} offer={offer} href={offersHref} />)}
       </div>}
     </div>
   </section>;
@@ -86,9 +87,7 @@ export function PinkFridayPageContent({ info, preview, onRequest }: {
           <p>{description}</p>
           <a className="pink-friday-button" href="#ofertas-pink-friday">Explorar ofertas <ArrowRight size={18} aria-hidden="true" /></a>
         </div>
-        {preview
-          ? <img className="pink-friday-hero-image" src={provisionalCover} alt="Bangalôs sobre o mar, imagem provisória da campanha" />
-          : <div className="pink-friday-hero-art" aria-hidden="true"><span /><span /><span /></div>}
+        <img className="pink-friday-hero-image" src={provisionalCover} alt="Bangalôs sobre o mar" />
       </div>
     </section>
     <section id="ofertas-pink-friday" className="pink-friday-container pink-friday-list" aria-labelledby="pink-friday-list-title">
@@ -101,7 +100,7 @@ export function PinkFridayPageContent({ info, preview, onRequest }: {
       </div>}
       {loading && <p role="status">Carregando ofertas…</p>}
       {!loading && !shown.length && <div className="pink-friday-empty" role="status">
-        <p>{preview ? "Prévia de layout. Nenhuma oferta foi cadastrada." : "Não há ofertas disponíveis nesta seleção no momento."}</p>
+        <p>{preview ? "Prévia de layout. Nenhuma oferta foi cadastrada." : "As ofertas da Pink Friday serão divulgadas aqui."}</p>
       </div>}
       {!!shown.length && <div className="pink-friday-offers">
         {shown.map(offer => <PinkFridayCard key={offer.id} offer={offer} onSelect={() => onRequest(offer)} />)}
