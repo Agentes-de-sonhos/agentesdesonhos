@@ -12,13 +12,14 @@ import { OfferChannelPicker } from "@/components/offers/OfferChannelPicker";
 import { CAMPAIGN_CATEGORY_OPTIONS, isValidOfferCtaUrl } from "@/lib/imageOffers";
 
 /** Cadastro rápido de oferta por imagem (flyer pronto) + link opcional. */
-export function ImageOfferDialog({ open, onOpenChange, offer }: { open: boolean; onOpenChange: (v: boolean) => void; offer?: OfferRow | null }) {
+export function ImageOfferDialog({ open, onOpenChange, offer, allowPinkFriday = false }: { open: boolean; onOpenChange: (v: boolean) => void; offer?: OfferRow | null; allowPinkFriday?: boolean }) {
   const { save } = useOffers(false);
   const [title, setTitle] = useState("");
   const [cover, setCover] = useState("");
   const [cta, setCta] = useState("");
   const [cat, setCat] = useState("todos");
-  const [channels, setChannels] = useState<string[]>(["novembro"]);
+  const defaultCampaign = allowPinkFriday ? "pink-friday" : "novembro";
+  const [channels, setChannels] = useState<string[]>([defaultCampaign]);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -27,8 +28,8 @@ export function ImageOfferDialog({ open, onOpenChange, offer }: { open: boolean;
     setCover(offer?.cover_url ?? "");
     setCta(offer?.cta_url ?? "");
     setCat(offer?.campaign_category ?? "todos");
-    setChannels(offer?.display_channels?.length ? offer.display_channels : ["novembro"]);
-  }, [open, offer]);
+    setChannels(offer?.display_channels?.length ? offer.display_channels : [defaultCampaign]);
+  }, [open, offer, defaultCampaign]);
 
   const upload = async (file: File) => {
     if (!file.type.startsWith("image/")) return toast.error("Envie um arquivo de imagem.");
@@ -109,7 +110,7 @@ export function ImageOfferDialog({ open, onOpenChange, offer }: { open: boolean;
           </div>
           <div className="space-y-1.5">
             <Label>Onde exibir no site</Label>
-            <OfferChannelPicker value={channels} onChange={setChannels} />
+            <OfferChannelPicker value={channels} onChange={setChannels} allowPinkFriday={allowPinkFriday} />
           </div>
         </div>
         <DialogFooter>

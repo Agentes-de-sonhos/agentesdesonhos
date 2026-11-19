@@ -93,11 +93,13 @@ export function OfferEditorDialog({
   onOpenChange,
   mode,
   offer,
+  allowPinkFriday = false,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   mode: Mode;
   offer?: OfferRow | null;
+  allowPinkFriday?: boolean;
 }) {
   const { save, restore } = useOffers(false);
   const [form, setForm] = useState<FormState>(EMPTY);
@@ -277,7 +279,7 @@ export function OfferEditorDialog({
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <Label>Onde exibir no site</Label>
-              <OfferChannelPicker value={channels} onChange={setChannels} />
+              <OfferChannelPicker value={channels} onChange={setChannels} allowPinkFriday={allowPinkFriday} />
             </div>
             <div className="sm:col-span-2 space-y-1.5">
               <Label>Imagem de capa (link)</Label>
