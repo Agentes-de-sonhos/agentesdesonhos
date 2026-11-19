@@ -1915,9 +1915,9 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   ],
   heroPresentation: { kicker: "CONSULTORIA DE VIAGENS · SÃO PAULO", overlay: "strongLeft", titleWeight: "regular" },
   hero: [
-    { title: "Sua viagem começa com uma boa conversa.", subtitle: "A Priscila entende o que você espera da viagem, planeja cada etapa e acompanha você até o retorno.", image: "parques", order: 1, enabled: true },
-    { title: "Orlando para viver em família.", subtitle: "Parques, hospedagem e passeios pensados para as pessoas que vão viajar com você.", image: "parques", order: 2, enabled: true },
-    { title: "Seu descanso merece atenção aos detalhes.", subtitle: "Resorts, Caribe e destinos pelo Brasil com orientação para escolher o que combina com a sua viagem.", image: "resort", order: 3, enabled: true },
+    { title: "Disney para viver em família.", subtitle: "Parques, hospedagem e passeios pensados para as pessoas que vão viajar com você.", image: "pristurHeroDisney", order: 1, enabled: true },
+    { title: "A temporada brasileira de cruzeiros espera por você.", subtitle: "Em 2026/2027, descubra os navios e roteiros que combinam com o seu jeito de viajar.", image: "pristurHeroCruzeiros", order: 2, enabled: true },
+    { title: "Sua viagem ao Caribe começa com uma boa conversa.", subtitle: "Conte à Priscila o que espera da viagem. Ela ajuda a escolher o destino, planeja cada etapa e acompanha você até o retorno.", image: "pristurHeroCaribe", order: 3, enabled: true },
   ],
   signature: {
     kicker: "CONSULTORIA DE VIAGENS COM A PRISCILA",
@@ -2005,6 +2005,7 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
   modules: pristurBaseline.modules?.slice(0, 4),
+  hero: pristurBaseline.hero,
   heroPresentation: { ...MUNDO_EM_CORES_PREVIEW_PROFILE.heroPresentation, kicker: "PRISTUR VIAGENS · CONSULTORIA DE VIAGENS" },
   socialStrip: { title: "Acompanhe a Pristur no Instagram", links: [{ network: "instagram", url: "https://www.instagram.com/priturismo/" }] },
   newsletterMedia: { src: pristurNewsletterWing.url, alt: "Vista do céu e da asa de um avião pela janela" },
