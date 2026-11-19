@@ -137,10 +137,15 @@ describe("Pristur — seções escolhidas por Fernando", () => {
   it("includes the cruise section and Orlando landing in the requested navigation", () => {
     const links = siteNavLinks(PRISTUR_PREVIEW_HOST);
     expect(links.map(({ label }) => label)).toEqual([
-      "Início", "Destinos", "Especialidades", "Parques Orlando / Disney",
-      "Cruzeiros 26/27", "Resorts Brasil", "Sobre",
+      "Início", "Destinos", "Especialidades", "Sobre",
+    ]);
+    expect(links[2].children).toEqual([
+      { label: "Parques Orlando / Disney", to: "/ingressos-orlando" },
+      { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
+      { label: "Resorts no Brasil", to: "/resorts-brasil" },
     ]);
     expect(links.at(-1)?.children?.map(({ label }) => label)).toEqual(["Quem Somos", "Dúvidas Frequentes"]);
+    expect(PRISTUR_PREVIEW_PROFILE.authority?.companies?.title).toBe("Na Pristur Viagens, você encontra as principais companhias marítimas. Planeje seu próximo cruzeiro!");
     expect(isUniversalLandingEnabled(PRISTUR_PREVIEW_HOST)).toBe(true);
     expect(resolveSections(PRISTUR_PREVIEW_PROFILE.sections).map(({ key }) => key))
       .toEqual(["signature", "destinations", "orlando", "authority", "resorts", "about", "differentials", "concierge", "faq", "newsletter"]);

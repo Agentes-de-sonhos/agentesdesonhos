@@ -1904,10 +1904,11 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
   nav: [
     { label: "Início", to: "/" },
     { label: "Destinos", to: "/#destinos" },
-    { label: "Especialidades", to: "/#assinatura" },
-    { label: "Parques Orlando / Disney", to: "/ingressos-orlando" },
-    { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
-    { label: "Resorts Brasil", to: "/resorts-brasil" },
+    { label: "Especialidades", to: "/#assinatura", children: [
+      { label: "Parques Orlando / Disney", to: "/ingressos-orlando" },
+      { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
+      { label: "Resorts no Brasil", to: "/resorts-brasil" },
+    ] },
     { label: "Sobre", to: "/#sobre", children: [
       { label: "Quem Somos", to: "/#sobre" }, { label: "Dúvidas Frequentes", to: "/#faq" },
     ] },
@@ -2009,6 +2010,10 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   newsletterMedia: { src: pristurNewsletterWing.url, alt: "Vista do céu e da asa de um avião pela janela" },
   inspirationDialog: { title: "Receber novidades da Pristur", description: "Informe seus dados para receber novidades sobre destinos e viagens da Pristur.", notice: "Prévia para revisão: nenhum dado será enviado agora." },
 };
+if (PRISTUR_PREVIEW_PROFILE.authority?.companies) {
+  PRISTUR_PREVIEW_PROFILE.authority.companies.title =
+    "Na Pristur Viagens, você encontra as principais companhias marítimas. Planeje seu próximo cruzeiro!";
+}
 PRISTUR_PREVIEW_PROFILE.footer = { ...pristurBaseline.footer, whatsapp: "(11) 98301-7038" };
 // Fernando (18/11/2026): sem Xcaret, sem Novembro e sem Avaliações do Google por enquanto.
 PRISTUR_PREVIEW_PROFILE.featuredExperience = undefined;
