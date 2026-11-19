@@ -121,6 +121,7 @@ import curtiCert13 from "@/assets/whitelabel/curti/curti-certificado-13.jpg.asse
 import curtiCert14 from "@/assets/whitelabel/curti/curti-certificado-14.jpg.asset.json";
 import curtiRicardoEpcot from "@/assets/whitelabel/curti/curti-ricardo-epcot.png.asset.json";
 import essyaTurLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
+import pristurPriscila from "@/assets/whitelabel/pristur/pristur-priscila.png.asset.json";
 import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.json";
 const karibuLogo = { url: "/karibu-logo.png" };
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
@@ -1946,9 +1947,11 @@ const pristurBaseline = buildGoldStandardProfile("pristurBriefing22", {
     { title: "Parques e entretenimento", text: "Orlando e parques como inspiração para a próxima viagem.", service: "ingressos", cta: "Planejar os parques" },
   ],
   about: {
-    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Prazer, eu sou a Priscila.",
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Uma trajetória construída desde 2009.",
     text: "A Pristur nasceu do meu desejo de construir um negócio próprio e realizar um sonho antigo. Antes disso, trabalhei por muitos anos em uma agência de viagens, onde ganhei experiência, conheci destinos e construí relações com clientes.\n\nComecei aos poucos, com planejamento, dedicação e muito amor pelo que faço. Hoje, como fundadora e consultora, quero que cada pessoa se sinta acolhida e segura para decidir sua viagem. Você não é mais uma reserva: seus planos e expectativas importam.\n\nEu acompanho a escolha dos serviços, as orientações antes do embarque e a viagem em si. Se surgir algum imprevisto, sigo perto para ajudar a encontrar uma solução. E gosto de saber como foi quando você volta.",
-    badge: { value: "Desde 2009", label: "Pristur Viagens" }, media: "hidden", showLocation: true, ownerName: "Priscila Vasconcelos",
+    badge: { value: "Desde 2009", label: "Pristur Viagens" }, media: "default", mediaAlign: "title",
+    images: [{ src: pristurPriscila.url, alt: "Priscila Vasconcelos, fundadora e consultora da Pristur Viagens", position: "center 30%" }],
+    showLocation: true, ownerName: "Priscila Vasconcelos",
   },
   differentials: [
     { title: "Você conversa com a Priscila", text: "Atendimento direto com quem planeja e acompanha a sua viagem.", icon: "consultivo" },

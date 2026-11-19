@@ -977,7 +977,7 @@ export default function AgencySiteHome({
             </div>
             )}
             {authority.companies?.items.length ? (
-              <div data-testid={seasonEnabled ? "cruise-season-companies" : undefined} className={`${container} ${seasonEnabled ? "pt-6 pb-8 md:pt-10 md:pb-12" : "pb-16 md:pb-24"}`}>
+              <div data-testid={seasonEnabled ? "cruise-season-companies" : undefined} className={`${container} ${seasonEnabled ? ((profile.key === "pristurBriefing22" || profile.key === "pristurOfficial") ? "pt-6 pb-14 md:pt-10 md:pb-20" : "pt-6 pb-8 md:pt-10 md:pb-12") : "pb-16 md:pb-24"}`}>
                 {(profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") ? (
                   <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
                 ) : <>
