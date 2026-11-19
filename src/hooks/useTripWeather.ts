@@ -13,6 +13,69 @@ const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
 // rejects the entire request (no day comes back), so keep this conservative.
 const FORECAST_HORIZON_DAYS = 15;
 
+// Main city used when the destination is a whole country.
+const COUNTRY_CAPITALS: Record<string, string> = {
+  CO: "Bogotá",
+  PE: "Lima",
+  CL: "Santiago",
+  AR: "Buenos Aires",
+  UY: "Montevideo",
+  PY: "Asunción",
+  BO: "La Paz",
+  EC: "Quito",
+  VE: "Caracas",
+  MX: "Mexico City",
+  US: "Washington",
+  CA: "Ottawa",
+  CR: "San José",
+  PA: "Panama City",
+  CU: "Havana",
+  DO: "Santo Domingo",
+  PT: "Lisbon",
+  ES: "Madrid",
+  FR: "Paris",
+  IT: "Rome",
+  DE: "Berlin",
+  GB: "London",
+  IE: "Dublin",
+  NL: "Amsterdam",
+  BE: "Brussels",
+  CH: "Bern",
+  AT: "Vienna",
+  GR: "Athens",
+  TR: "Istanbul",
+  CZ: "Prague",
+  HU: "Budapest",
+  PL: "Warsaw",
+  HR: "Zagreb",
+  NO: "Oslo",
+  SE: "Stockholm",
+  DK: "Copenhagen",
+  FI: "Helsinki",
+  IS: "Reykjavik",
+  MA: "Marrakesh",
+  EG: "Cairo",
+  ZA: "Cape Town",
+  KE: "Nairobi",
+  TZ: "Arusha",
+  AE: "Dubai",
+  QA: "Doha",
+  IL: "Jerusalem",
+  JO: "Amman",
+  IN: "New Delhi",
+  TH: "Bangkok",
+  VN: "Hanoi",
+  ID: "Denpasar",
+  MV: "Malé",
+  JP: "Tokyo",
+  CN: "Beijing",
+  KR: "Seoul",
+  SG: "Singapore",
+  AU: "Sydney",
+  NZ: "Auckland",
+  BR: "Brasília",
+};
+
 interface CacheShape {
   savedAt: number;
   data: Record<string, DayWeather>;
@@ -69,7 +132,7 @@ export function useTripWeather(
 
     const startStr = format(start, "yyyy-MM-dd");
     const endStr = format(effectiveEnd, "yyyy-MM-dd");
-    const cacheKey = `wx:${destination}:${startStr}:${endStr}`;
+    const cacheKey = `wx2:${destination}:${startStr}:${endStr}`;
 
     const cached = readCache(cacheKey);
     if (cached && cached.timezone) {
@@ -102,6 +165,22 @@ export function useTripWeather(
         if (!place) {
           console.warn("[useTripWeather] geocoding failed for", cityQuery);
           return;
+        }
+        // A country name (e.g. "Colômbia") geocodes to the country's geographic
+        // centre, which can be far from where travellers go (hot lowlands vs.
+        // Bogotá at 2.600 m). Use the capital city instead when available.
+        if (typeof place.feature_code === "string" && place.feature_code.startsWith("PCL") && place.country_code) {
+          try {
+            const capital: string | undefined = COUNTRY_CAPITALS[place.country_code];
+            if (capital) {
+              const r = await fetch(
+                `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(capital)}&count=10&language=en&format=json`
+              );
+              const j = await r.json();
+              const city = (j?.results ?? []).find((x: any) => x.country_code === place.country_code);
+              if (city) place = city;
+            }
+          } catch { /* keep country centre */ }
         }
         const tz: string | undefined = place.timezone;
         if (!cancelled && tz) setTimezone(tz);
