@@ -2005,6 +2005,7 @@ export const PRISTUR_PREVIEW_PROFILE: AgencySiteProfile = {
   copy: { ...pristurBaseline.copy },
   about: pristurBaseline.about,
   destinations: pristurBaseline.destinations,
+  destinationsFixedOrder: true,
   destinationCredits: [
     { title: "Punta Cana (Cap Cana)", author: "Mary Mark Ockerbloom", source: "https://commons.wikimedia.org/wiki/File:Beach_near_Santuary_Cap_Cana,_Dominican_Republic.jpg", license: "CC0 1.0", licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/" },
     { title: "Gramado (Lago Negro)", author: "Leone Melo", source: "https://commons.wikimedia.org/wiki/File:Lago_Negro_em_Gramado.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
