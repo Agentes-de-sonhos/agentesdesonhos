@@ -77,7 +77,7 @@ export function UniversalTicketsConfigurator({ hostname }: { hostname: string })
   const profileKey = resolveSiteProfile(hostname ?? "").key as string;
   const isCurti = ["curtiViagensOfficial", "curtiViagensBriefing20"].includes(profileKey);
   const isEssya = ["essyaCurtiPreview", "essyaOfficial"].includes(profileKey);
-  const isPristur = profileKey === "pristurBriefing22";
+  const isPristur = ["pristurBriefing22", "pristurOfficial"].includes(profileKey);
   const today = useMemo(todayIso, []);
   const monthOptions = useMemo(() => upcomingMonths(today, 24), [today]);
   const years = useMemo(() => Array.from(new Set(monthOptions.map((m) => m.slice(0, 4)))), [monthOptions]);

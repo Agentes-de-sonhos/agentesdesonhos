@@ -59,6 +59,8 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "kaributurismo.com.br": "siteBaseEditorial",
   "www.kaributurismo.com.br": "siteBaseEditorial",
   "briefing-22-v1.preview.local": "siteBaseEditorial",
+  "pristur.com.br": "siteBaseEditorial",
+  "www.pristur.com.br": "siteBaseEditorial",
   "briefing-23-v1.preview.local": "siteBaseEditorial",
   "briefing-24-v1.preview.local": "siteBaseEditorial",
   "briefing-25-v1.preview.local": "siteBaseEditorial",
@@ -125,7 +127,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
     const extra =
       h === "drica-presentation.preview.local" || h === "dricaviagens.com.br" || h === "www.dricaviagens.com.br"
         ? " wl-drica"
-        : h === "briefing-22-v1.preview.local"
+        : h === "briefing-22-v1.preview.local" || h === "pristur.com.br" || h === "www.pristur.com.br"
         ? " wl-mundo wl-pristur-mundo"
         : h === "briefing-25-v1.preview.local" || h === "shoppingviagens.com.br" || h === "www.shoppingviagens.com.br" || h === "immturismo.com.br" || h === "www.immturismo.com.br"
         ? " wl-mundo wl-shopping-mundo"

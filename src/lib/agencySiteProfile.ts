@@ -74,6 +74,7 @@ export type AgencySiteProfileKey =
   | "karibuOfficial"
   | "bardelliMundoOfficial"
   | "pristurBriefing22"
+  | "pristurOfficial"
   | "shoppingBriefing25"
   | "shoppingOfficial"
   | "arenaBriefing23"
@@ -1258,6 +1259,8 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "kaributurismo.com.br": "karibuOfficial",
   "www.kaributurismo.com.br": "karibuOfficial",
   "briefing-22-v1.preview.local": "pristurBriefing22",
+  "pristur.com.br": "pristurOfficial",
+  "www.pristur.com.br": "pristurOfficial",
   "briefing-23-v1.preview.local": "arenaBriefing23",
   "briefing-24-v1.preview.local": "innovatiBriefing24",
   "innovati.tur.br": "innovatiOfficial",
@@ -1317,6 +1320,18 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     seo: { ...BARDELLI_OFFICIAL_PROFILE.seo! },
   },
   pristurBriefing22: PRISTUR_PREVIEW_PROFILE,
+  pristurOfficial: {
+    ...PRISTUR_PREVIEW_PROFILE,
+    key: "pristurOfficial",
+    demo: false,
+    presentation: false,
+    footer: { ...PRISTUR_PREVIEW_PROFILE.footer, legalLinksDisabled: false },
+    inspirationDialog: { ...PRISTUR_PREVIEW_PROFILE.inspirationDialog, notice: undefined },
+    seo: {
+      title: "Pristur Viagens | Planejamento de viagens com a Priscila",
+      description: "Viagens em família, parques, cruzeiros e resorts com planejamento personalizado e acompanhamento da Pristur Viagens.",
+    },
+  },
   arenaBriefing23: ARENA_PREVIEW_PROFILE,
   arenaOfficial: {
     ...ARENA_PREVIEW_PROFILE,

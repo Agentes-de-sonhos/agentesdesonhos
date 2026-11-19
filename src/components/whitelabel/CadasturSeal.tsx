@@ -19,7 +19,7 @@ interface CadasturCertificate {
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null): CadasturCertificate | null {
   const h = hostname ?? "";
-  if (h === "briefing-22-v1.preview.local") return { url: certPristur.url, agency: "Pristur Viagens" };
+  if (["briefing-22-v1.preview.local", "pristur.com.br", "www.pristur.com.br"].includes(h)) return { url: certPristur.url, agency: "Pristur Viagens" };
   // Arena: documento enviado pelo proprietário, mantido sem alterar a validade impressa.
   if (["briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(h)) return {
     url: "/arena-travel-group/certificado-cadastur-2026-2028.webp",

@@ -37,6 +37,8 @@ import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json"
 
 const LOGO_BY_HOSTNAME: Record<string, string> = {
   "briefing-22-v1.preview.local": pristurLogo.url,
+  "pristur.com.br": pristurLogo.url,
+  "www.pristur.com.br": pristurLogo.url,
   "immturismo.com.br": immLogo.url,
   "www.immturismo.com.br": immLogo.url,
   "arenatravelgroup.com.br": arenaLogo.url,
@@ -78,6 +80,8 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
   "briefing-22-v1.preview.local": "/pristur/favicon.png",
+  "pristur.com.br": "/pristur/favicon.png",
+  "www.pristur.com.br": "/pristur/favicon.png",
   "arenatravelgroup.com.br": "/arena-travel-group/favicon.png",
   "www.arenatravelgroup.com.br": "/arena-travel-group/favicon.png",
   "briefing-23-v1.preview.local": "/arena-travel-group/favicon.png",
@@ -114,6 +118,8 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
  */
 const LOGO_WITH_WORDMARK_HOSTS = new Set([
   "briefing-22-v1.preview.local",
+  "pristur.com.br",
+  "www.pristur.com.br",
   "immturismo.com.br",
   "www.immturismo.com.br",
   "arenatravelgroup.com.br",
