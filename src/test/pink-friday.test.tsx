@@ -22,8 +22,9 @@ beforeEach(() => mock.usePublicOffers.mockReturnValue({ data: [], isLoading: fal
 
 describe("Pink Friday", () => {
   it("habilita a campanha apenas nos dois domínios exatos da Ju", () => {
-    expect(PINK_FRIDAY_LIVE_ENABLED).toBe(false);
-    expect(pinkFridayMode(ju, ju)).toBeNull();
+    expect(PINK_FRIDAY_LIVE_ENABLED).toBe(true);
+    expect(pinkFridayMode(ju, ju)).toBe("live");
+    expect(pinkFridayMode(ju, ju, "", false)).toBeNull();
     expect(pinkFridayMode(ju, ju, "", true)).toBe("live");
     expect(pinkFridayMode(www, ju, "", true)).toBe("live");
     expect(pinkFridayMode(ju, www, `?__agency_host=${mundo}`, true)).toBe("live");
@@ -34,7 +35,7 @@ describe("Pink Friday", () => {
     expect(isPinkFridayAgency("sub.destinoscomaju.com.br")).toBe(false);
   });
 
-  it("deixa a capa provisória restrita à prévia local explícita", () => {
+  it("restringe a prévia local a uma seleção explícita da agência", () => {
     expect(pinkFridayMode(ju, "localhost", `?__agency_host=${www}`)).toBe("preview");
     expect(pinkFridayMode(ju, "127.0.0.1", `?__agency_host=${ju}`)).toBe("preview");
     expect(pinkFridayMode(ju, "localhost")).toBeNull();
@@ -51,7 +52,7 @@ describe("Pink Friday", () => {
     mock.usePublicOffers.mockReturnValue({ data: Array.from({ length: 6 }, (_, i) => makeOffer(i + 1, ["pink-friday"])), isLoading: false });
     render(<PinkFridayHome hostname={www} preview={false} />);
     expect(screen.getAllByRole("article")).toHaveLength(4);
-    expect(screen.getByRole("link", { name: "Ver todas as ofertas" })).toHaveAttribute("href", "/pink-friday#ofertas-pink-friday");
+    expect(screen.getByRole("link", { name: "Ver campanha" })).toHaveAttribute("href", "/pink-friday");
     expect(mock.usePublicOffers).toHaveBeenCalledWith(www, true);
   });
 
@@ -59,16 +60,23 @@ describe("Pink Friday", () => {
     mock.usePublicOffers.mockReturnValue({ data: [makeOffer(1, ["pink-friday"])], isLoading: false });
     render(<PinkFridayPageContent info={info} preview onRequest={vi.fn()} />);
     expect(screen.getByText("Prévia de layout. Nenhuma oferta foi cadastrada.")).toBeVisible();
-    expect(screen.getByAltText(/imagem provisória/)).toBeVisible();
+    expect(screen.getByAltText("Bangalôs sobre o mar")).toBeVisible();
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
     expect(mock.usePublicOffers).toHaveBeenCalledWith(www, false);
+  });
+
+  it("mostra a seção e a página sem inventar ofertas quando o catálogo está vazio", () => {
+    render(<><PinkFridayHome hostname={www} preview={false} /><PinkFridayPageContent info={info} preview={false} onRequest={vi.fn()} /></>);
+    expect(screen.getByRole("link", { name: "Ver campanha" })).toHaveAttribute("href", "/pink-friday");
+    expect(screen.getByText("As ofertas da Pink Friday serão divulgadas aqui.")).toBeVisible();
+    expect(screen.queryByRole("article")).not.toBeInTheDocument();
   });
 
   it("filtra por categoria e direciona a solicitação com a oferta certa", () => {
     const onRequest = vi.fn();
     mock.usePublicOffers.mockReturnValue({ data: [makeOffer(1, ["pink-friday"]), makeOffer(2, ["pink-friday"], "cruzeiros"), makeOffer(3, ["novembro"])], isLoading: false });
     render(<PinkFridayPageContent info={info} preview={false} onRequest={onRequest} />);
-    expect(screen.queryByAltText(/imagem provisória/)).not.toBeInTheDocument();
+    expect(screen.getByAltText("Bangalôs sobre o mar")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Cruzeiros" }));
     const article = screen.getByRole("article");
     expect(within(article).getByText("Oferta 2")).toBeVisible();
