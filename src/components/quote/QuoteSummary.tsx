@@ -91,10 +91,10 @@ export function QuoteSummary({ quote, hideTitle }: QuoteSummaryProps) {
   return (
     <div
       data-testid="quote-main-data-grid"
-      className="grid min-w-0 overflow-hidden rounded-lg border border-border/60 bg-background md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(19rem,1.3fr)]"
+      className="grid min-w-0 rounded-lg border border-border/60 bg-background md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(19rem,1.3fr)]"
     >
           {/* Cliente editável */}
-          <div data-testid="quote-main-client" className="flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm">
+          <div data-testid="quote-main-client" className="relative z-20 flex min-h-14 min-w-0 items-center gap-2 border-b border-border/60 px-3 py-3 text-sm">
             <Users className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cliente:</span>
             {editingClient ? (
