@@ -174,6 +174,9 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
+  pristurHeroDisney: "/pristur/hero-disney.jpg",
+  pristurHeroCruzeiros: "/pristur/hero-cruzeiros.jpg",
+  pristurHeroCaribe: "/pristur/hero-caribe.jpg",
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,

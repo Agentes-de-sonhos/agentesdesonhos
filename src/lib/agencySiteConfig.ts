@@ -115,7 +115,8 @@ export type AgencyImageSlot =
   | "heroVarenna" | "heroSantoriniShip" | "heroMundoGrupoVideo" | "heroMundoEuropaVideo" | "heroMundoEuropaFoto" | "heroMundoGrupoFoto" | "mundoGreciaVanessa" | "mundoNclDestaque" | "heroMundoDesenhadaVideo" | "heroMundoPlacasFoto" | "heroAirportTraveler" | "heroJuMagicKingdom" | "curtiHolambra" | "essyaMural"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago" | "paraisoTanzania" | "paraisoEslovenia"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
-  | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites";
+  | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites"
+  | "pristurHeroDisney" | "pristurHeroCruzeiros" | "pristurHeroCaribe";
 
 export interface AgencyModule {
   key: string;
