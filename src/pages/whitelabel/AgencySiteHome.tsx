@@ -607,6 +607,12 @@ export default function AgencySiteHome({
       overrides.blog = typeof cur === "object" ? { ...cur, enabled: true } : { enabled: true };
     }
     const resolved = resolveSections(overrides);
+    // The 100 Limites navigation points to the season section on its own home.
+    if (profile.key === "editorialDmc") {
+      const at = resolved.findIndex((section) => section.key === "resorts");
+      if (at >= 0) resolved.splice(at + 1, 0,
+        { ...resolved[at], key: CRUISE_SEASON_TEASER_KEY, label: "Cruzeiros 26/27" });
+    }
     // O Mundo em Cores: resumo das Oportunidades de Novembro logo antes do Xcaret.
     if (profile.key === "mundoEmCoresBriefing14") {
       const at = resolved.findIndex((s) => s.key === "modules");
@@ -885,7 +891,14 @@ export default function AgencySiteHome({
       case "blog": {
         const real = realBlogList ? [realBlogList.featured, ...realBlogList.items].filter(Boolean).slice(0, 3) : [];
         const posts = presentationBlogPosts(hostname) ?? real.map((r) => ({ slug: r!.slug, title: r!.title, text: r!.excerpt, image: r!.cover_url ?? "" }));
-        if (!posts?.length) return null;
+        if (!posts?.length) {
+          if (profile.key !== "editorialDmc") return null;
+          return <section key={key} id="blog" className="scroll-mt-32 bg-background md:scroll-mt-36">
+            <div className={`${container} py-14 md:py-20`}>
+              <SectionHeading eyebrow="BLOG" title="Ideias e dicas para a sua próxima viagem" subtitle="Novos artigos serão publicados aqui." editorial={editorial} />
+            </div>
+          </section>;
+        }
         return (
           <section key={key} id="blog" className="bg-background">
             <div className={`${container} py-14 md:py-20`}>
