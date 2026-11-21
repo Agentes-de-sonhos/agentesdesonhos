@@ -39,7 +39,7 @@ describe("Pristur briefing-22-v1", () => {
       expect(isAgencySearchExcluded(host, "/")).toBe(true);
       expect(isAgencySearchExcluded(host, "/disney")).toBe(true);
     }
-    expect(isTenantPasswordProtected("0c61893e-0e8c-4d98-a1f5-4d2fd3c357ab")).toBe(true);
+    expect(isTenantPasswordProtected("0c61893e-0e8c-4d98-a1f5-4d2fd3c357ab")).toBe(false);
     expect(isTenantPasswordProtected(PRISTUR_PREVIEW_INFO.user_id)).toBe(false);
   });
   it("resolves only the exact job and synthetic host", () => {
