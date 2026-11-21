@@ -994,7 +994,7 @@ export default function AgencySiteHome({
                 {(profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") ? (
                   <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
                 ) : <>
-                  {seasonEnabled && profile.key !== "curtiViagensOfficial" && profile.key !== "curtiViagensBriefing20" && profile.key !== "pristurBriefing22" && profile.key !== "pristurOfficial" && <p className="mb-3 text-center text-[15px] leading-relaxed text-background/80 md:text-base">Na {info.agency_name || "nossa agência"}, você encontra as principais companhias marítimas.</p>}
+                  {seasonEnabled && profile.key !== "editorialRose" && profile.key !== "curtiViagensOfficial" && profile.key !== "curtiViagensBriefing20" && profile.key !== "pristurBriefing22" && profile.key !== "pristurOfficial" && <p className="mb-3 text-center text-[15px] leading-relaxed text-background/80 md:text-base">Na {info.agency_name || "nossa agência"}, você encontra as principais companhias marítimas.</p>}
                   <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
                 </>}
                 <ul className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5 md:gap-5">
