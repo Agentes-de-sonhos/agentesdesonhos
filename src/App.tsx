@@ -181,6 +181,8 @@ function SiteLabAdminReload() {
   }, []);
   return null;
 }
+/** Demos internas (SiteLab Base, Casa Nova Tur, Agência Teste ADS) desativadas a pedido do Fernando; código mantido para testes. */
+const DEMO_LABS_ENABLED = false;
 // ── Fallback spinner ───────────────────────────────────────
 function PageFallback() {
   return (
@@ -216,7 +218,7 @@ const App = () => {
    * montado dentro do WorkspaceGate/Routes, haveria Router dentro de Router.
    * É o mesmo padrão já usado por `AgencyDomainRoutes` nos domínios próprios.
    */
-  if (typeof window !== "undefined" && isSiteLabAdminPath(window.location.pathname)) {
+  if (typeof window !== "undefined" && DEMO_LABS_ENABLED && isSiteLabAdminPath(window.location.pathname)) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -318,16 +320,11 @@ const App = () => {
             <Route path="/certificate-test" element={<CertificateTest />} />
             {/* SiteLab — laboratório privado, sempre ANTES dos catch-alls dinâmicos. */}
             {/* Prévias técnicas ADS: fixtures locais isoladas; só no host id-preview, demais hosts = 404. */}
+            <Route path="/ads-briefing-preview/ads-email-test-v1/*" element={<Navigate to="/" replace />} />
             <Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} />
             <Route path="/preview/navios" element={<CruiseShipsPreview />} />
             <Route path="/preview/enquete" element={<SurveyPreview />} />
-            <Route path="/sitelab-base" element={<SiteLabRoot view="site" />} />
-            <Route path="/sitelab-base/area-do-cliente" element={<SiteLabRoot view="clientArea" />} />
-            {/* /sitelab-base/gestao/* é montado fora deste router (ver topo).
-                Ponte: uma navegação SPA até aqui vira carregamento real, que
-                cai na entrada do topo (sem loop: lá este router não monta). */}
-            <Route path="/sitelab-base/gestao/*" element={<SiteLabAdminReload />} />
-            <Route path="/sitelab-base/gestao" element={<SiteLabAdminReload />} />
+            <Route path="/sitelab-base/*" element={<Navigate to="/" replace />} />
 
             <Route path="/:slug/ofertas" element={<VitrinePublica />} />
             <Route path="/:agencySlug/:accessCode" element={<PublicCodeResolver />} />
