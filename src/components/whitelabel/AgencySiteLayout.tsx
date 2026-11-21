@@ -87,7 +87,7 @@ export const NAV_LINKS: AgencySiteNavItem[] = [
  */
 /** Link "Blog" só com o módulo ativo e ao menos um artigo publicado. */
 export function withBlogLink(nav: AgencySiteNavItem[], show: boolean): AgencySiteNavItem[] {
-  if (!show || nav.some((l) => l.to === "/blog")) return nav;
+  if (!show || nav.some((l) => l.to === "/blog" || l.to === "/#blog")) return nav;
   const i = nav.findIndex((l) => /area-do-cliente/.test(l.to));
   const item = { label: "Blog", to: "/blog" } as AgencySiteNavItem;
   return i >= 0 ? [...nav.slice(0, i), item, ...nav.slice(i)] : [...nav, item];
@@ -594,6 +594,17 @@ export function AgencyFooter({
                   >
                     {l.label}
                   </a>
+                  {profile.key === "editorialDmc" && l.children?.length ? (
+                    <ul className="mt-2 space-y-2 border-l border-current/15 pl-3">
+                      {l.children.map((child) => (
+                        <li key={child.to}>
+                          <a href={agencySiteHref(child.to)} className="inline-block py-0.5 text-sm text-[hsl(var(--wl-ink)_/_0.8)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                            {child.label}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </li>
               ))}
             </ul>
