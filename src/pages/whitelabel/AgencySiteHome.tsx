@@ -542,7 +542,7 @@ export default function AgencySiteHome({
   // Tema global do tenant: variáveis aplicadas na raiz do documento para que
   // modais, selects, calendários e demais portals também usem a marca.
   // Paleta COMPLETA (primária/secundária/terciária) via fonte única.
-  useAgencyBrandTheme(isImmHostname(info.hostname) ? null : agencyBrandInput(info));
+  useAgencyBrandTheme(agencyBrandInput(info));
   const wa = agencyWhatsappNumber(info);
   const rawLocation = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
