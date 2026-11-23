@@ -14,6 +14,9 @@ import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import essyaLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import pristurLogo from "@/assets/whitelabel/logo-pristur.png.asset.json";
+import immLogo from "@/assets/whitelabel/logo-imm-viagens.png.asset.json";
+
+const IMM_HOSTS = ["immturismo.com.br", "www.immturismo.com.br"];
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
 const CEM_LIMITES_MARK =
@@ -44,6 +47,7 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "essya-curti-v1.preview.local": essyaLogo.url,
   "arenatravelgroup.com.br": ARENA_MARK,
   "www.arenatravelgroup.com.br": ARENA_MARK,
+  ...Object.fromEntries(IMM_HOSTS.map((h) => [h, immLogo.url])),
 };
 
 /** Logo só na home e nos links públicos (carteira/orçamento/roteiro); demais páginas carregam sem animação. */
@@ -52,6 +56,7 @@ const HOME_AND_PUBLIC_ONLY = new Set([
   "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local",
   ...ARENA_HOSTS,
   "pristur.com.br", "www.pristur.com.br",
+  ...IMM_HOSTS,
 ]);
 
 /** Logotipos horizontais com "respiração" suave (igual aos links públicos), sem giro. */
@@ -81,7 +86,8 @@ export function agencyLoaderBackdropClass(hostname?: string | null): string {
 
 export function isAgencyLoaderSuppressed(hostname?: string | null): boolean {
   if (typeof window === "undefined") return false;
-  if (!ARENA_HOSTS.has(resolveContextHostname(hostname))) return false;
+  const host = resolveContextHostname(hostname);
+  if (!ARENA_HOSTS.has(host) && !IMM_HOSTS.includes(host)) return false;
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   return path !== "/";
 }
