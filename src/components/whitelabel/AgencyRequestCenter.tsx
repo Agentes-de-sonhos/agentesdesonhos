@@ -22,6 +22,7 @@ import {
 } from "@/lib/agencySiteRequests";
 import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
+import { isImmHostname } from "@/lib/agencyDomains";
 
 const SERVICE_ICONS: Record<string, typeof Plane> = {
   aereo: Plane,
@@ -258,7 +259,7 @@ export function AgencyRequestCenter({
                 <TabsTrigger
                   key={item.key}
                   value={item.key}
-                  className="shrink-0 gap-2 rounded-t-lg rounded-b-none border-b-2 border-transparent px-3 py-2.5 text-sm data-[state=active]:border-primary data-[state=active]:bg-primary/5 data-[state=active]:text-primary data-[state=active]:shadow-none"
+                  className={`shrink-0 gap-2 rounded-t-lg rounded-b-none border-b-2 border-transparent px-3 py-2.5 text-sm data-[state=active]:border-primary ${isImmHostname(hostname) ? "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground" : "data-[state=active]:bg-primary/5 data-[state=active]:text-primary"} data-[state=active]:shadow-none`}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />
                   <span className="whitespace-nowrap">{item.label}</span>
