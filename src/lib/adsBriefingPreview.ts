@@ -2699,9 +2699,24 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
   },
   heroPresentation: { kicker: "SÃO PAULO · SP", overlay: "strongLeft", titleWeight: "regular" },
   hero: [
-    { title: "IM&M Viagens e Turismo", subtitle: "Planejamento de viagens com atendimento próximo.", image: "europa", order: 1, enabled: true },
-    { title: "Cruzeiros", subtitle: "Companhias, navios e roteiros com orientação.", image: "cruzeiro", order: 2, enabled: true },
-    { title: "Resorts", subtitle: "Descanso planejado no Brasil e no exterior.", image: "resort", order: 3, enabled: true },
+    {
+      kicker: "EUROPA",
+      title: "Descubra os encantos de Viena",
+      subtitle: "Arquitetura imperial, cafés históricos e momentos inesquecíveis na capital austríaca.",
+      image: "immViennaNight", order: 1, enabled: true,
+    },
+    {
+      kicker: "CRUZEIROS",
+      title: "Temporada Brasileira 2026/2027",
+      subtitle: "Explore o litoral brasileiro a bordo e transforme cada parada em uma nova experiência.",
+      image: "immCruise", order: 2, enabled: true,
+    },
+    {
+      kicker: "ORLANDO",
+      title: "Viva a magia da Disney",
+      subtitle: "Planeje sua viagem e aproveite cada momento nos parques de Orlando.",
+      image: "immDisneyCastle", order: 3, enabled: true,
+    },
   ],
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Ivete Meneghello Milazzotto",
@@ -2713,6 +2728,8 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
 }, "IM&M Viagens e Turismo");
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto"),
+  // Retain IMM's own slide copy and media; the shared Mundo review profile is only the visual baseline.
+  hero: immBaseline.hero,
   demo: false, presentation: false, seo: immBaseline.seo,
 };
 
