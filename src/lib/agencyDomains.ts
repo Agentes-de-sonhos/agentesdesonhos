@@ -157,7 +157,7 @@ export async function fetchAgencyBySlug(slug: string): Promise<AgencyDomainInfo 
  * chegam como true e a derivação atual é preservada.
  */
 export function isImmHostname(hostname?: string | null): boolean {
-  const normalized = (hostname || "").trim().toLowerCase().replace(/:\\d+$/, "").replace(/^www\\./, "");
+  const normalized = (hostname || "").trim().toLowerCase().replace(/:\d+$/, "").replace(/^www\./, "");
   return normalized === "immturismo.com.br";
 }
 
