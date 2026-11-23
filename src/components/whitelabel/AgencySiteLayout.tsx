@@ -39,6 +39,8 @@ import {
   type AgencyDomainInfo,
   agencyDisplayName,
   agencyWhatsappNumber,
+  agencyBrandInput,
+  isImmHostname,
 } from "@/lib/agencyDomains";
 import {
   isEditorialTheme,
@@ -47,6 +49,7 @@ import {
   siteThemeRootClass,
 } from "@/lib/agencySiteTheme";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
+import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
 import {
   logoIncludesWordmark,
   resolveAgencyHeaderBrandPreset,
@@ -753,6 +756,8 @@ export function AgencySiteLayout({
   navOverride?: AgencySiteNavItem[];
 }) {
   useHashScroll();
+  // A paleta específica da IMM também acompanha as páginas internas do site.
+  useAgencyBrandTheme(isImmHostname(info.hostname) ? agencyBrandInput(info) : null);
   // Propaga o tema do tenant para o `body`, para que Dialog/Popover/Select/
   // Calendar renderizados em portal herdem os tokens da agência.
   useAgencySiteThemeOnBody(info.hostname);
