@@ -43,6 +43,7 @@ import {
 } from "@/lib/agencyDomains";
 import { AgencyQuickQuote } from "@/components/whitelabel/AgencyQuickQuote";
 import { AgencyFeaturedExperienceSection } from "@/components/whitelabel/AgencyFeaturedExperienceSection";
+import { AgencyOffersHomeSection } from "@/components/whitelabel/AgencyOffersHomeSection";
 import { CruiseSeasonHomeTeaser } from "@/components/cruise-season/CruiseSeasonHomeTeaser";
 import { CruiseSeasonAuthorityBlock, CruiseSeasonHelp } from "@/components/cruise-season/CruiseSeasonAuthorityBlock";
 import { NovemberHomeTeaser } from "@/components/campaign/NovemberHomeTeaser";
@@ -1088,6 +1089,9 @@ export default function AgencySiteHome({
       }
 
       case "modules":
+        if (profile.key === "immOfficial") {
+          return <AgencyOffersHomeSection key={key} hostname={info.hostname} container={container} />;
+        }
         if (profile.clubMedSnowHome?.enabled) {
           return <ClubMedSnowHomeSection key={key} config={profile.clubMedSnowHome} container={container} agencyName={name} />;
         }

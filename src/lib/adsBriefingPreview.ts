@@ -2728,6 +2728,7 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
 }, "IM&M Viagens e Turismo");
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto"),
+  featuredExperience: undefined,
   // Retain IMM's own slide copy and media; the shared Mundo review profile is only the visual baseline.
   hero: immBaseline.hero,
   demo: false, presentation: false, seo: immBaseline.seo,

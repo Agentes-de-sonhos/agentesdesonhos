@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SEO } from "@/components/seo/SEO";
+import { currentImmSample } from "@/lib/immOfferPreview";
+import { agencyContextHref } from "@/lib/agencyContextLink";
 import { Plane, Hotel, Car, Bus, Ticket, ShieldCheck, Ship, Train, Route, Package, type LucideIcon } from "lucide-react";
 import {
   filterPublicOffers,
@@ -114,7 +116,9 @@ export function usePublicOffers(hostname: string, enabled = true) {
     queryFn: async () => {
       const { data, error } = await (supabase as any).rpc("get_public_offers", { p_hostname: hostname });
       if (error) return [] as PublicOffer[];
-      return (Array.isArray(data) ? data : []) as PublicOffer[];
+      const offers = (Array.isArray(data) ? data : []) as PublicOffer[];
+      const sample = currentImmSample(hostname);
+      return offers.length === 0 && sample ? [sample] : offers;
     },
   });
 }
@@ -141,7 +145,7 @@ export function OfferCard({ offer, href }: { offer: PublicOffer; href: string })
         {(offer.included_services?.length ?? 0) > 0 && (
           <TooltipProvider delayDuration={150}>
             <div className="flex flex-wrap items-center gap-1.5 pt-1" aria-label="Serviços inclusos">
-              {offer.included_services!.map((svc, i) => {
+              {offer.included_services?.map((svc, i) => {
                 const Icon = serviceIcon(svc.type);
                 return (
                   <Tooltip key={`${svc.type}-${i}`}>
@@ -249,7 +253,7 @@ export default function AgencyOffersPage({ info, basePath = "" }: { info: Agency
           <p className="mt-10 text-center text-sm text-muted-foreground">Nenhuma oferta com esses filtros.</p>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.map((o) => <OfferCard key={o.slug} offer={o} href={`${basePath}/ofertas/${o.slug}`} />)}
+            {visible.map((o) => <OfferCard key={o.slug} offer={o} href={agencyContextHref(`${basePath}/ofertas/${o.slug}`)} />)}
           </div>
         )}
       </section>

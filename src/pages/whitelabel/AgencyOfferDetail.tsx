@@ -15,6 +15,7 @@ import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SEO } from "@/components/seo/SEO";
 import { AgencyRequestCenter } from "@/components/whitelabel/AgencyRequestCenter";
 import { serviceIcon, serviceLabel } from "@/pages/whitelabel/AgencyOffersPage";
+import { currentImmSample, IMM_SAMPLE_SLUG } from "@/lib/immOfferPreview";
 import { CheckCircle2, Info, Loader2 } from "lucide-react";
 import {
   EMPTY_OFFER_REQUEST,
@@ -64,6 +65,8 @@ export default function AgencyOfferDetail({ info, basePath = "" }: { info: Agenc
     staleTime: 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async () => {
+      const sample = currentImmSample(info.hostname);
+      if (sample && slug === IMM_SAMPLE_SLUG) return sample;
       const { data, error } = await (supabase as any).rpc("get_public_offer_by_slug", { p_hostname: info.hostname, p_slug: slug });
       if (error) return { status: "not_found" } as PublicOffer;
       return data as PublicOffer;
@@ -223,6 +226,7 @@ function OfferRequestDialog({
   const [honeypot, setHoneypot] = useState("");
   const openedAt = useRef(Date.now());
   const sending = useRef(false);
+  const illustrative = offer.slug === IMM_SAMPLE_SLUG && currentImmSample(info.hostname) !== null;
   const idem = useMemo(() => crypto.randomUUID(), [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = <K extends keyof OfferRequestForm>(k: K, v: OfferRequestForm[K]) => {
@@ -231,6 +235,7 @@ function OfferRequestDialog({
   };
 
   const submit = async () => {
+    if (illustrative) return;
     if (sending.current) return;
     const errs = validateOfferRequest(form);
     setErrors(errs);
@@ -302,7 +307,7 @@ function OfferRequestDialog({
           <>
             <DialogHeader>
               <DialogTitle>Solicitar esta oferta</DialogTitle>
-              <DialogDescription>{offer.title}</DialogDescription>
+              <DialogDescription>{offer.title}{illustrative ? " · Demonstração: nenhum pedido será enviado." : ""}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="sm:col-span-2 space-y-1">
@@ -352,7 +357,7 @@ function OfferRequestDialog({
                 <Info className="h-4 w-4 shrink-0" /> {OFFER_PRICE_NOTICE}
               </div>
               {serverError && <p className="sm:col-span-2 text-sm text-destructive">{serverError}</p>}
-              <Button className="sm:col-span-2" size="lg" onClick={submit} disabled={state === "sending"}>
+              <Button className="sm:col-span-2" size="lg" onClick={submit} disabled={illustrative || state === "sending"}>
                 {state === "sending" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Enviar solicitação
               </Button>
             </div>
