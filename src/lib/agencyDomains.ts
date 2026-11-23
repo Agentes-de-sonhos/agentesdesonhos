@@ -156,14 +156,20 @@ export async function fetchAgencyBySlug(slug: string): Promise<AgencyDomainInfo 
  * Contas legadas (só primária) continuam com fallback seguro: os flags `*_auto`
  * chegam como true e a derivação atual é preservada.
  */
+export function isImmHostname(hostname?: string | null): boolean {
+  const normalized = (hostname || "").trim().toLowerCase().replace(/:\\d+$/, "").replace(/^www\\./, "");
+  return normalized === "immturismo.com.br";
+}
+
 export function agencyBrandInput(info: AgencyDomainInfo | null | undefined) {
+  const imm = isImmHostname(info?.hostname);
   return {
-    primary: info?.primary_color ?? null,
-    secondary: info?.secondary_color ?? null,
-    secondaryAuto: info?.secondary_auto !== false,
-    tertiary: info?.tertiary_color ?? null,
-    tertiaryAuto: info?.tertiary_auto !== false,
-    onSecondary: info?.on_secondary_color ?? null,
+    primary: imm ? "#e27818" : info?.primary_color ?? null,
+    secondary: imm ? "#e27818" : info?.secondary_color ?? null,
+    secondaryAuto: imm ? false : info?.secondary_auto !== false,
+    tertiary: imm ? null : info?.tertiary_color ?? null,
+    tertiaryAuto: imm ? true : info?.tertiary_auto !== false,
+    onSecondary: imm ? "#111111" : info?.on_secondary_color ?? null,
   };
 }
 
