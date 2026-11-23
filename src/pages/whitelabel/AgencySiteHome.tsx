@@ -159,7 +159,7 @@ import heroJuMagicKingdom from "@/assets/whitelabel/destinos-com-a-ju/hero-ju-ma
 import bannerAmanda100Limites from "@/assets/whitelabel/100-limites/banner-amanda-lisboa-bonde.png.asset.json";
 import destinosStorefrontSide from "@/assets/whitelabel/destinos-com-a-ju/storefront-side.webp.asset.json";
 import { useAgencyBrandTheme } from "@/lib/useAgencyBrandTheme";
-import { agencyBrandInput } from "@/lib/agencyDomains";
+import { agencyBrandInput, isImmHostname } from "@/lib/agencyDomains";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { presentationBlogPosts } from "@/lib/presentationBlogPosts";
 import { usePublicBlogList, usePublicBlogStatus } from "@/hooks/usePublicBlog";
@@ -542,7 +542,7 @@ export default function AgencySiteHome({
   // Tema global do tenant: variáveis aplicadas na raiz do documento para que
   // modais, selects, calendários e demais portals também usem a marca.
   // Paleta COMPLETA (primária/secundária/terciária) via fonte única.
-  useAgencyBrandTheme(agencyBrandInput(info));
+  useAgencyBrandTheme(isImmHostname(info.hostname) ? null : agencyBrandInput(info));
   const wa = agencyWhatsappNumber(info);
   const rawLocation = [info.city, info.state].filter(Boolean).join(" · ");
   const hostname = info.hostname;
@@ -1715,7 +1715,7 @@ export default function AgencySiteHome({
                       "Reservado, tudo fica na sua Área do Cliente.",
                     ]).map((step, i) => (
                       <li key={step} className="flex gap-4">
-                        <span className="wl-step-num grid h-9 w-9 shrink-0 place-items-center rounded-full bg-background/15 text-sm font-bold text-background">
+                        <span className={`wl-step-num grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-bold ${isImmHostname(hostname) ? "bg-primary text-primary-foreground" : "bg-background/15 text-background"}`}>
                           {i + 1}
                         </span>
                         <p className="pt-1.5 text-[15px] leading-relaxed text-background/90">{step}</p>
