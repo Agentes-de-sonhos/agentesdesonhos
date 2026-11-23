@@ -36,6 +36,7 @@ import {
 } from "@/lib/agencyJourneyOccurrences";
 import { WhatsappGroupInvite } from "@/components/whitelabel/WhatsappGroupInvite";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
+import { isImmHostname } from "@/lib/agencyDomains";
 import { focusNextField, useKeyboardInset, useRevealFocusedField } from "@/hooks/useKeyboardInsets";
 import { agencySiteHref } from "@/lib/agencyContextLink";
 
@@ -209,13 +210,15 @@ function FieldControl({
 
 /** Opção de serviço adicional — seleção múltipla, sem abrir formulário. */
 function ServiceChoiceRow({
-  service, selected, onToggle,
+  service, selected, onToggle, hostname,
 }: {
   service: RequestService;
   selected: boolean;
   onToggle: () => void;
+  hostname: string;
 }) {
   const Icon = SERVICE_ICONS[service.key] ?? Compass;
+  const imm = isImmHostname(hostname);
   return (
     <button
       type="button"
@@ -224,17 +227,19 @@ function ServiceChoiceRow({
       data-testid={`wlq-choice-${service.key}`}
       onClick={onToggle}
       className={`flex items-center gap-3 rounded-2xl border px-3.5 py-3 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-        selected ? "border-primary bg-primary/5" : "border-border/60 hover:border-primary/50 hover:bg-primary/[0.03]"
+        selected
+          ? imm ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90" : "border-primary bg-primary/5"
+          : "border-border/60 hover:border-primary/50 hover:bg-primary/[0.03]"
       }`}
     >
-      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${selected ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"}`}>
+      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${selected ? (imm ? "bg-white/20 text-white" : "bg-primary text-primary-foreground") : "bg-primary/10 text-primary"}`}>
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
-      <span className="min-w-0 flex-1 text-sm font-medium text-foreground">{pickLabel(service)}</span>
+      <span className={`min-w-0 flex-1 text-sm font-medium ${selected && imm ? "text-primary-foreground" : "text-foreground"}`}>{pickLabel(service)}</span>
       <span
         aria-hidden="true"
         className={`grid h-5 w-5 shrink-0 place-items-center rounded-md border ${
-          selected ? "border-primary bg-primary text-primary-foreground" : "border-border"
+          selected ? (imm ? "border-white bg-white text-primary" : "border-primary bg-primary text-primary-foreground") : "border-border"
         }`}
       >
         {selected ? <Check className="h-3.5 w-3.5" /> : null}
@@ -770,6 +775,7 @@ export function AgencyQuoteJourney({
         {complements.map((service) => (
           <ServiceChoiceRow
             key={service.key}
+            hostname={hostname}
             service={service}
             selected={selection.includes(service.key)}
             onToggle={() =>
