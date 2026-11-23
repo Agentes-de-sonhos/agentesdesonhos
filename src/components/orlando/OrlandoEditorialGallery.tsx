@@ -28,16 +28,17 @@ const PHOTOS = [
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
-  const clearPhotos = /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br|curtiviagens\.com\.br|essyatur\.com\.br|pristur\.com\.br)$/i.test(hostname.replace(/\.$/, "")) || hostname === "briefing-20-v1.preview.local" || hostname === "essya-curti-v1.preview.local" || ["briefing-22-v1.preview.local", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname);
+  const imm = ["immturismo.com.br", "www.immturismo.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
+  const clearPhotos = imm || /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br|curtiviagens\.com\.br|essyatur\.com\.br|pristur\.com\.br)$/i.test(hostname.replace(/\.$/, "")) || hostname === "briefing-20-v1.preview.local" || hostname === "essya-curti-v1.preview.local" || ["briefing-22-v1.preview.local", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname);
   const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local", "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local", "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local", "briefing-22-v1.preview.local", "pristur.com.br", "www.pristur.com.br", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
 
   useEffect(() => {
-    if (!allowed || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!(allowed || imm) || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = window.setInterval(() => setSlide((s) => (s + 1) % PHOTOS.length), 7000);
     return () => window.clearInterval(t);
-  }, [allowed, paused]);
+  }, [allowed, imm, paused]);
 
-  if (!allowed) return null;
+  if (!(allowed || imm)) return null;
   const go = (d: number) => setSlide((s) => (s + d + PHOTOS.length) % PHOTOS.length);
   const navBtn = "grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white [&_svg]:text-white";
 

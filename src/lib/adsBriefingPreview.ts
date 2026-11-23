@@ -2723,7 +2723,7 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
     text: "A IM&M Viagens e Turismo atende em São Paulo (SP), com planejamento de viagens nacionais e internacionais.\n\nCada roteiro é organizado a partir do perfil de quem viaja, com orientação na escolha de destinos, hospedagens e experiências.\n\nO atendimento acompanha o cliente do primeiro contato ao retorno da viagem.",
     media: "hidden", showLocation: true, ownerName: "Ivete Meneghello Milazzotto",
   },
-  footer: { description: "Planejamento de viagens com atendimento próximo.", address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true },
+  footer: { descriptionHidden: true, address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true },
   seo: { title: "IM&M Viagens e Turismo", description: "Planejamento de viagens, cruzeiros e resorts com a IM&M Viagens e Turismo, em São Paulo (SP)." },
 }, "IM&M Viagens e Turismo");
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {

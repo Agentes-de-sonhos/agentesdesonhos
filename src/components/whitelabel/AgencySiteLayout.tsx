@@ -536,7 +536,7 @@ export function AgencyFooter({
      * Logotipos de prévias específicas sem moldura/sombra, na mesma caixa
      * do cabeçalho. Demais tenants seguem com o acabamento atual.
      */
-    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
+    const plainFooterLogo = plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial" || profile.key === "immOfficial";
     const footerLogoClass = profile.key === "pristurBriefing22" || profile.key === "pristurOfficial"
       ? "h-[72px] w-auto max-w-[300px] object-contain"
       : plainFooterLogo
@@ -681,7 +681,7 @@ export function AgencyFooter({
         </div>
         {legalPreview && <Limites100LegalFooterPreview />}
         <div className={footerBottomClass}>
-          <div className={`${siteContainer(true)} py-6 text-xs text-[hsl(var(--wl-ink)_/_0.65)]`}>
+          <div className={`${siteContainer(true)} wl-footer-copyright py-6 text-xs text-[hsl(var(--wl-ink)_/_0.65)]`}>
             © {new Date().getFullYear()} <BrandText>{legalPreview ? LIMITES100_LEGAL_DATA.tradeName : name}</BrandText>. Todos os direitos reservados.
           </div>
         </div>
