@@ -4,6 +4,7 @@ import { fxRateUrl, isValidRate } from "@/lib/fxConversion";
 import { circuitNights, circuitMoney, convertCircuitPrice, circuitDepartureDate, tourismRate, upcomingDepartures } from "@/lib/circuits/presentation";
 import { CircuitQuoteDialog } from "@/components/whitelabel/CircuitQuoteDialog";
 import { CircuitTimeline } from "@/components/whitelabel/CircuitTimeline";
+import { CircuitRouteMap } from "@/components/whitelabel/CircuitRouteMap";
 import "./circuit-tour.css";
 import { useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BedDouble, Bus, CalendarDays, Clock, Car, Compass, Download, Hotel, Ship, MapPin, MessageCircle, Plane, Star, UserRound, Utensils } from "lucide-react";
@@ -145,6 +146,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
               <Button variant="outline" size="sm" onClick={() => setOpen([])}>Recolher todos</Button>
             </div>}
           </div>
+          <CircuitRouteMap circuit={c} />
           {enhanced ? <CircuitTimeline days={c.itinerary} /> : <Accordion type="multiple" value={open} onValueChange={setOpen} className="mt-6 space-y-3">
             {c.itinerary.map((d) => (
               <AccordionItem key={d.day} value={`d${d.day}`} className="rounded-2xl border border-border bg-card px-5">
