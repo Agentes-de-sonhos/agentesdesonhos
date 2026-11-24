@@ -58,11 +58,11 @@ describe("cards agrupados x individuais no orçamento público", () => {
     expect(action).toBeGreaterThan(footer);
   });
 
-  it("faixa de ação do carrinho é azul-clara, full width e alinhada à direita", () => {
+  it("faixa de ação do carrinho é branca, full width e alinhada à direita", () => {
     const i = src.indexOf("data-booking-action-row");
     expect(i).toBeGreaterThan(0);
     const row = src.slice(i, i + 400);
-    expect(row).toMatch(/bg-primary\/\[0\.07\]/);
+    expect(row).toMatch(/bg-white/);
     expect(row).toMatch(/border-t-2 border-primary\/25/);
     expect(row).toMatch(/data-attached=/);
     expect(row).toMatch(/w-full/);
