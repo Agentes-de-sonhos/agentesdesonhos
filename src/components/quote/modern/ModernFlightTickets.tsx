@@ -85,13 +85,6 @@ export function ModernFlightTickets({ data, outbound, return_, internal }: { dat
   const baggage = !!data.includes_baggage;
   return (
     <div className="space-y-4" data-modern-flight="true">
-      <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary"><Plane className="h-5 w-5" /></div>
-        <div>
-          <div className="text-xl font-semibold text-foreground">Voos</div>
-          <div className="text-sm text-muted-foreground">{data.airline || "Companhia aérea"} · {hasReturn ? "ida e volta" : "somente ida"}</div>
-        </div>
-      </div>
       <div className={`grid gap-4 ${hasReturn ? "md:grid-cols-2" : ""}`}>
         <Ticket label="Ida" legs={outbound} fallbackDate={data.departure_date} airline={data.airline} baggage={baggage} />
         {hasReturn && <Ticket label="Volta" legs={return_} fallbackDate={data.return_date} airline={data.airline} baggage={baggage} />}
