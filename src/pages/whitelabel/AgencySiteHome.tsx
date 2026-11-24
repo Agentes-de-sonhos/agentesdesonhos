@@ -1,4 +1,5 @@
 import { ClubMedSnowHomeSection } from "@/components/whitelabel/ClubMedSnowHomeSection";
+import immLesteEuropeu from "@/assets/imm-leste-europeu-budapeste.png.asset.json";
 import curtiCaribeCancun from "@/assets/whitelabel/curti-caribe-cancun.png.asset.json";
 import curtiFozIguacu from "@/assets/whitelabel/curti/curti-foz-iguacu.png.asset.json";
 import curtiCruzeiros from "@/assets/whitelabel/curti/curti-cruzeiros.png.asset.json";
@@ -187,6 +188,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   pristurDisneyPartners: disneyMagicKingdomOfficial.url,
   immViennaNight: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Vienna%2C_Austria_-_Stephansdom_at_night.png/1920px-Vienna%2C_Austria_-_Stephansdom_at_night.png",
   immCruise: "/imm/hero-cruzeiros.jpg",
+  immLesteEuropeu: immLesteEuropeu.url,
   immDisneyCastle: disneyMagicKingdomOfficial.url,
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,

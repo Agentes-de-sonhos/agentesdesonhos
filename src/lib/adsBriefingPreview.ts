@@ -2730,8 +2730,8 @@ const immReviewProfile = buildMundoReviewProfile("immOfficial", immBaseline, "IM
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...immReviewProfile,
   destinations: [
-    ...(immReviewProfile.destinations ?? []),
-    { key: "leste-europeu-premium-2027", image: "immViennaNight", label: "Circuito pela Europa · 2027", title: "Leste Europeu Premium", text: "Viena, Budapeste, Bratislava, Praga, Dresden e Berlim em 11 dias e 10 noites. Saídas de abril a outubro de 2027.", service: "pacotes", href: "/circuitos/leste-europeu-premium-2027", enabled: true, order: (immReviewProfile.destinations?.length ?? 0) + 1 },
+    ...(immReviewProfile.destinations ?? []).filter(d => d.key !== "europa-portugal"),
+    { key: "leste-europeu-premium-2027", image: "immLesteEuropeu", label: "Circuito pela Europa · 2027", title: "Leste Europeu Premium", text: "Viena, Budapeste, Bratislava, Praga, Dresden e Berlim em 11 dias e 10 noites. Saídas de abril a outubro de 2027.", service: "pacotes", href: "/circuitos/leste-europeu-premium-2027", enabled: true, order: (immReviewProfile.destinations?.length ?? 0) + 1 },
   ],
   featuredExperience: undefined,
   // Retain IMM's own slide copy and media; the shared Mundo review profile is only the visual baseline.
