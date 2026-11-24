@@ -2730,7 +2730,12 @@ const immReviewProfile = buildMundoReviewProfile("immOfficial", immBaseline, "IM
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...immReviewProfile,
   destinations: [
-    ...(immReviewProfile.destinations ?? []).filter(d => d.key !== "europa-portugal"),
+    ...(immReviewProfile.destinations ?? [])
+      .filter(d => d.key !== "europa-portugal")
+      // O card "Resorts no Brasil" abre a página dedicada de resorts (Immerso, 27/11/2026).
+      .map(d => d.key === "resorts-brasil-review"
+        ? { ...d, href: "/resorts-brasil", ctaLabel: "Ver resorts" }
+        : d),
     { key: "leste-europeu-premium-2027", image: "immLesteEuropeu", label: "Circuito pela Europa · 2027", title: "Leste Europeu Premium", text: "Viena, Budapeste, Bratislava, Praga, Dresden e Berlim em 11 dias e 10 noites. Saídas de abril a outubro de 2027.", service: "pacotes", href: "/circuitos/leste-europeu-premium-2027", enabled: true, order: (immReviewProfile.destinations?.length ?? 0) + 1 },
   ],
   featuredExperience: undefined,

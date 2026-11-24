@@ -33,6 +33,13 @@ describe("Leste Europeu Premium 2027 da IMM", () => {
     expect(DRICA_PRESENTATION_PROFILE.destinations?.some(d => d.href === `/circuitos/${circuit.slug}`)).toBe(false);
     expect(DRICA_PRESENTATION_PROFILE.destinations?.find(d => d.key === "capitais-da-italia")?.href).toBe("/circuitos/capitais-da-italia");
   });
+  it("encaminha o card Resorts no Brasil para a página dedicada de resorts", () => {
+    const card = IMM_OFFICIAL_PROFILE.destinations?.find(d => d.key === "resorts-brasil-review");
+    expect(card?.title).toBe("Resorts no Brasil");
+    expect(card?.href).toBe("/resorts-brasil");
+    expect(card?.ctaLabel).toBe("Ver resorts");
+    expect(IMM_OFFICIAL_PROFILE.resortsMap?.enabled).toBe(true);
+  });
   it("transmite a saída escolhida pelo fluxo compartilhado sem definir proprietário no navegador", () => {
     const payload = circuitRequestPayload(circuit, "2027-05-20", { name: "Teste de circuito", phone: "", email: "teste@example.com", adults: 2, children: 0, notes: "", consent: true }, "");
     expect(payload.details.data_inicio).toBe("2027-05-20");
