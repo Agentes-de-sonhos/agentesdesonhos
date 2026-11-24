@@ -2726,8 +2726,13 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
   footer: { descriptionHidden: true, address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true },
   seo: { title: "IM&M Viagens e Turismo", description: "Planejamento de viagens, cruzeiros e resorts com a IM&M Viagens e Turismo, em São Paulo (SP)." },
 }, "IM&M Viagens e Turismo");
+const immReviewProfile = buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto");
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
-  ...buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto"),
+  ...immReviewProfile,
+  destinations: [
+    ...(immReviewProfile.destinations ?? []),
+    { key: "leste-europeu-premium-2027", image: "immViennaNight", label: "Circuito pela Europa · 2027", title: "Leste Europeu Premium", text: "Viena, Budapeste, Bratislava, Praga, Dresden e Berlim em 11 dias e 10 noites. Saídas de abril a outubro de 2027.", service: "pacotes", href: "/circuitos/leste-europeu-premium-2027", enabled: true, order: (immReviewProfile.destinations?.length ?? 0) + 1 },
+  ],
   featuredExperience: undefined,
   // Retain IMM's own slide copy and media; the shared Mundo review profile is only the visual baseline.
   hero: immBaseline.hero,
