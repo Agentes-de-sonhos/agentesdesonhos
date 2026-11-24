@@ -1,5 +1,6 @@
 import { ModernQuoteShell, ModernQuoteSidebar, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
 import { isModernQuotePreview, resolveModernSidebar } from "@/lib/quoteModernPreview";
+import { ModernFlightTickets } from "@/components/quote/modern/ModernFlightTickets";
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { getHotelRateChoice, hotelRates, mealPlanLabel, setHotelRateChoice, subscribeHotelRateChoice } from "@/lib/hotelRates";
 import { useState, useEffect, useRef } from "react";
@@ -435,6 +436,18 @@ function InclusionBadge({ ok, label }: { ok: boolean; label: string }) {
 
 function FlightBody({ data }: { data: any }) {
   const { outbound: outLegs, internal: intLegs, return_: retLegs } = splitFlightLegs(data) as { outbound: any[]; internal: any[]; return_: any[] };
+  if (typeof window !== "undefined" && isModernQuotePreview(window.location.search)) {
+    return (
+      <div className="space-y-4">
+        <ModernFlightTickets data={data} outbound={outLegs} return_={retLegs} internal={intLegs} />
+        {data.notes && (
+          <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap"><FormattedText>{data.notes}</FormattedText></p>
+          </div>
+        )}
+      </div>
+    );
+  }
   return (
     <div className="space-y-4">
       {/* Header: airline + route */}
