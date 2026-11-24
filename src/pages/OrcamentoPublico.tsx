@@ -1,5 +1,8 @@
 import { ModernQuoteShell, ModernQuoteSidebar, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
 import { isModernQuotePreview, resolveModernSidebar } from "@/lib/quoteModernPreview";
+import { ModernHotelChoice } from "@/components/quote/modern/ModernHotelChoice";
+import { findHotelOptions, totalWithHotelChoice } from "@/lib/quoteHotelChoice";
+import { isPackagePricing } from "@/lib/quotePricing";
 import { ModernFlightTickets } from "@/components/quote/modern/ModernFlightTickets";
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { getHotelRateChoice, hotelRates, mealPlanLabel, setHotelRateChoice, subscribeHotelRateChoice } from "@/lib/hotelRates";
@@ -1463,6 +1466,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const { quote: fetchedQuote, agentProfile: fetchedTokenAgentProfile, isLoading: isFetching } = usePublicQuote(quoteOverride ? undefined : token);
   const quote = quoteOverride ?? fetchedQuote;
   const isLoading = quoteOverride ? false : isFetching;
+  const [pickedHotelId, setPickedHotelId] = useState<string | null>(null);
   const [openServiceIndices, setOpenServiceIndices] = useState<Set<number>>(new Set());
   const servicesInitialized = useRef(false);
 
@@ -1671,10 +1675,16 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const heroImage = introImages[0] || resolvedHeroFallback || null;
   const tripTitle = (quote as any).trip_title as string | undefined;
 
-  const totalForBar = getEffectiveQuoteTotal(quote, quote.services);
   // Novo visual: somente prévia via ?visual=novo (não afeta links atuais).
   const modernPreview = typeof window !== "undefined" && isModernQuotePreview(window.location.search);
+  const hotelOptions = modernPreview ? findHotelOptions(quote.services as any, (quote as any).choice_groups || []) : [];
+  const selectedHotelId = hotelOptions.length ? (hotelOptions.some((o) => o.id === pickedHotelId) ? pickedHotelId! : hotelOptions[0].id) : null;
+  const hotelChoiceRecalc = hotelOptions.length > 0 && !isPackagePricing(quote);
+  const totalForBar = hotelChoiceRecalc
+    ? totalWithHotelChoice(quote.services as any, hotelOptions, selectedHotelId)
+    : getEffectiveQuoteTotal(quote, quote.services);
   const modernModel = resolveModernSidebar(quote, totalForBar);
+  const hiddenHotelIds = new Set(hotelOptions.filter((o) => o.id !== selectedHotelId).map((o) => o.id));
 
   // Highlights: custom edited list (if any) or auto-generated from services.
   const svcTypes = new Set((quote.services || []).map(s => s.service_type));
@@ -1899,6 +1909,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
           />
         )}
 
+        {modernPreview && hotelOptions.length > 0 && selectedHotelId && (
+          <ModernHotelChoice
+            options={hotelOptions}
+            selectedId={selectedHotelId}
+            onSelect={setPickedHotelId}
+            fmt={(v) => formatCurrency(v)}
+            totalFor={(id) => totalWithHotelChoice(quote.services as any, hotelOptions, id)}
+            showPrices={hotelChoiceRecalc && modernModel.kind !== "summary"}
+          />
+        )}
+
         {/* ─── Services Section (collapsed by default) ─── */}
         {quote.services && quote.services.length > 0 && (
           <section className="space-y-5 animate-fade-up">
@@ -1909,6 +1930,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
             {(() => {
               const renderCard = (service: QuoteService, collapsible = true) => {
+                if (hiddenHotelIds.has(service.id)) return null;
                 const index = quote.services!.findIndex((s) => s.id === service.id);
                 return (
                   <CollapsibleServiceCard
