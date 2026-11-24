@@ -120,10 +120,10 @@ export function ModernQuoteMobileBar({ model, fmt, whatsappUrl }: { model: Moder
 export function ModernQuoteShell({ enabled, className, sidebar, children }: { enabled: boolean; className: string; sidebar: ReactNode; children: ReactNode }) {
   if (!enabled) return <main className={className}>{children}</main>;
   return (
-    <main className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 sm:pt-20 pb-28 lg:pb-12 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10">
+    <main className="mx-auto max-w-[1140px] px-5 sm:px-8 pt-16 sm:pt-20 pb-28 lg:pb-12 lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-10">
       <div className="min-w-0 space-y-8 sm:space-y-10">{children}</div>
-      <aside className="hidden lg:block">
-        <div className="sticky top-20 mt-0">{sidebar}</div>
+      <aside className="hidden lg:block lg:-mt-40 relative z-10">
+        <div className="sticky top-20">{sidebar}</div>
       </aside>
     </main>
   );
