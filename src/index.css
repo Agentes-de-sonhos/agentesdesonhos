@@ -2064,3 +2064,30 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright { --wl-copyright-ink: 0 0% 0%; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright,
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright * { color: hsl(var(--wl-copyright-ink)) !important; }
+
+/* IMM: foto começa após o texto, sem alterar o banner aprovado de outras agências. */
+.wl-editorial.wl-mundo.wl-imm .wl-newsletter-card {
+  --wl-newsletter-photo: url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
+  --wl-newsletter-overlay: linear-gradient(to right, var(--brand-primary) 0%, var(--brand-primary) 35%, hsl(var(--primary) / 0.65) 48%, hsl(var(--primary) / 0) 70%);
+  --wl-newsletter-button-hover: #C9660F;
+  background-image: var(--wl-newsletter-overlay), var(--wl-newsletter-photo);
+  background-size: 100% 100%, 65% auto;
+  background-position: left top, right 0 top calc(11.5px - 11.5vw);
+}
+.wl-editorial.wl-mundo.wl-imm .wl-newsletter-cta {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  color: var(--brand-on-primary) !important;
+}
+.wl-editorial.wl-mundo.wl-imm .wl-newsletter-cta svg { color: var(--brand-on-primary) !important; }
+.wl-editorial.wl-mundo.wl-imm .wl-newsletter-cta:is(:hover, :focus-visible) {
+  background-color: var(--wl-newsletter-button-hover) !important;
+  border-color: var(--wl-newsletter-button-hover) !important;
+}
+@media (max-width: 767px) {
+  .wl-editorial.wl-mundo.wl-imm .wl-newsletter-card {
+    --wl-newsletter-overlay: linear-gradient(to bottom, hsl(var(--primary) / 0.82) 0%, hsl(var(--primary) / 0.94) 100%);
+    background-size: cover;
+    background-position: center 34%;
+  }
+}
