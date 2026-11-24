@@ -1,3 +1,5 @@
+import { ModernQuoteShell, ModernQuoteSidebar, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
+import { isModernQuotePreview, resolveModernSidebar } from "@/lib/quoteModernPreview";
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { getHotelRateChoice, hotelRates, mealPlanLabel, setHotelRateChoice, subscribeHotelRateChoice } from "@/lib/hotelRates";
 import { useState, useEffect, useRef } from "react";
@@ -1657,6 +1659,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const tripTitle = (quote as any).trip_title as string | undefined;
 
   const totalForBar = getEffectiveQuoteTotal(quote, quote.services);
+  // Novo visual: somente prévia via ?visual=novo (não afeta links atuais).
+  const modernPreview = typeof window !== "undefined" && isModernQuotePreview(window.location.search);
+  const modernModel = resolveModernSidebar(quote, totalForBar);
 
   // Highlights: custom edited list (if any) or auto-generated from services.
   const svcTypes = new Set((quote.services || []).map(s => s.service_type));
@@ -1790,7 +1795,23 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         </div>
       </section>
 
-      <main className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-12 sm:pb-10 space-y-8 sm:space-y-10">
+      <ModernQuoteShell
+        enabled={modernPreview}
+        className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-12 sm:pb-10 space-y-8 sm:space-y-10"
+        sidebar={
+          <ModernQuoteSidebar
+            model={modernModel}
+            fmt={(v) => formatCurrency(v)}
+            dates={`${formatDateShort(quote.start_date)} – ${formatDateShort(quote.end_date)}`}
+            nights={Math.max(0, days - 1)}
+            travelersLabel={buildPassengerLabel(quote)}
+            included={includedItems.map((i) => i.text).filter(Boolean).slice(0, 6)}
+            validUntil={validUntil ? formatDate(validUntil) : null}
+            whatsappUrl={whatsappUrl || null}
+            agentName={(agentProfile as any)?.full_name || (agentProfile as any)?.name || null}
+          />
+        }
+      >
         {/* ─── Smart Trip Highlights ─── */}
         <section className="-mt-32 sm:-mt-40 relative z-10 animate-fade-up">
           <div className="rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] border border-border/40 p-7 sm:p-9 transition-shadow duration-500 hover:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.3)]">
@@ -2297,10 +2318,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
           </section>
         )}
-      </main>
+      </ModernQuoteShell>
 
       {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
-      {whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
+      {modernPreview
+        ? <ModernQuoteMobileBar model={modernModel} fmt={(v) => formatCurrency(v)} whatsappUrl={whatsappUrl || null} />
+        : whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
 
       {/* ─── Carrinho persistente + modal amplo de solicitação ─── */}
       <BookingCartLauncher />
