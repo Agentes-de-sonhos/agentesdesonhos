@@ -71,10 +71,7 @@ function Ticket({ label, legs, fallbackDate, airline, baggage }: { label: string
         <Luggage className="h-4 w-4 text-primary" />
         {baggage ? "Bagagem despachada inclusa" : "Bagagem despachada não inclusa"}
       </div>
-      <div className="relative my-4 border-t-2 border-dashed border-border">
-        <span className="absolute -left-8 -top-2.5 h-5 w-5 rounded-full bg-background" />
-        <span className="absolute -right-8 -top-2.5 h-5 w-5 rounded-full bg-background" />
-      </div>
+      <div className="my-4 border-t-2 border-dashed border-border" />
       <div className="flex items-center justify-between gap-2 text-sm">
         <span className="text-muted-foreground">Operado por <span className="font-semibold text-foreground">{airline || "Companhia aérea"}</span></span>
         {numbers && <span className="font-mono text-muted-foreground">Voo {numbers}</span>}
