@@ -4,13 +4,13 @@ import { resolve } from "path";
 
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 
-describe("White Label — solicitação de reserva sempre ativa", () => {
+describe("Solicitação de reserva — padrão ligado para todas as agências", () => {
   const settings = read("src/components/quote/QuoteBookingRequestSettings.tsx");
 
-  it("não expõe mais um toggle por orçamento", () => {
-    expect(settings).not.toContain("@/components/ui/switch");
-    expect(settings).not.toContain("booking_requests_enabled:");
-    expect(settings).toContain("Sempre ativa");
+  it("agência pode desligar por orçamento (ligado quando não definido)", () => {
+    expect(settings).toContain("@/components/ui/switch");
+    expect(settings).toContain("booking_requests_enabled !== false");
+    expect(settings).toContain("persist({ booking_requests_enabled: v })");
   });
 
   it("mantém o gate de elegibilidade resolvido no servidor", () => {

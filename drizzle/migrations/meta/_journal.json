@@ -470,6 +470,13 @@
       "when": 1795119654209,
       "tag": "0066_itinerary_day_city",
       "breakpoints": true
+    },
+    {
+      "idx": 67,
+      "version": "7",
+      "when": 1795558937801,
+      "tag": "0067_migration",
+      "breakpoints": true
     }
   ]
 }

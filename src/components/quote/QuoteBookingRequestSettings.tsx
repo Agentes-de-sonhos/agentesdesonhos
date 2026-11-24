@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -130,14 +131,16 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
     (s) => (s.selection_mode || "optional") !== "optional",
   ).length;
 
+  const enabled = quote?.booking_requests_enabled !== false;
   const alwaysOnBadge = (
-    <Badge
-      variant="secondary"
-      className="text-[10px] shrink-0"
-      title="Ativada automaticamente para agências Premium com site White Label ativo"
-    >
-      <Check className="h-3 w-3 mr-1" /> Sempre ativa
-    </Badge>
+    <div className="flex items-center gap-2 shrink-0">
+      <span className="text-xs text-muted-foreground">{enabled ? "Ativada" : "Desativada"}</span>
+      <Switch
+        checked={enabled}
+        aria-label="Permitir que o cliente solicite serviços por este link"
+        onCheckedChange={(v) => persist({ booking_requests_enabled: v })}
+      />
+    </div>
   );
 
   const body = (
@@ -149,13 +152,13 @@ export function QuoteBookingRequestSettings({ quote, onUpdated, open, onToggle }
               <Globe className="h-4 w-4 text-amber-500" />
               <p className="text-sm font-semibold">Solicitação de reserva pelo orçamento web</p>
               <Badge className="bg-amber-500 text-white hover:bg-amber-500 text-[10px]">
-                White Label Premium
+                Padrão
               </Badge>
             </div>
           )}
           <p className="text-xs text-muted-foreground max-w-prose">
-            Este recurso está <strong>sempre ativo</strong> nos seus orçamentos, porque sua agência
-            é Premium com site White Label ativo. O cliente seleciona os serviços no link público e
+            Vem <strong>ligado por padrão</strong> em todos os novos orçamentos. Se não quiser,
+            desligue a chave neste orçamento. O cliente seleciona os serviços no link público e
             envia uma solicitação para a sua análise. Isso{" "}
             <strong>não confirma reserva, disponibilidade nem valores</strong>: você reconfirma tudo
             e retorna o contato. Nada é vendido, cobrado ou reservado automaticamente.
