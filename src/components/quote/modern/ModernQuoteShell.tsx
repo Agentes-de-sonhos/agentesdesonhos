@@ -117,9 +117,11 @@ export function ModernQuoteMobileBar({ model, fmt, whatsappUrl }: { model: Moder
  * Com o novo visual desligado, renderiza exatamente o <main> original.
  * Ligado, coloca o conteúdo em duas colunas com o card de investimento fixo.
  */
-export function ModernQuoteShell({ enabled, className, sidebar, children }: { enabled: boolean; className: string; sidebar: ReactNode; children: ReactNode }) {
+export function ModernQuoteShell({ enabled, className, sidebar, children }: { enabled: boolean; className: string; sidebar?: ReactNode | null; children: ReactNode }) {
   if (!enabled) return <main className={className}>{children}</main>;
   // Mantém a coluna original centralizada; o resumo fica fora dela, à direita.
+  // Com sidebar nulo, o card de resumo fica oculto (ainda podemos trazê-lo de volta).
+  if (!sidebar) return <main className={`${className} pb-28 lg:pb-12`}>{children}</main>;
   return (
     <div className="relative">
       <main className={`${className} pb-28 lg:pb-12`}>{children}</main>

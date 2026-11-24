@@ -1,4 +1,4 @@
-import { ModernQuoteShell, ModernQuoteSidebar, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
+import { ModernQuoteShell, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
 import { isModernQuotePreview, resolveModernSidebar } from "@/lib/quoteModernPreview";
 import { ModernFlightTickets } from "@/components/quote/modern/ModernFlightTickets";
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
@@ -1811,19 +1811,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       <ModernQuoteShell
         enabled={modernPreview}
         className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-12 sm:pb-10 space-y-8 sm:space-y-10"
-        sidebar={
-          <ModernQuoteSidebar
-            model={modernModel}
-            fmt={(v) => formatCurrency(v)}
-            dates={`${formatDateShort(quote.start_date)} – ${formatDateShort(quote.end_date)}`}
-            nights={Math.max(0, days - 1)}
-            travelersLabel={buildPassengerLabel(quote)}
-            included={includedItems.map((i) => i.text).filter(Boolean).slice(0, 6)}
-            validUntil={validUntil ? formatDate(validUntil) : null}
-            whatsappUrl={whatsappUrl || null}
-            agentName={(agentProfile as any)?.full_name || (agentProfile as any)?.name || null}
-          />
-        }
+        sidebar={null}
       >
         {/* ─── Smart Trip Highlights ─── */}
         <section className="-mt-32 sm:-mt-40 relative z-10 animate-fade-up">
