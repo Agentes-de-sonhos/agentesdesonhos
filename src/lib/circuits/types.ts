@@ -39,6 +39,8 @@ export interface CircuitTour {
   hotels: { city: string; overnightCity?: string; options: string[] }[];
   hotelsNote?: string;
   itinerary: CircuitDay[];
+  /** ISO dates (YYYY-MM-DD) of departures with an exclusive Brazilian guide. */
+  brazilianGuideDepartures?: string[];
   departures: { month: string; days: number[] }[];
   departuresNote?: string;
   departuresTitle?: string;

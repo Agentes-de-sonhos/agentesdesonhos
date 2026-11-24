@@ -65,7 +65,7 @@ export function CircuitRouteMap({ circuit }: { circuit: CircuitTour }) {
   if (circuit.cities.length < 2 || circuit.cities.some(c => !CIRCUIT_CITY_COORDS[c])) return null;
   return (
     <>
-      <figure className="relative mt-6 max-w-xl overflow-hidden rounded-2xl border border-border">
+      <figure className="relative mx-auto mt-6 max-w-xl overflow-hidden rounded-2xl border border-border">
         <button type="button" onClick={() => setOpen(true)} className="block w-full cursor-zoom-in" aria-label="Ampliar mapa do roteiro">
           <RouteSvg circuit={circuit} />
         </button>

@@ -52,6 +52,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
   useEffect(() => { updateMonthEdges(); window.addEventListener("resize", updateMonthEdges); return () => window.removeEventListener("resize", updateMonthEdges); }, [upcoming.length]);
   const scrollMonths = (dir: 1 | -1) => { const el = monthsRef.current; if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" }); };
   const scrollToDepartures = () => document.getElementById("saidas-garantidas")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  const brGuide = c.brazilianGuideDepartures ?? [];
   const allDays = c.itinerary.map((d) => `d${d.day}`);
   const price = enhanced ? circuitMoney(converted ?? c.fromPrice, converted == null ? c.currency : "BRL") : formatCircuitPrice(c.fromPrice, c.currency);
 
@@ -66,7 +67,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <div className={`${wrap} absolute inset-x-0 bottom-0 pb-10`}>
           <span className="inline-block rounded-full bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">{c.badge}</span>
           <h1 className="mt-3 text-4xl font-semibold leading-tight text-background md:text-6xl">{c.title}</h1>
-          {enhanced ? <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-2xl leading-snug text-background md:text-[32px]">{c.cities.map((city, index) => { const nights = circuitNights(c, city); return <span key={city} className="inline-flex items-center gap-4">{index > 0 && <span aria-hidden="true" className="h-6 w-px bg-background/40" />}<span>{city}{nights > 0 && <span className="whitespace-nowrap"> • {nights} {nights === 1 ? "noite" : "noites"}</span>}</span></span>; })}</div> : <p className="mt-2 text-background/90">{c.cities.join(" · ")}</p>}
+          {enhanced ? <><div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base leading-snug text-background md:text-lg">{c.cities.map((city, index) => { const nights = circuitNights(c, city); return <span key={city} className="inline-flex items-center gap-3">{index > 0 && <span aria-hidden="true" className="h-4 w-px bg-background/40" />}<span className="whitespace-nowrap">{city}{nights > 0 && <> • {nights} {nights === 1 ? "noite" : "noites"}</>}</span></span>; })}</div>{brGuide.length > 0 && <button type="button" onClick={scrollToDepartures} className="mt-4 inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-foreground/60 px-4 py-2 text-left text-sm text-background backdrop-blur-sm transition hover:bg-foreground/75 md:text-base"><span aria-hidden="true">🇧🇷</span><strong className="font-semibold">Saídas exclusivas com guia brasileiro:</strong><span>{brGuide.map(brGuideLabel).join(" · ")}</span></button>}</> : <p className="mt-2 text-background/90">{c.cities.join(" · ")}</p>}
         </div>
       </section>
 
@@ -174,6 +175,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
         <h2 className={h2}>{c.departuresTitle ?? (enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas")}</h2>
         {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{c.departurePrompt ?? "Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento"} com a {info.agency_name ?? "agência"}.</p>}
+        {enhanced && brGuide.length > 0 && <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card px-4 py-2 text-sm"><span aria-hidden="true">🇧🇷</span><span><span className="inline-flex h-5 w-5 items-center justify-center rounded bg-foreground text-[10px] font-semibold text-background ring-2 ring-primary">20</span> <strong className="font-semibold text-primary">Datas destacadas</strong> têm guia acompanhante brasileiro exclusivo. As demais contam com guia em espanhol.</span></p>}
         {enhanced ? (
           <div className="relative mt-6">
             {!monthEdges.start && <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>}
@@ -183,9 +185,9 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
                 <div key={m.month} className="w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {m.days.map((d) => (
-                      <Button key={d} variant="ghost" className="h-10 w-10 bg-primary/10 p-0 text-primary hover:bg-primary hover:text-primary-foreground" aria-label={`Solicitar orçamento: ${d} de ${m.month}`} onClick={() => setDeparture({ date: circuitDepartureDate(m.month, d), label: `${d} de ${m.month}` })}>{d}</Button>
-                    ))}
+                    {m.days.map((d) => { const iso = circuitDepartureDate(m.month, d); const br = brGuide.includes(iso); return (
+                      <Button key={d} variant="ghost" className={`relative h-10 w-10 p-0 ${br ? "!bg-foreground !text-background ring-2 ring-primary ring-offset-2 hover:!bg-foreground/85" : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"}`} aria-label={`Solicitar orçamento: ${d} de ${m.month}${br ? " (guia brasileiro)" : ""}`} onClick={() => setDeparture({ date: iso, label: `${d} de ${m.month}${br ? " · com guia brasileiro" : ""}` })}>{d}{br && <span aria-hidden="true" className="absolute -right-2 -top-2 text-sm leading-none">🇧🇷</span>}</Button>
+                    ); })}
                   </div>
                 </div>
               ))}
@@ -241,6 +243,9 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
     </div>
   );
 }
+
+const BR_MONTHS = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const brGuideLabel = (iso: string) => { const [, m, d] = iso.split("-").map(Number); return `${d} de ${BR_MONTHS[m - 1]}`; };
 
 export default function CircuitTourPage({ info }: { info: AgencyDomainInfo }) {
   const { slug } = useParams();
