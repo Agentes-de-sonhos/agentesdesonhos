@@ -886,10 +886,13 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
   if (conditions.packageMode) {
     return (
       <div
-        className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 text-center"
+        className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 text-center relative"
         data-service-investment-inline={service.id}
       >
         <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
+      <div className="flex justify-end sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
+        <InlineBookingAction service={service} />
+      </div>
       </div>
     );
   }
@@ -901,9 +904,12 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
 
   return (
     <div
-      className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 space-y-3 text-center"
+      className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 space-y-3 text-center relative"
       data-service-investment-inline={service.id}
     >
+      <div className="flex justify-end sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
+        <InlineBookingAction service={service} />
+      </div>
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
         {t("paymentConditions")}
       </p>
@@ -1183,6 +1189,8 @@ function BookingServiceActionRow({
 }: { service: QuoteService; attached?: boolean }) {
   const cart = useBookingCart();
   if (!cart.enabled || !cart.stateFor(service.id)) return null;
+  // Colado à faixa de pagamento: a ação já aparece dentro dela.
+  if (attached) return null;
   return (
     <div
       data-booking-action-row
