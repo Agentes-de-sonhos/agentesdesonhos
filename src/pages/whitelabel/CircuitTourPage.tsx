@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fxRateUrl, isValidRate } from "@/lib/fxConversion";
 import { circuitNights, circuitMoney, convertCircuitPrice, circuitDepartureDate, tourismRate, upcomingDepartures } from "@/lib/circuits/presentation";
@@ -47,6 +47,9 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
   const converted = enhanced && !fxError ? convertCircuitPrice(c.fromPrice, tourismRate(fx?.rate)) : undefined;
   const upcoming = upcomingDepartures(c.departures);
   const monthsRef = useRef<HTMLDivElement>(null);
+  const [monthEdges, setMonthEdges] = useState({ start: true, end: false });
+  const updateMonthEdges = () => { const el = monthsRef.current; if (!el) return; setMonthEdges({ start: el.scrollLeft <= 4, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 4 }); };
+  useEffect(() => { updateMonthEdges(); window.addEventListener("resize", updateMonthEdges); return () => window.removeEventListener("resize", updateMonthEdges); }, [upcoming.length]);
   const scrollMonths = (dir: 1 | -1) => { const el = monthsRef.current; if (el) el.scrollBy({ left: dir * el.clientWidth, behavior: "smooth" }); };
   const scrollToDepartures = () => document.getElementById("saidas-garantidas")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   const allDays = c.itinerary.map((d) => `d${d.day}`);
@@ -173,9 +176,9 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{c.departurePrompt ?? "Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento"} com a {info.agency_name ?? "agência"}.</p>}
         {enhanced ? (
           <div className="relative mt-6">
-            <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-card shadow-md hover:bg-primary hover:text-primary-foreground sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>
-            <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-card shadow-md hover:bg-primary hover:text-primary-foreground sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>
-            <div ref={monthsRef} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {!monthEdges.start && <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>}<REM>><ChevronLeft className="h-5 w-5" /></Button>
+            {!monthEdges.end && <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>}
+            <div ref={monthsRef} onScroll={updateMonthEdges} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {upcoming.map((m) => (
                 <div key={m.month} className="w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
