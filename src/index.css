@@ -2065,6 +2065,10 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright,
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright * { color: hsl(var(--wl-copyright-ink)) !important; }
 
+/* IMM: card "Em dúvida sobre o cruzeiro ideal" sobe para logo abaixo dos logotipos das companhias. */
+.wl-editorial.wl-mundo.wl-imm .wl-alt-surface > #autoridade > [data-testid="cruise-season-companies"] { padding-bottom: 1.25rem; }
+.wl-editorial.wl-mundo.wl-imm .wl-alt-surface > #autoridade > [data-testid="cruise-season-help"] { padding-top: 1rem; }
+
 /* IMM: foto começa após o texto, sem alterar o banner aprovado de outras agências. */
 .wl-editorial.wl-mundo.wl-imm .wl-newsletter-card {
   --wl-newsletter-photo: url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
