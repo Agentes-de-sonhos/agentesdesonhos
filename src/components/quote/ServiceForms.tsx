@@ -464,6 +464,16 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
   const [returnLegs, setReturnLegs] = useState(normalizedLegs.return_);
   const [internalLegs, setInternalLegs] = useState(normalizedLegs.internal);
 
+  // Passagens importadas podem ter só o total: sugere o valor por adulto equivalente.
+  const initialAdultPrice = (() => {
+    const saved = Number(init?.adult_price) || 0;
+    if (saved > 0) return saved;
+    const amount = Number(initialData?.amount) || 0;
+    const kids = Number(init?.child_price) || 0;
+    if (amount > 0 && kids === 0 && adultsCount > 0) return +(amount / adultsCount).toFixed(2);
+    return 0;
+  })();
+  const pricingTouchedRef = useRef(false);
   const isOneWayInit = init?.return_date ? false : !tripEndDate || (init && !init.return_date);
   const [isOneWay, setIsOneWay] = useState(init?.is_one_way ?? isOneWayInit ?? false);
 
@@ -476,7 +486,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
       includes_baggage: init?.includes_baggage ?? true, includes_boarding_fee: init?.includes_boarding_fee ?? true,
       fees_amount: (init as any)?.fees_amount ?? 0,
       charge_fees_first_installment: (init as any)?.charge_fees_first_installment ?? false,
-      adult_price: init?.adult_price || 0, child_price: init?.child_price || 0,
+      adult_price: initialAdultPrice, child_price: init?.child_price || 0,
       is_unit_price: true,
       is_one_way: init?.is_one_way ?? isOneWayInit ?? false,
       notes: init?.notes || "",
@@ -592,7 +602,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
     }
 
     const computedTotal = computedTotalAdults + computedTotalChildren;
-    const effectiveTotal = resolveFlightSaveTotal(computedTotal, initialData?.amount);
+    const effectiveTotal = pricingTouchedRef.current ? computedTotal : resolveFlightSaveTotal(computedTotal, initialData?.amount);
     // Recompute status from the data being saved (never keep a stale one).
     data.flight_status = computeFlightStatus(data, false, effectiveTotal);
 
@@ -791,13 +801,13 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                 <div className="space-y-2">
                   <Label htmlFor="flight-adults-count">Adultos nesta passagem</Label>
                   <Input id="flight-adults-count" type="number" min={0} step={1} value={adultsCount}
-                    onChange={(e) => setAdultsCount(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    onChange={(e) => { pricingTouchedRef.current = true; setAdultsCount(Math.max(0, parseInt(e.target.value, 10) || 0)); }}
                     onFocus={(e) => e.target.select()} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="flight-children-count">Crianças nesta passagem</Label>
                   <Input id="flight-children-count" type="number" min={0} step={1} value={childrenCount}
-                    onChange={(e) => setChildrenCount(Math.max(0, parseInt(e.target.value, 10) || 0))}
+                    onChange={(e) => { pricingTouchedRef.current = true; setChildrenCount(Math.max(0, parseInt(e.target.value, 10) || 0)); }}
                     onFocus={(e) => e.target.select()} />
                 </div>
                 <p className="sm:col-span-2 -mt-2 text-xs text-muted-foreground">
@@ -809,7 +819,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                   <FormItem>
                     <FormLabel>Valor por adulto (R$)</FormLabel>
                     <FormControl>
-                      <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
+                      <Input type="number" min={0} step="0.01" {...field} onChange={(e) => { pricingTouchedRef.current = true; field.onChange(parseFloat(e.target.value) || 0); }} onFocus={(e) => e.target.select()} />
                     </FormControl>
                     {isUnitPrice && adultsCount > 0 && adultPrice > 0 && (
                       <p className="text-xs text-muted-foreground">
@@ -823,7 +833,7 @@ function FlightForm({ onSubmit, onCancel, isLoading, showOptionLabel, tripStartD
                   <FormItem>
                     <FormLabel>Valor por criança (R$)</FormLabel>
                     <FormControl>
-                      <Input type="number" min={0} step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)} onFocus={(e) => e.target.select()} />
+                      <Input type="number" min={0} step="0.01" {...field} onChange={(e) => { pricingTouchedRef.current = true; field.onChange(parseFloat(e.target.value) || 0); }} onFocus={(e) => e.target.select()} />
                     </FormControl>
                     {isUnitPrice && childrenCount > 0 && childPrice > 0 && (
                       <p className="text-xs text-muted-foreground">
