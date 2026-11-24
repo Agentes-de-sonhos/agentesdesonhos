@@ -3067,3 +3067,120 @@ ADS_PREVIEW_FIXTURES["briefing-29-v1"] = {
   documentTitle: "Prévia — RB TOUR",
   pages: { resorts: { title: "Inspirações em resorts no Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
 };
+
+/** Briefing 30: local presentation only. Account/domain matching stays external;
+ * no confirmed logo asset, so the shared textual wordmark renderer is mandatory. */
+export const JE_VIAGENS_PREVIEW_JOB_ID = "briefing-30-v1";
+export const JE_VIAGENS_PREVIEW_HOST = "briefing-30-v1.preview.local";
+export const JE_VIAGENS_PREVIEW_PATH = `/ads-briefing-preview/${JE_VIAGENS_PREVIEW_JOB_ID}`;
+export const JE_VIAGENS_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad30",
+  agency_slug: "", public_slug: null, hostname: JE_VIAGENS_PREVIEW_HOST, is_primary: false,
+  agency_name: "JE VIAGENS", owner_name: "JE VIAGENS",
+  logo_url: null, cover_image_url: null,
+  primary_color: "#164f76", secondary_color: "#39b7d4",
+  tertiary_color: deriveTertiaryColor("#164f76"), secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: null, phone: null, city: "Santo André", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+export const JE_VIAGENS_PREVIEW_PROFILE = buildGoldStandardProfile("jeViagensBriefing30", {
+  textualWordmark: true, navDensity: "compact", cruiseSeasonInNav: false,
+  heroPresentation: { kicker: "SANTO ANDRÉ · SP · DESDE 2017", overlay: "strongLeft", titleWeight: "regular", cta: { label: "Planejar minha viagem", service: "pacotes" } },
+  hero: [
+    { title: "JE VIAGENS", subtitle: "Atendimento personalizado para viagens nacionais e internacionais, com experiências escolhidas para o seu momento.", image: "heroVarenna", enabled: true, order: 1 },
+    { title: "JE VIAGENS", subtitle: "Lazer e roteiros personalizados: paisagens e experiências como inspiração para a sua próxima viagem.", image: "litoral", enabled: true, order: 2 },
+    { title: "JE VIAGENS", subtitle: "Viagens em grupo e suporte ao viajante, com atenção aos interesses de quem vai viajar.", image: "brasil", enabled: true, order: 3 },
+  ],
+  nav: [
+    { label: "Início", to: "/" }, { label: "Destinos", to: "/#destinos" },
+    { label: "Experiências", to: "/#assinatura", children: [
+      { label: "Resorts no Brasil", to: "/resorts-brasil" }, { label: "Club Med e neve", to: "/club-med-neve" },
+      { label: "Xcaret", to: "/xcaret" }, { label: "Orlando", to: "/ingressos-orlando" },
+      { label: "Cruzeiros", to: "/#autoridade" }, { label: "Visto americano", to: "/visto-americano" },
+      { label: "Portugal · inspiração", to: "/dmc-portugal" },
+    ] },
+    { label: "Sobre", to: "/#sobre" }, { label: "Atendimento", to: "/#atendimento" },
+    { label: "Inspirações", to: "/ofertas" }, { label: "Blog", to: "/blog" },
+  ],
+  signature: {
+    kicker: "O JEITO JE VIAGENS DE PLANEJAR", title: "A sua viagem começa com os seus planos",
+    text: "A JE VIAGENS atua em Santo André/SP desde 2017, com atendimento personalizado e experiências de viagem. Viagens nacionais e internacionais, lazer, roteiros personalizados e grupos fazem parte de uma proposta que coloca os interesses de quem viaja no centro do planejamento.",
+    continuation: { title: "Experiências com a sua personalidade", text: "Compartilhar preferências, datas e o ritmo desejado é o ponto de partida para pensar um roteiro. Do lazer às viagens em grupo, o atendimento personalizado e o suporte ao viajante fazem parte da proposta da JE VIAGENS." },
+  },
+  modules: [
+    { key: "nacionais", title: "Viagens nacionais", text: "Paisagens brasileiras como inspiração para uma viagem de lazer personalizada.", service: "pacotes", image: "brasil", enabled: true, order: 1 },
+    { key: "internacionais", title: "Viagens internacionais", text: "Cidades, culturas e novas paisagens para um roteiro com a sua personalidade.", service: "pacotes", image: "heroVarenna", enabled: true, order: 2 },
+    { key: "lazer", title: "Tempo para descansar", text: "Praias e resorts como possibilidades de lazer, sem oferta ou disponibilidade presumidas.", service: "hospedagem", image: "resort", enabled: true, order: 3 },
+    { key: "personalizados", title: "Roteiros personalizados", text: "Inspirações que podem ser combinadas conforme seus interesses e seu ritmo.", service: "pacotes", image: "europa", enabled: true, order: 4 },
+    { key: "grupos", title: "Viagens em grupo", text: "Ideias para compartilhar experiências, respeitando as preferências dos viajantes.", service: "pacotes", image: "litoral", enabled: true, order: 5 },
+    { key: "experiencias", title: "Experiências de viagem", text: "Parques, passeios e descobertas do catálogo compartilhado como inspiração editorial.", service: "ingressos", image: "parques", enabled: true, order: 6 },
+  ],
+  destinations: [
+    { key: "brasil", title: "Brasil", label: "Inspiração nacional", text: "Paisagens para explorar em viagens nacionais de lazer, com planejamento personalizado.", image: "brasil", service: "pacotes", enabled: true, order: 1 },
+    { key: "europa", title: "Europa", label: "Inspiração internacional", text: "Cidades e culturas como ideias de roteiro, sem afirmar especialização em um destino específico.", image: "heroVarenna", service: "pacotes", enabled: true, order: 2 },
+    { key: "praias", title: "Praias e paisagens", label: "Lazer", text: "Tempo para descansar e descobrir novos cenários no ritmo de quem viaja.", image: "litoral", service: "pacotes", enabled: true, order: 3 },
+    { key: "resorts", title: "Resorts no Brasil", label: "Descanso", text: "Explore o catálogo compartilhado de resorts como inspiração para suas próximas férias.", image: "resort", service: "hospedagem", href: "/resorts-brasil", ctaLabel: "Ver resorts", enabled: true, order: 4 },
+    { key: "orlando", title: "Parques e experiências", label: "Inspiração em Orlando", text: "Possibilidades do catálogo para viagens de lazer; condições a confirmar com a agência.", image: "parques", service: "ingressos", href: "/ingressos-orlando", enabled: true, order: 5 },
+  ],
+  highlights: [
+    { title: "Viagens de lazer", text: "Experiências que conversam com seus interesses e com o tempo que deseja dedicar à viagem.", service: "pacotes", cta: "Planejar momentos de lazer" },
+    { title: "Roteiros personalizados", text: "Destinos e experiências como ponto de partida para um roteiro pensado para você.", service: "pacotes", cta: "Pensar meu roteiro" },
+    { title: "Viagens em grupo", text: "Compartilhe os planos do grupo para explorar possibilidades de viagem em conjunto.", service: "pacotes", cta: "Planejar em grupo" },
+  ],
+  about: {
+    kicker: "NOSSA HISTÓRIA", title: "JE VIAGENS, desde 2017", image: "heroVarenna",
+    text: "Fundada em 2017, a JE VIAGENS atua em Santo André/SP com atendimento personalizado e experiências de viagem. A proposta reúne viagens nacionais e internacionais e coloca os interesses de quem viaja como ponto de partida para o planejamento. Cada ideia de viagem é uma oportunidade de conversar sobre preferências e sobre o que faz sentido para aquele momento.\n\nLazer, roteiros personalizados e viagens em grupo estão entre as especialidades da agência. Paisagens, cidades e experiências compõem as inspirações apresentadas aqui, sem estabelecer ofertas ou disponibilidade. O objetivo é reunir possibilidades para construir um roteiro que respeite o perfil dos viajantes e o ritmo desejado, seja para explorar o Brasil ou conhecer destinos internacionais.\n\nO suporte ao viajante faz parte da proposta da JE VIAGENS. Para conhecer o atendimento e conversar sobre seus planos, o contato público informado é jeviagens.tur.br. Os canais, horários e condições específicos são combinados diretamente com a agência; esta apresentação não acrescenta compromissos operacionais ou credenciais não informados.",
+    badge: { value: "Desde 2017", label: "JE VIAGENS" }, showLocation: true,
+    facts: ["Santo André/SP", "Fundada em 2017", "Atendimento personalizado"],
+  },
+  differentials: [
+    { title: "Atendimento personalizado", text: "Uma conversa sobre seus interesses orienta as possibilidades de viagem.", icon: "consultivo" },
+    { title: "Roteiros com personalidade", text: "Viagens nacionais e internacionais pensadas conforme o perfil de quem viaja.", icon: "conferido" },
+    { title: "Experiências em grupo", text: "Lazer e experiências compartilhadas entre as especialidades da JE VIAGENS.", icon: "fornecedores" },
+    { title: "Suporte ao viajante", text: "Orientação ao viajante, com canais e condições combinados diretamente com a agência.", icon: "acompanhamento" },
+  ],
+  credentials: {
+    kicker: "CONHEÇA A JE VIAGENS", title: "Atendimento e trajetória",
+    text: "Informações públicas da agência, sem atribuição de selos, certificados ou avaliações não confirmados.",
+    items: [{ key: "fundacao", name: "Desde 2017", text: "JE VIAGENS, fundada em 2017, com atuação em Santo André/SP." }, { key: "atendimento", name: "Atendimento personalizado", text: "Viagens nacionais e internacionais, lazer, roteiros personalizados, grupos e suporte ao viajante." }],
+  },
+  team: [{ key: "atendimento", name: "Atendimento JE VIAGENS", role: "Atendimento personalizado", text: "Planejamento de experiências de viagem e suporte ao viajante. Contato público informado: jeviagens.tur.br." }],
+  hideConciergeWhatsapp: true, hideFaqWhatsapp: true,
+  conciergePoints: [
+    { key: "planos", title: "1. Compartilhar seus planos", text: "Conte o que espera da viagem, quem vai viajar e quais são os seus interesses." },
+    { key: "possibilidades", title: "2. Explorar possibilidades", text: "Considere destinos e experiências nacionais ou internacionais alinhados às suas preferências." },
+    { key: "roteiro", title: "3. Personalizar o roteiro", text: "Converse sobre o ritmo da viagem e as escolhas importantes para o grupo." },
+    { key: "suporte", title: "4. Combinar o suporte", text: "Alinhe com a JE VIAGENS os canais e as condições de atendimento ao viajante." },
+  ],
+  conciergeSteps: ["Compartilhe seus planos pelo contato público jeviagens.tur.br.", "Explore inspirações de viagem com atendimento personalizado.", "Converse sobre o roteiro e as experiências desejadas.", "Combine as condições e o suporte ao viajante com a agência."],
+  requestCenter: { title: "Planeje sua viagem com a JE VIAGENS", support: "Conte como você imagina sua próxima experiência.", notice: "Prévia técnica: formulário demonstrativo, sem envio de dados.", submitLabel: "Revisar solicitação", titlePlacement: "above-card" },
+  faq: [
+    { q: "Onde a JE VIAGENS atua?", a: "A JE VIAGENS atua em Santo André/SP." },
+    { q: "Quando a agência foi fundada?", a: "A JE VIAGENS foi fundada em 2017." },
+    { q: "Quais são as especialidades?", a: "Viagens nacionais e internacionais, lazer, roteiros personalizados, grupos e suporte ao viajante." },
+    { q: "O atendimento é personalizado?", a: "Sim. Atendimento personalizado e experiências de viagem fazem parte da proposta da JE VIAGENS." },
+    { q: "Posso planejar uma viagem em grupo?", a: "Viagens em grupo estão entre as especialidades informadas pela JE VIAGENS. As condições são combinadas diretamente com a agência." },
+    { q: "Como entrar em contato?", a: "O contato público informado é o site jeviagens.tur.br. Nesta prévia técnica, contatos, formulários e submissões estão bloqueados, sem vínculo de domínio." },
+    { q: "Posso reservar os produtos desta apresentação?", a: "Não nesta prévia. Os catálogos e as imagens compartilhadas são inspirações, sem preços ou disponibilidade presumidos; nenhuma solicitação é enviada." },
+  ],
+  copy: {
+    modules: { kicker: "EXPERIÊNCIAS E ROTEIROS", title: "Possibilidades para o seu próximo momento", subtitle: "Viagens nacionais e internacionais, lazer, roteiros personalizados e grupos." },
+    destinations: { kicker: "DESTINOS", title: "Inspirações para viajar pelo Brasil e pelo mundo", subtitle: "Imagens do acervo compartilhado como inspiração, sem oferta ou disponibilidade presumidas." },
+    highlights: { kicker: "MOMENTOS DE VIAGEM", title: "Experiências que combinam com você", subtitle: "Atendimento personalizado para lazer, roteiros e grupos." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "O cuidado da JE VIAGENS", subtitle: "Atendimento personalizado, experiências de viagem e suporte ao viajante." },
+    concierge: { kicker: "ATENDIMENTO", title: "Dos seus planos ao roteiro personalizado", subtitle: "Proposta de apresentação do atendimento; condições a combinar pelo site jeviagens.tur.br." },
+    avaliacoes: { kicker: "EXEMPLO DE APRESENTAÇÃO", title: "Experiências de quem viaja", subtitle: "Avaliações ilustrativas de demonstração, não são depoimentos reais nem avaliações do Google." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Conheça a JE VIAGENS" },
+    newsletter: { title: "Inspirações da JE VIAGENS", subtitle: "Formulário demonstrativo, sem inscrição ou envio nesta prévia técnica." },
+  },
+  footer: { description: "JE VIAGENS · Santo André/SP · desde 2017. Atendimento personalizado e experiências de viagem. Contato público: jeviagens.tur.br.", phoneHidden: true, whatsappHidden: true, showLocation: true, legalLinksDisabled: true },
+  seo: { title: "Prévia — JE VIAGENS", description: "Prévia técnica isolada da JE VIAGENS, em Santo André/SP, fundada em 2017. Sem envios, vínculo de domínio ou publicação." },
+}, "JE VIAGENS");
+if (JE_VIAGENS_PREVIEW_PROFILE.dmc) JE_VIAGENS_PREVIEW_PROFILE.dmc.cta = "Explorar Portugal";
+ADS_PREVIEW_FIXTURES[JE_VIAGENS_PREVIEW_JOB_ID] = {
+  jobId: JE_VIAGENS_PREVIEW_JOB_ID, info: JE_VIAGENS_PREVIEW_INFO, profile: JE_VIAGENS_PREVIEW_PROFILE,
+  realAgency: true, strictBackendBlock: true,
+  notice: "JE VIAGENS · prévia técnica · logotipo e vínculo de domínio pendentes · experiências ilustrativas · contatos e envios bloqueados",
+  documentTitle: "Prévia — JE VIAGENS",
+  pages: { resorts: { title: "Inspirações em resorts no Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
+};
