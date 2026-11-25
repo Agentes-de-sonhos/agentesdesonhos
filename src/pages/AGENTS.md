@@ -1,0 +1,1 @@
+- Quote language: `quotes.public_locale` (null = agency locale) overrides per quote. Why: per-quote language.
