@@ -1,6 +1,6 @@
 import { isInfoOnlyService, countCommercialServices } from "@/lib/quoteInfoOnly";
-import { ModernQuoteShell, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
-import { isModernQuotePreview, resolveModernSidebar } from "@/lib/quoteModernPreview";
+import { ModernQuoteShell } from "@/components/quote/modern/ModernQuoteShell";
+import { isModernQuotePreview } from "@/lib/quoteModernPreview";
 import { ModernFlightTickets } from "@/components/quote/modern/ModernFlightTickets";
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { getHotelRateChoice, hotelRates, mealPlanLabel, setHotelRateChoice, subscribeHotelRateChoice } from "@/lib/hotelRates";
@@ -1706,7 +1706,6 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const totalForBar = getEffectiveQuoteTotal(quote, quote.services);
   // Novo visual: somente prévia via ?visual=novo (não afeta links atuais).
   const modernPreview = typeof window !== "undefined" && isModernQuotePreview(window.location.search);
-  const modernModel = resolveModernSidebar(quote, totalForBar);
 
   // Highlights: custom edited list (if any) or auto-generated from services.
   const svcTypes = new Set((quote.services || []).map(s => s.service_type));
@@ -2287,6 +2286,17 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 </div>
               </div>
 
+              {modernPreview && whatsappUrl && (
+                <div className="mt-5 sm:hidden">
+                  <Button asChild className="w-full gap-2 rounded-full">
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                      <WhatsAppIcon className="h-4 w-4 shrink-0" />
+                      {t("talkOnWhatsApp")}
+                    </a>
+                  </Button>
+                </div>
+              )}
+
               {/* DESKTOP/TABLET: 3-col horizontal layout */}
               <div className="hidden sm:flex items-center gap-5 lg:gap-7">
                 {/* ── Col 1: Logo / Avatar ── */}
@@ -2355,10 +2365,8 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
         )}
       </ModernQuoteShell>
 
-      {/* ─── Floating mobile CTA — aparece ao rolar para baixo, recolhido no topo ─── */}
-      {modernPreview
-        ? <ModernQuoteMobileBar model={modernModel} fmt={(v) => formatCurrency(v)} whatsappUrl={whatsappUrl || null} />
-        : whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
+      {/* No novo visual, o contato fica na assinatura; só o carrinho permanece fixo. */}
+      {!modernPreview && whatsappUrl && <MobileFloatingCta href={whatsappUrl} />}
 
       {/* ─── Carrinho persistente + modal amplo de solicitação ─── */}
       <BookingCartLauncher />
