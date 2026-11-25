@@ -60,7 +60,7 @@ export function InlineBookingAction({
           className,
         )}
       >
-        Escolher este
+        {t("chooseThis")}
       </button>
     );
   }
