@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { normalizePublicLocale, resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
-import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight, Layers, type LucideIcon } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, Moon, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight, Layers, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -1747,7 +1747,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       <header className="border-b border-border/20 bg-white/85 backdrop-blur-md sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-5 py-3 flex items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary" /> {t("proposalBadge")}
+            <FileText className="h-3.5 w-3.5 text-primary" /> {t("proposalBadge")}
           </span>
           <BrandText as="span" className="text-sm sm:text-base font-semibold tracking-tight text-foreground/85 truncate max-w-[55%] text-right">
             {agentProfile?.agency_name || t("exclusiveProposal")}
@@ -1817,8 +1817,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 {formatDateShort(quote.start_date)} – {formatDateShort(quote.end_date)}
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
-                <Sparkles className="h-4 w-4 opacity-80" />
-                {days} {pluralize(publicLocale, days, { one: "dia", other: "dias" })}
+                <Moon className="h-4 w-4 opacity-80" />
+                {days > 1 && `${days - 1} ${pluralize(publicLocale, days - 1, { one: t("nightOne"), other: t("nightOther") })} / `}
+                {days} {pluralize(publicLocale, days, publicLocale === "en-US" ? { one: "day", other: "days" } : publicLocale === "it-IT" ? { one: "giorno", other: "giorni" } : { one: "dia", other: "dias" })}
               </div>
               <div className="inline-flex items-center gap-2 rounded-full bg-white/12 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-xs sm:text-sm font-medium">
                 <Users className="h-4 w-4 opacity-80" />
