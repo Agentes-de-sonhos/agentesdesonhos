@@ -1,3 +1,4 @@
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 
 /** Tarifa alternativa do mesmo hotel (mesmas datas e apartamentos). */
@@ -30,8 +31,10 @@ export const MEAL_PLAN_LABELS: Record<string, string> = {
   all_inclusive: "All Inclusive",
 };
 
-export function mealPlanLabel(v: string | undefined): string {
-  return (v && MEAL_PLAN_LABELS[v]) || v || "";
+export function mealPlanLabel(v: string | undefined, locale?: string): string {
+  const t = translateQuote(locale);
+  const labels: Record<string, string> = { sem_refeicao: t("mealNone"), cafe: t("mealBreakfast"), meia_pensao: t("mealHalf"), pensao_completa: t("mealFull"), all_inclusive: t("mealAll") };
+  return (v && labels[v]) || v || "";
 }
 
 export function sanitizeExtraRates(raw: unknown): HotelExtraRate[] {
@@ -50,14 +53,15 @@ export function sanitizeExtraRates(raw: unknown): HotelExtraRate[] {
 }
 
 /** Lista todas as tarifas (principal + extras). Vazia quando só existe uma. */
-export function hotelRates(data: any, mainPrice: number): HotelRateView[] {
+export function hotelRates(data: any, mainPrice: number, locale?: string): HotelRateView[] {
+  const t = translateQuote(locale);
   const extras = sanitizeExtraRates(data?.extra_rates);
   if (!extras.length) return [];
   const main: HotelRateView = {
     id: MAIN_RATE_ID,
-    label: String(data?.rate_label || "") || "Tarifa 1",
+    label: String(data?.rate_label || "") || t("rateNumber", { n: 1 }),
     meal_plan: String(data?.meal_plan || ""),
-    refundLabel: hotelRefundLabel(data),
+    refundLabel: hotelRefundLabel(data, locale),
     refundable: data?.refund_policy === "refundable",
     price: Number(mainPrice) || 0,
   };
@@ -65,9 +69,9 @@ export function hotelRates(data: any, mainPrice: number): HotelRateView[] {
     main,
     ...extras.map((r, i) => ({
       id: r.id,
-      label: r.label || `Tarifa ${i + 2}`,
+      label: r.label || t("rateNumber", { n: i + 2 }),
       meal_plan: r.meal_plan,
-      refundLabel: hotelRefundLabel(r),
+      refundLabel: hotelRefundLabel(r, locale),
       refundable: r.refund_policy === "refundable",
       price: r.price,
     })),

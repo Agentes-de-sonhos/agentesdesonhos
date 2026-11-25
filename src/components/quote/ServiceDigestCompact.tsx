@@ -1,3 +1,4 @@
+import { DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { serviceCompactDigest } from "@/lib/quoteServiceDigest";
 import { ResolvedServiceThumb } from "@/components/shared/ResolvedServiceImage";
 import { resolveServicePlaceId } from "@/lib/serviceImages";
@@ -12,11 +13,13 @@ import type { QuoteService } from "@/types/quote";
 export function ServiceDigestCompact({
   service,
   withThumb = false,
+  locale = DEFAULT_PUBLIC_LOCALE,
 }: {
   service: QuoteService;
   withThumb?: boolean;
+  locale?: string;
 }) {
-  const digest = serviceCompactDigest(service);
+  const digest = serviceCompactDigest(service, locale);
   const thumb = withThumb ? digest.images[0] : undefined;
 
   return (

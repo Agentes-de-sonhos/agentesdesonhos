@@ -1,6 +1,6 @@
 import { Plane, Luggage } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { DEFAULT_PUBLIC_LOCALE, formatPublicDate, pluralize } from "@/i18n/publicMaterials/locale";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 
 function parseLocal(s?: string): Date | null {
   if (!s) return null;
@@ -25,7 +25,8 @@ export function flightDuration(dep?: string, arr?: string): string | null {
 
 type Leg = Record<string, any>;
 
-function Ticket({ label, legs, fallbackDate, airline, baggage }: { label: string; legs: Leg[]; fallbackDate?: string; airline?: string; baggage: boolean }) {
+function Ticket({ label, legs, fallbackDate, airline, baggage, locale }: { label: string; legs: Leg[]; fallbackDate?: string; airline?: string; baggage: boolean; locale: string }) {
+  const t = translateQuote(locale);
   if (!legs.length) return null;
   const first = legs[0], last = legs[legs.length - 1];
   const date = parseLocal(first.leg_date || fallbackDate);
@@ -37,7 +38,7 @@ function Ticket({ label, legs, fallbackDate, airline, baggage }: { label: string
     <div className="relative rounded-2xl border border-border/50 bg-muted/30 p-5 sm:p-6">
       <div className="flex items-center justify-between gap-2">
         <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary">{label}</span>
-        {date && <span className="font-mono text-sm text-muted-foreground">{format(date, "EEE, dd MMM yyyy", { locale: ptBR })}</span>}
+        {date && <span className="font-mono text-sm text-muted-foreground">{formatPublicDate(date, locale, { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}</span>}
       </div>
       <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-start gap-2">
         <div className="min-w-0">
@@ -53,7 +54,7 @@ function Ticket({ label, legs, fallbackDate, airline, baggage }: { label: string
           </div>
           {dur && <div className="mt-1 font-mono text-xs text-muted-foreground">{dur}</div>}
           <div className={`mt-1 text-xs font-semibold ${stops ? "text-muted-foreground" : "text-success"}`}>
-            {stops ? `${stops} ${stops > 1 ? "conexões" : "conexão"}` : "voo direto"}
+            {stops ? `${stops} ${pluralize(locale, stops, { one: t("stopOne"), other: t("stopOther") })}` : t("nonstop")}
           </div>
         </div>
         <div className="min-w-0 text-right">
@@ -64,32 +65,33 @@ function Ticket({ label, legs, fallbackDate, airline, baggage }: { label: string
       </div>
       {stops > 0 && (
         <div className="mt-3 text-xs text-muted-foreground">
-          Conexão em {legs.slice(0, -1).map((l) => l.airport_destination || l.destination_city).filter(Boolean).join(", ")}
+          {t("connectionAt", { place: legs.slice(0, -1).map((l) => l.airport_destination || l.destination_city).filter(Boolean).join(", ") })}
         </div>
       )}
       <div className="mt-4 flex items-center gap-2 text-sm text-foreground/80">
         <Luggage className="h-4 w-4 text-primary" />
-        {baggage ? "Bagagem despachada inclusa" : "Bagagem despachada não inclusa"}
+        {baggage ? t("checkedBaggageIncluded") : t("checkedBaggageExcluded")}
       </div>
       <div className="my-4 border-t-2 border-dashed border-border" />
       <div className="flex items-center justify-between gap-2 text-sm">
-        <span className="text-muted-foreground">Operado por <span className="font-semibold text-foreground">{airline || "Companhia aérea"}</span></span>
-        {numbers && <span className="font-mono text-muted-foreground">Voo {numbers}</span>}
+        <span className="text-muted-foreground">{t("operatedBy")} <span className="font-semibold text-foreground">{airline || t("airlineDefault")}</span></span>
+        {numbers && <span className="font-mono text-muted-foreground">{t("voo")} {numbers}</span>}
       </div>
     </div>
   );
 }
 
-export function ModernFlightTickets({ data, outbound, return_, internal }: { data: any; outbound: Leg[]; return_: Leg[]; internal: Leg[] }) {
+export function ModernFlightTickets({ data, outbound, return_, internal, locale = DEFAULT_PUBLIC_LOCALE }: { data: any; outbound: Leg[]; return_: Leg[]; internal: Leg[]; locale?: string }) {
+  const t = translateQuote(locale);
   const hasReturn = !data.is_one_way && return_.length > 0;
   const baggage = !!data.includes_baggage;
   return (
     <div className="space-y-4" data-modern-flight="true">
       <div className={`grid gap-4 ${hasReturn ? "md:grid-cols-2" : ""}`}>
-        <Ticket label="Ida" legs={outbound} fallbackDate={data.departure_date} airline={data.airline} baggage={baggage} />
-        {hasReturn && <Ticket label="Volta" legs={return_} fallbackDate={data.return_date} airline={data.airline} baggage={baggage} />}
+        <Ticket locale={locale} label={t("ida")} legs={outbound} fallbackDate={data.departure_date} airline={data.airline} baggage={baggage} />
+        {hasReturn && <Ticket locale={locale} label={t("volta")} legs={return_} fallbackDate={data.return_date} airline={data.airline} baggage={baggage} />}
       </div>
-      {internal.length > 0 && <Ticket label="Trecho interno" legs={internal} airline={data.airline} baggage={baggage} />}
+      {internal.length > 0 && <Ticket locale={locale} label={t("internalLeg")} legs={internal} airline={data.airline} baggage={baggage} />}
     </div>
   );
 }

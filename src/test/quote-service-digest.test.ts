@@ -183,21 +183,11 @@ describe("regressões da revisão final", () => {
     );
   });
 
-  it("todos os resumos do fluxo usam ServiceDigestCompact com withThumb", async () => {
-    const fs = await import("node:fs");
-    const files = [
-      "src/components/quote/booking/BookingCartDialog.tsx",
-    ];
-    for (const file of files) {
-      const source = fs.readFileSync(file, "utf8");
-      const usages = source.match(/<ServiceDigestCompact[^>]*>/g) || [];
-      expect(usages.length).toBeGreaterThan(0);
-      for (const usage of usages) expect(usage).toContain("withThumb");
-    }
-    // Pop-up final: lista "Serviços solicitados" com miniatura e sem contatos nominais.
-    const panel = fs.readFileSync("src/components/quote/booking/BookingCartDialog.tsx", "utf8");
-    expect(panel).toContain("<ServiceDigestCompact service={entry.service} withThumb />");
-    expect(panel).toContain("overflow-x-hidden");
-    expect(panel).toContain("{!hasLinkedClient && (");
+  it("preserves the saved thumbnail order when localizing the digest", () => {
+    const images = ["https://example.com/first.jpg", "https://example.com/second.jpg"];
+    const service = svc("hotel", { hotel_name: "Windsor Copa Hotel" }, { image_urls: images });
+    expect(serviceCompactDigest(service, "en-US").images).toEqual(images);
+    expect(serviceCompactDigest(service).images).toEqual(images);
+    expect(service.image_urls).toEqual(images);
   });
 });

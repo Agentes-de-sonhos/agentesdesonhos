@@ -1,3 +1,5 @@
+import { DEFAULT_PUBLIC_LOCALE, pluralize } from "@/i18n/publicMaterials/locale";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { useState } from "react";
 import { ChevronDown, Layers, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,13 +16,16 @@ export function PublicSectionAccordion({
   icon: Icon = Layers,
   children,
   defaultOpen = false,
+  locale = DEFAULT_PUBLIC_LOCALE,
 }: {
   title: string;
   count: number;
   icon?: LucideIcon;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  locale?: string;
 }) {
+  const t = translateQuote(locale);
   const [open, setOpen] = useState(defaultOpen);
 
   return (
@@ -37,7 +42,7 @@ export function PublicSectionAccordion({
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-foreground truncate">{title}</span>
           <span className="block text-xs text-muted-foreground">
-            {count} {count === 1 ? "serviço" : "serviços"}
+            {count} {pluralize(locale, count, { one: t("serviceCountOne"), other: t("serviceCountOther") })}
           </span>
         </span>
         <ChevronDown

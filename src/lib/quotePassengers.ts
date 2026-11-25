@@ -1,3 +1,5 @@
+import { translateQuote } from "@/i18n/publicMaterials/quote";
+import { DEFAULT_PUBLIC_LOCALE, normalizePublicLocale, pluralize } from "@/i18n/publicMaterials/locale";
 import type { Quote, QuoteService } from "@/types/quote";
 
 export interface PassengerComposition {
@@ -7,28 +9,29 @@ export interface PassengerComposition {
 }
 
 /** Formata contagens em texto natural com singular/plural e sem zeros. */
-export function formatPassengerComposition(counts: PassengerComposition): string {
+export function formatPassengerComposition(counts: PassengerComposition, locale: string = DEFAULT_PUBLIC_LOCALE): string {
+  const t = translateQuote(locale);
   const adults = Math.max(0, Number(counts.adults) || 0);
   const children = Math.max(0, Number(counts.children) || 0);
   const infants = Math.max(0, Number(counts.infants) || 0);
 
   const parts: string[] = [];
-  if (adults > 0) parts.push(`${adults} adulto${adults === 1 ? "" : "s"}`);
-  if (children > 0) parts.push(`${children} criança${children === 1 ? "" : "s"}`);
-  if (infants > 0) parts.push(`${infants} bebê${infants === 1 ? "" : "s"}`);
+  if (adults > 0) parts.push(`${adults} ${pluralize(locale, adults, { one: t("adultOne"), other: t("adultOther") })}`);
+  if (children > 0) parts.push(`${children} ${pluralize(locale, children, { one: t("childOne"), other: t("childOther") })}`);
+  if (infants > 0) parts.push(`${infants} ${pluralize(locale, infants, { one: t("infantOne"), other: t("infantOther") })}`);
 
-  if (parts.length === 0) return "Passageiros não informados";
+  if (parts.length === 0) return t("passengersNotProvided");
   if (parts.length === 1) return parts[0];
-  if (parts.length === 2) return `${parts[0]} e ${parts[1]}`;
-  return `${parts.slice(0, -1).join(", ")} e ${parts[parts.length - 1]}`;
+  if (parts.length === 2) return `${parts[0]} ${t("listAnd")} ${parts[1]}`;
+  return `${parts.slice(0, -1).join(", ")}${normalizePublicLocale(locale) === "en-US" ? "," : ""} ${t("listAnd")} ${parts[parts.length - 1]}`;
 }
 
 /**
  * Rótulo de composição de passageiros: "1 adulto", "2 adultos e 1 criança",
  * "2 adultos, 2 crianças e 1 bebê" etc. Singular/plural correto.
  */
-export function buildPassengerLabel(quote: Quote): string {
-  return formatPassengerComposition(quoteComposition(quote));
+export function buildPassengerLabel(quote: Quote, locale: string = DEFAULT_PUBLIC_LOCALE): string {
+  return formatPassengerComposition(quoteComposition(quote), locale);
 }
 
 function quoteComposition(quote: Quote | undefined | null): PassengerComposition {
@@ -102,8 +105,9 @@ export function resolveServicePassengerComposition(
 export function buildServicePassengerLabel(
   service: QuoteService | null | undefined,
   quote?: Quote | null,
+  locale: string = DEFAULT_PUBLIC_LOCALE,
 ): string | null {
   const composition = resolveServicePassengerComposition(service) ?? quoteComposition(quote);
   if (total(composition) <= 0) return null;
-  return formatPassengerComposition(composition);
+  return formatPassengerComposition(composition, locale);
 }

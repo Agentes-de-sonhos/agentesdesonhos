@@ -12,9 +12,8 @@ import { usePublicQuote } from "@/hooks/useQuotes";
 import { buildQuoteSectionLayout, visibleSectionGroups, sectionIconKindForGroup, type SectionIconKind } from "@/lib/quoteSections";
 import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordion";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { normalizePublicLocale, resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
+
+import { normalizePublicLocale, resolvePublicLocale, formatPublicDate, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, Moon, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight, Layers, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +56,6 @@ import {
 import {
   getEffectiveQuoteTotal,
   hidesIndividualAmounts,
-  PACKAGE_INCLUDED_LABEL,
 } from "@/lib/quotePricing";
 import { buildServicePaymentConditions } from "@/lib/servicePaymentConditions";
 
@@ -149,7 +147,7 @@ let publicLocale: PublicLocale = DEFAULT_PUBLIC_LOCALE;
 const t = (key: Parameters<ReturnType<typeof translateQuote>>[0], vars?: Record<string, string | number>) => translateQuote(publicLocale)(key, vars);
 
 function formatCurrency(value: number, currency?: QuoteCurrency) {
-  return formatQuoteCurrency(value, currency ?? quoteCurrency);
+  return formatQuoteCurrency(value, currency ?? quoteCurrency, publicLocale);
 }
 
 function formatLabel(value: string) {
@@ -259,7 +257,7 @@ function getServiceDetails(service: QuoteService): string[] {
     case "hotel":
       details.push(`${t("checkIn")}: ${formatDateShort(data.check_in)} | ${t("checkOut")}: ${formatDateShort(data.check_out)}`);
       if (data.meal_plan) details.push(`${t("regime")}: ${formatLabel(data.meal_plan)}`);
-      if (hotelRefundLabel(data)) details.push(hotelRefundLabel(data) as string);
+      if (hotelRefundLabel(data, publicLocale)) details.push(hotelRefundLabel(data, publicLocale) as string);
       if (Array.isArray(data.rooms) && data.rooms.length > 0) {
         data.rooms.forEach((r: any) => {
           const paxParts: string[] = [];
@@ -369,7 +367,7 @@ function formatLayover(prevArr?: string, nextDep?: string): string | null {
 function formatLegDate(s?: string): string {
   if (!s) return "";
   try {
-    return format(parseLocalDate(s), "dd MMM yyyy", { locale: ptBR }).toUpperCase();
+    return formatPublicDate(s, publicLocale, { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
   } catch {
     return s;
   }
@@ -447,7 +445,7 @@ function FlightBody({ data }: { data: any }) {
   if (typeof window !== "undefined" && isModernQuotePreview(window.location.search)) {
     return (
       <div className="space-y-4">
-        <ModernFlightTickets data={data} outbound={outLegs} return_={retLegs} internal={intLegs} />
+        <ModernFlightTickets locale={publicLocale} data={data} outbound={outLegs} return_={retLegs} internal={intLegs} />
         {data.notes && (
           <div className="rounded-lg border-l-2 border-primary/40 px-4 py-3 text-foreground" style={SERVICE_NOTE_BOX_STYLE} data-service-note-box="true">
             <p className="text-sm leading-relaxed whitespace-pre-wrap"><FormattedText>{data.notes}</FormattedText></p>
@@ -524,7 +522,7 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
   const rooms: any[] = Array.isArray(data.rooms) ? data.rooms : [];
   const hasMultipleRooms = rooms.length > 1;
   const showPrices = quote ? (quote as any).show_detailed_prices !== false : true;
-  const fmt = (v: number) => formatQuoteCurrency(v, quoteCurrency);
+  const fmt = (v: number) => formatQuoteCurrency(v, quoteCurrency, publicLocale);
   return (
     <div className="space-y-4">
       <div className="min-w-0">
@@ -556,11 +554,11 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
             <span className="font-medium">{formatLabel(data.meal_plan)}</span>
           </div>
         )}
-        {hotelRefundLabel(data) && (
+        {hotelRefundLabel(data, publicLocale) && (
           <span className={data.refund_policy === "refundable"
             ? "rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
             : "rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"}>
-            {hotelRefundLabel(data)}
+            {hotelRefundLabel(data, publicLocale)}
           </span>
         )}
       </div>
@@ -651,7 +649,7 @@ function HotelBody({ data, service, quote }: { data: any; service?: QuoteService
 }
 
 function HotelRatePicker({ data, service, showPrices, fmt }: { data: any; service: QuoteService; showPrices: boolean; fmt: (v: number) => string }) {
-  const rates = hotelRates(data, Number(service.amount) || 0);
+  const rates = hotelRates(data, Number(service.amount) || 0, publicLocale);
   const [choice, setChoice] = useState(() => getHotelRateChoice(service.id));
   useEffect(() => {
     const unsub = subscribeHotelRateChoice(() => setChoice(getHotelRateChoice(service.id)));
@@ -660,7 +658,7 @@ function HotelRatePicker({ data, service, showPrices, fmt }: { data: any; servic
   if (!rates.length) return null;
   return (
     <div className="space-y-2" data-hotel-rates>
-      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Escolha sua tarifa</div>
+      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("chooseRate")}</div>
       <div role="radiogroup" className="grid gap-2 sm:grid-cols-2">
         {rates.map((r) => {
           const active = choice === r.id;
@@ -675,7 +673,7 @@ function HotelRatePicker({ data, service, showPrices, fmt }: { data: any; servic
                 <span className="block text-sm font-semibold text-foreground">{r.label}</span>
                 {r.meal_plan && (
                   <span className="flex items-center gap-1.5 text-xs text-foreground/80">
-                    <UtensilsCrossed className="h-3 w-3 text-muted-foreground" />{mealPlanLabel(r.meal_plan)}
+                    <UtensilsCrossed className="h-3 w-3 text-muted-foreground" />{mealPlanLabel(r.meal_plan, publicLocale)}
                   </span>
                 )}
                 {r.refundLabel && (
@@ -780,7 +778,7 @@ function AttractionBody({ data }: { data: any }) {
         <span className="inline-flex items-center gap-1 tabular-nums"><Calendar className="h-3.5 w-3.5" />{formatDateShort(data.date)}</span>
         <span className="inline-flex items-center gap-1">
           <Ticket className="h-3.5 w-3.5" />
-          {fareCounts ? formatCompositionLabel(fareCounts) : `${t("qty")}: ${data.quantity || 1}`}
+          {fareCounts ? formatCompositionLabel(fareCounts, publicLocale) : `${t("qty")}: ${data.quantity || 1}`}
         </span>
       </div>
       {(data.adult_price > 0 || data.child_price > 0) && (
@@ -885,7 +883,7 @@ function hasServiceInvestmentBand(service: QuoteService, quote?: Quote) {
 }
 
 function ServiceInvestmentInline({ service, quote }: { service: QuoteService; quote?: Quote }) {
-  const passengerLabel = buildServicePassengerLabel(service, quote);
+  const passengerLabel = buildServicePassengerLabel(service, quote, publicLocale);
   const fmt = (v: number) => formatCurrency(v);
   const conditions = buildServicePaymentConditions(service as any, quote as any, fmt, publicLocale);
   const amount = conditions.amount;
@@ -897,7 +895,7 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
         className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 text-center relative"
         data-service-investment-inline={service.id}
       >
-        <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("includedInPackageAmount")}</p>
       <div className="mt-3 flex justify-center sm:mt-0 sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
         <InlineBookingAction service={service} />
       </div>
@@ -1102,7 +1100,7 @@ function CollapsibleServiceCard({
           {expanded && (() => {
             const imgs = (service as any).image_urls?.length ? (service as any).image_urls : (service.image_url ? [service.image_url] : []);
             return imgs.length > 0 ? (
-              <ServiceImageCarousel images={imgs} alt={getServiceLabel(service)} disableExpand placeId={resolveServicePlaceId(service)} />
+              <ServiceImageCarousel locale={publicLocale} images={imgs} alt={getServiceLabel(service)} disableExpand placeId={resolveServicePlaceId(service)} />
             ) : null;
           })()}
           {expanded && (() => {
@@ -1471,6 +1469,8 @@ function PublicQuoteDocuments({
         allowDownload
         onClose={closeViewer}
         onDownload={viewerDoc ? () => downloadDoc(viewerDoc) : undefined}
+        locale={publicLocale}
+        closeLabel={t("close")}
         downloadLabel={t("downloadLabel")}
       />
     </section>
@@ -1604,6 +1604,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   useAgencyBrandTheme(brandInput);
   useToolSharePreview(quote ? {
     kind: "quote",
+    locale: (quote as any)?.public_locale ? normalizePublicLocale((quote as any).public_locale) : resolvePublicLocale(agentProfile),
     destination: quote.destination,
     clientName: quote.client_name,
     agencyName: (brandProfile as any)?.agency_name ?? null,
@@ -1684,7 +1685,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
   const signatureContact = resolveSignatureContact((quote as any).signature_snapshot, agentProfile as any);
   const whatsappUrl = buildWhatsAppUrl(
     signatureContact.whatsapp || signatureContact.phone,
-    `Olá! Vi o orçamento para ${quote.destination} e gostaria de mais informações.`,
+    t("whatsappGreeting", { destination: quote.destination }),
   );
 
   const handleToggleService = (index: number) => {
@@ -1880,7 +1881,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     if (el) el.scrollBy({ left: el.clientWidth * 0.6, behavior: "smooth" });
                   }}
                   className="absolute right-1 top-1/2 -translate-y-1/2 z-20 sm:hidden h-8 w-8 rounded-full bg-background/90 border border-border shadow-sm flex items-center justify-center text-primary/80 animate-pulse"
-                  aria-label="Ver mais etapas da jornada"
+                  aria-label={t("moreJourneySteps")}
                 >
                   <ChevronsRight className="h-4 w-4" />
                 </button>
@@ -1889,7 +1890,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                 ref={journeyScrollRef}
                 className="flex items-center gap-1 overflow-x-auto sm:overflow-visible snap-x snap-mandatory sm:snap-none sm:justify-center sm:flex-wrap gap-y-3 px-1 -mx-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 role="list"
-                aria-label="Etapas da sua jornada"
+                aria-label={t("journeySteps")}
               >
                 {timelineNodes.map((n, i) => (
                   <div key={i} className="flex items-center snap-start" role="listitem">
@@ -1929,7 +1930,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             </div>
             {(() => {
               const renderCard = (service: QuoteService, collapsible = true) => {
-                const index = quote.services!.findIndex((s) => s.id === service.id);
+                const index = quote.services?.findIndex((s) => s.id === service.id);
                 return (
                   <CollapsibleServiceCard
                     key={service.id}
@@ -1952,7 +1953,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
               // Sem seções manuais → comportamento atual, inalterado.
               if (groups.length === 0) {
-                return <div className="space-y-3">{quote.services!.map((s) => renderCard(s))}</div>;
+                return <div className="space-y-3">{quote.services?.map((s) => renderCard(s))}</div>;
               }
 
               return (
@@ -1961,6 +1962,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     <PublicSectionAccordion
                       key={group.section.id}
                       title={group.section.title}
+                      locale={publicLocale}
                       count={countCommercialServices(group.services)}
                       icon={SECTION_ICONS[sectionIconKindForGroup(group.services)]}
                     >
@@ -2158,7 +2160,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                       {t("passengerCount")}
                     </p>
                     <p className="text-base sm:text-lg font-semibold text-primary">
-                      {buildPassengerLabel(quote)}
+                      {buildPassengerLabel(quote, publicLocale)}
                     </p>
                   </div>
                 </div>
@@ -2240,7 +2242,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
             <div className="relative px-5 sm:px-7 py-6 sm:py-7">
               {/* Title: centered relative to the entire white card */}
               <p className="text-[10px] lg:text-[11px] font-semibold uppercase tracking-[0.28em] text-primary/80 whitespace-nowrap text-center mb-4 sm:mb-5">
-                {signatureContact.title || "Sua consultora de viagens"}
+                {!signatureContact.title || /^(Sua consultora de viagens|Seu consultor de viagens)$/i.test(signatureContact.title.trim()) ? t("defaultConsultantTitle") : signatureContact.title}
               </p>
 
               {/* MOBILE: horizontal layout matching reference image */}

@@ -186,8 +186,8 @@ export function BookingCartProvider({
     [quote, services, groups],
   );
   const showcase = useMemo(
-    () => buildBookingShowcase(model, quote?.sections || [], groups),
-    [model, quote?.sections, groups],
+    () => buildBookingShowcase(model, quote?.sections || [], groups, locale),
+    [model, quote?.sections, groups, locale],
   );
 
   const blockByService = useMemo(() => {
@@ -256,7 +256,7 @@ export function BookingCartProvider({
       if (!block) return null;
       const action = cardAction(block);
       const isSelected = action === "locked" || selected.includes(serviceId);
-      const blockedReason = selectionBlockedReason(block, selected, serviceId);
+      const blockedReason = selectionBlockedReason(block, selected, serviceId, locale);
       return {
         action,
         selected: isSelected,
@@ -268,7 +268,7 @@ export function BookingCartProvider({
             : null,
       };
     },
-    [blockByService, selected],
+    [blockByService, selected, locale],
   );
 
   const runFly = useCallback((serviceId: string, origin?: HTMLElement | null) => {
@@ -283,13 +283,13 @@ export function BookingCartProvider({
       { imageUrl: typeof imageUrl === "string" && /^https?:\/\//.test(imageUrl) ? imageUrl : null },
     );
     flyCleanups.current.push(cleanup);
-  }, [services]);
+  }, [services, locale]);
 
   const toggle = useCallback(
     (serviceId: string, origin?: HTMLElement | null) => {
       const block = blockByService.get(serviceId);
       if (!block || cardAction(block) === "locked") return;
-      const blocked = selectionBlockedReason(block, selected, serviceId);
+      const blocked = selectionBlockedReason(block, selected, serviceId, locale);
       if (blocked) {
         setBlockedNotice(blocked);
         return;
@@ -300,7 +300,7 @@ export function BookingCartProvider({
       persist(next);
       if (added) runFly(serviceId, origin);
     },
-    [blockByService, selected, persist, runFly],
+    [blockByService, selected, persist, runFly, locale],
   );
 
   const remove = useCallback(
@@ -317,15 +317,15 @@ export function BookingCartProvider({
 
   const { currency } = getQuoteCurrencyInfo(quote);
   const formatAmount = useCallback(
-    (value: number) => formatQuoteCurrency(value, currency),
-    [currency],
+    (value: number) => formatQuoteCurrency(value, currency, locale),
+    [currency, locale],
   );
 
   const effectiveIds = effectiveSelectionIds(model, selected);
-  const { total, label: totalLabel } = bookingSelectionTotal(quote, model, selected);
-  const validationError = showcaseValidation(showcase, model, selected);
+  const { total, label: totalLabel } = bookingSelectionTotal(quote, model, selected, locale);
+  const validationError = showcaseValidation(showcase, model, selected, locale);
   const count = selectionCount(model, selected);
-  const ctaLabel = bookingCtaLabel(model, effectiveIds.length);
+  const ctaLabel = bookingCtaLabel(model, effectiveIds.length, locale);
   const hasLinkedClient = quoteHasLinkedClient(quote);
 
   const agencySlug =
@@ -368,7 +368,7 @@ export function BookingCartProvider({
             const ctx = (fnError as any)?.context;
             if (ctx?.text) {
               const body = JSON.parse(await ctx.text());
-              if (body?.error) message = String(body.error);
+              if (body?.error && locale === DEFAULT_PUBLIC_LOCALE) message = String(body.error);
             }
           } catch {
             /* mantém a mensagem genérica */
@@ -377,7 +377,7 @@ export function BookingCartProvider({
           return;
         }
         if ((data as any)?.error) {
-          setSubmitError(String((data as any).error));
+          setSubmitError(locale === DEFAULT_PUBLIC_LOCALE ? String((data as any).error) : t("couldNotSendRequest"));
           return;
         }
         const chosen = services.filter((s) => effectiveIds.includes(s.id));

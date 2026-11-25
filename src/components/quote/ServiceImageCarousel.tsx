@@ -1,3 +1,5 @@
+import { translateQuote } from "@/i18n/publicMaterials/quote";
+import { DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { useState, useCallback, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, X, Image, ImageOff, Loader2 } from "lucide-react";
@@ -15,22 +17,25 @@ interface ServiceImageCarouselProps {
   hideFallback?: boolean;
   panoramic?: boolean;
   viewPhotosLabel?: string;
+  locale?: string;
 }
 
-function ImageFallback({ alt, loading }: { alt: string; loading?: boolean }) {
+function ImageFallback({ alt, loading, locale }: { alt: string; loading?: boolean; locale: string }) {
+  const t = translateQuote(locale);
   return (
     <div className="w-full aspect-[4/3] sm:h-56 lg:h-52 sm:aspect-auto rounded-xl border border-border/30 bg-gradient-to-br from-muted via-muted/60 to-primary/10 flex flex-col items-center justify-center gap-2 text-muted-foreground">
       {loading ? <Loader2 className="h-6 w-6 animate-spin opacity-60" /> : <ImageOff className="h-6 w-6 opacity-50" />}
       <span className="text-xs font-medium opacity-70 px-3 text-center line-clamp-2">{alt}</span>
-      {!loading && <span className="text-[10px] uppercase tracking-wide opacity-60">Imagem ilustrativa</span>}
+      {!loading && <span className="text-[10px] uppercase tracking-wide opacity-60">{t("imageIllustrative")}</span>}
     </div>
   );
 }
 
-function GoogleAttribution({ attributions }: { attributions: string[] }) {
+function GoogleAttribution({ attributions, locale }: { attributions: string[]; locale: string }) {
+  const t = translateQuote(locale);
   return (
     <p className="mt-1.5 w-full min-w-0 px-3 py-1 text-center text-[10px] leading-relaxed text-muted-foreground/80 break-words [overflow-wrap:anywhere]">
-      Fotos: Google Maps
+      {t("photosGoogle")}
       {attributions.length > 0 && (
         <>
           {" · "}
@@ -44,7 +49,8 @@ function GoogleAttribution({ attributions }: { attributions: string[] }) {
   );
 }
 
-export function ServiceImageCarousel({ images, alt, disableExpand = false, placeId, hideFallback, panoramic = false, viewPhotosLabel }: ServiceImageCarouselProps) {
+export function ServiceImageCarousel({ images, alt, disableExpand = false, placeId, hideFallback, panoramic = false, viewPhotosLabel, locale = DEFAULT_PUBLIC_LOCALE }: ServiceImageCarouselProps) {
+  const t = translateQuote(locale);
   const { usable, loading, markFailed, hasGoogleImage, attributions } = useServiceImages(images, placeId);
   const srcs = usable.map((u) => u.src as string);
 
@@ -106,17 +112,17 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
   // Nenhuma imagem utilizável — nunca deixar ícone quebrado ou espaço vazio
   if (srcs.length === 0) {
     if (hideFallback && !loading) return null;
-    return <ImageFallback alt={alt} loading={loading} />;
+    return <ImageFallback alt={alt} loading={loading} locale={locale} />;
   }
 
   if (panoramic) return <>
     <div className="relative overflow-hidden rounded-2xl border border-border bg-muted">
       <img src={srcs[selectedIndex] || srcs[0]} alt={alt} className="h-44 w-full object-cover sm:h-56" onError={() => markFailed(usable[selectedIndex]?.ref || usable[0].ref)} />
       <span className="absolute right-3 top-3 rounded-full bg-foreground/80 px-3 py-1 text-xs font-semibold text-background">{selectedIndex + 1} / {srcs.length}</span>
-      {!disableExpand && <Button variant="secondary" className="absolute bottom-3 right-3 h-10 rounded-xl bg-foreground/85 text-background hover:bg-foreground" onClick={() => openLightbox(selectedIndex)}><Image className="h-4 w-4" />{viewPhotosLabel}</Button>}
+      {!disableExpand && <Button variant="secondary" className="absolute bottom-3 right-3 h-10 rounded-xl bg-foreground/85 text-background hover:bg-foreground" onClick={() => openLightbox(selectedIndex)}><Image className="h-4 w-4" />{viewPhotosLabel || t("viewPhotos")}</Button>}
     </div>
-    {hasGoogleImage && <GoogleAttribution attributions={attributions} />}
-    {!disableExpand && lightboxOpen && <Lightbox images={srcs} index={lightboxIndex} onClose={closeLightbox} onPrev={lightboxPrev} onNext={lightboxNext} />}
+    {hasGoogleImage && <GoogleAttribution attributions={attributions} locale={locale} />}
+    {!disableExpand && lightboxOpen && <Lightbox locale={locale} images={srcs} index={lightboxIndex} onClose={closeLightbox} onPrev={lightboxPrev} onNext={lightboxNext} />}
   </>;
 
   // Single image — no carousel needed
@@ -135,9 +141,10 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
             onError={() => markFailed(usable[0].ref)}
           />
         </div>
-        {hasGoogleImage && <GoogleAttribution attributions={attributions} />}
+        {hasGoogleImage && <GoogleAttribution attributions={attributions} locale={locale} />}
         {!disableExpand && lightboxOpen && (
           <Lightbox
+            locale={locale}
             images={srcs}
             index={lightboxIndex}
             onClose={closeLightbox}
@@ -177,14 +184,14 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
         <button
           onClick={(e) => { e.stopPropagation(); scrollPrev(); }}
           className="absolute left-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/40 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 sm:flex hidden"
-          aria-label="Anterior"
+          aria-label={t("previous")}
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); scrollNext(); }}
           className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/40 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/60 sm:flex hidden"
-          aria-label="Próxima"
+          aria-label={t("next")}
         >
           <ChevronRight className="h-5 w-5" />
         </button>
@@ -195,10 +202,11 @@ export function ServiceImageCarousel({ images, alt, disableExpand = false, place
         </div>
       </div>
 
-      {hasGoogleImage && <GoogleAttribution attributions={attributions} />}
+      {hasGoogleImage && <GoogleAttribution attributions={attributions} locale={locale} />}
 
       {!disableExpand && lightboxOpen && (
         <Lightbox
+          locale={locale}
           images={srcs}
           index={lightboxIndex}
           onClose={closeLightbox}
@@ -216,13 +224,16 @@ function Lightbox({
   onClose,
   onPrev,
   onNext,
+  locale,
 }: {
   images: string[];
   index: number;
   onClose: () => void;
   onPrev: () => void;
   onNext: () => void;
+  locale: string;
 }) {
+  const t = translateQuote(locale);
   return (
     <div
       className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex items-center justify-center"
@@ -232,7 +243,7 @@ function Lightbox({
       <button
         onClick={onClose}
         className="absolute top-4 right-4 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
-        aria-label="Fechar"
+        aria-label={t("close")}
       >
         <X className="h-6 w-6" />
       </button>
@@ -242,7 +253,7 @@ function Lightbox({
         <button
           onClick={(e) => { e.stopPropagation(); onPrev(); }}
           className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
-          aria-label="Anterior"
+          aria-label={t("previous")}
         >
           <ChevronLeft className="h-7 w-7" />
         </button>
@@ -251,7 +262,7 @@ function Lightbox({
       {/* Image */}
       <img
         src={images[index]}
-        alt={`Imagem ${index + 1}`}
+        alt={t("imageCounterAlt", { n: index + 1 })}
         className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       />
@@ -261,7 +272,7 @@ function Lightbox({
         <button
           onClick={(e) => { e.stopPropagation(); onNext(); }}
           className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors z-10"
-          aria-label="Próxima"
+          aria-label={t("next")}
         >
           <ChevronRight className="h-7 w-7" />
         </button>

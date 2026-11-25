@@ -10,7 +10,7 @@
  */
 import type { QuoteService, ServiceType } from "@/types/quote";
 import { translateQuote, type QuoteTranslator } from "@/i18n/publicMaterials/quote";
-import { pluralize, DEFAULT_PUBLIC_LOCALE, type PublicLocale } from "@/i18n/publicMaterials/locale";
+import { formatPublicShortDate, pluralize, DEFAULT_PUBLIC_LOCALE, type PublicLocale } from "@/i18n/publicMaterials/locale";
 
 export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
   flight: "Passagem aérea",
@@ -43,11 +43,11 @@ const first = (...values: unknown[]): string | null => {
 };
 
 /** Datas "YYYY-MM-DD" (ou ISO) → "dd/mm/aaaa" sem deslocamento de fuso. */
-function fmtDate(value?: unknown): string | null {
+function fmtDate(value?: unknown, locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE): string | null {
   const raw = str(value);
   if (!raw) return null;
   const br = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-  if (br) return raw;
+  if (br) return formatPublicShortDate(`${br[3]}-${br[2]}-${br[1]}`, locale);
   const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (!iso) return null;
   const y = Number(iso[1]);
@@ -56,7 +56,7 @@ function fmtDate(value?: unknown): string | null {
   if (m < 1 || m > 12 || d < 1 || d > 31) return null;
   const dt = new Date(y, m - 1, d);
   if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
-  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+  return formatPublicShortDate(dt, locale);
 }
 
 /** "HH:MM(:SS)" → "HH:MM". */
@@ -71,11 +71,11 @@ function fmtTime(value?: unknown): string | null {
   return `${String(h).padStart(2, "0")}:${m[2]}`;
 }
 
-function dateWithTime(date?: unknown, time?: unknown): string | null {
-  const d = fmtDate(date);
+function dateWithTime(date?: unknown, time?: unknown, locale: PublicLocale | string | null = DEFAULT_PUBLIC_LOCALE): string | null {
+  const d = fmtDate(date, locale);
   if (!d) return null;
   const t = fmtTime(time);
-  return t ? `${d} às ${t}` : d;
+  return t ? `${d} ${translateQuote(locale)("dateAt")} ${t}` : d;
 }
 
 /** Normaliza rótulos técnicos ("suv", "half_board") para leitura humana. */
@@ -143,7 +143,7 @@ export function serviceDigestTitle(
       real = first(data.car_model, data.vehicle_model, data.product_name, data.name);
       if (!real) {
         const category = first(data.car_type, data.car_category, data.vehicle_category);
-        if (category) real = `Locação de ${humanize(category)}`;
+        if (category) real = translateQuote(locale)("rentalOf", { category: humanize(category) });
       }
       if (!real) real = first(data.rental_company, data.provider, data.company_name);
       break;
@@ -160,7 +160,7 @@ export function serviceDigestTitle(
       real = first(data.provider, data.company_name, data.product_name, data.name, data.custom_title);
       if (!real) {
         const place = first(data.location, data.city);
-        real = place ? `Transfer em ${place}` : null;
+        real = place ? translateQuote(locale)("transferAt", { place }) : null;
       }
       break;
     }
@@ -221,6 +221,8 @@ export function serviceDigestDateLines(
 ): ServiceDigestLine[] {
   const data = (service.service_data as any) || {};
   const t = translateQuote(locale);
+  const date = (value: unknown) => fmtDate(value, locale);
+  const dateTime = (value: unknown, time: unknown) => dateWithTime(value, time, locale);
   const lines: ServiceDigestLine[] = [];
   const push = (label: string, value: string | null) => {
     if (value) lines.push({ label, value });
@@ -228,46 +230,46 @@ export function serviceDigestDateLines(
 
   switch (service.service_type) {
     case "flight":
-      push(t("ida"), fmtDate(data.departure_date));
-      if (!data.is_one_way) push(t("volta"), fmtDate(data.return_date));
+      push(t("ida"), date(data.departure_date));
+      if (!data.is_one_way) push(t("volta"), date(data.return_date));
       break;
     case "hotel":
-      push(t("checkIn"), fmtDate(data.check_in));
-      push(t("checkOut"), fmtDate(data.check_out));
+      push(t("checkIn"), date(data.check_in));
+      push(t("checkOut"), date(data.check_out));
       break;
     case "car_rental":
-      push(t("retirada"), dateWithTime(data.pickup_date, data.pickup_time));
-      push(t("devolucao"), dateWithTime(data.dropoff_date, data.dropoff_time));
+      push(t("retirada"), dateTime(data.pickup_date, data.pickup_time));
+      push(t("devolucao"), dateTime(data.dropoff_date, data.dropoff_time));
       break;
     case "transfer":
       push(
         t("chegada"),
-        dateWithTime(data.arrival_date || data.date, data.arrival_time || data.time),
+        dateTime(data.arrival_date || data.date, data.arrival_time || data.time),
       );
       push(
         t("retorno"),
-        dateWithTime(data.departure_date || data.return_date, data.departure_time || data.return_time),
+        dateTime(data.departure_date || data.return_date, data.departure_time || data.return_time),
       );
       break;
     case "attraction":
-      push(t("data"), fmtDate(data.date || data.usage_date));
+      push(t("data"), date(data.date || data.usage_date));
       break;
     case "insurance":
-      push(t("start"), fmtDate(data.start_date));
-      push(t("termino"), fmtDate(data.end_date));
+      push(t("start"), date(data.start_date));
+      push(t("termino"), date(data.end_date));
       break;
     case "cruise":
-      push(t("embarque"), fmtDate(data.start_date));
-      push(t("desembarque"), fmtDate(data.end_date));
+      push(t("embarque"), date(data.start_date));
+      push(t("desembarque"), date(data.end_date));
       break;
     case "rail_transport":
-      push(t("partida"), dateWithTime(data.travel_date || data.departure_date, data.departure_time));
-      push(t("retorno"), dateWithTime(data.return_date, data.return_time));
+      push(t("partida"), dateTime(data.travel_date || data.departure_date, data.departure_time));
+      push(t("retorno"), dateTime(data.return_date, data.return_time));
       break;
     default:
-      push(t("start"), fmtDate(data.start_date));
-      push(t("termino"), fmtDate(data.end_date));
-      if (lines.length === 0) push(t("data"), fmtDate(data.date));
+      push(t("start"), date(data.start_date));
+      push(t("termino"), date(data.end_date));
+      if (lines.length === 0) push(t("data"), date(data.date));
       break;
   }
   return lines;
@@ -400,7 +402,7 @@ export function serviceDigestHighlights(
       const rooms = Array.isArray(d.rooms) ? d.rooms : [];
       if (rooms.length > 0) {
         const total = rooms.reduce((acc: number, r: any) => acc + (Number(r?.quantity) || 0), 0);
-        if (total > 0) push(`${total} apartamento${total > 1 ? "s" : ""}`);
+        if (total > 0) push(`${total} ${pluralize(locale, total, { one: t("apartmentOne"), other: t("apartmentOther") })}`);
         const types = Array.from(
           new Set(rooms.map((r: any) => str(r?.room_type)).filter(Boolean) as string[]),
         );

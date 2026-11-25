@@ -5,6 +5,7 @@
  * público e pelos testes. O servidor continua sendo a autoridade final — aqui
  * apenas espelhamos as mesmas regras para dar feedback imediato ao cliente.
  */
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import type { QuoteChoiceGroup, QuoteSelectionMode, QuoteService } from "@/types/quote";
 import { hidesIndividualAmounts, isPackagePricing } from "@/lib/quotePricing";
 
@@ -104,21 +105,23 @@ export function toggleBookingSelection(
 export function validateBookingSelection(
   model: BookingSelectionModel,
   selected: string[],
+  locale?: string,
 ): string | null {
+  const t = translateQuote(locale);
   if (model.packageMode) {
-    return model.allServices.length > 0 ? null : "Selecione pelo menos um serviço.";
+    return model.allServices.length > 0 ? null : t("bookingSelectService");
   }
   const set = new Set(selected);
 
   for (const { group, services } of model.groups) {
     const count = services.filter((s) => set.has(s.id)).length;
     if (group.group_type === "alternative") {
-      if (count !== 1) return `Escolha exatamente 1 opção em "${group.title}".`;
+      if (count !== 1) return t("bookingChooseExactlyOne", { title: group.title });
     } else {
       const min = group.min_select ?? 0;
-      if (count < min) return `Escolha pelo menos ${min} opção(ões) em "${group.title}".`;
+      if (count < min) return t("bookingChooseMin", { count: min, title: group.title });
       if (group.max_select != null && count > group.max_select) {
-        return `Escolha no máximo ${group.max_select} opção(ões) em "${group.title}".`;
+        return t("bookingChooseMax", { count: group.max_select, title: group.title });
       }
     }
   }
@@ -126,7 +129,7 @@ export function validateBookingSelection(
   const effective = model.allServices.filter(
     (s) => set.has(s.id) || modeOf(s) === "required",
   );
-  if (effective.length === 0) return "Selecione pelo menos um serviço.";
+  if (effective.length === 0) return t("bookingSelectService");
   return null;
 }
 
@@ -143,10 +146,11 @@ export function effectiveSelectionIds(
 }
 
 /** Texto do botão conforme o contexto do orçamento. */
-export function bookingCtaLabel(model: BookingSelectionModel, selectedCount: number): string {
-  if (model.packageMode) return "Solicitar reserva deste pacote";
-  if (model.allServices.length === 1 || selectedCount === 1) return "Solicitar este serviço";
-  return "Solicitar reserva dos serviços selecionados";
+export function bookingCtaLabel(model: BookingSelectionModel, selectedCount: number, locale?: string): string {
+  const t = translateQuote(locale);
+  if (model.packageMode) return t("requestPackage");
+  if (model.allServices.length === 1 || selectedCount === 1) return t("requestService");
+  return t("requestServices");
 }
 
 /**
@@ -157,17 +161,19 @@ export function bookingSelectionTotal(
   quote: any,
   model: BookingSelectionModel,
   selectedIds: string[],
+  locale?: string,
 ): { total: number | null; label: string } {
+  const t = translateQuote(locale);
   if (model.packageMode) {
     const pkg = Number(quote?.package_total_amount) || Number(quote?.total_amount) || 0;
-    return { total: pkg > 0 ? pkg : null, label: "Valor total do pacote" };
+    return { total: pkg > 0 ? pkg : null, label: t("packageTotal") };
   }
-  if (model.hideAmounts) return { total: null, label: "Valor total" };
+  if (model.hideAmounts) return { total: null, label: t("bookingTotal") };
   const ids = new Set(effectiveSelectionIds(model, selectedIds));
   const sum = model.allServices
     .filter((s) => ids.has(s.id))
     .reduce((acc, s) => acc + (Number((s as any).amount) || 0), 0);
-  return { total: sum > 0 ? sum : null, label: "Valor dos serviços selecionados" };
+  return { total: sum > 0 ? sum : null, label: t("selectedServicesTotal") };
 }
 
 /** Validação do contato: nome + (WhatsApp OU e-mail). */
@@ -182,22 +188,23 @@ export function validateBookingContact(input: {
   disclaimerAccepted: boolean;
   /** Orçamento nominal: identidade vem do cadastro, sem pedir contato de novo. */
   hasLinkedClient?: boolean;
-}): string | null {
+}, locale?: string): string | null {
+  const t = translateQuote(locale);
   if (input.hasLinkedClient) {
     if (!input.disclaimerAccepted) {
-      return BOOKING_ACCEPT_REQUIRED_MESSAGE;
+      return t("bookingAcceptRequired");
     }
     return null;
   }
-  if (input.name.trim().length < 2) return "Informe seu nome completo.";
+  if (input.name.trim().length < 2) return t("bookingNameRequired");
   const digits = input.whatsapp.replace(/\D/g, "");
   const hasWhats = digits.length >= 10 && digits.length <= 15;
   const emailOk = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(input.email.trim());
-  if (input.whatsapp.trim() && !hasWhats) return "Informe um WhatsApp válido com DDD.";
-  if (input.email.trim() && !emailOk) return "Informe um e-mail válido.";
-  if (!hasWhats && !emailOk) return "Informe WhatsApp ou e-mail para a agência entrar em contato.";
+  if (input.whatsapp.trim() && !hasWhats) return t("bookingWhatsappInvalid");
+  if (input.email.trim() && !emailOk) return t("bookingEmailInvalid");
+  if (!hasWhats && !emailOk) return t("bookingContactRequired");
   if (!input.disclaimerAccepted) {
-    return BOOKING_ACCEPT_REQUIRED_MESSAGE;
+    return t("bookingAcceptRequired");
   }
   return null;
 }

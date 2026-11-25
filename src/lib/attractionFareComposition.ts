@@ -1,3 +1,5 @@
+import { translateQuote } from "@/i18n/publicMaterials/quote";
+import { pluralize } from "@/i18n/publicMaterials/locale";
 /**
  * Composição tarifária por ingresso (serviço "Ingressos e Atrações").
  *
@@ -376,7 +378,15 @@ export function computeAttractionTotal(input: {
 }
 
 /** "2 adultos + 1 criança + 1 gratuito" (omite categorias vazias). */
-export function formatCompositionLabel(counts: FareCounts): string {
+export function formatCompositionLabel(counts: FareCounts, locale?: string): string {
+  if (locale) {
+    const t = translateQuote(locale);
+    const parts: string[] = [];
+    if (counts.adult > 0) parts.push(`${counts.adult} ${pluralize(locale, counts.adult, { one: t("adultOne"), other: t("adultOther") })}`);
+    if (counts.child > 0) parts.push(`${counts.child} ${pluralize(locale, counts.child, { one: t("childOne"), other: t("childOther") })}`);
+    if (counts.free > 0) parts.push(`${counts.free} ${pluralize(locale, counts.free, { one: t("freePaxOne"), other: t("freePaxOther") })}`);
+    return parts.length ? parts.join(" + ") : t("noPassengers");
+  }
   const parts: string[] = [];
   if (counts.adult > 0) parts.push(plural(counts.adult, 'adult'));
   if (counts.child > 0) parts.push(plural(counts.child, 'child'));

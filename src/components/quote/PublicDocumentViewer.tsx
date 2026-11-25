@@ -1,3 +1,4 @@
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export interface PublicViewerDocument {
  */
 export function PublicDocumentViewer({
   doc,
+  locale,
   signedUrl,
   loading,
   allowDownload,
@@ -27,6 +29,7 @@ export function PublicDocumentViewer({
   downloadLabel = "Baixar",
 }: {
   doc: PublicViewerDocument | null;
+  locale?: string;
   signedUrl: string | null;
   loading?: boolean;
   allowDownload?: boolean;
@@ -35,6 +38,7 @@ export function PublicDocumentViewer({
   closeLabel?: string;
   downloadLabel?: string;
 }) {
+  const t = translateQuote(locale);
   const [errored, setErrored] = useState(false);
   useEffect(() => {
     setErrored(false);
@@ -51,11 +55,11 @@ export function PublicDocumentViewer({
       >
         <div className="flex items-center gap-1 border-b px-4 py-2">
           <DialogTitle className="flex-1 truncate text-sm font-semibold">{displayDocumentName(doc.file_name)}</DialogTitle>
-          <DialogDescription className="sr-only">Anexo do orçamento aberto dentro da própria página.</DialogDescription>
+          <DialogDescription className="sr-only">{t("attachmentDescription")}</DialogDescription>
           {(allowDownload && onDownload) || (kind === "pdf" && signedUrl) ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Mais opções">
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label={t("moreOptions")}>
                   <MoreVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -70,7 +74,7 @@ export function PublicDocumentViewer({
                   <DropdownMenuItem asChild>
                     <a href={signedUrl} target="_blank" rel="noopener noreferrer">
                       <Printer className="mr-2 h-4 w-4" />
-                      Imprimir / abrir no navegador
+                      {t("printOpenBrowser")}
                     </a>
                   </DropdownMenuItem>
                 ) : null}
@@ -85,11 +89,11 @@ export function PublicDocumentViewer({
           {loading || !signedUrl ? (
             <div className="flex h-full items-center justify-center p-10 text-sm text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Carregando anexo…
+              {t("loadingAttachment")}
             </div>
           ) : errored ? (
             <div className="flex h-full flex-col items-center justify-center gap-3 p-10 text-center text-sm text-muted-foreground">
-              <p>Não foi possível exibir este arquivo aqui.</p>
+              <p>{t("attachmentUnavailable")}</p>
               {allowDownload && onDownload ? (
                 <Button size="sm" onClick={onDownload}>
                   <Download className="mr-1.5 h-4 w-4" />

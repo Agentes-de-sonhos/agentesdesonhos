@@ -38,6 +38,7 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
           images={digest.images}
           alt={digest.title}
           placeId={resolveServicePlaceId(service)}
+          locale={cart.locale}
           hideFallback
         />
       )}
@@ -73,7 +74,7 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 {t("paymentConditions")}
               </p>
-              {conditions!.rows.map((row, i) => (
+              {conditions?.rows.map((row, i) => (
                 <p key={`${row.label}-${i}`} className="flex flex-wrap items-baseline gap-x-2 text-sm">
                   <span className="text-muted-foreground">{row.label}:</span>
                   <span
@@ -87,10 +88,10 @@ export function BookingServiceDetails({ service, amountLabel, onClose }: Props) 
                   </span>
                 </p>
               ))}
-              {conditions!.methodLabel && (
+              {conditions?.methodLabel && (
                 <p className="flex flex-wrap items-baseline gap-x-2 text-xs">
                   <span className="text-muted-foreground">{t("paymentMethodColon")}</span>
-                  <span className="font-medium text-foreground">{conditions!.methodLabel}</span>
+                  <span className="font-medium text-foreground">{conditions?.methodLabel}</span>
                 </p>
               )}
             </div>

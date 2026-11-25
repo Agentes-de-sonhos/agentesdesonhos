@@ -3,6 +3,8 @@
  * Título: destino · noites (datas) | cliente · agência. Imagem híbrida:
  * foto do destino quando existir; senão, banner/logotipo oficial da agência.
  */
+import { formatPublicDate, normalizePublicLocale } from "@/i18n/publicMaterials/locale";
+import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { useEffect } from "react";
 import { setOgMeta } from "@/lib/ogMeta";
 import { resolveAgencySharePreview } from "@/lib/agencySharePreview";
@@ -11,6 +13,7 @@ export type ToolShareKind = "quote" | "itinerary" | "wallet";
 
 export interface ToolShareInput {
   kind: ToolShareKind;
+  locale?: string;
   destination?: string | null;
   clientName?: string | null;
   agencyName?: string | null;
@@ -46,6 +49,10 @@ const DESCRIPTIONS: Record<ToolShareKind, (agency: string) => string> = {
 };
 
 export function buildToolSharePreview(input: ToolShareInput) {
+  const locale = normalizePublicLocale(input.locale);
+  const localizedQuote = input.kind === "quote" && locale !== "pt-BR";
+  const t = translateQuote(locale);
+  const shortDate = (d: Date) => localizedQuote ? formatPublicDate(d, locale, { day: "2-digit", month: "2-digit" }) : ddmm(d);
   const dest = (input.destination ?? "").trim();
   const client = firstName(input.clientName);
   const agency = (input.agencyName ?? "").trim();
@@ -55,20 +62,20 @@ export function buildToolSharePreview(input: ToolShareInput) {
   const head: string[] = [];
   if (input.kind === "itinerary") head.push(dest ? `Roteiro ${dest}` : "Roteiro de viagem");
   else if (input.kind === "wallet") head.push(dest ? `Carteira de Viagem · ${dest}` : "Carteira de Viagem");
-  else head.push(dest || "Proposta de viagem");
+  else head.push(dest || (localizedQuote ? t("proposalBadge") : "Proposta de viagem"));
   if (nights) {
-    const label = input.kind === "itinerary" ? `${nights + 1} dias` : `${nights} ${nights === 1 ? "noite" : "noites"}`;
-    head.push(s && e ? `${label} (${ddmm(s)} a ${ddmm(e)})` : label);
+    const label = input.kind === "itinerary" ? `${nights + 1} dias` : `${nights} ${localizedQuote ? t(nights === 1 ? "nightOne" : "nightOther") : nights === 1 ? "noite" : "noites"}`;
+    head.push(s && e ? `${label} (${shortDate(s)}${localizedQuote ? " – " : " a "}${shortDate(e)})` : label);
   }
 
   const tail: string[] = [];
-  if (client) tail.push(input.kind === "quote" ? `Proposta ${client}` : client);
+  if (client) tail.push(input.kind === "quote" ? `${localizedQuote ? t("proposalBadge") : "Proposta"} ${client}` : client);
   if (agency) tail.push(agency);
 
   const title = tail.length ? `${head.join(" · ")} | ${tail.join(" · ")}` : head.join(" · ");
   const agencyImage = resolveAgencySharePreview(input.hostname)?.image ?? null;
   const image = input.coverImage || agencyImage || input.agencyLogo || undefined;
-  return { title, description: DESCRIPTIONS[input.kind](agency), image };
+  return { title, description: localizedQuote ? (agency ? t("shareQuoteDescription", { agency }) : t("shareQuoteDescriptionNoAgency")) : DESCRIPTIONS[input.kind](agency), image };
 }
 
 /** Aplica a prévia na página pública quando os dados estiverem prontos. */
@@ -81,6 +88,19 @@ export function useToolSharePreview(input: ToolShareInput | null) {
       hostname: input.hostname ?? (typeof window !== "undefined" ? window.location.hostname : null),
     });
     setOgMeta({ title: p.title, description: p.description, image: p.image });
+    if (input.kind === "quote" && input.locale) {
+      const locale = normalizePublicLocale(input.locale);
+      const previousLang = document.documentElement.lang;
+      document.documentElement.lang = locale;
+      let description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+      if (!description) {
+        description = document.createElement("meta");
+        description.name = "description";
+        document.head.appendChild(description);
+      }
+      description.content = p.description;
+      return () => { document.documentElement.lang = previousLang; };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 }

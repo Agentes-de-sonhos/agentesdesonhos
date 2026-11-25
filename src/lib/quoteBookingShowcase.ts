@@ -9,6 +9,9 @@
  * Pertencimento a um conjunto de escolha vem SEMPRE de `choice_group_id`.
  * Destino, período e tipo da seção são apenas apresentação.
  */
+import { translateQuote } from "@/i18n/publicMaterials/quote";
+import { formatPublicShortDate, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
+import { serviceDigestTypeLabel } from "@/lib/quoteServiceDigest";
 import type { QuoteChoiceGroup, QuoteSection, QuoteSelectionMode, QuoteService } from "@/types/quote";
 import { buildQuoteSectionLayout } from "@/lib/quoteSections";
 import type { BookingSelectionModel } from "@/lib/quoteBookingSelection";
@@ -37,7 +40,7 @@ const str = (v: unknown): string | null => {
 };
 
 /** "YYYY-MM-DD" → "dd/mm/aaaa" sem deslocamento de fuso. */
-function fmtDate(value?: unknown): string | null {
+function fmtDate(value?: unknown, locale: string = DEFAULT_PUBLIC_LOCALE): string | null {
   const raw = str(value);
   if (!raw) return null;
   const iso = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
@@ -47,24 +50,25 @@ function fmtDate(value?: unknown): string | null {
   const d = Number(iso[3]);
   const dt = new Date(y, m - 1, d);
   if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
-  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
+  return formatPublicShortDate(dt, locale);
 }
 
-export function sectionPeriodLabel(section: Partial<QuoteSection> | null | undefined): string | null {
-  const start = fmtDate((section as any)?.start_date);
-  const end = fmtDate((section as any)?.end_date);
-  if (start && end) return start === end ? start : `${start} a ${end}`;
-  if (start) return `a partir de ${start}`;
-  if (end) return `até ${end}`;
+export function sectionPeriodLabel(section: Partial<QuoteSection> | null | undefined, locale: string = DEFAULT_PUBLIC_LOCALE): string | null {
+  const t = translateQuote(locale);
+  const start = fmtDate((section as any)?.start_date, locale);
+  const end = fmtDate((section as any)?.end_date, locale);
+  if (start && end) return start === end ? start : t("dateRange", { start, end });
+  if (start) return t("dateFrom", { date: start });
+  if (end) return t("dateUntil", { date: end });
   return null;
 }
 
-export function sectionMeta(section: QuoteSection | null | undefined): SectionMeta | null {
+export function sectionMeta(section: QuoteSection | null | undefined, locale: string = DEFAULT_PUBLIC_LOCALE): SectionMeta | null {
   if (!section) return null;
   const destination = str((section as any).destination);
-  const period = sectionPeriodLabel(section);
+  const period = sectionPeriodLabel(section, locale);
   const typeKey = str((section as any).service_type);
-  const typeLabel = typeKey ? SERVICE_TYPE_LABELS[typeKey as keyof typeof SERVICE_TYPE_LABELS] || null : null;
+  const typeLabel = typeKey ? (typeKey in SERVICE_TYPE_LABELS ? serviceDigestTypeLabel({ service_type: typeKey } as QuoteService, locale) : null) : null;
   return {
     title: section.title,
     destination,
@@ -139,6 +143,7 @@ export function buildBookingShowcase(
   model: BookingSelectionModel,
   sections: QuoteSection[] = [],
   groups: QuoteChoiceGroup[] = [],
+  locale: string = DEFAULT_PUBLIC_LOCALE,
 ): ShowcaseModel {
   const layout = buildQuoteSectionLayout(sections, model.allServices);
   const groupById = new Map((groups || []).map((g) => [g.id, g]));
@@ -168,7 +173,7 @@ export function buildBookingShowcase(
   const emittedGroups = new Set<string>();
 
   const buildScope = (section: QuoteSection | null, services: QuoteService[]) => {
-    const meta = sectionMeta(section);
+    const meta = sectionMeta(section, locale);
     const sectionId = section?.id ?? null;
     const sectionTitle = section?.title ?? null;
     const emitted = new Set<string>();
@@ -187,7 +192,7 @@ export function buildBookingShowcase(
             sectionTitle,
             sectionMeta: meta,
             group: null,
-            title: "Incluído na proposta",
+            title: translateQuote(locale)("includedInProposal"),
             options: [],
           };
           blocks.push(includedBlock);
@@ -226,7 +231,7 @@ export function buildBookingShowcase(
         sectionTitle,
         sectionMeta: meta,
         group: null,
-        title: model.packageMode ? "Incluído no pacote" : "Serviço",
+        title: model.packageMode ? translateQuote(locale)("includedInPackage") : translateQuote(locale)("svc_default"),
         options: [{ service, optionNumber: null }],
       });
     }
@@ -298,7 +303,8 @@ export function blockStatus(block: ShowcaseBlock, selected: readonly string[]): 
  * Mensagem específica de validação do bloco (null quando válido).
  * O servidor rejeita apenas abaixo de `min_select` ou acima de `max_select`.
  */
-export function blockValidation(block: ShowcaseBlock, selected: readonly string[]): string | null {
+export function blockValidation(block: ShowcaseBlock, selected: readonly string[], locale: string = DEFAULT_PUBLIC_LOCALE): string | null {
+  const t = translateQuote(locale);
   if (block.kind !== "choice" || !block.group) return null;
   const group = block.group;
   const count = blockSelectedCount(block, selected);
@@ -306,10 +312,10 @@ export function blockValidation(block: ShowcaseBlock, selected: readonly string[
   const max = groupMax(group);
   if (count < min) {
     return min === 1 && max === 1
-      ? `Escolha 1 opção em "${group.title}".`
-      : `Escolha pelo menos ${min} opção(ões) em "${group.title}".`;
+      ? t("bookingChooseOne", { title: group.title })
+      : t("bookingChooseMin", { count: min, title: group.title });
   }
-  if (max != null && count > max) return `Escolha no máximo ${max} opção(ões) em "${group.title}".`;
+  if (max != null && count > max) return t("bookingChooseMax", { count: max, title: group.title });
   return null;
 }
 
@@ -348,7 +354,9 @@ export function selectionBlockedReason(
   block: ShowcaseBlock,
   selected: readonly string[],
   serviceId: string,
+  locale: string = DEFAULT_PUBLIC_LOCALE,
 ): string | null {
+  const t = translateQuote(locale);
   if (block.kind !== "choice" || !block.group) return null;
   const isSelected = selected.includes(serviceId);
   const group = block.group;
@@ -358,7 +366,7 @@ export function selectionBlockedReason(
   // é cobrada apenas no envio (showcaseValidation).
   // Múltipla escolha no limite: mantém a seleção e pede remoção consciente.
   if (!isSelected && max != null && max > 1 && blockSelectedCount(block, selected) >= max) {
-    return `Você já escolheu ${max} opção(ões) em "${group.title}". Remova uma opção para escolher esta.`;
+    return t("bookingAtLimit", { count: max, title: group.title });
   }
   return null;
 }
@@ -400,17 +408,19 @@ export function showcaseValidation(
   showcase: ShowcaseModel,
   model: BookingSelectionModel,
   selected: readonly string[],
+  locale: string = DEFAULT_PUBLIC_LOCALE,
 ): string | null {
+  const t = translateQuote(locale);
   if (showcase.packageMode) {
-    return model.allServices.length > 0 ? null : "Selecione pelo menos um serviço.";
+    return model.allServices.length > 0 ? null : t("bookingSelectService");
   }
   for (const block of showcase.blocks) {
-    const error = blockValidation(block, selected);
+    const error = blockValidation(block, selected, locale);
     if (error) return error;
   }
   const set = new Set(selected);
   const effective = model.allServices.filter((s) => set.has(s.id) || modeOf(s) === "required");
-  if (effective.length === 0) return "Selecione pelo menos um serviço para solicitar.";
+  if (effective.length === 0) return t("bookingSelectServiceToRequest");
   return null;
 }
 

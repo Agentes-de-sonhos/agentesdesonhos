@@ -17,11 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ServiceDigestCompact } from "@/components/quote/ServiceDigestCompact";
 import { BookingServiceDetails } from "@/components/quote/booking/BookingServiceDetails";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
-import {
-  BOOKING_ACCEPT_REQUIRED_MESSAGE,
-  BOOKING_REQUEST_DISCLAIMER,
-  validateBookingContact,
-} from "@/lib/quoteBookingSelection";
+import { validateBookingContact } from "@/lib/quoteBookingSelection";
 import { cn } from "@/lib/utils";
 import { buildSelectionSummary, sectionMetaChips } from "@/lib/quoteBookingShowcase";
 import type { QuoteService } from "@/types/quote";
@@ -66,7 +62,7 @@ export function BookingCartDialog() {
       email,
       disclaimerAccepted: accepted,
       hasLinkedClient,
-    });
+    }, cart.locale);
     if (contactError) {
       setLocalError(contactError);
       return;
@@ -195,7 +191,7 @@ export function BookingCartDialog() {
                                 className="flex w-full min-w-0 flex-wrap items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-sm"
                                 data-cart-item={entry.service.id}
                               >
-                                <ServiceDigestCompact service={entry.service} withThumb />
+                                <ServiceDigestCompact service={entry.service} withThumb locale={cart.locale} />
                                 <div className="ml-auto flex shrink-0 flex-col items-end gap-1.5">
                                   {label && (
                                     <span className="text-sm font-semibold text-foreground">
@@ -368,7 +364,7 @@ export function BookingCartDialog() {
                         aria-label={t("acceptBookingDisclaimer")}
                         aria-describedby={acceptHint ? "booking-accept-hint" : undefined}
                       />
-                      <span>{BOOKING_REQUEST_DISCLAIMER}</span>
+                      <span>{t("bookingDisclaimer")}</span>
                     </label>
                     {acceptHint && (
                       <p
@@ -376,7 +372,7 @@ export function BookingCartDialog() {
                         role="alert"
                         className="text-xs font-medium text-destructive"
                       >
-                        {BOOKING_ACCEPT_REQUIRED_MESSAGE}
+                        {t("bookingAcceptRequired")}
                       </p>
                     )}
                     <div

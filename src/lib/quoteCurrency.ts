@@ -15,13 +15,13 @@ export function getCurrencyFlag(currency: QuoteCurrency): string {
   return CURRENCY_OPTIONS.find((c) => c.value === currency)?.flag ?? '🇧🇷';
 }
 
-export function formatQuoteCurrency(value: number, currency: QuoteCurrency = 'BRL'): string {
+export function formatQuoteCurrency(value: number, currency: QuoteCurrency = 'BRL', publicLocale?: string | null): string {
   const localeMap: Record<QuoteCurrency, string> = {
     BRL: 'pt-BR',
     USD: 'en-US',
     EUR: 'de-DE',
   };
-  return new Intl.NumberFormat(localeMap[currency], {
+  return new Intl.NumberFormat(publicLocale || localeMap[currency], {
     style: 'currency',
     currency,
   }).format(value);
