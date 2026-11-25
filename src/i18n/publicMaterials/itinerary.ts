@@ -8,7 +8,7 @@
  * por este dicionário.
  */
 import { format } from "date-fns";
-import { ptBR, it as itIT } from "date-fns/locale";
+import { ptBR, it as itIT, enUS } from "date-fns/locale";
 import {
   createTranslator,
   PublicLocale,
@@ -272,9 +272,95 @@ const it: ItineraryDictionary = {
   documentFallbackName: "file",
 };
 
+const en: ItineraryDictionary = {
+  headerBadge: "Travel Itinerary",
+  defaultAgencyName: "Your trip",
+  loadingAlt: "Loading",
+  notFoundTitle: "Itinerary not found",
+  notFoundGenericMessage: "The link may be incorrect or the itinerary is no longer available.",
+  loadErrorMessage: "Error loading itinerary",
+  backHome: "Go to homepage",
+  headlineFallback: "{count} {days} to experience {destination} in a unique way.",
+  travelersCount: "{count} {travelers}",
+  fontDecreaseAria: "Decrease font size",
+  fontDefaultAria: "Default font size",
+  fontIncreaseAria: "Increase font size",
+  passengersTitle: "Passengers",
+  passengerFallbackName: "Passenger",
+  babyLabel: "Infant",
+  childLabel: "Child ({age} years old)",
+  adultLabel: "Adult",
+  calendarSectionTitle: "Trip Calendar",
+  dayByDayTitle: "Day by Day",
+  activityCountSuffix: "{count} {activities}",
+  pricingSectionTitle: "Pricing and Conditions",
+  helpTitle: "Need help?",
+  helpSubtitle: "Speak with your travel advisor.",
+  helpAria: "View advisor",
+  whatsappCta: "Chat on WhatsApp",
+  documentsLabel: "Documents",
+  mapsTitle: "Open in Google Maps",
+  tripTypeFamilia: "Family Trip",
+  tripTypeCasal: "Couples Trip",
+  tripTypeLuaDeMel: "Honeymoon",
+  tripTypeSozinho: "Solo Trip",
+  tripTypeCorporativo: "Corporate Travel",
+  tripTypeFamiliaCriancaPequena: "Family with young child",
+  tripTypeFamiliaAdolescentes: "Family with teens",
+  tripTypeGrupoAmigos: "Group of friends",
+  tripTypeMelhorIdade: "Seniors",
+  budgetEconomico: "Budget",
+  budgetConforto: "Comfort",
+  budgetLuxo: "Luxury",
+  periodManha: "Morning",
+  periodTarde: "Afternoon",
+  periodNoite: "Evening",
+  interestGastronomia: "Gastronomy",
+  interestCultura: "Culture",
+  interestHistoria: "History",
+  interestCompras: "Shopping",
+  interestNatureza: "Nature",
+  interestPraia: "Beach",
+  interestEsportes: "Sports",
+  interestFutebol: "Soccer",
+  interestBasquete: "Basketball",
+  interestParques: "Parks",
+  interestVidaNoturna: "Nightlife",
+  interestRelaxamento: "Relaxation",
+  interestLuxo: "Luxury",
+  interestExperienciasLocais: "Local experiences",
+  interestMuseus: "Museums",
+  interestFotografia: "Photography",
+  interestAventura: "Adventure",
+  interestShows: "Shows",
+  interestVidaUrbana: "City life",
+  pdfRoteiroBadge: "✦ Travel Itinerary",
+  pdfDaysUnit: "{count} {days}",
+  pdfGalleryTitle: "Destination gallery",
+  pdfPassengersLabel: "👥 Passengers",
+  pdfAgeSuffix: "{age} years old",
+  pdfProfileLabel: "✨ Trip profile",
+  pdfDestinationLabel: "📍 Destination",
+  pdfPeriodLabel: "📅 Period",
+  pdfTravelersLabel: "👥 Travelers",
+  pdfDayProgrammingTitle: "Day-by-Day Schedule",
+  pdfNoDaysScheduled: "No days scheduled",
+  pdfDayLabel: "Day {number}",
+  pdfConsultantLabel: "Your travel advisor",
+  pdfWhatsappCta: "💬 Chat on WhatsApp",
+  pdfPreparedFor: "Specially prepared for {name}",
+  pdfGeneratedAt: "Generated on {date} • Agentes de Sonhos",
+  whatsappAria: "Chat on WhatsApp",
+  whatsappMessageTemplate: "Hello! I saw the itinerary for {destination} and would like more information.",
+  invalidLinkMessage: "Invalid link",
+  checkLinkMessage: "Please check the link and try again.",
+  documentFallbackName: "file",
+}
+
 export const itineraryTranslator = createTranslator<ItineraryDictionary>({
   "pt-BR": pt,
   "it-IT": it,
+  "en-US": en,
 });
 
 /** Rótulos de tipo de viagem, indexados pela mesma chave usada no banco. */
@@ -351,6 +437,8 @@ export function daysCountLabel(locale: PublicLocale | string | null | undefined,
   const forms =
     normalizeIsItalian(locale)
       ? { one: "giorno", other: "giorni" }
+      : normalizeIsEnglish(locale)
+      ? { one: "day", other: "days" }
       : { one: "dia", other: "dias" };
   return `${formatPublicNumber(count, locale)} ${pluralize(locale, count, forms)}`;
 }
@@ -359,6 +447,8 @@ export function travelersCountLabel(locale: PublicLocale | string | null | undef
   const forms =
     normalizeIsItalian(locale)
       ? { one: "viaggiatore", other: "viaggiatori" }
+      : normalizeIsEnglish(locale)
+      ? { one: "traveler", other: "travelers" }
       : { one: "viajante", other: "viajantes" };
   return `${formatPublicNumber(count, locale)} ${pluralize(locale, count, forms)}`;
 }
@@ -367,8 +457,14 @@ export function activitiesCountLabel(locale: PublicLocale | string | null | unde
   const forms =
     normalizeIsItalian(locale)
       ? { one: "attività", other: "attività" }
+      : normalizeIsEnglish(locale)
+      ? { one: "activity", other: "activities" }
       : { one: "atividade", other: "atividades" };
   return `${formatPublicNumber(count, locale)} ${pluralize(locale, count, forms)}`;
+}
+
+function normalizeIsEnglish(locale: PublicLocale | string | null | undefined): boolean {
+  return typeof locale === "string" && locale.toLowerCase().startsWith("en");
 }
 
 function normalizeIsItalian(locale: PublicLocale | string | null | undefined): boolean {
@@ -386,6 +482,9 @@ export function formatPublicItineraryDayHeader(
   locale: PublicLocale | string | null | undefined
 ): string {
   const isItalian = normalizeIsItalian(locale);
+  if (normalizeIsEnglish(locale)) {
+    return format(date, "EEEE, MMMM dd", { locale: enUS });
+  }
   const weekdaysPt = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
   const monthsPt = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
   const weekdaysIt = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
@@ -401,6 +500,7 @@ export function formatPublicItineraryDayHeader(
 
 /** Locale date-fns correspondente ao locale público (apenas para formatação, nunca tradução de texto livre). */
 function dateFnsLocale(locale: PublicLocale | string | null | undefined) {
+  if (normalizeIsEnglish(locale)) return enUS;
   return normalizeIsItalian(locale) ? itIT : ptBR;
 }
 
@@ -411,6 +511,9 @@ export function formatPublicHeroDateRange(
   locale: PublicLocale | string | null | undefined
 ): string {
   const dfLocale = dateFnsLocale(locale);
+  if (normalizeIsEnglish(locale)) {
+    return `${format(start, "MMM dd", { locale: dfLocale })} – ${format(end, "MMM dd, yyyy", { locale: dfLocale })}`;
+  }
   if (normalizeIsItalian(locale)) {
     return `${format(start, "dd MMM", { locale: dfLocale })} – ${format(end, "dd MMM yyyy", { locale: dfLocale })}`;
   }
@@ -429,12 +532,13 @@ export function formatPublicDayStripParts(date: Date, locale: PublicLocale | str
 
 /** Data curta dd/MM/yyyy no locale público (usada no PDF). */
 export function formatPublicPdfDate(date: Date, locale: PublicLocale | string | null | undefined): string {
-  return format(date, "dd/MM/yyyy", { locale: dateFnsLocale(locale) });
+  return format(date, normalizeIsEnglish(locale) ? "MM/dd/yyyy" : "dd/MM/yyyy", { locale: dateFnsLocale(locale) });
 }
 
 /** "Gerado em 8 de setembro de 2026" (pt-BR) / "Generato il 8 settembre 2026" (it-IT), usando o rótulo já traduzido. */
 export function formatPublicLongDateFns(date: Date, locale: PublicLocale | string | null | undefined): string {
   const dfLocale = dateFnsLocale(locale);
+  if (normalizeIsEnglish(locale)) return format(date, "MMMM d, yyyy", { locale: dfLocale });
   return normalizeIsItalian(locale)
     ? format(date, "d MMMM yyyy", { locale: dfLocale })
     : format(date, "d 'de' MMMM 'de' yyyy", { locale: dfLocale });

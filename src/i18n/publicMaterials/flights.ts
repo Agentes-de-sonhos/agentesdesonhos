@@ -11,4 +11,16 @@ export const tPublicFlight = createTranslator({
     ticket: "Nº del biglietto", documents: "Documenti di viaggio", openPdf: "Apri biglietto in PDF",
     baggage: "Bagaglio", duration: "Durata", noSegments: "Dettagli dei voli non indicati", loyalty: "Programma fedeltà",
   },
+  "en-US": {
+    copy: "Copy booking code",
+    copied: "Booking code copied",
+    copyError: "Unable to copy. Select the code to copy.",
+    ticket: "Ticket number",
+    documents: "Travel documents",
+    openPdf: "Open ticket in PDF",
+    baggage: "Baggage",
+    duration: "Duration",
+    noSegments: "Flight details not provided",
+    loyalty: "Loyalty program",
+  }
 });

@@ -13,7 +13,9 @@
  */
 
 /** Idiomas suportados nos materiais públicos (pt-BR é o padrão). */
-export type FriendlyLocale = "pt-BR" | "it-IT";
+export type FriendlyLocale = "pt-BR" | "it-IT" | "en-US";
+
+const MONTHS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 const MONTHS_IT = [
   "gennaio",
@@ -102,6 +104,9 @@ export function formatFriendlyDate(
 ): string | null {
   const d = parseFriendlyDate(value);
   if (!d) return null;
+  if (locale === "en-US") {
+    return `${MONTHS_EN[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  }
   if (locale === "it-IT") {
     return `${d.getDate()} ${MONTHS_IT[d.getMonth()]} ${d.getFullYear()}`;
   }
@@ -136,6 +141,12 @@ export function formatFriendlyDateRange(
     a.getDate() === b.getDate();
   if (sameDay) return formatFriendlyDate(a, locale);
 
+  if (locale === "en-US") {
+    const M = MONTHS_EN;
+    if (a.getFullYear() !== b.getFullYear()) return `${formatFriendlyDate(a, locale)} to ${formatFriendlyDate(b, locale)}`;
+    if (a.getMonth() !== b.getMonth()) return `${M[a.getMonth()]} ${a.getDate()} to ${M[b.getMonth()]} ${b.getDate()}, ${b.getFullYear()}`;
+    return `${M[a.getMonth()]} ${a.getDate()} to ${b.getDate()}, ${a.getFullYear()}`;
+  }
   const it = locale === "it-IT";
   const months = it ? MONTHS_IT : MONTHS_PT;
 

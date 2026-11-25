@@ -8,7 +8,7 @@
  * - Conteúdo livre digitado pelo agente NUNCA é traduzido.
  */
 
-export const PUBLIC_LOCALES = ["pt-BR", "it-IT"] as const;
+export const PUBLIC_LOCALES = ["pt-BR", "it-IT", "en-US"] as const;
 export type PublicLocale = (typeof PUBLIC_LOCALES)[number];
 
 /** Fallback seguro para agências sem configuração. */
@@ -24,6 +24,7 @@ export function normalizePublicLocale(value: unknown): PublicLocale {
   const lang = raw.toLowerCase().split(/[-_]/)[0];
   if (lang === "it") return "it-IT";
   if (lang === "pt") return "pt-BR";
+  if (lang === "en") return "en-US";
   return DEFAULT_PUBLIC_LOCALE;
 }
 

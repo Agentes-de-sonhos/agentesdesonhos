@@ -148,7 +148,9 @@ function PasswordGate({
   const phoneDigits = (branding?.phone || "").replace(/\D/g, "");
   const whatsappUrl = phoneDigits
     ? `https://wa.me/${phoneDigits.startsWith("55") ? phoneDigits : `55${phoneDigits}`}?text=${encodeURIComponent(
-        locale === "it-IT"
+        locale === "en-US"
+          ? "Hi! I need help accessing my Travel Wallet."
+          : locale === "it-IT"
           ? "Ciao! Ho bisogno di aiuto per accedere al mio Portafoglio di Viaggio."
           : "Olá! Preciso de ajuda para acessar minha Carteira de Viagem."
       )}`

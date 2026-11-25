@@ -122,7 +122,7 @@ function getServiceLabels(locale: PublicLocale): Record<TripServiceType, string>
 function formatDate(dateStr: string, locale: PublicLocale = "pt-BR") {
   try {
     const [y, m, d] = dateStr.split('-').map(Number);
-    const fmt = locale === "it-IT" ? "dd/MM/yyyy" : "dd/MM/yyyy";
+    const fmt = locale === "en-US" ? "MM/dd/yyyy" : "dd/MM/yyyy";
     return format(new Date(y, m - 1, d), fmt, { locale: ptBR });
   } catch {
     return dateStr;
@@ -938,7 +938,9 @@ function generateItinerarySection(
       `;
     }).join("");
 
-    const formattedDate = locale === "it-IT"
+    const formattedDate = locale === "en-US"
+      ? new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "2-digit" }).format(dayDate)
+      : locale === "it-IT"
       ? new Intl.DateTimeFormat("it-IT", { weekday: "long", day: "2-digit", month: "long" }).format(dayDate)
       : format(dayDate, "EEEE, dd 'de' MMMM", { locale: ptBR });
 
@@ -1048,7 +1050,9 @@ function buildTripPdfHtmlRaw(input: TripPdfBuildInput): string {
   const supabaseItin = (p: string) => (/^https?:\/\//i.test(p) ? p : documentUrl(p));
   const itineraryHtml = generateItinerarySection(input.itineraryActivities || [], supabaseItin, locale);
   const now = input.generatedAt || new Date();
-  const generatedAt = t("pdfGeneratedAt", { date: locale === "it-IT"
+  const generatedAt = t("pdfGeneratedAt", { date: locale === "en-US"
+    ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(now)
+    : locale === "it-IT"
     ? new Intl.DateTimeFormat("it-IT", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" }).format(now)
     : format(now, "dd 'de' MMMM 'de' yyyy 'às' HH:mm", { locale: ptBR }) });
   const title = (trip as any).trip_title || trip.destination;

@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_public_content_locale_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_public_content_locale_check CHECK (public_content_locale IN ('pt-BR', 'it-IT', 'en-US'));

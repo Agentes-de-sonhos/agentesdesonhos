@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { ptBR, it as itLocale } from "date-fns/locale";
+import { ptBR, it as itLocale, enUS } from "date-fns/locale";
 import {
   Plane, Hotel, Car, Bus, Ticket, Shield, Ship, TrainFront, FileText,
   LogIn, LogOut, CalendarClock, ChevronRight,
@@ -265,9 +265,11 @@ export function NextAppointmentCard({
         </div>
       ) : (() => {
         const Icon = ICON_FOR[next.kind];
-        const dateFns = locale === "it-IT" ? itLocale : ptBR;
+        const dateFns = locale === "it-IT" ? itLocale : locale === "en-US" ? enUS : ptBR;
         const dateLabel =
-          locale === "it-IT"
+          locale === "en-US"
+            ? format(next.when, "EEE, MMM d", { locale: dateFns })
+            : locale === "it-IT"
             ? format(next.when, "EEE d MMM", { locale: dateFns })
             : format(next.when, "EEE, dd 'de' MMM", { locale: dateFns });
         const timeLabel = next.hasTime ? format(next.when, "HH:mm", { locale: dateFns }) : null;

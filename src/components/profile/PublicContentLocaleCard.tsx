@@ -21,6 +21,7 @@ import {
 const OPTIONS: { value: PublicLocale; label: string }[] = [
   { value: "pt-BR", label: "Português (Brasil)" },
   { value: "it-IT", label: "Italiano" },
+  { value: "en-US", label: "English (United States)" },
 ];
 
 interface Props {

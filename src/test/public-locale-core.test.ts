@@ -35,6 +35,8 @@ describe("locale dos materiais públicos", () => {
     expect(resolvePublicLocale({})).toBe("pt-BR");
     expect(resolvePublicLocale({ public_content_locale: null })).toBe("pt-BR");
     expect(resolvePublicLocale({ public_content_locale: "it-IT" })).toBe("it-IT");
+    expect(resolvePublicLocale({ public_content_locale: "en-US" })).toBe("en-US");
+    expect(resolvePublicLocale({ public_content_locale: "en" })).toBe("en-US");
   });
 });
 
@@ -42,12 +44,14 @@ describe("tradutor tipado", () => {
   const t = createTranslator({
     "pt-BR": { hello: "Olá, {name}", plain: "Investimento" },
     "it-IT": { hello: "Ciao, {name}", plain: "Investimento totale" },
+    "en-US": { hello: "Hi, {name}", plain: "Total investment" },
   });
 
   it("traduz e interpola por idioma", () => {
     expect(t("pt-BR")("hello", { name: "Ana" })).toBe("Olá, Ana");
     expect(t("it-IT")("hello", { name: "Ana" })).toBe("Ciao, Ana");
     expect(t("it-IT")("plain")).toBe("Investimento totale");
+    expect(t("en-US")("hello", { name: "Ana" })).toBe("Hi, Ana");
   });
 
   it("cai em pt-BR quando o idioma é desconhecido", () => {
