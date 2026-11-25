@@ -1,19 +1,23 @@
 import { useState } from "react";
-import { ChevronDown, Layers } from "lucide-react";
+import { ChevronDown, Layers, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * Section accordion used on the public quote link. Starts collapsed and shows
- * the section name plus the number of services it contains.
+ * the section name plus the number of services it contains. The header icon
+ * follows the group's service type (plane for flights, hotel for lodging,
+ * layers as the neutral fallback).
  */
 export function PublicSectionAccordion({
   title,
   count,
+  icon: Icon = Layers,
   children,
   defaultOpen = false,
 }: {
   title: string;
   count: number;
+  icon?: LucideIcon;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }) {
@@ -28,7 +32,7 @@ export function PublicSectionAccordion({
         className="w-full flex items-center gap-3 px-4 sm:px-5 py-4 text-left hover:bg-muted/40 transition-colors"
       >
         <span className="shrink-0 h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Layers className="h-4 w-4 text-primary" />
+          <Icon className="h-4 w-4 text-primary" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-semibold text-foreground truncate">{title}</span>

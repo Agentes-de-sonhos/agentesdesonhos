@@ -6,7 +6,7 @@
  * at most one section (`section_id`), and legacy services simply have `null`.
  */
 
-import type { QuoteSection, QuoteService } from "@/types/quote";
+import type { QuoteSection, QuoteService, ServiceType } from "@/types/quote";
 
 export interface QuoteSectionGroup {
   section: QuoteSection;
@@ -67,6 +67,33 @@ export function buildQuoteSectionLayout(
 /** Public link only shows sections that actually have services. */
 export function visibleSectionGroups(layout: QuoteSectionLayout): QuoteSectionGroup[] {
   return layout.groups.filter((g) => g.services.length > 0);
+}
+
+/**
+ * Ícone do cabeçalho de uma seção: o tipo de serviço majoritário do grupo
+ * (empate fica com o primeiro serviço) ou "layers" quando o grupo está vazio.
+ * Visual apenas — nunca altera totais nem regras de negócio.
+ */
+export type SectionIconKind = ServiceType | "layers";
+
+const KNOWN_SERVICE_TYPES: ServiceType[] = [
+  "flight", "hotel", "car_rental", "transfer", "attraction",
+  "insurance", "cruise", "circuit", "rail_transport", "other",
+];
+
+export function sectionIconKindForGroup(services: QuoteService[]): SectionIconKind {
+  if (services.length === 0) return "layers";
+  const kindOf = (s: QuoteService): ServiceType =>
+    KNOWN_SERVICE_TYPES.includes(s.service_type) ? s.service_type : "other";
+  const counts = new Map<ServiceType, number>();
+  for (const s of services) counts.set(kindOf(s), (counts.get(kindOf(s)) ?? 0) + 1);
+  let best: ServiceType = "other";
+  let bestCount = 0;
+  for (const s of services) {
+    const c = counts.get(kindOf(s)) ?? 0;
+    if (c > bestCount) { best = kindOf(s); bestCount = c; }
+  }
+  return best;
 }
 
 /**

@@ -8,14 +8,14 @@ import { setOgMeta, GENERIC_PUBLIC_META } from "@/lib/ogMeta";
 import { useToolSharePreview } from "@/lib/toolSharePreview";
 import { useParams } from "react-router-dom";
 import { usePublicQuote } from "@/hooks/useQuotes";
-import { buildQuoteSectionLayout, visibleSectionGroups } from "@/lib/quoteSections";
+import { buildQuoteSectionLayout, visibleSectionGroups, sectionIconKindForGroup, type SectionIconKind } from "@/lib/quoteSections";
 import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordion";
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
-import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight, Layers, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -99,6 +99,13 @@ function getServiceIcon(service: QuoteService): React.ReactNode {
   const Icon = includedIconComponent(iconId);
   return <Icon className="h-5 w-5" aria-hidden="true" />;
 }
+
+/** Ícone do cabeçalho de cada seção: segue o tipo de serviço do grupo. */
+const SECTION_ICONS: Record<SectionIconKind, LucideIcon> = {
+  flight: Plane, hotel: Hotel, car_rental: Car, transfer: ArrowRightLeft,
+  attraction: Ticket, insurance: Shield, cruise: Ship, rail_transport: TramFront,
+  circuit: Map, other: Layers, layers: Layers,
+};
 
 /**
  * Cabeçalho do serviço no orçamento WEB: mantém o degradê histórico do
@@ -1951,6 +1958,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                       key={group.section.id}
                       title={group.section.title}
                       count={group.services.length}
+                      icon={SECTION_ICONS[sectionIconKindForGroup(group.services)]}
                     >
                       {/* Dentro de um grupo o único nível colapsável é o acordeão. */}
                       <div className="space-y-3">{group.services.map((s) => renderCard(s, false))}</div>

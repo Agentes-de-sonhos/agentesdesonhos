@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import {
   buildQuoteSectionLayout,
   visibleSectionGroups,
+  sectionIconKindForGroup,
 } from "@/lib/quoteSections";
 import type { QuoteSection, QuoteService } from "@/types/quote";
 import { quoteDict } from "@/i18n/publicMaterials/quote";
@@ -196,5 +197,34 @@ describe("bloco azul unificado de condições de pagamento", () => {
 
   it("card recolhido não recebe a faixa azul de pagamento", () => {
     expect(src).toMatch(/expanded && showInvestmentInline && !hotelHasMultipleRooms/);
+  });
+});
+
+describe("ícone da seção acompanha o tipo de serviço", () => {
+  const svc = (id: string, service_type: string): QuoteService =>
+    ({ id, quote_id: "q1", order_index: 0, section_id: "s1", service_type, amount: 100 } as unknown as QuoteService);
+
+  it("grupo de voos usa avião e grupo de hotéis usa hotel", () => {
+    expect(sectionIconKindForGroup([svc("a", "flight"), svc("b", "flight")])).toBe("flight");
+    expect(sectionIconKindForGroup([svc("a", "hotel"), svc("b", "hotel"), svc("c", "hotel")])).toBe("hotel");
+  });
+
+  it("tipo majoritário vence e empate fica com o primeiro serviço", () => {
+    expect(sectionIconKindForGroup([svc("a", "other"), svc("b", "other"), svc("c", "flight")])).toBe("other");
+    expect(sectionIconKindForGroup([svc("a", "flight"), svc("b", "hotel")])).toBe("flight");
+  });
+
+  it("outros serviços e grupo vazio mantêm o ícone de camadas", () => {
+    expect(sectionIconKindForGroup([svc("a", "other")])).toBe("other");
+    expect(sectionIconKindForGroup([])).toBe("layers");
+  });
+
+  it("o acordeão renderiza o ícone recebido e o orçamento mapeia cada tipo", () => {
+    const accordion = readFileSync("src/components/quote/PublicSectionAccordion.tsx", "utf8");
+    expect(accordion).toMatch(/icon: Icon = Layers/);
+    expect(accordion).toMatch(/<Icon className="h-4 w-4 text-primary" \/>/);
+    expect(src).toMatch(/icon=\{SECTION_ICONS\[sectionIconKindForGroup\(group\.services\)\]\}/);
+    expect(src).toMatch(/flight: Plane, hotel: Hotel/);
+    expect(src).toMatch(/other: Layers, layers: Layers/);
   });
 });
