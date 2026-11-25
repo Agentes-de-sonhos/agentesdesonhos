@@ -45,10 +45,10 @@ describe("cards agrupados x individuais no orçamento público", () => {
     expect(src).toMatch(/gridTemplateRows: expanded \? "1fr" : "0fr"/);
   });
 
-  it("serviços de grupo são renderizados com collapsible=false e os soltos sem a flag", () => {
-    expect(src).toMatch(/group\.services\.map\(\(s\) => renderCard\(s, false\)\)/);
+  it("grupo com vários serviços renderiza cards recolhidos; grupo com um só e soltos sem a flag", () => {
+    expect(src).toMatch(/group\.services\.map\(\(s\) => renderCard\(s, group\.services\.length > 1\)\)/);
     expect(src).toMatch(/layout\.unsectioned\.map\(\(s\) => renderCard\(s\)\)/);
-    expect(src).toMatch(/quote\.services!\.map\(\(s\) => renderCard\(s\)\)/);
+    expect(src).toMatch(/quote\.services\?\.map\(\(s\) => renderCard\(s\)\)/);
   });
 
   it("carrinho inline continua dentro do card, após o footer de pagamento", () => {
@@ -142,7 +142,7 @@ describe("apresentação dos pagamentos por serviço", () => {
 
   it("valores ocultos: pacote fechado mostra apenas o rótulo de incluído", () => {
     expect(src).toMatch(/hidesIndividualAmounts\(quote\)/);
-    expect(src).toMatch(/PACKAGE_INCLUDED_LABEL/);
+    expect(src).toMatch(/t\("includedInPackageAmount"\)/);
   });
 });
 

@@ -1047,7 +1047,7 @@ function CollapsibleServiceCard({
           <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
         )}
         {collapsible && (
-          <ChevronDown className={`h-5 w-5 opacity-60 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`} />
+          <ChevronDown className={`h-5 w-5 text-foreground opacity-70 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`} />
         )}
       </div>
     </>
@@ -1966,8 +1966,12 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                       count={countCommercialServices(group.services)}
                       icon={SECTION_ICONS[sectionIconKindForGroup(group.services)]}
                     >
-                      {/* Dentro de um grupo o único nível colapsável é o acordeão. */}
-                      <div className="space-y-3">{group.services.map((s) => renderCard(s, false))}</div>
+                      {/* Seção com mais de um serviço: cada card vem recolhido e
+                          abre ao clicar. Com um único serviço, o card fica aberto
+                          e o colapso fica a cargo do acordeão da seção. */}
+                      <div className="space-y-3">
+                        {group.services.map((s) => renderCard(s, group.services.length > 1))}
+                      </div>
                     </PublicSectionAccordion>
                   ))}
                   {layout.unsectioned.length > 0 && (

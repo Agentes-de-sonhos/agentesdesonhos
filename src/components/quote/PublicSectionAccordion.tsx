@@ -47,7 +47,7 @@ export function PublicSectionAccordion({
         </span>
         <ChevronDown
           className={cn(
-            "h-5 w-5 text-muted-foreground transition-transform duration-200 shrink-0",
+            "h-5 w-5 text-foreground transition-transform duration-200 shrink-0",
             open && "rotate-180",
           )}
         />
