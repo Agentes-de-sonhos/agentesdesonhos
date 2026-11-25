@@ -484,6 +484,13 @@
       "when": 1795566611446,
       "tag": "0068_public_locale_english",
       "breakpoints": true
+    },
+    {
+      "idx": 69,
+      "version": "7",
+      "when": 1795566803695,
+      "tag": "0069_quote_public_locale",
+      "breakpoints": true
     }
   ]
 }

@@ -47,7 +47,7 @@ import { QuoteSummary } from "@/components/quote/QuoteSummary";
 import { QuoteDateEditor } from "@/components/quote/QuoteDateEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateQuotePDF } from "@/components/quote/QuotePDF";
-import { resolvePublicLocale } from "@/i18n/publicMaterials/locale";
+import { normalizePublicLocale, resolvePublicLocale } from "@/i18n/publicMaterials/locale";
 import { QuoteDocuments } from "@/components/quote/QuoteDocuments";
 import { ServiceCategoryGrid } from "@/components/quote/ServiceCategoryGrid";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -87,6 +87,7 @@ import { formatQuoteCurrency, getQuoteCurrencyInfo, getCurrencySymbol, type Quot
 import { DestinationIntroEditor } from "@/components/quote/DestinationIntroEditor";
 import { WhatsIncludedEditor } from "@/components/quote/WhatsIncludedEditor";
 import { QuoteAdvancedSettings } from "@/components/quote/QuoteAdvancedSettings";
+import { QuoteLanguageSettings } from "@/components/quote/QuoteLanguageSettings";
 import { QuoteBookingRequestSettings } from "@/components/quote/QuoteBookingRequestSettings";
 import { QuoteOfferPublishToggle } from "@/components/quote/QuoteOfferPublishToggle";
 import { AIImportServiceModal, type AIImportResult } from "@/components/shared/AIImportServiceModal";
@@ -490,6 +491,7 @@ export default function GerarOrcamento() {
   /** Etapa 6 — blocos independentes, recolhidos ao entrar. */
   const [advancedSections, setAdvancedSections] = useState({
     currency: false,
+    language: false,
     signature: false,
     booking: false,
   });
@@ -997,7 +999,7 @@ export default function GerarOrcamento() {
     if (!quote) return;
     if (blockForFareReview()) return;
     if (blockForFareSync()) return;
-    await generateQuotePDF(quote, agentProfile, resolvePublicLocale(agentProfile));
+    await generateQuotePDF(quote, agentProfile, (quote as any).public_locale ? normalizePublicLocale((quote as any).public_locale) : resolvePublicLocale(agentProfile));
   };
 
   // Orçamentos antigos (criados antes do link automático) recebem o link
@@ -2037,6 +2039,12 @@ export default function GerarOrcamento() {
               onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
               open={advancedSections.currency}
               onToggle={() => toggleAdvancedSection("currency")}
+            />
+            <QuoteLanguageSettings
+              quote={quote as any}
+              onUpdated={() => queryClient.invalidateQueries({ queryKey: ["quote", id] })}
+              open={advancedSections.language}
+              onToggle={() => toggleAdvancedSection("language")}
             />
             <DocumentSignatureCard
               table="quotes"

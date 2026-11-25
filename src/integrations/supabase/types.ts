@@ -12639,6 +12639,7 @@ export type Database = {
           payment_terms: string | null
           pricing_mode: string
           public_access_code: string | null
+          public_locale: string | null
           share_expires_at: string | null
           share_token: string | null
           show_destination_intro: boolean
@@ -12688,6 +12689,7 @@ export type Database = {
           payment_terms?: string | null
           pricing_mode?: string
           public_access_code?: string | null
+          public_locale?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean
@@ -12737,6 +12739,7 @@ export type Database = {
           payment_terms?: string | null
           pricing_mode?: string
           public_access_code?: string | null
+          public_locale?: string | null
           share_expires_at?: string | null
           share_token?: string | null
           show_destination_intro?: boolean

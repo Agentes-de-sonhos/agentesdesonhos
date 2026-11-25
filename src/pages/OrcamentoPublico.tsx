@@ -13,7 +13,7 @@ import { PublicSectionAccordion } from "@/components/quote/PublicSectionAccordio
 import { ORCAMENTO_DOMAIN } from "@/lib/orcamento-domain";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
+import { normalizePublicLocale, resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight, Layers, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -1625,7 +1625,9 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
     );
   }
 
-  publicLocale = resolvePublicLocale(agentProfile);
+  publicLocale = (quote as any)?.public_locale
+    ? normalizePublicLocale((quote as any).public_locale)
+    : resolvePublicLocale(agentProfile);
 
   if (!quote) {
     return (

@@ -1,0 +1,2 @@
+ALTER TABLE public.quotes ADD COLUMN IF NOT EXISTS public_locale text;
+ALTER TABLE public.quotes ADD CONSTRAINT quotes_public_locale_check CHECK (public_locale IS NULL OR public_locale IN ('pt-BR', 'it-IT', 'en-US'));
