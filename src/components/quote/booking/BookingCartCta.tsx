@@ -1,4 +1,4 @@
-import { CheckCircle2, ShoppingCart } from "lucide-react";
+import { CheckCircle2, ClipboardCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
@@ -43,7 +43,7 @@ export function BookingCartCta() {
             {submitted ? (
               <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <ShoppingCart className="h-4 w-4" aria-hidden="true" />
+              <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
             )}
             {submitted ? t("viewMyRequest") : t("viewMyCart")}
             {!submitted && (

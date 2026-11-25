@@ -234,7 +234,7 @@ describe("carrinho persistente e modal amplo", () => {
     render(<Harness quote={quoteOf([svc("a")])} />);
     expect(document.querySelector("[data-booking-cart-dialog]")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: /Ver meu carrinho/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Aprovar e solicitar reserva/i }));
     await waitFor(() =>
       expect(document.querySelectorAll("[data-booking-cart-dialog]").length).toBe(1),
     );
@@ -251,14 +251,14 @@ describe("carrinho persistente e modal amplo", () => {
 
   it("carrinho continua acessível com zero itens e mostra estado vazio", async () => {
     render(<Harness quote={quoteOf([svc("a")])} />);
-    fireEvent.click(screen.getByRole("button", { name: /Ver meu carrinho/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Aprovar e solicitar reserva/i }));
     expect(await screen.findByText(/Sua seleção está vazia/i)).toBeTruthy();
   });
 
   it("remove um item de dentro do modal", async () => {
     render(<Harness quote={quoteOf([svc("a"), svc("b")])} />);
     fireEvent.click(addButton("a"));
-    fireEvent.click(screen.getByRole("button", { name: /Ver meu carrinho/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Aprovar e solicitar reserva/i }));
     const removeBtn = await screen.findByRole("button", { name: /Remover .* da solicitação/i });
     fireEvent.click(removeBtn);
     expect(screen.getByTestId("count").textContent).toBe("0");
@@ -273,7 +273,7 @@ describe("carrinho persistente e modal amplo", () => {
         })}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: /Ver meu carrinho/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Aprovar e solicitar reserva/i }));
     await screen.findByText(/Minha solicitação de reserva/i);
     expect(document.body.textContent).not.toContain("1.234");
   });
@@ -281,7 +281,7 @@ describe("carrinho persistente e modal amplo", () => {
   it("envia exatamente os serviços escolhidos pelo fluxo existente", async () => {
     render(<Harness quote={quoteOf([svc("a"), svc("b")])} />);
     fireEvent.click(addButton("a"));
-    fireEvent.click(screen.getByRole("button", { name: /Ver meu carrinho/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Aprovar e solicitar reserva/i }));
 
     fireEvent.change(await screen.findByLabelText(/Nome completo/i), {
       target: { value: "Maria Teste" },

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ShoppingCart } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBookingCart } from "@/components/quote/booking/BookingCartContext";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
@@ -71,7 +71,7 @@ export function BookingCartLauncher() {
         className="fixed right-4 top-[4.5rem] z-40 hidden items-center gap-2 rounded-full border border-border/60 px-4 py-2.5 text-sm font-semibold shadow-lg transition-[filter] hover:brightness-95 hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:inline-flex"
       >
         <span className="relative inline-flex">
-          <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+          <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
           {badge}
         </span>
         <span className="hidden lg:inline">{t("myBookingSelection")}</span>
@@ -89,7 +89,7 @@ export function BookingCartLauncher() {
         style={{ bottom: "calc(1rem + env(safe-area-inset-bottom, 0px))" }}
       >
         <span className="relative inline-flex">
-          <ShoppingCart className="h-6 w-6" aria-hidden="true" />
+          <ClipboardCheck className="h-6 w-6" aria-hidden="true" />
           <span
             className={cn(
               "absolute -right-2 -top-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold shadow ring-1 ring-primary/30",
