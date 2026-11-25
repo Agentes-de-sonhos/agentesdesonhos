@@ -89,7 +89,7 @@ export function BookingCartDialog() {
         onOpenChange={(v) => (cart.submitting ? null : cart.setCartOpen(v))}
       >
         <DialogContent
-          className="box-border flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-muted p-0 sm:h-auto sm:max-h-[92dvh] sm:w-[94vw] sm:max-w-[min(1100px,94vw)] sm:rounded-2xl"
+          className="box-border flex h-[100dvh] max-h-[100dvh] w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-muted p-0 sm:h-auto sm:max-h-[92dvh] sm:w-[94vw] sm:max-w-[min(760px,94vw)] sm:rounded-2xl"
           data-booking-cart-dialog="true"
         >
           <DialogHeader className="shrink-0 space-y-0 border-b border-border bg-card px-5 py-4 pr-12 text-left sm:px-6">
@@ -158,7 +158,7 @@ export function BookingCartDialog() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+              <div className="space-y-5">
                 <div className="min-w-0 space-y-4">
                   {summary.map((group) => {
                     const chips = sectionMetaChips(group.sectionMeta);
@@ -243,7 +243,7 @@ export function BookingCartDialog() {
                   })}
                 </div>
 
-                <div className="min-w-0 space-y-4 self-start rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5 [&_input]:bg-muted/60">
+                <div className="min-w-0 space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5 [&_input]:bg-muted/60">
                   <div className="grid gap-3 sm:grid-cols-2">
                     {!hasLinkedClient && (
                       <>
