@@ -1,0 +1,1 @@
+- `<SEO>` resolves relative canonicals on the agency's own host; platform/preview hosts keep the platform base. Why: no canonical to the platform domain.
