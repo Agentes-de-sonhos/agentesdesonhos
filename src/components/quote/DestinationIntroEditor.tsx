@@ -21,6 +21,9 @@ import { cn } from "@/lib/utils";
 import { AgencyLibraryPicker } from "@/components/image-library/AgencyLibraryPicker";
 import { InternetPhotosPicker } from "@/components/shared/InternetPhotosPicker";
 import { MediaOverlayActions, MediaOverlayButton } from "@/components/shared/MediaOverlayActions";
+import { RichContentEditor } from "@/components/operator/RichContentEditor";
+import { FormattedText } from "@/components/ui/formatted-text";
+import { descriptionToEditorHtml, descriptionToPlainText } from "@/lib/richDescription";
 
 /* ── Shared generation routines (used by the editor and by the header switch) ── */
 
@@ -185,7 +188,8 @@ export function DestinationIntroEditor({
     (newText: string) => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
       saveTimeoutRef.current = setTimeout(() => {
-        saveToDb({ destination_intro_text: newText || null });
+        const empty = !newText || !descriptionToPlainText(newText).trim();
+        saveToDb({ destination_intro_text: empty ? null : newText });
       }, 1500);
     },
     [saveToDb]
@@ -474,7 +478,8 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
   }, [textOpen, text]);
 
   const handleSaveText = () => {
-    onTextChange(draftText);
+    const cleaned = descriptionToPlainText(draftText).trim() ? draftText : "";
+    onTextChange(cleaned);
     setTextOpen(false);
   };
 
@@ -485,7 +490,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
     setUrlInput("");
   };
 
-  const charCount = draftText.length;
+  const charCount = descriptionToPlainText(draftText).length;
 
   return (
     <div className="space-y-4">
@@ -629,7 +634,7 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
             className="mt-3 min-h-[118px] flex-1 rounded-lg border border-border/70 bg-background p-3"
           >
             {text ? (
-              <p className="whitespace-pre-wrap text-sm leading-6 text-foreground line-clamp-[12]">{text}</p>
+              <FormattedText className="text-sm leading-6 text-foreground line-clamp-[12]">{text}</FormattedText>
             ) : (
               <p className="text-sm italic text-muted-foreground">Nenhuma descrição adicionada ainda.</p>
             )}
@@ -664,19 +669,17 @@ function EmbeddedDestinationIntro(props: EmbeddedProps) {
 
       {/* Text-only modal */}
       <Dialog open={textOpen} onOpenChange={setTextOpen}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Editar descrição do destino</DialogTitle>
             <DialogDescription>
-              Texto exibido na apresentação do destino do orçamento.
+              Texto exibido na apresentação do destino do orçamento. Use a barra de ferramentas para negrito, itálico, listas e links.
             </DialogDescription>
           </DialogHeader>
-          <Textarea
-            value={draftText}
-            onChange={(e) => setDraftText(e.target.value)}
+          <RichContentEditor
+            content={descriptionToEditorHtml(draftText)}
+            onChange={(html) => setDraftText(html)}
             placeholder="Descrição curta e envolvente do destino..."
-            rows={8}
-            className="resize-none text-sm"
           />
           <div className="text-xs text-muted-foreground text-right">{charCount} caracteres</div>
           <DialogFooter>

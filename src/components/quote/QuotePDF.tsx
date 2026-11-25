@@ -1,6 +1,6 @@
 import { hotelRefundLabel } from "@/lib/hotelRefundPolicy";
 import { hotelRates, mealPlanLabel } from "@/lib/hotelRates";
-import { sanitizedDescriptionHtml, descriptionToPlainText } from "@/lib/richDescription";
+import { sanitizedDescriptionHtml, descriptionToPlainText, isHtmlDescription } from "@/lib/richDescription";
 import { format } from "date-fns";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
 import { type PublicLocale, DEFAULT_PUBLIC_LOCALE, formatPublicShortDate, formatPublicLongDate, pluralize } from "@/i18n/publicMaterials/locale";
@@ -993,7 +993,9 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           // PDF: APENAS a primeira imagem; layout 2 colunas (img 25% / texto 75%)
           const firstImg = hasImages ? introImages[0] : null;
           const safeText = hasText
-            ? introText.replace(/</g, "&lt;").replace(/\n/g, "<br/>")
+            ? isHtmlDescription(introText)
+              ? sanitizedDescriptionHtml(introText)
+              : introText.replace(/</g, "&lt;").replace(/\n/g, "<br/>")
             : "";
 
           if (firstImg && hasText) {
@@ -1005,7 +1007,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
                       <img src="${firstImg}" alt="${quote.destination}" style="width:100%;height:170px;object-fit:cover;border-radius:14px;border:1px solid ${C.border};display:block;" />
                     </td>
                     <td style="vertical-align:top;">
-                      <p style="font-size:13px;color:${C.muted};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</p>
+                      <div style="font-size:13px;color:${C.muted};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;text-align:left;">${safeText}</div>
                     </td>
                   </tr>
                 </table>
@@ -1021,7 +1023,7 @@ export async function generateQuotePDF(quote: Quote & Record<string, any>, profi
           }
           return `
             <div class="pdf-block destination-intro" style="margin-bottom:20px;">
-              <p style="font-size:13px;color:${C.muted};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</p>
+              <div style="font-size:13px;color:${C.muted};line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-word;">${safeText}</div>
             </div>
           `;
         })()}

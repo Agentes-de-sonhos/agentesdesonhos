@@ -64,9 +64,9 @@ export function DestinationIntroPublic({ text, images, destination }: Destinatio
 
       {/* Description text */}
       {hasText && (
-        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center px-2 sm:px-6">
+        <div className="text-sm sm:text-base text-muted-foreground leading-relaxed text-center px-2 sm:px-6">
           <FormattedText>{text!}</FormattedText>
-        </p>
+        </div>
       )}
     </section>
   );
