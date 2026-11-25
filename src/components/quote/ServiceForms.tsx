@@ -40,6 +40,7 @@ import { useServiceImages } from "@/hooks/useServiceImages";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { MAX_HOTEL_RATES, MEAL_PLAN_LABELS, sanitizeExtraRates, type HotelExtraRate } from "@/lib/hotelRates";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextareaWithTemplate } from "@/components/notes/RichTextareaWithTemplate";
@@ -2880,6 +2881,7 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
   const initialIconId = sanitizeIncludedIconId((init as any)?.icon_id) ?? undefined;
   const [iconId, setIconId] = useState<IncludedIconId | undefined>(initialIconId);
   const [iconPickerOpen, setIconPickerOpen] = useState(false);
+  const [infoOnly, setInfoOnly] = useState<boolean>((init as any)?.info_only === true);
   const form = useForm<z.infer<typeof otherSchema>>({
     resolver: zodResolver(otherSchema),
     defaultValues: {
@@ -2925,10 +2927,11 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
       custom_title: values.custom_title?.trim() || "",
       company_name: values.company_name || "",
       description: values.description,
-      price: values.price ?? 0,
+      price: infoOnly ? 0 : (values.price ?? 0),
+      ...(infoOnly ? { info_only: true } : {}),
       ...(sanitizeIncludedIconId(iconId) ? { icon_id: sanitizeIncludedIconId(iconId) as string } : {}),
       ...(placeId ? { place_id: placeId } : {}),
-    }, values.price ?? 0, values.option_label || undefined);
+    }, infoOnly ? 0 : (values.price ?? 0), values.option_label || undefined);
   };
 
   return (
@@ -3013,12 +3016,21 @@ function OtherForm({ onSubmit, onCancel, isLoading, showOptionLabel, initialData
           <FormItem><FormLabel>Descrição</FormLabel><FormControl><RichTextareaWithTemplate placeholder="Descreva o serviço..." rows={3} onValueChange={field.onChange} {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         {photoSlot}
+        <div className="flex items-start justify-between gap-4 rounded-xl border bg-card p-4">
+          <div className="space-y-0.5">
+            <Label htmlFor="other-info-only" className="text-sm font-medium">Usar somente como texto informativo</Label>
+            <p className="text-xs text-muted-foreground">Para regras, condições e avisos. Não tem valor, não conta como serviço e o cliente não pode selecionar.</p>
+          </div>
+          <Switch id="other-info-only" checked={infoOnly} onCheckedChange={(v) => { setInfoOnly(v); if (v) form.setValue("price", 0); }} />
+        </div>
+        {!infoOnly && (<>
         <FormField control={form.control} name="price" render={({ field }) => (
           <FormItem><FormLabel>Valor (R$)</FormLabel><FormControl><Input type="number" min={0} step="0.01" {...field} value={field.value ?? ""} onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))} /></FormControl><FormMessage /></FormItem>
         )} />
         {renderPaymentSlot(paymentSlot, form.watch("price") ?? 0)}
         <OptionLabelField control={form.control} visible={showOptionLabel || !!initialData?.option_label} placeholder="Ex: Opção recomendada" />
         {supplierSlot}
+        </>)}
         <ServiceFormActions>
           <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
           <Button type="submit" disabled={isLoading}>{initialData ? <Pencil className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}Salvar</Button>

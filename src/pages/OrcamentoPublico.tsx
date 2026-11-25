@@ -1,3 +1,4 @@
+import { isInfoOnlyService, countCommercialServices } from "@/lib/quoteInfoOnly";
 import { ModernQuoteShell, ModernQuoteMobileBar } from "@/components/quote/modern/ModernQuoteShell";
 import { isModernQuotePreview, resolveModernSidebar } from "@/lib/quoteModernPreview";
 import { ModernFlightTickets } from "@/components/quote/modern/ModernFlightTickets";
@@ -1158,7 +1159,7 @@ function CollapsibleServiceCard({
             </div>
           )}
         </div>
-          {expanded && showInvestmentInline && !hotelHasMultipleRooms && (
+          {expanded && showInvestmentInline && !hotelHasMultipleRooms && !isInfoOnlyService(service) && (
             <ServiceInvestmentInline service={service} quote={quote} />
           )}
           {collapsible && expanded && (
@@ -1167,7 +1168,7 @@ function CollapsibleServiceCard({
         </div>
       </div>
       {/* Per-service payment footer — always visible (open or collapsed) */}
-      {showPaymentPerService && !showInvestmentInline && !hotelHasMultipleRooms && (() => {
+      {showPaymentPerService && !showInvestmentInline && !hotelHasMultipleRooms && !isInfoOnlyService(service) && (() => {
         const payConfig = extractServicePaymentConfig(service);
         if (!payConfig.is_custom_payment) return null;
         const feeInfo = extractFlightFeeInfo(service);
@@ -1960,7 +1961,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
                     <PublicSectionAccordion
                       key={group.section.id}
                       title={group.section.title}
-                      count={group.services.length}
+                      count={countCommercialServices(group.services)}
                       icon={SECTION_ICONS[sectionIconKindForGroup(group.services)]}
                     >
                       {/* Dentro de um grupo o único nível colapsável é o acordeão. */}

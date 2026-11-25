@@ -9,6 +9,7 @@
  * (`submit-booking-request` / `submit_quote_booking_request`) continua sendo a
  * autoridade final e o contrato do backend não muda.
  */
+import { isInfoOnlyService } from "@/lib/quoteInfoOnly";
 import {
   createContext,
   useCallback,
@@ -174,10 +175,10 @@ export function BookingCartProvider({
   children,
 }: ProviderProps) {
   const t = translateQuote(locale);
+  const services = ((quote?.services || []) as QuoteService[]).filter((s) => !isInfoOnlyService(s));
   const enabled =
-    (quote as any)?.booking_requests_enabled === true && (quote?.services?.length ?? 0) > 0;
+    (quote as any)?.booking_requests_enabled === true && services.length > 0;
 
-  const services = (quote?.services || []) as QuoteService[];
   const groups = (((quote as any)?.choice_groups || []) as QuoteChoiceGroup[]) || [];
 
   const model = useMemo(
