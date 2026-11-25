@@ -42,6 +42,14 @@ const MUNDO: AgencySharePreview = {
   imagePath: "/og/share-mundo.jpg",
 };
 
+const CURTI: AgencySharePreview = {
+  siteName: "Curti Viagens",
+  title: "Curti Viagens | Agência de Viagens em Holambra (SP)",
+  description:
+    "Consultoria completa de viagens desde 2013: Orlando, cruzeiros, resorts no Brasil, Nova York, Europa e roteiros sob medida com a Curti Viagens.",
+  imagePath: "/og/share-curti.jpg",
+};
+
 const PREVIEW_BY_HOST: Record<string, AgencySharePreview> = {
   "destinoscomaju.com.br": JU,
   "www.destinoscomaju.com.br": JU,
@@ -51,12 +59,14 @@ const PREVIEW_BY_HOST: Record<string, AgencySharePreview> = {
   "www.paraisoviagens.com": PARAISO,
   "omundoemcores.com.br": MUNDO,
   "www.omundoemcores.com.br": MUNDO,
+  "curtiviagens.com.br": CURTI,
+  "www.curtiviagens.com.br": CURTI,
 };
 
 export function resolveAgencySharePreview(hostname?: string | null) {
   const host = normalizeBrandHost(hostname);
   const preview = PREVIEW_BY_HOST[host];
   if (!preview) return null;
-  const origin = `https://${host}`;
+  const origin = `https://${host === "curtiviagens.com.br" ? "www.curtiviagens.com.br" : host}`;
   return { ...preview, image: `${origin}${preview.imagePath}`, canonical: `${origin}/` };
 }

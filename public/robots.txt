@@ -21,3 +21,5 @@ Sitemap: https://agentesdesonhos.com.br/sitemap.xml
 Sitemap: https://www.destinoscomaju.com.br/sitemap-destinoscomaju.xml
 
 Sitemap: https://www.omundoemcores.com.br/sitemap-omundoemcores.xml
+
+Sitemap: https://www.curtiviagens.com.br/sitemap-curtiviagens.xml

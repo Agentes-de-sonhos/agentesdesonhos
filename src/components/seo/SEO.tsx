@@ -8,6 +8,12 @@ import {
   absoluteUrl,
 } from "@/lib/seo";
 
+function isPlatformHost(host: string): boolean {
+  return host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")
+    || host === "agentesdesonhos.com.br" || host.endsWith(".agentesdesonhos.com.br")
+    || host.endsWith(".lovable.app") || host.endsWith(".lovableproject.com");
+}
+
 interface SEOProps {
   /** Page title. If omitted, uses the default site title. */
   title?: string;
@@ -64,9 +70,16 @@ export function SEO({
   const finalDescription =
     description ??
     "Sistema completo para agências de viagens com CRM, orçamentos, roteiros, carteira digital, financeiro e gestão de vendas em uma única plataforma.";
-  const finalCanonical = canonical
-    ? absoluteUrl(canonical)
-    : absoluteUrl(pathname);
+  // Sites de agências (domínio próprio) se autocanonicalizam no próprio host;
+  // somente a plataforma usa o domínio Agentes de Sonhos como base.
+  const host = typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
+  const agencyOrigin = host && !isPlatformHost(host)
+    ? `https://${host === "curtiviagens.com.br" ? "www.curtiviagens.com.br" : host}`
+    : null;
+  const rawCanonical = canonical ?? pathname;
+  const finalCanonical = agencyOrigin && !/^https?:\/\//i.test(rawCanonical)
+    ? agencyOrigin + (rawCanonical.startsWith("/") ? rawCanonical : `/${rawCanonical}`)
+    : absoluteUrl(rawCanonical);
   const finalImage = image ?? DEFAULT_OG_IMAGE;
   // An explicit tenant exclusion must not be overwritten by a page's
   // default indexable SEO, notably the shared legal pages.

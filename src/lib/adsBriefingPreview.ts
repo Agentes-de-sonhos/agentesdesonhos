@@ -1734,7 +1734,7 @@ export const CURTI_VIAGENS_OFFICIAL_PROFILE: AgencySiteProfile = {
     ...CURTI_VIAGENS_PREVIEW_PROFILE.copy,
     destinations: { ...CURTI_VIAGENS_PREVIEW_PROFILE.copy?.destinations, title: "Destinos para a sua próxima viagem", subtitle: "Brasil, Caribe, Nova York, Europa, resorts e cruzeiros." },
   },
-  seo: { title: "Curti Viagens", description: "Curti Viagens: consultoria completa de viagens em Holambra (SP), desde 2013." },
+  seo: { title: "Curti Viagens | Agência de Viagens em Holambra (SP)", description: "Consultoria completa de viagens desde 2013: Orlando, cruzeiros, resorts no Brasil, Nova York, Europa e roteiros sob medida com a Curti Viagens.", canonical: "https://www.curtiviagens.com.br/" },
 };
 
 /* ------------------------------------------------------------------ */
