@@ -1020,18 +1020,18 @@ function CollapsibleServiceCard({
 
   const headerInner = (
     <>
-      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-1.5 sm:gap-3">
         <div
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm ring-1 ring-black/10"
+          className="flex h-8 w-8 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl shadow-sm ring-1 ring-black/10"
           style={SERVICE_ICON_STYLE}
         >
           {getServiceIcon(service)}
         </div>
         <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
-          <div className="flex w-full min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
-            <span className="min-w-0 max-w-full break-words text-[13px] sm:text-sm font-bold uppercase tracking-normal text-left leading-snug" data-service-title>{getServiceLabel(service)}</span>
+          <div className="flex w-full min-w-0 flex-row flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-2">
+            <span className="min-w-0 max-w-full shrink-0 break-words text-[13px] sm:text-sm font-bold uppercase tracking-normal text-left leading-snug" data-service-title>{getServiceLabel(service)}</span>
             {service.option_label && (
-              <Badge variant="secondary" className="max-w-full text-xs gap-1 tracking-normal ring-1 ring-black/10" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+              <Badge variant="secondary" className="max-w-full shrink-0 px-2 sm:px-2.5 text-[11px] sm:text-xs gap-1 tracking-normal ring-1 ring-black/10" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
                 <Tag className="h-3 w-3 shrink-0" />
                 {service.option_label}
               </Badge>
@@ -1077,14 +1077,14 @@ function CollapsibleServiceCard({
         <button
           type="button"
           onClick={onToggle}
-          className={`w-full ${colorClass} px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
+          className={`w-full ${colorClass} px-3 sm:px-5 py-3 flex items-center justify-between cursor-pointer transition-colors`}
           style={SERVICE_HEADER_STYLE}
         >
           {headerInner}
         </button>
       ) : (
         <div
-          className={`w-full ${colorClass} px-5 py-3 flex items-center justify-between`}
+          className={`w-full ${colorClass} px-3 sm:px-5 py-3 flex items-center justify-between`}
           style={SERVICE_HEADER_STYLE}
           data-service-card-header="static"
         >
