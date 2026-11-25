@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAgencyOwnerId } from "@/hooks/useAgencyOwnerId";
+import { agencyNameToSlug } from "@/lib/orcamento-domain";
 import { normalizeAgencySiteSlug, normalizePublicHostname } from "@/lib/publicAgencyUrls";
 
 export interface AgencyPublicSite {
@@ -31,8 +32,18 @@ export function useAgencyPublicSite() {
         .order("is_primary", { ascending: false });
       if (error) return { agencySlug: null, customDomain: null };
       const rows = ((data as any[]) ?? []) as { hostname: string; agency_slug: string }[];
-      const agencySlug =
+      let agencySlug =
         rows.map((r) => normalizeAgencySiteSlug(r.agency_slug)).find((s) => !!s) ?? null;
+      if (!agencySlug) {
+        // Sem site cadastrado: usa o nome da agência do perfil (mesma regra do servidor).
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("agency_name")
+          .eq("user_id", agencyOwnerId as string)
+          .maybeSingle();
+        const name = (prof as any)?.agency_name as string | undefined;
+        agencySlug = name ? agencyNameToSlug(name) || null : null;
+      }
       const customDomain =
         rows.map((r) => normalizePublicHostname(r.hostname)).find((h) => !!h) ?? null;
       return { agencySlug, customDomain };
