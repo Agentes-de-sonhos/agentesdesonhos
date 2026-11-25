@@ -1621,6 +1621,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
       <AgencyBrandLoader
         logoUrl={loaderLogo}
         agencyName={(brandProfile as any)?.agency_name ?? null}
+        brandColor={(brandProfile as any)?.agency_primary_color ?? null}
         cacheKey={token ? `q:${token}` : null}
       />
     );

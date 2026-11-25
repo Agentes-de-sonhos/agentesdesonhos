@@ -10,6 +10,8 @@ const PREFIX = "public-loader-brand:";
 export interface CachedLoaderBrand {
   logoUrl: string;
   agencyName: string | null;
+  /** Cor principal da marca (hex), para o carregador já nascer na cor certa. */
+  primaryColor: string | null;
 }
 
 export function readLoaderBrand(key?: string | null): CachedLoaderBrand | null {
@@ -18,16 +20,29 @@ export function readLoaderBrand(key?: string | null): CachedLoaderBrand | null {
     const raw = localStorage.getItem(PREFIX + key);
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    return typeof parsed?.logoUrl === "string" && parsed.logoUrl ? parsed : null;
+    if (typeof parsed?.logoUrl !== "string" || !parsed.logoUrl) return null;
+    return {
+      logoUrl: parsed.logoUrl,
+      agencyName: parsed.agencyName ?? null,
+      primaryColor: typeof parsed.primaryColor === "string" ? parsed.primaryColor : null,
+    };
   } catch {
     return null;
   }
 }
 
-export function writeLoaderBrand(key: string | null | undefined, logoUrl?: string | null, agencyName?: string | null) {
+export function writeLoaderBrand(
+  key: string | null | undefined,
+  logoUrl?: string | null,
+  agencyName?: string | null,
+  primaryColor?: string | null,
+) {
   if (!key || !logoUrl) return;
   try {
-    localStorage.setItem(PREFIX + key, JSON.stringify({ logoUrl, agencyName: agencyName ?? null }));
+    localStorage.setItem(
+      PREFIX + key,
+      JSON.stringify({ logoUrl, agencyName: agencyName ?? null, primaryColor: primaryColor ?? null }),
+    );
   } catch {
     /* ignore */
   }

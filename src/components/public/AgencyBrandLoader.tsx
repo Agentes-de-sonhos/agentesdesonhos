@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { readLoaderBrand, writeLoaderBrand } from "@/lib/publicLoaderBrandCache";
+import { brandThemeVars, normalizeBrandHex } from "@/lib/brandTheme";
 
 interface AgencyBrandLoaderProps {
   /** Logotipo da agência (quando já resolvido). */
   logoUrl?: string | null;
   /** Nome da agência — usado apenas como texto alternativo da imagem. */
   agencyName?: string | null;
+  /** Cor principal da marca (hex) — evita o traço/halo nascerem no azul padrão. */
+  brandColor?: string | null;
   /** Chave do link (token/código) para lembrar o logotipo nos próximos acessos. */
   cacheKey?: string | null;
   className?: string;
@@ -18,16 +21,24 @@ interface AgencyBrandLoaderProps {
  * Logotipo da agência com "respiração" suave + halo, sempre centralizado na
  * tela. Sem logotipo conhecido — ou se a imagem falhar — usa o carregador discreto.
  */
-export function AgencyBrandLoader({ logoUrl, agencyName, cacheKey, className }: AgencyBrandLoaderProps) {
+export function AgencyBrandLoader({ logoUrl, agencyName, brandColor, cacheKey, className }: AgencyBrandLoaderProps) {
   const cached = readLoaderBrand(cacheKey);
   const effectiveLogo = logoUrl || cached?.logoUrl || null;
   const effectiveName = agencyName || cached?.agencyName || null;
+  const effectiveColor = normalizeBrandHex(brandColor) || normalizeBrandHex(cached?.primaryColor) || null;
   const [failed, setFailed] = useState(false);
   const showLogo = Boolean(effectiveLogo) && !failed;
 
+  // Quando a cor da marca já é conhecida (perfil carregado ou cache do link),
+  // o tema é aplicado no próprio carregador: halo, traço e spinner nascem na
+  // cor da agência, sem o "flash" azul do tema padrão.
+  const themeStyle = effectiveColor
+    ? (brandThemeVars({ primary: effectiveColor }) as unknown as CSSProperties)
+    : undefined;
+
   useEffect(() => {
-    if (logoUrl) writeLoaderBrand(cacheKey, logoUrl, agencyName);
-  }, [cacheKey, logoUrl, agencyName]);
+    if (logoUrl) writeLoaderBrand(cacheKey, logoUrl, agencyName, brandColor);
+  }, [cacheKey, logoUrl, agencyName, brandColor]);
 
   useEffect(() => setFailed(false), [effectiveLogo]);
 
@@ -37,6 +48,7 @@ export function AgencyBrandLoader({ logoUrl, agencyName, cacheKey, className }: 
         "fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-[hsl(0_0%_100%)]",
         className,
       )}
+      style={themeStyle}
       role="status"
       aria-live="polite"
       aria-busy="true"

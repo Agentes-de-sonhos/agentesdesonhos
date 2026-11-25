@@ -23,5 +23,6 @@ export function usePublicLoaderBrand(agencySlug?: string | null) {
   return {
     logoUrl: data?.logo_url ?? null,
     agencyName: data?.agency_name ?? data?.owner_name ?? null,
+    primaryColor: data?.primary_color ?? null,
   };
 }

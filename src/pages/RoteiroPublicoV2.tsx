@@ -59,7 +59,7 @@ export default function RoteiroPublicoV2({
 
   if (loading) {
     return (
-      <AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} cacheKey={cacheKey} />
+      <AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} brandColor={loaderBrand.primaryColor} cacheKey={cacheKey} />
     );
   }
 
@@ -75,7 +75,7 @@ export default function RoteiroPublicoV2({
   }
 
   return (
-    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} cacheKey={cacheKey} />}>
+    <Suspense fallback={<AgencyBrandLoader logoUrl={loaderBrand.logoUrl} agencyName={loaderBrand.agencyName} brandColor={loaderBrand.primaryColor} cacheKey={cacheKey} />}>
       <RoteiroPublico tokenOverride={shareToken} />
     </Suspense>
   );

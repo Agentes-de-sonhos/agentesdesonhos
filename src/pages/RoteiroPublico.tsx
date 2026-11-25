@@ -251,6 +251,7 @@ export default function RoteiroPublico({ tokenOverride }: { tokenOverride?: stri
       <AgencyBrandLoader
         logoUrl={loaderLogo}
         agencyName={(agentProfile as any)?.agency_name ?? null}
+        brandColor={(agentProfile as any)?.agency_primary_color ?? (itineraryBrand as any)?.agency_primary_color ?? null}
         cacheKey={token ? `r:${token}` : null}
       />
     );
