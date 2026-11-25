@@ -124,12 +124,12 @@ describe("escolha única", () => {
     expect(applyShowcaseSelection(block, first, "b")).toEqual(["b"]);
   });
 
-  it("obrigatória: clicar na já selecionada NÃO esvazia o conjunto", () => {
+  it("obrigatória: o cliente pode desmarcar; o envio é que exige 1", () => {
     const { showcase } = build(services, [group("g", { min_select: 1 })]);
     const block = showcase.blocks[0];
     expect(blockRequiresChoice(block)).toBe(true);
-    expect(selectionBlockedReason(block, ["a"], "a")).toMatch(/exige 1 opção/);
-    expect(applyShowcaseSelection(block, ["a"], "a")).toEqual(["a"]);
+    expect(selectionBlockedReason(block, ["a"], "a")).toBeNull();
+    expect(applyShowcaseSelection(block, ["a"], "a")).toEqual([]);
   });
 
   it("opcional: clicar na já selecionada remove", () => {

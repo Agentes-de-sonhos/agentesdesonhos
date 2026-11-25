@@ -354,10 +354,8 @@ export function selectionBlockedReason(
   const group = block.group;
   const max = groupMax(group);
 
-  // Escolha única obrigatória: clicar na opção já escolhida não esvazia o conjunto.
-  if (max === 1 && isSelected && groupMin(group) > 0) {
-    return `"${group.title}" exige 1 opção. Selecione outra opção para trocar.`;
-  }
+  // Escolha única: o cliente pode desmarcar livremente; a obrigatoriedade
+  // é cobrada apenas no envio (showcaseValidation).
   // Múltipla escolha no limite: mantém a seleção e pede remoção consciente.
   if (!isSelected && max != null && max > 1 && blockSelectedCount(block, selected) >= max) {
     return `Você já escolheu ${max} opção(ões) em "${group.title}". Remova uma opção para escolher esta.`;

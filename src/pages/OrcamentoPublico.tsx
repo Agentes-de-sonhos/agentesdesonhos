@@ -15,7 +15,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { resolvePublicLocale, formatPublicShortDate, formatPublicLongDate, formatPublicNumber, pluralize, type PublicLocale, DEFAULT_PUBLIC_LOCALE } from "@/i18n/publicMaterials/locale";
 import { translateQuote } from "@/i18n/publicMaterials/quote";
-import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight } from "lucide-react";
+import { Loader2, MapPin, Calendar, Users, Plane, PlaneTakeoff, PlaneLanding, Hotel, Car, ArrowRightLeft, Ticket, Shield, Ship, Package, Briefcase, CreditCard, Tag, ChevronDown, Map, FileText, Image as ImageIcon, FileSpreadsheet, FileType, Download, Paperclip, Eye, Sparkles, HeartHandshake, Headphones, ShieldCheck, Compass, Award, MessageCircle, Clock, BedDouble, UtensilsCrossed, CheckCircle2, Check, AlertTriangle, ArrowRight, TramFront, Wallet, ChevronsRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Quote, QuoteService, ServiceType } from "@/types/quote";
@@ -968,6 +968,7 @@ function CollapsibleServiceCard({
    */
   collapsible?: boolean;
 }) {
+  const choiceRole = useBookingCart().stateFor(service.id)?.choiceRole ?? null;
   const expanded = collapsible ? isOpen : true;
 
   const type = service.service_type as ServiceType;
@@ -1048,10 +1049,22 @@ function CollapsibleServiceCard({
 
   return (
     <div
-      className="rounded-2xl border border-border/40 bg-card overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-border/80"
+      className={`relative rounded-2xl bg-card overflow-hidden transition-all duration-300 hover:shadow-lg ${
+        choiceRole === "chosen"
+          ? "border-2 border-primary shadow-lg ring-4 ring-primary/10"
+          : choiceRole === "other"
+            ? "border border-border/40 opacity-60 hover:opacity-100"
+            : "border border-border/40 hover:border-border/80"
+      }`}
       data-service-card={service.id}
+      data-choice-role={choiceRole ?? undefined}
       data-collapsible={collapsible ? "true" : "false"}
     >
+      {choiceRole === "chosen" && (
+        <div className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-md" data-choice-badge>
+          <Check className="h-3.5 w-3.5" /> Opção escolhida
+        </div>
+      )}
       {collapsible ? (
         <button
           type="button"

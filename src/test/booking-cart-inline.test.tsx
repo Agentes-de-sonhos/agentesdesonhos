@@ -149,7 +149,7 @@ describe("ação inline nos cards do orçamento", () => {
     expect(screen.getByTestId("count").textContent).toBe("1");
   });
 
-  it("escolha única obrigatória troca automaticamente e não esvazia", () => {
+  it("escolha única obrigatória troca automaticamente e permite desmarcar", () => {
     const groups = [
       { id: "g", title: "Hotel", group_type: "alternative", min_select: 1, max_select: 1 },
     ];
@@ -168,9 +168,9 @@ describe("ação inline nos cards do orçamento", () => {
     expect(screen.getByTestId("effective").textContent).toBe("a");
     fireEvent.click(addButton("b"));
     expect(screen.getByTestId("effective").textContent).toBe("b");
-    // clicar de novo na selecionada não pode esvaziar o conjunto obrigatório
+    // clicar de novo na selecionada desmarca (o envio é que exige 1 opção)
     fireEvent.click(addButton("b"));
-    expect(screen.getByTestId("effective").textContent).toBe("b");
+    expect(screen.getByTestId("effective").textContent).toBe("");
   });
 
   it("escolha única opcional permite remover", () => {

@@ -66,6 +66,8 @@ export interface ServiceCartState {
   /** false quando um novo clique não pode remover (escolha única obrigatória). */
   canRemove: boolean;
   blockedReason: string | null;
+  /** Escolha única: "chosen" = opção escolhida; "other" = outra opção do conjunto já escolhido. */
+  choiceRole: "chosen" | "other" | null;
 }
 
 export interface BookingCartValue {
@@ -259,6 +261,10 @@ export function BookingCartProvider({
         selected: isSelected,
         canRemove: action !== "locked" && !blockedReason,
         blockedReason,
+        choiceRole:
+          action === "radio" && block.options.some((o) => selected.includes(o.service.id))
+            ? isSelected ? "chosen" : "other"
+            : null,
       };
     },
     [blockByService, selected],

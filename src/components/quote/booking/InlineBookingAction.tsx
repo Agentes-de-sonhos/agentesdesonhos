@@ -47,6 +47,24 @@ export function InlineBookingAction({
       : t("addedToRequest")
     : t("addToBookingRequest");
 
+  if (!selected && state.choiceRole === "other") {
+    return (
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => cart.toggle(service.id, buttonRef.current)}
+        data-booking-inline-action="add"
+        data-service-id={service.id}
+        className={cn(
+          "inline-flex min-h-11 items-center gap-1.5 rounded-full border border-primary bg-card px-4 py-2 text-sm font-semibold text-primary shadow-sm transition-all hover:bg-primary hover:text-primary-foreground active:scale-95",
+          className,
+        )}
+      >
+        Escolher este
+      </button>
+    );
+  }
+
   return (
     <div className={cn("inline-flex flex-col items-end gap-1", className)}>
       <button
@@ -79,11 +97,6 @@ export function InlineBookingAction({
           </>
         )}
       </button>
-      {selected && !state.canRemove && (
-        <span className="max-w-[180px] text-right text-[10px] leading-tight text-muted-foreground">
-          {t("selectAnotherOptionToSwapShort")}
-        </span>
-      )}
     </div>
   );
 }
