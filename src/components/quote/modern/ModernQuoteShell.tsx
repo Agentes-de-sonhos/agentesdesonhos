@@ -121,7 +121,7 @@ export function ModernQuoteShell({ enabled, className, sidebar, children }: { en
   if (!enabled) return <main className={className}>{children}</main>;
   // Mantém a coluna original centralizada; o resumo fica fora dela, à direita.
   // Com sidebar nulo, o card de resumo fica oculto (ainda podemos trazê-lo de volta).
-  if (!sidebar) return <main className={`${className} pb-28 lg:pb-12`}>{children}</main>;
+  if (!sidebar) return <main className={className} data-modern-quote>{children}</main>;
   return (
     <div className="relative">
       <main className={`${className} pb-28 lg:pb-12`}>{children}</main>

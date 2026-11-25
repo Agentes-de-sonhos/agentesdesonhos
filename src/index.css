@@ -1114,6 +1114,12 @@ img {
 body[data-booking-selection-bar] {
   padding-bottom: calc(var(--booking-selection-bar-height, 5rem) + 7rem);
 }
+/* Novo visual: apenas o carrinho circular, sem a antiga barra de contato. */
+@media (max-width: 767px) {
+  body[data-booking-selection-bar]:has([data-modern-quote]) {
+    padding-bottom: calc(var(--booking-selection-bar-height, 72px) + env(safe-area-inset-bottom, 0px));
+  }
+}
 @media (min-width: 1024px) {
   body[data-booking-selection-bar] {
     padding-bottom: 0;

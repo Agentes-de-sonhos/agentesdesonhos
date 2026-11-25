@@ -898,7 +898,7 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
         data-service-investment-inline={service.id}
       >
         <p className="text-xs font-medium text-muted-foreground">{PACKAGE_INCLUDED_LABEL}</p>
-      <div className="flex justify-end sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
+      <div className="mt-3 flex justify-center sm:mt-0 sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
         <InlineBookingAction service={service} />
       </div>
       </div>
@@ -915,9 +915,6 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
       className="border-t border-primary/25 bg-primary/[0.07] px-5 py-4 space-y-3 text-center relative"
       data-service-investment-inline={service.id}
     >
-      <div className="flex justify-end sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
-        <InlineBookingAction service={service} />
-      </div>
       <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary/80">
         {t("paymentConditions")}
       </p>
@@ -959,6 +956,9 @@ function ServiceInvestmentInline({ service, quote }: { service: QuoteService; qu
           <span className="font-medium text-foreground">{methodLabel}</span>
         </div>
       )}
+      <div className="flex justify-center pt-1 sm:pt-0 sm:absolute sm:right-4 sm:top-1/2 sm:-translate-y-1/2" data-booking-in-payment>
+        <InlineBookingAction service={service} />
+      </div>
     </div>
   );
 }
@@ -1020,19 +1020,19 @@ function CollapsibleServiceCard({
 
   const headerInner = (
     <>
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm ring-1 ring-black/10"
           style={SERVICE_ICON_STYLE}
         >
           {getServiceIcon(service)}
         </div>
-        <div className="flex flex-col items-start gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold uppercase tracking-wide text-left">{getServiceLabel(service)}</span>
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-0.5">
+          <div className="flex w-full min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-2">
+            <span className="min-w-0 max-w-full break-words text-[13px] sm:text-sm font-bold uppercase tracking-normal text-left leading-snug" data-service-title>{getServiceLabel(service)}</span>
             {service.option_label && (
-              <Badge variant="secondary" className="text-xs gap-1 ring-1 ring-black/10" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
-                <Tag className="h-3 w-3" />
+              <Badge variant="secondary" className="max-w-full text-xs gap-1 tracking-normal ring-1 ring-black/10" style={{ background: "var(--brand-tertiary)", color: "var(--brand-on-tertiary)" }}>
+                <Tag className="h-3 w-3 shrink-0" />
                 {service.option_label}
               </Badge>
             )}
@@ -1044,7 +1044,7 @@ function CollapsibleServiceCard({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-3">
         {effectiveShowPrice && (
           <span className="text-lg font-extrabold whitespace-nowrap">{formatCurrency(service.amount)}</span>
         )}
@@ -1842,7 +1842,7 @@ export default function OrcamentoPublico({ tokenOverride, quoteOverride, agentPr
 
       <ModernQuoteShell
         enabled={modernPreview}
-        className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 pb-12 sm:pb-10 space-y-8 sm:space-y-10"
+        className={cn("max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-20 sm:pb-10 space-y-8 sm:space-y-10", modernPreview ? "pb-4" : "pb-12")}
         sidebar={null}
       >
         {/* ─── Smart Trip Highlights ─── */}
