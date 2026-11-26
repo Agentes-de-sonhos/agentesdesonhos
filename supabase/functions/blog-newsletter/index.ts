@@ -8,6 +8,10 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
  */
 const STATUSES = ["lead", "em_negociacao", "cliente_ativo", "fidelizado"] as const;
 const PLATFORM_FROM_EMAIL = "novidades@agentesdesonhos.com.br";
+// Alias dedicado por agência (domínio do site sem www → remetente na plataforma).
+const AGENCY_ALIASES: Record<string, string> = {
+  "curtiviagens.com.br": "curtiviagens@agentesdesonhos.com.br",
+};
 const EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
 
 const json = (b: unknown, status = 200) =>
@@ -79,7 +83,8 @@ Deno.serve(async (req) => {
     const agencyName = (prof?.agency_name || prof?.name || "Sua agência de viagens").replace(/[<>"]/g, "");
     const resendKey = Deno.env.get("RESEND_API_KEY") ?? "";
     const domain = resendKey ? await verifiedDomain(resendKey, host) : null;
-    const fromEmail = domain ? `novidades@${domain}` : PLATFORM_FROM_EMAIL;
+    const alias = host ? AGENCY_ALIASES[host.replace(/^www\./, "").toLowerCase()] : undefined;
+    const fromEmail = domain ? `novidades@${domain}` : alias ?? PLATFORM_FROM_EMAIL;
 
     // Um e-mail por endereço (o primeiro cliente encontrado).
     const seen = new Set<string>();
