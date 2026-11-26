@@ -21,8 +21,9 @@ export const LESTE_EUROPEU_PREMIUM_2027: CircuitTour = {
   summary: "De Viena a Berlim, conheça seis cidades de cinco países em 11 dias. O programa da Sato Tours combina três noites em Viena, duas em Budapeste, três em Praga e duas em Berlim, com paradas em Bratislava e Dresden. Inclui hotéis centrais, visitas guiadas, jantar austríaco de boas-vindas e passeio de barco no rio Spree.",
   currency: "EUR",
   fromPrice: 2590,
+  brlInstallments: 10,
   singleSupplement: 1500,
-  priceNote: "Preço por pessoa em apartamento duplo. Suplemento individual: € 1.500. O PDF informa desconto de 5% para o terceiro passageiro em quarto triplo. Disponibilidade e valor final devem ser confirmados na cotação; conversão em reais é apenas referência.",
+  priceNote: "Preço por pessoa em apartamento duplo. Disponibilidade e valor final devem ser confirmados na cotação. Conversão em reais é apenas referência.",
   inclusions: [
     { icon: "hotel", title: "10 noites em hotéis centrais", text: "Hospedagem em hotéis 4 estrelas superior, previstos ou similares na categoria indicada para cada cidade." },
     { icon: "tours", title: "5 passeios", text: "Visitas e experiências previstas no itinerário, com guias locais licenciados e guia acompanhante." },

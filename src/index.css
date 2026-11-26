@@ -2052,6 +2052,22 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm .wl-qq-submit { background-color: #E27818 !important; color: #FFFFFF !important; border-color: #E27818 !important; }
 .wl-editorial.wl-mundo.wl-imm :is(.wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta) svg { color: #FFFFFF !important; }
 .wl-editorial.wl-mundo.wl-imm :is(.wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta):hover { background-color: #C9660F !important; }
+/* IMM homepage: color only the public Orlando card actions and planning CTA,
+   not the linked logos, slider controls or the separate park request flow. */
+.wl-editorial.wl-mundo.wl-imm #ingressos-orlando[data-imm-home-ctas] .wl-orlando-home-cta {
+  background-color: #E27818 !important;
+  border-color: #E27818 !important;
+  color: #FFFFFF !important;
+  text-shadow: 0 1px 2px rgb(89 39 0 / 0.72);
+}
+.wl-editorial.wl-mundo.wl-imm #ingressos-orlando[data-imm-home-ctas] .wl-orlando-home-cta svg {
+  color: inherit !important;
+}
+.wl-editorial.wl-mundo.wl-imm #ingressos-orlando[data-imm-home-ctas] .wl-orlando-home-cta:is(:hover, :focus-visible) {
+  background-color: #C9660F !important;
+  border-color: #C9660F !important;
+}
+
 .wl-editorial.wl-mundo.wl-imm :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) { background-color: #FFFFFF !important; background-image: linear-gradient(180deg, #FFFFFF 0%, #FFF4E8 100%) !important; }
 .wl-editorial.wl-mundo.wl-imm #rodape { background-image: linear-gradient(180deg, #FFFFFF 50%, #FFF4E8 100%) !important; }
 .wl-editorial.wl-mundo.wl-imm :is(.wl-step-num, #atendimento ol > li > span[aria-hidden="true"]) { background-color: #E27818 !important; color: #FFFFFF !important; }

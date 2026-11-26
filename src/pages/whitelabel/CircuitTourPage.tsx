@@ -55,6 +55,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
   const brGuide = c.brazilianGuideDepartures ?? [];
   const allDays = c.itinerary.map((d) => `d${d.day}`);
   const price = enhanced ? circuitMoney(converted ?? c.fromPrice, converted == null ? c.currency : "BRL") : formatCircuitPrice(c.fromPrice, c.currency);
+  const installments = c.brlInstallments;
+  const installmentPrice = converted != null && installments && installments > 1
+    ? circuitMoney(Math.round(converted * 100) / 100 / installments, "BRL")
+    : null;
 
   return (
     <div className={`bg-background pb-24 text-foreground md:pb-0 ${enhanced ? "circuit-enhanced" : ""}`}>
@@ -90,7 +94,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         </div>
         <aside className="h-fit rounded-2xl border border-border bg-card p-6 shadow-sm md:sticky md:top-24">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">A partir de</p>
-          <p className="mt-1 text-4xl font-semibold text-primary">{price}</p>
+          <p className="mt-1 text-4xl font-semibold text-primary">
+            {installmentPrice ? <><span className="whitespace-nowrap">{installments}x de</span>{" "}<span className="whitespace-nowrap">{installmentPrice}</span></> : price}
+          </p>
+          {installmentPrice && <p className="mt-2 text-sm font-medium text-foreground">Total em reais: {price}</p>}
           {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
           {c.singleSupplement != null && <p className="mt-1 text-sm text-muted-foreground">Suplemento individual: {formatCircuitPrice(c.singleSupplement, c.currency)}</p>}
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>
@@ -175,7 +182,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
         <h2 className={h2}>{c.departuresTitle ?? (enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas")}</h2>
         {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{c.departurePrompt ?? "Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento"} com a {info.agency_name ?? "agência"}.</p>}
-        {enhanced && brGuide.length > 0 && <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-card px-4 py-2 text-sm"><BrFlag /><span className="inline-block h-5 w-5 shrink-0 rounded bg-[#009C3B] ring-2 ring-primary" aria-hidden="true" /><span> <strong className="font-semibold text-primary">Datas destacadas</strong> têm guia acompanhante brasileiro exclusivo. As demais contam com guia em espanhol.</span></p>}
+        {enhanced && brGuide.length > 0 && <p className="mt-3 inline-flex items-center gap-4 rounded-2xl border border-primary/30 bg-card px-4 py-2 text-sm"><span aria-hidden="true" className="relative h-5 w-5 shrink-0 rounded bg-[#009C3B] ring-2 ring-primary ring-offset-2"><GuideCornerFlag /></span><span> <strong className="font-semibold text-primary">Datas destacadas</strong> têm guia acompanhante brasileiro exclusivo. As demais contam com guia em espanhol.</span></p>}
         {enhanced ? (
           <div className="relative mt-6">
             {!monthEdges.start && <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>}
@@ -186,7 +193,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {m.days.map((d) => { const iso = circuitDepartureDate(m.month, d); const br = brGuide.includes(iso); return (
-                      <Button key={d} variant="ghost" className={`relative h-10 w-10 p-0 ${br ? "!bg-[#009C3B] !text-white ring-2 ring-primary ring-offset-2 hover:!bg-[#00852f]" : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"}`} aria-label={`Solicitar orçamento: ${d} de ${m.month}${br ? " (guia brasileiro)" : ""}`} onClick={() => setDeparture({ date: iso, label: `${d} de ${m.month}${br ? " · com guia brasileiro" : ""}` })}>{d}{br && <span className="absolute -right-2 -top-2"><BrFlag className="h-3 w-[18px]" /></span>}</Button>
+                      <Button key={d} variant="ghost" className={`relative h-10 w-10 p-0 ${br ? "!bg-[#009C3B] !text-white ring-2 ring-primary ring-offset-2 hover:!bg-[#00852f]" : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"}`} aria-label={`Solicitar orçamento: ${d} de ${m.month}${br ? " (guia brasileiro)" : ""}`} onClick={() => setDeparture({ date: iso, label: `${d} de ${m.month}${br ? " · com guia brasileiro" : ""}` })}>{d}{br && <GuideCornerFlag />}</Button>
                     ); })}
                   </div>
                 </div>
@@ -246,6 +253,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
 
 const BR_MONTHS = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const brGuideLabel = (iso: string) => { const [, m, d] = iso.split("-").map(Number); return `${d} de ${BR_MONTHS[m - 1]}`; };
+
+function GuideCornerFlag() {
+  return <span aria-hidden="true" className="absolute -right-2 -top-2"><BrFlag className="h-3 w-[18px]" /></span>;
+}
 
 function BrFlag({ className = "h-3.5 w-5" }: { className?: string }) { return <svg viewBox="0 0 20 14" aria-hidden="true" className={`${className} shrink-0 rounded-[2px] shadow-sm`}><rect width="20" height="14" fill="#009C3B" /><path d="M10 1.6 18.2 7 10 12.4 1.8 7Z" fill="#FFDF00" /><circle cx="10" cy="7" r="3" fill="#002776" /></svg>; }
 export default function CircuitTourPage({ info }: { info: AgencyDomainInfo }) {

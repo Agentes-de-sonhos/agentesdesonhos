@@ -32,6 +32,8 @@ export interface CircuitTour {
   summary: string;
   currency: "EUR" | "USD" | "BRL";
   fromPrice: number;
+  /** Estimativa de parcelas exibida quando há conversão válida em reais. */
+  brlInstallments?: number;
   singleSupplement?: number;
   priceNote: string;
   inclusions: { icon: CircuitInclusionIcon; title: string; text: string }[];

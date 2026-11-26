@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useAgencySiteRequest } from "@/hooks/useAgencySiteRequest";
 import { cn } from "@/lib/utils";
 import { agencySiteHref } from "@/lib/agencyContextLink";
+import { isImmHostname } from "@/lib/agencyDomains";
 import disneyLogo from "@/assets/orlando/disney.asset.json";
 import universalLogo from "@/assets/orlando/universal.asset.json";
 import seaworldLogo from "@/assets/orlando/seaworld.asset.json";
@@ -347,7 +348,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
   );
 
   return (
-    <section ref={sectionRef} id="ingressos-orlando" className="scroll-mt-24 bg-background py-14 md:py-20">
+    <section ref={sectionRef} id="ingressos-orlando" data-imm-home-ctas={mode_ === "home" && isImmHostname(hostname) ? "" : undefined} className="scroll-mt-24 bg-background py-14 md:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="w-full text-left">
           <p className="wl-kicker mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Ingressos e parques</p>
