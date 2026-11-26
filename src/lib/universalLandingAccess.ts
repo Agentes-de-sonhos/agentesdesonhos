@@ -1,7 +1,7 @@
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 /** Perfis com a landing /universal (opt-in por agência). */
-const UNIVERSAL_LANDING_PROFILES = new Set(["editorialRose", "editorialDmc", "mundoEmCoresBriefing14", "dricaOfficial", "dricaPresentation", "curtiViagensOfficial", "curtiViagensBriefing20", "essyaCurtiPreview", "essyaOfficial", "arenaBriefing23", "arenaOfficial", "pristurBriefing22", "pristurOfficial"]);
+const UNIVERSAL_LANDING_PROFILES = new Set(["editorialRose", "editorialDmc", "mundoEmCoresBriefing14", "dricaOfficial", "dricaPresentation", "curtiViagensOfficial", "curtiViagensBriefing20", "essyaCurtiPreview", "essyaOfficial", "arenaBriefing23", "arenaOfficial", "pristurBriefing22", "pristurOfficial", "karibuBriefing21", "karibuOfficial"]);
 
 export function isUniversalLandingEnabled(hostname?: string | null): boolean {
   return UNIVERSAL_LANDING_PROFILES.has(resolveSiteProfile(hostname ?? "").key as string);
