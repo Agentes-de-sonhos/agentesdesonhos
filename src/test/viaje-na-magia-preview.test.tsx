@@ -36,6 +36,19 @@ describe("Viaje na Magia — isolated briefing-27-v1", () => {
     expect(resolveSiteProfile("destinoscomaju.com.br").key).toBe("editorialRose");
     expect(resolveSiteProfile("100limites.tur.br").key).toBe("editorialDmc");
   });
+  it("uses the agency logo and gives distinct prominence to Orlando, cruises and international trips", () => {
+    expect(info.logo_url).toBe("/viaje-na-magia/logo.webp");
+    expect(profile.alternateSurfaces).toBe(true);
+    expect(profile.hero?.map(slide => [slide.kicker, slide.image])).toEqual([
+      ["ORLANDO EM FAMÍLIA", "parques"], ["CRUZEIROS", "cruzeiro"], ["ROTEIROS INTERNACIONAIS", "europa"],
+    ]);
+    expect(profile.about?.media).toBe("hidden");
+    expect(resolveAdsPreviewFixture("briefing-27-v1")?.pages).toMatchObject({
+      visa: false, orlandoTickets: true,
+    });
+    expect(JSON.stringify(profile.nav)).not.toMatch(/Xcaret|Visto Americano/);
+    expect(resolveAdsPreviewFixture("briefing-27-v1")?.pages?.xcaret).toBeNull();
+  });
   it("does not assign unknown certificates, reviews, social accounts, legal identity or domains", () => {
     expect(info.cnpj).toBeNull();
     expect(profile.credentials).toBeUndefined();

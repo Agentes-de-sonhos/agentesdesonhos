@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SHOPPING_PREVIEW_HOST, SHOPPING_PREVIEW_INFO, SHOPPING_PREVIEW_PROFILE, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
@@ -12,7 +13,7 @@ afterEach(cleanup);
 function preview(hostname = "localhost", suffix = "") {
   Object.defineProperty(window, "location", { value: { ...window.location, hostname }, writable: true });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/ads-briefing-preview/briefing-25-v1${suffix}`]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></MemoryRouter></QueryClientProvider>);
+  return render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter initialEntries={[`/ads-briefing-preview/briefing-25-v1${suffix}`]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></MemoryRouter></QueryClientProvider></HelmetProvider>);
 }
 describe("Shopping briefing-25-v1", () => {
   it("resolves only the exact job and synthetic host", () => {
@@ -37,10 +38,10 @@ describe("Shopping briefing-25-v1", () => {
     expect(SHOPPING_PREVIEW_INFO.logo_url).toBeNull();
     expect(SHOPPING_PREVIEW_PROFILE.textualWordmark).toBe(true);
     expect(resolveSiteTheme(SHOPPING_PREVIEW_HOST)).toBe("siteBaseEditorial");
-    expect(siteThemeRootClass(SHOPPING_PREVIEW_HOST)).toBe(siteThemeRootClass("sitelab.local"));
+    expect(siteThemeRootClass(SHOPPING_PREVIEW_HOST)).toContain("wl-shopping-mundo");
   });
   it("does not enable unconfirmed reviews, certifications, team or offers", () => {
-    for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc", "newsletter", "authority"] as const) expect(SHOPPING_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
+    for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc", "newsletter", "orlando"] as const) expect(SHOPPING_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
     expect(SHOPPING_PREVIEW_PROFILE.team).toBeUndefined();
     expect(SHOPPING_PREVIEW_PROFILE.credentials).toBeUndefined();
     expect(SHOPPING_PREVIEW_PROFILE.visaHome).toBe(false);
@@ -49,9 +50,27 @@ describe("Shopping briefing-25-v1", () => {
   it("retains the authorized founding year and public contacts", () => {
     expect(SHOPPING_PREVIEW_PROFILE.about?.badge?.value).toBe("Desde 2002");
     expect(SHOPPING_PREVIEW_PROFILE.about?.ownerName).toBe("Cristina Vale");
-    expect(SHOPPING_PREVIEW_PROFILE.footer?.phone).toBe("WhatsApp 11 94714-8466 · Telefone 11 2096-7777");
+    expect(SHOPPING_PREVIEW_PROFILE.footer?.phone).toBe("(11) 2096-7777");
+    expect(SHOPPING_PREVIEW_PROFILE.footer?.whatsapp).toBe("(11) 94714-8466");
     expect(SHOPPING_PREVIEW_PROFILE.footer?.email).toBe("info@shoppingviagens.com.br");
     expect(SHOPPING_PREVIEW_PROFILE.footer?.instagramLabel).toBe("@shoppingviagens");
+  });
+  it("renders briefing-specific content in the IMM-inspired order without borrowed identity or offers", async () => {
+    preview();
+    await screen.findByRole("heading", { name: "Ideias para a sua próxima viagem" }, { timeout: 9_000 });
+    const home = document.querySelector('[data-ads-preview="briefing-25-v1"]')!;
+    const ids = [...home.querySelectorAll("section[id]")].map(s => s.id);
+    for (const id of ["campanhas", "destinos", "resorts", "autoridade", "sobre", "atendimento", "faq"]) expect(ids).toContain(id);
+    expect(ids.indexOf("campanhas")).toBeLessThan(ids.indexOf("destinos"));
+    expect(ids.indexOf("resorts")).toBeLessThan(ids.indexOf("autoridade"));
+    expect(screen.getByText("Caribe e México", { selector: "h3" })).toBeInTheDocument();
+    expect(home.querySelector('[href*="xcaret"], [href*="oportunidades-novembro"]')).toBeNull();
+    expect(home.textContent).not.toMatch(/Xcaret|Ivete Meneghello|Vanessa/);
+  }, 12_000);
+  it("maps editorial subjects to the correct reusable image slots", () => {
+    expect(SHOPPING_PREVIEW_PROFILE.hero?.map(s => s.image)).toEqual(["capitaisItalia", "cruzeiro", "iberostarPraiaDoForte"]);
+    expect(SHOPPING_PREVIEW_PROFILE.destinations?.map(d => d.title)).toEqual(["Itália", "Caribe e México", "Resorts no Nordeste", "Estados Unidos"]);
+    expect(SHOPPING_PREVIEW_PROFILE.about?.media).toBe("hidden");
   });
   it("leaves existing fixture and official profile resolutions intact", () => {
     expect(resolveAdsPreviewFixture("briefing-22-v1")?.profile.key).toBe("pristurBriefing22");

@@ -182,7 +182,7 @@ describe("prévia ADS ads-email-test-v1", () => {
       expect(BAGAGEM_NA_MAO_PREVIEW_HOST.endsWith(".preview.local")).toBe(true);
       expect(BAGAGEM_NA_MAO_PREVIEW_HOST).not.toContain("bagagemnamao.com.br");
       expect(resolveSiteProfile(BAGAGEM_NA_MAO_PREVIEW_HOST).key).toBe("bagagemNaMaoBriefing19");
-      expect(resolveSiteProfile("www.bagagemnamao.com.br").key).toBe("classic");
+      expect(resolveSiteProfile("www.bagagemnamao.com.br").key).toBe("bagagemNaMaoOfficial");
       expect(resolveSiteProfile("www.destinoscomaju.com.br").key).toBe("editorialRose");
     });
     it("mantém ações comerciais desativadas e seções sem dados confirmados desligadas", () => {
@@ -203,6 +203,19 @@ describe("prévia ADS ads-email-test-v1", () => {
       expect(f.pages?.visa).toBeUndefined();
       expect(f.pages?.dmc).toBeUndefined();
       expect(f.pages?.editorial).toBeUndefined();
+    });
+    it("usa os assuntos do briefing e não carrega mídia de outra agência", () => {
+      const p = resolveAdsPreviewFixture("briefing-19-v1")!.profile;
+      expect(p.hero?.map(({ kicker, image }) => ({ kicker, image }))).toEqual([
+        { kicker: "VIAGENS SOB MEDIDA", image: "heroVarenna" },
+        { kicker: "ORLANDO E PARQUES", image: "orlandoMagicKingdom" },
+        { kicker: "DISNEY CRUISE LINE", image: "cruzeiroDisneyWish" },
+      ]);
+      expect(p.about?.images).toBeUndefined();
+      expect(p.about?.mural).toBeUndefined();
+      expect(p.featuredExperience).toBeUndefined();
+      expect(p.authority?.title).toContain("cruzeiro");
+      expect(p.footer?.hours).toBe("Segunda a sexta, das 8h30 às 19h · Sábado, das 9h às 11h");
     });
     it("carrega os contatos públicos somente como texto de rodapé", () => {
       const p = resolveAdsPreviewFixture("briefing-19-v1")!.profile;
@@ -234,7 +247,7 @@ describe("prévia ADS ads-email-test-v1", () => {
           <Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes>
         </MemoryRouter>,
       );
-      expect(await screen.findByText("Prévia para revisão — sem publicação · ações desativadas")).toBeInTheDocument();
+      expect(await screen.findByText("Bagagem na Mão · prévia para revisão · imagens ilustrativas · sem publicação")).toBeInTheDocument();
       expect(document.querySelector('[data-ads-preview="briefing-19-v1"]')).toBeInTheDocument();
       expect(document.querySelector('meta[name="robots"]')?.getAttribute("content")).toContain("noindex");
       const backend = import.meta.env.VITE_SUPABASE_URL as string;

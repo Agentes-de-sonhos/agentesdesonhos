@@ -75,6 +75,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "dricaviagens.com.br": "siteBaseEditorial",
   "www.dricaviagens.com.br": "siteBaseEditorial",
   "bardelli-mundo.preview.local": "siteBaseEditorial",
+  "bardelli-imm.preview.local": "siteBaseEditorial",
   "bardelli-presentation.preview.local": "siteBaseEditorial",
   "bardelliviagens.com.br": "siteBaseEditorial",
   "www.bardelliviagens.com.br": "siteBaseEditorial",
@@ -141,7 +142,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-mundo wl-innovati-mundo"
         : h === "briefing-19-v1.preview.local" || h === "bagagemnamao.com.br" || h === "www.bagagemnamao.com.br"
         ? " wl-mundo wl-bagagem-mundo"
-        : h === "bardelli-mundo.preview.local" || h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
+        : h === "bardelli-imm.preview.local" || h === "bardelli-mundo.preview.local" || h === "bardelliviagens.com.br" || h === "www.bardelliviagens.com.br"
         ? " wl-mundo wl-bardelli-mundo"
         : h === "briefing-23-v1.preview.local" || h === "arenatravelgroup.com.br" || h === "www.arenatravelgroup.com.br"
         ? " wl-mundo wl-arena"

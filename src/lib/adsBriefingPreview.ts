@@ -1,3 +1,4 @@
+import { BARDELLI_IMM_PREVIEW_HOST, BARDELLI_IMM_PREVIEW_JOB_ID, buildBardelliImmPreview } from "@/lib/bardelliImmPreview";
 /**
  * Prévia técnica da fixture ADS "ads-email-test-v1" (agência FICTÍCIA).
  * Conteúdo 100% local: nenhum tenant, conta ou cadastro real é consultado.
@@ -126,7 +127,6 @@ import essyaCristiane from "@/assets/whitelabel/essya/essya-cristiane.png.asset.
 const karibuLogo = { url: "/karibu-logo.png" };
 import arenaLogo from "@/assets/ads-preview/briefing-23-v1-logo.jpeg.asset.json";
 import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
-import viajeNaMagiaLogo from "@/assets/ads-preview/briefing-27-v1-logo.jpg.asset.json";
 import rbTourLogo from "@/assets/ads-preview/briefing-29-v1-logo.png.asset.json";
 import roteirosDaTerraLogo from "@/assets/ads-preview/briefing-28-v1-logo.png.asset.json";
 import { deriveTertiaryColor } from "@/lib/brandTheme";
@@ -801,8 +801,11 @@ export const BAGAGEM_NA_MAO_PREVIEW_INFO: AgencyDomainInfo = {
   whatsapp_group_url: null,
 };
 
-const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", {
+export const BAGAGEM_NA_MAO_PREVIEW_PROFILE = buildGoldStandardProfile("bagagemNaMaoBriefing19", {
   navDensity: "compact",
+  randomizeDestinations: false,
+  highlights: [],
+  requestCenter: { title: "O que você quer planejar?", support: "Conte o que imagina para a sua viagem. A Márcia ajuda a organizar as escolhas.", notice: "Escolha o serviço para começar.", submitLabel: "Solicitar cotação", titlePlacement: "above-card" },
   // Sem página de visto americano nesta prévia.
   visaHome: false,
   // Sem dados confirmados de Xcaret: a seção editorial Xcaret não entra.
@@ -820,6 +823,7 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
   ],
   sections: {
     dmc: { enabled: false },
+    highlights: { enabled: false },
     offers: { enabled: false },
     credentials: { enabled: false },
     team: { enabled: false },
@@ -832,14 +836,18 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
     overlay: "strongLeft",
   },
   hero: [
-    { title: "Seu jeito novo de viajar começa aqui", subtitle: "Viagens sob medida planejadas com escuta e cuidado, do primeiro contato ao retorno.", image: "heroAirportTraveler", order: 1, enabled: true },
-    { title: "Orlando e parques em cada detalhe", subtitle: "Parques, hospedagem e deslocamentos organizados para a família aproveitar cada dia.", image: "orlandoMagicKingdom", order: 2, enabled: true },
-    { title: "Europa e cruzeiros do seu jeito", subtitle: "Roteiros pela Europa e cruzeiros — incluindo Disney Cruise Line — escolhidos para o seu perfil.", image: "heroVarenna", order: 3, enabled: true },
+    { kicker: "VIAGENS SOB MEDIDA", title: "Sua viagem começa com uma boa conversa", subtitle: "Conte à Márcia com quem você vai viajar, o que quer viver e em que ritmo. A Bagagem na Mão organiza as escolhas com você.", image: "heroVarenna", order: 1, enabled: true },
+    { kicker: "ORLANDO E PARQUES", title: "Orlando no ritmo da sua família", subtitle: "Escolha os parques, combine ingressos e hospedagem e reserve tempo para descansar entre um dia de diversão e outro.", image: "orlandoMagicKingdom", order: 2, enabled: true },
+    { kicker: "DISNEY CRUISE LINE", title: "A magia da Disney, agora no mar", subtitle: "Entenda o que muda de um navio para outro e encontre o roteiro, a cabine e a época que fazem sentido para sua família.", image: "cruzeiroDisneyWish", order: 3, enabled: true },
   ],
   signature: {
     kicker: "UM JEITO NOVO DE VIAJAR",
     title: "Viagens sob medida, planejadas com escuta e cuidado.",
     text: "Desde 2014, a Bagagem na Mão Viagens desenha roteiros a partir do perfil de quem viaja: famílias e parques, viagens internacionais, resorts e cruzeiros, com atenção a cada detalhe.",
+    continuation: {
+      title: "Orlando e a magia da Disney no mar",
+      text: "Quer combinar os parques com um cruzeiro? A Márcia ajuda a organizar os dias em Orlando, comparar roteiros e cabines da Disney Cruise Line e planejar como chegar ao porto sem apertar a programação da família.",
+    },
   },
   destinations: [
     { key: "eua-canada", image: "orlandoMagicKingdom", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Parques, cidades e natureza em roteiros organizados para o ritmo da sua família.", service: "pacotes", enabled: true, order: 1 },
@@ -853,11 +861,11 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
     { key: "familias-parques", title: "Famílias e parques", text: "Orlando e outras experiências em família, com cada dia pensado para todas as idades.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 2 },
     { key: "internacionais", title: "Viagens internacionais", text: "Estados Unidos, Canadá, Europa e outros destinos com planejamento completo.", service: "pacotes", image: "europa", enabled: true, order: 3 },
     { key: "resorts", title: "Resorts e all-inclusive", text: "Hospedagens selecionadas para descansar com conforto e aproveitar cada momento.", service: "hospedagem", image: "resort", enabled: true, order: 4 },
-    { key: "cruzeiros", title: "Cruzeiros", text: "Orientação para escolher navio, cabine e itinerário, da Disney Cruise Line a outras companhias.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 5 },
+    { key: "cruzeiros", title: "Disney Cruise Line e outros cruzeiros", text: "Compare navios, cabines e itinerários para viajar com a família, com ou sem uma passagem pelos parques de Orlando.", service: "cruzeiros", image: "cruzeiroDisneyWish", enabled: true, order: 5 },
   ],
   about: {
     kicker: "QUEM CUIDA DA SUA VIAGEM",
-    title: "Márcia Baccarini, fundadora e CEO da Bagagem na Mão Viagens.",
+    title: "Desde 2014, uma viagem diferente para cada viajante",
     text: "A Bagagem na Mão Viagens nasceu em 2014 com uma proposta clara: um jeito novo de viajar, com planejamento sob medida e atendimento próximo. À frente da agência, a fundadora e CEO Márcia Baccarini conduz cada viagem com escuta e cuidado.\n\nO atendimento é dedicado a viagens sob medida, famílias e parques e viagens internacionais, com prioridades em Estados Unidos e Canadá, Europa, resorts e all-inclusive, parques e entretenimento e cruzeiros.\n\nDa primeira conversa ao retorno, cada roteiro é desenhado a partir do perfil de quem viaja, com orientação clara em cada escolha.",
     badge: { value: "Desde 2014", label: "Bagagem na Mão Viagens" },
     media: "hidden",
@@ -871,6 +879,17 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
     { title: "Acompanhamento próximo", text: "Suporte antes, durante e depois da viagem, combinado conforme o serviço contratado.", icon: "acompanhamento" },
   ],
   hideConciergeActions: true,
+  conciergePoints: undefined,
+  authority: {
+    kicker: "DISNEY CRUISE LINE",
+    title: "Encontre o cruzeiro que combina com a sua família",
+    paragraphs: [
+      "Um cruzeiro Disney pode ser a viagem inteira ou entrar no roteiro depois dos parques de Orlando. Compare portos, duração e dias a bordo antes de decidir o que faz sentido para a sua família.",
+      "A Márcia ajuda a avaliar navio, roteiro e categoria da cabine, além de pensar no deslocamento até o porto. Se seu perfil pede outra companhia, a agência também ajuda a comparar as opções.",
+    ],
+    cta: "Pedir uma cotação de cruzeiro",
+    service: "cruzeiros",
+  },
   conciergeSteps: [
     "Uma conversa para entender quem vai viajar, as preferências e o ritmo desejado.",
     "Curadoria de destinos, hospedagens e serviços alinhados ao perfil da viagem.",
@@ -882,6 +901,8 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
     { q: "Quais são as especialidades da agência?", a: "Viagens sob medida, famílias e parques e viagens internacionais, com prioridades em Estados Unidos e Canadá, Europa, resorts e all-inclusive, parques e entretenimento e cruzeiros." },
     { q: "A agência planeja viagens para Orlando e parques?", a: "Sim. Parques e entretenimento são uma das ênfases da agência, com organização de ingressos, hospedagem e deslocamentos conforme o ritmo da família." },
     { q: "Há acompanhamento durante a viagem?", a: "O suporte antes, durante e depois da viagem é combinado conforme o serviço contratado. Converse com a agência para entender como funciona na sua viagem." },
+    { q: "A agência orienta na escolha de um cruzeiro Disney?", a: "Sim. A Bagagem na Mão ajuda a comparar roteiros, navios e categorias de cabine para que você escolha conforme o perfil da família e as datas da viagem." },
+    { q: "Qual é o horário de atendimento?", a: "De segunda a sexta, das 8h30 às 19h, e aos sábados, das 9h às 11h." },
     { q: "Onde a agência atende?", a: "A Bagagem na Mão Viagens fica na Rua Conde de Bonfim, 211, sala 412, na Tijuca, Rio de Janeiro/RJ, e também atende pelos canais digitais." },
   ],
   copy: {
@@ -906,6 +927,7 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
     legalName: "Bagagem na Mão Viagens Ltda",
     cnpj: "64.731.514/0001-08",
     showLocation: true,
+    hours: "Segunda a sexta, das 8h30 às 19h · Sábado, das 9h às 11h",
   },
   seo: {
     title: "Prévia para revisão — Bagagem na Mão Viagens",
@@ -913,54 +935,9 @@ const bagagemNaMaoBaseline = buildGoldStandardProfile("bagagemNaMaoBriefing19", 
   },
 }, "Bagagem na Mão Viagens");
 // Sem páginas especiais Xcaret, DMC Portugal ou Visto nesta prévia.
-delete bagagemNaMaoBaseline.dmc;
-delete bagagemNaMaoBaseline.credentials;
-delete bagagemNaMaoBaseline.team;
-/** Isolated review copy: source imagery stays provisional with original attribution. */
-const bagagemMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
-export const BAGAGEM_NA_MAO_PREVIEW_PROFILE: AgencySiteProfile = {
-  ...bagagemMundoSource, key: "bagagemNaMaoBriefing19",
-  nav: bagagemMundoSource.nav?.filter(item => item.to !== "/oportunidades-novembro"),
-  heroPresentation: { ...bagagemMundoSource.heroPresentation, kicker: "BAGAGEM NA MÃO · UM JEITO NOVO DE VIAJAR" },
-  hero: bagagemMundoSource.hero?.map((slide, index) => ({
-    ...slide, title: bagagemNaMaoBaseline.hero?.[index]?.title ?? slide.title,
-    subtitle: bagagemNaMaoBaseline.hero?.[index]?.subtitle ?? slide.subtitle,
-  })),
-  signature: bagagemNaMaoBaseline.signature,
-  modules: bagagemMundoSource.modules?.map((item, index) => ({
-    ...item, title: bagagemNaMaoBaseline.modules?.[index]?.title ?? item.title,
-    text: bagagemNaMaoBaseline.modules?.[index]?.text ?? item.text,
-    service: bagagemNaMaoBaseline.modules?.[index]?.service ?? item.service,
-  })),
-  destinations: bagagemMundoSource.destinations?.map((item, index) => {
-    const content = bagagemNaMaoBaseline.destinations?.[index];
-    return { ...item, ...(content ?? { key: "resorts-brasil", label: "Brasil", title: "Resorts no Brasil",
-      text: "Hospedagens para descansar e aproveitar no seu ritmo, com orientação da Bagagem na Mão.", service: "hospedagem" }),
-      image: item.image, order: item.order };
-  }),
-  about: { ...bagagemMundoSource.about, ...bagagemNaMaoBaseline.about, media: undefined,
-    images: bagagemMundoSource.about?.images, mural: bagagemMundoSource.about?.mural,
-    visitedDestinations: undefined, tagline: "Viagens sob medida · Escuta e cuidado" },
-  featuredExperience: bagagemMundoSource.featuredExperience ? { ...bagagemMundoSource.featuredExperience,
-    kicker: "DESCUBRA A RIVIERA MAYA", title: "Parques e hotéis Xcaret para a sua próxima viagem",
-    description: "Converse com a Bagagem na Mão para conhecer as possibilidades de parques, hotéis e experiências Xcaret e planejar uma viagem de acordo com suas preferências.",
-    highlights: ["Parques e hotéis", "Viagens em família", "Planejamento sob medida"] } : undefined,
-  authority: bagagemMundoSource.authority ? { ...bagagemMundoSource.authority,
-    companies: bagagemMundoSource.authority.companies ? { ...bagagemMundoSource.authority.companies,
-      title: "Planeje seu próximo cruzeiro com a Bagagem na Mão Viagens." } : undefined } : undefined,
-  differentials: bagagemNaMaoBaseline.differentials, conciergeSteps: bagagemNaMaoBaseline.conciergeSteps,
-  faq: bagagemNaMaoBaseline.faq,
-  copy: { ...bagagemMundoSource.copy, ...bagagemNaMaoBaseline.copy,
-    modules: { ...bagagemNaMaoBaseline.copy?.modules, cta: "Conversar com a Márcia" },
-    concierge: { ...bagagemNaMaoBaseline.copy?.concierge, cta: "Conversar com a Márcia" },
-    avaliacoes: { title: "Experiências de quem viaja com a Bagagem na Mão" },
-    testimonials: undefined,
-    newsletter: { title: "Novidades da Bagagem na Mão", subtitle: "Converse com a Márcia sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
-  },
-  footer: bagagemNaMaoBaseline.footer, socialStrip: bagagemNaMaoBaseline.socialStrip,
-  testimonials: undefined, inspirationDialog: undefined, seo: bagagemNaMaoBaseline.seo,
-};
-
+delete BAGAGEM_NA_MAO_PREVIEW_PROFILE.dmc;
+delete BAGAGEM_NA_MAO_PREVIEW_PROFILE.credentials;
+delete BAGAGEM_NA_MAO_PREVIEW_PROFILE.team;
 export const CURTI_VIAGENS_PREVIEW_JOB_ID = "briefing-20-v1";
 export const CURTI_VIAGENS_PREVIEW_PATH = `/ads-briefing-preview/${CURTI_VIAGENS_PREVIEW_JOB_ID}`;
 /**
@@ -1572,7 +1549,7 @@ export interface AdsBriefingPreviewFixture {
   strictBackendBlock?: boolean;
   /** Páginas internas opcionais da prévia (off por padrão). */
   pages?: {
-    xcaret?: { slots: XcaretMediaSlots; textRewrites?: [string, string][] };
+    xcaret?: { slots: XcaretMediaSlots; textRewrites?: [string, string][] } | null;
     resorts?: { title?: string };
     orlandoTickets?: boolean;
     visa?: boolean;
@@ -1635,10 +1612,11 @@ const ADS_PREVIEW_FIXTURES: Record<string, AdsBriefingPreviewFixture> = {
     jobId: BAGAGEM_NA_MAO_PREVIEW_JOB_ID,
     info: BAGAGEM_NA_MAO_PREVIEW_INFO,
     profile: BAGAGEM_NA_MAO_PREVIEW_PROFILE,
-    notice: "Prévia para revisão — sem publicação · ações desativadas",
+    notice: "Bagagem na Mão · prévia para revisão · imagens ilustrativas · sem publicação",
     documentTitle: "Prévia para revisão — Bagagem na Mão Viagens",
     realAgency: true,
-    pages: { resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão Viagens" }, orlandoTickets: true },
+    strictBackendBlock: true,
+    pages: { resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão Viagens" }, orlandoTickets: true, xcaret: undefined, visa: undefined, dmc: undefined, editorial: undefined },
   },
   [CURTI_VIAGENS_PREVIEW_JOB_ID]: {
     jobId: CURTI_VIAGENS_PREVIEW_JOB_ID,
@@ -2265,136 +2243,97 @@ export const INNOVATI_PREVIEW_INFO: AgencyDomainInfo = {
   on_secondary_color: "#1A1A1A", phone: null, city: "Franco da Rocha", state: "SP",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
-const INSP = "Imagem genérica de inspiração.";
-const innovatiBaseline = buildGoldStandardProfile("innovatiBriefing24", {
-  navDensity: "compact", visaHome: false, featuredExperience: undefined,
-  dmc: undefined, credentials: undefined, team: undefined,
-  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+// Briefing 24, 04 Nov 2026: reuse the editorial layout, not another agency’s content.
+export const INNOVATI_PREVIEW_PROFILE = buildGoldStandardProfile("innovatiBriefing24", {
+  navDensity: "compact", visaHome: false, randomizeDestinations: false,
+  featuredExperience: undefined, dmc: undefined, credentials: undefined,
+  team: undefined, testimonials: undefined, conciergePoints: undefined,
   sections: {
-    dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
-    testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
-    newsletter: { enabled: false }, authority: { enabled: false },
+    signature: { enabled: true, order: 1 }, destinations: { enabled: true, order: 2 },
+    orlando: { enabled: true, order: 3 }, resorts: { enabled: true, order: 4 },
+    authority: { enabled: true, order: 5 }, highlights: { enabled: true, order: 6 },
+    about: { enabled: true, order: 7 }, differentials: { enabled: true, order: 8 },
+    concierge: { enabled: true, order: 9 }, faq: { enabled: true, order: 10 },
+    modules: { enabled: false }, dmc: { enabled: false }, credentials: { enabled: false },
+    team: { enabled: false }, testimonials: { enabled: false }, avaliacoes: { enabled: false },
+    offers: { enabled: false }, blog: { enabled: false }, newsletter: { enabled: false },
   },
   nav: [
-    { label: "Início", to: "/" }, { label: "Especialidades", to: "/#assinatura" },
-    { label: "Destinos", to: "/#destinos" }, { label: "Resorts", to: "/#resorts" },
-    { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+    { label: "Início", to: "/" }, { label: "Destinos", to: "/#destinos" },
+    { label: "Especialidades", to: "/#assinatura", children: [
+      { label: "Parques em Orlando", to: "/ingressos-orlando" },
+      { label: "Resorts no Brasil", to: "/#resorts" },
+      { label: "Cruzeiros", to: "/#autoridade" },
+    ] },
+    { label: "Sobre", to: "/#sobre", children: [
+      { label: "Nossa história", to: "/#sobre" }, { label: "Como funciona", to: "/#atendimento" },
+      { label: "Dúvidas frequentes", to: "/#faq" },
+    ] },
   ],
-  heroPresentation: { kicker: "FRANCO DA ROCHA · SP · DESDE 2023", overlay: "strongLeft", titleWeight: "regular" },
+  heroPresentation: { kicker: "INNOVATI TRAVEL · CONSULTORIA DE VIAGENS", overlay: "strongLeft", titleWeight: "regular" },
   hero: [
-    { title: "Innovati Travel", subtitle: "Consultoria personalizada, roteiros sob medida e acompanhamento próximo.", image: "parques", order: 1, enabled: true },
-    { title: "Cruzeiros", subtitle: `Com destaque para a MSC. ${INSP}`, image: "cruzeiro", order: 2, enabled: true },
-    { title: "Resorts e all-inclusive", subtitle: `Viagens em família com planejamento detalhado. ${INSP}`, image: "resort", order: 3, enabled: true },
+    { title: "Orlando, do jeito da sua família", subtitle: "Organize parques, hospedagem e dias de descanso com quem conhece Orlando de perto.", image: "parques", order: 1, enabled: true },
+    { title: "Seu próximo destino pode começar no mar", subtitle: "Compare roteiros, navios e cabines, com atenção especial aos cruzeiros MSC.", image: "cruzeiro", order: 2, enabled: true },
+    { title: "Descanse em um resort no Nordeste", subtitle: "Escolha a hospedagem pela localização, estrutura e experiências que importam para você.", image: "resort", order: 3, enabled: true },
   ],
   signature: {
-    kicker: "FAMÍLIA · SOB MEDIDA · ACOMPANHAMENTO",
-    title: "Consultoria personalizada para viagens em família",
-    text: "Roteiros sob medida e acompanhamento próximo. Orlando e parques temáticos, cruzeiros, resorts, Brasil, Estados Unidos e Canadá orientam o trabalho da Innovati Travel.",
+    kicker: "SEU JEITO DE VIAJAR",
+    title: "Você conta como quer viajar. A Jussara ajuda a organizar o resto.",
+    text: "Seja para levar a família aos parques, viajar em casal ou reunir amigos a bordo, o planejamento começa com uma conversa. A Jussara ouve suas prioridades, compara hotéis, serviços e experiências e ajuda você a decidir o que realmente faz sentido para a viagem.",
   },
   destinations: [
-    { key: "orlando", image: "parques", label: "Orlando", title: "Orlando e parques temáticos", text: `Parques temáticos para toda a família. ${INSP}`, service: "pacotes", enabled: true, order: 1 },
-    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: `Com destaque para a MSC. ${INSP}`, service: "cruzeiros", enabled: true, order: 2 },
-    { key: "resorts", image: "resort", label: "Resorts", title: "Resorts e all-inclusive", text: `Descanso planejado em detalhes. ${INSP}`, service: "hospedagem", enabled: true, order: 3 },
-    { key: "brasil", image: "litoral", label: "Brasil", title: "Brasil: Sul e Nordeste", text: `Destinos nacionais sob medida. ${INSP}`, service: "pacotes", enabled: true, order: 4 },
-  ],
-  modules: [
-    { key: "orlando", title: "Orlando e parques temáticos", text: "Planejamento detalhado para a família.", image: "parques", service: "pacotes", enabled: true, order: 1 },
-    { key: "cruzeiros", title: "Cruzeiros", text: "Com destaque para a MSC. Imagem genérica.", image: "cruzeiro", service: "cruzeiros", enabled: true, order: 2 },
-    { key: "eua", title: "Estados Unidos e Canadá", text: "Roteiros sob medida e experiências esportivas nos EUA. Imagem genérica.", image: "grupos", service: "pacotes", enabled: true, order: 3 },
-    { key: "brasil", title: "Brasil: Sul e Nordeste", text: "Viagens nacionais personalizadas. Imagem genérica.", image: "brasil", service: "pacotes", enabled: true, order: 4 },
+    { key: "orlando", image: "parques", label: "Famílias e parques", title: "Orlando", text: "Organize os dias de parque, sem deixar de reservar tempo para descansar.", href: "/ingressos-orlando", ctaLabel: "Planejar os parques", service: "ingressos", enabled: true, order: 1 },
+    { key: "msc", image: "cruzeiro", label: "Viagens no mar", title: "Cruzeiros MSC", text: "Compare itinerários, datas e cabines de acordo com o perfil de quem vai embarcar.", service: "cruzeiros", enabled: true, order: 2 },
+    { key: "nordeste", image: "resort", label: "Nordeste", title: "Resorts e all-inclusive", text: "Escolha entre praia, lazer e descanso, com atenção ao que o hotel inclui na diária.", href: "/resorts-brasil", ctaLabel: "Ver resorts", service: "hospedagem", enabled: true, order: 3 },
+    { key: "sul-do-brasil", image: "innovatiIguacu", label: "Brasil", title: "Sul do Brasil", text: "Foz do Iguaçu é um ponto de partida para explorar a região em um roteiro no seu ritmo.", service: "pacotes", enabled: true, order: 4 },
+    { key: "america-do-norte", image: "innovatiNorthAmerica", label: "América do Norte", title: "Estados Unidos e Canadá", text: "Combine cidades e experiências a partir do que você quer ver e fazer na viagem.", service: "pacotes", enabled: true, order: 5 },
   ],
   highlights: [
-    { title: "Viagens em família", text: "Planejamento detalhado e recomendações personalizadas.", service: "pacotes", cta: "Planejar em família" },
-    { title: "Roteiros sob medida", text: "Cada viagem pensada para o perfil de quem viaja.", service: "pacotes", cta: "Planejar minha viagem" },
-    { title: "Experiências esportivas nos EUA", text: "Entre as especialidades da agência.", service: "pacotes", cta: "Saber mais" },
+    { title: "Casais", text: "Roteiros com tempo para aproveitar a viagem a dois, sem encher demais a agenda.", service: "pacotes", cta: "Planejar a dois" },
+    { title: "Grupos de amigos", text: "Datas, hospedagem e atividades que levem em conta o que o grupo quer fazer junto.", service: "pacotes", cta: "Planejar com amigos" },
+    { title: "Viajantes 60+", text: "Planeje pausas, deslocamentos e atividades no ritmo que você prefere.", service: "pacotes", cta: "Planejar no meu ritmo" },
   ],
   about: {
-    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Jussara Beraldes, fundadora e consultora",
-    text: "A Innovati Travel atua desde 2023 em Franco da Rocha (SP), com consultoria personalizada, viagens em família, roteiros sob medida e acompanhamento próximo.\n\nJussara Beraldes, fundadora e consultora, conduz o atendimento humano e o planejamento detalhado de cada viagem.\n\nAs especialidades incluem Orlando e parques temáticos, cruzeiros (com destaque para a MSC), resorts e all-inclusive, Brasil (Sul e Nordeste), Estados Unidos e Canadá e experiências esportivas nos EUA.",
+    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "De muitas idas a Orlando a uma carreira no turismo",
+    text: "Na adolescência, Jussara Beraldes acompanhava o trabalho de uma tia que havia aberto uma agência de viagens. Seguiu outra carreira, mas continuou viajando. Em 2023, depois de muitas idas a Orlando, seu destino favorito, fez do turismo a sua profissão.\n\nHoje, à frente da Innovati Travel, em Franco da Rocha (SP), a Jussara atende diretamente quem procura um roteiro próprio e orientação antes, durante e depois da viagem.",
     badge: { value: "Desde 2023", label: "Innovati Travel" }, media: "hidden", showLocation: true, ownerName: "Jussara Beraldes",
   },
   differentials: [
-    { title: "Atendimento humano", text: "Conversa próxima com quem planeja a viagem.", icon: "consultivo" },
-    { title: "Planejamento detalhado", text: "Cada etapa da viagem organizada com cuidado.", icon: "conferido" },
-    { title: "Recomendações personalizadas", text: "Sugestões pensadas para o perfil de cada viajante.", icon: "fornecedores" },
-    { title: "Suporte antes, durante e depois", text: "Acompanhamento em todas as fases da viagem.", icon: "acompanhamento" },
+    { title: "Atendimento direto com a Jussara", text: "Você conversa com a fundadora e consultora que vai planejar sua viagem.", icon: "consultivo" },
+    { title: "Roteiro sob medida", text: "Os dias são organizados de acordo com os interesses e o ritmo de quem viaja.", icon: "conferido" },
+    { title: "Curadoria de hotéis e serviços", text: "Entenda o que cada opção inclui antes de decidir onde ficar e o que reservar.", icon: "fornecedores" },
+    { title: "Acompanhamento na viagem e no retorno", text: "Quando houver um imprevisto, a agência ajuda você a acompanhar a solução com o fornecedor.", icon: "acompanhamento" },
   ],
   hideConciergeActions: true,
   conciergeSteps: [
-    "Conversa sobre a viagem pelo WhatsApp ou e-mail.",
-    "Planejamento detalhado e recomendações personalizadas.",
-    "Roteiro sob medida e organização da viagem.",
-    "Suporte antes, durante e depois da viagem.",
+    "Converse com a Jussara pelo WhatsApp ou por videochamada sobre as datas, o grupo e as prioridades.",
+    "Compare destinos, hospedagens e experiências na proposta personalizada.",
+    "Confirme as reservas e receba as orientações para o embarque.",
+    "Conte com orientação durante a viagem e com acompanhamento após o retorno.",
   ],
   faq: [
-    { q: "Quem é responsável pela agência?", a: "Jussara Beraldes, fundadora e consultora da Innovati Travel." },
-    { q: "Desde quando a agência atua?", a: "A Innovati Travel atua desde 2023, em Franco da Rocha (SP)." },
-    { q: "Quais são as especialidades?", a: "Orlando e parques temáticos, cruzeiros (com destaque para MSC), resorts e all-inclusive, Brasil (Sul e Nordeste), Estados Unidos e Canadá e experiências esportivas nos EUA." },
-    { q: "Como é o atendimento?", a: "Atendimento humano, planejamento detalhado, recomendações personalizadas e suporte antes, durante e depois da viagem." },
-    { q: "Quais são os canais de contato?", a: "WhatsApp (11) 91857-8547, e-mail innovatitravel@gmail.com e Instagram @innovatitravel." },
+    { q: "Como organizar os dias de parque em Orlando?", a: "A Jussara ajuda a encaixar os parques que sua família quer visitar, os deslocamentos e as pausas de acordo com as datas e o ritmo do grupo." },
+    { q: "A Innovati planeja viagens para eventos esportivos nos Estados Unidos?", a: "Sim. Informe as datas e os esportes de interesse para a agência avaliar como incluir a experiência no roteiro." },
+    { q: "Vocês trabalham com cruzeiros MSC?", a: "Sim. A MSC é um dos destaques. A escolha do navio, do itinerário e da cabine depende dos interesses de quem viaja e da disponibilidade." },
+    { q: "Como funciona o suporte se houver um imprevisto?", a: "O fornecedor presta o suporte direto do serviço contratado, e a Innovati orienta você e acompanha a tratativa quando necessário." },
+    { q: "Como começo a planejar?", a: "Fale com a Jussara pelo WhatsApp e conte o que você tem em mente. O atendimento também pode ser feito por videochamada." },
   ],
   copy: {
-    modules: { kicker: "ESPECIALIDADES", title: "Destaques da Innovati Travel", subtitle: "Orlando, cruzeiros, EUA e Canadá e Brasil." },
-    destinations: { kicker: "DESTINOS", title: "Destinos para a sua próxima viagem", subtitle: "Imagens genéricas de inspiração." },
-    highlights: { kicker: "PERFIS", title: "Viagens pensadas para você", subtitle: "Família, roteiros sob medida e experiências esportivas." },
-    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Acompanhamento próximo em cada etapa", subtitle: "Atendimento humano e planejamento detalhado." },
-    concierge: { kicker: "COMO FUNCIONA", title: "Do planejamento ao retorno", subtitle: "Suporte antes, durante e depois." },
-    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Sobre a Innovati Travel" },
+    destinations: { kicker: "DESTINOS E EXPERIÊNCIAS", title: "Encontre um ponto de partida para sua próxima viagem", subtitle: "Parques em Orlando, cruzeiros, resorts no Nordeste, Sul do Brasil e América do Norte. Imagens ilustrativas." },
+    highlights: { kicker: "PARA QUEM VIAJA", title: "O roteiro se adapta a quem vai viajar", subtitle: "Um jeito de planejar para casais, amigos e viajantes 60+." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Planejamento com alguém por perto", subtitle: "Da escolha do destino ao acompanhamento após o retorno." },
+    concierge: { kicker: "COMO FUNCIONA", title: "Do primeiro contato ao retorno", cta: "Conversar com a Jussara" },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Antes de planejar sua viagem" },
   },
   footer: {
-    description: "Consultoria personalizada de viagens em Franco da Rocha (SP), desde 2023. Roteiros sob medida e acompanhamento próximo.",
-    phone: "WhatsApp (11) 91857-8547", email: "innovatitravel@gmail.com",
+    description: "Consultoria de viagens e roteiros sob medida em Franco da Rocha (SP), desde 2023.",
+    phone: "WhatsApp (11) 91857-8547", whatsapp: "(11) 91857-8547", email: "innovatitravel@gmail.com",
     instagram: "https://www.instagram.com/innovatitravel/", instagramLabel: "@innovatitravel",
     address: "Franco da Rocha/SP", showLocation: true, legalLinksDisabled: true,
   },
-  seo: { title: "Prévia para revisão — Innovati Travel", description: "Prévia técnica da Innovati Travel; sem publicação e com ações desativadas." },
+  socialStrip: { title: "Acompanhe a Innovati Travel", links: [{ network: "instagram", url: "https://www.instagram.com/innovatitravel/" }] },
+  seo: { title: "Prévia para revisão — Innovati Travel", description: "Prévia da Innovati Travel; sem publicação e com ações desativadas." },
 }, "Innovati Travel");
-const innovatiMundoSource: AgencySiteProfile = JSON.parse(JSON.stringify(MUNDO_EM_CORES_PREVIEW_PROFILE));
-export const INNOVATI_PREVIEW_PROFILE: AgencySiteProfile = {
-  ...innovatiMundoSource, key: "innovatiBriefing24",
-  nav: innovatiMundoSource.nav?.filter(item => item.to !== "/oportunidades-novembro"),
-  heroPresentation: { ...innovatiMundoSource.heroPresentation, kicker: "INNOVATI TRAVEL · VIAGENS EM FAMÍLIA" },
-  hero: innovatiMundoSource.hero?.map((slide, index) => ({
-    ...slide, title: innovatiBaseline.hero?.[index]?.title ?? slide.title,
-    subtitle: (innovatiBaseline.hero?.[index]?.subtitle ?? slide.subtitle).replace(/ Imagem genérica de inspiração\./g, ""),
-  })),
-  signature: innovatiBaseline.signature,
-  modules: innovatiMundoSource.modules?.map((item, index) => ({
-    ...item, title: innovatiBaseline.modules?.[index]?.title ?? item.title,
-    text: (innovatiBaseline.modules?.[index]?.text ?? item.text).replace(/ Imagem genérica\./g, ""),
-    service: innovatiBaseline.modules?.[index]?.service ?? item.service,
-  })),
-  destinations: innovatiMundoSource.destinations?.map((item, index) => {
-    const content = innovatiBaseline.destinations?.[index];
-    return { ...item, ...(content ?? { key: "resorts-brasil", label: "Brasil", title: "Resorts no Brasil",
-      text: "Hospedagens para descansar e aproveitar no seu ritmo, com orientação da Innovati Travel.", service: "hospedagem" }),
-      key: content?.key ?? (index === 4 ? "eua-canada" : "resorts-brasil"),
-      ...(index === 4 ? { title: "Estados Unidos e Canadá", label: "América do Norte", text: "Roteiros sob medida e experiências para a família, com acompanhamento próximo.", service: "pacotes" } : {}),
-      text: (index === 4 ? "Roteiros sob medida e experiências para a família, com acompanhamento próximo." : content?.text ?? "Resorts no Brasil para aproveitar no seu ritmo.").replace(/ Imagem genérica de inspiração\./g, ""),
-      image: item.image, order: item.order };
-  }),
-  about: { ...innovatiMundoSource.about, ...innovatiBaseline.about, media: undefined,
-    images: innovatiMundoSource.about?.images, mural: innovatiMundoSource.about?.mural,
-    visitedDestinations: undefined, tagline: "Consultoria personalizada · Acompanhamento próximo" },
-  featuredExperience: innovatiMundoSource.featuredExperience ? { ...innovatiMundoSource.featuredExperience,
-    kicker: "DESCUBRA A RIVIERA MAYA", title: "Parques e hotéis Xcaret para a sua próxima viagem",
-    description: "Converse com a Innovati Travel para conhecer as possibilidades de parques, hotéis e experiências Xcaret e planejar uma viagem de acordo com suas preferências.",
-    highlights: ["Parques e hotéis", "Viagens em família", "Planejamento sob medida"] } : undefined,
-  authority: innovatiMundoSource.authority ? { ...innovatiMundoSource.authority,
-    companies: innovatiMundoSource.authority.companies ? { ...innovatiMundoSource.authority.companies,
-      title: "Planeje seu próximo cruzeiro com a Innovati Travel." } : undefined } : undefined,
-  differentials: innovatiBaseline.differentials, conciergeSteps: innovatiBaseline.conciergeSteps,
-  faq: innovatiBaseline.faq,
-  copy: { ...innovatiMundoSource.copy, ...innovatiBaseline.copy,
-    modules: { ...innovatiBaseline.copy?.modules, cta: "Conversar com a Jussara" },
-    concierge: { ...innovatiBaseline.copy?.concierge, cta: "Conversar com a Jussara" },
-    avaliacoes: { title: "Experiências de quem viaja com a Innovati Travel" },
-    testimonials: undefined,
-    newsletter: { title: "Novidades da Innovati Travel", subtitle: "Converse com a Jussara sobre destinos e possibilidades para sua próxima viagem.", cta: "Quero saber mais" },
-  },
-  footer: { ...innovatiBaseline.footer, whatsapp: "(11) 91857-8547", phone: "(11) 91857-8547" }, socialStrip: { title: "Siga-nos nas redes", links: [{ network: "instagram", url: "https://www.instagram.com/innovatitravel/" }] },
-  testimonials: undefined, inspirationDialog: undefined, seo: innovatiBaseline.seo,
-};
 
 
 ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID] = {
@@ -2422,101 +2361,98 @@ export const SHOPPING_PREVIEW_INFO: AgencyDomainInfo = {
   on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
-const shoppingBaseline = buildGoldStandardProfile("shoppingBriefing25", {
-  textualWordmark: true,
-  navDensity: "compact", visaHome: false, featuredExperience: undefined,
-  dmc: undefined, credentials: undefined, team: undefined,
-  authority: undefined, testimonials: undefined, conciergePoints: undefined,
+export const SHOPPING_PREVIEW_PROFILE = buildGoldStandardProfile("shoppingBriefing25", {
+  textualWordmark: true, navDensity: "compact", visaHome: false,
+  alternateSurfaces: true, compactSectionSpacing: true, randomizeDestinations: false,
+  featuredExperience: undefined, inspirationDialog: undefined,
+  dmc: undefined, credentials: undefined, team: undefined, testimonials: undefined, conciergePoints: undefined,
   sections: {
+    modules: { enabled: true, order: 1 }, destinations: { enabled: true, order: 2 },
+    resorts: { enabled: true, order: 3 }, authority: { enabled: true, order: 4 },
+    about: { enabled: true, order: 5 }, differentials: { enabled: true, order: 6 },
+    concierge: { enabled: true, order: 7 }, faq: { enabled: true, order: 8 },
+    signature: { enabled: false }, highlights: { enabled: false }, orlando: { enabled: false },
     dmc: { enabled: false }, credentials: { enabled: false }, team: { enabled: false },
     testimonials: { enabled: false }, avaliacoes: { enabled: false }, offers: { enabled: false },
-    newsletter: { enabled: false }, authority: { enabled: false },
+    newsletter: { enabled: false }, blog: { enabled: false },
   },
   nav: [
-    { label: "Início", to: "/" }, { label: "Sob medida", to: "/#assinatura" },
-    { label: "Destinos", to: "/#destinos" }, { label: "Cruzeiros", to: "/#cruzeiros" },
-    { label: "Resorts", to: "/#resorts" }, { label: "Sobre", to: "/#sobre" }, { label: "Dúvidas", to: "/#faq" },
+    { label: "Início", to: "/" },
+    { label: "Destinos", to: "/#destinos" },
+    { label: "Especialidades", to: "/#campanhas", children: [
+      { label: "Viagens sob medida", to: "/#campanhas" }, { label: "Resorts no Brasil", to: "/#resorts" },
+      { label: "Cruzeiros", to: "/#autoridade" },
+    ] },
+    { label: "Sobre", to: "/#sobre", children: [
+      { label: "Nossa história", to: "/#sobre" }, { label: "Como funciona", to: "/#atendimento" },
+      { label: "Dúvidas frequentes", to: "/#faq" },
+    ] },
   ],
-  heroPresentation: { kicker: "SÃO PAULO · SP · DESDE 2002", overlay: "strongLeft", titleWeight: "regular" },
+  heroPresentation: { kicker: "SHOPPING VIAGENS · DESDE 2002", overlay: "strongLeft", titleWeight: "regular" },
   hero: [
-    { title: "Shopping Viagens", subtitle: "Planejamento completo para você viajar com tranquilidade.", image: "europa", order: 1, enabled: true },
-    { title: "Europa, Itália e cruzeiros", subtitle: "Viagens sob medida com planejamento detalhado. Imagem genérica de inspiração.", image: "cruzeiro", order: 2, enabled: true },
-    { title: "Caribe, México e resorts", subtitle: "Resorts e all inclusive com orientação e atendimento próximo. Imagem genérica de inspiração.", image: "resort", order: 3, enabled: true },
-  ],
-  signature: {
-    kicker: "VIAGENS SOB MEDIDA · DESDE 2002",
-    title: "Consultoria completa para diferentes viagens",
-    text: "Desde 2002, a Shopping Viagens planeja viagens sob medida para quem quer viajar sem se preocupar com nada e valoriza orientação e atendimento próximo.",
-  },
-  destinations: [
-    { key: "europa", image: "europa", label: "Europa", title: "Europa e Itália", text: "Europa entre as prioridades, com destaque para a Itália. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 1 },
-    { key: "caribe", image: "litoral", label: "Caribe e México", title: "Caribe e México", text: "Destinos caribenhos e mexicanos planejados sob medida. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 2 },
-    { key: "brasil", image: "brasil", label: "Brasil", title: "Brasil e Nordeste", text: "Viagens pelo Brasil, com destaque para os resorts no Nordeste.", service: "pacotes", enabled: true, order: 3 },
-    { key: "cruzeiros", image: "cruzeiro", label: "Cruzeiros", title: "Cruzeiros", text: "Cruzeiros entre os detalhes prioritários do planejamento.", service: "cruzeiros", enabled: true, order: 4 },
-    { key: "resorts", image: "resort", label: "Resorts", title: "Resorts e all inclusive", text: "Descanso com planejamento completo, do Nordeste ao Caribe.", service: "hospedagem", enabled: true, order: 5 },
-    { key: "eua", image: "parques", label: "América do Norte", title: "Estados Unidos", text: "Estados Unidos entre os destinos prioritários. Imagem genérica de inspiração.", service: "pacotes", enabled: true, order: 6 },
+    { title: "Sua próxima viagem, planejada do seu jeito", subtitle: "Da escolha do roteiro às reservas, a Shopping Viagens organiza os detalhes para você viajar com tranquilidade.", image: "capitaisItalia", order: 1, enabled: true },
+    { title: "Encontre o cruzeiro que combina com você", subtitle: "Compare roteiros, navios e cabines com a orientação de quem ajuda a transformar preferências em escolhas.", image: "cruzeiro", order: 2, enabled: true },
+    { title: "Resorts no Nordeste, no seu ritmo", subtitle: "Descubra o que vale a pena para você: praia, descanso e uma hospedagem que cabe nos seus planos.", image: "iberostarPraiaDoForte", order: 3, enabled: true },
   ],
   modules: [
-    { key: "cruzeiros", title: "Cruzeiros", text: "Um dos detalhes prioritários da Shopping Viagens.", image: "cruzeiro", service: "cruzeiros", enabled: true, order: 1 },
-    { key: "italia", title: "Itália", text: "Destaque europeu nas viagens sob medida. Imagem genérica de inspiração.", image: "europa", service: "pacotes", enabled: true, order: 2 },
-    { key: "nordeste", title: "Resorts no Nordeste", text: "Resorts e all inclusive no Brasil.", image: "resort", service: "hospedagem", enabled: true, order: 3 },
-    { key: "caribe", title: "Caribe", text: "Inspirações caribenhas para a próxima viagem. Imagem genérica.", image: "litoral", service: "pacotes", enabled: true, order: 4 },
-    { key: "eua", title: "Estados Unidos", text: "Destino prioritário no planejamento. Imagem genérica.", image: "parques", service: "pacotes", enabled: true, order: 5 },
-    { key: "brasil", title: "Brasil", text: "Diferentes destinos nacionais planejados sob medida.", image: "brasil", service: "pacotes", enabled: true, order: 6 },
+    { key: "sob-medida", title: "Crie um roteiro sob medida", text: "Diga o que você quer viver e quanto tempo tem. A gente ajuda a montar um roteiro que respeite suas prioridades, sem lotar a agenda.", image: "capitaisItalia", service: "pacotes", enabled: true, order: 1 },
+    { key: "cruzeiros", title: "Compare opções antes de embarcar", text: "O porto, o itinerário, a cabine e o que está incluído mudam a viagem. A gente ajuda você a comparar esses detalhes antes de decidir.", image: "cruzeiro", service: "cruzeiros", enabled: true, order: 2 },
+    { key: "resorts", title: "Escolha um resort para descansar", text: "Compare localização, estrutura e regime de alimentação. Assim, você sabe o que encontrará no hotel e o que ainda precisa prever.", image: "iberostarPraiaDoForte", service: "hospedagem", enabled: true, order: 3 },
   ],
-  highlights: [
-    { title: "Viagens sob medida", text: "Cada viagem planejada conforme as necessidades do cliente.", service: "pacotes", cta: "Planejar minha viagem" },
-    { title: "Cruzeiros", text: "Cruzeiros entre os destaques do planejamento.", service: "cruzeiros", cta: "Planejar meu cruzeiro" },
-    { title: "Resorts e all inclusive", text: "Descanso no Nordeste, no Caribe e no México.", service: "hospedagem", cta: "Planejar meu descanso" },
+  destinations: [
+    { key: "italia", image: "capitaisItalia", label: "Europa", title: "Itália", text: "Combine cidades históricas, gastronomia e pausas no roteiro com o tempo de que você dispõe.", service: "pacotes", enabled: true, order: 1 },
+    { key: "caribe-mexico", image: "cancun", label: "Caribe e México", title: "Caribe e México", text: "Praias, resorts e passeios para escolher entre dias de descanso e experiências fora do hotel.", service: "pacotes", enabled: true, order: 2 },
+    { key: "resorts-nordeste", image: "iberostarPraiaDoForte", label: "Brasil", title: "Resorts no Nordeste", text: "Descubra quais resorts têm a estrutura, a praia e a localização que você procura.", href: "/resorts-brasil", ctaLabel: "Ver resorts", service: "hospedagem", enabled: true, order: 3 },
+    { key: "estados-unidos", image: "orlandoMagicKingdom", label: "Estados Unidos", title: "Estados Unidos", text: "Converse sobre as cidades que você quer visitar e o melhor jeito de organizar as etapas da viagem.", service: "pacotes", enabled: true, order: 4 },
   ],
   about: {
-    kicker: "QUEM CUIDA DA SUA VIAGEM", title: "Cristina Vale, fundadora",
-    text: "A Shopping Viagens atua desde 2002, em São Paulo (SP), com consultoria completa para diferentes viagens. Cristina Vale, fundadora, é a responsável pelo atendimento.\n\nA especialidade são as viagens sob medida, com planejamento completo para o cliente viajar com tranquilidade. Europa, Caribe e México, Brasil, cruzeiros, resorts e all inclusive estão entre as prioridades.\n\nO planejamento detalhado antecipa riscos e necessidades, apoiado pela vivência pessoal frequente nos destinos vendidos. A equipe compartilhada mantém a continuidade das informações, e o responsável habitual acompanha eventuais incidentes até a solução.",
+    kicker: "NOSSA HISTÓRIA", title: "Desde 2002, cuidando dos detalhes da sua viagem",
+    text: `A Shopping Viagens nasceu em São Paulo em 2002. Sob a direção da fundadora Cristina Vale, a equipe planeja viagens sob medida para quem valoriza orientação próxima e quer entender bem as opções antes de reservar.
+
+A experiência pessoal da equipe nos destinos ajuda a olhar além da lista de atrações. Na conversa, entram questões práticas: quanto tempo faz sentido ficar em cada lugar, como organizar os deslocamentos e quais detalhes vale resolver antes do embarque.
+
+O atendimento é compartilhado pela equipe, com continuidade das informações. Se surgir um imprevisto, quem costuma atender você acompanha o caso.`,
     badge: { value: "Desde 2002", label: "Shopping Viagens" }, media: "hidden", showLocation: true, ownerName: "Cristina Vale",
   },
   differentials: [
-    { title: "Planejamento detalhado", text: "Antecipa riscos e necessidades da viagem.", icon: "consultivo" },
-    { title: "Vivência nos destinos", text: "Vivência pessoal frequente nos destinos vendidos.", icon: "conferido" },
-    { title: "Continuidade no atendimento", text: "Equipe compartilhada com continuidade das informações.", icon: "fornecedores" },
-    { title: "Acompanhamento até a solução", text: "O responsável habitual acompanha incidentes até a solução.", icon: "acompanhamento" },
+    { title: "Planejamento detalhado", text: "Olhamos o roteiro e as reservas juntos para identificar o que merece atenção antes do embarque.", icon: "consultivo" },
+    { title: "Vivência nos destinos", text: "A experiência de quem já esteve nos destinos ajuda a transformar informação em orientação prática.", icon: "conferido" },
+    { title: "Continuidade no atendimento", text: "A equipe compartilha as informações do seu planejamento, sem perder o histórico da conversa.", icon: "fornecedores" },
+    { title: "Acompanhamento em imprevistos", text: "Seu contato habitual acompanha o caso e orienta você nos próximos passos.", icon: "acompanhamento" },
   ],
   hideConciergeActions: true,
   conciergeSteps: [
-    "Conversa por WhatsApp, telefone, e-mail ou atendimento presencial.",
-    "Planejamento detalhado da viagem sob medida.",
-    "Orçamento e reservas.",
-    "Acompanhamento pelo responsável habitual em caso de incidentes, até a solução.",
+    "Conte quem vai viajar, em que período e que tipo de experiência procura.",
+    "A equipe monta uma proposta de roteiro, hospedagem ou cruzeiro com base na conversa.",
+    "Você avalia as opções e aprova as escolhas antes das reservas.",
+    "Em caso de imprevisto, o contato que já conhece sua viagem acompanha o caso.",
   ],
   faq: [
-    { q: "Quem é responsável pelo atendimento?", a: "Cristina Vale, fundadora da Shopping Viagens." },
-    { q: "Desde quando a agência atua?", a: "A Shopping Viagens atua desde 2002, em São Paulo/SP." },
-    { q: "Qual é a especialidade?", a: "Viagens sob medida, com consultoria completa para diferentes viagens." },
-    { q: "Quais são os destinos prioritários?", a: "Europa, Caribe e México, Brasil, cruzeiros, resorts e all inclusive — com destaque para cruzeiros, Itália, resorts no Nordeste, Caribe e Estados Unidos." },
-    { q: "Como funciona o atendimento?", a: "Planejamento, orçamento e reservas, com equipe compartilhada que mantém a continuidade das informações. O responsável habitual acompanha incidentes até a solução." },
-    { q: "Quais são os canais de atendimento?", a: "WhatsApp 11 94714-8466, telefone 11 2096-7777, e-mail info@shoppingviagens.com.br, atendimento presencial e Instagram @shoppingviagens." },
+    { q: "Preciso já ter um roteiro em mente?", a: "Não. Basta contar o que gostaria de fazer, quem vai viajar e em que período. A equipe pode indicar por onde começar." },
+    { q: "Vocês ajudam a comparar cruzeiros e resorts?", a: "Sim. Para cruzeiros, vale comparar itinerário, cabine e datas. Para resorts, a equipe orienta sobre localização, alimentação e estrutura conforme o perfil da viagem." },
+    { q: "Como vocês trabalham com o meu orçamento?", a: "O investimento varia conforme as datas, o roteiro e os serviços. Compartilhe a faixa que faz sentido para você para orientar a proposta." },
+    { q: "Como faço para conversar com a equipe?", a: "Você pode falar pelo WhatsApp, telefone ou e-mail. A Shopping Viagens também oferece atendimento presencial em São Paulo." },
   ],
   copy: {
-    modules: { kicker: "DESTAQUES", title: "Destaques da Shopping Viagens", subtitle: "Cruzeiros, Itália, resorts no Nordeste, Caribe e Estados Unidos." },
-    destinations: { kicker: "DESTINOS", title: "Destinos para a sua próxima viagem", subtitle: "Europa, Caribe e México, Brasil, cruzeiros e resorts." },
-    highlights: { kicker: "INSPIRAÇÕES", title: "Diferentes formas de viajar", subtitle: "Planejamento completo para viajar com tranquilidade." },
-    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "O jeito Shopping Viagens de planejar", subtitle: "Orientação e atendimento próximo do início ao fim." },
-    concierge: { kicker: "COMO FUNCIONA", title: "Do planejamento à solução", subtitle: "Planejamento, orçamento, reservas e acompanhamento." },
-    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Sobre a Shopping Viagens" },
+    modules: { kicker: "PLANEJE COM A SHOPPING VIAGENS", title: "Três jeitos de começar a planejar", subtitle: "Roteiros sob medida, cruzeiros e resorts. Escolha o tipo de viagem e conte o que você tem em mente.", cta: "Conversar com a equipe" },
+    destinations: { kicker: "DESTINOS", title: "Ideias para a sua próxima viagem", subtitle: "Da Itália aos resorts do Nordeste, veja por onde começar a planejar." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "Orientação de verdade, para as escolhas da sua viagem" },
+    concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa às reservas" },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Antes de começar a planejar" },
   },
   footer: {
-    description: "Viagens sob medida desde 2002. Planejamento completo para viajar com tranquilidade.",
-    phone: "WhatsApp 11 94714-8466 · Telefone 11 2096-7777", email: "info@shoppingviagens.com.br",
+    description: "Consultoria de viagens sob medida em São Paulo, desde 2002.",
+    whatsapp: "(11) 94714-8466", phone: "(11) 2096-7777", email: "info@shoppingviagens.com.br",
     instagram: "https://www.instagram.com/shoppingviagens/", instagramLabel: "@shoppingviagens",
     address: "São Paulo/SP", showLocation: true, legalLinksDisabled: true,
   },
-  seo: { title: "Prévia para revisão — Shopping Viagens", description: "Prévia técnica da Shopping Viagens. Logotipo e paleta pendentes; sem publicação." },
+  socialStrip: { title: "Acompanhe a Shopping Viagens", links: [{ network: "instagram", url: "https://www.instagram.com/shoppingviagens/" }] },
+  seo: { title: "Prévia para revisão | Shopping Viagens", description: "Prévia da Shopping Viagens. Logotipo e paleta pendentes; sem publicação." },
 }, "Shopping Viagens");
-export const SHOPPING_PREVIEW_PROFILE: AgencySiteProfile = buildMundoReviewProfile("shoppingBriefing25", shoppingBaseline, "Shopping Viagens", "Cristina Vale");
-SHOPPING_PREVIEW_PROFILE.footer = { ...shoppingBaseline.footer, whatsapp: "(11) 94714-8466", phone: "(11) 2096-7777" };
 ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID] = {
   jobId: SHOPPING_PREVIEW_JOB_ID, info: SHOPPING_PREVIEW_INFO, profile: SHOPPING_PREVIEW_PROFILE,
   notice: "prévia técnica para revisão · logotipo e paleta pendentes · imagens genéricas · sem publicação",
-  documentTitle: "Prévia para revisão — Shopping Viagens", realAgency: true,
+  documentTitle: "Prévia para revisão — Shopping Viagens", realAgency: true, strictBackendBlock: true,
 };
 
 /** Bardelli review copy; never changes the official tenant or previous presentation. */
@@ -2595,19 +2531,30 @@ ADS_PREVIEW_FIXTURES[BARDELLI_MUNDO_PREVIEW_JOB_ID] = {
     resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, editorial: true },
 };
 
-// Shared content pages for the isolated Bagagem review only; no real submissions.
-ADS_PREVIEW_FIXTURES[BAGAGEM_NA_MAO_PREVIEW_JOB_ID].pages = {
-  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Bagagem na Mão Viagens").replace(/Bardelli/g, "Bagagem na Mão")]) },
-  resorts: { title: "Explore os resorts do Brasil com a Bagagem na Mão" }, orlandoTickets: true, editorial: true,
+export const BARDELLI_IMM_PREVIEW_PROFILE = buildBardelliImmPreview(BARDELLI_MUNDO_PREVIEW_PROFILE);
+ADS_PREVIEW_FIXTURES[BARDELLI_IMM_PREVIEW_JOB_ID] = {
+  jobId: BARDELLI_IMM_PREVIEW_JOB_ID,
+  info: {
+    ...BARDELLI_PRESENTATION_INFO,
+    user_id: "00000000-0000-0000-0000-00000000ba18",
+    hostname: BARDELLI_IMM_PREVIEW_HOST,
+    agency_slug: "", public_slug: null, is_primary: false,
+    cover_image_url: null, bio: null, whatsapp_group_url: null,
+  },
+  profile: BARDELLI_IMM_PREVIEW_PROFILE,
+  notice: "Bardelli Viagens · prévia para revisão · fotos ilustrativas · sem preços, envios ou publicação",
+  documentTitle: "Prévia editorial — Bardelli Viagens",
+  realAgency: true, strictBackendBlock: true,
+  pages: { resorts: { title: "Explore os resorts do Brasil com a Bardelli Viagens" }, orlandoTickets: true, editorial: true },
 };
-ADS_PREVIEW_FIXTURES[BAGAGEM_NA_MAO_PREVIEW_JOB_ID].notice = "Bagagem na Mão · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação";
+
 
 // Content pages stay within the isolated Innovati review; no live submissions.
 ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].pages = {
-  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Innovati Travel").replace(/Bardelli/g, "Innovati")]) },
   resorts: { title: "Explore os resorts do Brasil com a Innovati Travel" }, orlandoTickets: true, editorial: true,
+  xcaret: undefined, visa: false, dmc: false,
 };
-ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].notice = "Innovati Travel · prévia para revisão · fotos do modelo provisórias · sem envios ou publicação";
+ADS_PREVIEW_FIXTURES[INNOVATI_PREVIEW_JOB_ID].notice = "Innovati Travel · prévia para revisão · imagens ilustrativas · sem envios ou publicação";
 
 /** Review-only configuration copy: keeps source media, applies confirmed agency copy. */
 function buildMundoReviewProfile(
@@ -2659,8 +2606,7 @@ function buildMundoReviewProfile(
   };
 }
 ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].pages = {
-  xcaret: { slots: GENERIC_XCARET_SLOTS, textRewrites: BARDELLI_XCARET_REWRITES.map(([from, to]) => [from, to.replace(/Bardelli Viagens/g, "Shopping Viagens").replace(/Bardelli/g, "Shopping Viagens")]) },
-  resorts: { title: "Explore os resorts do Brasil com a Shopping Viagens" }, orlandoTickets: true, editorial: true,
+  resorts: { title: "Explore os resorts do Brasil com a Shopping Viagens" }, editorial: true,
 };
 ADS_PREVIEW_FIXTURES[SHOPPING_PREVIEW_JOB_ID].notice = "Shopping Viagens · prévia para revisão · logotipo e paleta pendentes · fotos do modelo provisórias · sem publicação";
 
@@ -2743,29 +2689,29 @@ export const VIAJE_NA_MAGIA_PREVIEW_INFO: AgencyDomainInfo = {
   user_id: "00000000-0000-0000-0000-00000000ad27",
   agency_slug: "", public_slug: null, hostname: VIAJE_NA_MAGIA_PREVIEW_HOST, is_primary: false,
   agency_name: "Viaje na Magia Turismo", owner_name: "Elisangela Silva",
-  logo_url: viajeNaMagiaLogo.url, cover_image_url: null,
+  logo_url: "/viaje-na-magia/logo.webp", cover_image_url: null,
   primary_color: "#164f76", secondary_color: "#ffffff",
   tertiary_color: deriveTertiaryColor("#164f76"), secondary_auto: false, tertiary_auto: false,
   on_secondary_color: "#164f76", phone: null, city: "Franco da Rocha", state: "SP",
   bio: null, cnpj: null, whatsapp_group_url: null,
 };
 export const VIAJE_NA_MAGIA_PREVIEW_PROFILE = buildGoldStandardProfile("viajeNaMagiaBriefing27", {
-  textualWordmark: false, navDensity: "compact", cruiseSeasonInNav: false,
+  textualWordmark: false, alternateSurfaces: true, destinationsFixedOrder: true, visaHome: false, navDensity: "compact", cruiseSeasonInNav: false,
   // Keep the specialty rail instead of replacing it with an unrelated home campaign.
   featuredExperience: undefined,
   sections: { avaliacoes: false, testimonials: false, credentials: false, team: false, dmc: false, offers: false, blog: false, newsletter: false },
   dmc: undefined, credentials: undefined, team: undefined, testimonials: undefined,
   heroPresentation: { kicker: "FRANCO DA ROCHA · SP · DESDE 2020", overlay: "strongLeft", titleWeight: "regular" },
   hero: [
-    { title: "Viaje na Magia Turismo", subtitle: "Planejamento completo para o cliente viajar com tranquilidade.", image: "orlandoMagicKingdom", enabled: true, order: 1 },
-    { title: "O sonho de Orlando começa no planejamento", subtitle: "Parques e entretenimento com escolhas que respeitam o ritmo de toda a família.", image: "parques", enabled: true, order: 2 },
-    { title: "Novos destinos, a mesma atenção aos detalhes", subtitle: "Cruzeiros e viagens internacionais para casais, famílias e grupos de amigos.", image: "heroSantoriniShip", enabled: true, order: 3 },
+    { kicker: "ORLANDO EM FAMÍLIA", title: "Viva a magia de Orlando no ritmo da sua família", subtitle: "Planeje os dias de parque, a hospedagem e os deslocamentos com quem cuida da viagem do começo ao retorno.", image: "parques", enabled: true, order: 1 },
+    { kicker: "CRUZEIROS", title: "Encontre um cruzeiro que combine com você", subtitle: "Compare roteiros, navios e cabines antes de escolher como e onde embarcar.", image: "cruzeiro", enabled: true, order: 2 },
+    { kicker: "ROTEIROS INTERNACIONAIS", title: "O próximo destino começa com uma boa conversa", subtitle: "Da América do Norte à Europa, passando por Argentina e Chile, monte um roteiro com tempo para aproveitar.", image: "europa", enabled: true, order: 3 },
   ],
   nav: [
     { label: "Início", to: "/" }, { label: "Destinos", to: "/#destinos" },
     { label: "Especialidades", to: "/#assinatura", children: [
       { label: "Parques Orlando", to: "/#ingressos-orlando" }, { label: "Cruzeiros", to: "/#autoridade" },
-      { label: "Resorts no Brasil", to: "/#resorts" }, { label: "Xcaret", to: "/xcaret" }, { label: "Visto Americano", to: "/visto-americano" },
+      { label: "Resorts no Brasil", to: "/#resorts" },
     ] },
     { label: "Sobre", to: "/#sobre", children: [{ label: "Nossa história", to: "/#sobre" }, { label: "Como funciona", to: "/#atendimento" }, { label: "Dúvidas frequentes", to: "/#faq" }] },
   ],
@@ -2775,28 +2721,36 @@ export const VIAJE_NA_MAGIA_PREVIEW_PROFILE = buildGoldStandardProfile("viajeNaM
     continuation: { title: "Tranquilidade para aproveitar cada momento", text: "Entendemos quem vai viajar, os interesses e o ritmo do grupo. A partir dessa conversa, organizamos destinos, reservas e orientações para que você participe das escolhas e viaje com suporte antes, durante e depois do retorno." },
   },
   modules: [
-    { key: "familias", title: "Famílias e parques", text: "Orlando e Disney com planejamento para reunir diferentes gerações e respeitar o ritmo de cada viajante.", service: "ingressos", image: "orlandoMagicKingdom", enabled: true, order: 1 },
+    { key: "familias", title: "Famílias e parques", text: "Orlando e Disney com planejamento para reunir diferentes gerações e respeitar o ritmo de cada viajante.", service: "ingressos", image: "parques", enabled: true, order: 1 },
     { key: "cruzeiros", title: "Cruzeiros", text: "Roteiros, navios e cabines comparados com atenção ao perfil de quem embarca.", service: "cruzeiros", image: "cruzeiro", enabled: true, order: 2 },
     { key: "internacionais", title: "Destinos internacionais", text: "Estados Unidos, Canadá, América do Sul e Europa em roteiros personalizados.", service: "pacotes", image: "europa", enabled: true, order: 3 },
     { key: "entretenimento", title: "Parques e entretenimento", text: "Dias de diversão organizados junto à hospedagem, aos deslocamentos e aos momentos de descanso.", service: "ingressos", image: "parques", enabled: true, order: 4 },
     { key: "america-sul", title: "América do Sul", text: "Argentina, Chile e Brasil entre as prioridades para descobrir paisagens e culturas.", service: "pacotes", image: "mendoza", enabled: true, order: 5 },
-    { key: "europa", title: "Europa no seu ritmo", text: "Cidades e experiências reunidas conforme os interesses e o tempo disponível para a viagem.", service: "pacotes", image: "heroVarenna", enabled: true, order: 6 },
+    { key: "europa", title: "Europa no seu ritmo", text: "Cidades e experiências reunidas conforme os interesses e o tempo disponível para a viagem.", service: "pacotes", image: "europa", enabled: true, order: 6 },
   ],
   destinations: [
-    { key: "eua", title: "Estados Unidos e Canadá", label: "América do Norte", text: "Parques, entretenimento e descobertas culturais em um planejamento personalizado.", image: "orlandoMagicKingdom", service: "pacotes", enabled: true, order: 1 },
+    { key: "eua", title: "Estados Unidos e Canadá", label: "América do Norte", text: "Parques, entretenimento e descobertas culturais em um planejamento personalizado.", image: "parques", service: "pacotes", enabled: true, order: 1 },
     { key: "orlando", title: "Orlando e Disney", label: "Famílias e parques", text: "O sonho que inspirou a agência, organizado com cuidado para toda a família.", image: "parques", service: "ingressos", enabled: true, order: 2 },
-    { key: "cruzeiros", title: "Viagens de cruzeiro", label: "No mar", text: "Novos destinos e momentos a bordo, com orientação para escolher roteiro e cabine.", image: "heroSantoriniShip", service: "cruzeiros", enabled: true, order: 3 },
+    { key: "cruzeiros", title: "Viagens de cruzeiro", label: "No mar", text: "Novos destinos e momentos a bordo, com orientação para escolher roteiro e cabine.", image: "cruzeiro", service: "cruzeiros", enabled: true, order: 3 },
     { key: "america-sul", title: "Argentina, Chile e Brasil", label: "América do Sul", text: "Paisagens e experiências sul-americanas para explorar com planejamento e apoio.", image: "mendoza", service: "pacotes", enabled: true, order: 4 },
-    { key: "europa", title: "Europa", label: "Destinos internacionais", text: "História, cultura e cidades que podem fazer parte da sua próxima viagem.", image: "heroVarenna", service: "pacotes", enabled: true, order: 5 },
+    { key: "europa", title: "Europa", label: "Destinos internacionais", text: "História, cultura e cidades que podem fazer parte da sua próxima viagem.", image: "europa", service: "pacotes", enabled: true, order: 5 },
   ],
+  authority: {
+    kicker: "VIAGENS DE CRUZEIRO", title: "Escolha o cruzeiro pensando em quem vai embarcar",
+    paragraphs: [
+      "Uma viagem a dois, férias com crianças e um roteiro com amigos pedem escolhas diferentes. A Elisangela ajuda você a comparar itinerário, cabine, portos de parada e atividades a bordo.",
+      "Antes de reservar, converse com a agência sobre o que está incluído e como organizar os deslocamentos até o embarque.",
+    ],
+    cta: "Planejar meu cruzeiro", service: "cruzeiros",
+  },
   highlights: [
     { title: "Casais", text: "Tempo juntos e experiências que combinam com os interesses dos dois.", service: "pacotes", cta: "Planejar a dois" },
     { title: "Famílias multigeracionais", text: "Avós, pais e filhos com atenção aos diferentes ritmos e necessidades.", service: "pacotes", cta: "Planejar em família" },
     { title: "Grupos de amigos", text: "Planos compartilhados, organização e descobertas em boa companhia.", service: "pacotes", cta: "Planejar com amigos" },
   ],
   about: {
-    kicker: "NOSSA HISTÓRIA", title: "Desde 2020, sonhos que merecem cuidado", image: "orlandoMagicKingdom",
-    text: "A Viaje na Magia Turismo nasceu do propósito de ajudar famílias a realizarem o sonho de Orlando e Disney. Em Franco da Rocha, SP, a agência acredita que viajar é possível com planejamento, estudo e atualização constante: conhecer as opções e organizar cada etapa torna o sonho mais próximo.\n\nElisangela Silva, Consultora de Viagens, conduz o atendimento pelo WhatsApp, e-mail, videochamada e presencialmente. A conversa começa pelo que é importante para você: quem vai viajar, o que deseja viver e como construir um roteiro que respeite suas prioridades.\n\nO cuidado continua no planejamento, nas reservas e nas orientações antes do embarque. Durante a viagem, você conta com acompanhamento; após o retorno, o contato permanece. Quero que o cliente sinta que o sonho dele também é importante para mim!",
+    kicker: "NOSSA HISTÓRIA", title: "Elisangela cuida da sua viagem do início ao retorno", media: "hidden",
+    text: "A Viaje na Magia Turismo nasceu do propósito de ajudar famílias a realizarem o sonho de Orlando e Disney. Em Franco da Rocha, SP, a agência acredita que viajar é possível com planejamento, estudo e atualização constante: conhecer as opções e organizar cada etapa torna o sonho mais próximo.\n\nElisangela Silva, Consultora de Viagens, conduz o atendimento pelo WhatsApp, e-mail, videochamada e presencialmente. A conversa começa pelo que é importante para você: quem vai viajar, o que deseja viver e como construir um roteiro que respeite suas prioridades.\n\nO cuidado continua no planejamento, nas reservas e nas orientações antes do embarque. Durante a viagem, você conta com acompanhamento; após o retorno, o contato permanece.",
     badge: { value: "Desde 2020", label: "Viaje na Magia Turismo" }, ownerName: "Elisangela Silva", showLocation: true,
     tagline: "Planejamento · Reservas · Orientações · Acompanhamento",
   },
@@ -2840,7 +2794,7 @@ ADS_PREVIEW_FIXTURES["briefing-27-v1"] = {
   realAgency: true, strictBackendBlock: true,
   notice: "Viaje na Magia Turismo · prévia para revisão · solicitações simuladas · sem envios ou publicação",
   documentTitle: "Prévia — Viaje na Magia Turismo",
-  pages: { dmc: false, editorial: false, xcaret: { slots: GENERIC_XCARET_SLOTS }, visa: true, orlandoTickets: true, resorts: { title: "Explore os resorts do Brasil" } },
+  pages: { dmc: false, editorial: false, xcaret: null, visa: false, orlandoTickets: true, resorts: { title: "Explore os resorts do Brasil" } },
 };
 
 /** Briefing 28: identity belongs only to the local fixture, never to an account. */

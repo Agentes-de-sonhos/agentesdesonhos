@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen } from "@testing-library/react";
+import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { INNOVATI_PREVIEW_HOST, INNOVATI_PREVIEW_INFO, INNOVATI_PREVIEW_PROFILE, resolveAdsPreviewFixture } from "@/lib/adsBriefingPreview";
@@ -12,7 +13,7 @@ afterEach(cleanup);
 function preview(hostname = "localhost", suffix = "") {
   Object.defineProperty(window, "location", { value: { ...window.location, hostname }, writable: true });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/ads-briefing-preview/briefing-24-v1${suffix}`]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></MemoryRouter></QueryClientProvider>);
+  return render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter initialEntries={[`/ads-briefing-preview/briefing-24-v1${suffix}`]}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></MemoryRouter></QueryClientProvider></HelmetProvider>);
 }
 describe("Innovati briefing-24-v1", () => {
   it("resolves only the exact job and synthetic host", () => {
@@ -37,14 +38,30 @@ describe("Innovati briefing-24-v1", () => {
     expect(INNOVATI_PREVIEW_INFO.logo_url).toMatch(/^\/__l5e\/assets-v1\//);
     expect(INNOVATI_PREVIEW_INFO.primary_color).toBe("#254F86");
     expect(resolveSiteTheme(INNOVATI_PREVIEW_HOST)).toBe("siteBaseEditorial");
-    expect(siteThemeRootClass(INNOVATI_PREVIEW_HOST)).toBe(siteThemeRootClass("sitelab.local"));
+    expect(INNOVATI_PREVIEW_INFO.secondary_color).toBe("#F98D0D");
+    expect(siteThemeRootClass(INNOVATI_PREVIEW_HOST)).toContain("wl-innovati-mundo");
   });
   it("does not enable unconfirmed reviews, certifications, team or offers", () => {
-    for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc", "newsletter", "authority"] as const) expect(INNOVATI_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
+    for (const key of ["avaliacoes", "testimonials", "credentials", "team", "offers", "dmc", "newsletter", "blog"] as const) expect(INNOVATI_PREVIEW_PROFILE.sections?.[key]).toEqual({ enabled: false });
     expect(INNOVATI_PREVIEW_PROFILE.team).toBeUndefined();
     expect(INNOVATI_PREVIEW_PROFILE.credentials).toBeUndefined();
     expect(INNOVATI_PREVIEW_PROFILE.visaHome).toBe(false);
     expect(INNOVATI_PREVIEW_PROFILE.hideConciergeActions).toBe(true);
+  });
+  it("renders the agency story, destinations, and cruise season without campaign bleed", async () => {
+    preview();
+    const about = await screen.findByRole("heading", { name: "De muitas idas a Orlando a uma carreira no turismo" }, { timeout: 6500 });
+    expect(about).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Cruzeiros MSC" })).toBeInTheDocument();
+    expect(screen.getByTestId("cruise-season-authority")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Estados Unidos e Canadá" })).toBeInTheDocument();
+    expect(document.querySelector('img[src="/innovati-travel/iguacu-ilustracao.svg"]')).not.toBeNull();
+    expect(screen.queryByText(/Xcaret|Pink Friday|Leste Europeu Premium|Oportunidades de Novembro/i)).not.toBeInTheDocument();
+  }, 9000);
+
+  it("rejects the unrelated Xcaret preview route", async () => {
+    preview("localhost", "/xcaret");
+    expect(await screen.findByText("Not found")).toBeInTheDocument();
   });
   it("retains the authorized founding year and public contacts", () => {
     expect(INNOVATI_PREVIEW_PROFILE.about?.badge?.value).toBe("Desde 2023");

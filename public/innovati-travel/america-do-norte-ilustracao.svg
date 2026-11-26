@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#254f86"/><stop offset="1" stop-color="#edb581"/>
+    </linearGradient>
+    <pattern id="windows" width="24" height="26" patternUnits="userSpaceOnUse">
+      <path d="M6 8h7v8H6z" fill="#f2bd82" opacity=".7"/>
+    </pattern>
+  </defs>
+  <path fill="url(#sky)" d="M0 0h960v640H0z"/>
+  <circle cx="252" cy="224" r="91" fill="#ffd297" opacity=".94"/>
+  <path fill="#7d8a9b" d="m0 430 113-26 112 23 91-44 104 17 120-36 127 53 150-47 143 36v234H0z"/>
+  <path fill="#243a53" d="M0 560v-84h68v-69h67v107h54V376h67v31h19v95h74V357h46v-30h20v30h51v153h55v-98h73v61h44V311h34v-22h15v22h29v162h56v-78h67v51h52v-85h69v199z"/>
+  <path fill="url(#windows)" d="M80 411h49v107H80zm118-27h56v130h-56zm161-16h94v139h-94zm175 53h47v100h-47zm113-101h58v205h-58zm90 86h61v116h-61zm107-35h56v129h-56z"/>
+  <path fill="#14293b" d="M0 543h960v97H0z"/>
+  <path fill="none" stroke="#ecb77a" stroke-width="3" opacity=".6" d="M123 576h203m-53 22h152m221-22h178m-79 30h133"/>
+  <path fill="none" stroke="#cadce7" stroke-width="4" opacity=".4" d="M75 614h80m273-44h73m-5 51h207"/>
+</svg>

@@ -183,6 +183,8 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
+  innovatiIguacu: "/innovati-travel/iguacu-ilustracao.svg",
+  innovatiNorthAmerica: "/innovati-travel/america-do-norte-ilustracao.svg",
   pristurHeroDisney: "/pristur/hero-disney.jpg",
   pristurHeroCruzeiros: "/pristur/hero-cruzeiros.jpg",
   pristurHeroCaribe: "/pristur/hero-caribe.jpg",
@@ -978,7 +980,7 @@ export default function AgencySiteHome({
         // Destinos com a Ju: set juSeasonEnabled to false to restore the original cruise authority block (kept intact in the profile).
         const juSeasonEnabled = true;
         const seasonEnabled = profile.key === "dricaOfficial"
-          || (juSeasonEnabled && profile.key === "editorialRose") || (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
+          || (juSeasonEnabled && profile.key === "editorialRose") || (curtiSeasonEnabled && (profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20")) || profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "bardelliImmPreview" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial";
         return (
           <Fragment key={key}>
           <section id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
