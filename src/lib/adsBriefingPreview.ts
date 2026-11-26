@@ -2714,6 +2714,13 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
 const immReviewProfile = buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto");
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...immReviewProfile,
+  socialStrip: {
+    title: "Acompanhe a IMM",
+    links: [
+      { network: "instagram", url: "https://www.instagram.com/imm_turismo/" },
+      { network: "facebook", url: "https://www.facebook.com/immturismo/" },
+    ],
+  },
   destinations: [
     ...(immReviewProfile.destinations ?? [])
       .filter(d => d.key !== "europa-portugal")
