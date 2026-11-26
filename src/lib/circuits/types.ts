@@ -8,6 +8,7 @@ export interface CircuitDay {
   title: string;
   meals?: string[];
   description: string;
+  photo?: { src: string; alt: string; caption: string; credit: string; width: number; height: number };
   /** City where this day ends with accommodation; absent on the final day. */
   overnightCity?: string;
 }
