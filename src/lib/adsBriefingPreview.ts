@@ -1220,7 +1220,7 @@ const karibuBaseline = buildGoldStandardProfile("karibuBriefing21", {
       { label: "Dúvidas frequentes", to: "/#faq" },
     ] },
   ],
-  heroPresentation: { overlay: "strongLeft", titleWeight: "regular" },
+  heroPresentation: { overlay: "strongLeft", titleWeight: "regular", actionsPlacement: "right" },
   hero: [
     { kicker: "CRUZEIROS", title: "O cruzeiro certo começa com boas escolhas", subtitle: "Compare navios, roteiros e cabines com a orientação da Karibu, do planejamento ao desembarque.", image: "immCruise", order: 1, enabled: true },
     { kicker: "ORLANDO · PARQUES E INGRESSOS", title: "Orlando no ritmo de quem viaja", subtitle: "Organize seus dias na Disney e na Universal com ajuda para escolher os parques e os ingressos.", image: "immDisneyCastle", order: 2, enabled: true },
@@ -1320,7 +1320,7 @@ export const KARIBU_PREVIEW_PROFILE: AgencySiteProfile = {
     concierge: { enabled: true, order: 8 },
     faq: { enabled: true, order: 9 },
     avaliacoes: false,
-    newsletter: false,
+    newsletter: { enabled: true, order: 99 },
   },
   signature: karibuBaseline.signature,
   modules: karibuBaseline.modules,
@@ -1342,14 +1342,19 @@ export const KARIBU_PREVIEW_PROFILE: AgencySiteProfile = {
     ...KARIBU_MUNDO_SOURCE_PROFILE.copy,
     ...karibuBaseline.copy,
     modules: { ...karibuBaseline.copy?.modules, cta: "Conversar com a Roseli" },
-    newsletter: { title: "Novidades da Karibu", subtitle: "Converse com a Roseli sobre destinos e oportunidades de viagem.", cta: "Quero saber mais" },
+    newsletter: { kicker: "Fique por dentro", title: "Novidades da Karibu", subtitle: "Cadastre-se para receber novidades sobre destinos, cruzeiros e oportunidades de viagem.", cta: "Quero me cadastrar" },
     avaliacoes: { title: "Experiências de quem viaja com a Karibu" },
   },
   footer: { ...karibuBaseline.footer, descriptionHidden: true, address: "Avenida Caetano Zamataro, 228, Ponte Grande, Guarulhos/SP", legalName: "Karibu Viagens e Turismo Ltda", cnpj: "13.687.335/0001-71" },
   // The source's customer reviews, social account and invitation belong to Mundo.
   testimonials: undefined,
   socialStrip: undefined,
-  inspirationDialog: undefined,
+  newsletterMedia: { src: pristurNewsletterWing.url, alt: "Asa de avião vista da janela durante o voo" },
+  inspirationDialog: {
+    title: "Receba as novidades da Karibu",
+    description: "Preencha seu contato para receber dicas e oportunidades de viagem da Karibu.",
+    submitLabel: "Cadastrar meu contato",
+  },
   seo: karibuBaseline.seo,
 };
 

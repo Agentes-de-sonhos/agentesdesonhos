@@ -2105,6 +2105,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 /* Karibu (briefing 21 and its verified domains): colors sampled from its logo. */
 .wl-karibu {
   --karibu-blue: #002a46;
+  --karibu-logo-blue: #28a8e1;
   --karibu-pale-blue: #f2faff;
 }
 .wl-karibu .wl-karibu-surface { background: #fff; }
@@ -2137,22 +2138,35 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   filter: brightness(.9) saturate(1.2);
   stroke: var(--karibu-blue);
 }
-.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] circle { fill: #fff !important; stroke: var(--karibu-blue) !important; }
-.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] text { fill: var(--karibu-blue) !important; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] circle { fill: var(--karibu-logo-blue) !important; stroke: #fff !important; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] text {
+  fill: #fff !important;
+  font-size: 17px;
+  font-weight: 800;
+  paint-order: stroke fill;
+  stroke: rgb(0 42 70 / .6);
+  stroke-width: .55px;
+}
 .wl-karibu :is(#resorts, #resorts-brasil) button[data-region][data-active] {
   background: var(--karibu-blue) !important;
   border-color: var(--karibu-blue) !important;
   color: #fff !important;
 }
-/* O azul-claro original (#28a8e1) tem contraste insuficiente em texto
-   pequeno sobre branco; a base azul-marinho preserva ambas as cores do logo. */
+/* Karibu: sem tarja nas seções claras; só cruzeiros tem a base branca no chapéu. */
 .wl-karibu .wl-karibu-surface .wl-kicker,
 .wl-karibu .wl-karibu-cruise .wl-kicker {
-  width: fit-content;
-  max-width: 100%;
-  padding: .3rem .75rem;
-  border-radius: 999px;
-  background: var(--karibu-blue);
-  color: #28a8e1 !important;
+  color: var(--karibu-logo-blue) !important;
 }
-.wl-karibu .wl-karibu-cruise .wl-kicker > span { background-color: #28a8e1; }
+.wl-karibu .wl-karibu-surface .wl-kicker {
+  background: transparent;
+}
+.wl-karibu .wl-karibu-cruise .wl-kicker {
+  background: #fff;
+  border-color: #fff;
+}
+.wl-karibu .wl-karibu-cruise .wl-kicker > span { background-color: var(--karibu-logo-blue); }
+.wl-karibu #novidades .wl-newsletter-card {
+  background: #fff !important;
+}
+.wl-karibu #novidades .wl-newsletter-card .wl-kicker svg { color: var(--karibu-logo-blue); }
+.wl-karibu #novidades .wl-newsletter-card > div > div:last-child img { object-position: center; }

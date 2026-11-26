@@ -561,6 +561,7 @@ export default function AgencySiteHome({
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
   const karibu = profile.key === "karibuBriefing21" || profile.key === "karibuOfficial";
   const liveKaribuOffers = profile.key === "karibuOfficial";
+  const karibuContact = karibu ? agencyWhatsappNumber({ ...info, phone: profile.footer?.whatsapp ?? info.phone }) : null;
   const karibuOffersQuery = usePublicOffers(hostname, liveKaribuOffers);
   const karibuOffers = (karibuOffersQuery.data ?? [])
     .filter((offer) => offer.status === "published" && offerInChannel(offer, "ofertas")
@@ -2079,6 +2080,15 @@ export default function AgencySiteHome({
               </div>
             </section>
             {profile.socialStrip && <SocialStrip strip={profile.socialStrip} />}
+            {karibuContact && (
+              <section aria-label="Acompanhe a Karibu" className="bg-background px-4 pb-12 text-center">
+                <p className="wl-kicker mx-auto mb-4 text-xs font-bold uppercase tracking-[0.18em]">Acompanhe a Karibu</p>
+                <a href={`https://wa.me/${karibuContact}`} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary">
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" /> WhatsApp da Karibu
+                </a>
+              </section>
+            )}
             </Fragment>
           );
         }
@@ -2313,7 +2323,7 @@ export default function AgencySiteHome({
             data-hero-actions-placement={profile.heroPresentation?.actionsPlacement ?? "inline"}
             className={
               profile.heroPresentation?.actionsPlacement === "right"
-                ? "mt-6 flex md:hidden"
+                ? (karibu ? "relative z-[1] mt-5 flex justify-end md:hidden" : "mt-6 flex md:hidden")
                 : undefined
             }
           >
@@ -2398,7 +2408,7 @@ export default function AgencySiteHome({
             {showHero && profile.heroPresentation?.actionsPlacement === "right" && slides.length > 1 && (
               <div
                 data-hero-nav-placement="bottom-right"
-                className="absolute bottom-full right-4 mb-5 hidden items-center gap-3 md:right-6 md:mb-6 md:flex lg:right-8"
+                className={`absolute bottom-full right-4 mb-5 hidden items-center gap-3 md:right-6 md:mb-6 md:flex lg:right-8 ${karibu ? "z-20" : ""}`}
               >
                 <button type="button" aria-label="Destaque anterior" onClick={() => setSlide((s) => (s - 1 + slides.length) % slides.length)} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white [&_svg]:text-white">
                   <ChevronLeft className="h-4 w-4" />

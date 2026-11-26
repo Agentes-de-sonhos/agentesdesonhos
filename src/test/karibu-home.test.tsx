@@ -1,6 +1,6 @@
 import { HelmetProvider } from "react-helmet-async";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { OrlandoEditorialGallery } from "@/components/orlando/OrlandoEditorialGallery";
@@ -13,12 +13,12 @@ import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 
-const { rpc } = vi.hoisted(() => ({ rpc: vi.fn(async (..._args: unknown[]): Promise<{ data: unknown[]; error: null }> => ({ data: [], error: null })) }));
+const { reset, rpc } = vi.hoisted(() => ({ reset: vi.fn(), rpc: vi.fn(async (..._args: unknown[]): Promise<{ data: unknown[]; error: null }> => ({ data: [], error: null })) }));
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: { rpc, auth: { getSession: vi.fn(async () => ({ data: { session: null } })) } },
 }));
 vi.mock("@/lib/resortCuration", async (original) => ({ ...await original<typeof import("@/lib/resortCuration")>(), useAgencyResortCuration: () => ({ data: undefined }) }));
-vi.mock("@/hooks/useAgencySiteRequest", () => ({ useAgencySiteRequest: () => ({ submit: vi.fn(), state: "idle" }) }));
+vi.mock("@/hooks/useAgencySiteRequest", () => ({ useAgencySiteRequest: () => ({ submit: vi.fn(), reset, state: "idle" }) }));
 afterEach(() => { cleanup(); rpc.mockClear(); });
 
 const officialHosts = ["kaributurismo.com.br", "www.kaributurismo.com.br"];
@@ -66,6 +66,22 @@ describe("Karibu homepage and Orlando configuration", () => {
     expect(root.querySelector("#rodape img[alt^='Logo ']")?.parentElement).not.toHaveClass("shadow");
     expect(screen.getByText("Novas ofertas aparecem aqui conforme a Karibu as publica.")).toBeInTheDocument();
     expect(rpc.mock.calls.some(([name]) => name === "get_public_offers")).toBe(false);
+  });
+  it("uses carousel controls above the quote and renders the newsletter and verified contact before the footer", () => {
+    const { container } = home();
+    const desktopNav = container.querySelector('[data-hero-nav-placement="bottom-right"]') as HTMLElement;
+    expect(desktopNav).not.toBeNull();
+    expect(desktopNav.closest("#cotacao")).not.toBeNull();
+    fireEvent.click(within(desktopNav).getByRole("button", { name: "Próximo destaque" }));
+    expect(screen.getByRole("heading", { name: "Orlando no ritmo de quem viaja" })).toBeInTheDocument();
+    const newsletter = document.getElementById("novidades")!;
+    const contact = screen.getByRole("region", { name: "Acompanhe a Karibu" });
+    expect(newsletter.nextElementSibling).toBe(contact);
+    expect(contact.compareDocumentPosition(document.getElementById("rodape")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(contact).getByRole("link", { name: "WhatsApp da Karibu" })).toHaveAttribute("href", "https://wa.me/5511947577307");
+    expect(within(contact).queryByRole("link", { name: /instagram|facebook/i })).toBeNull();
+    fireEvent.click(within(newsletter).getByRole("button", { name: "Quero me cadastrar" }));
+    expect(screen.getByRole("dialog", { name: "Receba as novidades da Karibu" })).toBeInTheDocument();
   });
   it("reads only the live Karibu hostname and shows published offers in its general channel", async () => {
     rpc.mockImplementation(async (name) => ({ data: name === "get_public_offers" ? [
