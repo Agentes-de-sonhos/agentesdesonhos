@@ -184,6 +184,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   immViennaNight: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/Vienna%2C_Austria_-_Stephansdom_at_night.png/1920px-Vienna%2C_Austria_-_Stephansdom_at_night.png",
   immCruise: "/imm/hero-cruzeiros.jpg",
   immDisneyCastle: disneyMagicKingdomOfficial.url,
+  bagagemDisneyCruise: "/bagagem-na-mao/marcia-cruzeiro-disney.webp",
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,

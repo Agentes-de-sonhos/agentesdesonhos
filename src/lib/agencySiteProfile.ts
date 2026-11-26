@@ -1310,6 +1310,20 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     key: "bagagemNaMaoOfficial",
     demo: false,
     presentation: false,
+    about: {
+      ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.about,
+      mural: undefined,
+      images: [{
+        src: "/bagagem-na-mao/marcia-epcot.webp",
+        alt: "Márcia Baccarini no EPCOT, com a esfera da Spaceship Earth ao fundo",
+        position: "center 25%",
+      }],
+    },
+    destinations: BAGAGEM_NA_MAO_PREVIEW_PROFILE.destinations?.map((destination) =>
+      destination.key === "cruzeiros"
+        ? { ...destination, image: "bagagemDisneyCruise", imagePosition: "center 28%" }
+        : destination,
+    ),
     seo: { title: "Bagagem na Mão Viagens", description: "Orlando, Nova York, cruzeiros e viagens em família com planejamento e suporte da Bagagem na Mão Viagens, no Rio de Janeiro." },
   },
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,
