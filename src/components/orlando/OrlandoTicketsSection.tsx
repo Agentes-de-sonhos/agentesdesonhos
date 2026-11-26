@@ -435,11 +435,11 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                     {(landingHref(c.id) || STRIP_EXPLORE_MAPS[c.id]) && (
                       <div className="mt-auto pt-4">
                         {landingHref(c.id) ? (
-                          <Button asChild variant="outline" className="w-full">
+                          <Button asChild variant="outline" className="wl-orlando-home-cta w-full">
                             <a href={landingHref(c.id)!}>Saiba mais</a>
                           </Button>
                         ) : (
-                          <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} ariaLabel={`Explorar o mapa de ${c.title}`} className="flex h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
+                          <DisneyParkMapTrigger park={STRIP_EXPLORE_MAPS[c.id]} ariaLabel={`Explorar o mapa de ${c.title}`} className="wl-orlando-home-cta flex h-10 w-full items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium text-foreground transition hover:border-primary/60 hover:text-primary">
                             Explorar mapa
                           </DisneyParkMapTrigger>
                         )}
@@ -464,7 +464,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
                 </div>
                 <div className="relative flex min-h-[260px] items-end justify-center md:h-full md:min-h-[300px] md:justify-start">
                   <img src={ticketsHand.url} alt="Mão segurando ingressos de parques de Orlando" loading="lazy" className="pointer-events-none h-[250px] w-auto object-contain object-bottom md:absolute md:bottom-0 md:left-0 md:h-[290px]" />
-                  <Button asChild size="lg" className="absolute bottom-5 left-1/2 w-[calc(100%-3rem)] -translate-x-1/2 rounded-xl shadow-lg md:bottom-8 md:left-auto md:right-6 md:w-auto md:translate-x-0">
+                  <Button asChild size="lg" className="wl-orlando-home-cta absolute bottom-5 left-1/2 w-[calc(100%-3rem)] -translate-x-1/2 rounded-xl shadow-lg md:bottom-8 md:left-auto md:right-6 md:w-auto md:translate-x-0">
                     <a href={agencySiteHref("/ingressos-orlando")}>Calcular meus dias e solicitar ingressos <ArrowRight className="ml-2 h-4 w-4" /></a>
                   </Button>
                 </div>

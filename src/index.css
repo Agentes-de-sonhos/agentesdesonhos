@@ -2170,3 +2170,41 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 }
 .wl-karibu #novidades .wl-newsletter-card .wl-kicker svg { color: var(--karibu-logo-blue); }
 .wl-karibu #novidades .wl-newsletter-card > div > div:last-child img { object-position: center; }
+
+/* Karibu: match the logo blue on the homepage actions without changing
+   the existing quote submit button or the theme of other agency sites. */
+.wl-karibu #diferenciais .wl-accent-icon {
+  color: var(--karibu-logo-blue) !important;
+}
+.wl-karibu #novidades .wl-newsletter-card :is(h2, h2 + p) {
+  color: #000 !important;
+}
+.wl-karibu :is(
+  #atendimento .wl-step-num,
+  #cotacao .wl-qq-heading,
+  #cotacao .wl-qq-tab-active,
+  #ofertas .wl-karibu-quote-cta,
+  #novidades .wl-inspiration-cta,
+  #ingressos-orlando .wl-orlando-home-cta,
+  #resorts .wl-resorts-btn
+) {
+  background-color: var(--karibu-logo-blue) !important;
+  border-color: var(--karibu-logo-blue) !important;
+  color: var(--karibu-blue) !important;
+}
+.wl-karibu #cotacao .wl-qq-tab-active svg {
+  color: inherit !important;
+}
+.wl-karibu #cotacao .wl-qq-tab-idle:is(:hover, :focus-visible) {
+  background-color: var(--karibu-pale-blue) !important;
+  border-color: var(--karibu-logo-blue) !important;
+  color: var(--karibu-blue) !important;
+}
+.wl-karibu :is(
+  #ofertas .wl-karibu-quote-cta,
+  #novidades .wl-inspiration-cta,
+  #ingressos-orlando .wl-orlando-home-cta,
+  #resorts .wl-resorts-btn
+):is(:hover, :focus-visible) {
+  filter: brightness(0.95);
+}

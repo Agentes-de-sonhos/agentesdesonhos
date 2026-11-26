@@ -67,7 +67,7 @@ describe("Karibu homepage and Orlando configuration", () => {
     expect(screen.getByText("Novas ofertas aparecem aqui conforme a Karibu as publica.")).toBeInTheDocument();
     expect(rpc.mock.calls.some(([name]) => name === "get_public_offers")).toBe(false);
   });
-  it("uses carousel controls above the quote and renders the newsletter and verified contact before the footer", () => {
+  it("uses carousel controls above the quote and renders the newsletter before the footer without an unconfirmed social link", () => {
     const { container } = home();
     const desktopNav = container.querySelector('[data-hero-nav-placement="bottom-right"]') as HTMLElement;
     expect(desktopNav).not.toBeNull();
@@ -75,11 +75,9 @@ describe("Karibu homepage and Orlando configuration", () => {
     fireEvent.click(within(desktopNav).getByRole("button", { name: "Próximo destaque" }));
     expect(screen.getByRole("heading", { name: "Orlando no ritmo de quem viaja" })).toBeInTheDocument();
     const newsletter = document.getElementById("novidades")!;
-    const contact = screen.getByRole("region", { name: "Acompanhe a Karibu" });
-    expect(newsletter.nextElementSibling).toBe(contact);
-    expect(contact.compareDocumentPosition(document.getElementById("rodape")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(within(contact).getByRole("link", { name: "WhatsApp da Karibu" })).toHaveAttribute("href", "https://wa.me/5511947577307");
-    expect(within(contact).queryByRole("link", { name: /instagram|facebook/i })).toBeNull();
+    expect(newsletter.compareDocumentPosition(document.getElementById("rodape")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole("region", { name: "Acompanhe a Karibu" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "WhatsApp da Karibu" })).toBeNull();
     fireEvent.click(within(newsletter).getByRole("button", { name: "Quero me cadastrar" }));
     expect(screen.getByRole("dialog", { name: "Receba as novidades da Karibu" })).toBeInTheDocument();
   });

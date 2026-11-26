@@ -561,7 +561,6 @@ export default function AgencySiteHome({
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
   const karibu = profile.key === "karibuBriefing21" || profile.key === "karibuOfficial";
   const liveKaribuOffers = profile.key === "karibuOfficial";
-  const karibuContact = karibu ? agencyWhatsappNumber({ ...info, phone: profile.footer?.whatsapp ?? info.phone }) : null;
   const karibuOffersQuery = usePublicOffers(hostname, liveKaribuOffers);
   const karibuOffers = (karibuOffersQuery.data ?? [])
     .filter((offer) => offer.status === "published" && offerInChannel(offer, "ofertas")
@@ -1185,7 +1184,7 @@ export default function AgencySiteHome({
                 ) : (
                   <div className="rounded-2xl border border-border bg-card px-6 py-7 text-center">
                     <p className="text-muted-foreground">{liveKaribuOffers && karibuOffersQuery.isLoading ? "Buscando as ofertas da Karibu…" : "Novas ofertas aparecem aqui conforme a Karibu as publica."}</p>
-                    {!(liveKaribuOffers && karibuOffersQuery.isLoading) && <Button className="mt-4" onClick={() => openRequest("pacotes")}>Pedir uma cotação</Button>}
+                    {!(liveKaribuOffers && karibuOffersQuery.isLoading) && <Button className="wl-karibu-quote-cta mt-4" onClick={() => openRequest("pacotes")}>Pedir uma cotação</Button>}
                   </div>
                 )}
               </div>
@@ -2080,15 +2079,6 @@ export default function AgencySiteHome({
               </div>
             </section>
             {profile.socialStrip && <SocialStrip strip={profile.socialStrip} />}
-            {karibuContact && (
-              <section aria-label="Acompanhe a Karibu" className="bg-background px-4 pb-12 text-center">
-                <p className="wl-kicker mx-auto mb-4 text-xs font-bold uppercase tracking-[0.18em]">Acompanhe a Karibu</p>
-                <a href={`https://wa.me/${karibuContact}`} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-card px-5 text-sm font-semibold text-foreground hover:border-primary hover:text-primary">
-                  <MessageCircle className="h-4 w-4" aria-hidden="true" /> WhatsApp da Karibu
-                </a>
-              </section>
-            )}
             </Fragment>
           );
         }
@@ -2401,7 +2391,7 @@ export default function AgencySiteHome({
         >
           <div ref={requestCenterRef} className={`relative ${container}`}>
             {profile.requestCenter?.titlePlacement === "above-card" && profile.requestCenter.title && (
-              <h2 className="absolute bottom-full left-6 z-0 mb-0 max-w-[calc(100%-3rem)] translate-y-2 whitespace-nowrap rounded-t-xl rounded-b-none bg-primary px-4 pb-4 pt-2 text-[clamp(0.95rem,4.6vw,1.25rem)] font-semibold leading-tight text-primary-foreground md:left-12 md:rounded-t-2xl md:px-4 md:pb-3.5 md:pt-2 md:text-xl lg:left-14">
+              <h2 className="wl-qq-heading absolute bottom-full left-6 z-0 mb-0 max-w-[calc(100%-3rem)] translate-y-2 whitespace-nowrap rounded-t-xl rounded-b-none bg-primary px-4 pb-4 pt-2 text-[clamp(0.95rem,4.6vw,1.25rem)] font-semibold leading-tight text-primary-foreground md:left-12 md:rounded-t-2xl md:px-4 md:pb-3.5 md:pt-2 md:text-xl lg:left-14">
                 {profile.requestCenter.title}
               </h2>
             )}
