@@ -111,6 +111,7 @@ export function usePublicOffers(hostname: string, enabled = true) {
   return useQuery({
     enabled,
     queryKey: ["public-offers", hostname],
+    enabled,
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
     queryFn: async () => {

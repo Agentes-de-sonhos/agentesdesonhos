@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import disney from "@/assets/orlando/editorial/disney-castle.webp.asset.json";
 import universal from "@/assets/orlando/editorial/universal-epic-universe-alternative.webp.asset.json";
 import united from "@/assets/orlando/editorial/seaworld-mako-sunset.webp.asset.json";
@@ -28,9 +29,11 @@ const PHOTOS = [
 export function OrlandoEditorialGallery({ hostname }: { hostname: string }) {
   const [slide, setSlide] = useState(0);
   const [paused, setPaused] = useState(false);
+  const profile = resolveSiteProfile(hostname).key;
+  const karibu = profile === "karibuBriefing21" || profile === "karibuOfficial";
   const imm = ["immturismo.com.br", "www.immturismo.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
-  const clearPhotos = imm || /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br|curtiviagens\.com\.br|essyatur\.com\.br|pristur\.com\.br)$/i.test(hostname.replace(/\.$/, "")) || hostname === "briefing-20-v1.preview.local" || hostname === "essya-curti-v1.preview.local" || ["briefing-22-v1.preview.local", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname);
-  const allowed = ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local", "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local", "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local", "briefing-22-v1.preview.local", "pristur.com.br", "www.pristur.com.br", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
+  const clearPhotos = karibu || imm || /(^|\.)(destinoscomaju\.com\.br|100limites\.tur\.br|omundoemcores\.com\.br|curtiviagens\.com\.br|essyatur\.com\.br|pristur\.com\.br)$/i.test(hostname.replace(/\.$/, "")) || hostname === "briefing-20-v1.preview.local" || hostname === "essya-curti-v1.preview.local" || ["briefing-22-v1.preview.local", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname);
+  const allowed = karibu || ["destinoscomaju.com.br", "www.destinoscomaju.com.br", "100limites.tur.br", "www.100limites.tur.br", "briefing-14-v1.preview.local", "omundoemcores.com.br", "www.omundoemcores.com.br", "bardelli-presentation.preview.local", "drica-presentation.preview.local", "curtiviagens.com.br", "www.curtiviagens.com.br", "briefing-20-v1.preview.local", "essyatur.com.br", "www.essyatur.com.br", "essya-curti-v1.preview.local", "briefing-22-v1.preview.local", "pristur.com.br", "www.pristur.com.br", "briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(hostname.toLowerCase().replace(/\.$/, ""));
 
   useEffect(() => {
     if (!(allowed || imm) || paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
