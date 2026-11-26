@@ -68,6 +68,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-28-v1.preview.local": "siteBaseEditorial",
   "briefing-29-v1.preview.local": "siteBaseEditorial",
   "briefing-30-v1.preview.local": "siteBaseEditorial",
+  "briefing-31-v1.preview.local": "siteBaseEditorial",
   "shoppingviagens.com.br": "siteBaseEditorial",
   "www.shoppingviagens.com.br": "siteBaseEditorial",
   "essya-curti-v1.preview.local": "siteBaseEditorial",

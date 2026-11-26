@@ -35,7 +35,7 @@ import {
 } from "@/lib/agencySiteConfig";
 import { sitelabSectionOverrides } from "@/lib/agencySiteCatalog";
 import { EDITORIAL_DMC, EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
-import { VIAJE_NA_MAGIA_PREVIEW_PROFILE, ROTEIROS_DA_TERRA_PREVIEW_PROFILE, RB_TOUR_PREVIEW_PROFILE, JE_VIAGENS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { VIAJE_NA_MAGIA_PREVIEW_PROFILE, ROTEIROS_DA_TERRA_PREVIEW_PROFILE, RB_TOUR_PREVIEW_PROFILE, JE_VIAGENS_PREVIEW_PROFILE, BLESSING_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 import { ADS_PREVIEW_PROFILE, DRICA_VIAGENS_PREVIEW_PROFILE, MUNDO_EM_CORES_PREVIEW_PROFILE, VIAJAR_TIRISMO_PREVIEW_PROFILE, BARDELLI_MUNDO_PREVIEW_PROFILE, BARDELLI_IMM_PREVIEW_PROFILE, BARDELLI_PRESENTATION_PROFILE, BARDELLI_OFFICIAL_PROFILE, DRICA_PRESENTATION_PROFILE, DRICA_OFFICIAL_PROFILE, BAGAGEM_NA_MAO_PREVIEW_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE, CURTI_VIAGENS_OFFICIAL_PROFILE, KARIBU_PREVIEW_PROFILE, ESSYA_CURTI_PREVIEW_PROFILE, ESSYA_OFFICIAL_PROFILE, PRISTUR_PREVIEW_PROFILE, ARENA_PREVIEW_PROFILE, INNOVATI_PREVIEW_PROFILE, SHOPPING_PREVIEW_PROFILE, IMM_OFFICIAL_PROFILE } from "@/lib/adsBriefingPreview";
 
 export type AgencySiteProfileKey =
@@ -82,6 +82,7 @@ export type AgencySiteProfileKey =
   | "roteirosDaTerraBriefing28"
   | "rbTourBriefing29"
   | "jeViagensBriefing30"
+  | "blessingBriefing31"
   | "shoppingOfficial"
   | "arenaBriefing23"
   | "arenaOfficial"
@@ -1281,6 +1282,7 @@ const PROFILE_BY_HOSTNAME: Record<string, AgencySiteProfileKey> = {
   "briefing-28-v1.preview.local": "roteirosDaTerraBriefing28",
   "briefing-29-v1.preview.local": "rbTourBriefing29",
   "briefing-30-v1.preview.local": "jeViagensBriefing30",
+  "briefing-31-v1.preview.local": "blessingBriefing31",
   "shoppingviagens.com.br": "shoppingOfficial",
   "www.shoppingviagens.com.br": "shoppingOfficial",
   "essya-curti-v1.preview.local": "essyaCurtiPreview",
@@ -1369,6 +1371,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   roteirosDaTerraBriefing28: ROTEIROS_DA_TERRA_PREVIEW_PROFILE,
   rbTourBriefing29: RB_TOUR_PREVIEW_PROFILE,
   jeViagensBriefing30: JE_VIAGENS_PREVIEW_PROFILE,
+  blessingBriefing31: BLESSING_PREVIEW_PROFILE,
   shoppingOfficial: {
     ...SHOPPING_PREVIEW_PROFILE,
     key: "shoppingOfficial",

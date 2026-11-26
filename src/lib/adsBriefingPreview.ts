@@ -3137,3 +3137,123 @@ ADS_PREVIEW_FIXTURES[JE_VIAGENS_PREVIEW_JOB_ID] = {
   documentTitle: "Prévia — JE VIAGENS",
   pages: { resorts: { title: "Inspirações em resorts no Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
 };
+
+/** Briefing 31: local presentation only. The account match stays external and
+ * there is no unequivocal active public domain, so nothing is bound here.
+ * No logo and colors not defined: textual wordmark + shared neutral tokens. */
+export const BLESSING_PREVIEW_JOB_ID = "briefing-31-v1";
+export const BLESSING_PREVIEW_HOST = "briefing-31-v1.preview.local";
+export const BLESSING_PREVIEW_PATH = `/ads-briefing-preview/${BLESSING_PREVIEW_JOB_ID}`;
+export const BLESSING_PREVIEW_INFO: AgencyDomainInfo = {
+  user_id: "00000000-0000-0000-0000-00000000ad31",
+  agency_slug: "", public_slug: null, hostname: BLESSING_PREVIEW_HOST, is_primary: false,
+  agency_name: "Blessingtravel", owner_name: "Samantha Casellato Perrucci",
+  logo_url: null, cover_image_url: null,
+  // Shared wl-site-base neutral fallbacks, not an official palette.
+  primary_color: "#0F1729", secondary_color: "#0F1729",
+  tertiary_color: "#F6F6F8", secondary_auto: false, tertiary_auto: false,
+  on_secondary_color: null, phone: null, city: "São Paulo", state: "SP",
+  bio: null, cnpj: null, whatsapp_group_url: null,
+};
+const BLESSING_CONTACTS = "WhatsApp 11 5565-5560, e-mail samantha@blessingtravel.com.br, Instagram @agenciablessingtravel e site www.blessingtravel.com.br";
+export const BLESSING_PREVIEW_PROFILE = buildGoldStandardProfile("blessingBriefing31", {
+  textualWordmark: true, navDensity: "compact", cruiseSeasonInNav: false,
+  heroPresentation: { kicker: "SÃO PAULO · SP · DESDE 2011", overlay: "strongLeft", titleWeight: "regular", cta: { label: "Planejar minha viagem", service: "pacotes" } },
+  hero: [
+    { title: "Blessingtravel", subtitle: "Consultoria completa para diferentes viagens, com planejamento para você viajar com tranquilidade.", image: "heroVarenna", enabled: true, order: 1 },
+    { title: "Blessingtravel", subtitle: "Viagens sob medida para casais, famílias com crianças e grupos de amigos.", image: "parques", enabled: true, order: 2 },
+    { title: "Blessingtravel", subtitle: "Europa, Estados Unidos e Canadá, América do Sul, Brasil e cruzeiros como inspiração.", image: "litoral", enabled: true, order: 3 },
+  ],
+  nav: [
+    { label: "Início", to: "/" }, { label: "Destinos", to: "/#destinos" },
+    { label: "Experiências", to: "/#assinatura", children: [
+      { label: "Resorts no Brasil", to: "/resorts-brasil" }, { label: "Club Med e neve", to: "/club-med-neve" },
+      { label: "Xcaret", to: "/xcaret" }, { label: "Orlando", to: "/ingressos-orlando" },
+      { label: "Cruzeiros", to: "/#autoridade" }, { label: "Visto americano", to: "/visto-americano" },
+      { label: "Portugal · inspiração", to: "/dmc-portugal" },
+    ] },
+    { label: "Sobre", to: "/#sobre" }, { label: "Atendimento", to: "/#atendimento" },
+    { label: "Inspirações", to: "/ofertas" }, { label: "Blog", to: "/blog" },
+  ],
+  signature: {
+    kicker: "O JEITO BLESSINGTRAVEL DE PLANEJAR", title: "Planejamento completo para viajar com tranquilidade",
+    text: "A Blessingtravel atua em São Paulo/SP desde 2011 com consultoria completa para diferentes viagens. Viagens sob medida, cruzeiros, famílias e parques estão entre as especialidades de uma proposta que une roteiros personalizados e planejamento detalhado.",
+    continuation: { title: "Atendimento por quem planeja", text: "O atendimento é feito pela proprietária e especialista, com suporte durante a viagem. Casais, famílias com crianças e grupos de amigos encontram aqui inspirações para conversar sobre o próximo roteiro." },
+  },
+  modules: [
+    { key: "sob-medida", title: "Viagens sob medida", text: "Roteiros personalizados construídos a partir do perfil e do ritmo de quem viaja.", service: "pacotes", image: "heroVarenna", enabled: true, order: 1 },
+    { key: "cruzeiros", title: "Cruzeiros", text: "Navios e roteiros do catálogo compartilhado como inspiração, sem disponibilidade presumida.", service: "cruzeiros", image: "litoral", enabled: true, order: 2 },
+    { key: "familias", title: "Famílias com crianças", text: "Planejamento detalhado para viagens em família, com atenção a cada etapa.", service: "pacotes", image: "resort", enabled: true, order: 3 },
+    { key: "parques", title: "Parques", text: "Orlando e outros parques como inspiração editorial; condições a confirmar com a agência.", service: "ingressos", image: "parques", enabled: true, order: 4 },
+    { key: "casais", title: "Viagens a dois", text: "Ideias para casais, da Itália ao Caribe, como ponto de partida para a conversa.", service: "pacotes", image: "europa", enabled: true, order: 5 },
+    { key: "grupos", title: "Grupos de amigos", text: "Inspirações para viajar em grupo, respeitando as preferências de todos.", service: "pacotes", image: "brasil", enabled: true, order: 6 },
+  ],
+  destinations: [
+    { key: "europa", title: "Europa", label: "Ex.: Itália", text: "Cidades e paisagens europeias como inspiração para roteiros personalizados.", image: "heroVarenna", service: "pacotes", enabled: true, order: 1 },
+    { key: "eua-canada", title: "Estados Unidos e Canadá", label: "Ex.: Orlando", text: "Parques e cidades da América do Norte como possibilidades de viagem.", image: "parques", service: "ingressos", href: "/ingressos-orlando", enabled: true, order: 2 },
+    { key: "america-sul", title: "América do Sul", label: "Inspiração", text: "Paisagens sul-americanas como ideia de roteiro, sem oferta presumida.", image: "europa", service: "pacotes", enabled: true, order: 3 },
+    { key: "brasil", title: "Brasil", label: "Ex.: resorts no Nordeste", text: "Explore o catálogo compartilhado de resorts como inspiração.", image: "resort", service: "hospedagem", href: "/resorts-brasil", ctaLabel: "Ver resorts", enabled: true, order: 4 },
+    { key: "cruzeiros", title: "Cruzeiros", label: "Ex.: Caribe", text: "Roteiros marítimos como inspiração; condições a confirmar com a agência.", image: "litoral", service: "cruzeiros", enabled: true, order: 5 },
+  ],
+  highlights: [
+    { title: "Viagens sob medida", text: "Roteiros personalizados para o seu momento.", service: "pacotes", cta: "Pensar meu roteiro" },
+    { title: "Famílias e parques", text: "Planejamento detalhado para viajar com crianças.", service: "ingressos", cta: "Planejar em família" },
+    { title: "Cruzeiros", text: "Inspirações a bordo para casais, famílias e grupos.", service: "cruzeiros", cta: "Conversar sobre cruzeiros" },
+  ],
+  about: {
+    kicker: "NOSSA HISTÓRIA", title: "Blessingtravel, desde 2011", image: "heroVarenna",
+    text: "A Blessingtravel nasceu da paixão de sua fundadora pelo universo das viagens. Fundada em 2011 em São Paulo/SP, a agência oferece consultoria completa para diferentes viagens, com planejamento pensado para que cada cliente viaje com tranquilidade.\n\nSão 23 anos de experiência no turismo, com consultoria especializada, experiências personalizadas e cuidado em cada detalhe. Viagens sob medida, cruzeiros, famílias e parques estão entre as especialidades, para casais, famílias com crianças e grupos de amigos.\n\nO suporte durante a viagem faz parte do atendimento: em um dos casos compartilhados pela agência, uma cliente recebeu suporte remoto no aeroporto de Roma para localizar a área de embarque. Os canais públicos informados são " + BLESSING_CONTACTS + ".",
+    badge: { value: "Desde 2011", label: "Blessingtravel" }, showLocation: true,
+    facts: ["São Paulo/SP", "Fundada em 2011", "23 anos de experiência no turismo"],
+  },
+  differentials: [
+    { title: "Atendimento pela especialista", text: "Atendimento feito pela proprietária e especialista.", icon: "consultivo" },
+    { title: "Roteiros personalizados", text: "Viagens pensadas conforme o perfil de quem viaja.", icon: "conferido" },
+    { title: "Planejamento detalhado", text: "Cuidado em cada detalhe, do planejamento ao embarque.", icon: "fornecedores" },
+    { title: "Suporte durante a viagem", text: "Como no suporte remoto a uma cliente no aeroporto de Roma.", icon: "acompanhamento" },
+  ],
+  credentials: {
+    kicker: "CONHEÇA A BLESSINGTRAVEL", title: "Atendimento e trajetória",
+    text: "Informações públicas da agência, sem atribuição de selos, certificados ou avaliações não confirmados.",
+    items: [{ key: "fundacao", name: "Desde 2011", text: "Blessingtravel, fundada em 2011, em São Paulo/SP." }, { key: "experiencia", name: "23 anos no turismo", text: "Consultoria especializada, experiências personalizadas e cuidado em cada detalhe." }],
+  },
+  team: [{ key: "samantha", name: "Samantha Casellato Perrucci", role: "Fundadora e consultora", text: "Consultoria especializada e atendimento direto. Contatos públicos: " + BLESSING_CONTACTS + "." }],
+  hideConciergeWhatsapp: true, hideFaqWhatsapp: true,
+  conciergePoints: [
+    { key: "conversa", title: "1. Conversar sobre a viagem", text: "Conte quem vai viajar, seus interesses e o ritmo desejado." },
+    { key: "roteiro", title: "2. Roteiro sob medida", text: "A especialista organiza as possibilidades em um roteiro personalizado." },
+    { key: "detalhes", title: "3. Planejamento detalhado", text: "Cada etapa é revisada com cuidado antes do embarque." },
+    { key: "suporte", title: "4. Suporte durante a viagem", text: "Canais e condições do suporte combinados diretamente com a agência." },
+  ],
+  conciergeSteps: ["Compartilhe seus planos pelos canais públicos da agência.", "Converse com a especialista sobre destinos e estilo de viagem.", "Receba um roteiro personalizado e detalhado.", "Combine o suporte durante a viagem com a agência."],
+  requestCenter: { title: "Planeje sua viagem com a Blessingtravel", support: "Conte como você imagina sua próxima viagem.", notice: "Prévia técnica: formulário demonstrativo, sem envio de dados.", submitLabel: "Revisar solicitação", titlePlacement: "above-card" },
+  faq: [
+    { q: "Onde a Blessingtravel atua?", a: "A Blessingtravel está em São Paulo/SP." },
+    { q: "Quando a agência foi fundada?", a: "A Blessingtravel foi fundada em 2011; a fundadora soma 23 anos de experiência no turismo." },
+    { q: "Quais são as especialidades?", a: "Viagens sob medida, cruzeiros, famílias e parques." },
+    { q: "Quem faz o atendimento?", a: "O atendimento é feito pela proprietária e especialista, Samantha Casellato Perrucci, fundadora e consultora." },
+    { q: "Há suporte durante a viagem?", a: "Sim. O suporte durante a viagem faz parte dos diferenciais informados pela agência; as condições são combinadas diretamente com ela." },
+    { q: "Como entrar em contato?", a: "Canais públicos: " + BLESSING_CONTACTS + ". Nesta prévia técnica, contatos, formulários e envios estão bloqueados." },
+    { q: "Posso reservar os produtos desta apresentação?", a: "Não nesta prévia. Catálogos e imagens compartilhadas são inspirações, sem preços ou disponibilidade presumidos." },
+  ],
+  copy: {
+    modules: { kicker: "ESPECIALIDADES", title: "Viagens pensadas para cada perfil", subtitle: "Sob medida, cruzeiros, famílias e parques." },
+    destinations: { kicker: "DESTINOS", title: "Inspirações pelo Brasil e pelo mundo", subtitle: "Imagens do acervo compartilhado como inspiração, sem oferta ou disponibilidade presumidas." },
+    highlights: { kicker: "MOMENTOS DE VIAGEM", title: "Experiências que combinam com você", subtitle: "Para casais, famílias com crianças e grupos de amigos." },
+    differentials: { kicker: "POR QUE VIAJAR CONOSCO", title: "O cuidado da Blessingtravel", subtitle: "Especialista, roteiros personalizados, suporte e planejamento detalhado." },
+    concierge: { kicker: "ATENDIMENTO", title: "Da conversa ao embarque", subtitle: "Proposta de apresentação do atendimento; condições a combinar com a agência." },
+    avaliacoes: { kicker: "EXEMPLO DE APRESENTAÇÃO", title: "Experiências de quem viaja", subtitle: "Avaliações ilustrativas de demonstração, não são depoimentos reais nem avaliações do Google." },
+    faq: { kicker: "DÚVIDAS FREQUENTES", title: "Conheça a Blessingtravel" },
+    newsletter: { title: "Inspirações da Blessingtravel", subtitle: "Formulário demonstrativo, sem inscrição ou envio nesta prévia técnica." },
+  },
+  footer: { description: "Blessingtravel Viagens e Turismo Ltda · São Paulo/SP · desde 2011. Consultoria completa para diferentes viagens.", phoneHidden: true, whatsappHidden: true, showLocation: true, legalLinksDisabled: true },
+  seo: { title: "Prévia — Blessingtravel", description: "Prévia técnica isolada da Blessingtravel, em São Paulo/SP, fundada em 2011. Sem envios, vínculo de domínio ou publicação." },
+}, "Blessingtravel");
+if (BLESSING_PREVIEW_PROFILE.dmc) BLESSING_PREVIEW_PROFILE.dmc.cta = "Explorar Portugal";
+ADS_PREVIEW_FIXTURES[BLESSING_PREVIEW_JOB_ID] = {
+  jobId: BLESSING_PREVIEW_JOB_ID, info: BLESSING_PREVIEW_INFO, profile: BLESSING_PREVIEW_PROFILE,
+  realAgency: true, strictBackendBlock: true,
+  notice: "Blessingtravel · prévia técnica · logotipo, cores e vínculo de cadastro/domínio pendentes · conteúdos ilustrativos · contatos e envios bloqueados",
+  documentTitle: "Prévia — Blessingtravel",
+  pages: { resorts: { title: "Inspirações em resorts no Brasil" }, orlandoTickets: true, visa: true, xcaret: { slots: GENERIC_XCARET_SLOTS }, dmc: true, editorial: true },
+};

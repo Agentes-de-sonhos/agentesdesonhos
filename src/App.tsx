@@ -203,7 +203,7 @@ const queryClient = new QueryClient({
 
 const App = () => {
   // This draft must never mount tenant/auth/billing providers, even with an override query.
-  if (/^\/ads-briefing-preview\/briefing-(?:27|28|29)-v1(?:\/|$)/.test(window.location.pathname) || /^\/ads-briefing-preview\/briefing-30-v1(?:\/|$)/.test(window.location.pathname)) {
+  if (/^\/ads-briefing-preview\/briefing-(?:27|28|29)-v1(?:\/|$)/.test(window.location.pathname) || /^\/ads-briefing-preview\/briefing-3[01]-v1(?:\/|$)/.test(window.location.pathname)) {
     return <QueryClientProvider client={queryClient}><TooltipProvider><Toaster /><Sonner /><ErrorBoundary><BrowserRouter><Suspense fallback={<PageFallback />}><Routes><Route path="/ads-briefing-preview/:jobId/*" element={<AdsBriefingPreview />} /></Routes></Suspense></BrowserRouter></ErrorBoundary></TooltipProvider></QueryClientProvider>;
   }
   // Isolated route before tenant/auth providers: local identity only, no CRM/network.
