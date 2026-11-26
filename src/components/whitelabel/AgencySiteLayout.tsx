@@ -129,12 +129,14 @@ export function AgencyBrandBar({
   const blogStatus = usePublicBlogStatus(navOverride || resolveSiteProfile(info.hostname).presentation ? null : info.hostname).data;
   const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
+  const karibuHeader = ["karibuBriefing21", "karibuOfficial"].includes(resolveSiteProfile(info.hostname).key);
+
   if (editorial) {
     const mainLinks = navAll.filter((l) => l.to !== "/area-do-cliente");
     return (
       <header className={`sticky top-0 z-40 backdrop-blur ${resolveSiteProfile(info.hostname).key === "editorialDmc" ? "bg-card/95" : "bg-background/95"}`}>
         <div
-          className={`${siteContainer(true)} flex items-center justify-between gap-6 ${headerBrand.headerClassName}`}
+          className={`${siteContainer(true)} flex items-center justify-between ${karibuHeader ? "gap-2 md:gap-6" : "gap-6"} ${headerBrand.headerClassName}`}
         >
           <Link to={resolveSiteProfile(info.hostname).presentation ? agencySiteHref("/") : agencyContextHref("/")} className="flex min-w-0 items-center gap-3">
             {resolveSiteProfile(info.hostname).textualWordmark ? (
@@ -215,15 +217,22 @@ export function AgencyBrandBar({
             )}
           </div>
 
-          <button
-            type="button"
-            className="-mr-2 rounded-lg p-3 text-foreground lg:hidden"
-            onClick={() => setOpen((v) => !v)}
-            aria-label="Abrir menu"
-            aria-expanded={open}
-          >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className={karibuHeader ? "flex shrink-0 items-center gap-2 lg:hidden" : "contents"}>
+            {karibuHeader && showCadastur(info.hostname) && (
+              <div className="md:hidden">
+                <CadasturSeal hostname={info.hostname} className="h-6 w-auto object-contain" />
+              </div>
+            )}
+            <button
+              type="button"
+              className="-mr-2 rounded-lg p-3 text-foreground lg:hidden"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Abrir menu"
+              aria-expanded={open}
+            >
+              {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {open && (

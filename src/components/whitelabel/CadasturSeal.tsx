@@ -19,6 +19,11 @@ interface CadasturCertificate {
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null): CadasturCertificate | null {
   const h = hostname ?? "";
+  if (["briefing-21-v1.preview.local", "kaributurismo.com.br", "www.kaributurismo.com.br"].includes(h)) return {
+    url: "/karibu/certificado-cadastur.webp",
+    agency: "Karibu Viagens e Turismo",
+    validityLabel: "08/10/2025 a 08/10/2027",
+  };
   if (["briefing-22-v1.preview.local", "pristur.com.br", "www.pristur.com.br"].includes(h)) return { url: certPristur.url, agency: "Pristur Viagens" };
   // Arena: documento enviado pelo proprietário, mantido sem alterar a validade impressa.
   if (["briefing-23-v1.preview.local", "arenatravelgroup.com.br", "www.arenatravelgroup.com.br"].includes(h)) return {

@@ -11,6 +11,7 @@ import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { siteThemeRootClass } from "@/lib/agencySiteTheme";
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 import { AgencyBrandSpinner, KaribuHomeIntro, isAgencyLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
+import { cadasturCertificateFor } from "@/components/whitelabel/CadasturSeal";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 
@@ -51,6 +52,22 @@ describe("Karibu homepage and Orlando configuration", () => {
       expect(isAgencyLoaderSuppressed("omundoemcores.com.br")).toBe(false);
     } finally {
       window.history.replaceState(null, "", previous);
+    }
+  });
+  it("shows the agency certificate from both the header and the footer", () => {
+    const { container } = home();
+    for (const host of [...officialHosts, preview]) {
+      expect(cadasturCertificateFor(host)?.url).toBe("/karibu/certificado-cadastur.webp");
+    }
+    expect(cadasturCertificateFor("other.example")).toBeNull();
+    for (const section of ["header", "#rodape"]) {
+      const el = container.querySelector<HTMLElement>(section)!;
+      const [seal] = within(el).getAllByRole("button", { name: "Ver certificado Cadastur" });
+      fireEvent.click(seal);
+      const modal = screen.getByRole("dialog", { name: "Certificado Cadastur" });
+      expect(within(modal).getByRole("img", { name: "Certificado Cadastur da Karibu Viagens e Turismo" })).toHaveAttribute("src", "/karibu/certificado-cadastur.webp");
+      fireEvent.keyDown(window, { key: "Escape" });
+      expect(screen.queryByRole("dialog", { name: "Certificado Cadastur" })).toBeNull();
     }
   });
   it("uses the registered domain variants and preview without touching other profiles", () => {
