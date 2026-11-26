@@ -1,1 +1,2 @@
 - `<SEO>` resolves relative canonicals on the agency's own host; platform/preview hosts keep the platform base. Why: no canonical to the platform domain.
+- Agency canonical host (www vs apex) comes from `canonicalAgencyHost` in `agencySharePreview.ts`, matching each `public/sitemap-*.xml` + robots.txt entry. Why: canonical, sitemap and Search Console must agree.

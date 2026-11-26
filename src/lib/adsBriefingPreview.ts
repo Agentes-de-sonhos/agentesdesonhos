@@ -1708,7 +1708,7 @@ export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
       ...(DRICA_PRESENTATION_PROFILE.copy?.newsletter ?? { kicker: "", title: "", subtitle: "", cta: "" }),
     },
   } as AgencySiteProfile["copy"],
-  seo: { title: "Drica Viagens", description: "Drica Viagens: viagens sob medida com Adriana Martins." },
+  seo: { title: "Drica Viagens | Viagens sob medida com Adriana Martins", description: "Drica Viagens: viagens sob medida com Adriana Martins. Orlando, cruzeiros, resorts e roteiros planejados com atendimento próximo.", canonical: "https://www.dricaviagens.com.br/" },
 };
 
 /* Curti Viagens — perfil OFICIAL (curtiviagens.com.br). Aprovado por Fernando (02/11/2026). */
@@ -1876,7 +1876,7 @@ export const ESSYA_OFFICIAL_PROFILE: AgencySiteProfile = {
     ...ESSYA_CURTI_PREVIEW_PROFILE.inspirationDialog,
     description: "Preencha seus dados. Ao confirmar, nossa equipe entra em contato pelo WhatsApp.",
   } as AgencySiteProfile["inspirationDialog"],
-  seo: { title: "Essyatur", description: "Essyatur: consultoria de viagens sob medida em São Paulo (SP), com mais de 10 anos de experiência." },
+  seo: { title: "Essyatur | Consultoria de Viagens em São Paulo (SP)", canonical: "https://www.essyatur.com.br/", description: "Essyatur: consultoria de viagens sob medida em São Paulo (SP), com mais de 10 anos de experiência." },
 };
 
 /* Pristur: local-only fixture. The authenticated briefing matched a profile

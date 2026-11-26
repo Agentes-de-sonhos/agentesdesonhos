@@ -50,6 +50,31 @@ const CURTI: AgencySharePreview = {
   imagePath: "/og/share-curti.jpg",
 };
 
+const DRICA: AgencySharePreview = {
+  siteName: "Drica Viagens",
+  title: "Drica Viagens | Viagens sob medida com Adriana Martins",
+  description: "Drica Viagens: viagens sob medida com Adriana Martins. Orlando, cruzeiros, resorts e roteiros planejados com atendimento próximo.",
+  imagePath: "/og/share-drica.jpg",
+};
+const ESSYA: AgencySharePreview = {
+  siteName: "Essyatur",
+  title: "Essyatur | Consultoria de Viagens em São Paulo (SP)",
+  description: "Essyatur: consultoria de viagens sob medida em São Paulo (SP), com mais de 10 anos de experiência.",
+  imagePath: "/og/share-essya.jpg",
+};
+const ARENA: AgencySharePreview = {
+  siteName: "Arena Travel Group",
+  title: "Arena Travel Group | Viagens sob medida para famílias e grupos",
+  description: "Viagens sob medida para famílias e grupos, resorts, Europa e experiências na neve com a Arena Travel Group.",
+  imagePath: "/og/share-arena.jpg",
+};
+const PRISTUR: AgencySharePreview = {
+  siteName: "Pristur Viagens",
+  title: "Pristur Viagens | Planejamento de viagens com a Priscila",
+  description: "Viagens em família, parques, cruzeiros e resorts com planejamento personalizado e acompanhamento da Pristur Viagens.",
+  imagePath: "/og/share-pristur.jpg",
+};
+
 const PREVIEW_BY_HOST: Record<string, AgencySharePreview> = {
   "destinoscomaju.com.br": JU,
   "www.destinoscomaju.com.br": JU,
@@ -61,12 +86,32 @@ const PREVIEW_BY_HOST: Record<string, AgencySharePreview> = {
   "www.omundoemcores.com.br": MUNDO,
   "curtiviagens.com.br": CURTI,
   "www.curtiviagens.com.br": CURTI,
+  "dricaviagens.com.br": DRICA,
+  "www.dricaviagens.com.br": DRICA,
+  "essyatur.com.br": ESSYA,
+  "www.essyatur.com.br": ESSYA,
+  "arenatravelgroup.com.br": ARENA,
+  "www.arenatravelgroup.com.br": ARENA,
+  "pristur.com.br": PRISTUR,
+  "www.pristur.com.br": PRISTUR,
 };
+
+/** Host canônico (o mesmo dos sitemaps): apex → www, exceto quando o www não está ativo. */
+const APEX_ONLY = new Set(["paraisoviagens.com"]);
+const CANONICAL_WWW = new Set([
+  "curtiviagens.com.br", "dricaviagens.com.br", "essyatur.com.br", "arenatravelgroup.com.br",
+  "pristur.com.br", "destinoscomaju.com.br", "omundoemcores.com.br", "100limites.tur.br",
+]);
+
+export function canonicalAgencyHost(hostname: string): string {
+  const host = (hostname || "").trim().toLowerCase().replace(/:\d+$/, "");
+  if (APEX_ONLY.has(host.replace(/^www\./, ""))) return host.replace(/^www\./, "");
+  return CANONICAL_WWW.has(host) ? `www.${host}` : host;
+}
 
 export function resolveAgencySharePreview(hostname?: string | null) {
   const host = normalizeBrandHost(hostname);
   const preview = PREVIEW_BY_HOST[host];
   if (!preview) return null;
-  const origin = `https://${host === "curtiviagens.com.br" ? "www.curtiviagens.com.br" : host}`;
-  return { ...preview, image: `${origin}${preview.imagePath}`, canonical: `${origin}/` };
+  return { ...preview, image: `https://${host === "curtiviagens.com.br" ? canonicalAgencyHost(host) : host}${preview.imagePath}`, canonical: `https://${canonicalAgencyHost(host)}/` };
 }

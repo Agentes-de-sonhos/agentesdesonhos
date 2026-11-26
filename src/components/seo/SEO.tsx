@@ -7,6 +7,7 @@ import {
   SITE_URL,
   absoluteUrl,
 } from "@/lib/seo";
+import { canonicalAgencyHost } from "@/lib/agencySharePreview";
 
 function isPlatformHost(host: string): boolean {
   return host === "localhost" || host === "127.0.0.1" || host.endsWith(".local")
@@ -74,7 +75,7 @@ export function SEO({
   // somente a plataforma usa o domínio Agentes de Sonhos como base.
   const host = typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
   const agencyOrigin = host && !isPlatformHost(host)
-    ? `https://${host === "curtiviagens.com.br" ? "www.curtiviagens.com.br" : host}`
+    ? `https://${canonicalAgencyHost(host)}`
     : null;
   const rawCanonical = canonical ?? pathname;
   const finalCanonical = agencyOrigin && !/^https?:\/\//i.test(rawCanonical)
