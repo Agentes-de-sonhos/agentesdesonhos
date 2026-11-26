@@ -112,6 +112,7 @@ export type AgencyImageSlot =
   | "dricaLondon" | "capitaisItalia" | "dricaJapan" | "dricaPrague"
   | "litoral" | "resort" | "cruzeiro" | "europa" | "europaCastelo" | "parques"
   | "immViennaNight" | "immLesteEuropeu" | "immCruise" | "immDisneyCastle"
+  | "bagagemDisneyCruise"
   | "caribeMexico" | "curtiCaribe" | "curtiBrasil" | "curtiCruzeiros" | "curtiNovaYork" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
   | "heroVarenna" | "heroSantoriniShip" | "heroMundoGrupoVideo" | "heroMundoEuropaVideo" | "heroMundoEuropaFoto" | "heroMundoGrupoFoto" | "mundoGreciaVanessa" | "mundoNclDestaque" | "heroMundoDesenhadaVideo" | "heroMundoPlacasFoto" | "heroAirportTraveler" | "heroJuMagicKingdom" | "curtiHolambra" | "essyaMural"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago" | "paraisoTanzania" | "paraisoEslovenia"

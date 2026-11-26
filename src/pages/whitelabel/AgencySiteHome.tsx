@@ -195,6 +195,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   immCruise: "/imm/hero-cruzeiros.jpg",
   immLesteEuropeu: immLesteEuropeu.url,
   immDisneyCastle: disneyMagicKingdomOfficial.url,
+  bagagemDisneyCruise: "/bagagem-na-mao/marcia-cruzeiro-disney.webp",
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,
