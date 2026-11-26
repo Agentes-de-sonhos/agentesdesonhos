@@ -18,6 +18,7 @@ import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/
 import { OfferCard, usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
+import { KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -2157,6 +2158,7 @@ export default function AgencySiteHome({
   const sharePreview = resolveAgencySharePreview(info.hostname);
   return (
     <>
+      {karibu && <KaribuHomeIntro hostname={hostname} />}
       {isMundoSeoHost(info.hostname) ? null : sharePreview && !profile.presentation ? (
         <SEO
           title={sharePreview.title}

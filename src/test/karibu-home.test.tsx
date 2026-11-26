@@ -10,6 +10,7 @@ import { resolveSections } from "@/lib/agencySiteConfig";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { siteThemeRootClass } from "@/lib/agencySiteTheme";
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
+import { AgencyBrandSpinner, KaribuHomeIntro, isAgencyLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 
@@ -30,6 +31,28 @@ const home = (hostname = preview) => {
 };
 
 describe("Karibu homepage and Orlando configuration", () => {
+  it("pulses the Karibu logo on home only, including the technical preview", () => {
+    const previous = window.location.pathname;
+    try {
+      for (const [hostname, homePath] of [...officialHosts.map((host) => [host, "/"]), [preview, "/ads-briefing-preview/briefing-21-v1"]]) {
+        window.history.replaceState(null, "", homePath);
+        const intro = render(<KaribuHomeIntro hostname={hostname} />);
+        expect(intro.container.querySelector("[data-karibu-home-intro] img")).toHaveAttribute("src", "/karibu-logo.png");
+        expect(intro.container.querySelector("img")).toHaveClass("animate-brand-breathe");
+        intro.unmount();
+        for (const pathname of ["/disney", "/ingressos-orlando", "/carteira/CODE", "/ads-briefing-preview/briefing-21-v1/disney"]) {
+          window.history.replaceState(null, "", pathname);
+          expect(isAgencyLoaderSuppressed(hostname)).toBe(true);
+          const fallback = render(<AgencyBrandSpinner hostname={hostname} />);
+          expect(fallback.container).toBeEmptyDOMElement();
+          fallback.unmount();
+        }
+      }
+      expect(isAgencyLoaderSuppressed("omundoemcores.com.br")).toBe(false);
+    } finally {
+      window.history.replaceState(null, "", previous);
+    }
+  });
   it("uses the registered domain variants and preview without touching other profiles", () => {
     for (const hostname of [...officialHosts, preview]) {
       expect(resolveSiteProfile(hostname).key).toMatch(/^karibu/);

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { BrandText } from "@/components/ui/brand-text";
 import { type AgencyDomainInfo, agencyDisplayName } from "@/lib/agencyDomains";
 import { resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
-import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
+import { AgencyBrandSpinner, isKaribuLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
 import {
   clearUnlock,
   isPasswordExemptPath,
@@ -63,6 +63,7 @@ export function AgencySitePasswordGate({ info, children }: { info: AgencyDomainI
 
   if (!active || phase === "unlocked") return <>{children}</>;
   if (phase === "checking") {
+    if (isKaribuLoaderSuppressed(info.hostname)) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
         <AgencyBrandSpinner hostname={info.hostname} size="lg" />
