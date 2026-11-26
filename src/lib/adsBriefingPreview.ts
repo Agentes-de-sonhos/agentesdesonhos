@@ -1329,7 +1329,10 @@ export const KARIBU_PREVIEW_PROFILE: AgencySiteProfile = {
   footer: { ...karibuBaseline.footer, descriptionHidden: true, address: "Avenida Caetano Zamataro, 228, Ponte Grande, Guarulhos/SP", legalName: "Karibu Viagens e Turismo Ltda", cnpj: "13.687.335/0001-71" },
   // The source's customer reviews, social account and invitation belong to Mundo.
   testimonials: undefined,
-  socialStrip: undefined,
+  socialStrip: {
+    title: "Acompanhe a Karibu",
+    links: [{ network: "instagram", url: "https://www.instagram.com/karibuviagens/" }],
+  },
   newsletterMedia: { src: pristurNewsletterWing.url, alt: "Asa de avião vista da janela durante o voo" },
   inspirationDialog: {
     title: "Receba as novidades da Karibu",

@@ -107,7 +107,7 @@ describe("Karibu homepage and Orlando configuration", () => {
     expect(screen.getByText("Novas ofertas aparecem aqui conforme a Karibu as publica.")).toBeInTheDocument();
     expect(rpc.mock.calls.some(([name]) => name === "get_public_offers")).toBe(false);
   });
-  it("uses carousel controls above the quote and renders the newsletter before the footer without an unconfirmed social link", () => {
+  it("uses carousel controls above the quote and renders the newsletter then the approved Instagram and footer", () => {
     const { container } = home();
     const desktopNav = container.querySelector('[data-hero-nav-placement="bottom-right"]') as HTMLElement;
     expect(desktopNav).not.toBeNull();
@@ -116,7 +116,14 @@ describe("Karibu homepage and Orlando configuration", () => {
     expect(screen.getByRole("heading", { name: "Orlando no ritmo de quem viaja" })).toBeInTheDocument();
     const newsletter = document.getElementById("novidades")!;
     expect(newsletter.compareDocumentPosition(document.getElementById("rodape")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.queryByRole("region", { name: "Acompanhe a Karibu" })).toBeNull();
+    const social = screen.getByRole("region", { name: "Acompanhe a Karibu" });
+    expect(social).toHaveClass("bg-background");
+    expect(newsletter.compareDocumentPosition(social) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(social.compareDocumentPosition(document.getElementById("rodape")!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const links = within(social).getAllByRole("link");
+    expect(links).toHaveLength(1);
+    expect(links[0]).toHaveAccessibleName("Instagram da agência");
+    expect(links[0]).toHaveAttribute("href", "https://www.instagram.com/karibuviagens/");
     expect(screen.queryByRole("link", { name: "WhatsApp da Karibu" })).toBeNull();
     fireEvent.click(within(newsletter).getByRole("button", { name: "Quero me cadastrar" }));
     expect(screen.getByRole("dialog", { name: "Receba as novidades da Karibu" })).toBeInTheDocument();
