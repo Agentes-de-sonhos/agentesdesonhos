@@ -912,6 +912,10 @@ export const BAGAGEM_NA_MAO_PREVIEW_PROFILE = buildGoldStandardProfile("bagagemN
     concierge: { kicker: "COMO FUNCIONA", title: "Da primeira conversa ao retorno", subtitle: "Um processo próximo e claro, conduzido pela agência." },
     faq: { title: "Dúvidas frequentes" },
   },
+  whatsappChannels: {
+    group: "https://chat.whatsapp.com/Eqc08LTxqMcJIAir5xuS4l?s=cl&p=i&mlu=4&ilr=4&iam=2",
+    contact: "https://api.whatsapp.com/send?phone=5521988559515&utm_medium=social&utm_source=heylink.me",
+  },
   socialStrip: {
     title: "Siga-nos nas redes",
     links: [{ network: "instagram", url: "https://www.instagram.com/bagagemnamaoviagens/" }],

@@ -329,6 +329,7 @@ export interface AgencySiteProfile {
   /** Chamada compacta de consultoria de visto (opcional), logo após os destinos. */
   visaConsult?: { kicker?: string; title: string; text: string; cta: string };
   /** Faixa opcional de redes sociais logo após "Receba novidades". */
+  whatsappChannels?: { group: string; contact: string };
   socialStrip?: { title: string; links: { network: "instagram" | "facebook" | "tiktok" | "youtube"; url: string }[] };
   /** Opcional: card do grupo de novidades em degradê claro com foto à direita. */
   newsletterMedia?: { src: string; alt: string };

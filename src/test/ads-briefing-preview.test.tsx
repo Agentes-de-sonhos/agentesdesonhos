@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   isTechnicalPreviewHost,
@@ -23,7 +24,7 @@ vi.mock("@/pages/NotFound", () => ({ default: () => <p>Página não encontrada</
 /** O layout consulta o status do blog (React Query): envolve com um client de teste. */
 const renderPreview = (ui: React.ReactNode) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  return render(<HelmetProvider><QueryClientProvider client={client}>{ui}</QueryClientProvider></HelmetProvider>);
 };
 
 describe("prévia ADS ads-email-test-v1", () => {
@@ -227,6 +228,32 @@ describe("prévia ADS ads-email-test-v1", () => {
       expect(p.footer?.address).toContain("Rua Conde de Bonfim, 211");
       expect(p.about?.ownerName).toBe("Márcia Baccarini");
       expect(p.about?.badge?.value).toBe("Desde 2014");
+    });
+    it("mostra os dois links aprovados do WhatsApp e mantém outros links bloqueados", async () => {
+      await import("@/pages/whitelabel/AgencySiteHome");
+      Object.defineProperty(window, "location", { value: { ...window.location, hostname: "localhost" }, writable: true });
+      const { default: Page } = await import("@/pages/adsPreview/AdsBriefingPreview");
+      const { unmount } = renderPreview(
+        <MemoryRouter initialEntries={["/ads-briefing-preview/briefing-19-v1"]}>
+          <Routes><Route path="/ads-briefing-preview/:jobId/*" element={<Page />} /></Routes>
+        </MemoryRouter>,
+      );
+      const group = await screen.findByRole("link", { name: "Entrar no grupo de oportunidades" }, { timeout: 3500 });
+      const contact = screen.getByRole("link", { name: "Falar com a agência no WhatsApp" });
+      expect(group).toHaveAttribute("href", "https://chat.whatsapp.com/Eqc08LTxqMcJIAir5xuS4l?s=cl&p=i&mlu=4&ilr=4&iam=2");
+      expect(contact).toHaveAttribute("href", "https://api.whatsapp.com/send?phone=5521988559515&utm_medium=social&utm_source=heylink.me");
+      for (const link of [group, contact]) {
+        let reached = false;
+        link.addEventListener("click", ev => { reached = !ev.defaultPrevented; ev.preventDefault(); }, { once: true });
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+        expect(reached).toBe(true);
+      }
+      group.setAttribute("href", "https://chat.whatsapp.com/unapproved");
+      const other = new MouseEvent("click", { bubbles: true, cancelable: true });
+      group.dispatchEvent(other);
+      expect(other.defaultPrevented).toBe(true);
+      expect(resolveSiteProfile("immturismo.com.br").whatsappChannels).toBeUndefined();
+      unmount();
     });
     it("em host de produção não renderiza", async () => {
       Object.defineProperty(window, "location", { value: { ...window.location, hostname: "agentedesonhoproject.lovable.app" }, writable: true });

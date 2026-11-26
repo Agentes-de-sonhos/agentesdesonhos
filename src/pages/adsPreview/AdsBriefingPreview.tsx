@@ -31,8 +31,8 @@ const OrlandoTicketsSection = lazy(() => import("@/components/orlando/OrlandoTic
 
 /**
  * Prévia técnica revisável da fixture ADS. Reusa AgencySiteLayout/AgencySiteHome
- * sem cópias. Navegação e controles locais ficam ativos; envios e ações externas ficam
- * desativados e qualquer escrita/função de backend é bloqueada enquanto montada.
+ * sem cópias. Navegação e controles locais ficam ativos; envios e outras ações
+ * externas ficam desativados e qualquer escrita/função de backend é bloqueada enquanto montada.
  */
 export default function AdsBriefingPreview() {
   const { jobId, "*": subPath = "" } = useParams<{ jobId: string; "*": string }>();
@@ -83,6 +83,12 @@ export default function AdsBriefingPreview() {
         }, 120);
         return;
       }
+      const whatsappChannel = link?.dataset.agencyWhatsapp;
+      const whatsappChannels = fixture.profile.whatsappChannels;
+      // Somente os dois links aprovados para esta agência são navegáveis.
+      if (link?.closest('[data-ads-preview="briefing-19-v1"]') && fixture.jobId === "briefing-19-v1"
+        && (whatsappChannel === "group" || whatsappChannel === "contact")
+        && href === whatsappChannels?.[whatsappChannel]) return;
       if (link && href.startsWith("#")) return;
       // Local controls (filters, calculators, dialogs and carousels) are reviewable.
       // Submit events, external navigation and backend calls stay blocked below.

@@ -2520,6 +2520,27 @@ export default function AgencySiteHome({
         </section>
       )}
 
+      {profile.whatsappChannels && (
+        <section id="whatsapp" aria-labelledby="agency-whatsapp-title" className="bg-background py-12 text-center md:py-16">
+          <div className={container}>
+            <h2 id="agency-whatsapp-title" className="text-2xl font-semibold tracking-tight md:text-3xl">Oportunidades e atendimento pelo WhatsApp</h2>
+            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Entre no grupo para acompanhar as oportunidades. Se preferir, fale diretamente com a agência.</p>
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+              <Button asChild className="min-h-11">
+                <a data-agency-whatsapp="group" href={profile.whatsappChannels.group} target="_blank" rel="noopener noreferrer">
+                  <Users className="mr-2 h-4 w-4" aria-hidden="true" /> Entrar no grupo de oportunidades
+                </a>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11">
+                <a data-agency-whatsapp="contact" href={profile.whatsappChannels.contact} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar com a agência no WhatsApp
+                </a>
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Captação "Receba inspirações": tenant resolvido no servidor pelo hostname. */}
       <AgencyInspirationDialog
         open={inspirationOpen}
