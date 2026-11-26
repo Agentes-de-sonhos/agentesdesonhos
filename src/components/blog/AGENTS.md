@@ -1,0 +1,1 @@
+- Blog post e-mails go through Edge Function `blog-newsletter` (blog_can_manage gate, CRM `clients` of the agency filtered by status, opt-out via HMAC link, sends logged in `blog_newsletter_sends`); sender auto-switches to the agency domain when verified in Resend. Why: per-agency CRM mailing without manual sender setup.

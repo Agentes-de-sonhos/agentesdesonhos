@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, ArrowLeft, Check, Eye, History, Loader2, Settings2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Eye, History, Loader2, Mail, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useSiteBlogAccess } from "@/hooks/useSiteBlogAccess";
@@ -16,6 +16,7 @@ import { BlogEditorToolbar } from "@/components/blog/editor/BlogEditorToolbar";
 import { BlogArticleSettingsSheet } from "@/components/blog/editor/BlogArticleSettingsSheet";
 import { BlogPublishControls } from "@/components/blog/editor/BlogPublishControls";
 import { BlogVersionsDialog } from "@/components/blog/editor/BlogVersionsDialog";
+import { BlogNewsletterDialog } from "@/components/blog/editor/BlogNewsletterDialog";
 import { uploadBlogImage, signBlogPaths } from "@/lib/blog/blogMedia";
 import { collectMediaPaths, slugify, statusLabel, suggestExcerpt, withSignedSources, type BlogSnapshot, type TiptapNode } from "@/lib/blog/blogUtils";
 
@@ -172,7 +173,7 @@ function BlogEditor({ initial, agencyId, defaultTz }: { initial: BlogPostRow; ag
 
   const reload = async () => {
     const { data } = await sb.from("site_blog_posts").select("*").eq("id", post.id).single();
-    if (!data) return;
+    if (!data) return null;
     const row = data as BlogPostRow;
     const map = await signBlogPaths(collectMediaPaths(row.draft.content));
     const content = row.draft.content ? withSignedSources(row.draft.content, map) : undefined;
@@ -182,10 +183,12 @@ function BlogEditor({ initial, agencyId, defaultTz }: { initial: BlogPostRow; ag
     setSnap(next);
     editor?.commands.setContent((content as any) ?? "", { emitUpdate: false });
     qc.invalidateQueries({ queryKey: ["blog-posts", agencyId] });
+    return row;
   };
 
   const goBack = async () => { await flush(); navigate("/site/blog"); };
 
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
   const pendingChanges = post.status === "published" && post.published_updated_at && new Date(post.draft_updated_at) > new Date(post.published_updated_at);
 
   return (
@@ -199,7 +202,8 @@ function BlogEditor({ initial, agencyId, defaultTz }: { initial: BlogPostRow; ag
           <Button variant="ghost" size="sm" onClick={() => setVersionsOpen(true)}><History className="mr-1 h-4 w-4" /> Versões</Button>
           <Button variant="ghost" size="sm" onClick={async () => { await flush(); navigate(`/site/blog/${post.id}/previa`); }}><Eye className="mr-1 h-4 w-4" /> Prévia</Button>
           <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}><Settings2 className="mr-1 h-4 w-4" /> Configurações do artigo</Button>
-          <BlogPublishControls post={post} defaultTz={defaultTz} beforeAction={flush} onDone={reload} />
+          {post.status === "published" && <Button variant="outline" size="sm" onClick={() => setNewsletterOpen(true)}><Mail className="mr-1 h-4 w-4" /> Enviar aos clientes</Button>}
+          <BlogPublishControls post={post} defaultTz={defaultTz} beforeAction={flush} onDone={async () => { const was = post.status; const row = await reload(); if (was !== "published" && row?.status === "published") setNewsletterOpen(true); }} />
         </div>
       </div>
 
@@ -225,7 +229,8 @@ function BlogEditor({ initial, agencyId, defaultTz }: { initial: BlogPostRow; ag
         slugLocked={!!post.published_at}
         onSlugChange={(v) => { setSlugManual(true); slugRef.current = v; setSlug(v); schedule(); }}
       />
-      <BlogVersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} postId={post.id} beforeRestore={flush} onRestored={reload} />
+      <BlogNewsletterDialog open={newsletterOpen} onOpenChange={setNewsletterOpen} postId={post.id} title={(post.published as BlogSnapshot | null)?.title ?? snap.title ?? ""} />
+      <BlogVersionsDialog open={versionsOpen} onOpenChange={setVersionsOpen} postId={post.id} beforeRestore={flush} onRestored={async () => { await reload(); }} />
     </div>
   );
 }

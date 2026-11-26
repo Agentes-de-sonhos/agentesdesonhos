@@ -2319,6 +2319,53 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_newsletter_sends: {
+        Row: {
+          agency_id: string
+          created_at: string
+          created_by: string | null
+          failed: number
+          id: string
+          post_id: string
+          recipients: number
+          sender: string
+          sent: number
+          statuses: string[]
+        }
+        Insert: {
+          agency_id: string
+          created_at?: string
+          created_by?: string | null
+          failed?: number
+          id?: string
+          post_id: string
+          recipients?: number
+          sender: string
+          sent?: number
+          statuses?: string[]
+        }
+        Update: {
+          agency_id?: string
+          created_at?: string
+          created_by?: string | null
+          failed?: number
+          id?: string
+          post_id?: string
+          recipients?: number
+          sender?: string
+          sent?: number
+          statuses?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_newsletter_sends_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "site_blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_commissions: {
         Row: {
           booking_service_id: string
@@ -3196,6 +3243,7 @@ export type Database = {
           birthday_day: number | null
           birthday_month: number | null
           birthday_year: number | null
+          blog_email_opt_out: boolean
           category_id: string | null
           city: string | null
           created_at: string
@@ -3220,6 +3268,7 @@ export type Database = {
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
+          blog_email_opt_out?: boolean
           category_id?: string | null
           city?: string | null
           created_at?: string
@@ -3244,6 +3293,7 @@ export type Database = {
           birthday_day?: number | null
           birthday_month?: number | null
           birthday_year?: number | null
+          blog_email_opt_out?: boolean
           category_id?: string | null
           city?: string | null
           created_at?: string
