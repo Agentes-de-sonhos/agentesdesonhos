@@ -2066,13 +2066,18 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="co"] { --karibu-region: #dfbd95; }
 .wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="se"] { --karibu-region: #a8cfdf; }
 .wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="s"] { --karibu-region: #c7b6d9; }
-.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region] > path { fill: var(--karibu-region); stroke: #fff; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region] > path { fill: var(--karibu-region) !important; stroke: #fff; }
 .wl-karibu :is(#resorts, #resorts-brasil) svg [data-region]:is(:hover, :focus-visible, [data-active]) > path {
   filter: brightness(.9) saturate(1.2);
   stroke: var(--karibu-blue);
 }
-.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] circle { fill: #fff; stroke: var(--karibu-blue); }
-.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] text { fill: var(--karibu-blue); }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] circle { fill: #fff !important; stroke: var(--karibu-blue) !important; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] text { fill: var(--karibu-blue) !important; }
+.wl-karibu :is(#resorts, #resorts-brasil) button[data-region][data-active] {
+  background: var(--karibu-blue) !important;
+  border-color: var(--karibu-blue) !important;
+  color: #fff !important;
+}
 /* O azul-claro original (#28a8e1) tem contraste insuficiente em texto
    pequeno sobre branco; a base azul-marinho preserva ambas as cores do logo. */
 .wl-karibu .wl-karibu-surface .wl-kicker,
