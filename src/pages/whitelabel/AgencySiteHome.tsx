@@ -638,6 +638,12 @@ export default function AgencySiteHome({
       if (at < 0) resolved.unshift({ key: PINK_FRIDAY_TEASER_KEY, label: "Pink Friday", enabled: true, order: -1 });
       else resolved.splice(at, 0, { ...resolved[at], key: PINK_FRIDAY_TEASER_KEY, label: "Pink Friday" });
     }
+    // Na IMM, Oportunidades abre a página e Novidades fecha a sequência,
+    // mesmo se a agência habilitar outras seções no futuro.
+    if (profile.key === "immOfficial") {
+      const edgeOrder = (key: string) => key === "modules" ? -1 : key === "newsletter" ? 1 : 0;
+      resolved.sort((a, b) => edgeOrder(a.key) - edgeOrder(b.key));
+    }
     return resolved;
   }, [dmc, profile, labPresentation?.sections, hasRealBlog, pinkFriday]);
   const modules = useMemo(() => {
@@ -2449,6 +2455,18 @@ export default function AgencySiteHome({
         const node = renderSection(section.key);
         if (!node) return null;
         let tagged = node;
+        if (profile.key === "immOfficial") {
+          const isFirst = rendered === 0;
+          const gradient = rendered++ % 2 === 1 && section.key !== "newsletter";
+          return (
+            <div key={section.key}
+              className="wl-alt-surface wl-imm-home-surface"
+              data-imm-surface={gradient ? "gradient" : "white"}
+              style={isFirst && editorial ? { paddingTop: bottomOverlap } : undefined}>
+              {node}
+            </div>
+          );
+        }
         if (karibu) {
           // A faixa azul de cruzeiros interrompe a sequência; a próxima começa branca.
           const cruise = section.key === "authority";

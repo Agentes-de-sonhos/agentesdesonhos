@@ -2052,8 +2052,33 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm .wl-qq-submit { background-color: #E27818 !important; color: #FFFFFF !important; border-color: #E27818 !important; }
 .wl-editorial.wl-mundo.wl-imm :is(.wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta) svg { color: #FFFFFF !important; }
 .wl-editorial.wl-mundo.wl-imm :is(.wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta):hover { background-color: #C9660F !important; }
-.wl-editorial.wl-mundo.wl-imm :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) { background-color: #FFFFFF !important; background-image: linear-gradient(180deg, #FFFFFF 0%, #FFF4E8 100%) !important; }
-.wl-editorial.wl-mundo.wl-imm #rodape { background-image: linear-gradient(180deg, #FFFFFF 50%, #FFF4E8 100%) !important; }
+/* IMM only: apply the alternating surface both on mobile and desktop,
+   overriding section-ID gradients inherited from the Mundo em Cores theme. */
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface[data-imm-surface] {
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+}
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface[data-imm-surface="gradient"] {
+  background-image: var(--wl-mundo-gradient) !important;
+}
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface[data-imm-surface] > section,
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface > #autoridade {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+/* The shared cruise component is otherwise dark; keep its typography legible
+   over the light IMM band without changing the cruise page or other tenants. */
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface > #autoridade,
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface > #autoridade :is(.text-background, .text-background\/80, .text-background\/90) {
+  color: hsl(var(--foreground));
+}
+.wl-editorial.wl-mundo.wl-imm .wl-imm-home-surface > #autoridade [data-testid="cruise-season-authority"] p:first-child {
+  border-color: hsl(var(--border));
+}
+.wl-editorial.wl-mundo.wl-imm #rodape {
+  background-image: linear-gradient(180deg, #FBFCF8 0%, #F3F7ED 54%, #EBF2E1 100%) !important;
+}
+
 .wl-editorial.wl-mundo.wl-imm :is(.wl-step-num, #atendimento ol > li > span[aria-hidden="true"]) { background-color: #E27818 !important; color: #FFFFFF !important; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region="n"] { --arena-map-region: #b8d8a6; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region="ne"] { --arena-map-region: #f4d77e; }
@@ -2066,7 +2091,6 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm button[data-region][data-active] { background-color: #E27818 !important; color: #FFFFFF !important; border-color: #E27818 !important; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region] circle { fill: var(--brand-primary) !important; stroke: hsl(var(--primary-foreground)) !important; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region] text { fill: hsl(var(--primary-foreground)) !important; }
-.wl-editorial.wl-mundo.wl-imm .wl-alt-surface:has(> #resorts) { background-image: var(--wl-mundo-gradient) !important; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright { --wl-copyright-ink: 0 0% 0%; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright,
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright * { color: hsl(var(--wl-copyright-ink)) !important; }
