@@ -115,6 +115,7 @@ export type AgencyImageSlot =
   | "bagagemDisneyCruise"
   | "caribeMexico" | "curtiCaribe" | "curtiBrasil" | "curtiCruzeiros" | "curtiNovaYork" | "orlandoMagicKingdom" | "portugalBelem" | "fernandoNoronha" | "cancun" | "mendoza" | "cruzeiroDisneyWish" | "nordesteResort" | "iberostarPraiaDoForte"
   | "heroVarenna" | "heroSantoriniShip" | "heroMundoGrupoVideo" | "heroMundoEuropaVideo" | "heroMundoEuropaFoto" | "heroMundoGrupoFoto" | "mundoGreciaVanessa" | "mundoNclDestaque" | "heroMundoDesenhadaVideo" | "heroMundoPlacasFoto" | "heroAirportTraveler" | "heroJuMagicKingdom" | "curtiHolambra" | "essyaMural"
+  | "requinteSafari" | "requinteNeve"
   | "safari" | "douro" | "villa" | "gastronomia" | "brasil" | "luademel" | "paraisoFounders" | "paraisoAmalfi" | "paraisoLago" | "paraisoTanzania" | "paraisoEslovenia"
   | "destinosStorefrontFront" | "destinosStorefrontSide"
   | "norteafrica" | "escandinavia" | "grupos" | "amanda100Limites"

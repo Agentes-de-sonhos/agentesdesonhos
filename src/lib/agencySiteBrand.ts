@@ -80,6 +80,7 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
 const FAVICON_BY_HOSTNAME: Record<string, string> = {
   "briefing-29-v1.preview.local": "/rb-tour/favicon.png",
   "briefing-28-v1.preview.local": "/roteiros-da-terra/favicon.png",
+  "briefing-26-v1.preview.local": "/requinte-turismo/favicon.png",
   "briefing-27-v1.preview.local": "/viaje-na-magia/favicon.png",
   "briefing-22-v1.preview.local": "/pristur/favicon.png",
   "pristur.com.br": "/pristur/favicon.png",
@@ -201,6 +202,11 @@ const DRICA_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
  * other tenant or the footer/public documents.
  */
 const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
+  "briefing-26-v1.preview.local": {
+    logoOnly: true,
+    headerClassName: "h-[94px] md:h-[116px]",
+    logoClassName: "h-[78px] w-auto max-w-[170px] object-contain md:h-[100px]",
+  },
   "destinoscomaju.com.br": {
     logoOnly: true,
     logoUrl: destinosComAJuHeaderLogo.url,

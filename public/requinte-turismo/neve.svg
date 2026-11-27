@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-label="Ilustração de pistas de esqui nas montanhas">
+<defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#183f64"/><stop offset="1" stop-color="#99c8dc"/></linearGradient><linearGradient id="snow" x2="0" y2="1"><stop stop-color="#f4f9fc"/><stop offset="1" stop-color="#b9d7e6"/></linearGradient></defs>
+<path fill="url(#sky)" d="M0 0h900v600H0z"/>
+<circle cx="680" cy="142" r="55" fill="#f9eacb" opacity=".8"/>
+<path d="M0 432 164 236l67 79 162-178 144 146 98-104 265 265v156H0Z" fill="#749eb5"/>
+<path d="m0 490 222-224 99 98L485 164l99 119 38-30 154 139 124-57v265H0Z" fill="url(#snow)"/>
+<path d="m454 201 31-37 99 119 38-30 154 139-110-35-61-56-31 28-30-76-36 38Z" fill="#9dbfd3"/>
+<path d="m0 503 222-237 57 57-41-11-41 48-78 65Z" fill="#cadee9"/>
+<path d="M0 517c215-60 303-30 444 14s251-11 456-60v129H0Z" fill="#edf5f9"/>
+<path d="M483 449c123 22 121 45 65 62-47 14-118 26-123 89" fill="none" stroke="#91b6cd" stroke-width="4" opacity=".75" stroke-linecap="round"/>
+</svg>

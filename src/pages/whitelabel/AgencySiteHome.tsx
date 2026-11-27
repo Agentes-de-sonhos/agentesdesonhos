@@ -255,6 +255,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   heroJuMagicKingdom: heroJuMagicKingdom.url,
   parques: destinoParques,
   safari: destinoSafari,
+  requinteSafari: "/requinte-turismo/safari-banner.webp",
+  requinteNeve: "/requinte-turismo/neve.svg",
   douro: destinoDouro,
   villa: destinoVilla,
   paraisoFounders: paraisoFoundersPortrait.url,
@@ -277,6 +279,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
 const HERO_IMAGES: Record<string, string> = {
   praia: heroPraia,
   luxo: heroLuxo,
+  requinteSafari: "/requinte-turismo/safari-banner.webp",
   fae: heroFae,
   europa: destinoEuropa,
 };
@@ -1982,14 +1985,14 @@ export default function AgencySiteHome({
         const copy = copyFor("faq");
         const footerNumber = profile.footer?.whatsappHidden && profile.key !== "curtiViagensOfficial"
           ? undefined : profile.footer?.whatsapp;
-        const faqDestination = !profile.presentation && !lab ? resolveFaqDestination({
+        const faqDestination = (!profile.presentation || profile.faqContactPreview) && !lab ? resolveFaqDestination({
           phone: footerNumber ?? info.phone,
           contactUrl: profile.whatsappChannels?.contact,
           email: profile.footer?.email ?? resolveSiteContacts(hostname).email,
           whatsappHidden: profile.hideFaqWhatsapp,
         }) : undefined;
         const faqContact = faqDestination
-          ? <AgencyFaqContact destination={faqDestination} agencyName={name} />
+          ? <AgencyFaqContact destination={faqDestination} agencyName={name} preview={profile.presentation} />
           : <Button variant="outline" size="lg" className="mt-6" onClick={() => openRequest("pacotes")}>
               Enviar uma solicitação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Button>;
@@ -2270,7 +2273,7 @@ export default function AgencySiteHome({
             }`}
           >
           {editorial ? (
-            <p className="mb-4 inline-flex max-w-full items-center gap-2 whitespace-nowrap text-[clamp(9px,2.6vw,11px)] font-bold uppercase tracking-[0.12em] md:mb-5 md:tracking-[0.18em] text-white [&_svg]:text-white">
+            <p className="mb-4 inline-flex max-w-full items-center gap-2 whitespace-nowrap text-[clamp(9px,2.6vw,11px)] font-bold uppercase tracking-[0.12em] wl-hero-kicker md:mb-5 md:tracking-[0.18em] text-white [&_svg]:text-white">
               <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden="true" />
                {current.kicker ?? profile.heroPresentation?.kicker ?? (location ? `Consultoria de viagens · ${location}` : "Consultoria de viagens")}
             </p>

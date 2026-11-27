@@ -64,6 +64,7 @@ const THEME_BY_HOSTNAME: Record<string, AgencySiteThemeKey> = {
   "briefing-23-v1.preview.local": "siteBaseEditorial",
   "briefing-24-v1.preview.local": "siteBaseEditorial",
   "briefing-25-v1.preview.local": "siteBaseEditorial",
+  "briefing-26-v1.preview.local": "siteBaseEditorial",
   "briefing-27-v1.preview.local": "siteBaseEditorial",
   "briefing-28-v1.preview.local": "siteBaseEditorial",
   "briefing-29-v1.preview.local": "siteBaseEditorial",
@@ -137,6 +138,8 @@ export function siteThemeRootClass(hostname?: string | null): string {
         ? " wl-mundo wl-pristur-mundo"
         : h === "immturismo.com.br" || h === "www.immturismo.com.br"
         ? " wl-mundo wl-shopping-mundo wl-imm"
+        : h === "briefing-26-v1.preview.local"
+        ? " wl-requinte"
         : h === "briefing-25-v1.preview.local" || h === "shoppingviagens.com.br" || h === "www.shoppingviagens.com.br"
         ? " wl-mundo wl-shopping-mundo"
         : h === "briefing-24-v1.preview.local" || h === "innovati.tur.br" || h === "www.innovati.tur.br"

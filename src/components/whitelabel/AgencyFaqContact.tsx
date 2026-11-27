@@ -5,10 +5,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 import type { FaqDestination } from "@/lib/agencyFaqContact";
 
-export function AgencyFaqContact({ destination, agencyName, buttonClassName = "" }: {
+export function AgencyFaqContact({ destination, agencyName, buttonClassName = "", preview = false }: {
   destination: FaqDestination;
   agencyName: string;
   buttonClassName?: string;
+  preview?: boolean;
 }) {
   const id = useId();
   const [question, setQuestion] = useState("");
@@ -33,7 +34,7 @@ export function AgencyFaqContact({ destination, agencyName, buttonClassName = ""
       {message
         ? <Button asChild className={actionClass}><a href={href} target={whatsapp ? "_blank" : undefined} rel={whatsapp ? "noopener noreferrer" : undefined}><Icon className="mr-1.5 h-4 w-4" aria-hidden="true" />Enviar pelo {channel}</a></Button>
         : <Button type="button" className={actionClass} disabled><Icon className="mr-1.5 h-4 w-4" aria-hidden="true" />Enviar pelo {channel}</Button>}
-      <p id={`${id}-hint`} className="min-w-0 text-xs leading-4 text-muted-foreground">Sua mensagem abre {whatsapp ? "no WhatsApp" : "no seu app de e-mail"}. Confirme o envio por lá.</p>
+      <p id={`${id}-hint`} className="min-w-0 text-xs leading-4 text-muted-foreground">{preview ? "Prévia: o envio fica desativado nesta versão." : <>Sua mensagem abre {whatsapp ? "no WhatsApp" : "no seu app de e-mail"}. Confirme o envio por lá.</>}</p>
     </div>
   </section>;
 }

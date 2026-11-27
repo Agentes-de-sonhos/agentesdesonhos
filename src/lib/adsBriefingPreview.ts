@@ -4,6 +4,7 @@ import { BARDELLI_IMM_PREVIEW_HOST, BARDELLI_IMM_PREVIEW_JOB_ID, buildBardelliIm
  * Conteúdo 100% local: nenhum tenant, conta ou cadastro real é consultado.
  * Servida apenas no host técnico id-preview (e localhost de desenvolvimento).
  */
+import { REQUINTE_PREVIEW_JOB_ID, REQUINTE_PREVIEW_INFO, REQUINTE_PREVIEW_PROFILE } from "@/lib/requinteBriefingPreview";
 import { buildGoldStandardProfile } from "@/lib/goldStandardSiteTemplate";
 import { EDITORIAL_ROSE } from "@/lib/agencyReferenceProfiles";
 import bardelliLogo from "@/assets/whitelabel/logo-bardelli-viagens.png.asset.json";
@@ -2692,6 +2693,17 @@ export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   // Retain IMM's own slide copy and media; the shared Mundo review profile is only the visual baseline.
   hero: immBaseline.hero,
   demo: false, presentation: false, seo: immBaseline.seo,
+};
+
+ADS_PREVIEW_FIXTURES[REQUINTE_PREVIEW_JOB_ID] = {
+  jobId: REQUINTE_PREVIEW_JOB_ID,
+  info: REQUINTE_PREVIEW_INFO,
+  profile: REQUINTE_PREVIEW_PROFILE,
+  realAgency: true,
+  strictBackendBlock: true,
+  notice: "Requinte Turismo · prévia para revisão · imagens ilustrativas · sem envio",
+  documentTitle: "Prévia — Requinte Turismo",
+  pages: { dmc: false, editorial: false, xcaret: null, visa: false, orlandoTickets: true, resorts: { title: "Explore os resorts do Brasil" } },
 };
 
 /** Local identity: deliberately never uses the existing account or public slug. */
