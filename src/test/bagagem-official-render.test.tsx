@@ -34,6 +34,16 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(container.querySelector('[data-destination="resorts-all-inclusive"]')).toHaveAttribute("href", "/resorts-brasil/iberostar-bahia");
     expect(container.querySelectorAll('[data-testid="cruise-season-companies"] img')).toHaveLength(5);
     expect(container.querySelectorAll(".wl-step-num")).toHaveLength(4);
+    const faq = within(screen.getByRole("region", { name: "Ainda tem alguma dúvida?" }));
+    const question = faq.getByRole("textbox", { name: "Sua dúvida" });
+    const blocked = faq.getByRole("button", { name: "Enviar", exact: true });
+    expect(blocked).toBeDisabled();
+    expect(blocked.parentElement).toBe(question.parentElement);
+    expect(question).toHaveAttribute("rows", "1");
+    expect(faq.getByText("A Bagagem na Mão Viagens responde pelo WhatsApp.")).toBeInTheDocument();
+    expect(faq.queryByText(/Sua mensagem abre/)).toBeNull();
+    fireEvent.change(question, { target: { value: "Olá, tenho uma dúvida." } });
+    expect(faq.getByRole("link", { name: "Enviar", exact: true })).toHaveAttribute("href", "https://wa.me/5521988559515?text=Ol%C3%A1%2C%20tenho%20uma%20d%C3%BAvida.");
     const footer = within(container.querySelector<HTMLElement>("#rodape")!);
     expect(footer.getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5521988559515");
     expect(footer.queryByText(/98855-9515/)).toBeNull();

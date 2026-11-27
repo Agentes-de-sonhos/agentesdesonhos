@@ -2375,3 +2375,10 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   box-shadow: none;
   filter: none;
 }
+
+.wl-bagagem-official .wl-bagagem-faq-inline { align-items: flex-start; }
+.wl-bagagem-official .wl-bagagem-faq-inline :is(button, a) {
+  background-color: #0D726D !important;
+  border-color: #0D726D !important;
+  color: white !important;
+}

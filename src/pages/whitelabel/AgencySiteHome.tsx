@@ -1995,7 +1995,7 @@ export default function AgencySiteHome({
           whatsappHidden: profile.hideFaqWhatsapp,
         }) : undefined;
         const faqContact = faqDestination
-          ? <AgencyFaqContact destination={faqDestination} agencyName={name} preview={profile.presentation} />
+          ? <AgencyFaqContact destination={faqDestination} agencyName={name} preview={profile.presentation} compact={bagagemOfficial} />
           : <Button variant="outline" size="lg" className="mt-6" onClick={() => openRequest("pacotes")}>
               Enviar uma solicitação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Button>;
