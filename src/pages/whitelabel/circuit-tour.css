@@ -21,7 +21,7 @@
 .circuit-curti-italia-trem :is(.circuit-eyebrow, .circuit-highlight svg, .circuit-inclusion-icon) {
   color: var(--curti-circuit-blue);
 }
-.circuit-curti-italia-trem .circuit-inclusion-icon { background: #f5f5f5; }
+.circuit-curti-italia-trem .circuit-inclusion-icon { background: #f2efff; }
 .circuit-curti-italia-trem :is(.circuit-timeline-prefix, .circuit-timeline-meals) { color: var(--curti-circuit-soft-blue); }
 .circuit-curti-italia-trem .circuit-timeline-line { background: #c8bfff; }
 .circuit-curti-italia-trem .circuit-timeline-number {
