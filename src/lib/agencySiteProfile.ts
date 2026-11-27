@@ -1352,6 +1352,11 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       },
     },
     newsletterMedia: { src: "/bagagem-na-mao/marcia-cruzeiro-disney.webp", alt: "Márcia Baccarini a bordo em um cruzeiro Disney" },
+    footer: {
+      ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.footer,
+      whatsappLabel: "Falar por WhatsApp",
+      phoneHidden: true,
+    },
     whatsappChannels: undefined,
     inspirationDialog: {
       title: "Grupo de oportunidades da Bagagem na Mão",

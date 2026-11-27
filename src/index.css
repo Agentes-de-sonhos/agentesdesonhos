@@ -2354,3 +2354,18 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 }
 .wl-bagagem-official [data-testid="cruise-season-help"] a:hover,
 .wl-bagagem-official #faq a[href*="wa.me"]:hover { background-color: #095B57 !important; }
+
+/* Bagagem oficial: o turquesa #27C7C3 é o preenchimento da palavra
+   "Bagagem" no logotipo oficial; a base do rodapé fica entre 4% e 10%. */
+.wl-editorial.wl-mundo.wl-bagagem-official #rodape {
+  background-color: #fff !important;
+  background-image: linear-gradient(180deg, rgb(39 199 195 / 4%) 0%, rgb(39 199 195 / 10%) 100%) !important;
+  border-top-color: #e1e4e4;
+}
+.wl-editorial.wl-mundo.wl-bagagem-official #rodape > div:last-child {
+  border-top-color: #dce1e1 !important;
+}
+.wl-editorial.wl-mundo.wl-bagagem-official #rodape .wl-footer-copyright,
+.wl-editorial.wl-mundo.wl-bagagem-official #rodape .wl-footer-copyright * {
+  color: #171717 !important;
+}
