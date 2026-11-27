@@ -2540,8 +2540,12 @@ export default function AgencySiteHome({
         if (!node) return null;
         let tagged = node;
         if (profile.key === "luxuryCurated") {
+          // The newsletter keeps its original treatment; the Explora block
+          // is an independent surface inside the highlights fragment.
+          if (section.key === "newsletter") return node;
+          const tinted = rendered++ % 2 === 1;
           return (
-            <div key={section.key} className="wl-paraiso-home-surface"
+            <div key={section.key} className={`wl-paraiso-home-surface${tinted ? " wl-paraiso-home-tint" : ""}`}
               style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
               {node}
             </div>

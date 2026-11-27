@@ -12,11 +12,14 @@ describe("Paraíso homepage and main menu", () => {
     expect(profile.hideHeaderBlog).toBe(true);
   });
 
-  it("scopes white section surfaces to the Paraíso home wrappers, not hero or footer", () => {
+  it("alternates the ordinary sections without recoloring Explora, the newsletter, or the footer", () => {
     const css = readFileSync("src/index.css", "utf8");
     const home = readFileSync("src/pages/whitelabel/AgencySiteHome.tsx", "utf8");
-    expect(home).toMatch(/if \(profile\.key === "luxuryCurated"\)[\s\S]*?className="wl-paraiso-home-surface"/);
-    expect(css).toMatch(/\.wl-paraiso-home-surface > section,[\s\S]*?background-color: #fff !important/);
+    expect(home).toContain('if (section.key === "newsletter") return node;');
+    expect(home).toContain('const tinted = rendered++ % 2 === 1;');
+    expect(css).toContain(".wl-paraiso-home-surface > section:not(#explora-monaco)");
+    expect(css).toContain("color-mix(in srgb, hsl(var(--wl-green)) 9%, #fff)");
     expect(css).not.toContain(".wl-paraiso-home-surface #rodape");
+    expect(css).not.toContain(".wl-paraiso-home-surface #novidades");
   });
 });
