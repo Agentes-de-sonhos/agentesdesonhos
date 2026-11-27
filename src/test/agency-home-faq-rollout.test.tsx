@@ -93,3 +93,15 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
 });
+
+it("inclui Novidades da Innovati após o FAQ, com convite direto e o Instagram da agência", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const node = container.querySelector<HTMLElement>("#novidades")!;
+  expect(container.querySelector("#faq")!.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const section = within(node);
+  expect(section.getByRole("heading", { name: "Receba oportunidades de viagem no WhatsApp" })).toBeInTheDocument();
+  expect(section.getByRole("link", { name: "Entrar no grupo do WhatsApp" })).toHaveAttribute("href", "https://chat.whatsapp.com/KzyQhTCtZGy6iVfgRcOUbI?mode=r_c");
+  expect(node.nextElementSibling).toHaveTextContent("Acompanhe a Innovati Travel");
+});

@@ -21,6 +21,7 @@ import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/
 import { OfferCard, usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
+import { safeWhatsappGroupUrl } from "@/lib/agencyInspirationLead";
 import { KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -2065,6 +2066,7 @@ export default function AgencySiteHome({
       case "newsletter":
         {
         const copy = copyFor("newsletter");
+        const directGroup = safeWhatsappGroupUrl(profile.newsletterDirectGroupUrl);
         if (editorial && profile.newsletterMedia) {
           const media = profile.newsletterMedia;
           return (
@@ -2123,14 +2125,20 @@ export default function AgencySiteHome({
                       </p>
                     </div>
                     <div className="md:justify-self-end">
-                      <Button
+                      {directGroup ? (
+                        <Button asChild size="lg" className="wl-newsletter-cta h-12 w-full rounded-xl border border-white bg-white px-7 text-primary hover:bg-white/90 md:w-auto">
+                          <a href={directGroup} target="_blank" rel="noopener noreferrer">
+                            {copy.cta ?? "Entrar no grupo do WhatsApp"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                          </a>
+                        </Button>
+                      ) : <Button
                         size="lg"
                         className="wl-newsletter-cta h-12 w-full rounded-xl border border-[var(--brand-secondary)] bg-[var(--brand-secondary)] px-7 text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)] [&_svg]:text-[var(--brand-on-secondary)] md:w-auto"
                         onClick={() => setInspirationOpen(true)}
                       >
                         {copy.cta ?? "Quero receber inspirações"}{" "}
                         <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                      </Button>
+                      </Button>}
                     </div>
                   </div>
                 </div>

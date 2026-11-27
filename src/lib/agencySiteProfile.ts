@@ -342,6 +342,8 @@ export interface AgencySiteProfile {
   /** Faixa opcional de redes sociais logo após "Receba novidades". */
   whatsappChannels?: { group: string; contact: string };
   socialStrip?: { title: string; links: { network: "instagram" | "facebook" | "tiktok" | "youtube"; url: string }[] };
+  /** Convite direto ao grupo no card editorial (sem formulário intermediário). */
+  newsletterDirectGroupUrl?: string;
   /** Opcional: card do grupo de novidades em degradê claro com foto à direita. */
   newsletterMedia?: { src: string; alt: string };
 }
@@ -1465,6 +1467,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       ...INNOVATI_PREVIEW_PROFILE.sections,
       signature: { enabled: false },
       highlights: { enabled: false },
+      newsletter: { enabled: true, order: 100 },
     },
     nav: INNOVATI_PREVIEW_PROFILE.nav?.map((item) =>
       item.to === "/#assinatura" ? { ...item, to: "/#ingressos-orlando" } : item,
@@ -1475,6 +1478,16 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       phoneHidden: true,
       whatsappLabel: "Falar por WhatsApp",
     },
+    copy: {
+      ...INNOVATI_PREVIEW_PROFILE.copy,
+      newsletter: {
+        kicker: "Novidades da Innovati",
+        title: "Receba oportunidades de viagem no WhatsApp",
+        subtitle: "Entre no grupo da Innovati Travel para acompanhar novidades e oportunidades selecionadas pela agência.",
+        cta: "Entrar no grupo do WhatsApp",
+      },
+    },
+    newsletterDirectGroupUrl: "https://chat.whatsapp.com/KzyQhTCtZGy6iVfgRcOUbI?mode=r_c",
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
