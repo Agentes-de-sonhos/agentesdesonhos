@@ -16,12 +16,11 @@
 .circuit-curti-italia-trem {
   --curti-circuit-blue: #2502ff;
   --curti-circuit-green: #639682;
-  --curti-circuit-light: #e5e1ff;
 }
 .circuit-curti-italia-trem :is(.circuit-eyebrow, .circuit-highlight svg, .circuit-inclusion-icon) {
   color: var(--curti-circuit-blue);
 }
-.circuit-curti-italia-trem .circuit-inclusion-icon { background: var(--curti-circuit-light); }
+.circuit-curti-italia-trem .circuit-inclusion-icon { background: #f5f5f5; }
 .circuit-curti-italia-trem .circuit-timeline-prefix { color: #5a62d4; }
 .circuit-curti-italia-trem .circuit-timeline-line { background: #c8bfff; }
 .circuit-curti-italia-trem .circuit-timeline-number {
