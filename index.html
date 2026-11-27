@@ -9,7 +9,18 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="manifest" href="/manifest.json" />
+    <!-- App manifest only on the platform app host: agency sites must never offer "Instalar Agentes de Sonhos". -->
+    <script>
+      (function () {
+        var h = location.hostname.toLowerCase();
+        if (h === "app.agentesdesonhos.com.br" || h === "agentesdesonhos.com.br" || h === "www.agentesdesonhos.com.br") {
+          var l = document.createElement("link");
+          l.rel = "manifest";
+          l.href = "/manifest.json";
+          document.head.appendChild(l);
+        }
+      })();
+    </script>
     <meta name="theme-color" content="#0f766e" />
 
     <!-- Neutral baseline shared across all domains — institutional site AND
