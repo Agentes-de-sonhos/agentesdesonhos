@@ -6,6 +6,8 @@ import { CircuitQuoteDialog } from "@/components/whitelabel/CircuitQuoteDialog";
 import { CircuitTimeline } from "@/components/whitelabel/CircuitTimeline";
 import { ItaliaEmTremRouteMap } from "@/components/whitelabel/ItaliaEmTremRouteMap";
 import { CircuitRouteMap } from "@/components/whitelabel/CircuitRouteMap";
+import { Textarea } from "@/components/ui/textarea";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import "./circuit-tour.css";
 import { useParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, BedDouble, Bus, CalendarDays, Clock, Car, Compass, Download, Hotel, Ship, MapPin, MessageCircle, Plane, Star, UserRound, Utensils } from "lucide-react";
@@ -29,11 +31,32 @@ function waHref(info: AgencyDomainInfo, c: CircuitTour, extra = "") {
   return n ? `https://wa.me/${n}?text=${encodeURIComponent(msg)}` : "#contato";
 }
 
+function CurtiFaqWhatsapp({ phone }: { phone: string }) {
+  const [question, setQuestion] = useState("");
+  const message = question.trim();
+  return <section aria-labelledby="curti-faq-whatsapp-title" className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-5">
+    <h3 id="curti-faq-whatsapp-title" className="text-base font-semibold">Ainda tem alguma dúvida?</h3>
+    <p className="mt-1 text-sm leading-6 text-muted-foreground">A Curti Viagens responde pelo WhatsApp.</p>
+    <label htmlFor="curti-faq-question" className="sr-only">Sua dúvida</label>
+    <Textarea id="curti-faq-question" placeholder="Escreva sua dúvida aqui" maxLength={1000} rows={3}
+      aria-describedby="curti-faq-whatsapp-hint" className="mt-3 resize-y" value={question}
+      onChange={event => setQuestion(event.target.value)} />
+    {message
+      ? <Button asChild className="circuit-price-quote mt-3 w-full sm:w-auto"><a href={`https://wa.me/${phone}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />Enviar pelo WhatsApp</a></Button>
+      : <Button type="button" className="circuit-price-quote mt-3 w-full sm:w-auto" disabled><MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />Enviar pelo WhatsApp</Button>}
+    <p id="curti-faq-whatsapp-hint" className="mt-2 text-xs leading-5 text-muted-foreground">Sua mensagem abre no WhatsApp. Confirme o envio por lá.</p>
+  </section>;
+}
+
 export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; circuit: CircuitTour }) {
   const [open, setOpen] = useState<string[]>(["d1"]);
   const [departure, setDeparture] = useState<{ date: string; label: string } | null>(null);
   const enhanced = c.enhancedPresentation === true;
   const rail = c.slug === "italia-em-trem";
+  const curtiProfile = rail ? resolveSiteProfile(info.hostname) : null;
+  const faqWhatsapp = curtiProfile?.key === "curtiViagensOfficial"
+    ? agencyWhatsappNumber({ ...info, phone: curtiProfile.footer?.whatsapp ?? info.phone })
+    : null;
   const { data: fx, isError: fxError } = useQuery({
     queryKey: ["circuit-fx", c.currency, "BRL"],
     enabled: enhanced && c.currency !== "BRL",
@@ -257,6 +280,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
                 <AccordionItem key={f.q} value={`f${i}`}><AccordionTrigger className="text-left">{f.q}</AccordionTrigger><AccordionContent className="leading-7 text-muted-foreground">{f.a}</AccordionContent></AccordionItem>
               ))}
             </Accordion>
+            {faqWhatsapp && <CurtiFaqWhatsapp phone={faqWhatsapp} />}
           </div>
         </div>
       </section>

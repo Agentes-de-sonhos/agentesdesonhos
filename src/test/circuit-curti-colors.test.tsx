@@ -88,10 +88,26 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(price.getByRole("button", { name: "Solicitar orçamento", exact: true })).toHaveClass("circuit-price-quote");
   });
 
+  it("preenche somente a dúvida no WhatsApp oficial e não permite abrir em branco", () => {
+    renderCircuit();
+    const faq = screen.getByRole("region", { name: "Ainda tem alguma dúvida?" });
+    const field = within(faq).getByRole("textbox", { name: "Sua dúvida" });
+    expect(within(faq).getByRole("button", { name: "Enviar pelo WhatsApp" })).toBeDisabled();
+    fireEvent.change(field, { target: { value: "  Olá! Capri & Pompeia?\nAceitam duas pessoas?  " } });
+    const link = within(faq).getByRole("link", { name: "Enviar pelo WhatsApp" });
+    const url = new URL(link.getAttribute("href")!);
+    expect(url.origin).toBe("https://wa.me");
+    expect(url.pathname).toBe("/5511992506672");
+    expect(url.searchParams.get("text")).toBe("Olá! Capri & Pompeia?\nAceitam duas pessoas?");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
   it("não aplica as cores da Curti à IMM", () => {
     const { container } = renderCircuit(LESTE_EUROPEU_PREMIUM_2027, "immturismo.com.br");
     expect(container.querySelector(".circuit-curti-italia-trem")).toBeNull();
     expect(container.querySelector(".circuit-calendar-grid")).toBeNull();
     expect(container.querySelector(".circuit-note")).toBeNull();
+    expect(screen.queryByText("Ainda tem alguma dúvida?")).not.toBeInTheDocument();
   });
 });
