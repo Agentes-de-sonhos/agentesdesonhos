@@ -18,8 +18,15 @@ describe("SEO das agências no ar", () => {
     expect(canonicalAgencyHost(host)).toBe(canon);
     expect(resolveAgencySharePreview(host)?.canonical).toBe(`https://${canon}/`);
   });
-  it("robots.txt declara o sitemap de cada agência", () => {
+  it("robots.txt compartilhado não declara domínios ou sitemaps de agências", () => {
     const robots = readFileSync("public/robots.txt", "utf8");
-    for (const [, canon] of SITES) expect(robots).toContain(`Sitemap: https://${canon}/sitemap-`);
+    expect(robots).not.toMatch(/^Sitemap:/im);
+    expect(robots).not.toMatch(/https?:\/\//i);
+  });
+  it("robots.txt mantém o rastreamento público e o bloqueio dos endpoints internos", () => {
+    const robots = readFileSync("public/robots.txt", "utf8");
+    expect(robots).toMatch(/^User-agent: \*$/m);
+    expect(robots).toMatch(/^Allow: \/$/m);
+    expect(robots).toMatch(/^Disallow: \/\.lovable\/$/m);
   });
 });

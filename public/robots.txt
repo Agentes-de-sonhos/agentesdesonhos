@@ -1,4 +1,3 @@
-# https://agentesdesonhos.com.br
 # Robots.txt is not a security mechanism. All authenticated, administrative
 # and client-shared pages emit <meta name="robots" content="noindex, nofollow">
 # via react-helmet-async. To honor that noindex, crawlers must be able to
@@ -14,18 +13,3 @@ Allow: /
 # Lovable internals / non-HTML endpoints (no indexable content).
 Disallow: /.lovable/
 
-Sitemap: https://agentesdesonhos.com.br/sitemap.xml
-
-# Sites white label (mesmos arquivos estáticos servidos em cada domínio).
-# Cada sitemap lista somente URLs do seu próprio host.
-Sitemap: https://www.destinoscomaju.com.br/sitemap-destinoscomaju.xml
-
-Sitemap: https://www.omundoemcores.com.br/sitemap-omundoemcores.xml
-
-Sitemap: https://www.curtiviagens.com.br/sitemap-curtiviagens.xml
-Sitemap: https://www.100limites.tur.br/sitemap-100limites.xml
-Sitemap: https://paraisoviagens.com/sitemap-paraisoviagens.xml
-Sitemap: https://www.dricaviagens.com.br/sitemap-dricaviagens.xml
-Sitemap: https://www.essyatur.com.br/sitemap-essyatur.xml
-Sitemap: https://www.arenatravelgroup.com.br/sitemap-arenatravelgroup.xml
-Sitemap: https://www.pristur.com.br/sitemap-pristur.xml
