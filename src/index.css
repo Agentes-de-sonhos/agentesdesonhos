@@ -2077,7 +2077,27 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 }
 
 .wl-editorial.wl-mundo.wl-imm :is(.wl-alt-gradient, .wl-soft-gradient, .wl-alt-surface) { background-color: #FFFFFF !important; background-image: linear-gradient(180deg, #FFFFFF 0%, #FFF4E8 100%) !important; }
-.wl-editorial.wl-mundo.wl-imm #rodape { background-image: linear-gradient(180deg, #FFFFFF 50%, #FFF4E8 100%) !important; }
+/* IMM: alternância escolhida por seção, sem mudar os demais sites. */
+.wl-editorial.wl-mundo.wl-imm {
+  --wl-imm-home-gradient: linear-gradient(180deg, #fff 0%, #fff8f1 100%);
+}
+.wl-editorial.wl-mundo.wl-imm .wl-alt-surface:has(> :is(#ofertas, #ingressos-orlando, #diferenciais, #faq)),
+.wl-editorial.wl-mundo.wl-imm div:has(> .wl-alt-surface > #ofertas) {
+  background-color: #fff !important;
+  background-image: var(--wl-imm-home-gradient) !important;
+}
+/* A faixa sob o solicitador e as ofertas usam um único degradê contínuo. */
+.wl-editorial.wl-mundo.wl-imm div:has(> .wl-alt-surface > #ofertas) > .wl-alt-surface {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.wl-editorial.wl-mundo.wl-imm .wl-alt-surface:has(> :is(#destinos, #resorts, #sobre, #atendimento, #novidades)) {
+  background-color: #fff !important;
+  background-image: none !important;
+}
+.wl-editorial.wl-mundo.wl-imm #rodape {
+  background-image: linear-gradient(180deg, #fffdfb 0%, #fff8f1 100%) !important;
+}
 .wl-editorial.wl-mundo.wl-imm :is(.wl-step-num, #atendimento ol > li > span[aria-hidden="true"]) { background-color: #E27818 !important; color: #FFFFFF !important; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region="n"] { --arena-map-region: #b8d8a6; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region="ne"] { --arena-map-region: #f4d77e; }
@@ -2090,7 +2110,6 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm button[data-region][data-active] { background-color: #E27818 !important; color: #FFFFFF !important; border-color: #E27818 !important; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region] circle { fill: var(--brand-primary) !important; stroke: hsl(var(--primary-foreground)) !important; }
 .wl-editorial.wl-mundo.wl-imm svg g[data-map-region] text { fill: hsl(var(--primary-foreground)) !important; }
-.wl-editorial.wl-mundo.wl-imm .wl-alt-surface:has(> #resorts) { background-image: var(--wl-mundo-gradient) !important; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright { --wl-copyright-ink: 0 0% 0%; }
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright,
 .wl-editorial.wl-mundo.wl-imm #rodape .wl-footer-copyright * { color: hsl(var(--wl-copyright-ink)) !important; }
