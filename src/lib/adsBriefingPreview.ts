@@ -1673,6 +1673,12 @@ export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...DRICA_PRESENTATION_PROFILE,
   key: "dricaOfficial",
   presentation: false,
+  sections: {
+    ...DRICA_PRESENTATION_PROFILE.sections,
+    highlights: { enabled: true, order: 2 },
+    destinations: { enabled: true, order: 3 },
+  },
+  about: { ...DRICA_PRESENTATION_PROFILE.about!, title: "Há 16 anos realizando sonhos" },
   headerNav: [
     { label: "Início", to: "/" },
     { label: "Destaques", to: "/#destinos" },

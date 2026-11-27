@@ -61,6 +61,9 @@ it("reorganiza somente o cabeçalho público da Drica e retira os quatro cartõe
   ]);
   expect(specialties?.[0]?.children?.map(x => x.to)).toEqual(["/disney", "/universal", "/#ingressos-orlando"]);
   expect(official.sections?.sports?.enabled).toBe(true);
+  expect(resolveSections(official.sections).slice(0, 4).map(({ key }) => key))
+    .toEqual(["signature", "highlights", "destinations", "orlando"]);
+  expect(official.about?.title).toBe("Há 16 anos realizando sonhos");
   expect(official.conciergePoints).toEqual([]);
   expect(p.conciergePoints).toHaveLength(4);
   expect(siteThemeRootClass("dricaviagens.com.br")).toContain("wl-drica-official");

@@ -34,12 +34,12 @@ export const SPORTS_PACKAGES: (SportsEventChoice & { badge: string; subtitle: st
   { key: "classicos-londrinos-2027", badge: "Premier League", title: "Clássicos Londrinos 2027", subtitle: "Especial Carnaval · 2 jogos do Manchester City (Fulham × Man City 06/02 e Tottenham × Man City 10/02, sujeitos à confirmação)", fixedDate: "05 a 12/02/2027", place: "Londres, Inglaterra · 7 noites em Kensington", image: londres.url, includes: ["Voos Iberia", "7 noites de hospedagem 4★", "2 ingressos oficiais", "Traslados privativos", "City tour + London Eye"], price: "A partir de 6x de R$ 3.761,89", priceNote: "ou R$ 22.571,34 por pessoa + taxas de embarque" },
 ];
 
-function SportsPackagesBanner({ onRequest }: { onRequest: (p: SportsEventChoice) => void }) {
+function SportsPackagesBanner({ onRequest, packages }: { onRequest: (p: SportsEventChoice) => void; packages: typeof SPORTS_PACKAGES }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
-  const n = SPORTS_PACKAGES.length;
+  const n = packages.length;
   useEffect(() => { if (paused) return; const t = setInterval(() => setI(v => (v + 1) % n), 7000); return () => clearInterval(t); }, [paused, n]);
-  const p = SPORTS_PACKAGES[i];
+  const p = packages[i];
   return (
     <div className="relative mt-10 overflow-hidden rounded-md border border-border bg-card shadow-sm" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-roledescription="carrossel" aria-label="Pacotes esportivos à venda">
       <div key={p.key} className="animate-in fade-in duration-500">
@@ -50,7 +50,7 @@ function SportsPackagesBanner({ onRequest }: { onRequest: (p: SportsEventChoice)
       <button type="button" onClick={() => setI((i - 1 + n) % n)} aria-label="Pacote anterior" className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 text-foreground shadow"><ChevronLeft className="h-5 w-5" /></button>
       <button type="button" onClick={() => setI((i + 1) % n)} aria-label="Próximo pacote" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-background/90 p-2 text-foreground shadow"><ChevronRight className="h-5 w-5" /></button>
       <div className="absolute bottom-3 right-4 flex gap-2">
-        {SPORTS_PACKAGES.map((x, k) => <button key={x.key} type="button" onClick={() => setI(k)} aria-label={`Ir para ${x.title}`} aria-current={k === i} className={`h-2.5 rounded-full transition-all ${k === i ? "w-6 bg-primary" : "w-2.5 bg-muted-foreground/40"}`} />)}
+        {packages.map((x, k) => <button key={x.key} type="button" onClick={() => setI(k)} aria-label={`Ir para ${x.title}`} aria-current={k === i} className={`h-2.5 rounded-full transition-all ${k === i ? "w-6 bg-primary" : "w-2.5 bg-muted-foreground/40"}`} />)}
       </div>
     </div>
   );
@@ -63,7 +63,9 @@ const PILLARS = [
   { icon: Headphones, title: "Pacote sob medida", text: "Viagem personalizada, do planejamento ao retorno." },
 ];
 
-export function AgencySportsEventsSection({ container, onRequest }: { container: string; onRequest: (event: SportsEventChoice) => void }) {
+const SPORTS_PACKAGES_WITHOUT_SULAMERICANA = SPORTS_PACKAGES.filter(p => p.key !== "sulamericana-2026");
+
+export function AgencySportsEventsSection({ container, onRequest, hideSulAmericana2026 = false }: { container: string; onRequest: (event: SportsEventChoice) => void; hideSulAmericana2026?: boolean }) {
   return (
     <section id="esportes" className="scroll-mt-32 md:scroll-mt-36">
       <div className={`${container} py-14 md:py-24`}>
@@ -93,7 +95,7 @@ export function AgencySportsEventsSection({ container, onRequest }: { container:
           ))}
         </div>
 
-        <div className="mt-12"><SportsPackagesBanner onRequest={onRequest} /></div>
+        <div className="mt-12"><SportsPackagesBanner onRequest={onRequest} packages={hideSulAmericana2026 ? SPORTS_PACKAGES_WITHOUT_SULAMERICANA : SPORTS_PACKAGES} /></div>
 
         <div className="mt-12 grid gap-6 rounded-md border border-border bg-card p-6 sm:grid-cols-2 lg:grid-cols-4 md:p-8">
           {PILLARS.map(({ icon: Icon, title, text }) => (

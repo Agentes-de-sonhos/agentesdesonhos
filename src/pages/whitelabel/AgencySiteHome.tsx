@@ -1997,7 +1997,7 @@ export default function AgencySiteHome({
         );
 
       case "sports":
-        return <Fragment key={key}><AgencySportsEventsSection container={container} onRequest={setSportsEvent} /><AgencySportsRequestDialog hostname={hostname} event={sportsEvent} onClose={() => setSportsEvent(null)} /></Fragment>;
+        return <Fragment key={key}><AgencySportsEventsSection container={container} onRequest={setSportsEvent} hideSulAmericana2026={profile.key === "dricaOfficial"} /><AgencySportsRequestDialog hostname={hostname} event={sportsEvent} onClose={() => setSportsEvent(null)} /></Fragment>;
 
       case "orlando":
         return (

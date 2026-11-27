@@ -2619,3 +2619,17 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   background-color: #fff !important;
   background-image: none !important;
 }
+
+/* Drica: mantém a ordem visual branco / degradê / branco / degradê na home. */
+.wl-editorial.wl-drica.wl-drica-official .wl-alt-surface:has(> :is(#destaques, #ingressos-orlando)) {
+  background-color: #fff !important;
+  background-image: linear-gradient(180deg, #fff, hsl(var(--wl-sand))) !important;
+}
+.wl-editorial.wl-drica.wl-drica-official .wl-alt-surface > :is(#destaques, #ingressos-orlando) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.wl-editorial.wl-drica.wl-drica-official :is(.wl-alt-surface:has(> #destinos), #destinos) {
+  background-color: #fff !important;
+  background-image: none !important;
+}
