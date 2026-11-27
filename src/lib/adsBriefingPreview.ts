@@ -2667,6 +2667,11 @@ const immBaseline = buildGoldStandardProfile("immOfficial", {
 const immReviewProfile = buildMundoReviewProfile("immOfficial", immBaseline, "IM&M Viagens e Turismo", "Ivete Meneghello Milazzotto");
 export const IMM_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...immReviewProfile,
+  about: {
+    ...immReviewProfile.about,
+    mural: undefined,
+    images: [{ src: "/imm/ivete-budapeste.webp", alt: "Retrato de Ivete Meneghello Milazzotto com o Parlamento Húngaro ao fundo", aspect: "landscape" }],
+  },
   socialStrip: {
     title: "Acompanhe a IMM",
     links: [

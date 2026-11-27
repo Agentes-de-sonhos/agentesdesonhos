@@ -295,7 +295,7 @@ export interface AgencySiteProfile {
     title?: string;
     text?: string;
     image?: AgencyImageSlot;
-    images?: { src: string; alt: string; position?: string; aspect?: "square" }[];
+    images?: { src: string; alt: string; position?: string; aspect?: "square" | "landscape" }[];
     /** Opt-in: mural panorâmico navegável (arrastar/setas, em loop) no lugar das fotos. */
     mural?: { src: string; alt: string };
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */

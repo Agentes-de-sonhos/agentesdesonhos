@@ -11,6 +11,9 @@ import capitaisItaliaHero from "@/assets/circuits/capitais-italia-hero.jpg";
 import { VisitedFlagsCarousel } from "@/components/whitelabel/VisitedFlagsCarousel";
 import { BrazilResortsMap } from "@/components/resorts-brasil/BrazilResortsMap";
 import { CurtiGtaInsuranceBanner } from "@/components/whitelabel/CurtiGtaInsuranceBanner";
+import { AgencyFaqContact } from "@/components/whitelabel/AgencyFaqContact";
+import { resolveFaqDestination } from "@/lib/agencyFaqContact";
+import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsSection";
 import { useAgencyResortCuration } from "@/lib/resortCuration";
 import { AgencySportsEventsSection } from "@/components/whitelabel/AgencySportsEventsSection";
@@ -1508,11 +1511,13 @@ export default function AgencySiteHome({
                             src={image.src}
                             alt={image.alt}
                             loading="lazy"
-                            width={900}
-                            height={1100}
+                            width={image.aspect === "landscape" ? 1200 : 900}
+                            height={image.aspect === "landscape" ? 900 : 1100}
                             className={`w-full object-cover ${
                               image.aspect === "square"
                                 ? "aspect-square"
+                                : image.aspect === "landscape"
+                                ? "aspect-[4/3]"
                                 : aboutCopy.images!.length === 1 && aboutCopy.mediaAlign === "title" && aboutCopy.visitedDestinations?.presentation === "flags"
                                 ? "aspect-[10/9]"
                                 : aboutCopy.images!.length === 1 && aboutCopy.mediaAlign === "title"
@@ -1975,6 +1980,19 @@ export default function AgencySiteHome({
       case "faq":
         {
         const copy = copyFor("faq");
+        const footerNumber = profile.footer?.whatsappHidden && profile.key !== "curtiViagensOfficial"
+          ? undefined : profile.footer?.whatsapp;
+        const faqDestination = !profile.presentation && !lab ? resolveFaqDestination({
+          phone: footerNumber ?? info.phone,
+          contactUrl: profile.whatsappChannels?.contact,
+          email: profile.footer?.email ?? resolveSiteContacts(hostname).email,
+          whatsappHidden: profile.hideFaqWhatsapp,
+        }) : undefined;
+        const faqContact = faqDestination
+          ? <AgencyFaqContact destination={faqDestination} agencyName={name} />
+          : <Button variant="outline" size="lg" className="mt-6" onClick={() => openRequest("pacotes")}>
+              Enviar uma solicitação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+            </Button>;
         if (editorial) {
           return (
             <section key={key} id="faq" className="bg-background">
@@ -1989,41 +2007,26 @@ export default function AgencySiteHome({
                   <p className="mt-6 text-[15px] leading-relaxed text-muted-foreground">
                     {copy.subtitle ?? <>Se a sua dúvida não estiver aqui, fale com uma consultora da{" "}<BrandText>{name}</BrandText>.</>}
                   </p>
-                  <div className="mt-7 flex flex-wrap gap-3">
-                    {waHref && !profile.hideFaqWhatsapp ? (
-                      <Button
-                        asChild
-                        size="lg"
-                        className="bg-[hsl(var(--wl-whatsapp))] text-white hover:bg-[hsl(var(--wl-whatsapp))]/90"
-
-                      >
-                        <a href={waHref} target="_blank" rel="noopener noreferrer">
-                          <MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" /> Falar no WhatsApp
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="lg" onClick={() => openRequest("pacotes")}>
-                        Enviar uma solicitação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                      </Button>
-                    )}
-                  </div>
                 </div>
-                <Accordion type="single" collapsible className="w-full border-t border-border/70">
-                  {faq.map((item, index) => (
-                    <AccordionItem
-                      key={item.q}
-                      value={`faq-${index}`}
-                      className="border-b border-border/70"
-                    >
-                      <AccordionTrigger className="py-6 text-left text-[17px] font-semibold leading-snug text-foreground hover:no-underline md:text-lg">
-                        {item.q}
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-7 pr-6 text-[15px] leading-relaxed text-muted-foreground">
-                        {item.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
+                <div>
+                  <Accordion type="single" collapsible className="w-full border-t border-border/70">
+                    {faq.map((item, index) => (
+                      <AccordionItem
+                        key={item.q}
+                        value={`faq-${index}`}
+                        className="border-b border-border/70"
+                      >
+                        <AccordionTrigger className="py-6 text-left text-[17px] font-semibold leading-snug text-foreground hover:no-underline md:text-lg">
+                          {item.q}
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-7 pr-6 text-[15px] leading-relaxed text-muted-foreground">
+                          {item.a}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                  {faqContact}
+                </div>
               </div>
             </section>
           );
@@ -2041,6 +2044,7 @@ export default function AgencySiteHome({
                   </AccordionItem>
                 ))}
               </Accordion>
+              {faqContact}
             </div>
           </section>
         );

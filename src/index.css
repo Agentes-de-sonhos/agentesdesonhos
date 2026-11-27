@@ -2118,19 +2118,19 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-imm .wl-alt-surface > #autoridade > [data-testid="cruise-season-companies"] { padding-bottom: 1.25rem; }
 .wl-editorial.wl-mundo.wl-imm .wl-alt-surface > #autoridade > [data-testid="cruise-season-help"] { padding-top: 1rem; }
 
-/* IMM: transição curta entre “sobre” e “possibilidades”, sem alterar outros temas. */
-.wl-editorial.wl-mundo.wl-imm .wl-newsletter-card {
-  --wl-newsletter-photo: url("/__l5e/assets-v1/f5bbda41-24d6-4e85-b8f0-c560981f6624/mundo-newsletter-wing.jpg");
-  --wl-newsletter-overlay: linear-gradient(to right, var(--brand-primary) 0%, var(--brand-primary) 20%, hsl(var(--primary) / 0.50) 25%, hsl(var(--primary) / 0) 30%);
+/* IMM: faixa clara, com a mesma foto da 100 Limites à direita e a asa inteira visível. */
+.wl-editorial.wl-mundo.wl-imm #novidades .wl-newsletter-card {
   --wl-newsletter-button-hover: #C9660F;
-  background-image: var(--wl-newsletter-overlay), var(--wl-newsletter-photo);
-  background-size: 100% 100%, 81% auto;
-  background-position: left top, right 0 top calc(11.5px - 14vw);
+  background-color: #fff6eb !important;
+  background-image: linear-gradient(to right, #fff6eb 0%, #fff6eb 38%, rgb(255 246 235 / .94) 49%, rgb(255 246 235 / 0) 72%),
+    url("./assets/100limites-newsletter-wing.jpg") !important;
+  background-size: 100% 100%, auto 100% !important;
+  background-position: left top, right center !important;
+  background-repeat: no-repeat;
 }
-@media (min-width: 768px) {
-  .wl-editorial.wl-mundo.wl-imm #novidades .wl-newsletter-card :is(h2, h2 + p) {
-    text-shadow: 0 1px 4px rgb(24 15 7 / 0.68), 0 0 12px rgb(24 15 7 / 0.28);
-  }
+.wl-editorial.wl-mundo.wl-imm #novidades .wl-newsletter-card :is(h2, h2 + p) {
+  color: #30241a !important;
+  text-shadow: none;
 }
 .wl-editorial.wl-mundo.wl-imm .wl-newsletter-cta {
   background-color: var(--brand-primary) !important;
@@ -2143,10 +2143,12 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   border-color: var(--wl-newsletter-button-hover) !important;
 }
 @media (max-width: 767px) {
-  .wl-editorial.wl-mundo.wl-imm .wl-newsletter-card {
-    --wl-newsletter-overlay: linear-gradient(to bottom, hsl(var(--primary) / 0.82) 0%, hsl(var(--primary) / 0.94) 100%);
-    background-size: cover;
-    background-position: center 34%;
+  .wl-editorial.wl-mundo.wl-imm #novidades .wl-newsletter-card {
+    padding-bottom: clamp(8.5rem, 42vw, 18rem);
+    background-image: linear-gradient(to bottom, #fff6eb 0%, #fff6eb 57%, rgb(255 246 235 / .88) 64%, rgb(255 246 235 / 0) 82%),
+      url("./assets/100limites-newsletter-wing.jpg") !important;
+    background-size: 100% 100%, 100% auto !important;
+    background-position: left top, right bottom !important;
   }
 }
 
