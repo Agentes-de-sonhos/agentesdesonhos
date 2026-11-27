@@ -93,3 +93,19 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
 });
+
+it.each(["innovati.tur.br", "www.innovati.tur.br"])("abre o certificado certo nos selos do cabeçalho e rodapé de %s", (hostname) => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname, agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><p>Home</p></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const header = within(container.querySelector<HTMLElement>("header")!);
+  const footer = within(container.querySelector<HTMLElement>("footer")!);
+  const headerSeals = header.getAllByRole("button", { name: "Ver certificado Cadastur" });
+  expect(headerSeals).toHaveLength(2); // versão desktop e versão mobile
+  for (const trigger of [...headerSeals, footer.getByRole("button", { name: "Ver certificado Cadastur" })]) {
+    fireEvent.click(trigger);
+    const modal = within(document.body).getByRole("dialog", { name: "Certificado Cadastur" });
+    expect(within(modal).getByRole("img", { name: "Certificado Cadastur da Innovati Travel" })).toHaveAttribute("src", "/innovati-travel/certificado-cadastur.webp");
+    fireEvent.click(within(modal).getByRole("button", { name: "Fechar" }));
+  }
+});

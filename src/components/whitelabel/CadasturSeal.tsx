@@ -19,6 +19,11 @@ interface CadasturCertificate {
 /** Certificado por agência autorizada (hostname). */
 export function cadasturCertificateFor(hostname?: string | null): CadasturCertificate | null {
   const h = hostname ?? "";
+  if (h === "innovati.tur.br" || h === "www.innovati.tur.br") return {
+    url: "/innovati-travel/certificado-cadastur.webp",
+    agency: "Innovati Travel",
+    validityLabel: "23/04/2025 a 23/04/2027",
+  };
   if (["briefing-21-v1.preview.local", "kaributurismo.com.br", "www.kaributurismo.com.br"].includes(h)) return {
     url: "/karibu/certificado-cadastur.webp",
     agency: "Karibu Viagens e Turismo",
