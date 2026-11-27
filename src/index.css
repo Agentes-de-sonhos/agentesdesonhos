@@ -2594,3 +2594,14 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   background-color: transparent !important;
   background-image: none !important;
 }
+
+/* O Mundo em Cores: etapas no mesmo azul dos botões e FAQ branco. */
+.wl-editorial.wl-mundo.wl-mundo-official #atendimento .wl-steps-card .wl-step-num {
+  background-color: var(--mundo-action) !important;
+  color: #fff !important;
+}
+
+.wl-editorial.wl-mundo.wl-mundo-official :is(.wl-alt-surface:has(> #faq), #faq) {
+  background-color: #fff !important;
+  background-image: none !important;
+}
