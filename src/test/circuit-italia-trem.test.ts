@@ -5,6 +5,7 @@ import { circuitDepartureDate, circuitNights } from "@/lib/circuits/presentation
 import { CURTI_VIAGENS_OFFICIAL_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
 import { ITALIA_ROUTE_LEGS, ITALIA_ROUTE_STOPS } from "@/lib/circuits/italiaRoute";
 import { existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 
 describe("Itália em Trem da Curti", () => {
   it("mantém o roteiro exclusivo da Curti", () => {
@@ -25,6 +26,11 @@ describe("Itália em Trem da Curti", () => {
     expect(ITALIA_EM_TREM.itinerary).toHaveLength(12);
     expect(["Roma", "Sorrento", "Bari", "Lecce"].map(city => circuitNights(ITALIA_EM_TREM, city))).toEqual([2, 5, 2, 2]);
     expect(existsSync(`public${ITALIA_EM_TREM.pdfUrl}`)).toBe(true);
+  });
+  it("mantém o texto integral de cada dia conforme o PDF original 31847", () => {
+    const transcript = ITALIA_EM_TREM.itinerary.map(({ day, title, description }) => [day, title, description]);
+    const sha = createHash("sha256").update(JSON.stringify(transcript)).digest("hex");
+    expect(sha).toBe("17d8b835569e5255586f2f16464338c8c478e1a21081fc3e0ff559b55f637e92");
   });
   it("distingue os três trens dos traslados e termina no aeroporto de Brindisi", () => {
     expect(ITALIA_ROUTE_LEGS.filter(leg => leg.mode === "train").map(leg => [leg.from, leg.to])).toEqual([
