@@ -34,17 +34,22 @@ function waHref(info: AgencyDomainInfo, c: CircuitTour, extra = "") {
 function CurtiFaqWhatsapp({ phone }: { phone: string }) {
   const [question, setQuestion] = useState("");
   const message = question.trim();
+  const actionClass = "circuit-price-quote min-h-10 shrink-0 px-2.5 text-xs sm:px-3 sm:text-sm";
   return <section aria-labelledby="curti-faq-whatsapp-title" className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-5">
-    <h3 id="curti-faq-whatsapp-title" className="text-base font-semibold">Ainda tem alguma dúvida?</h3>
-    <p className="mt-1 text-sm leading-6 text-muted-foreground">A Curti Viagens responde pelo WhatsApp.</p>
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+      <h3 id="curti-faq-whatsapp-title" className="text-sm font-semibold">Ainda tem alguma dúvida?</h3>
+      <p className="text-sm leading-5 text-muted-foreground">A Curti Viagens responde pelo WhatsApp.</p>
+    </div>
     <label htmlFor="curti-faq-question" className="sr-only">Sua dúvida</label>
-    <Textarea id="curti-faq-question" placeholder="Escreva sua dúvida aqui" maxLength={1000} rows={3}
-      aria-describedby="curti-faq-whatsapp-hint" className="mt-3 resize-y" value={question}
+    <Textarea id="curti-faq-question" placeholder="Escreva sua dúvida aqui" maxLength={1000} rows={1}
+      aria-describedby="curti-faq-whatsapp-hint" className="mt-3 min-h-10 resize-y leading-5" value={question}
       onChange={event => setQuestion(event.target.value)} />
-    {message
-      ? <Button asChild className="circuit-price-quote mt-3 w-full sm:w-auto"><a href={`https://wa.me/${phone}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />Enviar pelo WhatsApp</a></Button>
-      : <Button type="button" className="circuit-price-quote mt-3 w-full sm:w-auto" disabled><MessageCircle className="mr-2 h-4 w-4" aria-hidden="true" />Enviar pelo WhatsApp</Button>}
-    <p id="curti-faq-whatsapp-hint" className="mt-2 text-xs leading-5 text-muted-foreground">Sua mensagem abre no WhatsApp. Confirme o envio por lá.</p>
+    <div className="mt-2 flex items-center gap-2 sm:gap-3">
+      {message
+        ? <Button asChild className={actionClass}><a href={`https://wa.me/${phone}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer"><MessageCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />Enviar pelo WhatsApp</a></Button>
+        : <Button type="button" className={actionClass} disabled><MessageCircle className="mr-1.5 h-4 w-4" aria-hidden="true" />Enviar pelo WhatsApp</Button>}
+      <p id="curti-faq-whatsapp-hint" className="min-w-0 text-xs leading-4 text-muted-foreground">Sua mensagem abre no WhatsApp. Confirme o envio por lá.</p>
+    </div>
   </section>;
 }
 

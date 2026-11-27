@@ -92,7 +92,14 @@ describe("Identidade visual de Itália em Trem", () => {
     renderCircuit();
     const faq = screen.getByRole("region", { name: "Ainda tem alguma dúvida?" });
     const field = within(faq).getByRole("textbox", { name: "Sua dúvida" });
-    expect(within(faq).getByRole("button", { name: "Enviar pelo WhatsApp" })).toBeDisabled();
+    const button = within(faq).getByRole("button", { name: "Enviar pelo WhatsApp" });
+    expect(button).toBeDisabled();
+    expect(field).toHaveAttribute("rows", "1");
+    expect(field).toHaveClass("min-h-10", "resize-y");
+    expect(within(faq).getByText("A Curti Viagens responde pelo WhatsApp.").parentElement).toBe(
+      within(faq).getByRole("heading", { name: "Ainda tem alguma dúvida?" }).parentElement,
+    );
+    expect(within(faq).getByText("Sua mensagem abre no WhatsApp. Confirme o envio por lá.").parentElement).toBe(button.parentElement);
     fireEvent.change(field, { target: { value: "  Olá! Capri & Pompeia?\nAceitam duas pessoas?  " } });
     const link = within(faq).getByRole("link", { name: "Enviar pelo WhatsApp" });
     const url = new URL(link.getAttribute("href")!);
