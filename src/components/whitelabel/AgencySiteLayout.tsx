@@ -171,7 +171,7 @@ export function AgencyBrandBar({
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
   const blogStatus = usePublicBlogStatus(navOverride || resolveSiteProfile(info.hostname).presentation ? null : info.hostname).data;
   const navProfile = resolveSiteProfile(info.hostname);
-  const headerLinks = navOverride ?? withBlogLink(navProfile.headerNav ?? siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
+  const headerLinks = navOverride ?? withBlogLink(navProfile.headerNav ?? siteNavLinks(info.hostname), !navProfile.hideHeaderBlog && !!(blogStatus?.enabled && blogStatus?.has_posts));
   const isHighlightsLink = (item: AgencySiteNavItem) => /^\/?#destinos$/.test(item.to) && !item.children?.length;
   const navAll = headerLinks.map((item) => isHighlightsLink(item) ? { ...item, label: AGENCY_HIGHLIGHTS_LABEL } : item);
   if (!navOverride && sectionOverrideEnabled(navProfile.sections?.destinations) && !navAll.some(isHighlightsLink)) {

@@ -323,7 +323,7 @@ function AgencyDomainRoutesInner({ info, onStartupReady }: { info: AgencyDomainI
             {isDisneyPreviewRouteEnabled(info.hostname) && (
               <Route path="/disney/hoteis/:slug" element={<DisneyHotelPage info={info} />} />
             )}
-            {["editorialDmc", "curtiViagensOfficial", "curtiViagensBriefing20"].includes(resolveSiteProfile(info.hostname).key) && (
+            {["editorialDmc", "curtiViagensOfficial", "curtiViagensBriefing20", "essyaOfficial"].includes(resolveSiteProfile(info.hostname).key) && (
               <Route path="/visto-americano" element={<UsVisaLandingPage info={info} />} />
             )}
             {resolveSiteProfile(info.hostname).key === "editorialDmc" && (

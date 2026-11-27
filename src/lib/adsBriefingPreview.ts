@@ -1851,6 +1851,22 @@ export const ESSYA_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...ESSYA_CURTI_PREVIEW_PROFILE,
   key: "essyaOfficial",
   presentation: false,
+  hideHeaderBlog: true,
+  headerNav: ESSYA_CURTI_PREVIEW_PROFILE.nav?.filter((item) => item.to !== "/blog").map((item) => {
+    if (item.to === "/#destinos") return { ...item, label: "Destaques" };
+    if (item.label !== "Especialidades") return item;
+    return {
+      ...item,
+      children: [
+        { label: "Orlando", to: "/#ingressos-orlando", children: [
+          { label: "Disney", to: "/disney" },
+          { label: "Universal", to: "/universal" },
+          { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
+        ] },
+        ...(item.children ?? []).filter((child) => child.to !== "/ingressos-orlando"),
+      ],
+    };
+  }),
   copy: {
     ...ESSYA_CURTI_PREVIEW_PROFILE.copy,
     newsletter: {

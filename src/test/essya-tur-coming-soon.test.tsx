@@ -22,10 +22,17 @@ describe("Essyatur — white label em www.essyatur.com.br", () => {
     expect(resolveSiteProfile(HOST).key).toBe("essyaOfficial");
     expect(isEditorialTheme(HOST)).toBe(true);
     expect(siteThemeRootClass(HOST)).toContain("wl-essya");
-    expect(siteNavLinks(HOST).map((l) => l.label)).toEqual([
-      "Início", "Sobre", "Destinos", "Parques Orlando",
-      "Cruzeiros", "Resorts Brasil", "Blog",
+    const profile = resolveSiteProfile(HOST);
+    expect(profile.hideHeaderBlog).toBe(true);
+    expect(profile.headerNav?.map((l) => l.label)).toEqual(["Início", "Destaques", "Especialidades", "Sobre"]);
+    const specialties = profile.headerNav?.[2]?.children;
+    expect(specialties?.map(({ label, to }) => [label, to])).toEqual([
+      ["Orlando", "/#ingressos-orlando"], ["Visto Americano", "/visto-americano"],
+      ["Cruzeiros 26/27", "/cruzeiros/temporada-brasileira-2026-2027"], ["Resorts Brasil", "/#resorts"],
     ]);
+    expect(specialties?.[0]?.children?.map(({ to }) => to)).toEqual(["/disney", "/universal", "/#ingressos-orlando"]);
+    expect(profile.headerNav?.[3]).toEqual(siteNavLinks(HOST).find(({ label }) => label === "Sobre"));
+    expect(resolveSiteProfile("essya-curti-v1.preview.local").hideHeaderBlog).toBeUndefined();
     expect(resolveSiteProfile("100limites.tur.br").key).not.toBe("essyaOfficial");
     expect(siteNavLinks("exemplo.com.br").map((l) => l.label)).not.toContain("Sobre a Essyatur");
   });

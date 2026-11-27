@@ -211,6 +211,8 @@ export interface AgencySiteProfile {
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
   nav?: AgencySiteNavItem[];
   headerNav?: AgencySiteNavItem[];
+  /** Não injeta o Blog automaticamente no menu principal. */
+  hideHeaderBlog?: boolean;
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
   navDensity?: "default" | "compact";
   /**
