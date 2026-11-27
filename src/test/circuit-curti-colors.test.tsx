@@ -80,8 +80,11 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(price.getByText("9x de")).toBeVisible();
     expect(price.getByText(/R\$\s*2\.525,26/)).toBeVisible();
     expect(price.getByText(/entrada de R\$\s*9\.740,30 \(30%\)/)).toBeVisible();
-    expect(price.getByText(/Total em reais: R\$\s*32\.467,66 por pessoa em acomodação dupla/)).toBeVisible();
-    expect(price.getByText("Cotação de 27/11/2026")).toBeVisible();
+    expect(price.getByText(/Total: R\$\s*32\.467,66 por pessoa em acomodação dupla/)).toBeVisible();
+    expect(price.getByText("Câmbio 27/11/2026: € 1 = R$ 6,5724")).toBeVisible();
+    expect(price.getByText(/Valor original: €\s*4\.940,00/)).toBeVisible();
+    expect(price.getByText(/IOF não incluído.*Preço e disponibilidade sujeitos à confirmação na reserva/)).toBeVisible();
+    expect(price.queryByText(/Cotação de|última parcela|individual a partir|confirmação da operadora no fechamento/i)).toBeNull();
     expect(price.getByRole("button", { name: "Solicitar orçamento", exact: true })).toHaveClass("circuit-price-quote");
   });
 

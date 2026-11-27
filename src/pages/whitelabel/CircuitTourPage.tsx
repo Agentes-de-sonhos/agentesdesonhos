@@ -66,7 +66,8 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
     ? Math.round(balanceCents / installments)
     : null;
   const installmentPrice = installmentCents != null ? circuitMoney(installmentCents / 100, "BRL") : null;
-  const showRoundingNote = installmentCents != null && installmentCents * (installments ?? 0) !== balanceCents;
+  const referenceRate = fx ? (tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 }) : null;
+  const referenceDate = fx?.date?.split("-").reverse().join("/");
 
   return (
     <div className={`bg-background pb-24 text-foreground md:pb-0 ${enhanced ? "circuit-enhanced" : ""}${rail ? " circuit-curti-italia-trem" : ""}`}>
@@ -109,10 +110,13 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
             {installmentPrice ? <><span className="whitespace-nowrap">{installments}x de</span>{" "}<span className="whitespace-nowrap">{installmentPrice}</span></> : price}
           </p>
           {downPaymentCents > 0 && installmentPrice && <p className="mt-2 text-sm text-foreground">+ entrada de {circuitMoney(downPaymentCents / 100, "BRL")} ({downPaymentPercent}%)</p>}
-          {installmentPrice && <p className="mt-2 text-sm font-medium text-foreground">Total em reais: {price}{rail && " por pessoa em acomodação dupla"}</p>}
+          {installmentPrice && <p className="mt-2 text-sm font-medium text-foreground">{rail ? "Total:" : "Total em reais:"} {price}{rail && " por pessoa em acomodação dupla"}</p>}
           {rail && !installmentPrice && <p className="mt-2 text-sm text-muted-foreground">Por pessoa em acomodação dupla. Condição: entrada de {downPaymentPercent}% e saldo em até {installments}x, com valores em reais na cotação.</p>}
-          {downPaymentCents > 0 && showRoundingNote && <p className="mt-1 text-xs text-muted-foreground">A última parcela pode variar alguns centavos por arredondamento.</p>}
-          {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
+          {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground">
+            <p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p>
+            <p>{rail ? `Câmbio${referenceDate ? ` ${referenceDate}` : ""}` : "Câmbio turismo de referência"}: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {referenceRate}</p>
+            {!rail && <><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{referenceDate && <p>Cotação de {referenceDate}</p>}</>}
+          </div>}
           {c.singleSupplement != null && <p className="mt-1 text-sm text-muted-foreground">Suplemento individual: {formatCircuitPrice(c.singleSupplement, c.currency)}</p>}
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>
           {c.pdfUrl && <Button asChild variant="outline" size="lg" className="mt-4 w-full"><a href={c.pdfUrl} target="_blank" rel="noopener noreferrer" download><Download className="mr-2 h-4 w-4" />Baixar roteiro em PDF</a></Button>}
