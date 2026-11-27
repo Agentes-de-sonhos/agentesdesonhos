@@ -14,6 +14,8 @@ import { AgencyResortsSection } from "@/components/resorts-brasil/AgencyResortsS
 import { useAgencyResortCuration } from "@/lib/resortCuration";
 import { AgencySportsEventsSection } from "@/components/whitelabel/AgencySportsEventsSection";
 import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/whitelabel/AgencySportsRequestDialog";
+import { OfferCard, usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
+import { offerInChannel } from "@/lib/offers";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -551,6 +553,13 @@ export default function AgencySiteHome({
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  const karibu = profile.key === "karibuBriefing21" || profile.key === "karibuOfficial";
+  const liveKaribuOffers = profile.key === "karibuOfficial";
+  const karibuOffersQuery = usePublicOffers(hostname, liveKaribuOffers);
+  const karibuOffers = (karibuOffersQuery.data ?? [])
+    .filter((offer) => offer.status === "published" && offerInChannel(offer, "ofertas")
+      && (!offer.expires_at || Date.parse(offer.expires_at) > Date.now()))
+    .slice(0, 3);
   // Blog real: a seção aparece sozinha assim que existe o primeiro artigo publicado.
   const realBlogHost = profile.presentation || profile.demo ? null : hostname;
   const realBlogStatus = usePublicBlogStatus(realBlogHost).data;
@@ -971,7 +980,7 @@ export default function AgencySiteHome({
         return (
           <Fragment key={key}>
           <section id="autoridade" className="scroll-mt-32 md:scroll-mt-36 bg-[hsl(var(--wl-navy))] text-background">
-            {seasonEnabled ? <CruiseSeasonAuthorityBlock container={container} /> : (
+            {seasonEnabled ? <CruiseSeasonAuthorityBlock container={container} brandedKicker={karibu} /> : (
             <div className={`${container} grid items-center gap-x-10 py-14 md:grid-cols-[0.9fr_1.1fr] md:gap-x-16 md:py-24`}>
               <div className="order-2 mt-8 md:order-none md:col-start-1 md:row-span-2 md:row-start-1 md:mt-0">
               {authority.videos?.length ? (
@@ -1007,7 +1016,7 @@ export default function AgencySiteHome({
             </div>
             )}
             {authority.companies?.items.length ? (
-              <div data-testid={seasonEnabled ? "cruise-season-companies" : undefined} className={`${container} ${seasonEnabled ? ((profile.key === "pristurBriefing22" || profile.key === "pristurOfficial") ? "pt-6 pb-14 md:pt-10 md:pb-20" : "pt-6 pb-8 md:pt-10 md:pb-12") : "pb-16 md:pb-24"}`}>
+              <div data-testid={seasonEnabled ? "cruise-season-companies" : undefined} className={`${container} ${seasonEnabled ? ((profile.key === "pristurBriefing22" || profile.key === "pristurOfficial") ? "pt-6 pb-14 md:pt-10 md:pb-20" : karibu ? "pt-6 pb-5 md:pt-10 md:pb-[1.875rem]" : "pt-6 pb-8 md:pt-10 md:pb-12") : "pb-16 md:pb-24"}`}>
                 {(profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") ? (
                   <p className="text-center text-lg font-semibold text-background/90 md:text-xl">{authority.companies.title}</p>
                 ) : <>
@@ -1154,6 +1163,31 @@ export default function AgencySiteHome({
         }
 
       case "offers":
+        if (karibu) {
+          return (
+            <section key={key} id="ofertas" className="scroll-mt-24 py-14 md:py-16">
+              <div className={container}>
+                <SectionHeading eyebrow="OFERTAS DE VIAGEM" title="Oportunidades para a sua próxima viagem"
+                  subtitle="A Karibu seleciona opções de pacotes, cruzeiros e hospedagens para diferentes jeitos de viajar." editorial={editorial} />
+                {karibuOffers.length ? (
+                  <>
+                    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                      {karibuOffers.map((offer) => <OfferCard key={offer.slug} offer={offer} href={agencySiteHref(`/ofertas/${encodeURIComponent(offer.slug)}`)} />)}
+                    </div>
+                    <div className="mt-6 flex justify-center">
+                      <Button asChild variant="outline"><a href={agencySiteHref("/ofertas")}>Ver todas as ofertas <ArrowRight className="ml-2 h-4 w-4" /></a></Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-2xl border border-border bg-card px-6 py-7 text-center">
+                    <p className="text-muted-foreground">{liveKaribuOffers && karibuOffersQuery.isLoading ? "Buscando as ofertas da Karibu…" : "Novas ofertas aparecem aqui conforme a Karibu as publica."}</p>
+                    {!(liveKaribuOffers && karibuOffersQuery.isLoading) && <Button className="mt-4" onClick={() => openRequest("pacotes")}>Pedir uma cotação</Button>}
+                  </div>
+                )}
+              </div>
+            </section>
+          );
+        }
         // Tenants reais só exibem ofertas com vitrine publicada; o laboratório
         // mostra o bloco com exemplos editoriais para referência visual.
         if (!showcasePublished && !lab && !profile.presentation) return null;
@@ -2255,12 +2289,12 @@ export default function AgencySiteHome({
             </Button>
           )}
           </div>
-          {/* Shared mobile default for every current and future agency homepage. */}
-          <div className="hidden md:block">
+          {/* Karibu approved copy includes a subtitle on all screen sizes. */}
+          <div className={karibu ? "block" : "hidden md:block"}>
             <p
               className={
                  editorial
-                   ? AGENCY_HERO_SUBTITLE_CLASS
+                   ? `${AGENCY_HERO_SUBTITLE_CLASS} ${karibu ? "max-md:line-clamp-none" : ""}`
                    : "mt-3 line-clamp-2 w-full max-w-5xl break-words text-pretty text-[14px] leading-snug text-primary-foreground/85 md:mt-4 md:line-clamp-none md:text-lg"
               }
             >
@@ -2406,10 +2440,23 @@ export default function AgencySiteHome({
 
       {/* Apresentação comercial: o laboratório não mostra mapa do catálogo nem
           etiquetas internas entre seções (só o conteúdo das próprias seções). */}
-      {(() => { let rendered = 0; return sections.map((section, index) => {
+      {(() => { let rendered = 0; let afterCruise = false; return sections.map((section, index) => {
         const node = renderSection(section.key);
         if (!node) return null;
         let tagged = node;
+        if (karibu) {
+          // A faixa azul de cruzeiros interrompe a sequência; a próxima começa branca.
+          const cruise = section.key === "authority";
+          const gradient = !cruise && rendered % 2 === (afterCruise ? 1 : 0);
+          if (cruise) afterCruise = true;
+          rendered = cruise ? 0 : rendered + 1;
+          return (
+            <div key={section.key} className={cruise ? "wl-karibu-cruise" : `wl-karibu-surface ${gradient ? "wl-karibu-gradient" : ""}`}
+              style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
+              {node}
+            </div>
+          );
+        }
         if (profile.alternateSurfaces) {
           // Alternância declarada no perfil: branco, degradê, branco, degradê…
           // 100 Limites começa em degradê e conta o Visto americano (dentro de

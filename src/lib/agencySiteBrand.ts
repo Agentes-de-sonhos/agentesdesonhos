@@ -25,7 +25,6 @@ import viajarTirismoLogo from "@/assets/ads-preview/briefing-17-v1-logo.png.asse
 import bagagemNaMaoLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import curtiViagensLogo from "@/assets/ads-preview/briefing-20-v1-logo.png.asset.json";
 import karibuOfficialLogo from "@/assets/whitelabel/karibu-logo-oficial.png.asset.json";
-import karibuLogo from "@/assets/ads-preview/briefing-21-v1-logo.png.asset.json";
 import bardelliLogo from "@/assets/ads-preview/briefing-18-v1-logo.jpg.asset.json";
 import mundoEmCoresFavicon from "@/assets/whitelabel/favicon-o-mundo-em-cores.png.asset.json";
 import dricaFavicon from "@/assets/whitelabel/favicon-drica-viagens-2.png.asset.json";
@@ -70,7 +69,7 @@ const LOGO_BY_HOSTNAME: Record<string, string> = {
   "briefing-20-v1.preview.local": curtiViagensLogo.url,
   "curtiviagens.com.br": curtiViagensLogo.url,
   "www.curtiviagens.com.br": curtiViagensLogo.url,
-  "briefing-21-v1.preview.local": karibuOfficialLogo.url,
+  "briefing-21-v1.preview.local": "/karibu-logo.png",
   "kaributurismo.com.br": karibuOfficialLogo.url,
   "www.kaributurismo.com.br": karibuOfficialLogo.url,
   "essya-curti-v1.preview.local": essyaLogo.url,

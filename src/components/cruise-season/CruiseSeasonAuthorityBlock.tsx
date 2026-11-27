@@ -7,7 +7,7 @@ import { SeasonGalleries } from './SeasonGalleries';
 import { seasonCardPhoto } from '@/lib/cruiseShips/seasonCardPhotos';
 
 /** Season gallery shown inside the dark cruise (authority) section; opt-in per profile. */
-export function CruiseSeasonAuthorityBlock({ container }: { container: string }) {
+export function CruiseSeasonAuthorityBlock({ container, brandedKicker = false }: { container: string; brandedKicker?: boolean }) {
   const listRef = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: true, end: false });
   const drag = useRef<{ x: number; left: number; moved: boolean } | null>(null);
@@ -30,7 +30,7 @@ export function CruiseSeasonAuthorityBlock({ container }: { container: string })
     <div className={`${container} pt-14 pb-10 md:pt-20 md:pb-4`} data-testid="cruise-season-authority">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-background">
+          <p className={`inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-background ${brandedKicker ? "wl-kicker" : ""}`}>
             <span className="h-2 w-2 rounded-full bg-[hsl(var(--wl-red))]" aria-hidden="true" />Temporada brasileira 2026/2027
           </p>
           <h2 id="cruise-home-title" className="mt-5 text-3xl font-semibold leading-tight text-background md:text-[2.4rem]">Viva a Temporada Brasileira 2026-2027</h2>

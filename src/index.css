@@ -2035,3 +2035,58 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
         }
 
 .wl-arena #temporada-cruzeiros .csi .csi-itinerary :is(a, h4, p, span, strong) { color: #111 !important; }
+
+/* Karibu (briefing 21 and its verified domains): colors sampled from its logo. */
+.wl-karibu {
+  --karibu-blue: #002a46;
+  --karibu-pale-blue: #f2faff;
+}
+.wl-karibu .wl-karibu-surface { background: #fff; }
+.wl-karibu .wl-karibu-gradient,
+.wl-karibu #rodape.wl-karibu-footer {
+  background: linear-gradient(180deg, #fff 35%, var(--karibu-pale-blue) 100%) !important;
+}
+.wl-karibu .wl-karibu-surface > section {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.wl-karibu #rodape.wl-karibu-footer > div:last-child,
+.wl-karibu #rodape.wl-karibu-footer > div:last-child > div,
+.wl-karibu #rodape.wl-karibu-footer > div:last-child .notranslate {
+  background: transparent;
+  color: #333840 !important;
+}
+.wl-karibu #rodape img[alt^="Logo "] {
+  border: 0;
+  box-shadow: none;
+  filter: none;
+}
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="n"] { --karibu-region: #b8d8a6; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="ne"] { --karibu-region: #f4d77e; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="co"] { --karibu-region: #dfbd95; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="se"] { --karibu-region: #a8cfdf; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region="s"] { --karibu-region: #c7b6d9; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-map-region] > path { fill: var(--karibu-region) !important; stroke: #fff; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region]:is(:hover, :focus-visible, [data-active]) > path {
+  filter: brightness(.9) saturate(1.2);
+  stroke: var(--karibu-blue);
+}
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] circle { fill: #fff !important; stroke: var(--karibu-blue) !important; }
+.wl-karibu :is(#resorts, #resorts-brasil) svg [data-region] text { fill: var(--karibu-blue) !important; }
+.wl-karibu :is(#resorts, #resorts-brasil) button[data-region][data-active] {
+  background: var(--karibu-blue) !important;
+  border-color: var(--karibu-blue) !important;
+  color: #fff !important;
+}
+/* O azul-claro original (#28a8e1) tem contraste insuficiente em texto
+   pequeno sobre branco; a base azul-marinho preserva ambas as cores do logo. */
+.wl-karibu .wl-karibu-surface .wl-kicker,
+.wl-karibu .wl-karibu-cruise .wl-kicker {
+  width: fit-content;
+  max-width: 100%;
+  padding: .3rem .75rem;
+  border-radius: 999px;
+  background: var(--karibu-blue);
+  color: #28a8e1 !important;
+}
+.wl-karibu .wl-karibu-cruise .wl-kicker > span { background-color: #28a8e1; }
