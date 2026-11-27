@@ -35,7 +35,12 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(surfaces.at(-2)).toHaveAttribute("data-bagagem-section", "faq");
     expect(surfaces.at(-1)).toHaveAttribute("data-bagagem-section", "newsletter");
     expect(container.querySelector("#destinos [data-bagagem-cta]")).toBeNull();
-    expect(container.querySelector('#ingressos-orlando a[href="/universal"]')).not.toBeNull();
+    const orlando = within(container.querySelector<HTMLElement>("#ingressos-orlando")!);
+    expect(orlando.getByText("Ingressos e parques")).toHaveClass("wl-kicker");
+    expect(orlando.getByText("Próximo passo")).toHaveClass("wl-orlando-step-kicker");
+    expect(orlando.getAllByRole("link", { name: "Saiba mais" }).find((link) => link.getAttribute("href") === "/universal")).toHaveClass("wl-orlando-home-cta");
+    expect(orlando.getAllByRole("button", { name: /Explorar o mapa de / })[0]).toHaveClass("wl-orlando-home-cta");
+    expect(orlando.getByRole("link", { name: /Calcular meus dias/ })).toHaveClass("wl-orlando-home-cta");
     expect(container.querySelector('[data-destination="canada"] img')).toHaveAttribute("src", "/bagagem-na-mao/canada-lago-moraine.webp");
     expect(container.querySelector('[data-destination="resorts-all-inclusive"]')).toHaveAttribute("href", "/resorts-brasil/iberostar-bahia");
     expect(container.querySelectorAll('[data-testid="cruise-season-companies"] img')).toHaveLength(5);

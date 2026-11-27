@@ -459,7 +459,7 @@ export function OrlandoTicketsSection({ hostname, phone, mode: mode_ = "home" }:
               <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/80 to-background/10 md:bg-gradient-to-r md:from-background/95 md:via-background/70 md:to-transparent" />
               <div className="relative grid items-center gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] md:min-h-[300px]">
                 <div className="p-6 pb-0 md:p-10 md:pr-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Próximo passo</p>
+                  <p className="wl-orlando-step-kicker text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Próximo passo</p>
                   <h3 className="mt-2 text-2xl font-semibold leading-tight text-foreground md:text-[2rem]">Quantos dias você precisa para aproveitar Orlando?</h3>
                   <p className="mt-3 text-muted-foreground md:text-lg">Conte quais parques e experiências você quer viver. Nossa equipe calcula o tempo ideal para o seu ritmo e envia o orçamento completo dos ingressos.</p>
                 </div>
