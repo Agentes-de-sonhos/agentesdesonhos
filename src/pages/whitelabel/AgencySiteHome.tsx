@@ -1054,7 +1054,7 @@ export default function AgencySiteHome({
                 </ul>
               </div>
             ) : null}
-            {seasonEnabled && <CruiseSeasonHelp container={container} concise={bagagemOfficial} />}
+            {seasonEnabled && <CruiseSeasonHelp container={container} concise={bagagemOfficial} plainButtonLabel={isMundoSeoHost(hostname)} />}
           </section>
           {(profile.key === "curtiViagensOfficial" || profile.key === "curtiViagensBriefing20") && (
             <section aria-label="Seguro Viagem GTA" className="bg-background py-10 md:py-14">

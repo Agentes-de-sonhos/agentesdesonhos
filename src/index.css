@@ -2459,3 +2459,65 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-bagagem-official #novidades .wl-bagagem-newsletter-panel .wl-inspiration-cta svg {
   color: currentColor !important;
 }
+
+/* O Mundo em Cores: ações no azul da aba "Por onde você quer começar". */
+.wl-editorial.wl-mundo.wl-mundo-official {
+  --mundo-action: hsl(var(--primary));
+  --mundo-action-hover: color-mix(in srgb, var(--mundo-action) 86%, black);
+  --mundo-cruise-gap-part: 2.25rem;
+}
+@media (min-width: 768px) {
+  .wl-editorial.wl-mundo.wl-mundo-official { --mundo-cruise-gap-part: 3.375rem; }
+}
+.wl-mundo-official main :is(
+  .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta, .wl-newsletter-cta,
+  .wl-orlando-home-cta, .csi-all, .wl-faq-contact-inline :is(a, button),
+  #experiencia-xcaret :is(a, button).inline-flex,
+  #ofertas-novembro a.inline-flex[href*="oportunidades-novembro"],
+  [data-testid="cruise-season-help"] a,
+  :is(a, button).inline-flex[class*="bg-primary"]:not([data-region]):not([role="tab"])
+) {
+  background-color: var(--mundo-action) !important;
+  border-color: var(--mundo-action) !important;
+  border-radius: 0.5rem;
+  color: #fff !important;
+}
+.wl-mundo-official main :is(
+  .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta, .wl-newsletter-cta,
+  .wl-orlando-home-cta, .csi-all, .wl-faq-contact-inline :is(a, button),
+  #experiencia-xcaret :is(a, button).inline-flex,
+  #ofertas-novembro a.inline-flex[href*="oportunidades-novembro"],
+  [data-testid="cruise-season-help"] a,
+  :is(a, button).inline-flex[class*="bg-primary"]:not([data-region]):not([role="tab"])
+):is(:hover, :focus-visible):not(:disabled) {
+  background-color: var(--mundo-action-hover) !important;
+  border-color: var(--mundo-action-hover) !important;
+}
+.wl-mundo-official #ingressos-orlando .wl-orlando-step-kicker { color: var(--mundo-action); }
+
+.wl-editorial.wl-mundo.wl-mundo-official :is(.wl-alt-surface:has(> #resorts), #resorts) {
+  background-color: #fff !important;
+  background-image: none !important;
+}
+
+.wl-mundo-official #autoridade > [data-testid="cruise-season-companies"] {
+  padding-bottom: var(--mundo-cruise-gap-part);
+}
+.wl-mundo-official #autoridade > [data-testid="cruise-season-help"] {
+  padding-top: var(--mundo-cruise-gap-part);
+}
+
+.wl-mundo-official main section[aria-label] a[aria-label="Instagram da agência"] {
+  background-color: var(--mundo-action);
+  border-color: var(--mundo-action);
+  color: #fff;
+}
+.wl-mundo-official main section[aria-label] a[aria-label="Instagram da agência"]:is(:hover, :focus-visible) {
+  background-color: var(--mundo-action-hover);
+  border-color: var(--mundo-action-hover);
+  color: #fff;
+}
+
+.wl-mundo-official #rodape > div:last-child { border-top-color: hsl(var(--border)); }
+.wl-mundo-official #rodape .wl-footer-copyright,
+.wl-mundo-official #rodape .wl-footer-copyright span { color: hsl(var(--muted-foreground)) !important; }
