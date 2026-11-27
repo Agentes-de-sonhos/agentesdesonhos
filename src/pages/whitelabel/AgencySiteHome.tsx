@@ -2207,12 +2207,19 @@ export default function AgencySiteHome({
         id="topo"
         className={
           editorial
-            ? (profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial")
+            ? profile.key === "innovatiOfficial"
+              ? "relative min-h-[330px] overflow-hidden md:min-h-[500px]"
+              : (profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || profile.key === "innovatiBriefing24" || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial")
               ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16 lg:h-[500px]"
               : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
-        style={editorial ? { paddingBottom: `calc(${topOverlap} + 1.5rem)` } : undefined}
+        style={editorial ? {
+          // Reserve space for the rising quote panel and its heading without clipping hero controls.
+          paddingBottom: profile.key === "innovatiOfficial"
+            ? (showRequests ? Math.round(quoteHalf) : 0) + 56
+            : `calc(${topOverlap} + 1.5rem)`,
+        } : undefined}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -2352,7 +2359,8 @@ export default function AgencySiteHome({
             )}
 
             {slides.length > 1 && (
-              <div className={`flex items-center gap-3 ${profile.heroPresentation?.actionsPlacement === "right" ? "" : editorial ? "mt-6" : "mt-8"}`}>
+              <div data-hero-nav-placement={profile.key === "innovatiOfficial" ? "inline-left" : undefined}
+                className={`flex items-center gap-3 ${profile.key === "innovatiOfficial" ? "mt-6 justify-start" : profile.heroPresentation?.actionsPlacement === "right" ? "" : editorial ? "mt-6" : "mt-8"}`}>
               <button
                 type="button"
                 aria-label="Destaque anterior"

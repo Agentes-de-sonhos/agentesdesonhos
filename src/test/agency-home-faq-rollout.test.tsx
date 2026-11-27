@@ -93,3 +93,22 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
 });
+
+it("mantém os controles da Innovati à esquerda no fluxo do banner, acima da cotação", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const banner = container.querySelector<HTMLElement>("#topo")!;
+  const controls = banner.querySelector<HTMLElement>('[data-hero-nav-placement="inline-left"]')!;
+  const requestArea = container.querySelector<HTMLElement>("#cotacao")!;
+  expect(controls).toHaveClass("justify-start");
+  expect(controls.compareDocumentPosition(requestArea) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(banner.className).not.toContain("lg:h-");
+  expect(parseInt(banner.style.paddingBottom, 10)).toBeGreaterThanOrEqual(56);
+  expect(within(requestArea).queryByRole("button", { name: "Próximo destaque" })).toBeNull();
+  const nav = within(controls);
+  fireEvent.click(nav.getByRole("button", { name: "Próximo destaque" }));
+  expect(nav.getByRole("button", { name: "Ir para o destaque 2" })).toHaveAttribute("aria-current", "true");
+  fireEvent.click(nav.getByRole("button", { name: "Destaque anterior" }));
+  expect(nav.getByRole("button", { name: "Ir para o destaque 1" })).toHaveAttribute("aria-current", "true");
+});
