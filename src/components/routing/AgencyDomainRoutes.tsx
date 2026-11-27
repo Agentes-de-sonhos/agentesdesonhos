@@ -270,7 +270,7 @@ function AgencyDomainRoutesInner({ info, onStartupReady }: { info: AgencyDomainI
             <Route path="/xcaret" element={<XcaretLandingPage info={info} slots={MUNDO_EM_CORES_XCARET_SLOTS} textRewrites={MUNDO_EM_CORES_XCARET_REWRITES} cardImages={MUNDO_EM_CORES_XCARET_CARDS} />} />
           )}
           {isUniversalLandingEnabled(info.hostname) && (
-            <Route path="/universal" element={arena ? <AgencySiteLayout info={info}><UniversalLandingPage info={info} embedded /></AgencySiteLayout> : <UniversalLandingPage info={info} />} />
+            <Route path="/universal" element={arena || resolveSiteProfile(info.hostname).key === "innovatiOfficial" ? <AgencySiteLayout info={info}><UniversalLandingPage info={info} embedded /></AgencySiteLayout> : <UniversalLandingPage info={info} />} />
           )}
           {/* Disney: liberada para todas as agências. */}
           {isDisneyPreviewRouteEnabled(info.hostname) && (

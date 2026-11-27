@@ -33,6 +33,11 @@ describe("Galeria editorial da página de ingressos", () => {
     expect(within(gallery).queryByRole("link")).toBeNull();
   });
 
+  it.each(["innovati.tur.br", "www.innovati.tur.br"])("exibe as nove imagens na Innovati em %s", (hostname) => {
+    render(<OrlandoEditorialGallery hostname={hostname} />);
+    expect(screen.getAllByRole("img", { hidden: true })).toHaveLength(9);
+  });
+
   it("aceita www mas não outros tenants", () => {
     const { rerender } = render(<OrlandoEditorialGallery hostname="www.destinoscomaju.com.br" />);
     expect(screen.getAllByRole("img", { hidden: true })).toHaveLength(9);

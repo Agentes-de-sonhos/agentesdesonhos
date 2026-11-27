@@ -1822,6 +1822,17 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   }
 }
 
+/* Innovati live only: subtle header tint based on the logo blue; white home
+   surfaces override the inherited Mundo gradients. Keep the cruise panel blue. */
+.wl-editorial.wl-mundo.wl-innovati-official > header {
+  background-color: #fff;
+  background-image: linear-gradient(180deg, rgb(37 79 134 / 3%), rgb(37 79 134 / 8%));
+}
+.wl-editorial.wl-mundo.wl-innovati-official .wl-innovati-home-surface,
+.wl-editorial.wl-mundo.wl-innovati-official .wl-innovati-home-surface:not([data-innovati-section="authority"]) > section {
+  background: #fff !important;
+}
+
 /* Shopping review: neutral tokens pending confirmed agency palette. */
 .wl-editorial.wl-mundo.wl-shopping-mundo { --primary: 222 47% 11%; --primary-foreground: 0 0% 100%; --wl-navy: 222 47% 11%; --foreground: 222 30% 12%; --muted-foreground: 222 10% 38%; --border: 240 8% 88%; --mc: #0F1729; --wl-mundo-gradient: linear-gradient(180deg, #FFFFFF 0%, #F6F6F8 100%); }
 

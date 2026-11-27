@@ -1461,6 +1461,20 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     key: "innovatiOfficial",
     demo: false,
     presentation: false,
+    sections: {
+      ...INNOVATI_PREVIEW_PROFILE.sections,
+      signature: { enabled: false },
+      highlights: { enabled: false },
+    },
+    nav: INNOVATI_PREVIEW_PROFILE.nav?.map((item) =>
+      item.to === "/#assinatura" ? { ...item, to: "/#ingressos-orlando" } : item,
+    ),
+    footer: {
+      ...INNOVATI_PREVIEW_PROFILE.footer,
+      descriptionHidden: true,
+      phoneHidden: true,
+      whatsappLabel: "Falar por WhatsApp",
+    },
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,

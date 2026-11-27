@@ -73,3 +73,23 @@ describe("FAQ compacto nas páginas institucionais de agência", () => {
     expect(resolveSiteStatus("faeviagens.com.br")).toBe("under_construction");
   });
 });
+
+it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547", logo_url: "/innovati-logo.png" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  expect(container.querySelector(".wl-innovati-official > header")).not.toBeNull();
+  expect(container.querySelector("#assinatura, [data-innovati-section=highlights], a[href='/#assinatura']")).toBeNull();
+  for (const id of ["destinos", "resorts", "ingressos-orlando", "autoridade", "sobre", "faq"]) {
+    expect(container.querySelector(`[data-innovati-section] > #${id}`)).not.toBeNull();
+  }
+  expect(container.querySelector("[data-innovati-section=authority] > #autoridade")).not.toBeNull();
+  const park = within(container.querySelector("#ingressos-orlando")!);
+  expect(park.getByRole("link", { name: "Saiba mais sobre Universal Orlando Resort" })).toHaveAttribute("href", "/universal");
+  const footer = container.querySelector("#rodape")!;
+  const logo = within(footer as HTMLElement).getByRole("img", { name: "Logo Innovati Travel" });
+  expect(logo.parentElement?.tagName).toBe("DIV");
+  expect(footer).not.toHaveTextContent("Consultoria de viagens e roteiros sob medida em Franco da Rocha");
+  expect(footer).not.toHaveTextContent("91857-8547");
+  expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
+});

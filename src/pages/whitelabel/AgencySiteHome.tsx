@@ -2498,6 +2498,15 @@ export default function AgencySiteHome({
             </div>
           );
         }
+        if (profile.key === "innovatiOfficial") {
+          return (
+            <div key={section.key} className="wl-alt-surface wl-innovati-home-surface"
+              data-innovati-section={section.key}
+              style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
+              {node}
+            </div>
+          );
+        }
         if (profile.alternateSurfaces) {
           // Alternância declarada no perfil: branco, degradê, branco, degradê…
           // 100 Limites começa em degradê e conta o Visto americano (dentro de
