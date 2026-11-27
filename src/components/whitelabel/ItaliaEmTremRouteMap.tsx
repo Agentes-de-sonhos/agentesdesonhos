@@ -6,6 +6,7 @@ import { circuitNights } from "@/lib/circuits/presentation";
 import type { CircuitTour } from "@/lib/circuits/types";
 
 const W = 570, H = 300;
+const labelBlack = "#000";
 const routeBlue = "#2502ff"; // O mesmo azul da página principal da Curti.
 type Point = readonly [number, number];
 const project = ([lon, lat]: Point) => [
@@ -47,9 +48,9 @@ function RouteSvg({ circuit }: { circuit: CircuitTour }) {
         const edge = p.city === "Roma" || p.city === "Brindisi";
         return (
           <g key={p.city}>
-            <circle cx={x} cy={y} r={edge ? 7 : 5} fill={routeBlue} stroke="white" strokeWidth="1.6" />
-            <text x={x + dx} y={y + dy} textAnchor={p.anchor} fontSize="17" fontWeight="700" fill={routeBlue} stroke="white" strokeWidth="4" paintOrder="stroke">{p.city}</text>
-            {sub && <text x={x + dx} y={y + dy + 15} textAnchor={p.anchor} fontSize="12.5" fontWeight="600" fill={routeBlue} stroke="white" strokeWidth="3" paintOrder="stroke">{sub}</text>}
+            <circle cx={x} cy={y} r={edge ? 7 : 5} fill={nights ? routeBlue : "white"} stroke={nights ? "white" : routeBlue} strokeWidth={nights ? 1.6 : 2} />
+            <text x={x + dx} y={y + dy} textAnchor={p.anchor} fontSize="17" fontWeight="700" fill={labelBlack} stroke="white" strokeWidth="4" paintOrder="stroke">{p.city}</text>
+            {sub && <text x={x + dx} y={y + dy + 15} textAnchor={p.anchor} fontSize="12.5" fontWeight="600" fill={labelBlack} stroke="white" strokeWidth="3" paintOrder="stroke">{sub}</text>}
           </g>
         );
       })}

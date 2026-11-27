@@ -34,6 +34,18 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(screen.getByRole("button", { name: "Ampliar mapa do roteiro" })).toBeVisible();
   });
 
+  it("mostra a xícara de café somente nos dias previstos no PDF, a partir do dia 2", () => {
+    renderCircuit();
+    const arrival = screen.getByRole("article", { name: "Dia 1" });
+    expect(within(arrival).queryByText("Café da manhã")).toBeNull();
+    for (let day = 2; day <= 12; day++) {
+      const card = screen.getByRole("article", { name: `Dia ${day}` });
+      const meal = within(card).getByText("Café da manhã");
+      expect(meal).toHaveClass("circuit-timeline-meals");
+      expect(meal.querySelector("svg")).toHaveClass("lucide-coffee");
+    }
+  });
+
   it("usa as capas responsivas da Costa Amalfitana somente na página da Curti", () => {
     renderCircuit();
     const hero = screen.getByRole("img", { name: /Costa Amalfitana/ });

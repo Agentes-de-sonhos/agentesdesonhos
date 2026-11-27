@@ -163,7 +163,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
             </div>}
           </div>
           {rail ? <ItaliaEmTremRouteMap circuit={c} /> : <CircuitRouteMap circuit={c} />}
-          {enhanced ? <CircuitTimeline days={c.itinerary} /> : <Accordion type="multiple" value={open} onValueChange={setOpen} className="mt-6 space-y-3">
+          {enhanced ? <CircuitTimeline days={c.itinerary} breakfastCup={rail} /> : <Accordion type="multiple" value={open} onValueChange={setOpen} className="mt-6 space-y-3">
             {c.itinerary.map((d) => (
               <AccordionItem key={d.day} value={`d${d.day}`} className="rounded-2xl border border-border bg-card px-5">
                 <AccordionTrigger className="text-left hover:no-underline">
