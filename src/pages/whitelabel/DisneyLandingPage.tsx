@@ -9,7 +9,7 @@ import { siteThemeRootClass } from "@/lib/agencySiteTheme";
 import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
 import { resolveAgencyHeaderBrandPreset, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
-import { AgencyFooter } from "@/components/whitelabel/AgencySiteLayout";
+import { AgencyBrandBar, AgencyFooter } from "@/components/whitelabel/AgencySiteLayout";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { useNoindex } from "@/hooks/useNoindex";
@@ -187,7 +187,7 @@ export default function DisneyLandingPage({ info, embedded = false }: { info: Ag
   useEffect(() => { if (mundoSeo) return; document.title = `Walt Disney World Resort | ${info.agency_name ?? "Ingressos e hotéis"}`; }, [info.agency_name, mundoSeo]);
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
-      {!embedded && <Header info={info} />}
+      {!embedded && (resolveSiteProfile(info.hostname).headerNav ? <AgencyBrandBar info={info} /> : <Header info={info} />)}
       <main>
         <Hero />
         <section id="ingressos" className="scroll-mt-24 wl-alt-gradient py-16 md:py-20"><div className={W}><DisneyTicketsConfigurator hostname={info.hostname} /></div></section>

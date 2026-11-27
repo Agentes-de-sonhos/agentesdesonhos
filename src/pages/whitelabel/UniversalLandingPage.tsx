@@ -1,3 +1,4 @@
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Map as MapIcon, MessageCircle, Ticket } from "lucide-react";
@@ -7,7 +8,7 @@ import { siteThemeRootClass } from "@/lib/agencySiteTheme";
 import { isJuUniversalProfile } from "@/lib/universalLandingAccess";
 import { useAgencySiteThemeOnBody } from "@/lib/agencySitePortalTheme";
 import { resolveAgencyHeaderBrandPreset, resolveAgencyLogoUrl } from "@/lib/agencySiteBrand";
-import { AgencyFooter } from "@/components/whitelabel/AgencySiteLayout";
+import { AgencyBrandBar, AgencyFooter } from "@/components/whitelabel/AgencySiteLayout";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 import { mundoSeoPage } from "@/lib/mundoSeo";
@@ -170,7 +171,7 @@ export default function UniversalLandingPage({ info, noindex = false, embedded =
   return (
     <div className={`min-h-screen overflow-x-clip bg-background text-foreground ${siteThemeRootClass(info.hostname)}`}>
       {!noindex && !mundoSeoPage(info.hostname, "/universal") && <SEO exactTitle title={`Universal Orlando Resort | ${info.agency_name ?? "Ingressos e hotéis"}`} description="Ingressos, parques, hotéis, CityWalk e eventos especiais da Universal Orlando Resort com consultoria personalizada." image={UNIVERSAL_HERO[2].image} />}
-      {!embedded && <Header info={info} />}
+      {!embedded && (resolveSiteProfile(info.hostname).headerNav ? <AgencyBrandBar info={info} /> : <Header info={info} />)}
       <main>
         <Hero />
 

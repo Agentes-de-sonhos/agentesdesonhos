@@ -4,8 +4,8 @@ import iataTidsSeal from "@/assets/paraiso/iata-tids.jpg.asset.json";
 import { LIMITES100_LEGAL_DATA, isLimites100LegalPreviewActive } from "@/lib/agencyLegal/limites100LegalPreview";
 import { Limites100LegalFooterPreview } from "@/components/whitelabel/Limites100LegalFooterPreview";
 import { usePublicBlogStatus } from "@/hooks/usePublicBlog";
-import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown, Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { MessageCircle, MapPin, Menu, X, Phone, UserRound, Mail, Instagram, ChevronDown, ChevronRight, Clock } from "lucide-react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 /**
@@ -56,7 +56,8 @@ import {
   resolveAgencyLogoUrl,
 } from "@/lib/agencySiteBrand";
 import { resolveSiteContacts } from "@/lib/agencySiteContacts";
-import { resolveSiteProfile } from "@/lib/agencySiteProfile";
+import { resolveSiteProfile, type AgencySiteNavItem } from "@/lib/agencySiteProfile";
+export type { AgencySiteNavItem } from "@/lib/agencySiteProfile";
 import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
@@ -65,13 +66,6 @@ import { CadasturSeal, cadasturCertificateFor } from "@/components/whitelabel/Ca
 
 /** Selo Cadastur: somente agências com certificado cadastrado no componente compartilhado. */
 const showCadastur = (hostname?: string | null) => cadasturCertificateFor(hostname) !== null;
-
-/** Item de menu do site: pode ter um submenu declarado pelo perfil. */
-export interface AgencySiteNavItem {
-  label: string;
-  to: string;
-  children?: { label: string; to: string }[];
-}
 
 export const NAV_LINKS: AgencySiteNavItem[] = [
   { label: "Início", to: "/" },
@@ -112,6 +106,55 @@ export function siteNavLinks(hostname?: string | null): AgencySiteNavItem[] {
   return withCruiseSeasonLink(NAV_LINKS.filter((l) => offersEnabled || l.to !== "/ofertas"), showSeason);
 }
 
+/** Segundo nível à direita no desktop; acessível também por foco e Enter. */
+function AgencyDesktopFlyout({ item }: { item: AgencySiteNavItem }) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  const trigger = useRef<HTMLButtonElement>(null);
+  return (
+    <div className="relative"
+      onPointerEnter={(event) => { if (event.pointerType === "mouse") setOpen(true); }}
+      onPointerLeave={(event) => { if (event.pointerType === "mouse" && !event.currentTarget.contains(document.activeElement)) setOpen(false); }}
+      onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}
+      onKeyDown={(event) => {
+        if (event.key !== "Escape" || !open) return;
+        event.stopPropagation();
+        setOpen(false);
+        trigger.current?.focus();
+      }}
+    >
+      <button ref={trigger} type="button" aria-expanded={open} aria-controls={id}
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-[15px] text-foreground/75 transition-colors hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+      >
+        {item.label}<ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+      </button>
+      <div id={id} hidden={!open} className="absolute left-full top-0 z-[60] min-w-max pl-2">
+        <div className="rounded-xl border border-border/60 bg-background shadow-lg">
+          {item.children?.map((child) => (
+            <a key={child.to} href={agencySiteHref(child.to)}
+              className="block whitespace-nowrap px-4 py-3 text-[15px] text-foreground/75 hover:bg-muted/60 hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary">{child.label}</a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AgencyMobileSubLink({ item, close }: { item: AgencySiteNavItem; close: () => void }) {
+  if (item.children?.length) return (
+    <details className="group/orlando">
+      <summary className="flex min-h-[44px] cursor-pointer list-none items-center gap-2 py-2.5 text-[15px] text-foreground/75 [&::-webkit-details-marker]:hidden">
+        {item.label}<ChevronDown className="h-4 w-4 transition-transform group-open/orlando:rotate-180" aria-hidden="true" />
+      </summary>
+      <div className="flex flex-col border-l border-border/60 pl-3">
+        {item.children.map((child) => <AgencyMobileSubLink key={child.to} item={child} close={close} />)}
+      </div>
+    </details>
+  );
+  return <a href={agencySiteHref(item.to)} onClick={close} className="min-h-[44px] py-2.5 text-[15px] text-foreground/65">{item.label}</a>;
+}
+
 export function AgencyBrandBar({
   info,
   navOverride,
@@ -127,7 +170,7 @@ export function AgencyBrandBar({
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
   const blogStatus = usePublicBlogStatus(navOverride || resolveSiteProfile(info.hostname).presentation ? null : info.hostname).data;
-  const navAll = navOverride ?? withBlogLink(siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
+  const navAll = navOverride ?? withBlogLink(resolveSiteProfile(info.hostname).headerNav ?? siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
 
   const karibuHeader = ["karibuBriefing21", "karibuOfficial"].includes(resolveSiteProfile(info.hostname).key);
 
@@ -174,8 +217,8 @@ export function AgencyBrandBar({
                     <ChevronDown className="h-4 w-4 opacity-70" />
                   </a>
                   <div className="wl-nav-submenu invisible absolute left-0 top-full z-50 min-w-[13rem] pt-3 opacity-0 transition-opacity group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                    <div className="overflow-hidden rounded-xl border border-border/60 bg-background shadow-lg">
-                      {l.children.map((c) => (
+                    <div className={`${l.children.some((child) => child.children?.length) ? "overflow-visible" : "overflow-hidden"} rounded-xl border border-border/60 bg-background shadow-lg`}>
+                      {l.children.map((c) => c.children?.length ? <AgencyDesktopFlyout key={c.to} item={c} /> : (
                         <a
                           key={c.to}
                           href={agencySiteHref(c.to)}
@@ -236,7 +279,7 @@ export function AgencyBrandBar({
         </div>
 
         {open && (
-          <div className="border-t border-border/60 bg-background lg:hidden">
+          <div className={`border-t border-border/60 bg-background lg:hidden ${navAll.some((item) => item.children?.some((child) => child.children?.length)) ? "max-h-[70dvh] overflow-y-auto" : ""}`}>
             <nav className={`${siteContainer(true)} flex flex-col py-2`}>
               {navAll.map((l) => (
                 <div key={l.to} className="flex flex-col">
@@ -251,14 +294,7 @@ export function AgencyBrandBar({
                   {l.children?.length ? (
                     <div className="mb-2 flex flex-col border-l border-border/60 pl-3">
                       {l.children.map((c) => (
-                        <a
-                          key={c.to}
-                          href={agencySiteHref(c.to)}
-                          onClick={() => setOpen(false)}
-                          className="min-h-[44px] py-2.5 text-[15px] text-foreground/65"
-                        >
-                          {c.label}
-                        </a>
+                        <AgencyMobileSubLink key={c.to} item={c} close={() => setOpen(false)} />
                       ))}
                     </div>
                   ) : null}

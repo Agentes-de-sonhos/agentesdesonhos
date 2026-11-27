@@ -13,7 +13,8 @@ describe("Bagagem na Mão no domínio oficial", () => {
     expect(profile.hero).toHaveLength(3);
     expect(profile.heroPresentation?.actionsPlacement).toBe("right");
     expect(profile.requestCenter).toMatchObject({ title: "O que você deseja planejar?", submitLabel: "Solicitar" });
-    expect(profile.sections?.modules?.enabled).toBe(false);
+    expect(profile.sections?.modules).toEqual({ enabled: true, order: 2.5 });
+    expect(profile.clubMedSnowHome?.enabled).toBe(true);
     expect(profile.sections?.newsletter?.enabled).toBe(true);
     expect(profile.newsletterMedia?.src).toMatch(/marcia-cruzeiro/);
     expect(profile.socialStrip?.links).toContainEqual({ network: "instagram", url: "https://www.instagram.com/bagagemnamaoviagens/" });
@@ -29,6 +30,8 @@ describe("Bagagem na Mão no domínio oficial", () => {
   it("não altera a prévia antiga nem habilita Universal nela", () => {
     const host = "briefing-19-v1.preview.local";
     expect(resolveSiteProfile(host).sections?.newsletter?.enabled).toBe(false);
+    expect(resolveSiteProfile(host).headerNav).toBeUndefined();
+    expect(resolveSiteProfile(host).clubMedSnowHome?.enabled).not.toBe(true);
     expect(resolveSiteProfile(host).whatsappChannels?.group).toBeTruthy();
     expect(siteThemeRootClass(host)).not.toContain("wl-bagagem-official");
     expect(isUniversalLandingEnabled(host)).toBe(false);

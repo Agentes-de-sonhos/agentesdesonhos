@@ -1,3 +1,4 @@
+import bagagemClubMedVideo from "@/assets/whitelabel/club-med-all-inclusive-ski-vacations.mp4.asset.json";
 import exploraMonaco from "@/assets/paraiso/explora-monaco.jpg";
 import exploraVideo from "@/assets/paraiso/explora-i-desktop.mp4.asset.json";
 import momentFamily from "@/assets/100limites-moment-family.jpg";
@@ -193,6 +194,12 @@ export interface AgencyHeroPresentation {
   overlay?: "strongLeft" | "none";
 }
 
+export interface AgencySiteNavItem {
+  label: string;
+  to: string;
+  children?: AgencySiteNavItem[];
+}
+
 export interface AgencySiteProfile {
   key: AgencySiteProfileKey;
   /** Opt-in for an unconfirmed brand: plain agency name, no invented logo. */
@@ -202,7 +209,8 @@ export interface AgencySiteProfile {
   /** Alterna o fundo das seções da home: branco, degradê suave, branco… */
   alternateSurfaces?: boolean;
   /** Menu próprio do perfil (substitui o menu padrão quando definido). */
-  nav?: { label: string; to: string; children?: { label: string; to: string }[] }[];
+  nav?: AgencySiteNavItem[];
+  headerNav?: AgencySiteNavItem[];
   /** Reduz o intervalo entre links quando o menu editorial tem mais itens. */
   navDensity?: "default" | "compact";
   /**
@@ -1336,6 +1344,25 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       submitLabel: "Solicitar",
     },
     nav: BAGAGEM_NA_MAO_PREVIEW_PROFILE.nav?.map((item) => item.label === "Especialidades" ? { ...item, to: "/#ingressos-orlando" } : item),
+    headerNav: [
+      { label: "Início", to: "/" },
+      { label: "Especialidades", to: "/#ingressos-orlando", children: [
+        { label: "Orlando", to: "/#ingressos-orlando", children: [
+          { label: "Parques e experiências", to: "/#ingressos-orlando" },
+          { label: "Disney", to: "/disney" },
+          { label: "Universal", to: "/universal" },
+        ] },
+        { label: "Resorts no Brasil", to: "/#resorts" },
+        { label: "Cruzeiros 26/27", to: "/#autoridade" },
+        { label: "Club Med", to: "/#campanhas" },
+      ] },
+      { label: "Destinos", to: "/#destinos" },
+      { label: "Sobre", to: "/#sobre", children: [
+        { label: "Quem somos", to: "/#sobre" },
+        { label: "Perguntas frequentes", to: "/#faq" },
+      ] },
+    ],
+    clubMedSnowHome: { enabled: true, videoUrl: bagagemClubMedVideo.url },
     sections: {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.sections,
       offers: { enabled: true, order: 0 },
@@ -1343,7 +1370,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       orlando: { enabled: true, order: 1.5 },
       destinations: { enabled: true, order: 2 },
       resorts: { enabled: true, order: 3.5 },
-      modules: { enabled: false },
+      modules: { enabled: true, order: 2.5 },
       newsletter: { enabled: true, order: 100 },
     },
     copy: {
