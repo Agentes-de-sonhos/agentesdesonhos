@@ -4,6 +4,7 @@ import { fxRateUrl, isValidRate } from "@/lib/fxConversion";
 import { circuitNights, circuitMoney, convertCircuitPrice, circuitDepartureDate, tourismRate, upcomingDepartures } from "@/lib/circuits/presentation";
 import { CircuitQuoteDialog } from "@/components/whitelabel/CircuitQuoteDialog";
 import { CircuitTimeline } from "@/components/whitelabel/CircuitTimeline";
+import { ItaliaEmTremRouteMap } from "@/components/whitelabel/ItaliaEmTremRouteMap";
 import { CircuitRouteMap } from "@/components/whitelabel/CircuitRouteMap";
 import "./circuit-tour.css";
 import { useParams } from "react-router-dom";
@@ -32,6 +33,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
   const [open, setOpen] = useState<string[]>(["d1"]);
   const [departure, setDeparture] = useState<{ date: string; label: string } | null>(null);
   const enhanced = c.enhancedPresentation === true;
+  const rail = c.slug === "italia-em-trem";
   const { data: fx, isError: fxError } = useQuery({
     queryKey: ["circuit-fx", c.currency, "BRL"],
     enabled: enhanced && c.currency !== "BRL",
@@ -83,7 +85,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           <div className="flex flex-wrap gap-2">
             {[
               { i: Clock, t: c.duration },
-              { i: MapPin, t: `${c.cities.length} cidades` },
+              { i: MapPin, t: rail ? `${c.cities.length} cidades-base` : `${c.cities.length} cidades` },
               { i: Compass, t: c.countries.join(", ") },
               ...(c.code ? [{ i: Star, t: `Cód. ${c.code}` }] : []),
             ].map(({ i: I, t }) => (
@@ -157,7 +159,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
               <Button variant="outline" size="sm" onClick={() => setOpen([])}>Recolher todos</Button>
             </div>}
           </div>
-          <CircuitRouteMap circuit={c} />
+          {rail ? <ItaliaEmTremRouteMap circuit={c} /> : <CircuitRouteMap circuit={c} />}
           {enhanced ? <CircuitTimeline days={c.itinerary} /> : <Accordion type="multiple" value={open} onValueChange={setOpen} className="mt-6 space-y-3">
             {c.itinerary.map((d) => (
               <AccordionItem key={d.day} value={`d${d.day}`} className="rounded-2xl border border-border bg-card px-5">

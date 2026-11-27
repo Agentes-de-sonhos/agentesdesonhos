@@ -3,6 +3,7 @@ import { findCircuit } from "@/lib/circuits";
 import { ITALIA_EM_TREM } from "@/lib/circuits/italiaEmTrem";
 import { circuitDepartureDate, circuitNights } from "@/lib/circuits/presentation";
 import { CURTI_VIAGENS_OFFICIAL_PROFILE, CURTI_VIAGENS_PREVIEW_PROFILE } from "@/lib/adsBriefingPreview";
+import { ITALIA_ROUTE_LEGS, ITALIA_ROUTE_STOPS } from "@/lib/circuits/italiaRoute";
 import { existsSync } from "node:fs";
 
 describe("Itália em Trem da Curti", () => {
@@ -24,6 +25,20 @@ describe("Itália em Trem da Curti", () => {
     expect(ITALIA_EM_TREM.itinerary).toHaveLength(12);
     expect(["Roma", "Sorrento", "Bari", "Lecce"].map(city => circuitNights(ITALIA_EM_TREM, city))).toEqual([2, 5, 2, 2]);
     expect(existsSync(`public${ITALIA_EM_TREM.pdfUrl}`)).toBe(true);
+  });
+  it("distingue os três trens dos traslados e termina no aeroporto de Brindisi", () => {
+    expect(ITALIA_ROUTE_LEGS.filter(leg => leg.mode === "train").map(leg => [leg.from, leg.to])).toEqual([
+      ["Roma", "Nápoles"], ["Nápoles", "Bari"], ["Bari", "Lecce"],
+    ]);
+    expect(ITALIA_ROUTE_LEGS.at(-1)).toEqual({ from: "Lecce", to: "Brindisi", mode: "transfer" });
+    const cities = ITALIA_ROUTE_STOPS.map(stop => stop.city);
+    for (const [index, leg] of ITALIA_ROUTE_LEGS.entries()) {
+      expect(cities).toContain(leg.from);
+      expect(cities).toContain(leg.to);
+      if (index > 0) expect(leg.from).toBe(ITALIA_ROUTE_LEGS[index - 1].to);
+    }
+    expect(circuitNights(ITALIA_EM_TREM, "Nápoles")).toBe(0);
+    expect(circuitNights(ITALIA_EM_TREM, "Brindisi")).toBe(0);
   });
   it("liga o destaque europeu oficial ao roteiro sem alterar a base compartilhada", () => {
     expect(CURTI_VIAGENS_OFFICIAL_PROFILE.destinations?.find(d => d.key === "italia-em-trem")?.href).toBe("/circuitos/italia-em-trem");
