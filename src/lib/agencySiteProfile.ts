@@ -1401,6 +1401,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     },
     about: {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.about,
+      title: "Uma viagem diferente para cada viajante",
       media: "default",
       images: [{
         src: "/bagagem-na-mao/marcia-epcot.webp",

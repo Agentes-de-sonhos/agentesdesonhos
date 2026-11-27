@@ -127,6 +127,9 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(footerLogo).toHaveClass("h-16");
     expect(footerLogo.parentElement?.tagName).toBe("DIV");
     expect(footerLogo.parentElement?.className).not.toMatch(/shadow|ring|border|bg-white/);
+    const about = within(container.querySelector<HTMLElement>("#sobre")!);
+    expect(about.getByRole("heading", { name: "Uma viagem diferente para cada viajante" })).toBeInTheDocument();
+    expect(about.getByText("Desde 2014", { exact: true })).toBeInTheDocument();
     const social = screen.getByRole("region", { name: "Siga-nos nas redes" });
     expect(container.querySelector("#novidades")?.nextElementSibling).toBe(social);
     expect(within(social).getByRole("link", { name: "Instagram da agência" })).toHaveAttribute("href", "https://www.instagram.com/bagagemnamaoviagens/");
