@@ -357,31 +357,29 @@ img {
   /* Cantos discretos, quase retos. */
   --radius: 0.25rem;
 
-  /* Detalhes/kickers e ícones em azul-marinho; o verde é a assinatura. */
+  /* Azul-marinho para texto e verde para os chapéus e acentos da marca. */
   --wl-red: 236 29% 25%;
   --wl-navy: 218 46% 12%;
   --wl-ink: 218 46% 12%;
   /* Marfim #F4F1EB nas faixas alternadas. */
   --wl-sand: 40 26% 94%;
-  /* Verde Paraíso #A8CC44 — usado só como assinatura (ícones, linhas, setas). */
+  /* Verde Paraíso: chapéus, ícones e setas. */
   --wl-green: 74 58% 53%;
 
   font-family: 'Manrope', 'Inter', system-ui, sans-serif;
 }
 
-/* --- Assinatura verde: traço acima dos títulos (eyebrow) ------------------- */
-.wl-editorial.wl-luxury .wl-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
+/* Paraíso: o texto do chapéu assume o verde; não há filetes decorativos. */
+.wl-editorial.wl-luxury :is(.wl-kicker, .wl-orlando-step-kicker) {
+  color: hsl(var(--wl-green));
 }
-.wl-editorial.wl-luxury .wl-kicker::before {
-  content: "";
-  display: inline-block;
-  width: 1.75rem;
-  height: 2px;
-  flex: none;
-  background: hsl(var(--wl-green));
+
+.wl-editorial.wl-luxury .wl-signature-rule {
+  display: none;
+}
+
+.wl-editorial.wl-luxury .wl-about-badge {
+  border-block-width: 0;
 }
 
 /* Ícones de apoio (curadoria, cuidados, credenciais) em verde Paraíso. */
@@ -462,15 +460,7 @@ img {
   }
 }
 
-/* "A curadoria Paraíso": filete verde no topo do card + hover discreto. */
-.wl-editorial.wl-luxury .wl-curation-card::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 3px;
-  background: hsl(var(--wl-green));
-  opacity: 0.85;
-}
+/* "A curadoria Paraíso": mantém o contorno no hover. */
 .wl-editorial.wl-luxury .wl-curation-card:hover {
   border-color: hsl(var(--wl-green) / 0.6);
 }
@@ -510,20 +500,9 @@ img {
   border-radius: 2px;
 }
 
-/* Títulos das colunas com pequeno traço verde à esquerda. */
+/* Títulos das colunas sem traços decorativos. */
 .wl-editorial.wl-luxury .wl-luxury-footer .wl-footer-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
   color: hsl(var(--wl-ink));
-}
-.wl-editorial.wl-luxury .wl-luxury-footer .wl-footer-title::before {
-  content: "";
-  display: inline-block;
-  width: 1.25rem;
-  height: 2px;
-  flex: none;
-  background: hsl(var(--wl-green));
 }
 
 /* Ícones mantêm a assinatura verde. */

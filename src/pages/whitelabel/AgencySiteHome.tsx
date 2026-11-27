@@ -970,7 +970,7 @@ export default function AgencySiteHome({
                 <h2 className="mt-3 w-full break-words text-pretty text-3xl font-semibold leading-[1.12] text-foreground md:text-[clamp(2.25rem,3.25vw,2.75rem)] md:leading-[1.08]">
                   {s.title}
                 </h2>
-                <div className="mt-6 h-px w-16 bg-foreground/20" />
+                <div className="wl-signature-rule mt-6 h-px w-16 bg-foreground/20" />
                 <p className="mt-8 text-[15px] leading-relaxed text-muted-foreground md:text-lg">
                   {s.text}
                 </p>
@@ -1491,7 +1491,7 @@ export default function AgencySiteHome({
                     </p>
                   )}
                   {aboutCopy?.badge && (
-                    <div className={`${compactSpacing ? "mt-5" : "mt-8"} inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6`}>
+                    <div className={`${compactSpacing ? "mt-5" : "mt-8"} wl-about-badge inline-flex items-center gap-4 border-y-2 border-[hsl(var(--wl-green))] py-4 pr-6`}>
                       <span className="text-4xl font-extrabold uppercase leading-none tracking-tight text-primary md:text-5xl">
                         {aboutCopy.badge.value}
                       </span>
