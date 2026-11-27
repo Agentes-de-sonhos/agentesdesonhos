@@ -203,7 +203,16 @@ const DRICA_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
  * with different proportions can be sized independently without affecting any
  * other tenant or the footer/public documents.
  */
+const SHOPPING_HEADER_BRAND_PRESET: AgencyHeaderBrandPreset = {
+  logoOnly: true,
+  headerClassName: "h-20",
+  // The account's original image has large white margins; frame it without modifying the file.
+  logoClassName: "h-14 w-[170px] max-w-full object-cover md:w-[200px]",
+};
+
 const HEADER_BRAND_BY_HOSTNAME: Record<string, AgencyHeaderBrandPreset> = {
+  "shoppingviagens.com.br": SHOPPING_HEADER_BRAND_PRESET,
+  "www.shoppingviagens.com.br": SHOPPING_HEADER_BRAND_PRESET,
   "briefing-26-v1.preview.local": {
     logoOnly: true,
     headerClassName: "h-[94px] md:h-[116px]",

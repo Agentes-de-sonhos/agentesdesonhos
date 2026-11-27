@@ -591,7 +591,7 @@ export function AgencyFooter({
      */
     const karibu = profile.key === "karibuBriefing21" || profile.key === "karibuOfficial";
     const bagagemOfficial = profile.key === "bagagemNaMaoOfficial";
-    const plainFooterLogo = bagagemOfficial || profile.key === "innovatiOfficial" || karibu || plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial" || profile.key === "immOfficial";
+    const plainFooterLogo = bagagemOfficial || profile.key === "shoppingOfficial" || profile.key === "innovatiOfficial" || karibu || plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial" || profile.key === "immOfficial";
     const footerLogoClass = bagagemOfficial
       ? "wl-bagagem-footer-logo h-16 w-auto max-w-full object-contain"
       : profile.key === "pristurBriefing22" || profile.key === "pristurOfficial"

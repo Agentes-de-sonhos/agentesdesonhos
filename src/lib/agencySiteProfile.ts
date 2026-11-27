@@ -1580,6 +1580,11 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     key: "shoppingOfficial",
     demo: false,
     presentation: false,
+    textualWordmark: false,
+    sections: { ...SHOPPING_PREVIEW_PROFILE.sections, modules: { enabled: false } },
+    nav: SHOPPING_PREVIEW_PROFILE.nav?.map((item) => item.to === "/#campanhas"
+      ? { ...item, to: "/#resorts", children: item.children?.filter((child) => child.to !== "/#campanhas") }
+      : item),
     seo: { title: "Shopping Viagens", description: "Viagens sob medida desde 2002: cruzeiros, Itália, resorts no Nordeste, Caribe e Estados Unidos com a Shopping Viagens." },
   },
   essyaCurtiPreview: ESSYA_CURTI_PREVIEW_PROFILE,
