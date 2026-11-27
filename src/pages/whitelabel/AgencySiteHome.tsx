@@ -21,7 +21,7 @@ import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/
 import { OfferCard, usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
-import { KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
+import { BagagemHomeIntro, KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -2172,6 +2172,7 @@ export default function AgencySiteHome({
   return (
     <>
       {karibu && <KaribuHomeIntro hostname={hostname} />}
+      {bagagemOfficial && <BagagemHomeIntro hostname={hostname} />}
       {isMundoSeoHost(info.hostname) ? null : sharePreview && !profile.presentation ? (
         <SEO
           title={sharePreview.title}
@@ -2476,10 +2477,13 @@ export default function AgencySiteHome({
           );
         }
         if (bagagemOfficial) {
-          const gradient = ["orlando", "resorts", "faq"].includes(section.key);
+          // Conta apenas as seções exibidas e reinicia no branco depois da faixa azul.
+          const cruise = section.key === "authority";
+          const gradient = !cruise && section.key !== "newsletter" && rendered % 2 === 1;
+          rendered = cruise ? 0 : rendered + 1;
           return (
             <div key={section.key}
-              className={`wl-alt-surface wl-bagagem-home-surface ${gradient ? "wl-bagagem-home-tint" : ""}`}
+              className={`wl-alt-surface wl-bagagem-home-surface ${cruise ? "wl-bagagem-season" : gradient ? "wl-bagagem-home-tint" : ""}`}
               data-bagagem-section={section.key}
               style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
               {node}

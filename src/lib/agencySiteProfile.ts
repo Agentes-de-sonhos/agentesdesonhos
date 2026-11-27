@@ -1360,6 +1360,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.footer,
       whatsappLabel: "Falar por WhatsApp",
       phoneHidden: true,
+      descriptionHidden: true,
     },
     whatsappChannels: undefined,
     inspirationDialog: {

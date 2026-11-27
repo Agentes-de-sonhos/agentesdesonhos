@@ -2320,6 +2320,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 /* Bagagem oficial: turquesa integral do logo, com texto e ícones em branco sólido nas ações. */
 .wl-editorial.wl-mundo.wl-bagagem-official {
   --bagagem-turquoise: #27C7C3;
+  --bagagem-orange: #FF9518;
   --primary: 178.5 67.23% 46.67%;
   --primary-foreground: 0 0% 100%;
   --ring: 178.5 67.23% 46.67%;
@@ -2337,7 +2338,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface.wl-bagagem-home-tint {
   background: var(--wl-mundo-gradient) !important;
 }
-.wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-tint > section {
+.wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface:not(.wl-bagagem-season) > section {
   background: transparent !important;
 }
 .wl-editorial.wl-mundo.wl-bagagem-official #novidades .wl-newsletter-card {
@@ -2392,7 +2393,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   fill: currentColor;
 }
 .wl-editorial.wl-mundo.wl-bagagem-official .wl-qq-tab-active {
-  box-shadow: inset 0 0 0 2px #19615f;
+  box-shadow: inset 0 0 0 2px var(--bagagem-orange) !important;
 }
 .wl-editorial.wl-mundo.wl-bagagem-official .wl-qq-tab-idle:is(:hover, :focus-visible) {
   box-shadow: inset 0 0 0 1px #19615f;

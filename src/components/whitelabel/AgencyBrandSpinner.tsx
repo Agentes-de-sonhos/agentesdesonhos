@@ -15,6 +15,7 @@ import { isAgencyPublicToolPath } from "@/lib/agencyPublicToolRoutes";
 import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json";
 import essyaLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import pristurLogo from "@/assets/whitelabel/logo-pristur.png.asset.json";
+import bagagemLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
 import immLogo from "@/assets/whitelabel/logo-imm-viagens.png.asset.json";
 
 const KARIBU_PREVIEW_HOST = "briefing-21-v1.preview.local";
@@ -22,6 +23,7 @@ const KARIBU_HOSTS = new Set(["kaributurismo.com.br", "www.kaributurismo.com.br"
 const KARIBU_MARK = "/karibu-logo.png";
 const KARIBU_PREVIEW_PATH = "/ads-briefing-preview/briefing-21-v1";
 
+const BAGAGEM_HOSTS = new Set(["bagagemnamao.com.br", "www.bagagemnamao.com.br"]);
 const IMM_HOSTS = ["immturismo.com.br", "www.immturismo.com.br"];
 
 /** Logotipo oficial cadastrado pela 100 Limites (pin com globo e avião). */
@@ -54,6 +56,7 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   "arenatravelgroup.com.br": ARENA_MARK,
   "www.arenatravelgroup.com.br": ARENA_MARK,
   ...Object.fromEntries([...KARIBU_HOSTS].map((h) => [h, KARIBU_MARK])),
+  ...Object.fromEntries([...BAGAGEM_HOSTS].map((h) => [h, bagagemLogo.url])),
   ...Object.fromEntries(IMM_HOSTS.map((h) => [h, immLogo.url])),
 };
 
@@ -73,6 +76,7 @@ const BREATHE_HOSTNAMES = new Set([
   "omundoemcores.com.br", "www.omundoemcores.com.br", "briefing-14-v1.preview.local",
   ...HOME_AND_PUBLIC_ONLY,
   ...KARIBU_HOSTS,
+  ...BAGAGEM_HOSTS,
 ]);
 
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
@@ -95,18 +99,19 @@ export function agencyLoaderBackdropClass(hostname?: string | null): string {
 export function isAgencyLoaderSuppressed(hostname?: string | null): boolean {
   if (typeof window === "undefined") return false;
   const host = resolveContextHostname(hostname);
-  if (!KARIBU_HOSTS.has(host) && !ARENA_HOSTS.has(host) && !IMM_HOSTS.includes(host)) return false;
+  if (!KARIBU_HOSTS.has(host) && !BAGAGEM_HOSTS.has(host) && !ARENA_HOSTS.has(host) && !IMM_HOSTS.includes(host)) return false;
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
   if (host === KARIBU_PREVIEW_HOST && path === KARIBU_PREVIEW_PATH) return false;
   return path !== "/";
 }
 
-export function isKaribuLoaderSuppressed(hostname: string): boolean {
-  return KARIBU_HOSTS.has(resolveContextHostname(hostname)) && isAgencyLoaderSuppressed(hostname);
+export function isPasswordGateLoaderSuppressed(hostname: string): boolean {
+  const host = resolveContextHostname(hostname);
+  return (KARIBU_HOSTS.has(host) || BAGAGEM_HOSTS.has(host)) && isAgencyLoaderSuppressed(hostname);
 }
 
-/** Short entry treatment on the Karibu homepage even when the route is cached. */
-export function KaribuHomeIntro({ hostname }: { hostname: string }) {
+/** Short entry treatment on agency homepages even when the route is cached. */
+function AgencyHomeIntro({ hostname, brand }: { hostname: string; brand: "karibu" | "bagagem" }) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
@@ -114,12 +119,21 @@ export function KaribuHomeIntro({ hostname }: { hostname: string }) {
     return () => window.clearTimeout(timer);
   }, []);
 
-  if (done || !KARIBU_HOSTS.has(resolveContextHostname(hostname)) || isAgencyLoaderSuppressed(hostname)) return null;
+  const hosts = brand === "karibu" ? KARIBU_HOSTS : BAGAGEM_HOSTS;
+  if (done || !hosts.has(resolveContextHostname(hostname)) || isAgencyLoaderSuppressed(hostname)) return null;
   return (
-    <div data-karibu-home-intro className="pointer-events-none fixed inset-0 z-[110] flex items-center justify-center bg-white motion-reduce:hidden" aria-hidden="true">
+    <div data-karibu-home-intro={brand === "karibu" ? "" : undefined} data-bagagem-home-intro={brand === "bagagem" ? "" : undefined} className="pointer-events-none fixed inset-0 z-[110] flex items-center justify-center bg-white motion-reduce:hidden" aria-hidden="true">
       <AgencyBrandSpinner hostname={hostname} size="lg" />
     </div>
   );
+}
+
+export function KaribuHomeIntro({ hostname }: { hostname: string }) {
+  return <AgencyHomeIntro hostname={hostname} brand="karibu" />;
+}
+
+export function BagagemHomeIntro({ hostname }: { hostname: string }) {
+  return <AgencyHomeIntro hostname={hostname} brand="bagagem" />;
 }
 
 export interface AgencyBrandSpinnerProps {

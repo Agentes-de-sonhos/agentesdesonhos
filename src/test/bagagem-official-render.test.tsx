@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { BAGAGEM_NA_MAO_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
+import { AgencyBrandSpinner, BagagemHomeIntro, isPasswordGateLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 
@@ -16,6 +17,31 @@ vi.mock("@/hooks/useAgencySiteRequest", () => ({ useAgencySiteRequest: () => ({ 
 afterEach(cleanup);
 
 describe("home oficial da Bagagem na Mão", () => {
+  it("pulsa o logotipo apenas na entrada dos domínios oficiais", () => {
+    const prior = window.location.pathname;
+    try {
+      for (const host of ["bagagemnamao.com.br", "www.bagagemnamao.com.br"]) {
+        window.history.replaceState(null, "", "/");
+        const splash = render(<BagagemHomeIntro hostname={host} />);
+        const logo = splash.container.querySelector("[data-bagagem-home-intro] img");
+        expect(logo).toHaveClass("animate-brand-breathe", "motion-reduce:animate-none");
+        expect(logo?.getAttribute("src")).toMatch(/briefing-19-v1-logo\.png$/);
+        splash.unmount();
+        for (const path of ["/universal", "/ingressos-orlando", "/resorts-brasil"]) {
+          window.history.replaceState(null, "", path);
+          expect(isPasswordGateLoaderSuppressed(host)).toBe(true);
+          const internal = render(<><BagagemHomeIntro hostname={host} /><AgencyBrandSpinner hostname={host} /></>);
+          expect(internal.container).toBeEmptyDOMElement();
+          internal.unmount();
+        }
+      }
+      window.history.replaceState(null, "", "/ads-briefing-preview/briefing-19-v1");
+      expect(render(<BagagemHomeIntro hostname="briefing-19-v1.preview.local" />).container).toBeEmptyDOMElement();
+    } finally {
+      window.history.replaceState(null, "", prior);
+    }
+  });
+
   it("renderiza as três imagens/cópias, links internos e captação sem convite exposto", () => {
     const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "bagagemnamao.com.br" };
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -31,7 +57,11 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(container.querySelector("#campanhas")).toBeNull();
     const surfaces = Array.from(container.querySelectorAll<HTMLElement>("[data-bagagem-section]"));
     expect(surfaces.slice(0, 4).map((item) => item.dataset.bagagemSection)).toEqual(["signature", "orlando", "destinations", "resorts"]);
-    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["orlando", "resorts", "faq"]);
+    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["orlando", "resorts", "differentials", "faq"]);
+    const seasonIndex = surfaces.findIndex((surface) => surface.classList.contains("wl-bagagem-season"));
+    expect(surfaces[seasonIndex]).toHaveAttribute("data-bagagem-section", "authority");
+    expect(surfaces.at(seasonIndex + 1)).toHaveAttribute("data-bagagem-section", "about");
+    expect(surfaces.at(seasonIndex + 1)).not.toHaveClass("wl-bagagem-home-tint");
     expect(surfaces.at(-2)).toHaveAttribute("data-bagagem-section", "faq");
     expect(surfaces.at(-1)).toHaveAttribute("data-bagagem-section", "newsletter");
     expect(container.querySelector("#destinos [data-bagagem-cta]")).toBeNull();
@@ -58,6 +88,7 @@ describe("home oficial da Bagagem na Mão", () => {
     const footer = within(container.querySelector<HTMLElement>("#rodape")!);
     expect(footer.getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5521988559515");
     expect(footer.queryByText(/98855-9515/)).toBeNull();
+    expect(footer.queryByText(/Um jeito novo de viajar, desde 2014/i)).toBeNull();
     expect(footer.getByText(/Rua Conde de Bonfim, 211/)).toBeInTheDocument();
     const footerLogo = footer.getByRole("img", { name: "Logo Bagagem na Mão Viagens" });
     expect(footerLogo).toHaveClass("h-16");
