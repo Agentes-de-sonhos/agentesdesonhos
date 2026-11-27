@@ -1472,6 +1472,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
   innovatiOfficial: {
     ...INNOVATI_PREVIEW_PROFILE,
     key: "innovatiOfficial",
+    cruiseSeasonInNav: false,
     demo: false,
     presentation: false,
     sections: {
@@ -1484,7 +1485,15 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     },
     nav: INNOVATI_PREVIEW_PROFILE.nav?.flatMap((item) => {
       if (item.to === "/#assinatura") return [
-        { ...item, to: "/#ingressos-orlando" },
+        { ...item, to: "/#ingressos-orlando", children: [
+          { label: "Orlando", to: "/#ingressos-orlando", children: [
+            { label: "Disney", to: "/disney" },
+            { label: "Universal", to: "/universal" },
+            { label: "Ingressos e Parques", to: "/#ingressos-orlando" },
+          ] },
+          { label: "Resorts no Brasil", to: "/#resorts" },
+          { label: "Cruzeiros 26/27", to: "/#autoridade" },
+        ] },
         { label: "Visto Americano", to: "/#visto-americano" },
       ];
       if (item.to !== "/#sobre") return [item];

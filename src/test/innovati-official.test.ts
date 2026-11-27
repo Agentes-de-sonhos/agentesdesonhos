@@ -37,3 +37,17 @@ describe("Shopping Viagens official domains", () => {
     expect(siteThemeRootClass(h)).toContain("wl-shopping-mundo");
   });
 });
+
+it("agrupa Orlando no submenu de Especialidades da Innovati", () => {
+  const profile = resolveSiteProfile("www.innovati.tur.br");
+  expect(profile.cruiseSeasonInNav).toBe(false);
+  const specials = profile.nav?.find((item) => item.label === "Especialidades");
+  expect(specials?.children?.map((item) => item.label)).toEqual(["Orlando", "Resorts no Brasil", "Cruzeiros 26/27"]);
+  expect(specials?.children?.[0].children).toEqual([
+    { label: "Disney", to: "/disney" },
+    { label: "Universal", to: "/universal" },
+    { label: "Ingressos e Parques", to: "/#ingressos-orlando" },
+  ]);
+  expect(specials?.children?.[1].to).toBe("/#resorts");
+  expect(specials?.children?.[2].to).toBe("/#autoridade");
+});
