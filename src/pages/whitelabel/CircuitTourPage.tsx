@@ -205,7 +205,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
             {!monthEdges.end && <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="circuit-calendar-arrow absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>}
             <div ref={monthsRef} onScroll={updateMonthEdges} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {upcoming.map((m) => (
-                <div key={m.month} data-priority-month={rail && /^0[4-7]$/.test(circuitDepartureDate(m.month, 1).slice(5, 7)) ? "true" : undefined} className="circuit-calendar-month w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
+                <div key={m.month} className="circuit-calendar-month w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
                   <div className={rail ? "circuit-calendar-grid mt-3" : "mt-3 flex flex-wrap gap-2"}>
                     {m.days.map((d) => { const iso = circuitDepartureDate(m.month, d); const br = brGuide.includes(iso); return (

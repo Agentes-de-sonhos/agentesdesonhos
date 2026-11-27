@@ -15,7 +15,6 @@
 /* Somente Itália em Trem, que o registro de circuitos restringe à Curti. */
 .circuit-curti-italia-trem {
   --curti-circuit-blue: #2502ff;
-  --curti-circuit-green: #639682;
   --curti-circuit-soft-blue: #5a62d4;
 }
 .circuit-curti-italia-trem :is(.circuit-eyebrow, .circuit-highlight svg, .circuit-inclusion-icon) {
@@ -30,12 +29,9 @@
 }
 .circuit-curti-italia-trem .circuit-calendar-month {
   background: #fafafa;
-  border-color: var(--curti-circuit-green);
+  border-color: #000;
   color: #171717;
   padding: 0.75rem;
-}
-.circuit-curti-italia-trem .circuit-calendar-month[data-priority-month="true"] {
-  border-color: var(--curti-circuit-blue);
 }
 .circuit-curti-italia-trem .circuit-calendar-grid {
   display: grid;

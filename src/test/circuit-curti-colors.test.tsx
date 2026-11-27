@@ -38,10 +38,10 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(screen.getByRole("button", { name: "Ampliar mapa do roteiro" })).toBeVisible();
   });
 
-  it("destaca só abril a julho e abre o orçamento da Curti com a data escolhida", () => {
+  it("mostra os sete meses e abre o orçamento da Curti com a data escolhida", () => {
     const { container } = renderCircuit();
-    const blueMonths = [...container.querySelectorAll('.circuit-calendar-month[data-priority-month="true"]')];
-    expect(blueMonths.map(month => month.querySelector("p")?.textContent)).toEqual(["Abril 2027", "Maio 2027", "Junho 2027", "Julho 2027"]);
+    const months = [...container.querySelectorAll(".circuit-calendar-month")];
+    expect(months.map(month => month.querySelector("p")?.textContent)).toEqual(["Abril 2027", "Maio 2027", "Junho 2027", "Julho 2027", "Agosto 2027", "Setembro 2027", "Outubro 2027"]);
     expect(screen.getByText("Curti Viagens.", { exact: true })).toHaveClass("whitespace-nowrap");
     fireEvent.click(screen.getByRole("button", { name: "Solicitar orçamento: 12 de Julho 2027" }));
     const dialog = screen.getByRole("dialog", { name: "Solicitar orçamento" });
