@@ -180,6 +180,7 @@ export function AgencyBrandBar({
   }
 
   const karibuHeader = ["karibuBriefing21", "karibuOfficial"].includes(resolveSiteProfile(info.hostname).key);
+  const showMobileCadastur = karibuHeader || navProfile.key === "innovatiOfficial";
 
   if (editorial) {
     const mainLinks = navAll.filter((l) => l.to !== "/area-do-cliente");
@@ -267,8 +268,8 @@ export function AgencyBrandBar({
             )}
           </div>
 
-          <div className={karibuHeader ? "flex shrink-0 items-center gap-2 lg:hidden" : "contents"}>
-            {karibuHeader && showCadastur(info.hostname) && (
+          <div className={showMobileCadastur ? "flex shrink-0 items-center gap-2 lg:hidden" : "contents"}>
+            {showMobileCadastur && showCadastur(info.hostname) && (
               <div className="md:hidden">
                 <CadasturSeal hostname={info.hostname} className="h-6 w-auto object-contain" />
               </div>

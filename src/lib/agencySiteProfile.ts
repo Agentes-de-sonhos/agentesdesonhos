@@ -306,6 +306,15 @@ export interface AgencySiteProfile {
     text?: string;
     image?: AgencyImageSlot;
     images?: { src: string; alt: string; position?: string; aspect?: "square" | "landscape" }[];
+    /** Texto integral aprovado e apresentado em parágrafos, com os blocos institucionais intactos. */
+    fullStory?: {
+      title: string;
+      paragraphs: string[];
+      portrait: { src: string; alt: string };
+      values: string[];
+      mission: string;
+      vision: string;
+    };
     /** Opt-in: mural panorâmico navegável (arrastar/setas, em loop) no lugar das fotos. */
     mural?: { src: string; alt: string };
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
@@ -327,6 +336,8 @@ export interface AgencySiteProfile {
     /** Credencial oficial confirmada (selo + texto), exibida antes da assinatura. */
     credential?: { src: string; alt: string; title: string; text: string };
   };
+  /** Parceiros confirmados da agência, exibidos depois das avaliações. */
+  partners?: { name: string; logo: string }[];
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
   /** Opt-in: "Como funciona" só com os cards numerados (sem bloco de etapas escuro). */
@@ -342,6 +353,8 @@ export interface AgencySiteProfile {
   /** Faixa opcional de redes sociais logo após "Receba novidades". */
   whatsappChannels?: { group: string; contact: string };
   socialStrip?: { title: string; links: { network: "instagram" | "facebook" | "tiktok" | "youtube"; url: string }[] };
+  /** Convite direto ao grupo no card editorial (sem formulário intermediário). */
+  newsletterDirectGroupUrl?: string;
   /** Opcional: card do grupo de novidades em degradê claro com foto à direita. */
   newsletterMedia?: { src: string; alt: string };
 }
@@ -1465,16 +1478,85 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       ...INNOVATI_PREVIEW_PROFILE.sections,
       signature: { enabled: false },
       highlights: { enabled: false },
+      avaliacoes: { enabled: true, order: 10 },
+      newsletter: { enabled: true, order: 100 },
+      faq: { enabled: true, order: 11 },
     },
-    nav: INNOVATI_PREVIEW_PROFILE.nav?.map((item) =>
-      item.to === "/#assinatura" ? { ...item, to: "/#ingressos-orlando" } : item,
-    ),
+    nav: INNOVATI_PREVIEW_PROFILE.nav?.flatMap((item) => {
+      if (item.to === "/#assinatura") return [
+        { ...item, to: "/#ingressos-orlando" },
+        { label: "Visto Americano", to: "/#visto-americano" },
+      ];
+      if (item.to !== "/#sobre") return [item];
+      const children = [...(item.children ?? [])];
+      const faq = children.findIndex((child) => child.to === "/#faq");
+      children.splice(faq >= 0 ? faq : children.length, 0, { label: "Avaliações no Google", to: "/#avaliacoes" });
+      return [{ ...item, children }];
+    }),
+    copy: {
+      ...INNOVATI_PREVIEW_PROFILE.copy,
+      newsletter: {
+        kicker: "Novidades da Innovati",
+        title: "Receba oportunidades de viagem no WhatsApp",
+        subtitle: "Entre no grupo da Innovati Travel para acompanhar novidades e oportunidades selecionadas pela agência.",
+        cta: "Entrar no grupo do WhatsApp",
+      },
+      destinations: { ...INNOVATI_PREVIEW_PROFILE.copy?.destinations, title: "Escolha a sua próxima viagem", subtitle: "De parques e cruzeiros a resorts e natureza no Brasil. Escolha um destaque para começar a planejar." },
+      avaliacoes: { kicker: "Avaliações no Google", title: "O que dizem os viajantes da Innovati", subtitle: "Confira no Google as experiências de quem já viajou com a Innovati Travel." },
+    },
     footer: {
       ...INNOVATI_PREVIEW_PROFILE.footer,
       descriptionHidden: true,
       phoneHidden: true,
       whatsappLabel: "Falar por WhatsApp",
     },
+    destinationsFixedOrder: true,
+    destinations: [
+      { key: "iberostar-waves-bahia", image: "bagagemIberostarWaves", label: "Praia do Forte · Bahia", title: "Iberostar Waves Bahia", text: "Um resort all-inclusive à beira-mar para aproveitar a Praia do Forte em família.", href: "/resorts-brasil/iberostar-bahia", ctaLabel: "Conhecer o resort", service: "hospedagem", enabled: true, order: 1 },
+      { key: "disney-cruise-line", image: "cruzeiroDisneyWish", label: "Disney Cruise Line", title: "Cruzeiros Disney", text: "Personagens, espetáculos e diversão em família em alto-mar.", service: "cruzeiros", ctaLabel: "Consultar cruzeiros Disney", enabled: true, order: 2 },
+      { key: "serra-gaucha", image: "pristurGramado", label: "Rio Grande do Sul", title: "Serra Gaúcha", text: "Gramado, Canela e passeios no seu ritmo, com tempo para aproveitar a gastronomia da região.", service: "pacotes", ctaLabel: "Consultar roteiro", enabled: true, order: 3 },
+      { key: "msc", image: "innovatiMscSeaview", label: "MSC Cruzeiros", title: "Cruzeiros MSC", text: "Conheça o MSC Seaview e descubra o que importa na escolha do navio e da cabine.", href: "/cruzeiros/msc/msc-seaview", ctaLabel: "Conhecer o MSC Seaview", service: "cruzeiros", enabled: true, order: 4 },
+      { key: "orlando", image: "orlandoMagicKingdom", label: "Flórida · Estados Unidos", title: "Orlando", text: "Planeje os dias de parque e reserve tempo para descansar em família.", href: "/ingressos-orlando", ctaLabel: "Planejar os parques", service: "ingressos", enabled: true, order: 5 },
+      { key: "jalapao", image: "innovatiJalapao", label: "Natureza · Tocantins", title: "Expedição Jalapão", text: "Dunas, fervedouros e paisagens do Cerrado. Converse com a Innovati sobre as possibilidades de roteiro.", service: "pacotes", ctaLabel: "Consultar roteiro", enabled: true, order: 6 },
+    ],
+    destinationCredits: [
+      { title: "Gramado (centro)", author: "Yeuxpapilon", source: "https://commons.wikimedia.org/wiki/File:Centro_de_Gramado,_RS.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+      { title: "Dunas do Jalapão", author: "JcPietro", source: "https://commons.wikimedia.org/wiki/File:Dunas_do_Jalap%C3%A3o_-_Brasil_-_Tocantins.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+    ],
+    about: {
+      fullStory: {
+        title: "Olá",
+        paragraphs: [
+          "Meu nome é Jussara, fundadora da Innovati Travel, mas pode me chamar de Ju.",
+          "Apaixonada por viagens desde criança, passava horas estudando os mapas nos livros, decorando capitais e nomes de desertos, e me imaginava conhecendo esses lugares.",
+          "Quando adolescente, tive a oportunidade de conhecer um pouco mais o mundo do turismo através de uma tia que abriu uma agência de viagens. Naquela época consultar horários de voos e fazer reservas era um trabalho árduo, até poético. Documentos de viagem eram emitidos em papéis especiais e entregues em lindas capas. Tudo feito pessoalmente, recolhendo os documentos em todos os fornecedores e entregando ao cliente, que precisava ter tudo em mãos.",
+          "Apesar desta paixão, fui levada para a carreira de tecnologia, para ajudar meu pai que acabava de iniciar um novo negócio. Por mais de 25 anos trabalhei nessa área, flutuando entre atendimento, administração e financeiro, mas sempre que podia viajava e assim mantinha a chama do turismo acesa em meu coração.",
+          "Em 2018 tomei coragem e abri minha agência de viagens como segundo negócio. Tão logo comecei veio a pandemia, e meu plano foi engavetado, já que o turismo parou e a empresa de tecnologia seguiu normalmente nesse período, com algumas adaptações para o trabalho em home office e reuniões on-line.",
+          "A pandemia passou, e o turismo voltou muito adaptado ao ambiente virtual, o que me fez encerrar o ciclo na tecnologia e abraçar de vez o turismo, dessa vez trazendo um pouco do meu antigo mundo para a nova realidade.",
+          "Assim nasceu a Innovati, com a proposta de realizar o sonho de viagem de pessoas de todo o Brasil com um atendimento que mesmo a distância, trata cada detalhe com o cuidado de quem está bem pertinho.",
+          "Sou especialista em viagens para Orlando, já que este destino é meu queridinho e tenho na bagagem inúmeras visitas aos parques, conhecendo pessoalmente muito do que Orlando pode oferecer. Também sou apaixonada por futebol americano, incentivada pelo meu marido, o que me faz conhecer muito sobre o esporte, seus times e cidades, e preferir fazer viagens aos Estados Unidos na curta temporada da NFL para ter a oportunidade de assistir aos jogos ao vivo.",
+          "Estudar todos os dias e conhecer os destinos de perto, com o olhar crítico de quem procura os detalhes que fazem a diferença na viagem dos clientes. É assim que nos preparamos para entregar a melhor experiência de viagem para você.",
+        ],
+        portrait: { src: "/innovati-travel/jussara.webp", alt: "Jussara, fundadora da Innovati Travel" },
+        values: [
+          "Honestidade e transparência acima de tudo",
+          "Ouvir os desejos e necessidades do cliente",
+          "Cuidado em cada detalhe da jornada do cliente",
+          "Oferecer produtos e serviços de qualidade",
+          "Fazer parceria com empresas que cuidam do cliente",
+        ],
+        mission: "Oferecer a melhor experiência de viagem que o cliente possa ter",
+        vision: "Que todas as pessoas possam ter a experiência de vivenciar lugares diferentes da sua realidade, ampliando assim sua capacidade de entender o mundo e o lugar onde vive",
+      },
+    },
+    visaConsult: {
+      kicker: "Visto Americano",
+      title: "Vai viajar para os Estados Unidos?",
+      text: "Converse com a Innovati Travel sobre os primeiros passos para solicitar o visto de turismo. A decisão sobre a emissão do visto é da autoridade consular.",
+      cta: "Pedir orientação sobre o visto",
+    },
+    newsletterDirectGroupUrl: "https://chat.whatsapp.com/KzyQhTCtZGy6iVfgRcOUbI?mode=r_c",
+    partners: [{ name: "Cativa Operadora", logo: "/innovati-travel/cativa-operadora.png" }],
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,

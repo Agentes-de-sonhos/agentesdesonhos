@@ -21,6 +21,7 @@ import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/
 import { OfferCard, usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
+import { safeWhatsappGroupUrl } from "@/lib/agencyInspirationLead";
 import { KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -135,6 +136,7 @@ import disneyMagicKingdomOfficial from "@/assets/disney/official/magic-kingdom.j
 import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
 import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
+import mscSeaviewExterior from "@/assets/cruise-season/msc-seaview-exterior.jpg";
 import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
 import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
 import arenaRafaelMickey from "@/assets/arena-rafael-mickey-orlando.jpg.asset.json";
@@ -186,6 +188,8 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
+  innovatiMscSeaview: mscSeaviewExterior,
+  innovatiJalapao: "/innovati-travel/dunas-jalapao.webp",
   innovatiIguacu: "/innovati-travel/iguacu-ilustracao.svg",
   innovatiNorthAmerica: "/innovati-travel/america-do-norte-ilustracao.svg",
   pristurHeroDisney: "/pristur/hero-disney.jpg",
@@ -1417,6 +1421,42 @@ export default function AgencySiteHome({
         }
 
       case "about":
+        if (editorial && profile.about?.fullStory) {
+          const story = profile.about.fullStory;
+          const headings = "text-xl font-semibold text-foreground";
+          const body = "text-[15px] leading-relaxed text-muted-foreground md:text-base";
+          return (
+            <section key={key} id="sobre" aria-labelledby="agency-full-story-title" className="scroll-mt-28 bg-white">
+              <div className={`${container} py-14 md:py-20`}>
+                <div className="grid items-start gap-8 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-14">
+                  <div className="min-w-0">
+                    <h2 id="agency-full-story-title" className="text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">{story.title}</h2>
+                    <div data-agency-full-story className={`mt-6 space-y-4 ${body}`}>
+                      {story.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                    </div>
+                  </div>
+                  <img src={story.portrait.src} alt={story.portrait.alt} width={760} height={760} loading="lazy" className="aspect-square w-full max-w-md rounded-2xl object-cover" />
+                </div>
+                <div className="mt-10 grid gap-5 md:grid-cols-3">
+                  <article className="rounded-2xl border border-border p-6">
+                    <h3 className={headings}>Valores</h3>
+                    <ul className={`mt-3 list-disc space-y-2 pl-5 ${body}`}>
+                      {story.values.map((value) => <li key={value}>{value}</li>)}
+                    </ul>
+                  </article>
+                  <article className="rounded-2xl border border-border p-6">
+                    <h3 className={headings}>Missão</h3>
+                    <p className={`mt-3 ${body}`}>{story.mission}</p>
+                  </article>
+                  <article className="rounded-2xl border border-border p-6">
+                    <h3 className={headings}>Visão</h3>
+                    <p className={`mt-3 ${body}`}>{story.vision}</p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          );
+        }
         if (editorial) {
           const aboutCopy = profile.about;
           const bio = aboutCopy?.text ||
@@ -1979,13 +2019,29 @@ export default function AgencySiteHome({
         {
           const copy = copyFor("avaliacoes");
           return (
-            <AgencyGoogleReviewsSection
-              key={key}
-              hostname={hostname}
-              container={container}
-              compactSpacing={compactSpacing}
-              copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
-            />
+            <Fragment key={key}>
+              <AgencyGoogleReviewsSection
+                hostname={hostname}
+                container={container}
+                compactSpacing={compactSpacing}
+                copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
+              />
+              {!!profile.partners?.length && (
+                <section id="parceiros" aria-labelledby="agency-partners-title" className="scroll-mt-28 bg-white">
+                  <div className={`${container} py-12 md:py-16`}>
+                    <h2 id="agency-partners-title" className="text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">Parceiros</h2>
+                    <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-4">
+                      {profile.partners.map((partner) => (
+                        <li key={partner.name} className="grid min-h-32 place-content-center justify-items-center gap-2 rounded-xl border border-border bg-white p-4 text-center">
+                          <img src={partner.logo} alt="" loading="lazy" width={78} height={78} className="h-[78px] w-[78px] object-contain" />
+                          <span className="text-sm font-semibold text-foreground">{partner.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
+              )}
+            </Fragment>
           );
         }
 
@@ -2065,6 +2121,7 @@ export default function AgencySiteHome({
       case "newsletter":
         {
         const copy = copyFor("newsletter");
+        const directGroup = safeWhatsappGroupUrl(profile.newsletterDirectGroupUrl);
         if (editorial && profile.newsletterMedia) {
           const media = profile.newsletterMedia;
           return (
@@ -2123,14 +2180,20 @@ export default function AgencySiteHome({
                       </p>
                     </div>
                     <div className="md:justify-self-end">
-                      <Button
+                      {directGroup ? (
+                        <Button asChild size="lg" className="wl-newsletter-cta h-12 w-full rounded-xl border border-white bg-white px-7 text-primary hover:bg-white/90 md:w-auto">
+                          <a href={directGroup} target="_blank" rel="noopener noreferrer">
+                            {copy.cta ?? "Entrar no grupo do WhatsApp"} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+                          </a>
+                        </Button>
+                      ) : <Button
                         size="lg"
                         className="wl-newsletter-cta h-12 w-full rounded-xl border border-[var(--brand-secondary)] bg-[var(--brand-secondary)] px-7 text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)] [&_svg]:text-[var(--brand-on-secondary)] md:w-auto"
                         onClick={() => setInspirationOpen(true)}
                       >
                         {copy.cta ?? "Quero receber inspirações"}{" "}
                         <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
-                      </Button>
+                      </Button>}
                     </div>
                   </div>
                 </div>
@@ -2207,12 +2270,19 @@ export default function AgencySiteHome({
         id="topo"
         className={
           editorial
-            ? (profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || (profile.key === "innovatiBriefing24" || profile.key === "innovatiOfficial") || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial")
+            ? profile.key === "innovatiOfficial"
+              ? "relative min-h-[330px] overflow-hidden md:min-h-[500px]"
+              : (profile.key === "mundoEmCoresBriefing14" || (profile.key === "karibuBriefing21" || profile.key === "karibuOfficial") || (profile.key === "arenaBriefing23" || profile.key === "arenaOfficial") || (profile.key === "bardelliMundoPreview" || profile.key === "bardelliMundoOfficial") || (profile.key === "bagagemNaMaoBriefing19" || profile.key === "bagagemNaMaoOfficial") || profile.key === "innovatiBriefing24" || (profile.key === "shoppingBriefing25" || profile.key === "shoppingOfficial" || profile.key === "immOfficial") || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial")
               ? "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16 lg:h-[500px]"
               : "relative overflow-hidden pb-14 md:min-h-[500px] md:pb-16"
             : "relative overflow-hidden pb-32 md:pb-40"
         }
-        style={editorial ? { paddingBottom: `calc(${topOverlap} + 1.5rem)` } : undefined}
+        style={editorial ? {
+          // Reserve space for the rising quote panel and its heading without clipping hero controls.
+          paddingBottom: profile.key === "innovatiOfficial"
+            ? (showRequests ? Math.round(quoteHalf) : 0) + 56
+            : `calc(${topOverlap} + 1.5rem)`,
+        } : undefined}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         aria-roledescription="carrossel"
@@ -2352,7 +2422,8 @@ export default function AgencySiteHome({
             )}
 
             {slides.length > 1 && (
-              <div className={`flex items-center gap-3 ${profile.heroPresentation?.actionsPlacement === "right" ? "" : editorial ? "mt-6" : "mt-8"}`}>
+              <div data-hero-nav-placement={profile.key === "innovatiOfficial" ? "inline-left" : undefined}
+                className={`flex items-center gap-3 ${profile.key === "innovatiOfficial" ? "mt-6 justify-start" : profile.heroPresentation?.actionsPlacement === "right" ? "" : editorial ? "mt-6" : "mt-8"}`}>
               <button
                 type="button"
                 aria-label="Destaque anterior"

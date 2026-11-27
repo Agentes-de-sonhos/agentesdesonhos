@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { BAGAGEM_NA_MAO_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { resolveSiteStatus } from "@/lib/agencySiteStatus";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
@@ -92,4 +93,100 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("Consultoria de viagens e roteiros sob medida em Franco da Rocha");
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
+});
+
+it("mostra Cativa Operadora logo depois das avaliações da Innovati", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const reviews = container.querySelector("#avaliacoes");
+  const partners = container.querySelector<HTMLElement>("#parceiros")!;
+  expect(reviews?.nextElementSibling).toBe(partners);
+  const section = within(partners);
+  expect(section.getByRole("heading", { name: "Parceiros" })).toBeInTheDocument();
+  expect(section.getAllByRole("listitem")).toHaveLength(1);
+  expect(section.getByText("Cativa Operadora")).toBeInTheDocument();
+  expect(partners.querySelector("img")).toHaveAttribute("src", "/innovati-travel/cativa-operadora.png");
+});
+
+it("coloca Visto Americano depois de Especialidades e ancora a seção da home da Innovati", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const nav = within(container.querySelector("header nav")! as HTMLElement);
+  const visaLink = nav.getByRole("link", { name: "Visto Americano" });
+  expect(visaLink).toHaveAttribute("href", "/#visto-americano");
+  const specialties = nav.getByText("Especialidades", { exact: true });
+  expect(specialties.compareDocumentPosition(visaLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const section = within(container.querySelector("#visto-americano")! as HTMLElement);
+  expect(section.getByRole("heading", { name: "Vai viajar para os Estados Unidos?" })).toBeInTheDocument();
+  fireEvent.click(section.getByRole("button", { name: "Pedir orientação sobre o visto" }));
+  expect(section.getByRole("textbox", { name: "WhatsApp" })).toBeInTheDocument();
+  expect(section.queryByLabelText(/passaporte|documento/i)).toBeNull();
+});
+
+it("mantém os controles da Innovati à esquerda no fluxo do banner, acima da cotação", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const banner = container.querySelector<HTMLElement>("#topo")!;
+  const controls = banner.querySelector<HTMLElement>('[data-hero-nav-placement="inline-left"]')!;
+  const requestArea = container.querySelector<HTMLElement>("#cotacao")!;
+  expect(controls).toHaveClass("justify-start");
+  expect(controls.compareDocumentPosition(requestArea) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(banner.className).not.toContain("lg:h-");
+  expect(parseInt(banner.style.paddingBottom, 10)).toBeGreaterThanOrEqual(56);
+  expect(within(requestArea).queryByRole("button", { name: "Próximo destaque" })).toBeNull();
+  const nav = within(controls);
+  fireEvent.click(nav.getByRole("button", { name: "Próximo destaque" }));
+  expect(nav.getByRole("button", { name: "Ir para o destaque 2" })).toHaveAttribute("aria-current", "true");
+  fireEvent.click(nav.getByRole("button", { name: "Destaque anterior" }));
+  expect(nav.getByRole("button", { name: "Ir para o destaque 1" })).toHaveAttribute("aria-current", "true");
+});
+
+it("publica o Quem Somos integral da Innovati sem afetar a prévia ou outros sites", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const story = resolveSiteProfile(info.hostname).about!.fullStory!;
+  const section = container.querySelector<HTMLElement>("#sobre")!;
+  const about = within(section);
+  expect(about.getByRole("heading", { name: "Olá" })).toBeInTheDocument();
+  expect(story.paragraphs).toHaveLength(9);
+  expect(Array.from(section.querySelectorAll("[data-agency-full-story] > p"), (p) => p.textContent)).toEqual(story.paragraphs);
+  expect(about.getByRole("img", { name: story.portrait.alt })).toHaveAttribute("src", "/innovati-travel/jussara.webp");
+  for (const title of ["Valores", "Missão", "Visão"]) expect(about.getByRole("heading", { name: title })).toBeInTheDocument();
+  expect(about.getAllByRole("listitem").map((li) => li.textContent)).toEqual(story.values);
+  expect(about.getByText(story.mission, { exact: true })).toBeInTheDocument();
+  expect(about.getByText(story.vision, { exact: true })).toBeInTheDocument();
+  expect(resolveSiteProfile("briefing-24-v1.preview.local").about?.fullStory).toBeUndefined();
+  expect(resolveSiteProfile("immturismo.com.br").about?.fullStory).toBeUndefined();
+});
+
+it("inclui Novidades da Innovati após o FAQ, com convite direto e o Instagram da agência", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const node = container.querySelector<HTMLElement>("#novidades")!;
+  expect(container.querySelector("#faq")!.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const section = within(node);
+  expect(section.getByRole("heading", { name: "Receba oportunidades de viagem no WhatsApp" })).toBeInTheDocument();
+  expect(section.getByRole("link", { name: "Entrar no grupo do WhatsApp" })).toHaveAttribute("href", "https://chat.whatsapp.com/KzyQhTCtZGy6iVfgRcOUbI?mode=r_c");
+  expect(node.nextElementSibling).toHaveTextContent("Acompanhe a Innovati Travel");
+});
+
+it.each(["innovati.tur.br", "www.innovati.tur.br"])("abre o certificado certo nos selos do cabeçalho e rodapé de %s", (hostname) => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname, agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><p>Home</p></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const header = within(container.querySelector<HTMLElement>("header")!);
+  const footer = within(container.querySelector<HTMLElement>("footer")!);
+  const headerSeals = header.getAllByRole("button", { name: "Ver certificado Cadastur" });
+  expect(headerSeals).toHaveLength(2); // versão desktop e versão mobile
+  for (const trigger of [...headerSeals, footer.getByRole("button", { name: "Ver certificado Cadastur" })]) {
+    fireEvent.click(trigger);
+    const modal = within(document.body).getByRole("dialog", { name: "Certificado Cadastur" });
+    expect(within(modal).getByRole("img", { name: "Certificado Cadastur da Innovati Travel" })).toHaveAttribute("src", "/innovati-travel/certificado-cadastur.webp");
+    fireEvent.click(within(modal).getByRole("button", { name: "Fechar" }));
+  }
 });
