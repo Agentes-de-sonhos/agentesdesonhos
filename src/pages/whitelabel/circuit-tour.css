@@ -47,6 +47,7 @@
   outline-offset: 2px;
 }
 @media (hover: hover) and (pointer: fine) {
+  .circuit-curti-italia-trem .circuit-highlight:hover span { color: var(--curti-circuit-blue); }
   .circuit-curti-italia-trem .circuit-inclusion:hover { border-color: var(--curti-circuit-green); }
 }
 
