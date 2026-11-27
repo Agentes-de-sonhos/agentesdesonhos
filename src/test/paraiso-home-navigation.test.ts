@@ -15,8 +15,8 @@ describe("Paraíso homepage and main menu", () => {
   it("alternates the ordinary sections without recoloring Explora, the newsletter, or the footer", () => {
     const css = readFileSync("src/index.css", "utf8");
     const home = readFileSync("src/pages/whitelabel/AgencySiteHome.tsx", "utf8");
-    expect(home).toContain('if (section.key === "newsletter") return node;');
-    expect(home).toContain('const tinted = rendered++ % 2 === 1;');
+    expect(home).toContain('section.key !== "newsletter" && rendered++ % 2 === 1');
+    expect(home).toContain('section.key === "faq" || (section.key !== "credentials" && alternatingTint)');
     expect(css).toContain(".wl-paraiso-home-surface > section:not(#explora-monaco)");
     expect(css).toContain("color-mix(in srgb, hsl(var(--wl-green)) 9%, #fff)");
     expect(css).not.toContain(".wl-paraiso-home-surface #rodape");

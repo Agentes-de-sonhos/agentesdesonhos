@@ -2540,10 +2540,10 @@ export default function AgencySiteHome({
         if (!node) return null;
         let tagged = node;
         if (profile.key === "luxuryCurated") {
-          // The newsletter keeps its original treatment; the Explora block
-          // is an independent surface inside the highlights fragment.
-          if (section.key === "newsletter") return node;
-          const tinted = rendered++ % 2 === 1;
+          // FAQ and credentials override the alternating rhythm. The newsletter
+          // has a white outer surface; its blue panel keeps its own color.
+          const alternatingTint = section.key !== "newsletter" && rendered++ % 2 === 1;
+          const tinted = section.key === "faq" || (section.key !== "credentials" && alternatingTint);
           return (
             <div key={section.key} className={`wl-paraiso-home-surface${tinted ? " wl-paraiso-home-tint" : ""}`}
               style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
