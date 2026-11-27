@@ -135,6 +135,7 @@ import disneyMagicKingdomOfficial from "@/assets/disney/official/magic-kingdom.j
 import destinoCruzeiroWish from "@/assets/whitelabel/destinos-com-a-ju/destino-cruzeiro-disney-wish.avif.asset.json";
 import destinoNordesteResort from "@/assets/whitelabel/destinos-com-a-ju/destino-nordeste-resort.jpg.asset.json";
 import { AgencyPhotoMural } from "@/components/whitelabel/AgencyPhotoMural";
+import mscSeaviewExterior from "@/assets/cruise-season/msc-seaview-exterior.jpg";
 import iberostarPraiaDoForte from "@/assets/ads-preview/iberostar-praia-do-forte.avif.asset.json";
 import arenaIberostarLicensed from "@/assets/ads-preview/arena/iberostar-bahia.webp.asset.json";
 import arenaRafaelMickey from "@/assets/arena-rafael-mickey-orlando.jpg.asset.json";
@@ -186,6 +187,8 @@ import {
 
 /** Image slots referenced by the editorial config (config stays asset-free). */
 const DESTINATION_IMAGES: Record<string, string> = {
+  innovatiMscSeaview: mscSeaviewExterior,
+  innovatiJalapao: "/innovati-travel/dunas-jalapao.webp",
   innovatiIguacu: "/innovati-travel/iguacu-ilustracao.svg",
   innovatiNorthAmerica: "/innovati-travel/america-do-norte-ilustracao.svg",
   pristurHeroDisney: "/pristur/hero-disney.jpg",

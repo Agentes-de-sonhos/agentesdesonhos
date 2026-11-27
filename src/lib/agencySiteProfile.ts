@@ -1475,6 +1475,23 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       phoneHidden: true,
       whatsappLabel: "Falar por WhatsApp",
     },
+    destinationsFixedOrder: true,
+    destinations: [
+      { key: "iberostar-waves-bahia", image: "bagagemIberostarWaves", label: "Praia do Forte · Bahia", title: "Iberostar Waves Bahia", text: "Um resort all-inclusive à beira-mar para aproveitar a Praia do Forte em família.", href: "/resorts-brasil/iberostar-bahia", ctaLabel: "Conhecer o resort", service: "hospedagem", enabled: true, order: 1 },
+      { key: "disney-cruise-line", image: "cruzeiroDisneyWish", label: "Disney Cruise Line", title: "Cruzeiros Disney", text: "Personagens, espetáculos e diversão em família em alto-mar.", service: "cruzeiros", ctaLabel: "Consultar cruzeiros Disney", enabled: true, order: 2 },
+      { key: "serra-gaucha", image: "pristurGramado", label: "Rio Grande do Sul", title: "Serra Gaúcha", text: "Gramado, Canela e passeios no seu ritmo, com tempo para aproveitar a gastronomia da região.", service: "pacotes", ctaLabel: "Consultar roteiro", enabled: true, order: 3 },
+      { key: "msc", image: "innovatiMscSeaview", label: "MSC Cruzeiros", title: "Cruzeiros MSC", text: "Conheça o MSC Seaview e descubra o que importa na escolha do navio e da cabine.", href: "/cruzeiros/msc/msc-seaview", ctaLabel: "Conhecer o MSC Seaview", service: "cruzeiros", enabled: true, order: 4 },
+      { key: "orlando", image: "orlandoMagicKingdom", label: "Flórida · Estados Unidos", title: "Orlando", text: "Planeje os dias de parque e reserve tempo para descansar em família.", href: "/ingressos-orlando", ctaLabel: "Planejar os parques", service: "ingressos", enabled: true, order: 5 },
+      { key: "jalapao", image: "innovatiJalapao", label: "Natureza · Tocantins", title: "Expedição Jalapão", text: "Dunas, fervedouros e paisagens do Cerrado. Converse com a Innovati sobre as possibilidades de roteiro.", service: "pacotes", ctaLabel: "Consultar roteiro", enabled: true, order: 6 },
+    ],
+    destinationCredits: [
+      { title: "Gramado (centro)", author: "Yeuxpapilon", source: "https://commons.wikimedia.org/wiki/File:Centro_de_Gramado,_RS.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+      { title: "Dunas do Jalapão", author: "JcPietro", source: "https://commons.wikimedia.org/wiki/File:Dunas_do_Jalap%C3%A3o_-_Brasil_-_Tocantins.jpg", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/" },
+    ],
+    copy: {
+      ...INNOVATI_PREVIEW_PROFILE.copy,
+      destinations: { ...INNOVATI_PREVIEW_PROFILE.copy?.destinations, title: "Escolha a sua próxima viagem", subtitle: "De parques e cruzeiros a resorts e natureza no Brasil. Escolha um destaque para começar a planejar." },
+    },
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,
