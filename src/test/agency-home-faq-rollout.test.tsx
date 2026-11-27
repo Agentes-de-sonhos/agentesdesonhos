@@ -41,6 +41,12 @@ describe("FAQ compacto nas páginas institucionais de agência", () => {
     const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname, agency_name: name, phone };
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const { container } = render(<HelmetProvider><QueryClientProvider client={qc}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+    const destinations = container.querySelector<HTMLElement>("#destinos");
+    expect(destinations).not.toBeNull();
+    if (destinations) expect(within(destinations).getByText("Destaques", { exact: true })).toBeInTheDocument();
+    const highlightsLink = container.querySelector<HTMLAnchorElement>('header nav a[href="/#destinos"]');
+    expect(highlightsLink).not.toBeNull();
+    if (highlightsLink) expect(highlightsLink).toHaveTextContent(/^Destaques$/);
     const faq = within(container.querySelector<HTMLElement>("#faq")!);
     const block = faq.getByRole("region", { name: "Ainda tem alguma dúvida?" });
     const row = within(block);

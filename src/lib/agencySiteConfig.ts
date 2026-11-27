@@ -9,6 +9,8 @@
 
 import dmcAcolhimentoLisboa from "@/assets/whitelabel/100-limites/dmc-acolhimento-lisboa.jpg";
 
+export const AGENCY_HIGHLIGHTS_LABEL = "Destaques";
+
 export type AgencySectionKey =
   | "highlights"
   | "dmc"

@@ -9,6 +9,7 @@ import { usePublicBlogList, type PublicBlogCard } from "@/hooks/usePublicBlog";
 import { formatDateLong } from "@/lib/blog/blogUtils";
 import { AgencyBrandSpinner } from "@/components/whitelabel/AgencyBrandSpinner";
 import { cn } from "@/lib/utils";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 
 export default function AgencyBlogPage({ info }: { info: AgencyDomainInfo }) {
   const [params, setParams] = useSearchParams();
@@ -18,6 +19,8 @@ export default function AgencyBlogPage({ info }: { info: AgencyDomainInfo }) {
   const [term, setTerm] = useState(q);
   const { data, isLoading } = usePublicBlogList(info.hostname, { q, category, page });
   const name = agencyDisplayName(info);
+  const comingSoon = resolveSiteProfile(info.hostname).key === "bagagemNaMaoOfficial" &&
+    !q && !category && page === 1 && data?.total === 0 && !data.featured && data.items.length === 0;
   const canonical = `https://${info.hostname}/blog${page > 1 ? `?pagina=${page}` : ""}`;
 
   const href = (p: Record<string, string | number | null>) => {
@@ -40,10 +43,11 @@ export default function AgencyBlogPage({ info }: { info: AgencyDomainInfo }) {
       </Helmet>
       <header className="max-w-2xl space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Blog</p>
-        <h1 className="font-display text-3xl font-semibold md:text-5xl">Ideias e dicas para a sua próxima viagem</h1>
+        <h1 className="font-display text-3xl font-semibold md:text-5xl">{comingSoon ? "Em breve, novos conteúdos por aqui" : "Ideias e dicas para a sua próxima viagem"}</h1>
+        {comingSoon && <p className="text-muted-foreground">A Bagagem na Mão Viagens está preparando dicas, roteiros e novidades para a sua próxima viagem.</p>}
       </header>
 
-      <div className="mt-8 flex flex-wrap items-center gap-3">
+      {!comingSoon && <div className="mt-8 flex flex-wrap items-center gap-3">
         <form
           className="relative w-full max-w-sm"
           onSubmit={(e) => { e.preventDefault(); setParams(new URLSearchParams(href({ busca: term.trim(), pagina: null }).split("?")[1] ?? "")); }}
@@ -59,9 +63,9 @@ export default function AgencyBlogPage({ info }: { info: AgencyDomainInfo }) {
             ))}
           </nav>
         ) : null}
-      </div>
+      </div>}
 
-      {isLoading ? (
+      {comingSoon ? null : isLoading ? (
         <div className="flex justify-center p-16"><AgencyBrandSpinner size="lg" /></div>
       ) : !data || (!data.featured && data.items.length === 0) ? (
         <p className="mt-12 text-center text-muted-foreground">Nenhum artigo encontrado.</p>

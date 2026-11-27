@@ -56,7 +56,10 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(within(container.querySelector<HTMLElement>("#cotacao")!).getByRole("button", { name: "Solicitar", exact: true })).toBeInTheDocument();
     const clubMed = within(screen.getByTestId("club-med-snow-home"));
     expect(clubMed.getByRole("link", { name: "Conheça os resorts Club Med" })).toHaveAttribute("href", "/club-med-neve");
-    const desktopNav = within(container.querySelector<HTMLElement>("header nav")!);
+    const headerNav = container.querySelector<HTMLElement>("header nav")!;
+    expect(Array.from(headerNav.children).map((el) => el.matches("a") ? el.textContent?.trim() : el.firstElementChild?.textContent?.trim())).toEqual(["Início", "Destaques", "Especialidades", "Blog", "Sobre"]);
+    const desktopNav = within(headerNav);
+    expect(desktopNav.getByRole("link", { name: "Blog", exact: true })).toHaveAttribute("href", "/blog");
     const orlandoFlyout = desktopNav.getByRole("button", { name: "Orlando" });
     expect(orlandoFlyout).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(orlandoFlyout);

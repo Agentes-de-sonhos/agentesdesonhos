@@ -58,7 +58,7 @@ import {
 import { resolveSiteContacts } from "@/lib/agencySiteContacts";
 import { resolveSiteProfile, type AgencySiteNavItem } from "@/lib/agencySiteProfile";
 export type { AgencySiteNavItem } from "@/lib/agencySiteProfile";
-import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
+import { AGENCY_HIGHLIGHTS_LABEL, sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 import { agencyContextHref, agencySiteHref } from "@/lib/agencyContextLink";
 import { useAgencyBrowserTitle } from "@/hooks/useAgencyBrowserTitle";
 import { AgencyAssistLauncher } from "@/components/whitelabel/AgencyAssistLauncher";
@@ -170,7 +170,14 @@ export function AgencyBrandBar({
   const headerBrand = resolveAgencyHeaderBrandPreset(info.hostname);
   const headerLogoUrl = headerBrand.logoUrl ?? logoUrl;
   const blogStatus = usePublicBlogStatus(navOverride || resolveSiteProfile(info.hostname).presentation ? null : info.hostname).data;
-  const navAll = navOverride ?? withBlogLink(resolveSiteProfile(info.hostname).headerNav ?? siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
+  const navProfile = resolveSiteProfile(info.hostname);
+  const headerLinks = navOverride ?? withBlogLink(navProfile.headerNav ?? siteNavLinks(info.hostname), !!(blogStatus?.enabled && blogStatus?.has_posts));
+  const isHighlightsLink = (item: AgencySiteNavItem) => /^\/?#destinos$/.test(item.to) && !item.children?.length;
+  const navAll = headerLinks.map((item) => isHighlightsLink(item) ? { ...item, label: AGENCY_HIGHLIGHTS_LABEL } : item);
+  if (!navOverride && sectionOverrideEnabled(navProfile.sections?.destinations) && !navAll.some(isHighlightsLink)) {
+    const before = navAll.findIndex(({ to }, index) => index > 0 && ["/#sobre", "/blog", "/area-do-cliente"].includes(to));
+    navAll.splice(before >= 0 ? before : navAll.length, 0, { label: AGENCY_HIGHLIGHTS_LABEL, to: "/#destinos" });
+  }
 
   const karibuHeader = ["karibuBriefing21", "karibuOfficial"].includes(resolveSiteProfile(info.hostname).key);
 

@@ -72,7 +72,7 @@ import { isGoogleReviewsEnabled } from "@/lib/agencyGoogleReviews";
 import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
 import { buildAgencyJsonLd } from "@/lib/agencySiteJsonLd";
 import {
-  DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
+  AGENCY_HIGHLIGHTS_LABEL, DEFAULT_DIFFERENTIALS, DEFAULT_FAQ, DEFAULT_HIGHLIGHTS,
   normalizeInstitutionalText,
   resolveDestinations, resolveDmc, resolveHeroSlides, resolveModules, resolveSections,
   type AgencySectionKey, type AgencySectionOverride,
@@ -1259,7 +1259,7 @@ export default function AgencySiteHome({
             <section id="destinos" className="wl-soft-gradient scroll-mt-32 bg-[hsl(var(--wl-sand))] md:scroll-mt-36">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <SectionHeading
-                  eyebrow={copy.kicker ?? "DESTINOS"}
+                  eyebrow={AGENCY_HIGHLIGHTS_LABEL}
                 title={copy.title ?? "Descubra o seu próximo destino"}
                   subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
                   editorial
@@ -1374,7 +1374,7 @@ export default function AgencySiteHome({
           <section key={key} id="destinos" className="border-y border-border/60 bg-muted/30">
             <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
               <SectionHeading
-                eyebrow={copy.kicker ?? "DESTINOS"}
+                eyebrow={AGENCY_HIGHLIGHTS_LABEL}
                 title={copy.title ?? "Descubra o seu próximo destino"}
                 subtitle={copy.subtitle ?? "Inspirações que a nossa equipe conhece de perto. Escolha uma e receba uma proposta sob medida."}
               />

@@ -1343,6 +1343,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     nav: BAGAGEM_NA_MAO_PREVIEW_PROFILE.nav?.map((item) => item.label === "Especialidades" ? { ...item, to: "/#ingressos-orlando" } : item),
     headerNav: [
       { label: "Início", to: "/" },
+      { label: "Destaques", to: "/#destinos" },
       { label: "Especialidades", to: "/#ingressos-orlando", children: [
         { label: "Orlando", to: "/#ingressos-orlando", children: [
           { label: "Parques e experiências", to: "/#ingressos-orlando" },
@@ -1353,7 +1354,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
         { label: "Cruzeiros 26/27", to: "/#autoridade" },
         { label: "Club Med", to: "/#campanhas" },
       ] },
-      { label: "Destinos", to: "/#destinos" },
+      { label: "Blog", to: "/blog" },
       { label: "Sobre", to: "/#sobre", children: [
         { label: "Quem somos", to: "/#sobre" },
         { label: "Perguntas frequentes", to: "/#faq" },
