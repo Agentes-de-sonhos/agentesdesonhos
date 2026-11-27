@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveAgencyHeaderBrandPreset } from "@/lib/agencySiteBrand";
+import { logoIncludesWordmark, resolveAgencyHeaderBrandPreset } from "@/lib/agencySiteBrand";
 
 const TARGET_HOSTS = [
   "destinoscomaju.com.br",
@@ -71,4 +71,10 @@ describe("logotipo dobrado da Drica Viagens", () => {
       "h-12 w-auto max-w-[200px] object-contain",
     );
   });
+});
+
+it.each(["innovati.tur.br", "www.innovati.tur.br"])("não repete o nome junto ao logo no cabeçalho de %s", (hostname) => {
+  expect(logoIncludesWordmark(hostname)).toBe(true);
+  expect(resolveAgencyHeaderBrandPreset(hostname).logoOnly).toBe(false);
+  expect(logoIncludesWordmark("innovati.tur.br.example.com")).toBe(false);
 });

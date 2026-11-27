@@ -120,6 +120,8 @@ const FAVICON_BY_HOSTNAME: Record<string, string> = {
  * Quando true, a apresentação NÃO repete o nome ao lado do logotipo.
  */
 const LOGO_WITH_WORDMARK_HOSTS = new Set([
+  "innovati.tur.br",
+  "www.innovati.tur.br",
   "briefing-29-v1.preview.local",
   "briefing-28-v1.preview.local",
   "briefing-27-v1.preview.local",
