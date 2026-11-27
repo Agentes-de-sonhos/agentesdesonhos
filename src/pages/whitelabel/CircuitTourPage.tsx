@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fxRateUrl, isValidRate } from "@/lib/fxConversion";
 import { circuitNights, circuitMoney, convertCircuitPrice, circuitDepartureDate, tourismRate, upcomingDepartures } from "@/lib/circuits/presentation";
 import { CircuitQuoteDialog } from "@/components/whitelabel/CircuitQuoteDialog";
+import { ItaliaEmTremRouteMap } from "@/components/whitelabel/ItaliaEmTremRouteMap";
 import { CircuitTimeline } from "@/components/whitelabel/CircuitTimeline";
 import "./circuit-tour.css";
 import { useParams } from "react-router-dom";
@@ -31,6 +32,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
   const [open, setOpen] = useState<string[]>(["d1"]);
   const [departure, setDeparture] = useState<{ date: string; label: string } | null>(null);
   const enhanced = c.enhancedPresentation === true;
+  const rail = c.slug === "italia-em-trem";
   const { data: fx, isError: fxError } = useQuery({
     queryKey: ["circuit-fx", c.currency, "BRL"],
     enabled: enhanced && c.currency !== "BRL",
@@ -62,7 +64,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <div className={`${wrap} absolute inset-x-0 bottom-0 pb-10`}>
           <span className="inline-block rounded-full bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">{c.badge}</span>
           <h1 className="mt-3 text-4xl font-semibold leading-tight text-background md:text-6xl">{c.title}</h1>
-          {enhanced ? <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-2xl leading-snug text-background md:text-[32px]">{c.cities.map((city, index) => { const nights = circuitNights(c, city); return <span key={city} className="inline-flex items-center gap-4">{index > 0 && <span aria-hidden="true" className="h-6 w-px bg-background/40" />}<span>{city}{nights > 0 && <span className="whitespace-nowrap"> • {nights} {nights === 1 ? "noite" : "noites"}</span>}</span></span>; })}</div> : <p className="mt-2 text-background/90">{c.cities.join(" · ")}</p>}
+          {enhanced ? <div className={rail ? "mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base leading-snug text-background md:text-lg" : "mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-2xl leading-snug text-background md:text-[32px]"}>{c.cities.map((city, index) => { const nights = circuitNights(c, city); return <span key={city} className="inline-flex items-center gap-4">{index > 0 && <span aria-hidden="true" className="h-6 w-px bg-background/40" />}<span>{city}{nights > 0 && <span className="whitespace-nowrap"> • {nights} {nights === 1 ? "noite" : "noites"}</span>}</span></span>; })}</div> : <p className="mt-2 text-background/90">{c.cities.join(" · ")}</p>}
         </div>
       </section>
 
@@ -74,7 +76,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           <div className="flex flex-wrap gap-2">
             {[
               { i: Clock, t: c.duration },
-              { i: MapPin, t: `${c.cities.length} cidades` },
+              { i: MapPin, t: rail ? `${c.cities.length} cidades-base` : `${c.cities.length} cidades` },
               { i: Compass, t: c.countries.join(", ") },
               ...(c.code ? [{ i: Star, t: `Cód. ${c.code}` }] : []),
             ].map(({ i: I, t }) => (
@@ -145,6 +147,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
               <Button variant="outline" size="sm" onClick={() => setOpen([])}>Recolher todos</Button>
             </div>}
           </div>
+          {rail && <ItaliaEmTremRouteMap circuit={c} />}
           {enhanced ? <CircuitTimeline days={c.itinerary} /> : <Accordion type="multiple" value={open} onValueChange={setOpen} className="mt-6 space-y-3">
             {c.itinerary.map((d) => (
               <AccordionItem key={d.day} value={`d${d.day}`} className="rounded-2xl border border-border bg-card px-5">
