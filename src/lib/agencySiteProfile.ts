@@ -1363,7 +1363,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     sections: {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.sections,
       offers: { enabled: true, order: 0 },
-      signature: { enabled: true, order: 0.5 },
+      signature: { enabled: false, order: 0.5 },
       orlando: { enabled: true, order: 1.5 },
       destinations: { enabled: true, order: 2 },
       resorts: { enabled: true, order: 3.5 },

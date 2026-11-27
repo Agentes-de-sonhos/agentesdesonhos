@@ -2338,6 +2338,11 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface.wl-bagagem-home-tint {
   background: var(--wl-mundo-gradient) !important;
 }
+/* Vence os degradês herdados do template compartilhado em Destinos e Resorts. */
+.wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface:has(> :is(#ofertas, #destinos, #resorts)) {
+  background-color: #fff !important;
+  background-image: none !important;
+}
 .wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface:not(.wl-bagagem-season) > section {
   background: transparent !important;
 }

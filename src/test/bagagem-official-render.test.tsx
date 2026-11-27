@@ -78,8 +78,10 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(within(disclosure as HTMLElement).getByRole("link", { name: "Disney" })).toHaveAttribute("href", "/disney");
     fireEvent.click(mobileToggle);
     const surfaces = Array.from(container.querySelectorAll<HTMLElement>("[data-bagagem-section]"));
-    expect(surfaces.slice(0, 6).map((item) => item.dataset.bagagemSection)).toEqual(["offers", "signature", "orlando", "destinations", "modules", "resorts"]);
-    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["offers", "orlando", "modules", "differentials", "faq"]);
+    expect(surfaces.slice(0, 5).map((item) => item.dataset.bagagemSection)).toEqual(["offers", "orlando", "destinations", "modules", "resorts"]);
+    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["orlando", "modules", "differentials", "faq"]);
+    expect(container.querySelector("#assinatura")).toBeNull();
+    expect(container.querySelector("#ofertas")?.parentElement).not.toHaveClass("wl-bagagem-home-tint");
     expect(container.querySelector("#destinos")?.parentElement).not.toHaveClass("wl-bagagem-home-tint");
     expect(container.querySelector("#resorts")?.parentElement).not.toHaveClass("wl-bagagem-home-tint");
     expect(container.querySelector("#faq")?.parentElement).toHaveClass("wl-bagagem-home-tint");

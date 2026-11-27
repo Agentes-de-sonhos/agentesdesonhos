@@ -2481,8 +2481,8 @@ export default function AgencySiteHome({
           // Conta apenas as seções exibidas e reinicia no branco depois da faixa azul.
           const cruise = section.key === "authority";
           const offersIntro = section.key === "offers";
-          const alwaysWhite = section.key === "destinations" || section.key === "resorts" || section.key === "newsletter";
-          const alwaysTinted = offersIntro || section.key === "faq";
+          const alwaysWhite = offersIntro || section.key === "destinations" || section.key === "resorts" || section.key === "newsletter";
+          const alwaysTinted = section.key === "orlando" || section.key === "modules" || section.key === "faq";
           const gradient = alwaysTinted || (!cruise && !alwaysWhite && rendered % 2 === 1);
           if (!offersIntro) rendered = cruise ? 0 : rendered + 1;
           return (
