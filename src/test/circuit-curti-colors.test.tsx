@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -8,7 +8,10 @@ import { ITALIA_EM_TREM } from "@/lib/circuits/italiaEmTrem";
 import { LESTE_EUROPEU_PREMIUM_2027 } from "@/lib/circuits/lesteEuropeuPremium2027";
 import { CircuitTourView } from "@/pages/whitelabel/CircuitTourPage";
 
-vi.mock("@/components/whitelabel/CircuitQuoteDialog", () => ({ CircuitQuoteDialog: () => null }));
+vi.mock("@/hooks/useAgencySiteRequest", () => {
+  const request = { state: "idle", error: null, submit: vi.fn(), reset: vi.fn() };
+  return { useAgencySiteRequest: () => request };
+});
 
 function renderCircuit(circuit = ITALIA_EM_TREM, hostname = "curtiviagens.com.br") {
   const client = new QueryClient();
@@ -25,6 +28,7 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(page.querySelectorAll(".circuit-eyebrow")).toHaveLength(8);
     expect(page.querySelectorAll(".circuit-inclusion-icon svg")).toHaveLength(7);
     expect(page.querySelectorAll(".circuit-highlight svg")).toHaveLength(6);
+    expect(page.querySelectorAll(".circuit-note.circuit-inclusion")).toHaveLength(6);
     expect([...page.querySelectorAll(".circuit-timeline-prefix")].map(el => el.textContent)).toEqual(Array(12).fill("Dia"));
     expect([...page.querySelectorAll(".circuit-timeline-number")].map(el => el.textContent)).toEqual(Array.from({ length: 12 }, (_, i) => String(i + 1)));
     expect(page.querySelectorAll(".circuit-calendar-month")).toHaveLength(7);
@@ -32,6 +36,18 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(monthGrids.map(grid => grid.querySelectorAll(".circuit-calendar-day").length)).toEqual([30, 31, 30, 31, 31, 30, 31]);
     expect(screen.getByRole("button", { name: "Solicitar orçamento: 1 de Abril 2027" })).toHaveClass("circuit-calendar-day");
     expect(screen.getByRole("button", { name: "Ampliar mapa do roteiro" })).toBeVisible();
+  });
+
+  it("destaca só abril a julho e abre o orçamento da Curti com a data escolhida", () => {
+    const { container } = renderCircuit();
+    const blueMonths = [...container.querySelectorAll('.circuit-calendar-month[data-priority-month="true"]')];
+    expect(blueMonths.map(month => month.querySelector("p")?.textContent)).toEqual(["Abril 2027", "Maio 2027", "Junho 2027", "Julho 2027"]);
+    expect(screen.getByText("Curti Viagens.", { exact: true })).toHaveClass("whitespace-nowrap");
+    fireEvent.click(screen.getByRole("button", { name: "Solicitar orçamento: 12 de Julho 2027" }));
+    const dialog = screen.getByRole("dialog", { name: "Solicitar orçamento" });
+    expect(dialog).toHaveClass("circuit-curti-quote");
+    expect(within(dialog).getByText("Saída selecionada: 12 de Julho 2027")).toBeVisible();
+    expect(within(dialog).getByRole("button", { name: "Solicitar orçamento" })).toHaveClass("circuit-quote-action");
   });
 
   it("mostra a xícara de café somente nos dias previstos no PDF, a partir do dia 2", () => {
@@ -72,5 +88,6 @@ describe("Identidade visual de Itália em Trem", () => {
     const { container } = renderCircuit(LESTE_EUROPEU_PREMIUM_2027, "immturismo.com.br");
     expect(container.querySelector(".circuit-curti-italia-trem")).toBeNull();
     expect(container.querySelector(".circuit-calendar-grid")).toBeNull();
+    expect(container.querySelector(".circuit-note")).toBeNull();
   });
 });

@@ -34,6 +34,9 @@
   color: #171717;
   padding: 0.75rem;
 }
+.circuit-curti-italia-trem .circuit-calendar-month[data-priority-month="true"] {
+  border-color: var(--curti-circuit-blue);
+}
 .circuit-curti-italia-trem .circuit-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -76,4 +79,25 @@
 .circuit-curti-italia-trem .circuit-price-quote:focus-visible {
   outline: 2px solid var(--curti-circuit-blue);
   outline-offset: 2px;
+}
+
+
+/* O diálogo fica em um portal; os tokens da marca vêm do layout da agência. */
+.circuit-curti-quote {
+  --circuit-quote-blue: var(--brand-primary, #2502ff);
+  border-color: var(--brand-border, #e5e1ff);
+}
+.circuit-curti-quote :is(.circuit-quote-title, .circuit-quote-accent) {
+  color: var(--circuit-quote-blue);
+}
+.circuit-curti-quote .circuit-quote-action,
+.circuit-curti-quote [role="checkbox"][data-state="checked"] {
+  background-color: var(--circuit-quote-blue);
+  color: var(--brand-on-primary, #fff);
+}
+.circuit-curti-quote .circuit-quote-action:hover:not(:disabled) {
+  background-color: var(--brand-primary-hover, #2002d9);
+}
+.circuit-curti-quote :is(input, textarea, button, a):focus-visible {
+  --tw-ring-color: var(--brand-focus-ring, #639682);
 }

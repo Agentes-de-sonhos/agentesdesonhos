@@ -186,7 +186,9 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
       <section id="saidas-garantidas" className="wl-alt-gradient scroll-mt-24"><div className={`${wrap} py-14`}>
         <p className={eyebrow}>{enhanced ? "Escolha sua data de embarque" : "Calendário"}</p>
         <h2 className={h2}>{c.departuresTitle ?? (enhanced ? "Saídas garantidas aos domingos" : "Saídas garantidas")}</h2>
-        {enhanced && <p className="mt-3 max-w-2xl text-base leading-7 text-muted-foreground">{c.departurePrompt ?? "Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento"} com a {info.agency_name ?? "agência"}.</p>}
+        {enhanced && <p className={`mt-3 text-base leading-7 text-muted-foreground${rail ? "" : " max-w-2xl"}`}>
+          {rail ? <>Peça seu orçamento à <span className="whitespace-nowrap">Curti Viagens.</span></> : <>{c.departurePrompt ?? "Clique no domingo desejado para verificar a disponibilidade e solicitar seu orçamento"} com a {info.agency_name ?? "agência"}.</>}
+        </p>}
         {enhanced && brGuide.length > 0 && <p className="mt-3 inline-flex items-center gap-4 rounded-2xl border border-primary/30 bg-card px-4 py-2 text-sm"><span aria-hidden="true" className="relative h-5 w-5 shrink-0 rounded bg-[#009C3B] ring-2 ring-primary ring-offset-2"><GuideCornerFlag /></span><span> <strong className="font-semibold text-primary">Datas destacadas</strong> têm guia acompanhante brasileiro exclusivo. As demais contam com guia em espanhol.</span></p>}
         {enhanced ? (
           <div className="relative mt-6">
@@ -194,7 +196,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
             {!monthEdges.end && <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="circuit-calendar-arrow absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>}
             <div ref={monthsRef} onScroll={updateMonthEdges} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {upcoming.map((m) => (
-                <div key={m.month} className="circuit-calendar-month w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
+                <div key={m.month} data-priority-month={rail && /^0[4-7]$/.test(circuitDepartureDate(m.month, 1).slice(5, 7)) ? "true" : undefined} className="circuit-calendar-month w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
                   <div className={rail ? "circuit-calendar-grid mt-3" : "mt-3 flex flex-wrap gap-2"}>
                     {m.days.map((d) => { const iso = circuitDepartureDate(m.month, d); const br = brGuide.includes(iso); return (
@@ -230,7 +232,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
               <p className={eyebrow}>Antes de viajar</p>
               <h2 className={h2}>Informações importantes</h2>
               <div className="mt-6 space-y-3">
-                {c.notes.map((n) => <div key={n.title} className="rounded-2xl border border-border bg-card p-4"><p className="font-semibold">{n.title}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{n.text}</p></div>)}
+                {c.notes.map((n) => <div key={n.title} className={`rounded-2xl border border-border bg-card p-4${rail ? " circuit-note circuit-inclusion" : ""}`}><p className="font-semibold">{n.title}</p><p className="mt-1 text-sm leading-6 text-muted-foreground">{n.text}</p></div>)}
               </div>
             </div>
           ) : null}

@@ -33,14 +33,15 @@ export function CircuitQuoteDialog({ hostname, circuit, departure, onClose }: { 
   const [contact, setContact] = useState<CircuitContact>(emptyContact);
   const [honeypot, setHoneypot] = useState("");
   const submitting = useRef(false);
+  const curti = circuit.slug === "italia-em-trem";
   const presentation = hostname.endsWith(".preview.local") || hostname.endsWith(".demo.local");
   useEffect(() => { if (departure) { setContact(emptyContact()); setHoneypot(""); reset(); } }, [departure, reset]);
   const change = <K extends keyof CircuitContact>(key: K, value: CircuitContact[K]) => setContact(current => ({ ...current, [key]: value }));
 
   return <Dialog open={!!departure} onOpenChange={open => { if (!open && state !== "submitting") onClose(); }}>
-    <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg" onEscapeKeyDown={event => { if (state === "submitting") event.preventDefault(); }} onPointerDownOutside={event => { if (state === "submitting") event.preventDefault(); }}>
-      <DialogHeader><DialogTitle>Solicitar orçamento</DialogTitle><DialogDescription><span className="block font-semibold text-foreground">{circuit.title}</span><span className="mt-1 block">Saída selecionada: {departure?.label}</span></DialogDescription></DialogHeader>
-      {state === "success" ? <div role="status" className="py-6 text-center"><CheckCircle2 className="mx-auto h-12 w-12 text-primary" /><h3 className="mt-4 text-xl font-semibold">Solicitação enviada com sucesso!</h3><p className="mt-3 text-muted-foreground">Recebemos seu pedido de orçamento para {circuit.title}. Nossa equipe entrará em contato com você em breve.</p><Button className="mt-6" onClick={onClose}>Fechar</Button></div> :
+    <DialogContent className={`max-h-[90dvh] overflow-y-auto sm:max-w-lg${curti ? " circuit-curti-quote" : ""}`} onEscapeKeyDown={event => { if (state === "submitting") event.preventDefault(); }} onPointerDownOutside={event => { if (state === "submitting") event.preventDefault(); }}>
+      <DialogHeader><DialogTitle className="circuit-quote-title">Solicitar orçamento</DialogTitle><DialogDescription><span className="block font-semibold text-foreground">{circuit.title}</span><span className="mt-1 block">Saída selecionada: {departure?.label}</span></DialogDescription></DialogHeader>
+      {state === "success" ? <div role="status" className="py-6 text-center"><CheckCircle2 className="circuit-quote-accent mx-auto h-12 w-12 text-primary" /><h3 className="mt-4 text-xl font-semibold">Solicitação enviada com sucesso!</h3><p className="mt-3 text-muted-foreground">Recebemos seu pedido de orçamento para {circuit.title}. Nossa equipe entrará em contato com você em breve.</p><Button className="circuit-quote-action mt-6" onClick={onClose}>Fechar</Button></div> :
       <form className="space-y-5" onSubmit={async event => {
         event.preventDefault();
         if (!departure || !validCircuitContact(contact) || submitting.current || presentation) return;
@@ -56,11 +57,11 @@ export function CircuitQuoteDialog({ hostname, circuit, departure, onClose }: { 
           <div className="grid grid-cols-2 gap-4"><PassengerStepper label="Adultos" value={contact.adults} min={1} max={30} onChange={value => change("adults", value)} /><PassengerStepper label="Crianças" value={contact.children} min={0} max={12} onChange={value => change("children", value)} /></div>
           <div><Label htmlFor="circuit-notes">Observações (opcional)</Label><Textarea id="circuit-notes" maxLength={2000} value={contact.notes} onChange={event => change("notes", event.target.value)} className="mt-2" /></div>
           <div className="hidden" aria-hidden="true"><input name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={event => setHoneypot(event.target.value)} /></div>
-          <div className="flex items-start gap-3"><Checkbox id="circuit-consent" checked={contact.consent} onCheckedChange={value => change("consent", value === true)} /><Label htmlFor="circuit-consent" className="text-sm font-normal leading-6">Concordo com o envio dos meus dados para que a agência entre em contato comigo sobre este orçamento, conforme a <a href={agencySiteHref("/politicasdeprivacidade")} target="_blank" rel="noopener noreferrer" className="text-primary underline">Política de Privacidade</a>.</Label></div>
+          <div className="flex items-start gap-3"><Checkbox id="circuit-consent" checked={contact.consent} onCheckedChange={value => change("consent", value === true)} /><Label htmlFor="circuit-consent" className="text-sm font-normal leading-6">Concordo com o envio dos meus dados para que a agência entre em contato comigo sobre este orçamento, conforme a <a href={agencySiteHref("/politicasdeprivacidade")} target="_blank" rel="noopener noreferrer" className="circuit-quote-accent text-primary underline">Política de Privacidade</a>.</Label></div>
         </fieldset>
         {presentation && <p role="status" className="text-sm text-muted-foreground">Apresentação: nenhum dado será enviado.</p>}
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" size="lg" className="w-full" disabled={!validCircuitContact(contact) || state === "submitting" || presentation}>{state === "submitting" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Solicitar orçamento</Button>
+        <Button type="submit" size="lg" className="circuit-quote-action w-full" disabled={!validCircuitContact(contact) || state === "submitting" || presentation}>{state === "submitting" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Solicitar orçamento</Button>
       </form>}
     </DialogContent>
   </Dialog>;
