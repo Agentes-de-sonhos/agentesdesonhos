@@ -38,6 +38,22 @@ import type { AgencySiteProfile } from "@/lib/agencySiteProfile";
 export const EDITORIAL_DMC: AgencySiteProfile = {
   key: "editorialDmc",
   resortsMap: { enabled: true },
+  headerNav: [
+    { label: "Início", to: "/" },
+    { label: "Destaques", to: "/#destinos" },
+    { label: "DMC em Portugal", to: "/#dmc-agencias" },
+    { label: "Visto Americano", to: "/#visto-americano" },
+    { label: "Especialidades", to: "/#ingressos-orlando", children: [
+      { label: "Orlando", to: "/#ingressos-orlando", children: [
+        { label: "Disney", to: "/disney" },
+        { label: "Universal", to: "/universal" },
+        { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
+      ] },
+      { label: "Resorts no Brasil", to: "/#resorts" },
+      { label: "Cruzeiros 26/27", to: "/cruzeiros/temporada-brasileira-2026-2027" },
+    ] },
+    { label: "Blog", to: "/blog" },
+  ],
   nav: [
     { label: "Sobre", to: "/#sobre" },
     {

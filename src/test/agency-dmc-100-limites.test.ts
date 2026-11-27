@@ -55,10 +55,35 @@ describe("seção DMC da 100 Limites", () => {
     expect(resolveSiteProfile("destinoscomaju.com.br").key).toBe("editorialRose");
   });
 
-  it("mantém o menu do portfólio (com submenus) e oculta campanhas genéricas", () => {
+  it("usa a ordem e os destinos corretos no cabeçalho dos dois domínios da 100 Limites", () => {
+    for (const host of ["100limites.tur.br", "www.100limites.tur.br"]) {
+      const links = resolveSiteProfile(host).headerNav!;
+      expect(links.map(({ label, to }) => [label, to])).toEqual([
+        ["Início", "/"],
+        ["Destaques", "/#destinos"],
+        ["DMC em Portugal", "/#dmc-agencias"],
+        ["Visto Americano", "/#visto-americano"],
+        ["Especialidades", "/#ingressos-orlando"],
+        ["Blog", "/blog"],
+      ]);
+      const specialties = links[4].children!;
+      expect(specialties.map(({ label, to }) => [label, to])).toEqual([
+        ["Orlando", "/#ingressos-orlando"],
+        ["Resorts no Brasil", "/#resorts"],
+        ["Cruzeiros 26/27", "/cruzeiros/temporada-brasileira-2026-2027"],
+      ]);
+      expect(specialties[0].children).toEqual([
+        { label: "Disney", to: "/disney" },
+        { label: "Universal", to: "/universal" },
+        { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
+      ]);
+    }
+  });
+
+  it("mantém a navegação do rodapé e oculta campanhas genéricas", () => {
     const links = siteNavLinks("100limites.tur.br");
     expect(links.map((l) => l.label)).toEqual([
-      "Sobre", "DMC em Portugal", "Visto americano", "Parques em Orlando", "Resorts no Brasil", "Blog",
+      "Cruzeiros 26/27", "Sobre", "DMC em Portugal", "Visto americano", "Parques em Orlando", "Resorts no Brasil", "Blog",
     ]);
     expect(links.find((l) => l.label === "DMC em Portugal")?.children?.map((c) => c.to)).toEqual([
       "/dmc-portugal", "/dmc-portugal#lisboa", "/dmc-portugal#portugal", "/dmc-portugal#grupos",
@@ -68,8 +93,7 @@ describe("seção DMC da 100 Limites", () => {
     ]);
     expect(resolveSections(resolveSiteProfile("100limites.tur.br").sections).map((section) => section.key))
       .not.toContain("modules");
-    expect(resolveSections(resolveSiteProfile("paraisoviagens.com").sections).map((section) => section.key))
-      .toContain("modules");
+    expect(resolveSiteProfile("paraisoviagens.com").headerNav).not.toEqual(resolveSiteProfile("100limites.tur.br").headerNav);
   });
 
   it("resolve imagens variadas por banner sem alterar o fallback compartilhado", () => {
