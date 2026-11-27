@@ -57,9 +57,10 @@ it("reorganiza somente o cabeçalho público da Drica e retira os quatro cartõe
   expect(official.headerNav?.map(x => x.label)).toEqual(["Início", "Destaques", "Especialidades"]);
   const specialties = official.headerNav?.[2]?.children;
   expect(specialties?.map(x => [x.label, x.to])).toEqual([
-    ["Orlando", "/#ingressos-orlando"], ["Cruzeiros 26/27", "/#autoridade"], ["Eventos Esportivos", "/#esportes"], ["Resorts no Brasil", "/#resorts"],
+    ["Orlando", "/#ingressos-orlando"], ["Cruzeiros 26/27", "/#autoridade"], ["Resorts no Brasil", "/#resorts"],
   ]);
   expect(specialties?.[0]?.children?.map(x => x.to)).toEqual(["/disney", "/universal", "/#ingressos-orlando"]);
+  expect(official.sections?.sports?.enabled).toBe(true);
   expect(official.conciergePoints).toEqual([]);
   expect(p.conciergePoints).toHaveLength(4);
   expect(siteThemeRootClass("dricaviagens.com.br")).toContain("wl-drica-official");

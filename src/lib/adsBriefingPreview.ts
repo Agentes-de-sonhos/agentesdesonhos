@@ -1683,7 +1683,6 @@ export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
         { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
       ] },
       { label: "Cruzeiros 26/27", to: "/#autoridade" },
-      { label: "Eventos Esportivos", to: "/#esportes" },
       { label: "Resorts no Brasil", to: "/#resorts" },
     ] },
   ],

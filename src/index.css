@@ -2529,9 +2529,23 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 }
 
 .wl-drica-official main :is(#assinatura, #destinos, #destaques, #ingressos-orlando, #esportes, #resorts, #sobre, #diferenciais, #atendimento) h2,
-.wl-drica-official main :is(#assinatura, #esportes) .wl-kicker,
+.wl-drica-official main #esportes .wl-kicker,
 .wl-drica-official main #ingressos-orlando .wl-orlando-step-kicker + h3 {
   color: var(--drica-logo-blue);
+}
+
+/* The quote tab and both requested accents share the wine-red brand token. */
+.wl-editorial.wl-drica.wl-drica-official #cotacao .wl-qq-submit {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.wl-editorial.wl-drica.wl-drica-official #cotacao .wl-qq-submit:is(:hover, :focus-visible):not(:disabled) {
+  background-color: color-mix(in srgb, hsl(var(--primary)) 86%, black);
+}
+
+.wl-editorial.wl-drica.wl-drica-official #assinatura .wl-kicker {
+  color: hsl(var(--primary));
 }
 
 .wl-drica-official main :is(#ingressos-orlando .wl-orlando-home-cta, #resorts .wl-resorts-btn) {
