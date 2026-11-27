@@ -2434,3 +2434,20 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   box-shadow: none;
   filter: none;
 }
+
+
+/* Bagagem oficial: só o painel de texto, nunca o fundo externo ou a foto. */
+.wl-editorial.wl-mundo.wl-bagagem-official #novidades .wl-bagagem-newsletter-panel {
+  background-color: var(--bagagem-turquoise);
+}
+.wl-editorial.wl-mundo.wl-bagagem-official #novidades .wl-bagagem-newsletter-panel :is(p, h2, .wl-kicker svg) {
+  color: #fff !important;
+}
+.wl-editorial.wl-mundo.wl-bagagem-official #novidades .wl-bagagem-newsletter-panel .wl-inspiration-cta {
+  background-color: #fff !important;
+  border-color: #fff !important;
+  color: var(--bagagem-turquoise) !important;
+}
+.wl-editorial.wl-mundo.wl-bagagem-official #novidades .wl-bagagem-newsletter-panel .wl-inspiration-cta svg {
+  color: currentColor !important;
+}

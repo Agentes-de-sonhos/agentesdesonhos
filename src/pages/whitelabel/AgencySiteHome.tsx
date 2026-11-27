@@ -2068,7 +2068,7 @@ export default function AgencySiteHome({
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
                 <div className="wl-newsletter-card wl-alt-gradient overflow-hidden rounded-2xl border border-[hsl(var(--wl-ink)_/_0.08)]">
                   <div className="grid items-stretch md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-                    <div className="px-8 py-12 md:px-14 md:py-16">
+                    <div className={`px-8 py-12 md:px-14 md:py-16 ${bagagemOfficial ? "wl-bagagem-newsletter-panel" : ""}`}>
                       <p className="wl-kicker inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--wl-red,var(--primary)))]">
                         <Mail className="h-3.5 w-3.5" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>

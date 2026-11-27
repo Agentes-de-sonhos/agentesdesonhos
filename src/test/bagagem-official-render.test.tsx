@@ -126,7 +126,12 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(container.querySelector("#novidades")?.nextElementSibling).toBe(social);
     expect(within(social).getByRole("link", { name: "Instagram da agência" })).toHaveAttribute("href", "https://www.instagram.com/bagagemnamaoviagens/");
     expect(container.querySelector('a[href*="chat.whatsapp.com"]')).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Solicitar acesso ao grupo" }));
+    const newsletterPanel = within(container.querySelector<HTMLElement>("#novidades .wl-bagagem-newsletter-panel")!);
+    const groupButton = newsletterPanel.getByRole("button", { name: "Solicitar acesso ao grupo" });
+    expect(newsletterPanel.queryByRole("img")).toBeNull();
+    expect(container.querySelector("#novidades img")).toHaveAttribute("src", "/bagagem-na-mao/marcia-cruzeiro-disney.webp");
+    expect(newsletterPanel.getByRole("heading", { name: "Oportunidades e atendimento pelo WhatsApp" })).toBeInTheDocument();
+    fireEvent.click(groupButton);
     expect(screen.getByRole("dialog", { name: "Grupo de oportunidades da Bagagem na Mão" })).toBeInTheDocument();
     expect(document.querySelector('a[href*="chat.whatsapp.com"]')).toBeNull();
   });
