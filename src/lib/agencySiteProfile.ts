@@ -327,6 +327,8 @@ export interface AgencySiteProfile {
     /** Credencial oficial confirmada (selo + texto), exibida antes da assinatura. */
     credential?: { src: string; alt: string; title: string; text: string };
   };
+  /** Parceiros confirmados da agência, exibidos depois das avaliações. */
+  partners?: { name: string; logo: string }[];
   /** Etapas opcionais do atendimento; ausente mantém os quatro textos atuais. */
   conciergeSteps?: string[];
   /** Opt-in: "Como funciona" só com os cards numerados (sem bloco de etapas escuro). */
@@ -1486,6 +1488,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       phoneHidden: true,
       whatsappLabel: "Falar por WhatsApp",
     },
+    partners: [{ name: "Cativa Operadora", logo: "/innovati-travel/cativa-operadora.png" }],
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },
   shoppingBriefing25: SHOPPING_PREVIEW_PROFILE,

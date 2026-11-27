@@ -93,3 +93,17 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
 });
+
+it("mostra Cativa Operadora logo depois das avaliações da Innovati", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const reviews = container.querySelector("#avaliacoes");
+  const partners = container.querySelector<HTMLElement>("#parceiros")!;
+  expect(reviews?.nextElementSibling).toBe(partners);
+  const section = within(partners);
+  expect(section.getByRole("heading", { name: "Parceiros" })).toBeInTheDocument();
+  expect(section.getAllByRole("listitem")).toHaveLength(1);
+  expect(section.getByText("Cativa Operadora")).toBeInTheDocument();
+  expect(partners.querySelector("img")).toHaveAttribute("src", "/innovati-travel/cativa-operadora.png");
+});

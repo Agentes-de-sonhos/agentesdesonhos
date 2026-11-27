@@ -1979,13 +1979,29 @@ export default function AgencySiteHome({
         {
           const copy = copyFor("avaliacoes");
           return (
-            <AgencyGoogleReviewsSection
-              key={key}
-              hostname={hostname}
-              container={container}
-              compactSpacing={compactSpacing}
-              copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
-            />
+            <Fragment key={key}>
+              <AgencyGoogleReviewsSection
+                hostname={hostname}
+                container={container}
+                compactSpacing={compactSpacing}
+                copy={{ kicker: copy.kicker, title: copy.title, subtitle: copy.subtitle }}
+              />
+              {!!profile.partners?.length && (
+                <section id="parceiros" aria-labelledby="agency-partners-title" className="scroll-mt-28 bg-white">
+                  <div className={`${container} py-12 md:py-16`}>
+                    <h2 id="agency-partners-title" className="text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">Parceiros</h2>
+                    <ul className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-4">
+                      {profile.partners.map((partner) => (
+                        <li key={partner.name} className="grid min-h-32 place-content-center justify-items-center gap-2 rounded-xl border border-border bg-white p-4 text-center">
+                          <img src={partner.logo} alt="" loading="lazy" width={78} height={78} className="h-[78px] w-[78px] object-contain" />
+                          <span className="text-sm font-semibold text-foreground">{partner.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </section>
+              )}
+            </Fragment>
           );
         }
 
