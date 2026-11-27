@@ -92,3 +92,29 @@ describe("captação de inspirações — agência real", () => {
     expect(assign).not.toHaveBeenCalled();
   });
 });
+
+describe("grupo da Bagagem na Mão", () => {
+  const openDialog = () => render(
+    <AgencyInspirationDialog open onOpenChange={() => {}} hostname="bagagemnamao.com.br"
+      agencyName="Bagagem na Mão" requireCrmGroupAccess />,
+  );
+
+  it("só mostra o convite depois da confirmação do CRM e aguarda clique do visitante", async () => {
+    const invite = "https://chat.whatsapp.com/ABC123";
+    submit.mockResolvedValue({ success: true, group_access_url: invite });
+    openDialog();
+    expect(screen.queryByRole("link", { name: "Abrir grupo no WhatsApp" })).toBeNull();
+    fill();
+    const link = await screen.findByRole("link", { name: "Abrir grupo no WhatsApp" });
+    expect(link).toHaveAttribute("href", invite);
+    expect(submit).toHaveBeenCalledWith(expect.objectContaining({ consent: true, service_key: "inspiracoes" }), { confirmBagagemGroup: true });
+  });
+
+  it("não libera o grupo com sucesso genérico, sem confirmação do CRM", async () => {
+    submit.mockResolvedValue({ success: true });
+    openDialog();
+    fill();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Não foi possível confirmar");
+    expect(screen.queryByRole("link", { name: "Abrir grupo no WhatsApp" })).toBeNull();
+  });
+});

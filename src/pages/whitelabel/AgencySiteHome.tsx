@@ -199,6 +199,8 @@ const DESTINATION_IMAGES: Record<string, string> = {
   immLesteEuropeu: immLesteEuropeu.url,
   immDisneyCastle: disneyMagicKingdomOfficial.url,
   bagagemDisneyCruise: "/bagagem-na-mao/marcia-cruzeiro-disney.webp",
+  bagagemCanada: "/bagagem-na-mao/canada-lago-moraine.webp",
+  bagagemIberostarWaves: "/resorts/iberostar-bahia/0.jpg",
   arenaRafaelSnow: arenaRafaelSnow.url,
   arenaIberostarLicensed: arenaIberostarLicensed.url,
   arenaVarennaLicensed: arenaVarennaLicensed.url,
@@ -569,6 +571,7 @@ export default function AgencySiteHome({
 
   // Perfil editorial (seções, ordem e conteúdo) resolvido centralmente pelo host.
   const profile = useMemo(() => resolveSiteProfile(hostname), [hostname]);
+  const bagagemOfficial = profile.key === "bagagemNaMaoOfficial";
   const karibu = profile.key === "karibuBriefing21" || profile.key === "karibuOfficial";
   const liveKaribuOffers = profile.key === "karibuOfficial";
   const karibuOffersQuery = usePublicOffers(hostname, liveKaribuOffers);
@@ -1328,7 +1331,7 @@ export default function AgencySiteHome({
                         {i === 0 && (
                           <p className={`mt-2 hidden w-full max-w-2xl text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
-                        <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
+                        <span data-bagagem-cta={bagagemOfficial ? "" : undefined} className={`mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background ${bagagemOfficial ? "rounded-md px-3 py-2" : ""}`}>
                           {d.ctaLabel ?? (d.href ? "Ver circuito" : "Solicitar proposta")} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                         </span>
                       </div>
@@ -2305,7 +2308,7 @@ export default function AgencySiteHome({
           )}
           </div>
           {/* Karibu approved copy includes a subtitle on all screen sizes. */}
-          <div className={karibu ? "block" : "hidden md:block"}>
+          <div className={karibu || bagagemOfficial ? "block" : "hidden md:block"}>
             <p
               className={
                  editorial
@@ -2325,7 +2328,7 @@ export default function AgencySiteHome({
             data-hero-actions-placement={profile.heroPresentation?.actionsPlacement ?? "inline"}
             className={
               profile.heroPresentation?.actionsPlacement === "right"
-                ? (karibu ? "relative z-[1] mt-5 flex justify-end md:hidden" : "mt-6 flex md:hidden")
+                ? (karibu || bagagemOfficial ? "relative z-[1] mt-5 flex justify-end md:hidden" : "mt-6 flex md:hidden")
                 : undefined
             }
           >
@@ -2410,7 +2413,7 @@ export default function AgencySiteHome({
             {showHero && profile.heroPresentation?.actionsPlacement === "right" && slides.length > 1 && (
               <div
                 data-hero-nav-placement="bottom-right"
-                className={`absolute bottom-full right-4 mb-5 hidden items-center gap-3 md:right-6 md:mb-6 md:flex lg:right-8 ${karibu ? "z-20" : ""}`}
+                className={`absolute bottom-full right-4 mb-5 hidden items-center gap-3 md:right-6 md:mb-6 md:flex lg:right-8 ${karibu || bagagemOfficial ? "z-20" : ""}`}
               >
                 <button type="button" aria-label="Destaque anterior" onClick={() => setSlide((s) => (s - 1 + slides.length) % slides.length)} className="grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white [&_svg]:text-white">
                   <ChevronLeft className="h-4 w-4" />
@@ -2555,7 +2558,8 @@ export default function AgencySiteHome({
         onOpenChange={setInspirationOpen}
         hostname={hostname}
         agencyName={name}
-        groupUrl={info.whatsapp_group_url || profile.inspirationDialog?.groupUrl}
+        groupUrl={bagagemOfficial ? undefined : info.whatsapp_group_url || profile.inspirationDialog?.groupUrl}
+        requireCrmGroupAccess={bagagemOfficial}
         title={profile.inspirationDialog?.title}
         description={profile.inspirationDialog?.description}
         submitLabel={profile.inspirationDialog?.submitLabel}

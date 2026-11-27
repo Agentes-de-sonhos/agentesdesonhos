@@ -2316,3 +2316,41 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   text-decoration: underline;
   text-underline-offset: 4px;
 }
+
+/* Bagagem na Mão: domínio oficial apenas. Verde-petróleo sobre branco mantém contraste AA. */
+.wl-editorial.wl-mundo.wl-bagagem-official {
+  --primary: 177 79% 25%;
+  --primary-foreground: 0 0% 100%;
+  --mc: #0D726D;
+}
+.wl-bagagem-official :is(.wl-qq-heading, .wl-qq-tab-active, .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta, .wl-orlando-home-cta, .wl-step-num, .csi-all, [data-bagagem-cta]),
+.bagagem-group-button {
+  background-color: #0D726D !important;
+  border-color: #0D726D !important;
+  color: #fff !important;
+}
+.wl-bagagem-official :is(.wl-qq-tab-active, .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta, .wl-orlando-home-cta, .csi-all, [data-bagagem-cta]):hover,
+.bagagem-group-button:hover {
+  background-color: #095B57 !important;
+  border-color: #095B57 !important;
+}
+.wl-bagagem-official :is(.wl-qq-tab-active, .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta, .wl-orlando-home-cta, .csi-all, [data-bagagem-cta]) svg {
+  color: #fff !important;
+}
+.wl-bagagem-official svg [data-map-region="n"] { --bagagem-map-fill: #a8e1de; }
+.wl-bagagem-official svg [data-map-region="ne"] { --bagagem-map-fill: #ffce91; }
+.wl-bagagem-official svg [data-map-region="co"] { --bagagem-map-fill: #ffe9c9; }
+.wl-bagagem-official svg [data-map-region="se"] { --bagagem-map-fill: #70cec8; }
+.wl-bagagem-official svg [data-map-region="s"] { --bagagem-map-fill: #d4f1ee; }
+.wl-bagagem-official svg [data-map-region] > path { fill: var(--bagagem-map-fill) !important; stroke: white; }
+.wl-bagagem-official svg [data-map-region]:is(:hover, :focus-visible, [aria-pressed="true"]) > path { filter: brightness(.92); }
+.wl-bagagem-official svg [data-map-region] > circle { fill: #0D726D !important; stroke: white !important; }
+.wl-bagagem-official svg [data-map-region] > text { fill: white !important; }
+.wl-bagagem-official [data-testid="cruise-season-help"] a,
+.wl-bagagem-official #faq a[href*="wa.me"] {
+  background-color: #0D726D !important;
+  border-color: #0D726D !important;
+  color: #fff !important;
+}
+.wl-bagagem-official [data-testid="cruise-season-help"] a:hover,
+.wl-bagagem-official #faq a[href*="wa.me"]:hover { background-color: #095B57 !important; }

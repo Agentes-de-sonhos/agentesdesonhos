@@ -1323,6 +1323,46 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     key: "bagagemNaMaoOfficial",
     demo: false,
     presentation: false,
+    heroPresentation: { ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.heroPresentation, actionsPlacement: "right" },
+    hero: [
+      { kicker: "VIAGENS SOB MEDIDA COM MÁRCIA BACCARINI", title: "Sua família não viaja em modo padrão", subtitle: "Da primeira conversa ao embarque, a Márcia monta o roteiro com vocês: o que vale incluir, o que pode ficar de fora e onde deixar tempo livre.", image: "bagagemCanada", imageCredit: { author: "Gorgo", source: "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg", license: "domínio público", licenseUrl: "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg#Licensing" }, order: 1, enabled: true },
+      { kicker: "ORLANDO EM FAMÍLIA", title: "Mais tempo nos parques. Menos correria entre eles.", subtitle: "Disney, Universal, ingressos e hospedagem no mesmo planejamento, com dias de descanso entre os parques e atenção às idades das crianças.", image: "orlandoMagicKingdom", order: 2, enabled: true },
+      { kicker: "DISNEY CRUISE LINE", title: "Dos parques ao navio, sem apertar o roteiro", subtitle: "A Márcia ajuda a escolher navio, cabine e porto de embarque e a encaixar o cruzeiro antes ou depois dos dias em Orlando.", image: "cruzeiroDisneyWish", order: 3, enabled: true },
+    ],
+    requestCenter: {
+      ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.requestCenter,
+      title: "O que você deseja planejar?",
+      notice: "Cada proposta é feita sob medida, considerando seu perfil, suas preferências e o ritmo da sua viagem.",
+      submitLabel: "Solicitar",
+    },
+    nav: BAGAGEM_NA_MAO_PREVIEW_PROFILE.nav?.map((item) => item.label === "Especialidades" ? { ...item, to: "/#ingressos-orlando" } : item),
+    sections: {
+      ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.sections,
+      modules: { enabled: false },
+      newsletter: { enabled: true },
+    },
+    copy: {
+      ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.copy,
+      destinations: { title: "Destinos para a sua próxima viagem", subtitle: "Canadá, Europa, resorts, Orlando e cruzeiros escolhidos para o seu jeito de viajar." },
+      newsletter: {
+        kicker: "NOVIDADES DA BAGAGEM NA MÃO",
+        title: "Oportunidades e atendimento pelo WhatsApp",
+        subtitle: "Quer acompanhar as novidades da Bagagem na Mão? Confirme seus dados para receber o convite do grupo.",
+        cta: "Solicitar acesso ao grupo",
+      },
+    },
+    newsletterMedia: { src: "/bagagem-na-mao/marcia-cruzeiro-disney.webp", alt: "Márcia Baccarini a bordo em um cruzeiro Disney" },
+    whatsappChannels: undefined,
+    inspirationDialog: {
+      title: "Grupo de oportunidades da Bagagem na Mão",
+      description: "Confirme seus dados para solicitar acesso ao grupo da agência no WhatsApp.",
+      submitLabel: "Confirmar dados",
+      notice: "Ao confirmar, você autoriza a Bagagem na Mão a usar estes dados para registrar sua solicitação de acesso e entrar em contato sobre o grupo.",
+    },
+    authority: BAGAGEM_NA_MAO_PREVIEW_PROFILE.authority && {
+      ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.authority,
+      companies: EDITORIAL_ROSE.authority?.companies,
+    },
     about: {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.about,
       media: "default",
@@ -1332,11 +1372,12 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
         position: "center 25%",
       }],
     },
-    destinations: BAGAGEM_NA_MAO_PREVIEW_PROFILE.destinations?.map((destination) =>
-      destination.key === "cruzeiros"
-        ? { ...destination, image: "bagagemDisneyCruise", imagePosition: "center 28%" }
-        : destination,
-    ),
+    destinations: BAGAGEM_NA_MAO_PREVIEW_PROFILE.destinations?.map((destination) => {
+      if (destination.key === "eua-canada") return { ...destination, key: "canada", image: "bagagemCanada", label: "Canadá", title: "Canadá", text: "Combine as Montanhas Rochosas e os lagos de Banff com cidades canadenses em um roteiro sob medida." };
+      if (destination.key === "resorts-all-inclusive") return { ...destination, image: "bagagemIberostarWaves", label: "Praia do Forte · Bahia", title: "Iberostar Waves Bahia", text: "Resort all-inclusive à beira-mar na Praia do Forte, para descansar e aproveitar a Bahia em família.", href: "/resorts-brasil/iberostar-bahia", ctaLabel: "Conhecer o resort" };
+      if (destination.key === "cruzeiros") return { ...destination, image: "bagagemDisneyCruise", imagePosition: "center 28%" };
+      return destination;
+    }),
     seo: { title: "Bagagem na Mão Viagens", description: "Orlando, Nova York, cruzeiros e viagens em família com planejamento e suporte da Bagagem na Mão Viagens, no Rio de Janeiro." },
   },
   curtiViagensBriefing20: CURTI_VIAGENS_PREVIEW_PROFILE,

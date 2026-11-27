@@ -74,7 +74,7 @@ describe("payload e origem do lead", () => {
 
 describe("modal e CTA", () => {
   it("grava antes de redirecionar e não redireciona em caso de erro", () => {
-    const submitIndex = dialog.indexOf("await submit(buildInspirationPayload");
+    const submitIndex = dialog.indexOf("await submit(payload)");
     const guardIndex = dialog.indexOf('if (!("success" in result) || !result.success)');
     const redirectIndex = dialog.indexOf("window.location.assign(safeUrl)");
     expect(submitIndex).toBeGreaterThan(-1);
@@ -96,9 +96,9 @@ describe("modal e CTA", () => {
   });
 
   it("CTA editorial usa secundária dinâmica e o quadro usa a primária", () => {
-    expect(home).toContain("bg-[var(--brand-primary)] px-8 py-12");
+    expect(home).toContain('copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"');
     expect(home).toContain("Quero receber inspirações");
-    expect(home).toContain("groupUrl={info.whatsapp_group_url ||");
+    expect(home).toContain("groupUrl={bagagemOfficial ? undefined : info.whatsapp_group_url ||");
   });
 
   it("modal é acessível (labels e alertas)", () => {

@@ -42,7 +42,7 @@ export function useAgencySiteRequest(hostname: string) {
   const session = useMemo(() => sessionHash(hostname), [hostname]);
 
   const submit = useCallback(
-    async (payload: Record<string, unknown>) => {
+    async (payload: Record<string, unknown>, options?: { confirmBagagemGroup?: boolean }) => {
       if (hostname.endsWith(".preview.local")) {
         setError("Prévia para revisão: nenhum dado será enviado.");
         setState("error");
@@ -68,6 +68,7 @@ export function useAgencySiteRequest(hostname: string) {
           error?: string;
           success?: boolean;
           duplicate?: boolean;
+          request_id?: string;
           trace?: string;
         };
   
@@ -100,8 +101,24 @@ export function useAgencySiteRequest(hostname: string) {
           return { error: true as const };
         }
   
+        let groupAccessUrl: string | undefined;
+        if (options?.confirmBagagemGroup) {
+          if (!result.request_id) throw new Error("Missing request receipt");
+          // This RPC returns only the invite after validating receipt, session,
+          // tenant, consent and both CRM links. No CRM details reach the browser.
+          const confirm = await supabase.rpc("confirm_bagagem_opportunity_group", {
+            p_request_id: result.request_id,
+            p_session_id: session,
+          });
+          if (confirm.error || typeof confirm.data !== "string" || !confirm.data) {
+            setState("error");
+            setError("Não foi possível confirmar o acesso ao grupo agora. Tente novamente em instantes.");
+            return { error: true as const };
+          }
+          groupAccessUrl = confirm.data;
+        }
         setState("success");
-        return { success: true as const, duplicate: result.duplicate === true };
+        return { success: true as const, duplicate: result.duplicate === true, group_access_url: groupAccessUrl };
       } catch {
         setState("error");
         setError("Não foi possível enviar sua solicitação agora. Verifique sua conexão e tente novamente.");

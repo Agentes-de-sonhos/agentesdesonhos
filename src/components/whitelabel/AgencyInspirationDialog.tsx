@@ -33,6 +33,7 @@ export function AgencyInspirationDialog({
   hostname,
   agencyName,
   groupUrl,
+  requireCrmGroupAccess = false,
   title,
   description,
   submitLabel,
@@ -43,6 +44,7 @@ export function AgencyInspirationDialog({
   hostname: string;
   agencyName: string;
   groupUrl?: string | null;
+  requireCrmGroupAccess?: boolean;
   title?: string;
   description?: string;
   submitLabel?: string;
@@ -52,6 +54,8 @@ export function AgencyInspirationDialog({
   const [form, setForm] = useState<InspirationLeadForm>({ first_name: "", phone: "", email: "" });
   const [errors, setErrors] = useState<Partial<Record<keyof InspirationLeadForm, string>>>({});
   const [done, setDone] = useState(false);
+  const [confirmedGroup, setConfirmedGroup] = useState<string | null>(null);
+  const [groupError, setGroupError] = useState(false);
   const submittingRef = useRef(false);
   const safeUrl = safeWhatsappGroupUrl(groupUrl);
   // Site Lab: tenant sintético, sem endpoint real, sem dados e sem redirecionamento.
@@ -62,6 +66,8 @@ export function AgencyInspirationDialog({
     setForm({ first_name: "", phone: "", email: "" });
     setErrors({});
     setDone(false);
+    setConfirmedGroup(null);
+    setGroupError(false);
     submittingRef.current = false;
     reset();
   }, [open, reset]);
@@ -75,15 +81,31 @@ export function AgencyInspirationDialog({
       if (Object.keys(found).length) return;
 
       submittingRef.current = true;
+      setGroupError(false);
       if (isDemo) {
         setDone(true);
         submittingRef.current = false;
         return;
       }
-      const result = await submit(buildInspirationPayload(form));
+      const payload = buildInspirationPayload(form);
+      const result = requireCrmGroupAccess
+        ? await submit({ ...payload, service_label: "Grupo de oportunidades no WhatsApp" }, { confirmBagagemGroup: true })
+        : await submit(payload);
       if (!("success" in result) || !result.success) {
         submittingRef.current = false;
         return; // erro exibido; nunca redireciona
+      }
+      if (requireCrmGroupAccess) {
+        const confirmedUrl = safeWhatsappGroupUrl(result.group_access_url);
+        if (!confirmedUrl || new URL(confirmedUrl).origin !== "https://chat.whatsapp.com") {
+          setGroupError(true);
+          submittingRef.current = false;
+          return;
+        }
+        setConfirmedGroup(confirmedUrl);
+        setDone(true);
+        submittingRef.current = false;
+        return;
       }
       if (safeUrl) {
         window.location.assign(safeUrl);
@@ -92,7 +114,7 @@ export function AgencyInspirationDialog({
       setDone(true);
       submittingRef.current = false;
     },
-    [form, isDemo, safeUrl, submit],
+    [form, isDemo, requireCrmGroupAccess, safeUrl, submit],
   );
 
   const submitting = state === "submitting";
@@ -121,11 +143,15 @@ export function AgencyInspirationDialog({
               aria-hidden="true"
             />
             <p className="mt-3 text-base font-semibold text-[var(--brand-primary)]">
-              Pronto! Você receberá nossas próximas inspirações.
+              {confirmedGroup ? "Dados confirmados. Você já pode abrir o grupo." : "Pronto! Você receberá nossas próximas inspirações."}
             </p>
-            <Button type="button" variant="outline" className="mt-5" onClick={() => onOpenChange(false)}>
-              Fechar
-            </Button>
+            {confirmedGroup ? (
+              <Button asChild className="bagagem-group-button mt-5">
+                <a href={confirmedGroup} target="_blank" rel="noopener noreferrer">Abrir grupo no WhatsApp</a>
+              </Button>
+            ) : (
+              <Button type="button" variant="outline" className="mt-5" onClick={() => onOpenChange(false)}>Fechar</Button>
+            )}
           </div>
         ) : (
           <form className="space-y-4" onSubmit={handleSubmit} noValidate>
@@ -184,6 +210,11 @@ export function AgencyInspirationDialog({
               )}
             </div>
 
+            {groupError && (
+              <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                Não foi possível confirmar o acesso ao grupo agora. Tente novamente em instantes.
+              </p>
+            )}
             {state === "error" && error && (
               <p role="alert" className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {error}
@@ -194,7 +225,7 @@ export function AgencyInspirationDialog({
               type="submit"
               size="lg"
               disabled={submitting}
-              className="w-full bg-[var(--brand-secondary)] text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)]"
+              className={requireCrmGroupAccess ? "bagagem-group-button w-full" : "w-full bg-[var(--brand-secondary)] text-[var(--brand-on-secondary)] hover:bg-[var(--brand-secondary-hover)]"}
             >
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
               {submitLabel ?? "Confirmar"}

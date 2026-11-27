@@ -17108,6 +17108,10 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_bagagem_opportunity_group: {
+        Args: { p_request_id: string; p_session_id: string }
+        Returns: string | null
+      }
       _normalize_phone: { Args: { p: string }; Returns: string }
       academy_event_participants: {
         Args: { p_training_id: string }
