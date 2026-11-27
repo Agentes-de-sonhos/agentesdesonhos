@@ -2343,8 +2343,8 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   background-color: #fff !important;
   background-image: none !important;
 }
-/* O FAQ não herda o degradê amarelo do template Mundo, inclusive no celular. */
-.wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface:has(> #faq) {
+/* FAQ e Diferenciais usam o mesmo turquesa, não os degradês herdados. */
+.wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface:has(> :is(#faq, #diferenciais)) {
   background: var(--wl-mundo-gradient) !important;
 }
 .wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-home-surface:not(.wl-bagagem-season) > section {
