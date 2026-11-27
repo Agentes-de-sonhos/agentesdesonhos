@@ -2557,3 +2557,26 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   border-color: var(--drica-logo-hover);
   color: #fff;
 }
+
+/* Essyatur oficial: acabamento da abertura e das ações de contato. */
+.wl-editorial.wl-essya-curti.wl-essya-official {
+  --essya-action: #164f76;
+  --essya-action-hover: #0f3a58;
+}
+
+.wl-essya-official #assinatura .wl-signature-rule { display: none; }
+.wl-essya-official #assinatura .wl-signature-rule + p { margin-top: 1rem; }
+.wl-essya-official #resorts .wl-resorts-btn { border-radius: 0.5rem; }
+
+.wl-essya-official #novidades :is(.wl-inspiration-cta, .wl-newsletter-cta),
+.wl-essya-official main section[aria-label] a[aria-label="Instagram da agência"] {
+  background-color: var(--essya-action) !important;
+  color: #fff !important;
+}
+.wl-essya-official #novidades :is(.wl-inspiration-cta, .wl-newsletter-cta) { border: 1px solid #fff; }
+.wl-essya-official #novidades :is(.wl-inspiration-cta, .wl-newsletter-cta) svg { color: #fff !important; }
+.wl-essya-official main section[aria-label] a[aria-label="Instagram da agência"] { border-color: var(--essya-action); }
+.wl-essya-official #novidades :is(.wl-inspiration-cta, .wl-newsletter-cta):is(:hover, :focus-visible),
+.wl-essya-official main section[aria-label] a[aria-label="Instagram da agência"]:is(:hover, :focus-visible) {
+  background-color: var(--essya-action-hover) !important;
+}

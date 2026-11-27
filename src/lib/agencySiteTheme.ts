@@ -171,7 +171,7 @@ export function siteThemeRootClass(hostname?: string | null): string {
           : h === "essya-curti-v1.preview.local"
           ? " wl-curti wl-essya-curti"
           : h === "essyatur.com.br" || h === "www.essyatur.com.br"
-          ? " wl-curti wl-essya-curti"
+          ? " wl-curti wl-essya-curti wl-essya-official"
           : "";
     return `${EDITORIAL_ROOT_CLASS} ${SITE_BASE_ROOT_CLASS}${extra}`;
   }
