@@ -11,6 +11,7 @@ const PLATFORM_FROM_EMAIL = "novidades@agentesdesonhos.com.br";
 // Alias dedicado por agência (domínio do site sem www → remetente na plataforma).
 const AGENCY_ALIASES: Record<string, string> = {
   "curtiviagens.com.br": "curtiviagens@agentesdesonhos.com.br",
+  "bagagemnamao.com.br": "bagagemnamao@agentesdesonhos.com.br",
 };
 const EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
 

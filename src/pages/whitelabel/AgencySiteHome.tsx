@@ -1179,6 +1179,7 @@ export default function AgencySiteHome({
         }
 
       case "offers":
+        if (bagagemOfficial) return <AgencyOffersHomeSection key={key} hostname={hostname} container={container} />;
         if (karibu) {
           return (
             <section key={key} id="ofertas" className="scroll-mt-24 py-14 md:py-16">
@@ -2479,8 +2480,9 @@ export default function AgencySiteHome({
         if (bagagemOfficial) {
           // Conta apenas as seções exibidas e reinicia no branco depois da faixa azul.
           const cruise = section.key === "authority";
-          const gradient = !cruise && section.key !== "newsletter" && rendered % 2 === 1;
-          rendered = cruise ? 0 : rendered + 1;
+          const offersIntro = section.key === "offers";
+          const gradient = offersIntro || (!cruise && section.key !== "newsletter" && rendered % 2 === 1);
+          if (!offersIntro) rendered = cruise ? 0 : rendered + 1;
           return (
             <div key={section.key}
               className={`wl-alt-surface wl-bagagem-home-surface ${cruise ? "wl-bagagem-season" : gradient ? "wl-bagagem-home-tint" : ""}`}

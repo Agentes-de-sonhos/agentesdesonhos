@@ -1338,6 +1338,7 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     nav: BAGAGEM_NA_MAO_PREVIEW_PROFILE.nav?.map((item) => item.label === "Especialidades" ? { ...item, to: "/#ingressos-orlando" } : item),
     sections: {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.sections,
+      offers: { enabled: true, order: 0 },
       signature: { enabled: true, order: 0.5 },
       orlando: { enabled: true, order: 1.5 },
       destinations: { enabled: true, order: 2 },

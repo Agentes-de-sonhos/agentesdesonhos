@@ -56,8 +56,11 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(within(container.querySelector<HTMLElement>("#cotacao")!).getByRole("button", { name: "Solicitar", exact: true })).toBeInTheDocument();
     expect(container.querySelector("#campanhas")).toBeNull();
     const surfaces = Array.from(container.querySelectorAll<HTMLElement>("[data-bagagem-section]"));
-    expect(surfaces.slice(0, 4).map((item) => item.dataset.bagagemSection)).toEqual(["signature", "orlando", "destinations", "resorts"]);
-    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["orlando", "resorts", "differentials", "faq"]);
+    expect(surfaces.slice(0, 5).map((item) => item.dataset.bagagemSection)).toEqual(["offers", "signature", "orlando", "destinations", "resorts"]);
+    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["offers", "orlando", "resorts", "differentials", "faq"]);
+    const offers = within(container.querySelector<HTMLElement>("#ofertas")!);
+    expect(offers.getByRole("heading", { name: "Ofertas selecionadas" })).toBeInTheDocument();
+    expect(offers.queryByRole("link", { name: "Ver todas as ofertas" })).toBeNull();
     const seasonIndex = surfaces.findIndex((surface) => surface.classList.contains("wl-bagagem-season"));
     expect(surfaces[seasonIndex]).toHaveAttribute("data-bagagem-section", "authority");
     expect(surfaces.at(seasonIndex + 1)).toHaveAttribute("data-bagagem-section", "about");
