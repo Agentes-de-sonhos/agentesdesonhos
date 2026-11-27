@@ -2413,6 +2413,15 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   color: #fff !important;
   text-shadow: none !important;
 }
+/* Só o vão entre logotipos e CTA: 96→76,8px no celular; 144→115,2px no desktop. */
+.wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-season > #autoridade > [data-testid="cruise-season-help"] {
+  padding-top: 1.8rem;
+}
+@media (min-width: 768px) {
+  .wl-editorial.wl-mundo.wl-bagagem-official .wl-bagagem-season > #autoridade > [data-testid="cruise-season-help"] {
+    padding-top: 2.7rem;
+  }
+}
 .wl-bagagem-official svg [data-map-region="n"] { --bagagem-map-fill: #a8e1de; }
 .wl-bagagem-official svg [data-map-region="ne"] { --bagagem-map-fill: #ffce91; }
 .wl-bagagem-official svg [data-map-region="co"] { --bagagem-map-fill: #ffe9c9; }

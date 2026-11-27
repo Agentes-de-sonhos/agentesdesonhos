@@ -82,11 +82,11 @@ export function CruiseSeasonAuthorityBlock({ container, brandedKicker = false }:
 }
 
 /** Placed after the company logos by the shared homepage. */
-export function CruiseSeasonHelp({ container }: { container: string }) {
+export function CruiseSeasonHelp({ container, concise = false }: { container: string; concise?: boolean }) {
   return <div className={`${container} pb-14 md:pb-20`} data-testid="cruise-season-help">
       <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-background/15 bg-background/5 px-6 py-5 text-center sm:flex-row sm:text-left">
-        <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o cruzeiro ideal para você?</p>
-        <a href={agencySiteHref(CRUISE_FINDER_PATH)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />Qual cruzeiro combina com você?</a>
+        {!concise && <p className="text-xl font-semibold text-background md:text-2xl">Em dúvida sobre o cruzeiro ideal para você?</p>}
+        <a href={agencySiteHref(CRUISE_FINDER_PATH)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-background px-6 py-3 text-base font-semibold text-[hsl(var(--wl-navy))] shadow-md transition-all hover:-translate-y-0.5 hover:shadow-lg"><Compass className="h-4 w-4" aria-hidden="true" />{concise ? "Qual cruzeiro combina com você" : "Qual cruzeiro combina com você?"}</a>
       </div>
   </div>;
 }

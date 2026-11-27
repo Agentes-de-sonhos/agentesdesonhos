@@ -107,6 +107,9 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(container.querySelector('[data-destination="canada"] img')).toHaveAttribute("src", "/bagagem-na-mao/canada-lago-moraine.webp");
     expect(container.querySelector('[data-destination="resorts-all-inclusive"]')).toHaveAttribute("href", "/resorts-brasil/iberostar-bahia");
     expect(container.querySelectorAll('[data-testid="cruise-season-companies"] img')).toHaveLength(5);
+    const cruiseHelp = within(screen.getByTestId("cruise-season-help"));
+    expect(cruiseHelp.getByRole("link", { name: "Qual cruzeiro combina com você", exact: true })).toBeInTheDocument();
+    expect(cruiseHelp.queryByText("Em dúvida sobre o cruzeiro ideal para você?")).toBeNull();
     expect(container.querySelectorAll(".wl-step-num")).toHaveLength(4);
     const faq = within(screen.getByRole("region", { name: "Ainda tem alguma dúvida?" }));
     const question = faq.getByRole("textbox", { name: "Sua dúvida" });
