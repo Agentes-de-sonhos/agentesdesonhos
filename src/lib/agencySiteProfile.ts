@@ -1465,10 +1465,21 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       ...INNOVATI_PREVIEW_PROFILE.sections,
       signature: { enabled: false },
       highlights: { enabled: false },
+      avaliacoes: { enabled: true, order: 10 },
+      faq: { enabled: true, order: 11 },
     },
-    nav: INNOVATI_PREVIEW_PROFILE.nav?.map((item) =>
-      item.to === "/#assinatura" ? { ...item, to: "/#ingressos-orlando" } : item,
-    ),
+    nav: INNOVATI_PREVIEW_PROFILE.nav?.map((item) => {
+      if (item.to === "/#assinatura") return { ...item, to: "/#ingressos-orlando" };
+      if (item.to !== "/#sobre") return item;
+      const children = [...(item.children ?? [])];
+      const faq = children.findIndex((child) => child.to === "/#faq");
+      children.splice(faq >= 0 ? faq : children.length, 0, { label: "Avaliações no Google", to: "/#avaliacoes" });
+      return { ...item, children };
+    }),
+    copy: {
+      ...INNOVATI_PREVIEW_PROFILE.copy,
+      avaliacoes: { kicker: "Avaliações no Google", title: "O que dizem os viajantes da Innovati", subtitle: "Confira no Google as experiências de quem já viajou com a Innovati Travel." },
+    },
     footer: {
       ...INNOVATI_PREVIEW_PROFILE.footer,
       descriptionHidden: true,

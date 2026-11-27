@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { isGoogleReviewsEnabled, mapGooglePlaceReviews } from "@/lib/agencyGoogleReviews";
+import { resolveGoogleReviewsConfig, mapGooglePlaceReviews } from "@/lib/agencyGoogleReviews";
 
 /**
  * Busca sob demanda (quando `active`), deduplicada enquanto a requisição está ativa.
  * Conteúdo do Google não é retido após o componente sair da tela (política do Places).
  */
 export function useAgencyGoogleReviews(hostname: string, active: boolean) {
-  const enabled = active && isGoogleReviewsEnabled(hostname);
+  const enabled = active && !!resolveGoogleReviewsConfig(hostname)?.placeId;
   return useQuery({
     queryKey: ["agency-google-reviews", hostname.toLowerCase()],
     enabled,

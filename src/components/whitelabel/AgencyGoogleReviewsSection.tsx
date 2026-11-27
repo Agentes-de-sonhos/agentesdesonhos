@@ -5,7 +5,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAgencyGoogleReviews } from "@/hooks/useAgencyGoogleReviews";
-import { googleReviewsFallbackUrl, type GoogleReview } from "@/lib/agencyGoogleReviews";
+import { googleReviewsFallbackUrl, resolveGoogleReviewsConfig, type GoogleReview } from "@/lib/agencyGoogleReviews";
 import { getPersonInitials } from "@/components/shared/ClientAvatar";
 import { AGENCY_SECTION_SUBTITLE_CLASS, AGENCY_SECTION_TITLE_CLASS } from "@/lib/agencySiteTypography";
 
@@ -122,6 +122,8 @@ export function AgencyGoogleReviewsSection({
   const isError = !illustrative && live.isError;
   const fallback = illustrative ? null : googleReviewsFallbackUrl(hostname);
   const googleUrl = data?.url ?? fallback;
+  const config = resolveGoogleReviewsConfig(hostname);
+  const linkOnly = !illustrative && !!config?.profileUrl && !config.placeId;
 
   // Sem dados ou com erro: bloco compacto, sem buraco na página.
   if (isError || (data && data.reviews.length === 0)) {
@@ -165,7 +167,14 @@ export function AgencyGoogleReviewsSection({
           {copy?.subtitle && <p className={AGENCY_SECTION_SUBTITLE_CLASS}>{copy.subtitle}</p>}
         </div>
 
-        {data ? (
+        {linkOnly && googleUrl ? (
+          <Button asChild variant="outline" size="lg" className="mt-6 w-full sm:w-auto">
+            <a href={googleUrl} target="_blank" rel="noopener noreferrer">
+              <GoogleG className="mr-2 h-5 w-5" />
+              Ver todas as avaliações no Google <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+            </a>
+          </Button>
+        ) : data ? (
           <Carousel
             opts={{ align: "start", slidesToScroll: 1, containScroll: "trimSnaps" }}
             className="mt-6 md:mt-8"

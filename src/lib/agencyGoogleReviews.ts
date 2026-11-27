@@ -12,7 +12,9 @@ export const GOOGLE_REVIEWS_MAX = 5;
 interface GoogleReviewsHostConfig {
   /** Nome buscado no link de fallback do Google Maps. */
   label: string;
-  placeId: string;
+  placeId?: string;
+  /** Link público para a ficha quando só há identificação por link compartilhado. */
+  profileUrl?: string;
 }
 
 const DESTINOS_COM_A_JU: GoogleReviewsHostConfig = {
@@ -40,7 +42,14 @@ const CURTI_VIAGENS: GoogleReviewsHostConfig = {
   placeId: "ChIJIayUCNDvyJQRPPvUIISIZbg",
 };
 
+const INNOVATI_TRAVEL: GoogleReviewsHostConfig = {
+  label: "Innovati Travel",
+  profileUrl: "https://share.google/eoiBjNF25b4Q8ICGY",
+};
+
 const GOOGLE_REVIEWS_BY_HOSTNAME: Record<string, GoogleReviewsHostConfig> = {
+  "innovati.tur.br": INNOVATI_TRAVEL,
+  "www.innovati.tur.br": INNOVATI_TRAVEL,
   "omundoemcores.com.br": MUNDO_EM_CORES,
   "www.omundoemcores.com.br": MUNDO_EM_CORES,
   "destinoscomaju.com.br": DESTINOS_COM_A_JU,
@@ -69,6 +78,8 @@ export function isGoogleReviewsEnabled(hostname: string | null | undefined): boo
 export function googleReviewsFallbackUrl(hostname: string | null | undefined): string | null {
   const cfg = resolveGoogleReviewsConfig(hostname);
   if (!cfg) return null;
+  if (cfg.profileUrl) return cfg.profileUrl;
+  if (!cfg.placeId) return null;
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cfg.label)}&query_place_id=${cfg.placeId}`;
 }
 
