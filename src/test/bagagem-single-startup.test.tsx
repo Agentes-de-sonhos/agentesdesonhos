@@ -69,3 +69,28 @@ it.each(["/ingressos-orlando", "/universal", "/resorts-brasil", "/area-do-client
   await screen.findByRole("button", { name: "Página pronta" });
   expect(container.querySelector("[data-innovati-startup], .animate-spin, .animate-brand-breathe")).toBeNull();
 });
+
+it.each(["dricaviagens.com.br", "www.dricaviagens.com.br"])("exibe só uma abertura com a marca da Drica em %s", async (hostname) => {
+  let resolveDomain!: (value: object) => void;
+  lookup.mockReturnValueOnce(new Promise((resolve) => { resolveDomain = resolve; }));
+  const { container } = renderGate("/", hostname);
+  const splash = container.querySelector("[data-drica-startup]");
+  expect(splash?.querySelector("img")).toHaveAttribute("src", expect.stringContaining("briefing-16-v1-logo.png"));
+  expect(splash?.querySelector("img")).toHaveClass("animate-brand-breathe");
+  resolveDomain({ hostname, agency_name: "Drica Viagens", user_id: "fixture", phone: null });
+  const ready = await screen.findByRole("button", { name: "Página pronta" });
+  expect(container.querySelectorAll("[data-drica-startup]")).toHaveLength(1);
+  expect(container.querySelector("[data-drica-startup]")).toBe(splash);
+  fireEvent.click(ready);
+  await waitFor(() => expect(container.querySelector("[data-drica-startup]")).toBeNull());
+});
+
+it.each(["/disney", "/universal", "/resorts-brasil", "/area-do-cliente"])("abre %s da Drica sem animação", async (pathname) => {
+  const hostname = "www.dricaviagens.com.br";
+  lookup.mockResolvedValueOnce({ hostname, agency_name: "Drica Viagens", user_id: "fixture", phone: null });
+  const { container } = renderGate(pathname, hostname);
+  const animation = "[data-drica-startup], .animate-spin, .animate-brand-breathe";
+  expect(container.querySelector(animation)).toBeNull();
+  await screen.findByRole("button", { name: "Página pronta" });
+  expect(container.querySelector(animation)).toBeNull();
+});

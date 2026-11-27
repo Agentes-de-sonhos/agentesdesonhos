@@ -51,3 +51,17 @@ describe("Drica — apresentação integral isolada", () => {
     expect(JSON.stringify(p.nav)).not.toContain("dricaviagens.rio"); expect(JSON.stringify(p)).not.toMatch(/https?:\/\/(www\.)?dricaviagens\.rio/);
   });
 });
+
+it("reorganiza somente o cabeçalho público da Drica e retira os quatro cartões de processo", () => {
+  const official = resolveSiteProfile("www.dricaviagens.com.br");
+  expect(official.headerNav?.map(x => x.label)).toEqual(["Início", "Destaques", "Especialidades"]);
+  const specialties = official.headerNav?.[2]?.children;
+  expect(specialties?.map(x => [x.label, x.to])).toEqual([
+    ["Orlando", "/#ingressos-orlando"], ["Cruzeiros 26/27", "/#autoridade"], ["Eventos Esportivos", "/#esportes"], ["Resorts no Brasil", "/#resorts"],
+  ]);
+  expect(specialties?.[0]?.children?.map(x => x.to)).toEqual(["/disney", "/universal", "/#ingressos-orlando"]);
+  expect(official.conciergePoints).toEqual([]);
+  expect(p.conciergePoints).toHaveLength(4);
+  expect(siteThemeRootClass("dricaviagens.com.br")).toContain("wl-drica-official");
+  expect(siteThemeRootClass(info.hostname)).not.toContain("wl-drica-official");
+});

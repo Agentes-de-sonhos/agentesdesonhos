@@ -132,7 +132,9 @@ export function siteThemeRootClass(hostname?: string | null): string {
     // O Mundo em Cores: acabamento claro próprio, só no host da prévia.
     const h = normalizeHost(hostname);
     const extra =
-      h === "drica-presentation.preview.local" || h === "dricaviagens.com.br" || h === "www.dricaviagens.com.br"
+      h === "dricaviagens.com.br" || h === "www.dricaviagens.com.br"
+        ? " wl-drica wl-drica-official"
+        : h === "drica-presentation.preview.local"
         ? " wl-drica"
         : h === "briefing-22-v1.preview.local" || h === "pristur.com.br" || h === "www.pristur.com.br"
         ? " wl-mundo wl-pristur-mundo"

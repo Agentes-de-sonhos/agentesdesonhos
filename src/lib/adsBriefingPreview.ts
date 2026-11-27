@@ -1673,6 +1673,21 @@ export const DRICA_OFFICIAL_PROFILE: AgencySiteProfile = {
   ...DRICA_PRESENTATION_PROFILE,
   key: "dricaOfficial",
   presentation: false,
+  headerNav: [
+    { label: "Início", to: "/" },
+    { label: "Destaques", to: "/#destinos" },
+    { label: "Especialidades", to: "/#ingressos-orlando", children: [
+      { label: "Orlando", to: "/#ingressos-orlando", children: [
+        { label: "Disney", to: "/disney" },
+        { label: "Universal", to: "/universal" },
+        { label: "Parques e Ingressos", to: "/#ingressos-orlando" },
+      ] },
+      { label: "Cruzeiros 26/27", to: "/#autoridade" },
+      { label: "Eventos Esportivos", to: "/#esportes" },
+      { label: "Resorts no Brasil", to: "/#resorts" },
+    ] },
+  ],
+  conciergePoints: [],
   copy: {
     ...DRICA_PRESENTATION_PROFILE.copy,
     newsletter: {

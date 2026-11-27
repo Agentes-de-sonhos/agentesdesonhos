@@ -2521,3 +2521,39 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-mundo-official #rodape > div:last-child { border-top-color: hsl(var(--border)); }
 .wl-mundo-official #rodape .wl-footer-copyright,
 .wl-mundo-official #rodape .wl-footer-copyright span { color: hsl(var(--muted-foreground)) !important; }
+
+/* Drica Viagens — azul amostrado diretamente do logotipo oficial (#195D86). */
+.wl-editorial.wl-drica.wl-drica-official {
+  --drica-logo-blue: #195d86;
+  --drica-logo-hover: color-mix(in srgb, var(--drica-logo-blue) 84%, black);
+}
+
+.wl-drica-official main :is(#assinatura, #destinos, #destaques, #ingressos-orlando, #esportes, #resorts, #sobre, #diferenciais, #atendimento) h2,
+.wl-drica-official main :is(#assinatura, #esportes) .wl-kicker,
+.wl-drica-official main #ingressos-orlando .wl-orlando-step-kicker + h3 {
+  color: var(--drica-logo-blue);
+}
+
+.wl-drica-official main :is(#ingressos-orlando .wl-orlando-home-cta, #resorts .wl-resorts-btn) {
+  background-color: var(--drica-logo-blue) !important;
+  border-color: var(--drica-logo-blue) !important;
+  border-radius: 0.5rem;
+  color: #fff !important;
+}
+
+.wl-drica-official main :is(#ingressos-orlando .wl-orlando-home-cta, #resorts .wl-resorts-btn):is(:hover, :focus-visible) {
+  background-color: var(--drica-logo-hover) !important;
+  border-color: var(--drica-logo-hover) !important;
+}
+
+.wl-drica-official main section[aria-label] a[aria-label="Instagram da agência"] {
+  background-color: var(--drica-logo-blue);
+  border-color: var(--drica-logo-blue);
+  color: #fff;
+}
+
+.wl-drica-official main section[aria-label] a[aria-label="Instagram da agência"]:is(:hover, :focus-visible) {
+  background-color: var(--drica-logo-hover);
+  border-color: var(--drica-logo-hover);
+  color: #fff;
+}

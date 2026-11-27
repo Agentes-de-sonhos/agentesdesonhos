@@ -16,6 +16,7 @@ import paraisoLogo from "@/assets/whitelabel/logo-paraiso-viagens.png.asset.json
 import essyaLogo from "@/assets/whitelabel/logo-essya-tur.png.asset.json";
 import pristurLogo from "@/assets/whitelabel/logo-pristur.png.asset.json";
 import bagagemLogo from "@/assets/ads-preview/briefing-19-v1-logo.png.asset.json";
+import dricaLogo from "@/assets/ads-preview/briefing-16-v1-logo.png.asset.json";
 import innovatiLogo from "@/assets/ads-preview/briefing-24-v1-logo.png.asset.json";
 import immLogo from "@/assets/whitelabel/logo-imm-viagens.png.asset.json";
 
@@ -25,6 +26,7 @@ const KARIBU_MARK = "/karibu-logo.png";
 const KARIBU_PREVIEW_PATH = "/ads-briefing-preview/briefing-21-v1";
 
 const BAGAGEM_HOSTS = new Set(["bagagemnamao.com.br", "www.bagagemnamao.com.br"]);
+const DRICA_HOSTS = new Set(["dricaviagens.com.br", "www.dricaviagens.com.br"]);
 const INNOVATI_HOSTS = new Set(["innovati.tur.br", "www.innovati.tur.br"]);
 const IMM_HOSTS = ["immturismo.com.br", "www.immturismo.com.br"];
 
@@ -60,6 +62,7 @@ const SPINNER_MARK_BY_HOSTNAME: Record<string, string> = {
   ...Object.fromEntries([...KARIBU_HOSTS].map((h) => [h, KARIBU_MARK])),
   ...Object.fromEntries([...BAGAGEM_HOSTS].map((h) => [h, bagagemLogo.url])),
   ...Object.fromEntries([...INNOVATI_HOSTS].map((h) => [h, innovatiLogo.url])),
+  ...Object.fromEntries([...DRICA_HOSTS].map((h) => [h, dricaLogo.url])),
   ...Object.fromEntries(IMM_HOSTS.map((h) => [h, immLogo.url])),
 };
 
@@ -81,6 +84,7 @@ const BREATHE_HOSTNAMES = new Set([
   ...KARIBU_HOSTS,
   ...BAGAGEM_HOSTS,
   ...INNOVATI_HOSTS,
+  ...DRICA_HOSTS,
 ]);
 
 /** Hostname contextual: override de prévia (`?__agency_host=`) → host real. */
@@ -104,7 +108,8 @@ export function isAgencyLoaderSuppressed(hostname?: string | null): boolean {
   if (typeof window === "undefined") return false;
   const host = resolveContextHostname(hostname);
   const path = window.location.pathname.replace(/\/+$/, "") || "/";
-  // For Innovati, use the actual hostname even if a query param suggests another brand.
+  // Home-only sites also respect the real domain if a preview override is present.
+  if (DRICA_HOSTS.has(host) || DRICA_HOSTS.has(normalizeBrandHost(window.location.hostname))) return path !== "/";
   if (INNOVATI_HOSTS.has(host) || INNOVATI_HOSTS.has(normalizeBrandHost(window.location.hostname))) return path !== "/";
   if (!KARIBU_HOSTS.has(host) && !BAGAGEM_HOSTS.has(host) && !ARENA_HOSTS.has(host) && !IMM_HOSTS.includes(host)) return false;
   if (host === KARIBU_PREVIEW_HOST && path === KARIBU_PREVIEW_PATH) return false;
@@ -113,7 +118,7 @@ export function isAgencyLoaderSuppressed(hostname?: string | null): boolean {
 
 export function isPasswordGateLoaderSuppressed(hostname: string): boolean {
   const host = resolveContextHostname(hostname);
-  return (KARIBU_HOSTS.has(host) || BAGAGEM_HOSTS.has(host) || INNOVATI_HOSTS.has(host)) && isAgencyLoaderSuppressed(hostname);
+  return (KARIBU_HOSTS.has(host) || BAGAGEM_HOSTS.has(host) || INNOVATI_HOSTS.has(host) || DRICA_HOSTS.has(host)) && isAgencyLoaderSuppressed(hostname);
 }
 
 export function isBagagemStartupPath(hostname: string, pathname: string): boolean {
@@ -122,14 +127,15 @@ export function isBagagemStartupPath(hostname: string, pathname: string): boolea
 
 export function isAgencyStartupPath(hostname: string, pathname: string): boolean {
   return isBagagemStartupPath(hostname, pathname)
-    || (INNOVATI_HOSTS.has(normalizeBrandHost(hostname)) && (pathname === "/" || pathname === ""));
+    || ((INNOVATI_HOSTS.has(normalizeBrandHost(hostname)) || DRICA_HOSTS.has(normalizeBrandHost(hostname))) && (pathname === "/" || pathname === ""));
 }
 
 /** Rendered by the domain gate, not remounted by the route or password checks. */
 export function AgencyStartupOverlay({ hostname }: { hostname: string }) {
   const innovati = INNOVATI_HOSTS.has(normalizeBrandHost(hostname));
+  const drica = DRICA_HOSTS.has(normalizeBrandHost(hostname));
   return (
-    <div data-innovati-startup={innovati ? "" : undefined} data-bagagem-startup={innovati ? undefined : ""} className="fixed inset-0 z-[110] flex items-center justify-center bg-white" style={{ backgroundColor: "#fff" }}>
+    <div data-innovati-startup={innovati ? "" : undefined} data-drica-startup={drica ? "" : undefined} data-bagagem-startup={innovati || drica ? undefined : ""} className="fixed inset-0 z-[110] flex items-center justify-center bg-white" style={{ backgroundColor: "#fff" }}>
       <AgencyBrandSpinner hostname={hostname} size="lg" />
     </div>
   );
