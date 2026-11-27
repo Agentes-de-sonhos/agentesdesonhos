@@ -29,6 +29,12 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(screen.getByRole("heading", { name: "O que você deseja planejar?" })).toBeInTheDocument();
     expect(within(container.querySelector<HTMLElement>("#cotacao")!).getByRole("button", { name: "Solicitar", exact: true })).toBeInTheDocument();
     expect(container.querySelector("#campanhas")).toBeNull();
+    const surfaces = Array.from(container.querySelectorAll<HTMLElement>("[data-bagagem-section]"));
+    expect(surfaces.slice(0, 4).map((item) => item.dataset.bagagemSection)).toEqual(["signature", "orlando", "destinations", "resorts"]);
+    expect(surfaces.filter((item) => item.classList.contains("wl-bagagem-home-tint")).map((item) => item.dataset.bagagemSection)).toEqual(["orlando", "resorts", "faq"]);
+    expect(surfaces.at(-2)).toHaveAttribute("data-bagagem-section", "faq");
+    expect(surfaces.at(-1)).toHaveAttribute("data-bagagem-section", "newsletter");
+    expect(container.querySelector("#destinos [data-bagagem-cta]")).toBeNull();
     expect(container.querySelector('#ingressos-orlando a[href="/universal"]')).not.toBeNull();
     expect(container.querySelector('[data-destination="canada"] img')).toHaveAttribute("src", "/bagagem-na-mao/canada-lago-moraine.webp");
     expect(container.querySelector('[data-destination="resorts-all-inclusive"]')).toHaveAttribute("href", "/resorts-brasil/iberostar-bahia");
@@ -53,6 +59,7 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(footerLogo.parentElement?.tagName).toBe("DIV");
     expect(footerLogo.parentElement?.className).not.toMatch(/shadow|ring|border|bg-white/);
     const social = screen.getByRole("region", { name: "Siga-nos nas redes" });
+    expect(container.querySelector("#novidades")?.nextElementSibling).toBe(social);
     expect(within(social).getByRole("link", { name: "Instagram da agência" })).toHaveAttribute("href", "https://www.instagram.com/bagagemnamaoviagens/");
     expect(container.querySelector('a[href*="chat.whatsapp.com"]')).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Solicitar acesso ao grupo" }));

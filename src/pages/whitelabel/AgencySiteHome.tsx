@@ -1331,7 +1331,7 @@ export default function AgencySiteHome({
                         {i === 0 && (
                           <p className={`mt-2 hidden w-full max-w-2xl text-sm text-background/80 md:block ${AGENCY_CARD_DESCRIPTION_CLASS}`}>{d.text}</p>
                         )}
-                        <span data-bagagem-cta={bagagemOfficial ? "" : undefined} className={`mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background ${bagagemOfficial ? "rounded-md px-3 py-2" : ""}`}>
+                        <span className="mt-4 inline-flex items-center border-b border-background/40 pb-0.5 text-sm font-semibold text-background">
                           {d.ctaLabel ?? (d.href ? "Ver circuito" : "Solicitar proposta")} <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                         </span>
                       </div>
@@ -2470,6 +2470,17 @@ export default function AgencySiteHome({
           rendered = cruise ? 0 : rendered + 1;
           return (
             <div key={section.key} className={cruise ? "wl-karibu-cruise" : `wl-karibu-surface ${gradient ? "wl-karibu-gradient" : ""}`}
+              style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
+              {node}
+            </div>
+          );
+        }
+        if (bagagemOfficial) {
+          const gradient = ["orlando", "resorts", "faq"].includes(section.key);
+          return (
+            <div key={section.key}
+              className={`wl-alt-surface wl-bagagem-home-surface ${gradient ? "wl-bagagem-home-tint" : ""}`}
+              data-bagagem-section={section.key}
               style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
               {node}
             </div>
