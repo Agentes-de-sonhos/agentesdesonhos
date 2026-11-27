@@ -27,7 +27,7 @@ const verifiedThisSession = new Set<string>();
  * Envolve as páginas institucionais. Renderiza no próprio URL solicitado
  * (inclusive `?__agency_host=`), então o destino é preservado após liberar.
  */
-export function AgencySitePasswordGate({ info, children }: { info: AgencyDomainInfo; children: ReactNode }) {
+export function AgencySitePasswordGate({ info, children, onPasswordScreenReady }: { info: AgencyDomainInfo; children: ReactNode; onPasswordScreenReady?: () => void }) {
   const { pathname } = useLocation();
   const tenant = info.user_id;
   const active = isTenantPasswordProtected(tenant) && !isPasswordExemptPath(pathname);
@@ -61,9 +61,13 @@ export function AgencySitePasswordGate({ info, children }: { info: AgencyDomainI
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
 
+  useEffect(() => {
+    if (active && (phase === "locked" || phase === "verifyUnavailable")) onPasswordScreenReady?.();
+  }, [active, phase, onPasswordScreenReady]);
+
   if (!active || phase === "unlocked") return <>{children}</>;
   if (phase === "checking") {
-    if (isPasswordGateLoaderSuppressed(info.hostname)) return null;
+    if (onPasswordScreenReady || isPasswordGateLoaderSuppressed(info.hostname)) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-background">
         <AgencyBrandSpinner hostname={info.hostname} size="lg" />

@@ -110,30 +110,33 @@ export function isPasswordGateLoaderSuppressed(hostname: string): boolean {
   return (KARIBU_HOSTS.has(host) || BAGAGEM_HOSTS.has(host)) && isAgencyLoaderSuppressed(hostname);
 }
 
-/** Short entry treatment on agency homepages even when the route is cached. */
-function AgencyHomeIntro({ hostname, brand }: { hostname: string; brand: "karibu" | "bagagem" }) {
-  const [done, setDone] = useState(false);
+export function isBagagemStartupPath(hostname: string, pathname: string): boolean {
+  return BAGAGEM_HOSTS.has(normalizeBrandHost(hostname)) && (pathname === "/" || pathname === "");
+}
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setDone(true), 1250);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  const hosts = brand === "karibu" ? KARIBU_HOSTS : BAGAGEM_HOSTS;
-  if (done || !hosts.has(resolveContextHostname(hostname)) || isAgencyLoaderSuppressed(hostname)) return null;
+/** Rendered by the domain gate, not remounted by the route or password checks. */
+export function BagagemStartupOverlay({ hostname }: { hostname: string }) {
   return (
-    <div data-karibu-home-intro={brand === "karibu" ? "" : undefined} data-bagagem-home-intro={brand === "bagagem" ? "" : undefined} className="pointer-events-none fixed inset-0 z-[110] flex items-center justify-center bg-white motion-reduce:hidden" aria-hidden="true">
+    <div data-bagagem-startup className="fixed inset-0 z-[110] flex items-center justify-center bg-white" style={{ backgroundColor: "#fff" }}>
       <AgencyBrandSpinner hostname={hostname} size="lg" />
     </div>
   );
 }
 
+/** Short entry treatment on the Karibu homepage even when the route is cached. */
 export function KaribuHomeIntro({ hostname }: { hostname: string }) {
-  return <AgencyHomeIntro hostname={hostname} brand="karibu" />;
-}
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDone(true), 1250);
+    return () => window.clearTimeout(timer);
+  }, []);
 
-export function BagagemHomeIntro({ hostname }: { hostname: string }) {
-  return <AgencyHomeIntro hostname={hostname} brand="bagagem" />;
+  if (done || !KARIBU_HOSTS.has(resolveContextHostname(hostname)) || isAgencyLoaderSuppressed(hostname)) return null;
+  return (
+    <div data-karibu-home-intro className="pointer-events-none fixed inset-0 z-[110] flex items-center justify-center bg-white motion-reduce:hidden" aria-hidden="true">
+      <AgencyBrandSpinner hostname={hostname} size="lg" />
+    </div>
+  );
 }
 
 export interface AgencyBrandSpinnerProps {

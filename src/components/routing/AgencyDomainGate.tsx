@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   agencyHostFromLocation,
@@ -14,7 +14,7 @@ import { resolveConstructionVariant } from "@/lib/agencySiteStatus";
 import { canonicalRedirectHost, withSiteContacts } from "@/lib/agencySiteContacts";
 import PublicDomainRoot, { publicDomainRootLabel } from "@/components/routing/PublicDomainRoot";
 import { resolveAgencyFaviconUrl } from "@/lib/agencySiteBrand";
-import { AgencyBrandSpinner, agencyLoaderBackdropClass, isAgencyLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
+import { AgencyBrandSpinner, BagagemStartupOverlay, agencyLoaderBackdropClass, isAgencyLoaderSuppressed, isBagagemStartupPath } from "@/components/whitelabel/AgencyBrandSpinner";
 
 import { useNoindex } from "@/hooks/useNoindex";
 import { useAgencyFavicon } from "@/hooks/useAgencyFavicon";
@@ -59,6 +59,9 @@ function SharedHostIndex() {
 export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
   const browserHost = typeof window === "undefined" ? "" : window.location.hostname;
   const browserPath = typeof window === "undefined" ? "/" : window.location.pathname;
+  const [bagagemEntry] = useState(() => isBagagemStartupPath(browserHost, browserPath));
+  const [entryVisible, setEntryVisible] = useState(bagagemEntry);
+  const finishEntry = useCallback(() => setEntryVisible(false), []);
   const redirectHost = canonicalRedirectHost(browserHost);
   if (redirectHost && typeof window !== "undefined") {
     const { pathname, search, hash } = window.location;
@@ -160,6 +163,19 @@ export function AgencyDomainGate({ children }: { children: React.ReactNode }) {
     );
   }
 
+
+  // Uma só camada branca sobre as etapas de DNS/roteamento e acesso.
+  // Mantém o mesmo nó enquanto chegam o perfil e o JS da página.
+  if (bagagemEntry && host && (isLoading || data)) {
+    return (
+      <>
+        {entryVisible && <BagagemStartupOverlay hostname={browserHost} />}
+        {data && <Suspense fallback={null}>
+          <AgencyDomainRoutes info={withSiteContacts(data)} onStartupReady={finishEntry} />
+        </Suspense>}
+      </>
+    );
+  }
 
   if (host && isLoading) return <Spinner />;
 

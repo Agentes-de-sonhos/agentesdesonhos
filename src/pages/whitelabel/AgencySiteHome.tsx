@@ -21,7 +21,7 @@ import { AgencySportsRequestDialog, type SportsEventChoice } from "@/components/
 import { OfferCard, usePublicOffers } from "@/pages/whitelabel/AgencyOffersPage";
 import { offerInChannel } from "@/lib/offers";
 import { OrlandoTicketsSection } from "@/components/orlando/OrlandoTicketsSection";
-import { BagagemHomeIntro, KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
+import { KaribuHomeIntro } from "@/components/whitelabel/AgencyBrandSpinner";
 import { SocialStrip } from "@/components/whitelabel/SocialStrip";
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -541,8 +541,10 @@ export default function AgencySiteHome({
   info,
   labPresentation,
   noindex = false,
+  onStartupReady,
 }: {
   info: AgencyDomainInfo;
+  onStartupReady?: () => void;
   /** Technical preview caller prevents indexing without changing real sites. */
   noindex?: boolean;
   /**
@@ -555,6 +557,7 @@ export default function AgencySiteHome({
     modules?: Record<string, boolean>;
   };
 }) {
+  useEffect(() => { onStartupReady?.(); }, [onStartupReady]);
   const name = agencyDisplayName(info);
   // Tema global do tenant: variáveis aplicadas na raiz do documento para que
   // modais, selects, calendários e demais portals também usem a marca.
@@ -2173,7 +2176,6 @@ export default function AgencySiteHome({
   return (
     <>
       {karibu && <KaribuHomeIntro hostname={hostname} />}
-      {bagagemOfficial && <BagagemHomeIntro hostname={hostname} />}
       {isMundoSeoHost(info.hostname) ? null : sharePreview && !profile.presentation ? (
         <SEO
           title={sharePreview.title}

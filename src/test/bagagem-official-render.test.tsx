@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { BAGAGEM_NA_MAO_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
-import { AgencyBrandSpinner, BagagemHomeIntro, isPasswordGateLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
+import { AgencyBrandSpinner, BagagemStartupOverlay, isBagagemStartupPath, isPasswordGateLoaderSuppressed } from "@/components/whitelabel/AgencyBrandSpinner";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 
@@ -22,21 +22,25 @@ describe("home oficial da Bagagem na Mão", () => {
     try {
       for (const host of ["bagagemnamao.com.br", "www.bagagemnamao.com.br"]) {
         window.history.replaceState(null, "", "/");
-        const splash = render(<BagagemHomeIntro hostname={host} />);
-        const logo = splash.container.querySelector("[data-bagagem-home-intro] img");
+        expect(isBagagemStartupPath(host, "/")).toBe(true);
+        const splash = render(<BagagemStartupOverlay hostname={host} />);
+        const overlay = splash.container.querySelector("[data-bagagem-startup]");
+        expect(overlay).toHaveStyle({ backgroundColor: "#fff" });
+        const logo = overlay?.querySelector("img");
         expect(logo).toHaveClass("animate-brand-breathe", "motion-reduce:animate-none");
         expect(logo?.getAttribute("src")).toMatch(/briefing-19-v1-logo\.png$/);
         splash.unmount();
         for (const path of ["/universal", "/ingressos-orlando", "/resorts-brasil"]) {
           window.history.replaceState(null, "", path);
           expect(isPasswordGateLoaderSuppressed(host)).toBe(true);
-          const internal = render(<><BagagemHomeIntro hostname={host} /><AgencyBrandSpinner hostname={host} /></>);
+          expect(isBagagemStartupPath(host, path)).toBe(false);
+          const internal = render(<AgencyBrandSpinner hostname={host} />);
           expect(internal.container).toBeEmptyDOMElement();
           internal.unmount();
         }
       }
       window.history.replaceState(null, "", "/ads-briefing-preview/briefing-19-v1");
-      expect(render(<BagagemHomeIntro hostname="briefing-19-v1.preview.local" />).container).toBeEmptyDOMElement();
+      expect(isBagagemStartupPath("briefing-19-v1.preview.local", "/")).toBe(false);
     } finally {
       window.history.replaceState(null, "", prior);
     }
@@ -46,12 +50,12 @@ describe("home oficial da Bagagem na Mão", () => {
     const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "bagagemnamao.com.br" };
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const { container } = render(<HelmetProvider><QueryClientProvider client={qc}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
-    expect(screen.getByRole("heading", { name: "Sua família não viaja em modo padrão" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Mais tempo nos parques. Menos correria entre eles." })).toBeInTheDocument();
     const controls = within(container.querySelector<HTMLElement>('[data-hero-nav-placement="bottom-right"]')!);
     fireEvent.click(controls.getByRole("button", { name: "Próximo destaque" }));
-    expect(screen.getByRole("heading", { name: "Mais tempo nos parques. Menos correria entre eles." })).toBeInTheDocument();
-    fireEvent.click(controls.getByRole("button", { name: "Próximo destaque" }));
     expect(screen.getByRole("heading", { name: "Dos parques ao navio, sem apertar o roteiro" })).toBeInTheDocument();
+    fireEvent.click(controls.getByRole("button", { name: "Próximo destaque" }));
+    expect(screen.getByRole("heading", { name: "Sua família não viaja em modo padrão" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "O que você deseja planejar?" })).toBeInTheDocument();
     expect(within(container.querySelector<HTMLElement>("#cotacao")!).getByRole("button", { name: "Solicitar", exact: true })).toBeInTheDocument();
     const clubMed = within(screen.getByTestId("club-med-snow-home"));

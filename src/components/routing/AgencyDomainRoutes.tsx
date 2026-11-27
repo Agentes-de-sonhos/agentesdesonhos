@@ -157,9 +157,11 @@ function StandaloneTool({ info, kind }: { info: AgencyDomainInfo; kind: Paramete
 export default function AgencyDomainRoutes({
   info,
   basePath = "",
+  onStartupReady,
 }: {
   info: AgencyDomainInfo;
   basePath?: string;
+  onStartupReady?: () => void;
 }) {
   const base = (basePath || "").replace(/\/+$/, "");
   /** Caminho interno (sem o prefixo do slug) usado nas decisões de rota. */
@@ -185,14 +187,14 @@ export default function AgencyDomainRoutes({
 
   return (
     <BrowserRouter basename={base || undefined}>
-      <Suspense fallback={<Fallback />}>
-        <AgencyDomainRoutesInner info={info} />
+      <Suspense fallback={onStartupReady ? null : <Fallback />}>
+        <AgencyDomainRoutesInner info={info} onStartupReady={onStartupReady} />
       </Suspense>
     </BrowserRouter>
   );
 }
 
-function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
+function AgencyDomainRoutesInner({ info, onStartupReady }: { info: AgencyDomainInfo; onStartupReady?: () => void }) {
   /**
    * Indexação centralizada: host técnico compartilhado e áreas
    * privadas/técnicas ficam noindex; páginas institucionais públicas seguem
@@ -221,7 +223,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
         );
 
   return (
-      <AgencySitePasswordGate info={info}>
+      <AgencySitePasswordGate info={info} onPasswordScreenReady={onStartupReady}>
         <MundoSEO hostname={info.hostname} />
         <Routes>
           {/* Home em construção: página isolada, SEM cabeçalho/menu/rodapé do site. */}
@@ -302,7 +304,7 @@ function AgencyDomainRoutesInner({ info }: { info: AgencyDomainInfo }) {
               </AgencySiteLayout>
             }
           >
-            {!construction && <Route path="/" element={<AgencySiteHome info={info} />} />}
+            {!construction && <Route path="/" element={<AgencySiteHome info={info} onStartupReady={onStartupReady} />} />}
             <Route path="/area-do-cliente" element={<AgencyClientArea info={info} />} />
             {/* Detalhe da viagem: mesma tela autenticada, resolvida pelo path. */}
             <Route path="/area-do-cliente/viagens/:id" element={<AgencyClientArea info={info} />} />

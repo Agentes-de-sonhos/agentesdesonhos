@@ -1330,9 +1330,9 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
     presentation: false,
     heroPresentation: { ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.heroPresentation, actionsPlacement: "right" },
     hero: [
-      { kicker: "VIAGENS SOB MEDIDA COM MÁRCIA BACCARINI", title: "Sua família não viaja em modo padrão", subtitle: "Da primeira conversa ao embarque, a Márcia monta o roteiro com vocês: o que vale incluir, o que pode ficar de fora e onde deixar tempo livre.", image: "bagagemCanada", imageCredit: { author: "Gorgo", source: "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg", license: "domínio público", licenseUrl: "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg#Licensing" }, order: 1, enabled: true },
-      { kicker: "ORLANDO EM FAMÍLIA", title: "Mais tempo nos parques. Menos correria entre eles.", subtitle: "Disney, Universal, ingressos e hospedagem no mesmo planejamento, com dias de descanso entre os parques e atenção às idades das crianças.", image: "orlandoMagicKingdom", order: 2, enabled: true },
-      { kicker: "DISNEY CRUISE LINE", title: "Dos parques ao navio, sem apertar o roteiro", subtitle: "A Márcia ajuda a escolher navio, cabine e porto de embarque e a encaixar o cruzeiro antes ou depois dos dias em Orlando.", image: "cruzeiroDisneyWish", order: 3, enabled: true },
+      { kicker: "ORLANDO EM FAMÍLIA", title: "Mais tempo nos parques. Menos correria entre eles.", subtitle: "Disney, Universal, ingressos e hospedagem no mesmo planejamento, com dias de descanso entre os parques e atenção às idades das crianças.", image: "orlandoMagicKingdom", order: 1, enabled: true },
+      { kicker: "DISNEY CRUISE LINE", title: "Dos parques ao navio, sem apertar o roteiro", subtitle: "A Márcia ajuda a escolher navio, cabine e porto de embarque e a encaixar o cruzeiro antes ou depois dos dias em Orlando.", image: "cruzeiroDisneyWish", order: 2, enabled: true },
+      { kicker: "VIAGENS SOB MEDIDA COM MÁRCIA BACCARINI", title: "Sua família não viaja em modo padrão", subtitle: "Da primeira conversa ao embarque, a Márcia monta o roteiro com vocês: o que vale incluir, o que pode ficar de fora e onde deixar tempo livre.", image: "bagagemCanada", imageCredit: { author: "Gorgo", source: "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg", license: "domínio público", licenseUrl: "https://commons.wikimedia.org/wiki/File:Moraine_Lake_17092005.jpg#Licensing" }, order: 3, enabled: true },
     ],
     requestCenter: {
       ...BAGAGEM_NA_MAO_PREVIEW_PROFILE.requestCenter,
