@@ -1466,9 +1466,20 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       signature: { enabled: false },
       highlights: { enabled: false },
     },
-    nav: INNOVATI_PREVIEW_PROFILE.nav?.map((item) =>
-      item.to === "/#assinatura" ? { ...item, to: "/#ingressos-orlando" } : item,
+    nav: INNOVATI_PREVIEW_PROFILE.nav?.flatMap((item) =>
+      item.to === "/#assinatura"
+        ? [
+          { ...item, to: "/#ingressos-orlando" },
+          { label: "Visto Americano", to: "/#visto-americano" },
+        ]
+        : [item],
     ),
+    visaConsult: {
+      kicker: "Visto Americano",
+      title: "Vai viajar para os Estados Unidos?",
+      text: "Converse com a Innovati Travel sobre os primeiros passos para solicitar o visto de turismo. A decisão sobre a emissão do visto é da autoridade consular.",
+      cta: "Pedir orientação sobre o visto",
+    },
     footer: {
       ...INNOVATI_PREVIEW_PROFILE.footer,
       descriptionHidden: true,

@@ -93,3 +93,19 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
 });
+
+it("coloca Visto Americano depois de Especialidades e ancora a seção da home da Innovati", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const nav = within(container.querySelector("header nav")! as HTMLElement);
+  const visaLink = nav.getByRole("link", { name: "Visto Americano" });
+  expect(visaLink).toHaveAttribute("href", "/#visto-americano");
+  const specialties = nav.getByText("Especialidades", { exact: true });
+  expect(specialties.compareDocumentPosition(visaLink) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  const section = within(container.querySelector("#visto-americano")! as HTMLElement);
+  expect(section.getByRole("heading", { name: "Vai viajar para os Estados Unidos?" })).toBeInTheDocument();
+  fireEvent.click(section.getByRole("button", { name: "Pedir orientação sobre o visto" }));
+  expect(section.getByRole("textbox", { name: "WhatsApp" })).toBeInTheDocument();
+  expect(section.queryByLabelText(/passaporte|documento/i)).toBeNull();
+});
