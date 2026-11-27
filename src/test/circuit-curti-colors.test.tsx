@@ -28,6 +28,8 @@ describe("Identidade visual de Itália em Trem", () => {
     expect([...page.querySelectorAll(".circuit-timeline-prefix")].map(el => el.textContent)).toEqual(Array(12).fill("Dia"));
     expect([...page.querySelectorAll(".circuit-timeline-number")].map(el => el.textContent)).toEqual(Array.from({ length: 12 }, (_, i) => String(i + 1)));
     expect(page.querySelectorAll(".circuit-calendar-month")).toHaveLength(7);
+    const monthGrids = [...page.querySelectorAll(".circuit-calendar-grid")];
+    expect(monthGrids.map(grid => grid.querySelectorAll(".circuit-calendar-day").length)).toEqual([30, 31, 30, 31, 31, 30, 31]);
     expect(screen.getByRole("button", { name: "Solicitar orçamento: 1 de Abril 2027" })).toHaveClass("circuit-calendar-day");
     expect(screen.getByRole("button", { name: "Ampliar mapa do roteiro" })).toBeVisible();
   });
@@ -57,5 +59,6 @@ describe("Identidade visual de Itália em Trem", () => {
   it("não aplica as cores da Curti à IMM", () => {
     const { container } = renderCircuit(LESTE_EUROPEU_PREMIUM_2027, "immturismo.com.br");
     expect(container.querySelector(".circuit-curti-italia-trem")).toBeNull();
+    expect(container.querySelector(".circuit-calendar-grid")).toBeNull();
   });
 });

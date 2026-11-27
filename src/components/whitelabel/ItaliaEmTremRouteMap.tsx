@@ -48,8 +48,8 @@ function RouteSvg({ circuit }: { circuit: CircuitTour }) {
         return (
           <g key={p.city}>
             <circle cx={x} cy={y} r={edge ? 7 : 5} fill={routeBlue} stroke="white" strokeWidth="1.6" />
-            <text x={x + dx} y={y + dy} textAnchor={p.anchor} fontSize="17" fontWeight="700" fill="#171717" stroke="white" strokeWidth="4" paintOrder="stroke">{p.city}</text>
-            {sub && <text x={x + dx} y={y + dy + 15} textAnchor={p.anchor} fontSize="12.5" fontWeight="600" fill="#171717" stroke="white" strokeWidth="3" paintOrder="stroke">{sub}</text>}
+            <text x={x + dx} y={y + dy} textAnchor={p.anchor} fontSize="17" fontWeight="700" fill={routeBlue} stroke="white" strokeWidth="4" paintOrder="stroke">{p.city}</text>
+            {sub && <text x={x + dx} y={y + dy + 15} textAnchor={p.anchor} fontSize="12.5" fontWeight="600" fill={routeBlue} stroke="white" strokeWidth="3" paintOrder="stroke">{sub}</text>}
           </g>
         );
       })}

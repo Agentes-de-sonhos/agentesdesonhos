@@ -196,7 +196,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
               {upcoming.map((m) => (
                 <div key={m.month} className="circuit-calendar-month w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className={rail ? "circuit-calendar-grid mt-3" : "mt-3 flex flex-wrap gap-2"}>
                     {m.days.map((d) => { const iso = circuitDepartureDate(m.month, d); const br = brGuide.includes(iso); return (
                       <Button key={d} variant="ghost" className={`circuit-calendar-day relative h-10 w-10 p-0 ${br ? "!bg-[#009C3B] !text-white ring-2 ring-primary ring-offset-2 hover:!bg-[#00852f]" : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"}`} aria-label={`Solicitar orçamento: ${d} de ${m.month}${br ? " (guia brasileiro)" : ""}`} onClick={() => setDeparture({ date: iso, label: `${d} de ${m.month}${br ? " · com guia brasileiro" : ""}` })}>{d}{br && <GuideCornerFlag />}</Button>
                     ); })}

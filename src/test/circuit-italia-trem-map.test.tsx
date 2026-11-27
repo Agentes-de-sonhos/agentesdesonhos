@@ -11,8 +11,8 @@ describe("Mapa Itália em Trem", () => {
     expect(map.querySelectorAll('line[data-mode="transfer"]')).toHaveLength(2);
     for (const line of map.querySelectorAll("line")) expect(line).toHaveAttribute("stroke", "#2502ff");
     for (const circle of map.querySelectorAll("circle")) expect(circle).toHaveAttribute("fill", "#2502ff");
-    expect(within(map).getByText("Sorrento")).toHaveAttribute("fill", "#171717");
-    expect(within(map).getByText("5 noites")).toHaveAttribute("fill", "#171717");
+    expect(within(map).getByText("Sorrento")).toHaveAttribute("fill", "#2502ff");
+    expect(within(map).getByText("5 noites")).toHaveAttribute("fill", "#2502ff");
     const legend = screen.getByRole("list", { name: "Legenda do mapa" });
     for (const swatch of legend.querySelectorAll("span")) expect(swatch).toHaveStyle({ borderColor: "#2502ff" });
     expect(within(map).getByText("Término · aeroporto")).toBeVisible();
