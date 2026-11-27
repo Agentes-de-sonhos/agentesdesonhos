@@ -51,6 +51,8 @@ describe("home oficial da Bagagem na Mão", () => {
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const { container } = render(<HelmetProvider><QueryClientProvider client={qc}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
     expect(screen.getByRole("heading", { name: "Mais tempo nos parques. Menos correria entre eles." })).toBeInTheDocument();
+    const openingImage = container.querySelector<HTMLElement>('#topo img[src="/bagagem-na-mao/marcia-castelo-orlando.webp"]');
+    expect(openingImage).toHaveClass("object-[79%_center]", "md:object-[center_30%]");
     const controls = within(container.querySelector<HTMLElement>('[data-hero-nav-placement="bottom-right"]')!);
     fireEvent.click(controls.getByRole("button", { name: "Próximo destaque" }));
     expect(screen.getByRole("heading", { name: "Dos parques ao navio, sem apertar o roteiro" })).toBeInTheDocument();

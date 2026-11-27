@@ -198,6 +198,7 @@ const DESTINATION_IMAGES: Record<string, string> = {
   immCruise: "/imm/hero-cruzeiros.jpg",
   immLesteEuropeu: immLesteEuropeu.url,
   immDisneyCastle: disneyMagicKingdomOfficial.url,
+  bagagemOrlandoMarcia: "/bagagem-na-mao/marcia-castelo-orlando.webp",
   bagagemDisneyCruise: "/bagagem-na-mao/marcia-cruzeiro-disney.webp",
   bagagemCanada: "/bagagem-na-mao/canada-lago-moraine.webp",
   bagagemIberostarWaves: "/resorts/iberostar-bahia/0.jpg",
@@ -769,6 +770,7 @@ export default function AgencySiteHome({
     santoriniShip: "object-[64%_center] md:object-[center_58%]",
     airportTraveler: "object-[68%_center] md:object-[64%_28%]",
     juMagicKingdom: "object-[74%_center] md:object-[70%_30%]",
+    bagagemOrlando: "object-[79%_center] md:object-[center_30%]",
     amandaRight: "object-[74%_24%] sm:object-[72%_24%] md:object-[72%_24%]",
     // O Mundo em Cores slide 3: rostos das quatro no topo — ancora no alto.
     mundoGrupoFaces: "object-[80%_28%] md:object-[center_28%]",
