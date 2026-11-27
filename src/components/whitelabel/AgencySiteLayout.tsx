@@ -546,12 +546,15 @@ export function AgencyFooter({
      * do cabeçalho. Demais tenants seguem com o acabamento atual.
      */
     const karibu = profile.key === "karibuBriefing21" || profile.key === "karibuOfficial";
-    const plainFooterLogo = karibu || plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial" || profile.key === "immOfficial";
-    const footerLogoClass = profile.key === "pristurBriefing22" || profile.key === "pristurOfficial"
-      ? "h-[72px] w-auto max-w-[300px] object-contain"
-      : plainFooterLogo
-        ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
-        : "h-12 w-auto max-w-[200px] object-contain";
+    const bagagemOfficial = profile.key === "bagagemNaMaoOfficial";
+    const plainFooterLogo = bagagemOfficial || karibu || plainFooter || profile.key === "mundoEmCoresBriefing14" || profile.key === "pristurBriefing22" || profile.key === "pristurOfficial" || profile.key === "immOfficial";
+    const footerLogoClass = bagagemOfficial
+      ? "wl-bagagem-footer-logo h-16 w-auto max-w-full object-contain"
+      : profile.key === "pristurBriefing22" || profile.key === "pristurOfficial"
+        ? "h-[72px] w-auto max-w-[300px] object-contain"
+        : plainFooterLogo
+          ? resolveAgencyHeaderBrandPreset(info.hostname).logoClassName
+          : "h-12 w-auto max-w-[200px] object-contain";
     return (
       <footer id="rodape" className={karibu ? `${footerShellClass} wl-karibu-footer` : footerShellClass}>
         <div className={`${siteContainer(true)} grid gap-12 py-16 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.75fr)_minmax(0,1.35fr)_minmax(0,0.75fr)] md:gap-10`}>

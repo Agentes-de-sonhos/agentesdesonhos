@@ -38,6 +38,10 @@ describe("home oficial da Bagagem na Mão", () => {
     expect(footer.getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5521988559515");
     expect(footer.queryByText(/98855-9515/)).toBeNull();
     expect(footer.getByText(/Rua Conde de Bonfim, 211/)).toBeInTheDocument();
+    const footerLogo = footer.getByRole("img", { name: "Logo Bagagem na Mão Viagens" });
+    expect(footerLogo).toHaveClass("h-16");
+    expect(footerLogo.parentElement?.tagName).toBe("DIV");
+    expect(footerLogo.parentElement?.className).not.toMatch(/shadow|ring|border|bg-white/);
     const social = screen.getByRole("region", { name: "Siga-nos nas redes" });
     expect(within(social).getByRole("link", { name: "Instagram da agência" })).toHaveAttribute("href", "https://www.instagram.com/bagagemnamaoviagens/");
     expect(container.querySelector('a[href*="chat.whatsapp.com"]')).toBeNull();

@@ -2369,3 +2369,9 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-bagagem-official #rodape .wl-footer-copyright * {
   color: #171717 !important;
 }
+.wl-bagagem-official #rodape .wl-bagagem-footer-logo {
+  height: 4rem;
+  border: 0;
+  box-shadow: none;
+  filter: none;
+}
