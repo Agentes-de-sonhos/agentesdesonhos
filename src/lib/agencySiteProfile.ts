@@ -400,34 +400,44 @@ export interface AgencyFeaturedExperience {
 
 const CLASSIC: AgencySiteProfile = { key: "classic" };
 
+const PARAISO_NAV: AgencySiteNavItem[] = [
+  { label: "Início", to: "/" },
+  {
+    label: "Experiências",
+    to: "/#destaques",
+    children: [
+      { label: "Inspirações", to: "/#novidades" },
+      { label: "EXPLORA I · Grande Prêmio de Mônaco 2027", to: "/#explora-monaco" },
+    ],
+  },
+  {
+    label: "Sobre",
+    to: "/#sobre",
+    children: [
+      { label: "Nossa trajetória", to: "/#sobre" },
+      { label: "Credenciais", to: "/#credenciais" },
+      { label: "FAQ", to: "/#faq" },
+    ],
+  },
+  { label: "Grupo WhatsApp", to: "https://chat.whatsapp.com/H65S2OtR73Q3PnAGH6sCoT" },
+  { label: "Área do Cliente", to: "/area-do-cliente" },
+];
+
 /** Paraíso Viagens — curadoria de luxo, sem DMC e sem depoimentos. */
 const LUXURY_CURATED: AgencySiteProfile = {
   key: "luxuryCurated",
   // A Paraíso não trabalha a temporada nacional de cruzeiros: sem o item
   // automático "Cruzeiros 26/27" no menu (pedido de Fernando, 18/11/2026).
   cruiseSeasonInNav: false,
-  nav: [
-    { label: "Início", to: "/" },
-    {
-      label: "Experiências",
-      to: "/#destaques",
-      children: [
-        { label: "Inspirações", to: "/#novidades" },
-        { label: "EXPLORA I · Grande Prêmio de Mônaco 2027", to: "/#explora-monaco" },
-      ],
-    },
-    {
-      label: "Sobre",
-      to: "/#sobre",
-      children: [
-        { label: "Nossa trajetória", to: "/#sobre" },
-        { label: "Credenciais", to: "/#credenciais" },
-        { label: "FAQ", to: "/#faq" },
-      ],
-    },
-    { label: "Grupo WhatsApp", to: "https://chat.whatsapp.com/H65S2OtR73Q3PnAGH6sCoT" },
-    { label: "Área do Cliente", to: "/area-do-cliente" },
-  ],
+  nav: PARAISO_NAV,
+  hideHeaderBlog: true,
+  headerNav: PARAISO_NAV.flatMap((item) => {
+    if (item.to === "/") return [item, { label: "Destaques", to: "/#destinos" }];
+    if (item.to !== "/#sobre") return [item];
+    return [{ ...item, children: item.children?.map((child) =>
+      child.to === "/#faq" ? { ...child, label: "Perguntas frequentes" } : child,
+    ) }];
+  }),
   // Mantém a Central de Solicitações no atendimento; o FAQ tem o campo
   // direto padronizado do site com o WhatsApp público da agência.
   hideConciergeWhatsapp: true,

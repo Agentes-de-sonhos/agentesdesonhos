@@ -2539,6 +2539,14 @@ export default function AgencySiteHome({
         const node = renderSection(section.key);
         if (!node) return null;
         let tagged = node;
+        if (profile.key === "luxuryCurated") {
+          return (
+            <div key={section.key} className="wl-paraiso-home-surface"
+              style={index === 0 && editorial ? { paddingTop: bottomOverlap } : undefined}>
+              {node}
+            </div>
+          );
+        }
         if (karibu) {
           // A faixa azul de cruzeiros interrompe a sequência; a próxima começa branca.
           const cruise = section.key === "authority";
