@@ -68,7 +68,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
 
       {/* Hero */}
       <section className="relative">
-        <img src={c.heroImage} alt={c.heroAlt} width={1920} height={912} className="h-[420px] w-full object-cover md:h-[520px]" fetchPriority="high" />
+        <picture>
+          {c.heroMobileImage && <source media="(max-width: 639px)" srcSet={c.heroMobileImage} type="image/webp" />}
+          <img src={c.heroImage} alt={c.heroAlt} width={c.heroImageSize?.width ?? 1920} height={c.heroImageSize?.height ?? 912} className="h-[420px] w-full object-cover md:h-[520px]" fetchPriority="high" />
+        </picture>
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent" />
         <div className={`${wrap} absolute inset-x-0 bottom-0 pb-10`}>
           <span className="circuit-eyebrow inline-block rounded-full bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">{c.badge}</span>

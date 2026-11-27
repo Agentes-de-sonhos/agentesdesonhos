@@ -6,7 +6,7 @@ import { circuitNights } from "@/lib/circuits/presentation";
 import type { CircuitTour } from "@/lib/circuits/types";
 
 const W = 570, H = 300;
-const color = "var(--brand-primary, hsl(var(--primary)))";
+const routeBlue = "#2502ff"; // O mesmo azul da página principal da Curti.
 type Point = readonly [number, number];
 const project = ([lon, lat]: Point) => [
   (lon - 11.35) * 63,
@@ -37,7 +37,7 @@ function RouteSvg({ circuit }: { circuit: CircuitTour }) {
       {visibleLegs.map(({ from, to, mode }) => {
         const [x1, y1] = positions.get(from)!;
         const [x2, y2] = positions.get(to)!;
-        return <line key={`${from}-${to}`} data-mode={mode} x1={x1} y1={y1} x2={x2} y2={y2} stroke={mode === "train" ? color : "#415a68"} strokeWidth="3.6" strokeDasharray={mode === "train" ? "8 6" : undefined} strokeLinecap="round" />;
+        return <line key={`${from}-${to}`} data-mode={mode} x1={x1} y1={y1} x2={x2} y2={y2} stroke={routeBlue} strokeWidth="3.6" strokeDasharray={mode === "train" ? "8 6" : undefined} strokeLinecap="round" />;
       })}
       {ITALIA_ROUTE_STOPS.map(p => {
         const [x, y] = positions.get(p.city)!;
@@ -47,9 +47,9 @@ function RouteSvg({ circuit }: { circuit: CircuitTour }) {
         const edge = p.city === "Roma" || p.city === "Brindisi";
         return (
           <g key={p.city}>
-            <circle cx={x} cy={y} r={edge ? 7 : 5} fill={edge ? color : "white"} stroke={color} strokeWidth="2.6" />
-            <text x={x + dx} y={y + dy} textAnchor={p.anchor} fontSize="17" fontWeight="700" fill="#16262b" stroke="white" strokeWidth="4" paintOrder="stroke">{p.city}</text>
-            {sub && <text x={x + dx} y={y + dy + 15} textAnchor={p.anchor} fontSize="12.5" fontWeight="600" fill="#334b55" stroke="white" strokeWidth="3" paintOrder="stroke">{sub}</text>}
+            <circle cx={x} cy={y} r={edge ? 7 : 5} fill={routeBlue} stroke="white" strokeWidth="1.6" />
+            <text x={x + dx} y={y + dy} textAnchor={p.anchor} fontSize="17" fontWeight="700" fill="#171717" stroke="white" strokeWidth="4" paintOrder="stroke">{p.city}</text>
+            {sub && <text x={x + dx} y={y + dy + 15} textAnchor={p.anchor} fontSize="12.5" fontWeight="600" fill="#171717" stroke="white" strokeWidth="3" paintOrder="stroke">{sub}</text>}
           </g>
         );
       })}
@@ -59,9 +59,9 @@ function RouteSvg({ circuit }: { circuit: CircuitTour }) {
 }
 
 function RouteLegend() {
-  return <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Legenda do mapa">
-    <li className="flex items-center gap-2"><span aria-hidden="true" className="w-7 border-t-[3px] border-dashed" style={{ borderColor: color }} /> Trem</li>
-    <li className="flex items-center gap-2"><span aria-hidden="true" className="w-7 border-t-[3px] border-[#415a68]" /> Traslado</li>
+  return <ul className="flex flex-wrap gap-x-5 gap-y-2 text-sm" aria-label="Legenda do mapa" style={{ color: routeBlue }}>
+    <li className="flex items-center gap-2"><span aria-hidden="true" className="w-7 border-t-[3px] border-dashed" style={{ borderColor: routeBlue }} /> Trem</li>
+    <li className="flex items-center gap-2"><span aria-hidden="true" className="w-7 border-t-[3px]" style={{ borderColor: routeBlue }} /> Traslado</li>
   </ul>;
 }
 

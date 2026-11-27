@@ -1,4 +1,3 @@
-import hero from "@/assets/whitelabel/destinos-com-a-ju/hero-varenna-lago-como.webp.asset.json";
 import type { CircuitTour } from "./types";
 
 /** Fonte: programa 31847 enviado pela Curti, PDF de 12/11/2026. */
@@ -9,8 +8,10 @@ export const ITALIA_EM_TREM: CircuitTour = {
   title: "Itália em Trem",
   code: "31847", duration: "12 dias / 11 noites", countries: ["Itália"],
   cities: ["Roma", "Sorrento", "Bari", "Lecce"],
-  heroImage: hero.url, heroAlt: "Varenna, no Lago de Como: imagem ilustrativa da Itália, fora deste roteiro",
-  heroCaption: "Imagem ilustrativa da Itália: Varenna, Lago de Como (não integra este roteiro).",
+  heroImage: "/roteiros/curti/curti-italia-em-trem-capa.webp",
+  heroMobileImage: "/roteiros/curti/curti-italia-em-trem-capa-mobile.webp",
+  heroImageSize: { width: 1920, height: 905 },
+  heroAlt: "Casas à beira-mar entre montanhas e buganvílias na Costa Amalfitana, na Itália",
   pdfUrl: "/roteiros/curti/italia-em-trem-2027.pdf",
   summary: "Roma, Nápoles, Costa Amalfitana e Puglia em 12 dias. De Roma ao sul da Itália, combine trechos de trem com estadias em Sorrento, Bari e Lecce. Conheça os Museus Vaticanos, a Costa Amalfitana, Capri, Pompeia e os trulli de Alberobello em um programa semi-independente, com excursões e traslados previstos.",
   currency: "EUR", fromPrice: 4940,

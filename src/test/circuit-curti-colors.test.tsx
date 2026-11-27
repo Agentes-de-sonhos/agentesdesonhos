@@ -25,10 +25,23 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(page.querySelectorAll(".circuit-eyebrow")).toHaveLength(8);
     expect(page.querySelectorAll(".circuit-inclusion-icon svg")).toHaveLength(7);
     expect(page.querySelectorAll(".circuit-highlight svg")).toHaveLength(6);
+    expect([...page.querySelectorAll(".circuit-timeline-prefix")].map(el => el.textContent)).toEqual(Array(12).fill("Dia"));
     expect([...page.querySelectorAll(".circuit-timeline-number")].map(el => el.textContent)).toEqual(Array.from({ length: 12 }, (_, i) => String(i + 1)));
     expect(page.querySelectorAll(".circuit-calendar-month")).toHaveLength(7);
     expect(screen.getByRole("button", { name: "Solicitar orçamento: 1 de Abril 2027" })).toHaveClass("circuit-calendar-day");
     expect(screen.getByRole("button", { name: "Ampliar mapa do roteiro" })).toBeVisible();
+  });
+
+  it("usa as capas responsivas da Costa Amalfitana somente na página da Curti", () => {
+    renderCircuit();
+    const hero = screen.getByRole("img", { name: /Costa Amalfitana/ });
+    expect(hero).toHaveAttribute("src", "/roteiros/curti/curti-italia-em-trem-capa.webp");
+    expect(hero).toHaveAttribute("width", "1920");
+    expect(hero).toHaveAttribute("height", "905");
+    const mobile = hero.closest("picture")?.querySelector("source");
+    expect(mobile).toHaveAttribute("media", "(max-width: 639px)");
+    expect(mobile).toHaveAttribute("srcset", "/roteiros/curti/curti-italia-em-trem-capa-mobile.webp");
+    expect(screen.queryByText(/não integra este roteiro/i)).toBeNull();
   });
 
   it("não aplica as cores da Curti à IMM", () => {

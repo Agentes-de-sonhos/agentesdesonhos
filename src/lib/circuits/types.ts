@@ -26,6 +26,8 @@ export interface CircuitTour {
   countries: string[];
   cities: string[];
   heroImage: string;
+  heroMobileImage?: string;
+  heroImageSize?: { width: number; height: number };
   heroAlt: string;
   heroCaption?: string;
   pdfUrl?: string;
