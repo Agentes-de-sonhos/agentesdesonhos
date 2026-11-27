@@ -20,7 +20,7 @@ const ICONS: Record<CircuitInclusionIcon, typeof Hotel> = {
   hotel: BedDouble, tours: Compass, meals: Utensils, bus: Bus, transfer: Car, guide: UserRound, boat: Ship, flight: Plane,
 };
 const wrap = "mx-auto w-full max-w-[1200px] px-5 md:px-8";
-const eyebrow = "text-xs font-semibold uppercase tracking-[0.18em] text-primary";
+const eyebrow = "circuit-eyebrow text-xs font-semibold uppercase tracking-[0.18em] text-primary";
 const h2 = "mt-2 text-3xl font-semibold leading-tight text-foreground md:text-4xl";
 
 function waHref(info: AgencyDomainInfo, c: CircuitTour, extra = "") {
@@ -63,7 +63,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
     : null;
 
   return (
-    <div className={`bg-background pb-24 text-foreground md:pb-0 ${enhanced ? "circuit-enhanced" : ""}`}>
+    <div className={`bg-background pb-24 text-foreground md:pb-0 ${enhanced ? "circuit-enhanced" : ""}${rail ? " circuit-curti-italia-trem" : ""}`}>
       <SEO title={`${c.title} · ${c.duration}`} description={c.summary} />
 
       {/* Hero */}
@@ -71,7 +71,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         <img src={c.heroImage} alt={c.heroAlt} width={1920} height={912} className="h-[420px] w-full object-cover md:h-[520px]" fetchPriority="high" />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent" />
         <div className={`${wrap} absolute inset-x-0 bottom-0 pb-10`}>
-          <span className="inline-block rounded-full bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">{c.badge}</span>
+          <span className="circuit-eyebrow inline-block rounded-full bg-background/90 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">{c.badge}</span>
           <h1 className="mt-3 text-4xl font-semibold leading-tight text-background md:text-6xl">{c.title}</h1>
           {enhanced ? <><div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-base leading-snug text-background md:text-lg">{c.cities.map((city, index) => { const nights = circuitNights(c, city); return <span key={city} className="inline-flex items-center gap-3">{index > 0 && <span aria-hidden="true" className="h-4 w-px bg-background/40" />}<span className="whitespace-nowrap">{city}{nights > 0 && <> • {nights} {nights === 1 ? "noite" : "noites"}</>}</span></span>; })}</div>{brGuide.length > 0 && <button type="button" onClick={scrollToDepartures} className="mt-4 inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full bg-[#009C3B] px-4 py-2 text-left text-sm text-white shadow-md transition hover:bg-[#00852f] md:text-base"><BrFlag /><strong className="font-semibold">Saídas exclusivas com guia brasileiro:</strong><span>{brGuide.map(brGuideLabel).join(" · ")}</span></button>}</> : <p className="mt-2 text-background/90">{c.cities.join(" · ")}</p>}
         </div>
@@ -116,7 +116,7 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {c.inclusions.map((x) => { const I = ICONS[x.icon]; return (
               <div key={x.title} className="circuit-inclusion rounded-2xl border border-border bg-card p-5">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><I className="h-5 w-5" /></span>
+                <span className="circuit-inclusion-icon flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><I className="h-5 w-5" /></span>
                 <h3 className="mt-4 font-semibold">{x.title}</h3>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">{x.text}</p>
               </div>
@@ -187,15 +187,15 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
         {enhanced && brGuide.length > 0 && <p className="mt-3 inline-flex items-center gap-4 rounded-2xl border border-primary/30 bg-card px-4 py-2 text-sm"><span aria-hidden="true" className="relative h-5 w-5 shrink-0 rounded bg-[#009C3B] ring-2 ring-primary ring-offset-2"><GuideCornerFlag /></span><span> <strong className="font-semibold text-primary">Datas destacadas</strong> têm guia acompanhante brasileiro exclusivo. As demais contam com guia em espanhol.</span></p>}
         {enhanced ? (
           <div className="relative mt-6">
-            {!monthEdges.start && <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>}
-            {!monthEdges.end && <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>}
+            {!monthEdges.start && <Button type="button" variant="outline" size="icon" aria-label="Meses anteriores" onClick={() => scrollMonths(-1)} className="circuit-calendar-arrow absolute -left-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-left-5"><ChevronLeft className="h-5 w-5" /></Button>}
+            {!monthEdges.end && <Button type="button" variant="outline" size="icon" aria-label="Próximos meses" onClick={() => scrollMonths(1)} className="circuit-calendar-arrow absolute -right-3 top-1/2 z-10 h-10 w-10 -translate-y-1/2 rounded-full border-border bg-background text-primary shadow-md hover:bg-background hover:text-primary sm:-right-5"><ChevronRight className="h-5 w-5" /></Button>}
             <div ref={monthsRef} onScroll={updateMonthEdges} className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {upcoming.map((m) => (
-                <div key={m.month} className="w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
+                <div key={m.month} className="circuit-calendar-month w-full shrink-0 snap-start rounded-2xl border border-border bg-card p-4 sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-3rem)/4)]">
                   <p className="flex items-center gap-2 font-semibold"><CalendarDays className="h-4 w-4 text-primary" />{m.month}</p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {m.days.map((d) => { const iso = circuitDepartureDate(m.month, d); const br = brGuide.includes(iso); return (
-                      <Button key={d} variant="ghost" className={`relative h-10 w-10 p-0 ${br ? "!bg-[#009C3B] !text-white ring-2 ring-primary ring-offset-2 hover:!bg-[#00852f]" : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"}`} aria-label={`Solicitar orçamento: ${d} de ${m.month}${br ? " (guia brasileiro)" : ""}`} onClick={() => setDeparture({ date: iso, label: `${d} de ${m.month}${br ? " · com guia brasileiro" : ""}` })}>{d}{br && <GuideCornerFlag />}</Button>
+                      <Button key={d} variant="ghost" className={`circuit-calendar-day relative h-10 w-10 p-0 ${br ? "!bg-[#009C3B] !text-white ring-2 ring-primary ring-offset-2 hover:!bg-[#00852f]" : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"}`} aria-label={`Solicitar orçamento: ${d} de ${m.month}${br ? " (guia brasileiro)" : ""}`} onClick={() => setDeparture({ date: iso, label: `${d} de ${m.month}${br ? " · com guia brasileiro" : ""}` })}>{d}{br && <GuideCornerFlag />}</Button>
                     ); })}
                   </div>
                 </div>

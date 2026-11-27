@@ -12,3 +12,41 @@
   .circuit-enhanced .circuit-inclusion, .circuit-enhanced .circuit-highlight svg { transition: none; }
   .circuit-enhanced .circuit-inclusion:hover { transform: none; }
 }
+/* Somente Itália em Trem, que o registro de circuitos restringe à Curti. */
+.circuit-curti-italia-trem {
+  --curti-circuit-blue: #2502ff;
+  --curti-circuit-green: #639682;
+  --curti-circuit-light: #e5e1ff;
+  --curti-circuit-pale: #f6f5ff;
+}
+.circuit-curti-italia-trem :is(.circuit-eyebrow, .circuit-highlight svg, .circuit-inclusion-icon) {
+  color: var(--curti-circuit-blue);
+}
+.circuit-curti-italia-trem .circuit-inclusion-icon { background: var(--curti-circuit-light); }
+.circuit-curti-italia-trem .circuit-timeline-line { background: #c8bfff; }
+.circuit-curti-italia-trem .circuit-timeline-number {
+  background: var(--curti-circuit-blue);
+  color: #fff;
+}
+.circuit-curti-italia-trem .circuit-calendar-month {
+  background: var(--curti-circuit-pale);
+  border-color: var(--curti-circuit-light);
+  color: var(--curti-circuit-blue);
+}
+.circuit-curti-italia-trem .circuit-calendar-month svg { color: var(--curti-circuit-blue); }
+.circuit-curti-italia-trem :is(.circuit-calendar-day, .circuit-calendar-arrow) {
+  background: var(--curti-circuit-light);
+  border-color: transparent;
+  color: var(--curti-circuit-blue);
+}
+.circuit-curti-italia-trem :is(.circuit-calendar-day, .circuit-calendar-arrow):is(:hover, :focus-visible) {
+  background: var(--curti-circuit-blue);
+  color: #fff;
+}
+.circuit-curti-italia-trem :is(.circuit-calendar-day, .circuit-calendar-arrow):focus-visible {
+  outline: 2px solid var(--curti-circuit-blue);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .circuit-curti-italia-trem .circuit-inclusion:hover { border-color: var(--curti-circuit-green); }
+}
