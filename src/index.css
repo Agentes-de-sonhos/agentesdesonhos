@@ -2325,6 +2325,9 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   --primary-foreground: 176.5 27% 12.35%;
   --ring: 178.5 67.23% 46.67%;
   --wl-red: var(--primary);
+  --wl-green: var(--primary);
+  --brand-primary: var(--bagagem-turquoise);
+  --brand-on-primary: var(--bagagem-ink);
   --mc: var(--bagagem-turquoise);
   --wl-mundo-gradient: linear-gradient(180deg, #fff 40%, #effbfa 100%);
 }
