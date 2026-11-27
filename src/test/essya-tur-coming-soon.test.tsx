@@ -31,7 +31,11 @@ describe("Essyatur — white label em www.essyatur.com.br", () => {
       ["Cruzeiros 26/27", "/cruzeiros/temporada-brasileira-2026-2027"], ["Resorts Brasil", "/#resorts"],
     ]);
     expect(specialties?.[0]?.children?.map(({ to }) => to)).toEqual(["/disney", "/universal", "/#ingressos-orlando"]);
-    expect(profile.headerNav?.[3]).toEqual(siteNavLinks(HOST).find(({ label }) => label === "Sobre"));
+    expect(profile.headerNav?.[3]?.children?.map(({ label, to }) => [label, to])).toEqual([
+      ["Quem Somos", "/#sobre"], ["Dúvidas Frequentes", "/#faq"],
+    ]);
+    expect(resolveSiteProfile("essya-curti-v1.preview.local").nav?.find(({ label }) => label === "Sobre")?.children)
+      .toContainEqual({ label: "Avaliações do Google", to: "/#avaliacoes" });
     expect(resolveSiteProfile("essya-curti-v1.preview.local").hideHeaderBlog).toBeUndefined();
     expect(resolveSiteProfile("100limites.tur.br").key).not.toBe("essyaOfficial");
     expect(siteNavLinks("exemplo.com.br").map((l) => l.label)).not.toContain("Sobre a Essyatur");

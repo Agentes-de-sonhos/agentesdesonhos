@@ -1853,6 +1853,9 @@ export const ESSYA_OFFICIAL_PROFILE: AgencySiteProfile = {
   hideHeaderBlog: true,
   headerNav: ESSYA_CURTI_PREVIEW_PROFILE.nav?.filter((item) => item.to !== "/blog").map((item) => {
     if (item.to === "/#destinos") return { ...item, label: "Destaques" };
+    if (item.to === "/#sobre") {
+      return { ...item, children: item.children?.filter((child) => child.to !== "/#avaliacoes") };
+    }
     if (item.label !== "Especialidades") return item;
     return {
       ...item,
