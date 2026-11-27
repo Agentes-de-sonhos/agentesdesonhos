@@ -14,8 +14,8 @@ vi.mock("@/components/routing/AgencyDomainRoutes", () => ({
 const locationDescriptor = Object.getOwnPropertyDescriptor(window, "location")!;
 afterEach(() => { cleanup(); Object.defineProperty(window, "location", locationDescriptor); });
 
-function renderGate(pathname: string) {
-  Object.defineProperty(window, "location", { configurable: true, value: { hostname: "bagagemnamao.com.br", pathname, search: "", hash: "", protocol: "https:" } });
+function renderGate(pathname: string, hostname = "bagagemnamao.com.br") {
+  Object.defineProperty(window, "location", { configurable: true, value: { hostname, pathname, search: "", hash: "", protocol: "https:" } });
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={client}><AgencyDomainGate><p>Plataforma</p></AgencyDomainGate></QueryClientProvider>);
 }
@@ -42,4 +42,30 @@ it("não exibe tela de abertura fora da página inicial da Bagagem", async () =>
   expect(container.querySelector("[data-bagagem-startup]")).toBeNull();
   await screen.findByRole("button", { name: "Página pronta" });
   expect(container.querySelector("[data-bagagem-startup]")).toBeNull();
+});
+
+it.each(["innovati.tur.br", "www.innovati.tur.br"])("mantém uma abertura branca com o logo oficial da Innovati em %s", async (hostname) => {
+  let resolveDomain!: (value: object) => void;
+  lookup.mockReturnValueOnce(new Promise((resolve) => { resolveDomain = resolve; }));
+  const { container } = renderGate("/", hostname);
+  const splash = container.querySelector("[data-innovati-startup]");
+  expect(splash).toHaveStyle({ backgroundColor: "#fff" });
+  const logo = splash?.querySelector("img");
+  expect(logo).toHaveAttribute("src", expect.stringContaining("briefing-24-v1-logo.png"));
+  expect(logo).toHaveClass("animate-brand-breathe", "motion-reduce:animate-none");
+  expect(container.querySelector("[data-bagagem-startup]")).toBeNull();
+  resolveDomain({ hostname, agency_name: "Innovati Travel", user_id: "fixture", phone: null });
+  const ready = await screen.findByRole("button", { name: "Página pronta" });
+  expect(container.querySelector("[data-innovati-startup]")).toBe(splash);
+  fireEvent.click(ready);
+  await waitFor(() => expect(container.querySelector("[data-innovati-startup]")).toBeNull());
+});
+
+it.each(["/ingressos-orlando", "/universal", "/resorts-brasil", "/area-do-cliente"])("não mostra animação de abertura da Innovati em %s", async (path) => {
+  const hostname = "www.innovati.tur.br";
+  lookup.mockResolvedValueOnce({ hostname, agency_name: "Innovati Travel", user_id: "fixture", phone: null });
+  const { container } = renderGate(path, hostname);
+  expect(container.querySelector("[data-innovati-startup], .animate-spin, .animate-brand-breathe")).toBeNull();
+  await screen.findByRole("button", { name: "Página pronta" });
+  expect(container.querySelector("[data-innovati-startup], .animate-spin, .animate-brand-breathe")).toBeNull();
 });
