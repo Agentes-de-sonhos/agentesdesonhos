@@ -1,15 +1,2 @@
-# Robots.txt is not a security mechanism. All authenticated, administrative
-# and client-shared pages emit <meta name="robots" content="noindex, nofollow">
-# via react-helmet-async. To honor that noindex, crawlers must be able to
-# fetch the HTML — so we do NOT Disallow those routes here. Real protection
-# is provided by authentication, tokens and RLS.
-#
-# Only routes deliberately excluded from indexing at the sitemap level and
-# that have no HTML noindex to read (Lovable internals) are blocked below.
-
 User-agent: *
 Allow: /
-
-# Lovable internals / non-HTML endpoints (no indexable content).
-Disallow: /.lovable/
-

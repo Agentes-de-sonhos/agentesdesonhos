@@ -23,10 +23,12 @@ describe("SEO das agências no ar", () => {
     expect(robots).not.toMatch(/^Sitemap:/im);
     expect(robots).not.toMatch(/https?:\/\//i);
   });
-  it("robots.txt mantém o rastreamento público e o bloqueio dos endpoints internos", () => {
+  it("robots.txt mantém apenas a liberação de rastreamento, sem menção a plataformas", () => {
     const robots = readFileSync("public/robots.txt", "utf8");
     expect(robots).toMatch(/^User-agent: \*$/m);
     expect(robots).toMatch(/^Allow: \/$/m);
-    expect(robots).toMatch(/^Disallow: \/\.lovable\/$/m);
+    expect(robots).not.toMatch(/lovable/i);
+    expect(robots).not.toMatch(/^Disallow:/im);
+    expect(robots.trim().split("\n")).toEqual(["User-agent: *", "Allow: /"]);
   });
 });
