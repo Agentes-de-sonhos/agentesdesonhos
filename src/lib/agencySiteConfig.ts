@@ -108,6 +108,7 @@ export function resolveSections(
  * Mapeamento central em `AgencySiteHome` — nunca imports espalhados.
  */
 export type AgencyImageSlot =
+  | "innovatiIguacu" | "innovatiNorthAmerica" | "bagagemOrlandoMarcia" | "praia"
   | "arenaRafaelSnow"
   | "arenaIberostarLicensed" | "arenaNoronha" | "arenaMontanhas" | "arenaVarennaLicensed" | "arenaRafaelMickey" | "arenaMontBlanc" | "arenaMatterhorn" | "arenaPuntaCana"
   | "arenaAlpesUser" | "arenaSuicaUser" | "arenaVenezaUser" | "arenaResortsUser" | "arenaCaribeUser"

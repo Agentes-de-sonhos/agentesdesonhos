@@ -4,6 +4,7 @@ import { siteThemeRootClass } from "@/lib/agencySiteTheme";
 import { isUniversalLandingEnabled } from "@/lib/universalLandingAccess";
 import { whatsappGroupUrlFor } from "@/components/whitelabel/WhatsappGroupInvite";
 import { BRAZIL_RESORTS } from "@/components/resorts-brasil/resortsData";
+import { sectionOverrideEnabled } from "@/lib/agencySiteConfig";
 
 describe("Bagagem na Mão no domínio oficial", () => {
   it.each(["bagagemnamao.com.br", "www.bagagemnamao.com.br"])("aplica os ajustes somente a %s", (host) => {
@@ -15,7 +16,7 @@ describe("Bagagem na Mão no domínio oficial", () => {
     expect(profile.requestCenter).toMatchObject({ title: "O que você deseja planejar?", submitLabel: "Solicitar" });
     expect(profile.sections?.modules).toEqual({ enabled: true, order: 2.5 });
     expect(profile.clubMedSnowHome?.enabled).toBe(true);
-    expect(profile.sections?.newsletter?.enabled).toBe(true);
+    expect(sectionOverrideEnabled(profile.sections?.newsletter)).toBe(true);
     expect(profile.newsletterMedia?.src).toMatch(/marcia-cruzeiro/);
     expect(profile.socialStrip?.links).toContainEqual({ network: "instagram", url: "https://www.instagram.com/bagagemnamaoviagens/" });
     expect(isUniversalLandingEnabled(host)).toBe(true);
@@ -29,7 +30,7 @@ describe("Bagagem na Mão no domínio oficial", () => {
 
   it("não altera a prévia antiga nem habilita Universal nela", () => {
     const host = "briefing-19-v1.preview.local";
-    expect(resolveSiteProfile(host).sections?.newsletter?.enabled).toBe(false);
+    expect(sectionOverrideEnabled(resolveSiteProfile(host).sections?.newsletter)).toBe(false);
     expect(resolveSiteProfile(host).headerNav).toBeUndefined();
     expect(resolveSiteProfile(host).clubMedSnowHome?.enabled).not.toBe(true);
     expect(resolveSiteProfile(host).whatsappChannels?.group).toBeTruthy();

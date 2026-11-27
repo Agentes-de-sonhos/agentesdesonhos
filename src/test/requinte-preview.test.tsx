@@ -58,8 +58,8 @@ describe("Prévia Requinte Turismo", () => {
     expect(within(contact).getByText("Prévia: o envio fica desativado nesta versão.")).toBeVisible();
     expect(box).toHaveAttribute("rows", "1");
     fireEvent.change(box, { target: { value: "Olá, queria saber mais." } });
-    expect(within(contact).getByRole("button", { name: "Enviar", exact: true })).toBeDisabled();
-    expect(within(contact).queryByRole("link", { name: "Enviar", exact: true })).toBeNull();
+    expect(within(contact).getByRole("button", { name: "Enviar" })).toBeDisabled();
+    expect(within(contact).queryByRole("link", { name: "Enviar" })).toBeNull();
     expect(within(faq).getByText("Há apoio depois que eu embarcar?").compareDocumentPosition(contact) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

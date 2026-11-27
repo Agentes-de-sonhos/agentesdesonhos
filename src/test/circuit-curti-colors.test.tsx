@@ -85,7 +85,7 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(price.getByText(/Valor original: €\s*4\.940,00/)).toBeVisible();
     expect(price.getByText(/IOF não incluído.*Preço e disponibilidade sujeitos à confirmação na reserva/)).toBeVisible();
     expect(price.queryByText(/Cotação de|última parcela|individual a partir|confirmação da operadora no fechamento/i)).toBeNull();
-    expect(price.getByRole("button", { name: "Solicitar orçamento", exact: true })).toHaveClass("circuit-price-quote");
+    expect(price.getByRole("button", { name: "Solicitar orçamento" })).toHaveClass("circuit-price-quote");
   });
 
   it("preenche somente a dúvida no WhatsApp oficial e não permite abrir em branco", () => {
