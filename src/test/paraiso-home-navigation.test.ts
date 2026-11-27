@@ -12,6 +12,14 @@ describe("Paraíso homepage and main menu", () => {
     expect(profile.hideHeaderBlog).toBe(true);
   });
 
+  it("adds the inspiration photo only to the Paraíso profile and preserves the signup flow", () => {
+    const file = "/paraiso/aurora-boreal.webp";
+    expect(resolveSiteProfile("www.paraisoviagens.com").newsletterMedia?.src).toBe(file);
+    expect(resolveSiteProfile("www.bagagemnamao.com.br").newsletterMedia?.src).not.toBe(file);
+    expect(resolveSiteProfile("www.paraisoviagens.com").newsletterDirectGroupUrl).toBeUndefined();
+    expect(readFileSync(`public${file}`).subarray(8, 12).toString()).toBe("WEBP");
+  });
+
   it("alternates the ordinary sections without recoloring Explora, the newsletter, or the footer", () => {
     const css = readFileSync("src/index.css", "utf8");
     const home = readFileSync("src/pages/whitelabel/AgencySiteHome.tsx", "utf8");

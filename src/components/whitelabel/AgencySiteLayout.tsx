@@ -185,7 +185,7 @@ export function AgencyBrandBar({
   if (editorial) {
     const mainLinks = navAll.filter((l) => l.to !== "/area-do-cliente");
     return (
-      <header className={`sticky top-0 z-40 backdrop-blur ${resolveSiteProfile(info.hostname).key === "editorialDmc" ? "bg-card/95" : "bg-background/95"}`}>
+      <header className={`sticky top-0 z-40 ${navProfile.key === "luxuryCurated" ? "bg-white" : `backdrop-blur ${navProfile.key === "editorialDmc" ? "bg-card/95" : "bg-background/95"}`}`}>
         <div
           className={`${siteContainer(true)} flex items-center justify-between ${karibuHeader ? "gap-2 md:gap-6" : "gap-6"} ${headerBrand.headerClassName}`}
         >

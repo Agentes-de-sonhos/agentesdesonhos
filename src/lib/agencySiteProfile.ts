@@ -426,6 +426,7 @@ const PARAISO_NAV: AgencySiteNavItem[] = [
 /** Paraíso Viagens — curadoria de luxo, sem DMC e sem depoimentos. */
 const LUXURY_CURATED: AgencySiteProfile = {
   key: "luxuryCurated",
+  newsletterMedia: { src: "/paraiso/aurora-boreal.webp", alt: "Aurora boreal sobre um fiorde nevado, com uma cabana iluminada à margem" },
   // A Paraíso não trabalha a temporada nacional de cruzeiros: sem o item
   // automático "Cruzeiros 26/27" no menu (pedido de Fernando, 18/11/2026).
   cruiseSeasonInNav: false,

@@ -2122,7 +2122,8 @@ export default function AgencySiteHome({
         {
         const copy = copyFor("newsletter");
         const directGroup = safeWhatsappGroupUrl(profile.newsletterDirectGroupUrl);
-        if (editorial && profile.newsletterMedia) {
+        const luxuryMedia = profile.key === "luxuryCurated" ? profile.newsletterMedia : undefined;
+        if (editorial && profile.newsletterMedia && !luxuryMedia) {
           const media = profile.newsletterMedia;
           return (
             <Fragment key={key}>
@@ -2164,9 +2165,9 @@ export default function AgencySiteHome({
             <Fragment key={key}>
             <section id="novidades" className="bg-background">
               <div className={`${container} ${compactSpacing ? "pt-8 pb-14 md:pt-12 md:pb-24" : "py-14 md:py-24"}`}>
-                <div className={`wl-newsletter-card overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"}`}>
-                  <div className="grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14">
-                    <div>
+                <div className={`wl-newsletter-card overflow-hidden rounded-2xl ${luxuryMedia ? "wl-paraiso-newsletter" : "px-8 py-12 md:px-14 md:py-16"} ${copy.surface === "navy" ? "bg-[hsl(var(--wl-navy))]" : "bg-[var(--brand-primary)]"}`}>
+                  <div className={luxuryMedia ? "wl-paraiso-newsletter-grid" : "grid items-center gap-10 md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] md:gap-14"}>
+                    <div className={luxuryMedia ? "wl-paraiso-newsletter-copy" : undefined}>
                       <p className="wl-kicker inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white">
                         <Mail className="h-3.5 w-3.5 wl-accent-icon" aria-hidden="true" /> {copy.kicker ?? "Novidades da agência"}
                       </p>
@@ -2179,7 +2180,7 @@ export default function AgencySiteHome({
                           "Envie uma solicitação com o seu e-mail e o canal preferido: passamos a avisar quando surgirem oportunidades no seu perfil de viagem."}
                       </p>
                     </div>
-                    <div className="md:justify-self-end">
+                    <div className={luxuryMedia ? "wl-paraiso-newsletter-action" : "md:justify-self-end"}>
                       {directGroup ? (
                         <Button asChild size="lg" className="wl-newsletter-cta h-12 w-full rounded-xl border border-white bg-white px-7 text-primary hover:bg-white/90 md:w-auto">
                           <a href={directGroup} target="_blank" rel="noopener noreferrer">
@@ -2195,6 +2196,11 @@ export default function AgencySiteHome({
                         <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
                       </Button>}
                     </div>
+                    {luxuryMedia && (
+                      <div className="wl-paraiso-newsletter-photo">
+                        <img src={luxuryMedia.src} alt={luxuryMedia.alt} loading="lazy" decoding="async" width={1200} height={800} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
