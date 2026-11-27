@@ -49,3 +49,13 @@
 @media (hover: hover) and (pointer: fine) {
   .circuit-curti-italia-trem .circuit-inclusion:hover { border-color: var(--curti-circuit-green); }
 }
+
+.circuit-curti-italia-trem .circuit-price-quote {
+  background: var(--curti-circuit-blue);
+  color: #fff;
+}
+.circuit-curti-italia-trem .circuit-price-quote:hover { background: #2002d9; }
+.circuit-curti-italia-trem .circuit-price-quote:focus-visible {
+  outline: 2px solid var(--curti-circuit-blue);
+  outline-offset: 2px;
+}

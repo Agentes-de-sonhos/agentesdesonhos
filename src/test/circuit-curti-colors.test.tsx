@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { HelmetProvider } from "react-helmet-async";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
@@ -12,7 +12,7 @@ vi.mock("@/components/whitelabel/CircuitQuoteDialog", () => ({ CircuitQuoteDialo
 
 function renderCircuit(circuit = ITALIA_EM_TREM, hostname = "curtiviagens.com.br") {
   const client = new QueryClient();
-  client.setQueryData(["circuit-fx", "EUR", "BRL"], { rate: 6.4, date: "2026-11-27" });
+  client.setQueryData(["circuit-fx", "EUR", "BRL"], { rate: 6.3196, date: "2026-11-27" });
   return render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter>
     <CircuitTourView circuit={circuit} info={{ ...CURTI_VIAGENS_PREVIEW_INFO, hostname }} />
   </MemoryRouter></QueryClientProvider></HelmetProvider>);
@@ -42,6 +42,16 @@ describe("Identidade visual de Itália em Trem", () => {
     expect(mobile).toHaveAttribute("media", "(max-width: 639px)");
     expect(mobile).toHaveAttribute("srcset", "/roteiros/curti/curti-italia-em-trem-capa-mobile.webp");
     expect(screen.queryByText(/não integra este roteiro/i)).toBeNull();
+  });
+
+  it("mostra dez parcelas de referência calculadas sobre o câmbio do dia", () => {
+    renderCircuit();
+    const price = within(screen.getByText("A partir de").closest("aside")!);
+    expect(price.getByText("10x de")).toBeVisible();
+    expect(price.getByText(/R\$\s*3\.246,77/)).toBeVisible();
+    expect(price.getByText(/Total em reais: R\$\s*32\.467,66/)).toBeVisible();
+    expect(price.getByText("Cotação de 27/11/2026")).toBeVisible();
+    expect(price.getByRole("button", { name: "Solicitar orçamento", exact: true })).toHaveClass("circuit-price-quote");
   });
 
   it("não aplica as cores da Curti à IMM", () => {

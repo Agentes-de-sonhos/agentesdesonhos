@@ -14,8 +14,8 @@ export const ITALIA_EM_TREM: CircuitTour = {
   heroAlt: "Casas à beira-mar entre montanhas e buganvílias na Costa Amalfitana, na Itália",
   pdfUrl: "/roteiros/curti/italia-em-trem-2027.pdf",
   summary: "Roma, Nápoles, Costa Amalfitana e Puglia em 12 dias. De Roma ao sul da Itália, combine trechos de trem com estadias em Sorrento, Bari e Lecce. Conheça os Museus Vaticanos, a Costa Amalfitana, Capri, Pompeia e os trulli de Alberobello em um programa semi-independente, com excursões e traslados previstos.",
-  currency: "EUR", fromPrice: 4940,
-  priceNote: "Por pessoa em acomodação dupla ou tripla. Individual a partir de € 6.290. IOF não incluído. Preços e disponibilidade sujeitos a alterações; valores em reais dependem do câmbio e da confirmação na reserva.",
+  currency: "EUR", fromPrice: 4940, brlInstallments: 10,
+  priceNote: "Por pessoa em acomodação dupla ou tripla. Individual a partir de € 6.290. IOF não incluído. Preços e disponibilidade sujeitos a alterações; valores e parcelas em reais são estimativas pelo câmbio do dia e dependem de confirmação na reserva.",
   inclusions: [
     { icon: "hotel", title: "11 noites em hotéis 4 estrelas", text: "Quartos standard em hotéis de primeira classe ou similares, nas cidades previstas." },
     { icon: "meals", title: "Café da manhã diário", text: "Café da manhã em estilo buffet nos hotéis." },
