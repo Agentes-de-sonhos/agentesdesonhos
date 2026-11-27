@@ -58,9 +58,15 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
   const allDays = c.itinerary.map((d) => `d${d.day}`);
   const price = enhanced ? circuitMoney(converted ?? c.fromPrice, converted == null ? c.currency : "BRL") : formatCircuitPrice(c.fromPrice, c.currency);
   const installments = c.brlInstallments;
-  const installmentPrice = converted != null && installments && installments > 1
-    ? circuitMoney(Math.round(converted * 100) / 100 / installments, "BRL")
+  const downPaymentPercent = c.brlDownPaymentPercent ?? 0;
+  const totalCents = converted != null ? Math.round(converted * 100) : null;
+  const downPaymentCents = totalCents != null && downPaymentPercent > 0 ? Math.round(totalCents * downPaymentPercent / 100) : 0;
+  const balanceCents = totalCents != null ? totalCents - downPaymentCents : null;
+  const installmentCents = balanceCents != null && installments && installments > 1
+    ? Math.round(balanceCents / installments)
     : null;
+  const installmentPrice = installmentCents != null ? circuitMoney(installmentCents / 100, "BRL") : null;
+  const showRoundingNote = installmentCents != null && installmentCents * (installments ?? 0) !== balanceCents;
 
   return (
     <div className={`bg-background pb-24 text-foreground md:pb-0 ${enhanced ? "circuit-enhanced" : ""}${rail ? " circuit-curti-italia-trem" : ""}`}>
@@ -102,7 +108,10 @@ export function CircuitTourView({ info, circuit: c }: { info: AgencyDomainInfo; 
           <p className="mt-1 text-4xl font-semibold text-primary">
             {installmentPrice ? <><span className="whitespace-nowrap">{installments}x de</span>{" "}<span className="whitespace-nowrap">{installmentPrice}</span></> : price}
           </p>
-          {installmentPrice && <p className="mt-2 text-sm font-medium text-foreground">Total em reais: {price}</p>}
+          {downPaymentCents > 0 && installmentPrice && <p className="mt-2 text-sm text-foreground">+ entrada de {circuitMoney(downPaymentCents / 100, "BRL")} ({downPaymentPercent}%)</p>}
+          {installmentPrice && <p className="mt-2 text-sm font-medium text-foreground">Total em reais: {price}{rail && " por pessoa em acomodação dupla"}</p>}
+          {rail && !installmentPrice && <p className="mt-2 text-sm text-muted-foreground">Por pessoa em acomodação dupla. Condição: entrada de {downPaymentPercent}% e saldo em até {installments}x, com valores em reais na cotação.</p>}
+          {downPaymentCents > 0 && showRoundingNote && <p className="mt-1 text-xs text-muted-foreground">A última parcela pode variar alguns centavos por arredondamento.</p>}
           {converted != null && fx && <div className="mt-3 space-y-1 text-xs leading-5 text-muted-foreground"><p>Valor original: {circuitMoney(c.fromPrice, c.currency)}</p><p>Câmbio turismo de referência: {c.currency === "EUR" ? "€" : "$"} 1 = R$ {(tourismRate(fx.rate) ?? fx.rate).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</p><p>Valor final sujeito à confirmação da operadora no fechamento.</p>{fx.date && <p>Cotação de {fx.date.split("-").reverse().join("/")}</p>}</div>}
           {c.singleSupplement != null && <p className="mt-1 text-sm text-muted-foreground">Suplemento individual: {formatCircuitPrice(c.singleSupplement, c.currency)}</p>}
           <p className="mt-3 text-xs leading-5 text-muted-foreground">{c.priceNote}</p>

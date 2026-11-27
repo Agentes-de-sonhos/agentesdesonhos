@@ -36,6 +36,8 @@ export interface CircuitTour {
   fromPrice: number;
   /** Estimativa de parcelas exibida quando há conversão válida em reais. */
   brlInstallments?: number;
+  /** Entrada separada, como porcentagem do total em reais, antes de parcelar o saldo. */
+  brlDownPaymentPercent?: number;
   singleSupplement?: number;
   priceNote: string;
   inclusions: { icon: CircuitInclusionIcon; title: string; text: string }[];
