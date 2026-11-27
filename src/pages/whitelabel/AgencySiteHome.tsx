@@ -1989,14 +1989,14 @@ export default function AgencySiteHome({
         const copy = copyFor("faq");
         const footerNumber = profile.footer?.whatsappHidden && profile.key !== "curtiViagensOfficial"
           ? undefined : profile.footer?.whatsapp;
-        const faqDestination = (!profile.presentation || profile.faqContactPreview) && !lab ? resolveFaqDestination({
-          phone: footerNumber ?? info.phone,
+        const faqDestination = !lab ? resolveFaqDestination({
+          phone: footerNumber ?? resolveSiteContacts(hostname).phone ?? info.phone,
           contactUrl: profile.whatsappChannels?.contact,
           email: profile.footer?.email ?? resolveSiteContacts(hostname).email,
           whatsappHidden: profile.hideFaqWhatsapp,
         }) : undefined;
-        const faqContact = faqDestination
-          ? <AgencyFaqContact destination={faqDestination} agencyName={name} preview={profile.presentation} compact={bagagemOfficial} />
+        const faqContact = faqDestination || (profile.presentation && !lab)
+          ? <AgencyFaqContact destination={faqDestination} agencyName={name} preview={profile.presentation} compact />
           : <Button variant="outline" size="lg" className="mt-6" onClick={() => openRequest("pacotes")}>
               Enviar uma solicitação <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Button>;

@@ -20,7 +20,7 @@ export const REQUINTE_PREVIEW_INFO: AgencyDomainInfo = {
 export const REQUINTE_PREVIEW_PROFILE = buildGoldStandardProfile("requinteBriefing26", {
   textualWordmark: false, presentation: true, demo: false,
   alternateSurfaces: true, compactSectionSpacing: true, destinationsFixedOrder: true,
-  faqContactPreview: true, visaHome: false, cruiseSeasonInNav: false,
+  visaHome: false, cruiseSeasonInNav: false,
   featuredExperience: undefined, dmc: undefined, authority: undefined, credentials: undefined,
   team: undefined, testimonials: undefined,
   sections: {

@@ -2360,7 +2360,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   .wl-qq-heading, .wl-qq-tab-active, .wl-qq-tab-idle, .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn,
   .wl-inspiration-cta, .wl-orlando-home-cta, .wl-steps-card .wl-step-num,
   #atendimento ol > li > span[aria-hidden="true"], .csi-all,
-  [data-testid="cruise-season-help"] a, .wl-bagagem-faq-inline :is(button, a),
+  [data-testid="cruise-season-help"] a, .wl-faq-contact-inline :is(button, a),
   #novidades + section a, button.bg-primary, a.bg-primary, button.bg-\[var\(--brand-primary\)\]
 ),
 .bagagem-group-button {
@@ -2373,7 +2373,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-bagagem-official :is(
   .wl-qq-tab-active, .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn, .wl-inspiration-cta,
   .wl-orlando-home-cta, .csi-all, [data-testid="cruise-season-help"] a,
-  .wl-bagagem-faq-inline :is(button, a), #novidades + section a, button.bg-primary, a.bg-primary
+  .wl-faq-contact-inline :is(button, a), #novidades + section a, button.bg-primary, a.bg-primary
 ):is(:hover, :focus-visible),
 .bagagem-group-button:is(:hover, :focus-visible) {
   box-shadow: inset 0 0 0 1px #19615f;
@@ -2381,7 +2381,7 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
 .wl-editorial.wl-mundo.wl-bagagem-official :is(
   .wl-qq-heading, .wl-qq-tab-active, .wl-qq-tab-idle, .wl-qq-submit, .wl-cta-primary, .wl-resorts-btn,
   .wl-inspiration-cta, .wl-orlando-home-cta, .csi-all, [data-testid="cruise-season-help"] a,
-  .wl-bagagem-faq-inline :is(button, a), #novidades + section a,
+  .wl-faq-contact-inline :is(button, a), #novidades + section a,
   button.bg-primary, a.bg-primary, button.bg-\[var\(--brand-primary\)\], button[data-region][data-active]
 ) :where(svg, span),
 .bagagem-group-button :where(svg, span) {
@@ -2434,5 +2434,3 @@ main:has([data-testid="kanban-scroll-area"]) > footer { display: none; }
   box-shadow: none;
   filter: none;
 }
-
-.wl-bagagem-official .wl-bagagem-faq-inline { align-items: flex-start; }

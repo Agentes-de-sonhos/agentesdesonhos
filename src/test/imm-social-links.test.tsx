@@ -65,7 +65,7 @@ describe("IMM social links", () => {
     const field = within(contact).getByRole("textbox", { name: "Sua dúvida" });
     expect(field).toHaveAttribute("rows", "1");
     fireEvent.change(field, { target: { value: "Gostaria de saber mais." } });
-    const button = within(contact).getByRole("link", { name: "Enviar pelo WhatsApp" });
+    const button = within(contact).getByRole("link", { name: "Enviar", exact: true });
     expect(button.getAttribute("href")).toBe("https://wa.me/5511998765432?text=Gostaria%20de%20saber%20mais.");
   });
   it.each(["omundoemcores.com.br", "paraisoviagens.com", "kaributurismo.com.br"])("does not add IMM accounts to %s", (hostname) => {

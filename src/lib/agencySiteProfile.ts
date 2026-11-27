@@ -248,8 +248,6 @@ export interface AgencySiteProfile {
   hideConciergeWhatsapp?: boolean;
   /** Oculta o botão de WhatsApp das perguntas frequentes, caindo para a Central. */
   hideFaqWhatsapp?: boolean;
-  /** Mostra a composição no FAQ de prévia; a trava de navegação continua ativa. */
-  faqContactPreview?: boolean;
 
 
   /** Slot de imagem de fallback do hero (resolvido na apresentação). */
@@ -415,10 +413,9 @@ const LUXURY_CURATED: AgencySiteProfile = {
     { label: "Grupo WhatsApp", to: "https://chat.whatsapp.com/H65S2OtR73Q3PnAGH6sCoT" },
     { label: "Área do Cliente", to: "/area-do-cliente" },
   ],
-  // A Paraíso conduz o contato pela Central de Solicitações: sem atalho de
-  // WhatsApp no atendimento nem nas perguntas frequentes.
+  // Mantém a Central de Solicitações no atendimento; o FAQ tem o campo
+  // direto padronizado do site com o WhatsApp público da agência.
   hideConciergeWhatsapp: true,
-  hideFaqWhatsapp: true,
   partnerSpotlight: {
     kicker: "O NAVIO · EXPLORA JOURNEYS",
     title: "EXPLORA I · Grande Prêmio de Mônaco 2027",

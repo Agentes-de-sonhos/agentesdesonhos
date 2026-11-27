@@ -1,0 +1,69 @@
+import { HelmetProvider } from "react-helmet-async";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter } from "react-router-dom";
+import { BAGAGEM_NA_MAO_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
+import { resolveSiteStatus } from "@/lib/agencySiteStatus";
+import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
+import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
+
+vi.mock("@/integrations/supabase/client", () => ({
+  supabase: { rpc: vi.fn(async () => ({ data: [], error: null })), auth: { getSession: vi.fn(async () => ({ data: { session: null } })) } },
+}));
+vi.mock("@/lib/resortCuration", async (original) => ({ ...await original<typeof import("@/lib/resortCuration")>(), useAgencyResortCuration: () => ({ data: undefined }) }));
+vi.mock("@/hooks/useAgencySiteRequest", () => ({ useAgencySiteRequest: () => ({ submit: vi.fn(), reset: vi.fn(), state: "idle" }) }));
+vi.mock("@/hooks/usePublicBlog", () => ({ usePublicBlogStatus: () => ({}), usePublicBlogList: () => ({}) }));
+vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
+afterEach(cleanup);
+
+const liveHosts = [
+  ["100limites.tur.br", "100 Limites Viagens", "48996086615"],
+  ["arenatravelgroup.com.br", "Arena Travel Group", "4792690807"],
+  ["bagagemnamao.com.br", "Bagagem na Mão Viagens", "21988559515"],
+  ["destinoscomaju.com.br", "Destinos com a Ju", "11957414840"],
+  ["www.essyatur.com.br", "Essyatur", "11962193690"],
+  ["immturismo.com.br", "IM&M Viagens e Turismo", "11996942844"],
+  ["kaributurismo.com.br", "Karibu Turismo", "11947577307"],
+  ["paraisoviagens.com", "Paraíso Viagens", "48999466467"],
+  ["pristur.com.br", "Pristur Viagens", "11983017038"],
+  ["www.bardelliviagens.com.br", "Bardelli Viagens", "11975767319"],
+  ["www.curtiviagens.com.br", "Curti Viagens", "11992506672"],
+  ["www.dricaviagens.com.br", "Drica Viagens", "21987907853"],
+  ["www.innovati.tur.br", "Innovati Travel", "11918578547"],
+  ["www.omundoemcores.com.br", "O Mundo em Cores", "11999954734"],
+  ["www.shoppingviagens.com.br", "Shopping Viagens", "11947148466"],
+] as const;
+
+describe("FAQ compacto nas páginas institucionais de agência", () => {
+  it.each(liveHosts)("renderiza nome, campo e WhatsApp público em %s", (hostname, name, phone) => {
+    const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname, agency_name: name, phone };
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = render(<HelmetProvider><QueryClientProvider client={qc}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+    const faq = within(container.querySelector<HTMLElement>("#faq")!);
+    const block = faq.getByRole("region", { name: "Ainda tem alguma dúvida?" });
+    const row = within(block);
+    expect(row.getByText(`${name.startsWith("O ") ? name : `A ${name}`} responde pelo WhatsApp.`)).toBeInTheDocument();
+    const input = row.getByPlaceholderText("Escreva sua dúvida aqui");
+    const send = row.getByRole("button", { name: "Enviar" });
+    expect(send).toBeDisabled();
+    expect(send.parentElement).toBe(input.parentElement);
+    expect(input).toHaveAttribute("rows", "1");
+    const last = Array.from(faq.queryAllByRole("button")).filter((q) => q.getAttribute("data-orientation") === "vertical").at(-1);
+    if (last) expect(last.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.change(input, { target: { value: "   " } });
+    expect(row.getByRole("button", { name: "Enviar" })).toBeDisabled();
+    fireEvent.change(input, { target: { value: "Quero saber mais & tirar dúvidas." } });
+    const link = row.getByRole("link", { name: "Enviar" });
+    const url = new URL(link.getAttribute("href")!);
+    expect(url.origin).toBe("https://wa.me");
+    expect(url.pathname).toMatch(/^\/55\d{10,11}$/);
+    expect(url.searchParams.get("text")).toBe("Quero saber mais & tirar dúvidas.");
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(row.queryByText(/Sua mensagem abre/)).toBeNull();
+  });
+  it("não altera a publicação de Faé, cuja página inicial está em construção", () => {
+    expect(resolveSiteStatus("faeviagens.com.br")).toBe("under_construction");
+  });
+});
