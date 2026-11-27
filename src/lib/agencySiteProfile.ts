@@ -306,6 +306,15 @@ export interface AgencySiteProfile {
     text?: string;
     image?: AgencyImageSlot;
     images?: { src: string; alt: string; position?: string; aspect?: "square" | "landscape" }[];
+    /** Texto integral aprovado e apresentado em parágrafos, com os blocos institucionais intactos. */
+    fullStory?: {
+      title: string;
+      paragraphs: string[];
+      portrait: { src: string; alt: string };
+      values: string[];
+      mission: string;
+      vision: string;
+    };
     /** Opt-in: mural panorâmico navegável (arrastar/setas, em loop) no lugar das fotos. */
     mural?: { src: string; alt: string };
     /** Selo tipográfico factual (ex.: "Desde 1997") com apoio curto. */
@@ -1474,6 +1483,32 @@ const PROFILES: Record<AgencySiteProfileKey, AgencySiteProfile> = {
       descriptionHidden: true,
       phoneHidden: true,
       whatsappLabel: "Falar por WhatsApp",
+    },
+    about: {
+      fullStory: {
+        title: "Olá",
+        paragraphs: [
+          "Meu nome é Jussara, fundadora da Innovati Travel, mas pode me chamar de Ju.",
+          "Apaixonada por viagens desde criança, passava horas estudando os mapas nos livros, decorando capitais e nomes de desertos, e me imaginava conhecendo esses lugares.",
+          "Quando adolescente, tive a oportunidade de conhecer um pouco mais o mundo do turismo através de uma tia que abriu uma agência de viagens. Naquela época consultar horários de voos e fazer reservas era um trabalho árduo, até poético. Documentos de viagem eram emitidos em papéis especiais e entregues em lindas capas. Tudo feito pessoalmente, recolhendo os documentos em todos os fornecedores e entregando ao cliente, que precisava ter tudo em mãos.",
+          "Apesar desta paixão, fui levada para a carreira de tecnologia, para ajudar meu pai que acabava de iniciar um novo negócio. Por mais de 25 anos trabalhei nessa área, flutuando entre atendimento, administração e financeiro, mas sempre que podia viajava e assim mantinha a chama do turismo acesa em meu coração.",
+          "Em 2018 tomei coragem e abri minha agência de viagens como segundo negócio. Tão logo comecei veio a pandemia, e meu plano foi engavetado, já que o turismo parou e a empresa de tecnologia seguiu normalmente nesse período, com algumas adaptações para o trabalho em home office e reuniões on-line.",
+          "A pandemia passou, e o turismo voltou muito adaptado ao ambiente virtual, o que me fez encerrar o ciclo na tecnologia e abraçar de vez o turismo, dessa vez trazendo um pouco do meu antigo mundo para a nova realidade.",
+          "Assim nasceu a Innovati, com a proposta de realizar o sonho de viagem de pessoas de todo o Brasil com um atendimento que mesmo a distância, trata cada detalhe com o cuidado de quem está bem pertinho.",
+          "Sou especialista em viagens para Orlando, já que este destino é meu queridinho e tenho na bagagem inúmeras visitas aos parques, conhecendo pessoalmente muito do que Orlando pode oferecer. Também sou apaixonada por futebol americano, incentivada pelo meu marido, o que me faz conhecer muito sobre o esporte, seus times e cidades, e preferir fazer viagens aos Estados Unidos na curta temporada da NFL para ter a oportunidade de assistir aos jogos ao vivo.",
+          "Estudar todos os dias e conhecer os destinos de perto, com o olhar crítico de quem procura os detalhes que fazem a diferença na viagem dos clientes. É assim que nos preparamos para entregar a melhor experiência de viagem para você.",
+        ],
+        portrait: { src: "/innovati-travel/jussara.webp", alt: "Jussara, fundadora da Innovati Travel" },
+        values: [
+          "Honestidade e transparência acima de tudo",
+          "Ouvir os desejos e necessidades do cliente",
+          "Cuidado em cada detalhe da jornada do cliente",
+          "Oferecer produtos e serviços de qualidade",
+          "Fazer parceria com empresas que cuidam do cliente",
+        ],
+        mission: "Oferecer a melhor experiência de viagem que o cliente possa ter",
+        vision: "Que todas as pessoas possam ter a experiência de vivenciar lugares diferentes da sua realidade, ampliando assim sua capacidade de entender o mundo e o lugar onde vive",
+      },
     },
     seo: { title: "Innovati Travel", description: "Consultoria personalizada de viagens em família: Orlando, cruzeiros, resorts, Brasil, Estados Unidos e Canadá com a Innovati Travel." },
   },

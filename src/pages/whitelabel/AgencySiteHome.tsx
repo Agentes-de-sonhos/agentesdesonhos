@@ -1417,6 +1417,42 @@ export default function AgencySiteHome({
         }
 
       case "about":
+        if (editorial && profile.about?.fullStory) {
+          const story = profile.about.fullStory;
+          const headings = "text-xl font-semibold text-foreground";
+          const body = "text-[15px] leading-relaxed text-muted-foreground md:text-base";
+          return (
+            <section key={key} id="sobre" aria-labelledby="agency-full-story-title" className="scroll-mt-28 bg-white">
+              <div className={`${container} py-14 md:py-20`}>
+                <div className="grid items-start gap-8 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-14">
+                  <div className="min-w-0">
+                    <h2 id="agency-full-story-title" className="text-3xl font-semibold leading-tight text-foreground md:text-[2.6rem]">{story.title}</h2>
+                    <div data-agency-full-story className={`mt-6 space-y-4 ${body}`}>
+                      {story.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                    </div>
+                  </div>
+                  <img src={story.portrait.src} alt={story.portrait.alt} width={760} height={760} loading="lazy" className="aspect-square w-full max-w-md rounded-2xl object-cover" />
+                </div>
+                <div className="mt-10 grid gap-5 md:grid-cols-3">
+                  <article className="rounded-2xl border border-border p-6">
+                    <h3 className={headings}>Valores</h3>
+                    <ul className={`mt-3 list-disc space-y-2 pl-5 ${body}`}>
+                      {story.values.map((value) => <li key={value}>{value}</li>)}
+                    </ul>
+                  </article>
+                  <article className="rounded-2xl border border-border p-6">
+                    <h3 className={headings}>Missão</h3>
+                    <p className={`mt-3 ${body}`}>{story.mission}</p>
+                  </article>
+                  <article className="rounded-2xl border border-border p-6">
+                    <h3 className={headings}>Visão</h3>
+                    <p className={`mt-3 ${body}`}>{story.vision}</p>
+                  </article>
+                </div>
+              </div>
+            </section>
+          );
+        }
         if (editorial) {
           const aboutCopy = profile.about;
           const bio = aboutCopy?.text ||

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { BAGAGEM_NA_MAO_PREVIEW_INFO } from "@/lib/adsBriefingPreview";
 import { resolveSiteStatus } from "@/lib/agencySiteStatus";
+import { resolveSiteProfile } from "@/lib/agencySiteProfile";
 import { AgencySiteLayout } from "@/components/whitelabel/AgencySiteLayout";
 import AgencySiteHome from "@/pages/whitelabel/AgencySiteHome";
 
@@ -92,4 +93,23 @@ it("ajusta só a home oficial da Innovati e mantém as rotas de Orlando", () => 
   expect(footer).not.toHaveTextContent("Consultoria de viagens e roteiros sob medida em Franco da Rocha");
   expect(footer).not.toHaveTextContent("91857-8547");
   expect(within(footer as HTMLElement).getByRole("link", { name: "Falar por WhatsApp" })).toHaveAttribute("href", "https://wa.me/5511918578547");
+});
+
+it("publica o Quem Somos integral da Innovati sem afetar a prévia ou outros sites", () => {
+  const info = { ...BAGAGEM_NA_MAO_PREVIEW_INFO, hostname: "www.innovati.tur.br", agency_name: "Innovati Travel", phone: "11918578547" };
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const { container } = render(<HelmetProvider><QueryClientProvider client={client}><MemoryRouter><AgencySiteLayout info={info}><AgencySiteHome info={info} noindex /></AgencySiteLayout></MemoryRouter></QueryClientProvider></HelmetProvider>);
+  const story = resolveSiteProfile(info.hostname).about!.fullStory!;
+  const section = container.querySelector<HTMLElement>("#sobre")!;
+  const about = within(section);
+  expect(about.getByRole("heading", { name: "Olá" })).toBeInTheDocument();
+  expect(story.paragraphs).toHaveLength(9);
+  expect(Array.from(section.querySelectorAll("[data-agency-full-story] > p"), (p) => p.textContent)).toEqual(story.paragraphs);
+  expect(about.getByRole("img", { name: story.portrait.alt })).toHaveAttribute("src", "/innovati-travel/jussara.webp");
+  for (const title of ["Valores", "Missão", "Visão"]) expect(about.getByRole("heading", { name: title })).toBeInTheDocument();
+  expect(about.getAllByRole("listitem").map((li) => li.textContent)).toEqual(story.values);
+  expect(about.getByText(story.mission, { exact: true })).toBeInTheDocument();
+  expect(about.getByText(story.vision, { exact: true })).toBeInTheDocument();
+  expect(resolveSiteProfile("briefing-24-v1.preview.local").about?.fullStory).toBeUndefined();
+  expect(resolveSiteProfile("immturismo.com.br").about?.fullStory).toBeUndefined();
 });
